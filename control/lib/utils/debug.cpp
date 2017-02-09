@@ -33,6 +33,10 @@
 #include <sys/time.h>
 #endif /* HAVE_SYS_TIME_H */
 
+#ifdef HAVE_SYS_STAT_H
+#include <sys/stat.h>
+#endif /* HAVE_SYS_STAT_H */
+
 #ifdef HAVE_FCNTL_H
 #include <fcntl.h>
 #endif /* HAVE_FCNTL_H */
@@ -41,9 +45,17 @@
 #include <unistd.h>
 #endif /* HAVE_UNISTD_H */
 
+#ifdef HAVE_SYS_PARAM_H
+#include <sys/param.h>
+#endif /* HAVE_SYS_PARAM_H */
+
 int	debuglevel = LOG_ERR;
 int	debugtimeprecision = 0;
 int	debugthreads = 0;
+
+int	debugmaxlines = 0;
+int	debugnfiles = 0;
+static char	*logfilename = NULL;
 
 #define DEBUG_STDERR	0
 #define DEBUG_FD	1
@@ -77,15 +89,18 @@ extern "C" void debug_set_ident(const char *ident) {
 extern "C" void	debug_syslog(int facility) {
 	openlog(DEBUG_IDENT, LOG_NDELAY, facility);
 	debug_destination = DEBUG_SYSLOG;
+	logfilename = NULL;
 }
 
 extern "C" void	debug_stderr() {
 	debug_destination = DEBUG_STDERR;
+	logfilename = NULL;
 }
 
 static int	debug_filedescriptor = -1;
 
 extern "C" void debug_fd(int fd) {
+	logfilename = NULL;
 	if (debug_filedescriptor >= 0) {
 		close(debug_filedescriptor);
 		debug_filedescriptor = -1;
@@ -94,13 +109,65 @@ extern "C" void debug_fd(int fd) {
 	debug_destination = DEBUG_FD;
 }
 
+static int	linecounter = 0;
+
 extern "C" int debug_file(const char *filename) {
+	// find out whether the file exists
+	struct stat	sb;
+	if (stat(filename, &sb) < 0) {
+		linecounter = 0;
+	} else {
+		linecounter = debugmaxlines + 1;
+	}
+
+	// create or open the new file
 	int	fd = open(filename, O_CREAT | O_WRONLY, 0666);
 	if (fd < 0) {
 		return -1;
 	}
 	debug_fd(fd);
+	logfilename = strdup(filename);
 	return 0;
+}
+
+static void	rotate_logfile() {
+	// if the log file name is not known, we cannot rotate the log file
+	if (NULL == logfilename) {
+		return;
+	}
+
+	// how many positions
+	int	positions = 0;
+	int	d = debugnfiles;
+	do {
+		d = d / 10;
+		positions++;
+	} while (d);
+
+	// rotate the old log files
+	for (int n = debugnfiles; n >= 0; n--) {
+		char	from[MAXPATHLEN + 1];
+		snprintf(from, sizeof(from), "%s.%0*d", logfilename,
+			positions, n);
+		if (n == debugnfiles) {
+			unlink(from);
+		} else {
+			char	to[MAXPATHLEN + 1];
+			snprintf(to, sizeof(to), "%s.%0*d", logfilename,
+				positions, n + 1);
+			rename(from, to);
+		}
+	}
+	// close and rename current log file
+	if (debug_filedescriptor >= 0) {
+		close(debug_filedescriptor);
+		debug_filedescriptor = -1;
+		char	to[MAXPATHLEN + 1];
+		snprintf(to, sizeof(to), "%s.%0*d", logfilename, positions, 0);
+		rename(logfilename, to);
+	}
+	// reopen a new log file
+	debug_file(logfilename);
 }
 
 #define	MSGSIZE	1024
@@ -204,9 +271,14 @@ extern "C" void vdebug(int loglevel, const char *file, int line,
 		prefix, msgbuffer);
 	{
 		std::unique_lock<std::mutex>	lock(mtx);
+		linecounter++;
 		lseek(debug_filedescriptor, 0, SEEK_END);
 		write(debug_filedescriptor, msgbuffer2, strlen(msgbuffer2));
 		write(debug_filedescriptor, "\n", 1);
+		// check whether we have to rotate the 
+		if ((debugmaxlines > 0) && (linecounter >= debugmaxlines)) {
+			rotate_logfile();
+		}
 	}
 	return;
 }

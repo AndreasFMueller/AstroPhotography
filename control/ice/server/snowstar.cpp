@@ -28,16 +28,18 @@ static struct option	longopts[] = {
 { "debug",		no_argument,		NULL,	'd' }, /*  2 */
 { "database",		required_argument,	NULL,	'D' }, /*  3 */
 { "foreground",		no_argument,		NULL,	'f' }, /*  4 */
-{ "group",		required_argument,	NULL,	'g' }, /*  5 */
-{ "help",		no_argument,		NULL,	'h' }, /*  6 */
-{ "logfile",		required_argument,	NULL,	'l' }, /*  7 */
-{ "syslog",		no_argument,		NULL,	'L' }, /*  8 */
-{ "port",		required_argument,	NULL,	'p' }, /*  9 */
-{ "pidfile",		required_argument,	NULL,	'P' }, /* 10 */
-{ "sslport",		required_argument,	NULL,	's' }, /* 11 */
-{ "name",		required_argument,	NULL,	'n' }, /* 12 */
-{ "user",		required_argument,	NULL,	'u' }, /* 13 */
-{ NULL,			0,			NULL,	 0  }, /* 14 */
+{ "files",		required_argument,	NULL,	'F' }, /*  5 */
+{ "group",		required_argument,	NULL,	'g' }, /*  6 */
+{ "help",		no_argument,		NULL,	'h' }, /*  7 */
+{ "logfile",		required_argument,	NULL,	'l' }, /*  8 */
+{ "lines",		required_argument,	NULL,	'N' }, /*  9 */
+{ "syslog",		no_argument,		NULL,	'L' }, /* 10 */
+{ "port",		required_argument,	NULL,	'p' }, /* 11 */
+{ "pidfile",		required_argument,	NULL,	'P' }, /* 12 */
+{ "sslport",		required_argument,	NULL,	's' }, /* 13 */
+{ "name",		required_argument,	NULL,	'n' }, /* 14 */
+{ "user",		required_argument,	NULL,	'u' }, /* 15 */
+{ NULL,			0,			NULL,	 0  }, /* 16 */
 };
 
 static void	usage(const char *progname) {
@@ -59,11 +61,15 @@ static void	usage(const char *progname) {
 		"exit" << std::endl;
 	std::cout << " -f,--foreground           stay in foreground"
 		<< std::endl;
+	std::cout << " -F,--files=n              set number of log files to "
+		"rotate" << std::endl;
 	std::cout << " -g,--group=<group>        group to run as" << std::endl;
 	std::cout << " -l,--logfile=<file>       send log to logfile named "
 		"<file>" << std::endl;
 	std::cout << " -L,--syslog               send log to syslog"
 		<< std::endl;
+	std::cout << " -N,--lines=lines          maximum number of lines per "
+		"log file" << std::endl;
 	std::cout << " -n,--name=<name>          define zeroconf name to use"
 		<< std::endl;
 	std::cout << " -p,--port=<port>          port to offer the service on"
@@ -120,7 +126,7 @@ int	snowstar_main(int argc, char *argv[]) {
 	// parse the command line
 	int	c;
 	int	longindex;
-	while (EOF != (c = getopt_long(argc, argv, "b:c:dD:fghl:Ln:p:P:s:u",
+	while (EOF != (c = getopt_long(argc, argv, "b:c:dD:fghl:Ln:p:P:s:uN:F:",
 		longopts, &longindex)))
 		switch (c) {
 		case 'b':
@@ -137,6 +143,9 @@ int	snowstar_main(int argc, char *argv[]) {
 			break;
 		case 'f':
 			foreground = true;
+			break;
+		case 'F':
+			debugnfiles = std::stoi(optarg);
 			break;
 		case 'g':
 			{
@@ -184,6 +193,9 @@ int	snowstar_main(int argc, char *argv[]) {
 			break;
 		case 'L':
 			debug_syslog(LOG_DAEMON);
+			break;
+		case 'N':
+			debugmaxlines = std::stoi(optarg);
 			break;
 		case 'n':
 			astro::discover::ServiceLocation::get().servicename(std::string(optarg));

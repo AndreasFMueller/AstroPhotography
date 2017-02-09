@@ -110,7 +110,8 @@ test:	snowstar
 	fi; \
 	./snowstar --debug --base=`pwd`/images --database=`pwd`/testdb.db \
 		--config=`pwd`/testdb.db --name=$${servername} --foreground \
-		2>&1 | tee test.log
+		--lines=100 --files=10 --logfile=test.log
+#		2>&1 | tee test.log
 
 testsun:	snowstar
 	if [ -r servername ]; \
