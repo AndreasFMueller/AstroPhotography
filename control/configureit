@@ -13,7 +13,7 @@ CFLAGS="-Wall -Wextra -g -O2"
 CXXFLAGS="-fuse-cxa-atexit ${CFLAGS}"
 export CFLAGS CXXFLAGS
 
-# always enable unit tests 
+# always enable the othello driver
 commonflags="--enable-othello"
 
 # we always build the microtouch driver, as it is very small and we need
@@ -36,6 +36,20 @@ fi
 if [ -r /usr/local/include/qsiapi.h ]
 then
 	commonflags="${commonflags} --enable-qsi"
+fi
+
+# find out whether the ASI library is installed, and trigger build the
+# ASI driver
+if [ -r /usr/local/include/ASICamera.h ]
+then
+	commonflags="${commonflags} --enable-asi"
+fi
+
+# find out whether the ATIK driver library is install, and trigger build
+# the ATIK driver
+if [ -r /usr/local/include/atikccdusb.h ]
+then
+	commonflags="${commonflags} --enable-atik"
 fi
 
 # the next few sections are about whether or not to build the ICE components
@@ -79,6 +93,7 @@ Darwin)	echo "configuring for Mac OS X"
 		echo "configureing with SBIG driver"
 		sbigoption=--enable-sbig
 	fi
+	commonflags="${commonflags} --enable-unittests"
 	;;
 Linux)	if [ -r /etc/debian_version ]
 	then
@@ -97,6 +112,7 @@ Linux)	if [ -r /etc/debian_version ]
 		then
 			echo "configuring for SuSE"
 			systemtype=SuSE
+			commonflags="${commonflags} --enable-unittests"
 		else
 			echo "configuring for unspecified Linux (cross your fingers)"
 		fi
@@ -160,8 +176,8 @@ Darwin)
 	CXXFLAGS="${CFLAGS} --std=c++11"
 	export CFLAGS CXXFLAGS LDFLAGS
 	CXXFLAGS="${CXXFLAGS} -stdlib=libc++"
-	./configure --prefix=${prefix} ${commonflags} --enable-uvc \
-		${sbigoption}
+	./configure --prefix=${prefix} ${commonflags} --enable-unittests \
+		--enable-uvc ${sbigoption}
 	;;
 esac
 

@@ -170,7 +170,6 @@ Linux)	CFLAGS="${CFLAGS} -fopenmp"
 	;;
 esac
 
-
 ## UNITTESTS #########################################################
 # decide whether or not to build the test programs
 AC_ARG_ENABLE(unittests,
@@ -178,6 +177,16 @@ AC_ARG_ENABLE(unittests,
 [
 ],[
 ])
+if pkg-config --exists cppunit
+then
+	if test x$enable_unittests = xyes
+	then
+		CXXFLAGS="${CXXFLAGS} `pkg-config --cflags cppunit`"
+		LIBS="${LIBS} `pkg-config --libs cppunit`"
+	fi
+else
+	enable_unittests=no
+fi
 AM_CONDITIONAL(ENABLE_UNITTESTS, test x$enable_unittests = xyes)
 
 ## UVC ###############################################################
@@ -199,7 +208,7 @@ AM_CONDITIONAL(ENABLE_UVC, test x$enable_uvc = xyes)
 ## SX ################################################################
 # decide whether to build the SX driver
 AC_ARG_ENABLE(sx,
-[AS_HELP_STRING([--enable-sx], [build the SX driver])],
+[AS_HELP_STRING([--enable-sx],[build the SX driver])],
 [
 	enable_sx=yes
 ],[
@@ -210,7 +219,7 @@ AM_CONDITIONAL(ENABLE_SX, test x$enable_sx = xyes)
 ## OTHELLO ###########################################################
 # decide whether to build the OTHELLO driver
 AC_ARG_ENABLE(othello,
-[AS_HELP_STRING([--enable-othello], [build the Othello driver])],
+[AS_HELP_STRING([--enable-othello],[build the Othello driver])],
 [
 	enable_othello=yes
 ],[
@@ -220,20 +229,26 @@ AM_CONDITIONAL(ENABLE_OTHELLO, test x$enable_othello = xyes)
 
 ## ASI ###############################################################
 # check for the ASI library
-enable_asi=yes
 ASIINCLUDE=
 ASILIBPATH=
 ASILIBS="-lASICamera2"
 AC_ARG_WITH(asi,
-[AS_HELP_STRING([--with-asi], [location of ASI header/library])],
+[AS_HELP_STRING([--with-asi=dir], [location of ASI header/library])],
 [
 	ASIINCLUDE="-I${with_asi}/include"
 	ASILIBPATH="-L${with_asi}/lib -L${with_asi}/lib64"
 ],
 )
+AC_ARG_ENABLE(asi,
+[AS_HELP_STRING([--enable-asi],[build the ASI driver])],
+[
+	enable_asi=yes
+],[
+	enable_asi=no
+])
+OLDINCLUDE=${CPPFLAGS}
 if test .${enable_asi} = .yes
 then
-	OLDINCLUDE=${CPPFLAGS}
 	CPPFLAGS="${CPPFLAGS} ${ASIINCLUDE}"
 	AC_CHECK_HEADERS(ASICamera2.h, enable_asi=yes, enable_asi=no)
 fi
@@ -256,20 +271,26 @@ AM_CONDITIONAL(ENABLE_ASI, test x$enable_asi = xyes)
 
 ## ATIK ##############################################################
 # checks for ATIK libary, currently only dummy settings
-enable_atik=yes
 ATIKINCLUDEE=
 ATIKLIBPATH=
 ATIKLIBS=
 AC_ARG_WITH(atik,
-[AS_HELP_STRING([--width-atik], [location of ATIK header/library])],
+[AS_HELP_STRING([--with-atik=dir], [location of ATIK header/library])],
 [
 	ATIKINCLUDE="-I${with_atik}/include"
 	ATIKLIBPATH="-L${with_atik}/lib -L${with_atik}/lib64"
 ],
 )
+AC_ARG_ENABLE(atik,
+[AS_HELP_STRING([--enable-atik],[build the ATIK driver])],
+[
+	enable_atik=yes
+],[
+	enable_atik=no
+])
+OLDINCLUDE=${CPPFLAGS}
 if test .${enable_atik} = .yes
 then
-	OLDINCLUDE=${CPPFLAGS}
 	CPPFLAGS="${CPPFLAGS} ${ATIKINCLUDE}"
 	AC_LANG_PUSH([C++])
 	AC_CHECK_HEADERS(atikccdusb.h, enable_atik=yes, enable_atik=no)
