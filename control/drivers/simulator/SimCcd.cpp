@@ -157,7 +157,6 @@ ImagePtr  SimCcd::getRawImage() {
 	// focuser effect
 	double	radius = _locator.simfocuser()->radius();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "radius = %f", radius);
-std::cerr << __FILE__ << ":" << __LINE__ << ": radius = " << radius << std::endl;
 	starcamera.radius(radius);
 	starcamera.innerradius(0.4 * radius);
 

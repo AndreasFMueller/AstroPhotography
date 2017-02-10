@@ -782,6 +782,8 @@ public:
 	const std::vector<InterfacePtr>&	interfaces() const;
 	const InterfacePtr&	operator[](size_t index) const;
 	InterfacePtr&	operator[](size_t index);
+
+	std::string	toString() const;
 };
 
 std::ostream&	operator<<(std::ostream& out, const Configuration& config);

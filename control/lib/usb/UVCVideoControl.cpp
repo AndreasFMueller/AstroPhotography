@@ -506,7 +506,7 @@ ExtensionUnitDescriptor::ExtensionUnitDescriptor(Device& _device,
 	try {
 		extension = device.getStringDescriptor(uint8At(23 + p + n));
 	} catch (std::exception& x) {
-		std::cerr << "extension naem not found: " << x.what()
+		std::cerr << "extension name not found: " << x.what()
 			<< std::endl;
 	}
 	guid = std::string(&((char *)data)[4], 16);

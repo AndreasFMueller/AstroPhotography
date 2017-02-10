@@ -170,7 +170,7 @@ static void	rotate_logfile() {
 	debug_file(logfilename);
 }
 
-#define	MSGSIZE	1024
+#define	MSGSIZE	8192
 
 static std::mutex	mtx;
 
@@ -188,6 +188,32 @@ static int	lookupthreadid(const std::thread::id& id) {
 	int	newid = nextthreadid++;
 	thread_map.insert(std::make_pair(id, newid));
 	return newid;
+}
+
+static void	writeout(char *prefix, char *msgbuffer) {
+	// format log message
+	if (debug_destination == DEBUG_STDERR) {
+		fprintf(stderr, "%s %s\n", prefix, msgbuffer);
+		fflush(stderr);
+		return;
+	}
+
+	// last case is FD, where we first have to create the message
+	// buffer
+	char	msgbuffer2[MSGSIZE];
+	snprintf(msgbuffer2, sizeof(msgbuffer2), "%s %s",
+		prefix, msgbuffer);
+	{
+		std::unique_lock<std::mutex>	lock(mtx);
+		linecounter++;
+		lseek(debug_filedescriptor, 0, SEEK_END);
+		write(debug_filedescriptor, msgbuffer2, strlen(msgbuffer2));
+		write(debug_filedescriptor, "\n", 1);
+		// check whether we have to rotate the 
+		if ((debugmaxlines > 0) && (linecounter >= debugmaxlines)) {
+			rotate_logfile();
+		}
+	}
 }
 
 extern "C" void vdebug(int loglevel, const char *file, int line,
@@ -258,27 +284,22 @@ extern "C" void vdebug(int loglevel, const char *file, int line,
 			tstp, DEBUG_IDENT, getpid(), threadid, file, line);
 	}
 
-	// format log message
-	if (debug_destination == DEBUG_STDERR) {
-		fprintf(stderr, "%s %s\n", prefix, msgbuffer);
-		fflush(stderr);
-		return;
-	}
-
-	// last case is FD, where we first have to create the message
-	// buffer
-	snprintf(msgbuffer2, sizeof(msgbuffer2), "%s %s",
-		prefix, msgbuffer);
-	{
-		std::unique_lock<std::mutex>	lock(mtx);
-		linecounter++;
-		lseek(debug_filedescriptor, 0, SEEK_END);
-		write(debug_filedescriptor, msgbuffer2, strlen(msgbuffer2));
-		write(debug_filedescriptor, "\n", 1);
-		// check whether we have to rotate the 
-		if ((debugmaxlines > 0) && (linecounter >= debugmaxlines)) {
-			rotate_logfile();
+	// split msgbuffer at newlines
+	char	*p = msgbuffer;
+	while (*p) {
+		char	*p2 = p;
+		// advance the pointer until you find \n or \0
+		while (('\n' != *p2) && ('\0' != *p2)) {
+			p2++;
+		}
+		if ('\0' == *p2) {
+			writeout(prefix, p);
+			p = p2;
+		} else if ('\n' == *p2) {
+			*p2 = '\0';
+			writeout(prefix, p);
+			p = ++p2;
 		}
 	}
-	return;
 }
+

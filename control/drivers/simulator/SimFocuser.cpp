@@ -79,7 +79,6 @@ void	SimFocuser::set(unsigned short value) {
 
 double	SimFocuser::radius() {
 	double	r = fabs((reference() - current()) / (double)variance());
-std::cerr << "radius = " << (MAXRADIUS * r) << std::endl;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "radius = %f", MAXRADIUS * r);
 	return MAXRADIUS * r;
 }

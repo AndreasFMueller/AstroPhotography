@@ -8,6 +8,7 @@
 #include <iomanip>
 #include <cassert>
 #include <cstring>
+#include <sstream>
 
 namespace astro {
 namespace usb {
@@ -90,6 +91,12 @@ void	Configuration::configure() throw(USBError) {
 }
 
 static std::string	indent("C   ");
+
+std::string	Configuration::toString() const {
+	std::ostringstream	out;
+	out << *this;
+	return out.str();
+}
 
 std::ostream&	operator<<(std::ostream& out, const Configuration& config) {
 	out << indent << "bConfigurationValue:           ";

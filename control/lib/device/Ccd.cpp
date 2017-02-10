@@ -350,7 +350,7 @@ void	Ccd::setShutterState(const Shutter::state& state) {
 void	Ccd::addExposureMetadata(ImageBase& image) const {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "adding exposure metadata");
 	exposure.addToImage(image);
-	std::cout << image;
+	//std::cout << image;
 }
 
 /**

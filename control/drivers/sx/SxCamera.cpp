@@ -13,6 +13,7 @@
 #include "SxGuidePort.h"
 #include "SxUtils.h"
 #include "SxCooler.h"
+#include <sstream>
 
 using namespace astro::image;
 
@@ -110,7 +111,7 @@ SxCamera::SxCamera(DevicePtr& _deviceptr)
 
 	// now get the data interface ...
 	ConfigurationPtr	conf = deviceptr->activeConfig();
-	std::cout << *conf;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "%s", conf->toString().c_str());
 	interface = (*conf)[0];
 
 	// and also claim it, we will need it all the time
@@ -134,10 +135,10 @@ SxCamera::SxCamera(DevicePtr& _deviceptr)
 		outendpoint = endpoint0;
 	}
 	if (debuglevel >= LOG_DEBUG) {
-		std::cout << "IN endpoint:" << std::endl;
-		std::cout << *inendpoint;
-		std::cout << "OUT endpoint:" << std::endl;
-		std::cout << *outendpoint;
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "IN endpoint:");
+		debug(LOG_DEBUG, DEBUG_LOG, 0, inendpoint->toString().c_str());
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "OUT endpoint:");
+		debug(LOG_DEBUG, DEBUG_LOG, 0, outendpoint->toString().c_str());
 	}
 
 	// reset the camera, just for good measure

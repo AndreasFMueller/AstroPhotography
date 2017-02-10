@@ -61,20 +61,20 @@ void	UVCCamera::getCur(uint8_t interface) {
 	maxpayloadtransfersize = rcur.data()->dwMaxPayloadTransferSize;
 
 	if (debuglevel >= LOG_DEBUG) {
-		std::cout << "Format:                   ";
-		std::cout << (int)rcur.data()->bFormatIndex << std::endl;
-		std::cout << "Frame:                    ";
-		std::cout << (int)rcur.data()->bFrameIndex << std::endl;
-		std::cout << "wWidth:                   ";
-		std::cout << (int)framedescriptor->wWidth() << std::endl;
-		std::cout << "wHeight:                  ";
-		std::cout << (int)framedescriptor->wHeight() << std::endl;
-		std::cout << "dwFrameInterval:          ";
-		std::cout << (int)frameinterval << std::endl;
-		std::cout << "dwMaxVideoFrameSize:      ";
-		std::cout << (int)maxvideoframesize << std::endl;
-		std::cout << "dwMaxPayloadTransferSize: ";
-		std::cout << maxpayloadtransfersize << std::endl;
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "Format:                   %d",
+			(int)rcur.data()->bFormatIndex);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "Frame:                    %d",
+			(int)rcur.data()->bFrameIndex);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "wWidth:                   %d",
+			(int)framedescriptor->wWidth());
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "wHeight:                  %d",
+			(int)framedescriptor->wHeight());
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "dwFrameInterval:          %d",
+			(int)frameinterval);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "dwMaxVideoFrameSize:      %d",
+			(int)maxvideoframesize);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "dwMaxPayloadTransferSize: %d",
+			maxpayloadtransfersize);
 	}
 }
 
