@@ -40,6 +40,7 @@ INCLUDEPATH += ../instruments ../images ../repository ../expose
 INCLUDEPATH += ../task ../browser
 
 ASTROGUISOURCES = 							\
+	Application.cpp							\
         mainwindow.cpp 							\
 	configurationdialog.cpp						\
 	connectiondialog.cpp 						\
@@ -49,6 +50,7 @@ ASTROGUISOURCES = 							\
 	instrumentselectiondialog.cpp
 
 ASTROGUIHEADERS =							\
+	Application.h							\
 	mainwindow.h							\
 	configurationdialog.h						\
 	connectiondialog.h						\

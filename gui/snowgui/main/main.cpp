@@ -5,7 +5,7 @@
  */
 #include "mainwindow.h"
 #include "serverselectiondialog.h"
-#include <QApplication>
+#include "Application.h"
 #include <AstroDebug.h>
 #include <AstroUtils.h>
 #include <AstroConfig.h>
@@ -81,7 +81,7 @@ int main(int argc, char *argv[]) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "snowgui starting up");
 
 	// start the application
-	QApplication a(argc, argv);
+	Application a(argc, argv);
 	a.setApplicationDisplayName(QString("SnowGUI"));
 
 	// get the service discovery object
