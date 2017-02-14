@@ -36,7 +36,7 @@ float	AtikCooler::getSetTemperature() {
 	_camera->getCoolingStatus(&state, &targetTemp, &power);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieve cooler temperature: %.1f, "
 		"power %.2f, state %d", targetTemp, power, state);
-	if ((state == COOLING_ON) || (state == COOLING_SETPOINT)) {
+	if ((state == COOLING_ON) || (state == COOLING_SETPOINT)) {
 		Cooler::setTemperature(targetTemp + 273.15);
 	}
 	return Cooler::getSetTemperature();
@@ -81,7 +81,7 @@ bool	AtikCooler::isOn() {
 	float	targetTemp = 0;
 	float	power = 0;
 	_camera->getCoolingStatus(&state, &targetTemp, &power);
-	return ((state == COOLING_ON) || (state == COOLING_SETPOINT));
+	return ((state == COOLING_ON) || (state == COOLING_SETPOINT));
 }
 
 void	AtikCooler::setOn(bool onoff) {

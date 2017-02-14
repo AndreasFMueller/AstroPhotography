@@ -47,7 +47,7 @@ fi
 
 # find out whether the ATIK driver library is install, and trigger build
 # the ATIK driver
-if [ -r /usr/local/include/atikccdusb.h ]
+if [ -r /usr/local/include/atikccdusb.h -o -r /usr/include/atikccdusb.h ]
 then
 	commonflags="${commonflags} --enable-atik"
 fi
