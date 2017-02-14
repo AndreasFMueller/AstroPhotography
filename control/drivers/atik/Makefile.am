@@ -15,7 +15,7 @@ if ENABLE_UNITTESTS
 noinst_LTLIBRARIES = libatik.la
 
 libatik_la_SOURCES = AtikLocator.cpp AtikUtils.cpp AtikCamera.cpp	\
-	AtikCcd.cpp AtikFilterwheel.cpp AtikGuideport.cpp
+	AtikCooler.cpp AtikCcd.cpp AtikFilterwheel.cpp AtikGuideport.cpp
 libatik_la_DEPENDENCIES = ../../lib/libastro.la
 libatik_la_LIBADD = ../../lib/libastro.la
 
@@ -27,7 +27,7 @@ atiktests_DEPENDENCIES = ../../lib/libastro.la libatik.la
 endif
 
 atik_la_SOURCES = AtikLocator.cpp AtikUtils.cpp AtikCamera.cpp		\
-	AtikCcd.cpp AtikFilterwheel.cpp AtikGuideport.cpp
+	AtikCooler.cpp AtikCcd.cpp AtikFilterwheel.cpp AtikGuideport.cpp
 atik_la_LDFLAGS = -module
 atik_la_DEPENDENCIES = ../../lib/libastro.la
 atik_la_LIBADD = ../../lib/libastro.la @ATIKLIBPATH@ @ATIKLIBS@

@@ -34,9 +34,16 @@ DeviceName	guideportname(::AtikCamera *camera) {
 }
 
 DeviceName	coolername(::AtikCamera *camera) {
+	DeviceName	cn = cameraname(camera);
+	cn.push_back("Imaging");
+	cn.push_back("cooler");
+	cn.type(DeviceName::Cooler);
+	return cn;
+#if 0
 	unsigned int serial = camera->getSerialNumber();
 	return DeviceName(DeviceName::Cooler, "atik",
 		astro::stringprintf("%u", serial));
+#endif
 }
 
 } // namespace atik

@@ -175,7 +175,9 @@ std::vector<std::string>	AtikCameraLocator::getDevicelist(DeviceName::device_typ
  */
 CameraPtr	AtikCameraLocator::getCamera0(const DeviceName& name) {
 	std::string	sname = name;
-	unsigned int	serial = std::stoi(name.unitname());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieve camera %s: converting unit name '%s'",
+		sname.c_str(), name.unitname().c_str());
+	unsigned int	serial = std::stoul(name.unitname());
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "locate camera %s", sname.c_str());
 	for (int i = 0; i < atik_camera_count; i++) {
 		if (atik_camera[i]->getSerialNumber() == serial) {

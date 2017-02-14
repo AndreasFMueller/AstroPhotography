@@ -7,6 +7,7 @@
 #include <AstroDebug.h>
 #include <AstroFormat.h>
 #include <AstroExceptions.h>
+#include <AtikCooler.h>
 #include <includes.h>
 
 namespace astro {
@@ -113,6 +114,15 @@ void	AtikCcd::run() {
 	ImageSize	size = exposure.frame().size() / exposure.mode();
 	Image<unsigned short>	*image = new Image<unsigned short>(size);
 	image->setOrigin(exposure.frame().origin());
+	switch (capa.colour) {
+	case COLOUR_RGGB:
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "this is a color camera");
+		image->setMosaicType(MosaicType::BAYER_RGGB);
+		break;
+	default:
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "unknown camera color");
+		break;
+	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "reading image data: %d pixels",
 		image->getSize().getPixels());
 	rc = _camera->getImage(image->pixels, image->getSize().getPixels());
@@ -176,7 +186,7 @@ bool	AtikCcd::hasCooler() const {
 }
 
 CoolerPtr	AtikCcd::getCooler0() {
-	return CoolerPtr(NULL);
+	return CoolerPtr(new AtikCooler(_camera));
 }
 
 } // namespace atik
