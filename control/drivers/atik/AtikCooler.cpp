@@ -64,6 +64,10 @@ float	AtikCooler::getActualTemperature() {
 	case COOLING_SETPOINT:
 		return Cooler::getSetTemperature();
 	}
+	std::string	msg = stringprintf("unknown cooling state: %d",
+		state);
+	debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+	throw std::runtime_error(msg);
 }
 
 void	AtikCooler::setTemperature(const float temperature) {
