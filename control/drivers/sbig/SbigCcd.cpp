@@ -15,6 +15,7 @@
 #endif /* HAVE_SBIGUDRV_LPARDRV_H */
 #endif
 
+#include <SbigLock.h>
 #include <SbigLocator.h>
 #include <SbigCcd.h>
 #include <AstroOperators.h>
@@ -39,7 +40,7 @@ namespace sbig {
  * to the camera.
  */
 SbigCcd::SbigCcd(const CcdInfo& info, int _id, SbigCamera& _camera)
-	: Ccd(info), id(_id), camera(_camera) {
+	: Ccd(info), SbigDevice(_camera), id(_id) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "ccd %d: %s", id,
 		info.toString().c_str());
 	cooler = true;
@@ -56,16 +57,12 @@ SbigCcd::~SbigCcd() {
  */
 CcdState::State	SbigCcd::exposureStatus() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "checking exposure status");
-	SbigLock	lock;
 	QueryCommandStatusParams	params;
 	params.command = CC_START_EXPOSURE2;
 	QueryCommandStatusResults	results;
-	camera.sethandle();
-	short 	e = SBIGUnivDrvCommand(CC_QUERY_COMMAND_STATUS,
-		&params, &results);
-	if (e != CE_NO_ERROR) {
-		debug(LOG_ERR, DEBUG_LOG, 0, "cannot open command");
-	}
+
+	query_command_status(&params, &results);
+
 	int	s = 0;
 	if (id == 0) {
 		s = 0x3 & results.status;
@@ -299,16 +296,13 @@ CoolerPtr	SbigCcd::getCooler0() {
  * \brief Query the shutter state
  */
 Shutter::state	SbigCcd::getShutterState() {
-	SbigLock	lock;
-	camera.sethandle();
-
 	// get the shutter state from query command status command
 	QueryCommandStatusParams	params;
 	QueryCommandStatusResults	results;
 	params.command = CC_MISCELLANEOUS_CONTROL;
-	unsigned short	e;
-	e = SBIGUnivDrvCommand(CC_QUERY_COMMAND_STATUS, &params, &results);
-	if (e != CE_NO_ERROR) {
+	try {
+		query_command_status(&params, &results);
+	} catch (const SbigError& x) {
 		throw NotImplemented("cannot query command status");
 	}
 
@@ -339,9 +333,9 @@ void	SbigCcd::setShutterState(const Shutter::state& state) {
 	QueryCommandStatusParams	params;
 	params.command = CC_MISCELLANEOUS_CONTROL;
 	QueryCommandStatusResults	results;
-	unsigned short	e;
-	e = SBIGUnivDrvCommand(CC_QUERY_COMMAND_STATUS, &params, &results);
-	if (e != CE_NO_ERROR) {
+	try {
+		query_command_status(&params, &results);
+	} catch (const SbigError& x) {
 		debug(LOG_ERR, DEBUG_LOG, 0,
 			"cannot get status, assuming no shutter");
 		throw NotImplemented("apparently there is no shutter");
@@ -377,7 +371,7 @@ void	SbigCcd::setShutterState(const Shutter::state& state) {
 					: SC_OPEN_SHUTTER;
 		break;
 	}
-	e = SBIGUnivDrvCommand(CC_MISCELLANEOUS_CONTROL, &misc, NULL);
+	short e = SBIGUnivDrvCommand(CC_MISCELLANEOUS_CONTROL, &misc, NULL);
 	if (e != CE_NO_ERROR) {
 		throw NotImplemented("shutter command not implemented");
 	}

@@ -15,6 +15,7 @@
 #endif /* HAVE_SBIGUDRV_LPARDRV_H */
 #endif
 
+#include <SbigLock.h>
 #include <SbigLocator.h>
 #include <includes.h>
 #include <SbigFilterWheel.h>
@@ -27,6 +28,19 @@ namespace astro {
 namespace camera {
 namespace sbig {
 
+void	SbigFilterWheel::cfw(CFWParams *params, CFWResults *results,
+		const std::string& msg) {
+	SbigLock	lock;
+	camera.sethandle();
+	short	e = SBIGUnivDrvCommand(CC_CFW, &params, &results);
+	if (e != CE_NO_ERROR) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s: %s", msg.c_str(),
+			sbig_error(e).c_str());
+		throw SbigError(e);
+	}
+
+}
+
 /**
  * \brief Initialize the filter wheel
  */
@@ -36,12 +50,15 @@ void	SbigFilterWheel::init() {
 	CFWResults	results;
 	params.cfwCommand = CFWC_INIT;
 	params.cfwModel = CFWSEL_AUTO;
+	cfw(&params, &results, "cannot initialize");
+#if 0
 	short	e = SBIGUnivDrvCommand(CC_CFW, &params, &results);
 	if (e != CE_NO_ERROR) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "cannot initialize: %s",
 		sbig_error(e).c_str());
 		throw SbigError(e);
 	}
+#endif
 
 	// wait until the filter wheel settles
 	wait();
@@ -57,11 +74,10 @@ void	SbigFilterWheel::wait() {
 	params.cfwModel = CFWSEL_AUTO;
 	unsigned int	timeout = 30;
 	do {
-		short	e = SBIGUnivDrvCommand(CC_CFW, &params, &results);
-		if (e != CE_NO_ERROR) {
-			debug(LOG_ERR, DEBUG_LOG, 0,
-				"cannot open filter wheel: %s",
-				sbig_error(e).c_str());
+		try {
+			cfw(&params, &results, "cannot open filter wheel");
+		} catch (...) {
+			// XXX what if
 		}
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "status: %s",
 			(CFWS_BUSY == results.cfwStatus) ? "BUSY" :
@@ -91,7 +107,7 @@ void	SbigFilterWheel::wait() {
  */
 SbigFilterWheel::SbigFilterWheel(SbigCamera& _camera)
 	: FilterWheel(FilterWheel::defaultname(name(), "filterwheel")),
-	  camera(_camera) {
+	  SbigDevice(_camera) {
 	SbigLock	lock;
 	camera.sethandle();
 
@@ -100,12 +116,7 @@ SbigFilterWheel::SbigFilterWheel(SbigCamera& _camera)
 	CFWResults	results;
 	params.cfwCommand = CFWC_OPEN_DEVICE;
 	params.cfwModel = CFWSEL_AUTO;
-	short	e = SBIGUnivDrvCommand(CC_CFW, &params, &results);
-	if (e != CE_NO_ERROR) {
-		debug(LOG_ERR, DEBUG_LOG, 0, "cannot open filter wheel: %s",
-		sbig_error(e).c_str());
-		throw SbigError(e);
-	}
+	cfw(&params, &results, "cannot open filter wheel");
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "filter wheel version: %hu, "
 		"position: %hu, status %hu",
 		results.cfwModel, results.cfwPosition, results.cfwStatus);
@@ -118,12 +129,7 @@ SbigFilterWheel::SbigFilterWheel(SbigCamera& _camera)
 	// find information about the firmware 
 	params.cfwCommand = CFWC_GET_INFO;
 	params.cfwParam1 = CFWG_FIRMWARE_VERSION;
-	e = SBIGUnivDrvCommand(CC_CFW, &params, &results);
-	if (e != CE_NO_ERROR) {
-		debug(LOG_ERR, DEBUG_LOG, 0, "cannot get filter info: %s",
-		sbig_error(e).c_str());
-		throw SbigError(e);
-	}
+	cfw(&params, &results, "cannot get filter info");
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "filter wheel firmware version: %lu",
 		results.cfwResult1);
 	npositions = results.cfwResult2;
@@ -143,19 +149,12 @@ SbigFilterWheel::SbigFilterWheel(SbigCamera& _camera)
 }
 
 SbigFilterWheel::~SbigFilterWheel() {
-	SbigLock	lock;
-	camera.sethandle();
 	// find out what type of filter wheel we have
 	CFWParams	params;
 	CFWResults	results;
 	params.cfwCommand = CFWC_CLOSE_DEVICE;
 	params.cfwModel = CFWSEL_AUTO;
-	short	e = SBIGUnivDrvCommand(CC_CFW, &params, &results);
-	if (e != CE_NO_ERROR) {
-		debug(LOG_ERR, DEBUG_LOG, 0, "cannot open filter wheel: %s",
-		sbig_error(e).c_str());
-		throw SbigError(e);
-	}
+	cfw(&params, &results, "cannot close filter wheel");
 }
 
 unsigned int	SbigFilterWheel::nFilters() {
@@ -186,18 +185,16 @@ void	SbigFilterWheel::select(size_t filterindex) {
 		return;
 	}
 #endif
-	SbigLock	lock;
-	camera.sethandle();
 	CFWParams	params;
 	CFWResults	results;
 	params.cfwCommand = CFWC_GOTO;
 	params.cfwModel = CFWSEL_AUTO;
 	params.cfwParam1 = filterindex + 1;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "positioning on %hu", params.cfwParam1);
-	short	e = SBIGUnivDrvCommand(CC_CFW, &params, &results);
-	if (e != CE_NO_ERROR) {
-		debug(LOG_ERR, DEBUG_LOG, 0, "cannot position filter wheel: %s",
-			sbig_error(e).c_str());
+	try {
+		cfw(&params, &results, "cannot position filter wheel");
+	} catch (...) {
+		// XXX what if
 	}
 
 	// now query the position, this will block until the filter wheel
@@ -219,9 +216,6 @@ std::string	SbigFilterWheel::filterName(size_t filterindex) {
  * \brief find the current filter wheel state
  */
 FilterWheel::State	SbigFilterWheel::getState() {
-	// make sure we have the handle set
-	camera.sethandle();
-	SbigLock	lock;
 	return state();
 }
 
@@ -230,11 +224,10 @@ FilterWheel::State	SbigFilterWheel::state() {
 	CFWResults	results;
 	params.cfwCommand = CFWC_QUERY;
 	params.cfwModel = CFWSEL_AUTO;
-	short	e = SBIGUnivDrvCommand(CC_CFW, &params, &results);
-	if (e != CE_NO_ERROR) {
-		debug(LOG_ERR, DEBUG_LOG, 0,
-			"cannot open filter wheel: %s",
-			sbig_error(e).c_str());
+	try {
+		cfw(&params, &results, "cannot open filter wheel");
+	} catch (...) {
+		// XXX what if
 	}
 	// if the filter wheel is idle, it could still be that we are
 	// in the unknown state, because we don't know the position

@@ -8,13 +8,14 @@
 
 #include <AstroCamera.h>
 #include <SbigCamera.h>
+#include <SbigDevice.h>
 
 namespace astro {
 namespace camera {
 namespace sbig {
 
-class SbigGuidePort : public GuidePort {
-	SbigCamera&	camera;
+class SbigGuidePort : public GuidePort, public SbigDevice {
+	void	activate_relay(ActivateRelayParams *params);
 public:
 	SbigGuidePort(SbigCamera& camera);
 	virtual ~SbigGuidePort();

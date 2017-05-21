@@ -7,6 +7,7 @@
 #define _SbigCooler_h
 
 #include <SbigCamera.h>
+#include <SbigDevice.h>
 
 using namespace astro::camera;
 
@@ -14,10 +15,13 @@ namespace astro {
 namespace camera {
 namespace sbig {
 
-class SbigCooler : public Cooler {
-	SbigCamera&	camera;
+class SbigCooler : public Cooler, public SbigDevice {
 	bool	enabled;
 	void	set();
+	void	query_temperature_status(
+			QueryTemperatureStatusResults2  *results);
+	void	set_temperature_regulation2(
+			SetTemperatureRegulationParams2 *params);
 public:
 	SbigCooler(SbigCamera& camera, const DeviceName& devname);
 	~SbigCooler();

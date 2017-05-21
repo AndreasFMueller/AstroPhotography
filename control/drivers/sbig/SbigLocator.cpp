@@ -15,6 +15,7 @@
 #endif /* HAVE_SBIGUDRV_LPARDRV_H */
 #endif
 
+#include <SbigLock.h>
 #include <SbigLocator.h>
 #include <AstroDebug.h>
 #include <utils.h>
@@ -69,24 +70,6 @@ namespace astro {
 namespace camera {
 namespace sbig {
 
-
-//////////////////////////////////////////////////////////////////////
-// SbigLock implementation
-//////////////////////////////////////////////////////////////////////
-
-static std::recursive_mutex	sbigmutex;
-static std::unique_lock<std::recursive_mutex>	sbiglock(sbigmutex, std::defer_lock);
-
-SbigLock::SbigLock() {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "locking sbig mutex");
-	sbigmutex.lock();
-}
-
-SbigLock::~SbigLock() {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "unlocking sbig mutex");
-	sbigmutex.unlock();
-}
-
 //////////////////////////////////////////////////////////////////////
 // SbigLocator implementation
 //////////////////////////////////////////////////////////////////////
@@ -102,6 +85,13 @@ std::string	SbigCameraLocator::getVersion() const {
 	return VERSION;
 }
 
+/**
+ * \brief Constructor for the SbigCameraLocator class
+ *
+ * Constructor and Destructor keep track of how many locators have been
+ * created because the the last locator destroyed has to also close
+ * the driver.
+ */
 SbigCameraLocator::SbigCameraLocator() {
 	if (0 == driveropen) {
 		short	e = SBIGUnivDrvCommand(CC_OPEN_DRIVER, NULL, NULL);
@@ -112,14 +102,21 @@ SbigCameraLocator::SbigCameraLocator() {
 			throw SbigError(errmsg.c_str());
 		}
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "driver opened: %hd", e);
+		getNames();
 	} else {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "driver already open");
 	}
 	driveropen++;
 }
 
+/**
+ * \brief Destructor for the locator
+ *
+ * The destructor counts down the driveropen static variable
+ */
 SbigCameraLocator::~SbigCameraLocator() {
 	if (0 == --driveropen) {
+		clearNames();
 		short	e = SBIGUnivDrvCommand(CC_CLOSE_DRIVER, NULL, NULL);
 		if (e != CE_NO_ERROR) {
 			std::string	errmsg = sbig_error(e);
@@ -157,7 +154,7 @@ static void	sbigAddGuideportName(std::vector<std::string>& names,
 				const QueryUSBResults& queryresult,
 				int index) {
 	DeviceName	cameraname = sbigCameraName(queryresult, index);
-	std::string	guideportname = cameraname.child(DeviceName::Ccd,
+	std::string	guideportname = cameraname.child(DeviceName::Guideport,
 				"guideport");
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "adding guideport %s",
 		guideportname.c_str());
@@ -288,22 +285,44 @@ static void	sbigAddCoolerName(std::vector<std::string>& names,
 /**
  * \brief Get a list of SBIG cameras
  *
- * The cameras on the USB bus are number, that's the order in which the
+ * The cameras on the USB bus are numbers, that's the order in which the
  * locator returns the identifying string of the camera. A camera is
  * identified by its serial number an name.
  */
 std::vector<std::string>	SbigCameraLocator::getDevicelist(DeviceName::device_type device) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "get SBIG device list");
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "get SBIG device list for %s",
+		DeviceName::type2string(device).c_str());
+
+	// there are no focusers, adaptive optics units, modules and mounts
+	// that we could return, so for these object types we return an
+	// empty list
 	std::vector<std::string>	names;
 	switch (device) {
-	case DeviceName::AdaptiveOptics:
-	case DeviceName::Focuser:
-	case DeviceName::Module:
-	case DeviceName::Mount:
-		return names;
+	case DeviceName::Camera:
+		return _cameras;
+	case DeviceName::Ccd:
+		return _ccds;
+	case DeviceName::Cooler:
+		return _coolers;
+	case DeviceName::Filterwheel:
+		return _filterwheels;
+	case DeviceName::Guideport:
+		return _guideports;
 	default:
-		break;
+		return names;
 	}
+}
+
+/**
+ * \brief Method to build the list of device names 
+ *
+ * The SBIG driver library is not flexible enough to learn about new
+ * devices after the library has been opened. In particular, it can
+ * not scan for cameras when one of the cameras is still open. To make
+ * up for this stupidity, we have to get all the names at the beginning.
+ */
+void	SbigCameraLocator::getNames() {
+	// for all other types of names we consult the 
 	QueryUSBResults	results;
 	SbigLock	lock;
 	short	e = SBIGUnivDrvCommand(CC_QUERY_USB, NULL, &results);
@@ -312,39 +331,44 @@ std::vector<std::string>	SbigCameraLocator::getDevicelist(DeviceName::device_typ
 			sbig_error(e).c_str());
 		throw SbigError(e);
 	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "found %d cameras, looking for %s",
-		results.camerasFound, DeviceName::type2string(device).c_str());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "found %d cameras",
+		results.camerasFound);
 	for (int i = 0; i < results.camerasFound; i++) {
 		if (results.usbInfo[i].cameraFound) {
 			std::string	cameraname = sbigCameraName(results, i);
-			switch (device) {
-			case DeviceName::Camera:
-				debug(LOG_DEBUG, DEBUG_LOG, 0,
-					"adding camera %s",
-					cameraname.c_str());
-				names.push_back(cameraname);
-				break;
-			case DeviceName::Guideport:
-				sbigAddGuideportName(names, results, i);
-				break;
-			case DeviceName::Ccd:
-				sbigAddCcdName(names, results, i);
-				break;
-			case DeviceName::Cooler:
-				sbigAddCoolerName(names, results, i);
-				break;
-			case DeviceName::Filterwheel:
-				sbigAddFilterwheelName(names, results, i);
-				break;
-			default:
-				break;
-			}
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "adding camera %s",
+				cameraname.c_str());
+				_cameras.push_back(cameraname);
+			sbigAddGuideportName(_guideports, results, i);
+			sbigAddCcdName(_ccds, results, i);
+			sbigAddCoolerName(_coolers, results, i);
+			sbigAddFilterwheelName(_filterwheels, results, i);
 		}
 	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "returning list with %d members",
-		names.size());
-	return names;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "names found: %d cameras, %d ccds, "
+		"%d coolers, %d filterwheels, %d guideports",
+		_cameras.size(), _ccds.size(), _coolers.size(),
+		_filterwheels.size(), _guideports.size());
 }
+
+/**
+ * \brief Clear the list of names
+ *
+ * This method should only be called when closing the driver library
+ */
+void	SbigCameraLocator::clearNames() {
+	_cameras.clear();
+	_ccds.clear();
+	_coolers.clear();
+	_filterwheels.clear();
+	_guideports.clear();
+}
+
+std::vector<std::string>	SbigCameraLocator::_cameras;
+std::vector<std::string>	SbigCameraLocator::_ccds;
+std::vector<std::string>	SbigCameraLocator::_coolers;
+std::vector<std::string>	SbigCameraLocator::_filterwheels;
+std::vector<std::string>	SbigCameraLocator::_guideports;
 
 /**
  * \brief Get a camera by name

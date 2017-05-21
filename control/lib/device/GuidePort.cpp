@@ -1,5 +1,5 @@
 /* 
- * GuidePort.pp -- Guider Port implementation
+ * GuidePort.cpp -- Guider Port implementation
  *
  * (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */

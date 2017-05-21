@@ -3,6 +3,8 @@
  *
  * (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
+#ifndef _SbigLocator_h
+#define _SbigLocator_h
 
 #include <AstroLoader.h>
 #include <AstroCamera.h>
@@ -24,6 +26,13 @@ namespace sbig {
  */
 class SbigCameraLocator : public DeviceLocator {
 	static int	driveropen;
+	static std::vector<std::string>	_cameras;
+	static std::vector<std::string>	_ccds;
+	static std::vector<std::string>	_coolers;
+	static std::vector<std::string>	_filterwheels;
+	static std::vector<std::string>	_guideports;
+	void	getNames();
+	void	clearNames();
 public:
 	SbigCameraLocator();
 	virtual ~SbigCameraLocator();
@@ -35,16 +44,8 @@ protected:
 	virtual FilterWheelPtr	getFilterWheel0(const DeviceName& name);
 };
 
-/**
- * \brief Locking class for SBIG camera driver
- */
-class SbigLock {
-public:
-	SbigLock();
-	~SbigLock();
-};
-
 } // namespace sbig
 } // namespace camera
 } // namespace astro
 
+#endif /* _SbigLocator_h */

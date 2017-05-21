@@ -4,6 +4,7 @@
  * (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
 #include <SbigCamera.h>
+#include <SbigDevice.h>
 
 namespace astro {
 namespace camera {
@@ -14,13 +15,14 @@ public:
 	SbigFilterWheelTimeout(const char *cause) : std::runtime_error(cause) {}
 };
 
-class SbigFilterWheel : public FilterWheel {
-	SbigCamera&	camera;
+class SbigFilterWheel : public FilterWheel, public SbigDevice {
 	unsigned int	npositions;
 	unsigned int	currentindex;
 	void	init();
 	void	wait();
 	FilterWheel::State	state();
+	void	cfw(CFWParams *params, CFWResults *results,
+			const std::string& msg);
 public:
 	SbigFilterWheel(SbigCamera& camera);
 	virtual ~SbigFilterWheel();

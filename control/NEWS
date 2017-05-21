@@ -13,6 +13,12 @@ MacBook Pro 2011: 2 GHz, 8GB, make -j 8 (5.5x)
 	user	48m5.479s
 	sys	3m13.924s
 
+MacBook Pro 2016: 2.6 GHz, 16GB, make -j 1
+
+	real	20m37.131s
+	user	18m26.232s
+	sys	1m35.101s
+
 OpenSUSE Tumbleweed, 2core, 16GB, 2GHz, make -j 4
 
 	real    17m29.292s

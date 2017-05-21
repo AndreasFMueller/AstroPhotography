@@ -15,6 +15,7 @@
 #endif /* HAVE_SBIGUDRV_LPARDRV_H */
 #endif
 
+#include <SbigLock.h>
 #include <SbigLocator.h>
 #include <SbigGuidePort.h>
 #include <utils.h>
@@ -31,10 +32,19 @@ namespace sbig {
  */
 SbigGuidePort::SbigGuidePort(SbigCamera& _camera)
 	: GuidePort(GuidePort::defaultname(name(), "guideport")),
-	  camera(_camera) {
+	  SbigDevice(_camera) {
 }
 
 SbigGuidePort::~SbigGuidePort() {
+}
+
+void	SbigGuidePort::activate_relay(ActivateRelayParams *params) {
+	short	e = SBIGUnivDrvCommand(CC_ACTIVATE_RELAY, params, NULL);
+	if (e != CE_NO_ERROR) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "cannot activate relays: %s",
+			sbig_error(e).c_str());
+		throw SbigError(e);
+	}
 }
 
 /**
@@ -44,18 +54,10 @@ SbigGuidePort::~SbigGuidePort() {
  * output relays.
  */
 uint8_t	SbigGuidePort::active() {
-	SbigLock	lock;
-	camera.sethandle();
 	QueryCommandStatusParams	params;
 	QueryCommandStatusResults	results;
 	params.command = CC_ACTIVATE_RELAY;
-	short	e = SBIGUnivDrvCommand(CC_QUERY_COMMAND_STATUS,
-		&params, &results);
-	if (e != CE_NO_ERROR) {
-		debug(LOG_ERR, DEBUG_LOG, 0, "cannot activate relays: %s",
-			sbig_error(e).c_str());
-		throw SbigError(e);
-	}
+	query_command_status(&params, &results);
 	uint8_t	result = 0;
 	if (results.status & 0x8) {
 		result |= RAPLUS;
@@ -84,19 +86,12 @@ uint8_t	SbigGuidePort::active() {
  */
 void	SbigGuidePort::activate(float raplus, float raminus,
 	float decplus, float decminus) {
-	SbigLock	lock;
-	camera.sethandle();
 	ActivateRelayParams	params;
 	params.tXPlus = raplus * 100;
 	params.tXMinus = raminus * 100;
 	params.tYPlus = decplus * 100;
 	params.tYMinus = decminus * 100;
-	short	e = SBIGUnivDrvCommand(CC_ACTIVATE_RELAY, &params, NULL);
-	if (e != CE_NO_ERROR) {
-		debug(LOG_ERR, DEBUG_LOG, 0, "cannot activate relays: %s",
-			sbig_error(e).c_str());
-		throw SbigError(e);
-	}
+	activate_relay(&params);
 }
 
 } // namespace sbig

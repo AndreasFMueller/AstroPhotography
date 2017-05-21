@@ -15,6 +15,7 @@
 #endif /* HAVE_SBIGUDRV_LPARDRV_H */
 #endif
 
+#include <SbigLock.h>
 #include <SbigLocator.h>
 #include <SbigCamera.h>
 #include <SbigCcd.h>
@@ -55,6 +56,72 @@ static DeviceName	cameraname(int usbno) {
 	return DeviceName(std::string("camera:sbig/") + std::to_string(usbno));
 }
 
+short	SbigCamera::current_handle = -1;
+
+void	SbigCamera::query_usb(QueryUSBResults *results) {
+	SbigLock	lock;
+	short   e = SBIGUnivDrvCommand(CC_QUERY_USB, NULL, results);
+        if (e != CE_NO_ERROR) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "cannot get camera list: %s",
+			sbig_error(e).c_str());
+		throw SbigError(e);
+        }
+}
+
+void	SbigCamera::open_device(int usbno) {
+	SbigLock	lock;
+	OpenDeviceParams	openparams;
+	openparams.deviceType = 0x7f02 + usbno;
+	short	e = SBIGUnivDrvCommand(CC_OPEN_DEVICE, &openparams, NULL);
+	if (e != CE_NO_ERROR) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "cannot open device: %s",
+			sbig_error(e).c_str());
+		throw SbigError(e);
+	}
+}
+
+unsigned short	SbigCamera::get_camera_type() {
+	SbigLock	lock;
+	EstablishLinkParams	establishparams;
+	establishparams.sbigUseOnly = 0;
+	EstablishLinkResults	establishresults;
+	short	e = SBIGUnivDrvCommand(CC_ESTABLISH_LINK, &establishparams,
+		&establishresults);
+	if (e != CE_NO_ERROR) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "cannot establish link: %s",
+			sbig_error(e).c_str());
+		throw SbigError(e);
+	}
+	return establishresults.cameraType;
+}
+
+short	SbigCamera::get_driver_handle() {
+	SbigLock	lock;
+	GetDriverHandleResults	driverhandle;
+	short	e = SBIGUnivDrvCommand(CC_GET_DRIVER_HANDLE, NULL,
+			&driverhandle);
+	if (e != CE_NO_ERROR) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "cannot get driver handle: %s",
+			sbig_error(e).c_str());
+		throw SbigError(e);
+	}
+	return driverhandle.handle;
+}
+
+void	SbigCamera::close_device() {
+	SbigLock	lock;
+	// set the handle first
+	sethandle();
+
+	// close the device
+	short	e = SBIGUnivDrvCommand(CC_CLOSE_DEVICE, NULL, NULL);
+	if (e != CE_NO_ERROR) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "cannot close device: %s",
+			sbig_error(e).c_str());
+		// throw SbigError(e);
+	}
+}
+
 /**
  * \brief Open the SBIG UDRV library
  *
@@ -68,12 +135,7 @@ SbigCamera::SbigCamera(int usbno) : Camera(cameraname(usbno)) {
 	// make sure we can really find this camera, and construct the name
 	// of the camera
 	QueryUSBResults results;
-	short   e = SBIGUnivDrvCommand(CC_QUERY_USB, NULL, &results);
-        if (e != CE_NO_ERROR) {
-		debug(LOG_ERR, DEBUG_LOG, 0, "cannot get camera list: %s",
-			sbig_error(e).c_str());
-		throw SbigError(e);
-        }
+	query_usb(&results);
 	if ((usbno >= results.camerasFound) ||
 		(!results.usbInfo[usbno].cameraFound)) {
 		std::string	msg = stringprintf("camera %d not found",
@@ -87,49 +149,25 @@ SbigCamera::SbigCamera(int usbno) : Camera(cameraname(usbno)) {
 		_name.toString().c_str());
 
 	// open the device
-	OpenDeviceParams	openparams;
-	openparams.deviceType = 0x7f02 + usbno;
-	e = SBIGUnivDrvCommand(CC_OPEN_DEVICE, &openparams, NULL);
-	if (e != CE_NO_ERROR) {
-		debug(LOG_ERR, DEBUG_LOG, 0, "cannot open device: %s",
-			sbig_error(e).c_str());
-		throw SbigError(e);
-	}
+	open_device(usbno);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "device opened");
 
 	// establish the link (it completely escapes me why this is a 
 	// separate step from opening the device)
-	EstablishLinkParams	establishparams;
-	establishparams.sbigUseOnly = 0;
-	EstablishLinkResults	establishresults;
-	e = SBIGUnivDrvCommand(CC_ESTABLISH_LINK, &establishparams,
-		&establishresults);
-	if (e != CE_NO_ERROR) {
-		debug(LOG_ERR, DEBUG_LOG, 0, "cannot establish link: %s",
-			sbig_error(e).c_str());
-		throw SbigError(e);
-	}
-	cameraType = establishresults.cameraType;
+	cameraType = get_camera_type();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "camera type: %hu", cameraType);
 
 	// get the handle
-	GetDriverHandleResults	driverhandle;
-	e = SBIGUnivDrvCommand(CC_GET_DRIVER_HANDLE, NULL, &driverhandle);
-	if (e != CE_NO_ERROR) {
-		debug(LOG_ERR, DEBUG_LOG, 0, "cannot get driver handle: %s",
-			sbig_error(e).c_str());
-		throw SbigError(e);
-	}
-	handle = driverhandle.handle;
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "got driver handle %d",
-		driverhandle.handle);
+	handle = get_driver_handle();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "got driver handle %d", handle);
 
+#if 0
 	// query the driver info
 	GetDriverInfoParams	driverinfoparams;
 	GetDriverInfoResults0	driverinfo;
 	for (driverinfoparams.request = 0; driverinfoparams.request < 3;
 		driverinfoparams.request++) {
-		e = SBIGUnivDrvCommand(CC_GET_DRIVER_INFO, &driverinfoparams,
+		short	e = SBIGUnivDrvCommand(CC_GET_DRIVER_INFO, &driverinfoparams,
 			&driverinfo);
 		if (e != CE_NO_ERROR) {
 			debug(LOG_ERR, DEBUG_LOG, 0,
@@ -145,30 +183,77 @@ SbigCamera::SbigCamera(int usbno) : Camera(cameraname(usbno)) {
 		}
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "driver info retrieved");
-
-	// we now get the ccd info for all ccds of this camera
-	GetCCDInfoParams	ccdinfoparams;
-	GetCCDInfoResults0	ccdinforesult;
+#endif
 
 	// we want to assign CCD ids sequentially
 	unsigned int	ccdidcounter = 0;
 
 	// imaging ccd
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "query imaging CCD info");
-	ccdinfoparams.request = CCD_INFO_IMAGING;
-	e = SBIGUnivDrvCommand(CC_GET_CCD_INFO, &ccdinfoparams, &ccdinforesult);
+	try {
+		CcdInfo	ccd = get_ccd_info(CCD_INFO_IMAGING, "Imaging",
+			ccdidcounter);
+		ccd.shutter(true);
+		ccdinfo.push_back(ccd);
+		ccdidcounter++;
+	} catch (...) {
+		// ignore
+	}
+		
+	// tracking ccd if present
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "querying tracking CCD info");
+	try {
+		CcdInfo	ccd = get_ccd_info(CCD_INFO_TRACKING, "Tracking",
+			ccdidcounter);
+		ccdinfo.push_back(ccd);
+		ccdidcounter++;
+	} catch (...) {
+		// ignore
+	}
+
+	// external tracking ccd, if present
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "querying external tracking CCD info");
+	try {
+		CcdInfo	ccd = get_ccd_info(CCD_INFO_EXTENDED,
+			"external Tracking", ccdidcounter);
+		ccdinfo.push_back(ccd);
+		ccdidcounter++;
+	} catch (...) {
+		// ignore
+	}
+
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "camera constructor complete");
+}
+
+/**
+ * \brief Common method to retrieve information about a CCD
+ *
+ * \param request	SBIG driver library request code for this CCD
+ * \param basename	the name we want to give this CCD in the URL naming
+ * \param ccdindex	the index of this CCD in the array of CCDs
+ */
+CcdInfo	SbigCamera::get_ccd_info(unsigned short request,
+		const std::string& basename, unsigned int ccdindex) {
+	GetCCDInfoParams	ccdinfoparams;
+	GetCCDInfoResults0	ccdinforesult;
+	ccdinfoparams.request = request;
+	short	e = SBIGUnivDrvCommand(CC_GET_CCD_INFO, &ccdinfoparams,
+			&ccdinforesult);
 	if (e != CE_NO_ERROR) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "no imaging ccd");
+		throw SbigError(e);
 	} else {
 		// here we assume that the largest readout mode is
 		// delivered first, otherwise we would have to scan
 		// the readout modes for one with mode == 0 (RM_1X1)
 		ImageSize	ccdsize(ccdinforesult.readoutInfo[0].width,
 			ccdinforesult.readoutInfo[0].height);
-		DeviceName	ccdname(name(), DeviceName::Ccd, "Imaging");
-		CcdInfo	ccd(ccdname, ccdsize, ccdidcounter++);
-		ccd.pixelwidth(pixelsize(ccdinforesult.readoutInfo[0].pixelWidth));
-		ccd.pixelheight(pixelsize(ccdinforesult.readoutInfo[0].pixelHeight));
+		DeviceName	ccdname(name(), DeviceName::Ccd, basename);
+		CcdInfo	ccd(ccdname, ccdsize, ccdindex);
+		long	w = ccdinforesult.readoutInfo[0].pixelWidth;
+		long	h = ccdinforesult.readoutInfo[0].pixelHeight;
+		ccd.pixelwidth(pixelsize(w));
+		ccd.pixelheight(pixelsize(h));
 		ccd.shutter(true);
 
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "found imageing ccd: %s",
@@ -183,58 +268,8 @@ SbigCamera::SbigCamera(int usbno) : Camera(cameraname(usbno)) {
 				ccdinforesult.readoutInfo[i].mode);
 		}
 		ccd.shutter(true);
-		ccdinfo.push_back(ccd);
+		return ccd;
 	}
-
-	// tracking ccd if present
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "querying tracking CCD info");
-	ccdinfoparams.request = CCD_INFO_TRACKING;
-	e = SBIGUnivDrvCommand(CC_GET_CCD_INFO, &ccdinfoparams, &ccdinforesult);
-	if (e != CE_NO_ERROR) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "no tracking ccd");
-	} else {
-		ImageSize	ccdsize(ccdinforesult.readoutInfo[0].width,
-			ccdinforesult.readoutInfo[0].height);
-		DeviceName	ccdname(name(), DeviceName::Ccd, "Tracking");
-		CcdInfo	ccd(ccdname, ccdsize, ccdidcounter++);
-		ccd.pixelwidth(pixelsize(ccdinforesult.readoutInfo[0].pixelWidth));
-		ccd.pixelheight(pixelsize(ccdinforesult.readoutInfo[0].pixelHeight));
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "found tracking ccd: %s",
-			ccd.toString().c_str());
-
-		for (int i = 0; i < ccdinforesult.readoutModes; i++) {
-			SbigBinningAdd(ccd, ccdinforesult.readoutInfo[i].mode);
-			debug(LOG_DEBUG, DEBUG_LOG, 0, "mode[%d]: %d x %d",
-				i, 
-				ccdinforesult.readoutInfo[i].width,
-				ccdinforesult.readoutInfo[i].height,
-				ccdinforesult.readoutInfo[i].mode);
-		}
-		ccdinfo.push_back(ccd);
-	}
-
-	// external tracking ccd, if present
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "querying external tracking CCD info");
-	ccdinfoparams.request = CCD_INFO_TRACKING;
-	e = SBIGUnivDrvCommand(CC_GET_CCD_INFO, &ccdinfoparams, &ccdinforesult);
-	if (e != CE_NO_ERROR) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "no external tracking ccd");
-	} else {
-		ImageSize	ccdsize(ccdinforesult.readoutInfo[0].width,
-			ccdinforesult.readoutInfo[0].height);
-		DeviceName	ccdname(name(), DeviceName::Ccd,
-					"external Tracking");
-		CcdInfo	ccd(ccdname, ccdsize, ccdidcounter++);
-		ccd.pixelwidth(pixelsize(ccdinforesult.readoutInfo[0].pixelWidth));
-		ccd.pixelheight(pixelsize(ccdinforesult.readoutInfo[0].pixelHeight));
-		for (int i = 0; i < ccdinforesult.readoutModes; i++) {
-			SbigBinningAdd(ccd, ccdinforesult.readoutInfo[i].mode);
-		}
-		ccd.shutter(true);
-		ccdinfo.push_back(ccd);
-	}
-
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "camera constructor complete");
 }
 
 /**
@@ -248,11 +283,25 @@ SbigCamera::SbigCamera(int usbno) : Camera(cameraname(usbno)) {
  * XXX There are some concurrency issues here: we should really make sure 
  * that now function is attempted on a camera while an uninterruptible
  * operation on some other camera is in progress. But then it should
- * really be the driver libraries task to ensure such basic stuff.
+ * really be the driver library's task to ensure such basic stuff.
  */
 void	SbigCamera::sethandle() {
+	SbigLock	lock;
+
+	// nothing needs to be done if the handle is already set correctly
+	// not that we need to do this while locked, because otherwise
+	// the handle might be stolen by another thread
+	if (handle == current_handle) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "handle setting not necessary");
+		return;
+	}
+
+	// setting the handle, but this is only needed if the driver handle
+	// is different from our handle
 	SetDriverHandleParams	driverhandle;
 	driverhandle.handle = handle;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "setting handle from %hd to %hd",
+		current_handle, handle);
 	short	e = SBIGUnivDrvCommand(CC_SET_DRIVER_HANDLE, &driverhandle,
 		NULL);
 	if (e != CE_NO_ERROR) {
@@ -260,6 +309,7 @@ void	SbigCamera::sethandle() {
 			sbig_error(e).c_str());
 		throw SbigError(e);
 	}
+	current_handle = handle;
 }
 
 /**
@@ -268,17 +318,9 @@ void	SbigCamera::sethandle() {
  * This cleans up the handle of the camera and closes the device.
  */
 SbigCamera::~SbigCamera() {
-	SbigLock	lock;
-	// set the handle first
-	sethandle();
-
-	// close the device
-	short	e = SBIGUnivDrvCommand(CC_CLOSE_DEVICE, NULL, NULL);
-	if (e != CE_NO_ERROR) {
-		debug(LOG_ERR, DEBUG_LOG, 0, "cannot close device: %s",
-			sbig_error(e).c_str());
-		// throw SbigError(e);
-	}
+	close_device();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "camera %hd is being destructed",
+		handle);
 }
 
 /**
@@ -294,9 +336,7 @@ CcdPtr	SbigCamera::getCcd0(size_t id) {
 		throw std::range_error("ccd id not in range");
 	}
 
-debug(LOG_DEBUG, DEBUG_LOG, 0, "test");
 	CcdInfo	ccd = ccdinfo[id];
-debug(LOG_DEBUG, DEBUG_LOG, 0, "test");
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "ccd: %s", ccd.toString().c_str());
 
 	// now that we have he CCD info, we can create a ccd structure

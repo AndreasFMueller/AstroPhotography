@@ -9,6 +9,7 @@
 #include <AstroCamera.h>
 #include <AstroImage.h>
 #include <SbigCamera.h>
+#include <SbigDevice.h>
 
 using namespace astro::camera;
 using namespace astro::image;
@@ -17,9 +18,8 @@ namespace astro {
 namespace camera {
 namespace sbig {
 
-class SbigCcd : public Ccd {
+class SbigCcd : public Ccd, public SbigDevice {
 	int	id;
-	SbigCamera&	camera;
 	bool	cooler;
 public:
 	SbigCcd(const CcdInfo& info, int id, SbigCamera& camera);
