@@ -277,8 +277,6 @@ static bool	matches(const std::string& a, const std::string& b) {
  * \brief hdu	Header data unit containing the header
  */
 static bool	isStandardComment(const FITShdu& hdu) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "is '%s' a standard comment?",
-		hdu.comment.c_str());
 	return matches(hdu.comment, std::string(STANDARD_HEADER1)) ||
 		matches(hdu.comment, std::string(STANDARD_HEADER2));
 }

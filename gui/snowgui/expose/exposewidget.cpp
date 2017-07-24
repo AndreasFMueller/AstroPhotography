@@ -244,9 +244,23 @@ void	exposewidget::saveClicked() {
 	filedialog.setFileMode(QFileDialog::AnyFile);
 	filedialog.setDefaultSuffix(QString("fits"));
 	if (filedialog.exec()) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "file dialog returned");
 		QStringList     list = filedialog.selectedFiles();
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "list size: %d", list.size());
+		if (list.size() == 0) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "nothing selected");
+			QMessageBox     message(&filedialog);
+			message.setText(QString("No filename"));
+			std::ostringstream      o;
+			o << "The image file could not be saved because ";
+			o << "no file name was selected";
+			message.setInformativeText(QString(o.str().c_str()));
+			message.exec();
+			return;
+		}
 		std::string     filename(list.begin()->toLatin1().data());
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "filename: %s");
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "filename: %s",
+			filename.c_str());
 		astro::io::FITSout      out(filename);
 		if (out.exists()) {
 			out.unlink();
