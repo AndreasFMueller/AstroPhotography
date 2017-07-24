@@ -261,6 +261,28 @@ static bool	ignored(const std::string& keyname) {
 	return false;
 }
 
+#define	STANDARD_HEADER1 "  FITS (Flexible Image Transport System) format is defined in 'Astronomy"
+#define STANDARD_HEADER2 "  and Astrophysics', volume 376, page 359; bibcode: 2001A&A...376..359H"
+
+static bool	matches(const std::string& a, const std::string& b) {
+	return trim(a) == trim(b);
+}
+
+/**
+ * \brief Find out whether this is a standard comment header
+ *
+ * The standard comment headers should not be read, because they are rewritten
+ * each time a FITS file is written.
+ *
+ * \brief hdu	Header data unit containing the header
+ */
+static bool	isStandardComment(const FITShdu& hdu) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "is '%s' a standard comment?",
+		hdu.comment.c_str());
+	return matches(hdu.comment, std::string(STANDARD_HEADER1)) ||
+		matches(hdu.comment, std::string(STANDARD_HEADER2));
+}
+
 /**
  * \brief Read the headers from a FITS file
  *
@@ -298,10 +320,15 @@ void	FITSinfileBase::readkeys() throw (FITSexception) {
 				hdu.type.name());
 			hdu.comment = comment;
 			hdu.value = FITShdu::unquote(value);
-			debug(LOG_DEBUG, DEBUG_LOG, 0, "%s = %s/%s",
-				hdu.name.c_str(), hdu.value.c_str(),
-				hdu.comment.c_str());
-			headers.push_back(make_pair(hdu.name, hdu));
+			if (isStandardComment(hdu)) {
+				debug(LOG_DEBUG, DEBUG_LOG, 0,
+					"ignoring standard comment");
+			} else {
+				debug(LOG_DEBUG, DEBUG_LOG, 0, "%s = %s/%s",
+					hdu.name.c_str(), hdu.value.c_str(),
+					hdu.comment.c_str());
+				headers.push_back(make_pair(hdu.name, hdu));
+			}
 		}
 		keynum++;
 	}

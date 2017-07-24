@@ -79,12 +79,14 @@ std::string	AsiCameraLocator::getVersion() const {
 void	AsiCameraLocator::initialize_cameraopen() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "initialize the cameraopen array");
 	int	n = ASIGetNumOfConnectedCameras();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "found %d cameras", n);
 	for (int i = 0; i < n; i++) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "camera %d (%d)", i,
 			cameraopen.size());
 		AsiCameraLocator::cameraopen.push_back(false);
 	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "initalization complete");
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "initalization of %d cameras complete",
+		n);
 }
 
 std::once_flag	cameraopen_flag;
