@@ -85,8 +85,8 @@ void	AsiCameraLocator::initialize_cameraopen() {
 			cameraopen.size());
 		AsiCameraLocator::cameraopen.push_back(false);
 	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "initalization of %d cameras complete",
-		n);
+	debug(LOG_DEBUG, DEBUG_LOG, 0,
+		"initalization of %d cameras complete", n);
 }
 
 std::once_flag	cameraopen_flag;
