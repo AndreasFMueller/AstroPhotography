@@ -19,11 +19,11 @@ class NiceFocuser : public Focuser, public NiceDevice {
 public:
 	NiceFocuser(snowstar::FocuserPrx focuser, const DeviceName& name);
 	virtual ~NiceFocuser();
-	virtual unsigned short	min();
-	virtual unsigned short	max();
-	virtual unsigned short	current();
-	virtual unsigned short	backlash();
-	virtual void	set(unsigned short value);
+	virtual long	min();
+	virtual long	max();
+	virtual long	current();
+	virtual long	backlash();
+	virtual void	set(long value);
 };
 
 } // namespace nice

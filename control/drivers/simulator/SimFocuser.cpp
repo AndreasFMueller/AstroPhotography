@@ -17,8 +17,8 @@ double	SimFocuser::reference() {
 	return r / 2.;
 }
 
-unsigned short	SimFocuser::variance() {
-	return std::numeric_limits<unsigned short>::max() / 4;
+long	SimFocuser::variance() {
+	return (max() - min()) / 4;
 }
 
 SimFocuser::SimFocuser(SimLocator& locator)
@@ -36,15 +36,15 @@ void	SimFocuser::randomposition() {
 	lastset = 0;
 }
 
-unsigned short	SimFocuser::min() {
+long	SimFocuser::min() {
 	return 0;
 }
 
-unsigned short	SimFocuser::max() {
-	return std::numeric_limits<unsigned short>::max();
+long	SimFocuser::max() {
+	return 100000;
 }
 
-unsigned short	SimFocuser::current() {
+long	SimFocuser::current() {
 	if (0 == lastset) {
 		return _value;
 	}
@@ -62,11 +62,11 @@ debug(LOG_DEBUG, DEBUG_LOG, 0, "delta: %f, timepast: %f", delta, timepast);
 	return _value;
 }
 
-unsigned short	SimFocuser::backlash() {
+long	SimFocuser::backlash() {
 	return 1000;
 }
 
-void	SimFocuser::set(unsigned short value) {
+void	SimFocuser::set(long value) {
 	current();
 	if (value == target) {
 		return;

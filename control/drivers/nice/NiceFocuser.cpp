@@ -17,23 +17,23 @@ NiceFocuser::NiceFocuser(snowstar::FocuserPrx focuser,
 NiceFocuser::~NiceFocuser() {
 }
 
-unsigned short	NiceFocuser::min() {
+long	NiceFocuser::min() {
 	return _focuser->min();
 }
 
-unsigned short	NiceFocuser::max() {
+long	NiceFocuser::max() {
 	return _focuser->max();
 }
 
-unsigned short	NiceFocuser::current() {
+long	NiceFocuser::current() {
 	return _focuser->current();
 }
 
-unsigned short	NiceFocuser::backlash() {
+long	NiceFocuser::backlash() {
 	return _focuser->backlash();
 }
 
-void	NiceFocuser::set(unsigned short value) {
+void	NiceFocuser::set(long value) {
 	_focuser->set(value);
 }
 

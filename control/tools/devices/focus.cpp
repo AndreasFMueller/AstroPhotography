@@ -99,9 +99,9 @@ int	main(int argc, char *argv[]) {
 	}
 	std::string	command(argv[optind++]);
 	if (command == "get") {
-		unsigned short	min = focuser->min();
-		unsigned short	max = focuser->max();
-		unsigned short	current = focuser->current();
+		long	min = focuser->min();
+		long	max = focuser->max();
+		long	current = focuser->current();
 		std::cout << "min:     " << min << std::endl;
 		std::cout << "max:     " << max << std::endl;
 		std::cout << "current: " << current << std::endl;
@@ -111,7 +111,7 @@ int	main(int argc, char *argv[]) {
 			std::runtime_error("position argument missing");
 		}
 		std::string	positionstring(argv[optind++]);
-		unsigned short	position = std::stoi(positionstring);
+		long	position = std::stoi(positionstring);
 		focuser->set(position);
 	}
 	

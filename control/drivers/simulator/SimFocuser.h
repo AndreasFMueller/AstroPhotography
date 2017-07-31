@@ -16,18 +16,18 @@ namespace simulator {
 class SimFocuser : public Focuser {
 	SimLocator&	_locator;
 	double	lastset;
-	unsigned short	target;
-	unsigned short	_value;
+	long	target;
+	long	_value;
 	double  reference();
-	unsigned short  variance();
+	long	variance();
 public:
 	SimFocuser(SimLocator& locator);
 	virtual ~SimFocuser() { }
-	virtual unsigned short  min();
-	virtual unsigned short  max();
-	virtual unsigned short  current();
-	virtual unsigned short	backlash();
-	virtual void	set(unsigned short value);
+	long	min();
+	long	max();
+	long	current();
+	long	backlash();
+	virtual void	set(long value);
 	double	radius();
 	void	randomposition();	
 };

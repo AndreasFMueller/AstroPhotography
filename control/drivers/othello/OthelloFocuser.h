@@ -20,10 +20,10 @@ class OthelloFocuser : public astro::camera::Focuser {
 public:
 	OthelloFocuser(astro::usb::DevicePtr _deviceptr);
 	~OthelloFocuser();
-	virtual unsigned short	min();
-	virtual unsigned short	max();
-	virtual unsigned short	current();
-	virtual void	set(unsigned short value);
+	virtual long	min();
+	virtual long	max();
+	virtual long	current();
+	virtual void	set(long value);
 };
 
 } // namespace othello

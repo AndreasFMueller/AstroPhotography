@@ -617,12 +617,12 @@ public:
 	Focuser(const DeviceName& name);
 	Focuser(const std::string& name);
 	virtual ~Focuser();
-	virtual unsigned short	min();
-	virtual unsigned short	max();
-	virtual unsigned short	current();
-	virtual unsigned short	backlash();
-	virtual void	set(unsigned short value);
-	bool	moveto(unsigned short value, unsigned long timeout = 60);
+	virtual long	min();
+	virtual long	max();
+	virtual long	current();
+	virtual long	backlash();
+	virtual void	set(long value);
+	bool	moveto(long value, unsigned long timeout = 60);
 };
 
 class AdaptiveOptics;

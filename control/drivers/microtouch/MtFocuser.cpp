@@ -24,21 +24,22 @@ MtFocuser::~MtFocuser() {
 	delete mt;
 }
 
-unsigned short	MtFocuser::max() {
+long	MtFocuser::max() {
 	return 60000;
 }
 
-unsigned short	MtFocuser::current() {
+long	MtFocuser::current() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "request for current position");
 	return mt->position();
 }
 
-void	MtFocuser::set(unsigned short value) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "got position request %hu", value);
-	if (value > max()) {
+void	MtFocuser::set(long value) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "got position request %d", value);
+	if ((value > max()) || (value < min())) {
 		throw BadParameter("focuser value out of range");
 	}
-	mt->setPosition(value);
+	unsigned short	target = value;
+	mt->setPosition(target);
 }
 
 } // namespace microtouch

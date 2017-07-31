@@ -128,7 +128,7 @@ int	main(int argc, char *argv[]) {
 	std::string	reponame;
 	ImageRectangle	frame;
 	Exposure::purpose_t	purpose = Exposure::light;
-	unsigned short	focusposition = 0;
+	long	focusposition = 0;
 	std::string	prefix;
 
 	// parse the command line

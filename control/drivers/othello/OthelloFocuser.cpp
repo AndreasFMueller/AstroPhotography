@@ -34,24 +34,28 @@ OthelloFocuser::OthelloFocuser(DevicePtr _deviceptr)
 OthelloFocuser::~OthelloFocuser() {
 }
 
-unsigned short	OthelloFocuser::min() {
+long	OthelloFocuser::min() {
 	return 1;
 }
 
-unsigned short	OthelloFocuser::max() {
-	return 0xffff;
+long	OthelloFocuser::max() {
+	return 16777214;
 }
 
 typedef struct othello_get_s {
-	uint16_t	current;
-	uint16_t	target;
-	uint16_t	speed;
+	int32_t	current;
+	int32_t	target;
+	int32_t	speed;
 } __attribute__((packed)) othello_get_t;
+
+typedef struct othello_set_s {
+	int32_t		set;
+} __attribute__((packed)) othello_set_t;
 
 /**
  * \brief get the current position of the focuser
  */
-unsigned short	OthelloFocuser::current() {
+long	OthelloFocuser::current() {
 	Request<othello_get_t>	request(
 		RequestBase::vendor_specific_type,
 		RequestBase::device_recipient, 0,
@@ -63,11 +67,13 @@ unsigned short	OthelloFocuser::current() {
 /**
  * \brief Set the position to move to
  */
-void	OthelloFocuser::set(unsigned short value) {
-	EmptyRequest	request(
+void	OthelloFocuser::set(long value) {
+	othello_set_t	setdata;
+	setdata.set = value;
+	Request<othello_set_t>	request(
 		RequestBase::vendor_specific_type,
 		RequestBase::device_recipient, 1 /* fast move */,
-		(uint8_t)FOCUSER_SET, value);
+		(uint8_t)FOCUSER_SET, 0, &setdata);
 	deviceptr->controlRequest(&request);
 }
 

@@ -98,8 +98,8 @@ static struct option	longopts[] = {
 int	main(int argc, char *argv[]) {
 	int	c;
 	int	longindex;
-	unsigned short	min = 24000;
-	unsigned short	max = 40000;
+	long	min = 24000;
+	long	max = 40000;
 	int	steps = 10;
 	DeviceName	ccdname("ccd:simulator/camera/ccd");
 	DeviceName	focusername("focuser:simulator/focuser");

@@ -18,9 +18,9 @@ class MtFocuser : public astro::camera::Focuser {
 public:
 	MtFocuser();
 	~MtFocuser();
-	virtual unsigned short	max();
-	virtual unsigned short	current();
-	virtual void	set(unsigned short value);
+	virtual long	max();
+	virtual long	current();
+	virtual void	set(long value);
 };
 
 } // namespace microtouch

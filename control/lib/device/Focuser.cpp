@@ -24,26 +24,26 @@ Focuser::Focuser(const std::string& name) : Device(name, DeviceName::Focuser) {
 Focuser::~Focuser() {
 }
 
-unsigned short	Focuser::min() {
+long	Focuser::min() {
 	return 0;
 }
 
-unsigned short	Focuser::max() {
+long	Focuser::max() {
 	return std::numeric_limits<unsigned short>::max();
 }
 
-unsigned short	Focuser::current() {
+long	Focuser::current() {
 	throw NotImplemented("base Focuser does not implement current method");
 }
 
-unsigned short	Focuser::backlash() {
+long	Focuser::backlash() {
 	if (hasProperty("backlash")) {
 		return std::stoi(getProperty("backlash"));
 	}
 	return 0;
 }
 
-void	Focuser::set(unsigned short /* value */) {
+void	Focuser::set(long /* value */) {
 	throw NotImplemented("base Focuser does not implement set method");
 }
 
@@ -56,12 +56,20 @@ void	Focuser::set(unsigned short /* value */) {
  * \param timeout	maximum numer of seconds to wait for the focuser to
  *			reach the new position
  */
-bool	Focuser::moveto(unsigned short value, unsigned long timeout) {
+bool	Focuser::moveto(long value, unsigned long timeout) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "moving to %hu", value);
 	// record current time
 	time_t	starttime;
 	time(&starttime);
 	time_t	timelimit = starttime + timeout;
+
+	// ensure we stay within the limits
+	if (value > max()) {
+		value = max();
+	}
+	if (value < min()) {
+		value = min();
+	}
 
 	// start moving to this position
 	set(value);
@@ -69,7 +77,7 @@ bool	Focuser::moveto(unsigned short value, unsigned long timeout) {
 	// wait until we reach the position
 	time_t	now;
 	time(&now);
-	unsigned short	currentposition = current();
+	long	currentposition = current();
 	do {
 		if (value != currentposition) {
 			usleep(100000);
