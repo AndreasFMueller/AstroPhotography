@@ -701,8 +701,10 @@ ASI_EXPOSURE_STATUS	AsiCamera::getExpStatus() {
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 		throw AsiApiException(rc, msg);
 	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "camera%d: exposure status: %d", _id,
-		ExpStatus);
+	if (Asi_Debug_State) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "camera%d: exposure status: %d",
+			_id, ExpStatus);
+	}
 	// reset the mode if the exposure failed
 	if (ExpStatus == ASI_EXP_FAILED) {
 		_asi_mode = mode_idle;

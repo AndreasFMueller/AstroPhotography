@@ -83,9 +83,9 @@ void	AsiCcd::setExposure(const Exposure& e) {
 	if (exposure.size() == ImageSize()) {
 		exposure.frame(info.size());
 	} else {
-		// make sure window sizes are divisible by 4/2
+		// make sure window sizes are divisible by 8/2
 		int	w = exposure.width();
-		w = ((w + 3) >> 2) << 2;
+		w = ((w + 7) >> 3) << 3;
 		int	h = exposure.height();
 		h = ((h + 1) >> 1) << 1;
 		exposure.frame(ImageRectangle(exposure.origin(),
