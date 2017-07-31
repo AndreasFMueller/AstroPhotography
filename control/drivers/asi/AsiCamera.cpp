@@ -228,9 +228,11 @@ int	AsiCamera::controlIndex(const std::string& controlname) {
  */
 static void	getControlCapabilities(int id, int control_index,
 	ASI_CONTROL_CAPS *caps) {
-	int	rc;
+	int	rc = ASIGetControlCaps(id, control_index, caps);
 	if (Asi_Debug_Apicalls) {
-		rc = ASIGetControlCaps(id, control_index, caps);
+		debug(LOG_DEBUG, DEBUG_LOG, 0,
+			"%d = ASIGetControlCaps(%d, %d, %p)",
+			rc, id, control_index, caps);
 	}
 	if (ASI_SUCCESS != rc) {
 		std::string	msg = stringprintf("%d cannot get caps: %s",
