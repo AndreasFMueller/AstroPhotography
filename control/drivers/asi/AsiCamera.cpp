@@ -19,8 +19,7 @@ namespace asi {
  *
  * \param _index	index of the camera
  */
-AsiCamera::AsiCamera(int index) : Camera(asiCameraName(index)),
-	_index(index) {
+AsiCamera::AsiCamera(int index) : Camera(asiCameraName(index)), _index(index) {
 	// if the camera is already open, this constructors should not be
 	// called
 	if (AsiCameraLocator::isopen(_index)) {
@@ -33,6 +32,10 @@ AsiCamera::AsiCamera(int index) : Camera(asiCameraName(index)),
 	// open the camera
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "open camera idx = %d", index);
 	int	rc = ASIOpenCamera(index);
+	if (Asi_Debug_Apicalls) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "%d = ASIOpenCamera(%d)",
+			rc, index);
+	}
 	if (ASI_SUCCESS != rc) {
 		std::string	msg = stringprintf("%s: cannot open",
 			name().toString().c_str());
@@ -41,12 +44,31 @@ AsiCamera::AsiCamera(int index) : Camera(asiCameraName(index)),
 	}
 	AsiCameraLocator::setopen(_index, true);
 
+	// initialize the caomera
+	rc = ASIInitCamera(index);
+	if (Asi_Debug_Apicalls) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "%d = ASIInitCamera(%d)",
+			rc, index);
+	}
+	if (ASI_SUCCESS != rc) {
+		std::string	msg = stringprintf("%s: cannot initialize",
+			name().toString().c_str());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw std::runtime_error(msg);
+	}
+
 	// initialize the mode
 	_asi_mode = mode_idle;
 
 	// get information about the CCD
 	ASI_CAMERA_INFO camerainfo;
-        if (ASI_SUCCESS != (rc = ASIGetCameraProperty(&camerainfo, _index))) {
+        rc = ASIGetCameraProperty(&camerainfo, _index);
+	if (Asi_Debug_Apicalls) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0,
+			"%d = ASIGetCameraProperty(%p, %d)",
+			rc, &camerainfo, _index);
+	}
+        if (ASI_SUCCESS != rc) {
 		std::string	msg = stringprintf("%s: cannot get props: %s",
 			name().toString().c_str(), error(rc).c_str());
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
@@ -101,7 +123,12 @@ AsiCamera::AsiCamera(int index) : Camera(asiCameraName(index)),
 AsiCamera::~AsiCamera() {
 	int	rc;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "close camera %d (id = %d)", _index, _id);
-	if (ASI_SUCCESS != (rc = ASICloseCamera(_index))) {
+	rc = ASICloseCamera(_index);
+	if (Asi_Debug_Apicalls) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "%d = ASICloseCamera(%d)",
+			rc, _index);
+	}
+	if (ASI_SUCCESS != rc) {
 		std::string	msg = stringprintf("%s cannot close camera: %s",
 			name().toString().c_str(), error(rc).c_str());
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
@@ -157,7 +184,13 @@ int	AsiCamera::controlIndex(const std::string& controlname) {
 	std::unique_lock<std::recursive_mutex>	lock(_api_mutex);
 	int	n;
 	int	rc;
-	if (ASI_SUCCESS != (rc = ASIGetNumOfControls(_id, &n))) {
+	rc = ASIGetNumOfControls(_id, &n);
+	if (Asi_Debug_Apicalls) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0,
+			"%d = ASIGetNumOfControls(%d, %d)",
+			rc, _id, n);
+	}
+	if (ASI_SUCCESS != rc) {
 		std::string	msg = stringprintf("%s cannot get controls: %s",
 			name().toString().c_str(),
 			AsiCamera::error(rc).c_str());
@@ -167,7 +200,13 @@ int	AsiCamera::controlIndex(const std::string& controlname) {
 	for (int i = 0; i < n; i++) {
 		ASI_CONTROL_CAPS	caps;
 		int	rc;
-		if (ASI_SUCCESS != (rc = ASIGetControlCaps(_id, i, &caps))) {
+		rc = ASIGetControlCaps(_id, i, &caps);
+		if (Asi_Debug_Apicalls) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0,
+				"%d = ASIGetControlCaps(%d, %d, %d)",
+				rc, _id, i, caps);
+		}
+		if (ASI_SUCCESS != rc) {
 			std::string	msg = stringprintf("%s: cannot get "
 				"capability %d: %s", name().toString().c_str(),
 				i, AsiCamera::error(rc).c_str());
@@ -190,8 +229,10 @@ int	AsiCamera::controlIndex(const std::string& controlname) {
 static void	getControlCapabilities(int id, int control_index,
 	ASI_CONTROL_CAPS *caps) {
 	int	rc;
-	if (ASI_SUCCESS != (rc = ASIGetControlCaps(id, control_index,
-		caps))) {
+	if (Asi_Debug_Apicalls) {
+		rc = ASIGetControlCaps(id, control_index, caps);
+	}
+	if (ASI_SUCCESS != rc) {
 		std::string	msg = stringprintf("%d cannot get caps: %s",
 			id, AsiCamera::error(rc).c_str());
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
@@ -367,8 +408,13 @@ AsiControlValue	AsiCamera::getControlValue(AsiControlType type) {
 	ASI_BOOL	pbauto;
 	ASI_CONTROL_TYPE	asitype = type2asitype(type);
 	int	rc;
-	if (ASI_SUCCESS != (rc = ASIGetControlValue(_id, asitype,
-		&value, &pbauto))) {
+	rc = ASIGetControlValue(_id, asitype, &value, &pbauto);
+	if (Asi_Debug_Apicalls) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0,
+			"%d = ASIGetControlValue(%d, %d, %ld, %s)",
+			rc, _id, asitype, value, (pbauto) ? "TRUE" : "FALSE");
+	}
+	if (ASI_SUCCESS != rc) {
 		std::string	msg = stringprintf("%s cannot get control "
 			"%d: %s", name().toString().c_str(), type,
 			error(rc).c_str());
@@ -391,8 +437,13 @@ void	AsiCamera::setControlValue(const AsiControlValue& controlvalue) {
 	long		value = controlvalue.value;
 	ASI_BOOL	pbauto = (controlvalue.isauto) ? ASI_TRUE : ASI_FALSE;
 	int	rc;
-	if (ASI_SUCCESS != (rc = ASISetControlValue(_id, type, value,
-		pbauto))) {
+	rc = ASISetControlValue(_id, type, value, pbauto);
+	if (Asi_Debug_Apicalls) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0,
+			"%d = ASISetControlValue(%d, %d, %ld, %s)",
+			rc, _id, type, value, (pbauto) ? "TRUE" : "FALSE");
+	}
+	if (ASI_SUCCESS != rc) {
 		std::string	msg = stringprintf("%s cannot set control %d:"
 			" %s", name().toString().c_str(), type,
 			error(rc).c_str());
@@ -453,6 +504,12 @@ void	AsiCamera::setROIFormat(const roi_t roi) {
 	int	iBin = roi.mode.x();
 	ASI_ERROR_CODE	rc = ASISetROIFormat(_id, roi.size.width(),
 				roi.size.height(), iBin, roi.img_type);
+	if (Asi_Debug_Apicalls) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0,
+			"%d = ASISetROIFormat(%d, %d, %d, %d, %d)", rc, _id, 
+			roi.size.width(), roi.size.height(), iBin,
+			roi.img_type);
+	}
 	if (ASI_SUCCESS != rc) {
 		std::string	msg = stringprintf("cannot set ROI %s, %s, %d: %s",
 			roi.size.toString().c_str(),
@@ -472,6 +529,11 @@ AsiCamera::roi_t   AsiCamera::getROIFormat() {
 	ASI_IMG_TYPE	Img_type;
 	ASI_ERROR_CODE	rc = ASIGetROIFormat(_id, &iWidth, &iHeight, &iBin,
 		&Img_type);
+	if (Asi_Debug_Apicalls) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0,
+			"%d = ASIGetROIFormat(%d, %d, %d, %d, %d)",
+			_id, iWidth, iHeight, iBin, Img_type);
+	}
 	if (ASI_SUCCESS != rc) {
 		std::string	msg = stringprintf("cannot get ROI: %s",
 			error(rc).c_str());
@@ -491,6 +553,11 @@ AsiCamera::roi_t   AsiCamera::getROIFormat() {
 void    AsiCamera::setStartPos(const ImagePoint& point) {
 	std::unique_lock<std::recursive_mutex>	lock(_api_mutex);
 	ASI_ERROR_CODE	rc = ASISetStartPos(_id, point.x(), point.y());
+	if (Asi_Debug_Apicalls) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0,
+			"%d = ASISetStartPos(%d, %d, %d)",
+			rc, _id, point.x(), point.y());
+	}
 	if (ASI_SUCCESS != rc) {
 		std::string	msg = stringprintf("cannot set start position "
 			"%s: %s", point.toString().c_str(), error(rc).c_str());
@@ -508,6 +575,11 @@ ImagePoint      AsiCamera::getStartPos() {
 	std::unique_lock<std::recursive_mutex>	lock(_api_mutex);
 	int	iStartX, iStartY;
 	ASI_ERROR_CODE	rc = ASIGetStartPos(_id, &iStartX, &iStartY);
+	if (Asi_Debug_Apicalls) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0,
+			"%d = ASIGetStartPos(%d, %d, %d)",
+			rc, _id, iStartX, iStartY);
+	}
 	if (ASI_SUCCESS != rc) {
 		std::string	msg = stringprintf("cannot get start pos: %s",
 			error(rc).c_str());
@@ -524,6 +596,11 @@ unsigned long   AsiCamera::getDroppedFrames() {
 	std::unique_lock<std::recursive_mutex>	lock(_api_mutex);
 	int	iDropFrames;
 	ASI_ERROR_CODE	rc = ASIGetDroppedFrames(_id, &iDropFrames);
+	if (Asi_Debug_Apicalls) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0,
+			"%d = ASIGetDroppedFrames(%d, %d)",
+			rc, _id, iDropFrames);
+	}
 	if (ASI_SUCCESS != rc) {
 		std::string	msg = stringprintf("cannot get dropped: %s",
 			error(rc).c_str());
@@ -548,6 +625,10 @@ void	AsiCamera::startExposure(bool isdark) {
 	// start the exposure
 	ASI_BOOL	isDark = (isdark) ? ASI_TRUE : ASI_FALSE;
 	ASI_ERROR_CODE	rc = ASIStartExposure(_id, isDark);
+	if (Asi_Debug_Apicalls) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "%d = ASIStartExposure(%d, %s)",
+			rc, _id, (isDark == ASI_TRUE) ? "TRUE" : "FALSE");
+	}
 	if (ASI_SUCCESS != rc) {
 		std::string	msg = stringprintf("cannot start exposure: %s",
 			error(rc).c_str());
@@ -555,6 +636,8 @@ void	AsiCamera::startExposure(bool isdark) {
 		throw AsiApiException(rc, msg);
 	}
 	_asi_mode = mode_exposure;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "camera %d: exposure started: %d", _id,
+		getExpStatus());
 }
 
 /**
@@ -571,6 +654,7 @@ void	AsiCamera::stopExposure() {
 	}
 	// stop the exposure
 	ASI_ERROR_CODE	rc = ASIStopExposure(_id);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "%d = ASIStopExposure(%d)", rc, _id);
 	if (ASI_SUCCESS != rc) {
 		std::string	msg = stringprintf("cannot stop exposure: %s",
 			error(rc).c_str());
@@ -588,6 +672,9 @@ ASI_EXPOSURE_STATUS	AsiCamera::getExpStatus() {
 	// check that we are in the correct mode
 	switch (_asi_mode) {
 	case mode_idle:
+		if (Asi_Debug_State) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "asi_mode = idle");
+		}
 		return ASI_EXP_IDLE;
 	case mode_stream:
 		{
@@ -602,12 +689,18 @@ ASI_EXPOSURE_STATUS	AsiCamera::getExpStatus() {
 	// actually get the exposure status
 	ASI_EXPOSURE_STATUS	ExpStatus;
 	ASI_ERROR_CODE	rc = ASIGetExpStatus(_id, &ExpStatus);
+	if (Asi_Debug_Apicalls) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "%d = ASIGetExpStatus(%d, %d)",
+			rc, _id, ExpStatus);
+	}
 	if (ASI_SUCCESS != rc) {
 		std::string	msg = stringprintf("cannot get exp status: %s",
 			error(rc).c_str());
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 		throw AsiApiException(rc, msg);
 	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "camera%d: exposure status: %d", _id,
+		ExpStatus);
 	// reset the mode if the exposure failed
 	if (ExpStatus == ASI_EXP_FAILED) {
 		_asi_mode = mode_idle;
@@ -629,6 +722,11 @@ void	AsiCamera::getDataAfterExp(unsigned char *pBuffer, long lBuffSize) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "image buffer[%ld]@%p", lBuffSize,
 		pBuffer);
 	ASI_ERROR_CODE	rc = ASIGetDataAfterExp(_id, pBuffer, lBuffSize);
+	if (Asi_Debug_Apicalls) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0,
+			"%d = ASIGetDataAfterExp(%d, %p, %ld",
+			rc, _id, pBuffer, lBuffSize);
+	}
 	_asi_mode = mode_idle;
 	if (ASI_SUCCESS != rc) {
 		std::string	msg = stringprintf("cannot get exp data: %s",
@@ -652,6 +750,10 @@ void    AsiCamera::startVideoCapture() {
 	}
 	// start video capture
 	ASI_ERROR_CODE	rc = ASIStartVideoCapture(_id);
+	if (Asi_Debug_Apicalls) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "%d = ASIStartVideoCapture(%d)",
+			rc, _id);
+	}
 	if (ASI_SUCCESS != rc) {
 		std::string	msg = stringprintf("cannot start video: %s",
 			error(rc).c_str());
@@ -675,6 +777,10 @@ void    AsiCamera::stopVideoCapture() {
 		throw std::runtime_error(msg);
 	}
 	ASI_ERROR_CODE	rc = ASIStopVideoCapture(_id);
+	if (Asi_Debug_Apicalls) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "%d = ASIStopVideoCapture(%d)",
+			rc, _id);
+	}
 	if (ASI_SUCCESS != rc) {
 		std::string	msg = stringprintf("cannot stop video: %s",
 			error(rc).c_str());
@@ -700,6 +806,11 @@ void	AsiCamera::getVideoData(unsigned char *pBuffer, long lBuffSize,
 		throw std::runtime_error(msg);
 	}
 	ASI_ERROR_CODE	rc = ASIGetVideoData(_id, pBuffer, lBuffSize, iWaitms);
+	if (Asi_Debug_Apicalls) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0,
+			"%d = ASIGetVideoData(%d, %p, %ld, %d)",
+			rc, _id, pBuffer, lBuffSize, iWaitms);
+	}
 	if (ASI_SUCCESS != rc) {
 		std::string	msg = stringprintf("cannot get video data: %s",
 			error(rc).c_str());
@@ -747,6 +858,10 @@ void    AsiCamera::pulseGuideOn(direction_t dir) {
 	std::unique_lock<std::recursive_mutex>	lock(_api_mutex);
 	ASI_GUIDE_DIRECTION	direction = dir2dir(dir);
 	ASI_ERROR_CODE	rc = ASIPulseGuideOn(_id, direction);
+	if (Asi_Debug_Apicalls) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "%d = ASIPulseGuideOn(%d, %s)",
+			rc, _id, dir2string(dir).c_str());
+	}
 	if (ASI_SUCCESS != rc) {
 		std::string	msg = stringprintf("cannot pulse on: %s",
 			error(rc).c_str());
@@ -764,6 +879,10 @@ void    AsiCamera::pulseGuideOff(direction_t dir) {
 	std::unique_lock<std::recursive_mutex>	lock(_api_mutex);
 	ASI_GUIDE_DIRECTION	direction = dir2dir(dir);
 	ASI_ERROR_CODE	rc = ASIPulseGuideOff(_id, direction);
+	if (Asi_Debug_Apicalls) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "%d = ASIPulseGuideOff(%d, %s)",
+			rc, _id, dir2string(dir).c_str());
+	}
 	if (ASI_SUCCESS != rc) {
 		std::string	msg = stringprintf("cannot pulse off: %s",
 			error(rc).c_str());
