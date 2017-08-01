@@ -8,6 +8,7 @@
 #include <AstroUtils.h>
 #include <AstroFormat.h>
 #include <CommunicatorSingleton.h>
+#include <IceConversions.h>
 #include <Ice/Ice.h>
 
 using namespace astro::persistence;
@@ -220,6 +221,65 @@ MountPrx                RemoteInstrument::mount(unsigned int index) {
 	// get the AO device for mapped or direct components
 	return devices(astro::ServerName(component.servicename))
 			->getMount(component.deviceurl);
+}
+
+/**
+ * \brief Retrieve a Guider
+ */
+GuiderPrx	RemoteInstrument::guider(unsigned int ccdindex,
+			unsigned int guideportindex, unsigned int aoindex) {
+	// make sure we have enough 
+	if (ccdindex >= _instrument->nComponentsOfType(InstrumentGuiderCCD)) {
+		throw std::runtime_error("now guider CCD found");
+	}
+
+	// we ask for the component of the GuiderCCD, because that is
+	// where the guider will reside
+	InstrumentComponent	component
+			= getComponent(InstrumentGuiderCCD, ccdindex);
+	astro::ServerName	servername(component.servicename);
+
+	// make sure we can get all those devices
+
+	// get a communicator ptr (singleton?)
+	Ice::CommunicatorPtr	ic = CommunicatorSingleton::get();
+	Ice::ObjectPrx	gbase
+		= ic->stringToProxy(servername.connect("Guiders"));
+	GuiderFactoryPrx	guiderfactory
+		= GuiderFactoryPrx::checkedCast(gbase);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "got a guider factory");
+
+	// now build the descriptor
+	GuiderDescriptor	guiderdescriptor;
+	guiderdescriptor.instrumentname = name();
+	guiderdescriptor.ccdIndex = ccdindex;
+
+	// check guideport
+	guiderdescriptor.guideportIndex = guideportindex;
+	int	n = _instrument->nComponentsOfType(InstrumentGuidePort);
+	if (guideportindex >= n) {
+		guiderdescriptor.guideportIndex = -1;
+	}
+
+	// check adaptive optics
+	guiderdescriptor.adaptiveopticsIndex = aoindex;
+	n = _instrument->nComponentsOfType(InstrumentAdaptiveOptics);
+	if (aoindex >= n) {
+		guiderdescriptor.adaptiveopticsIndex = -1;
+	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "getting '%s|%d|%d|%d'",
+		guiderdescriptor.instrumentname.c_str(),
+		guiderdescriptor.ccdIndex,
+		guiderdescriptor.guideportIndex,
+		guiderdescriptor.adaptiveopticsIndex);
+
+	// retrieve the guider factory
+	GuiderPrx	guider = guiderfactory->get(guiderdescriptor);
+	if (guider) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "got guider with ccd %s",
+			convert(guider->getCcd()->getInfo()).toString().c_str());
+	}
+	return guider;
 }
 
 } // namespace snowstar

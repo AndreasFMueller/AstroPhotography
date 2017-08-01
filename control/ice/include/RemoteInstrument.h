@@ -10,6 +10,7 @@
 #include <instruments.h>
 #include <device.h>
 #include <camera.h>
+#include <guider.h>
 
 namespace snowstar {
 
@@ -45,6 +46,9 @@ public:
 	FocuserPrx		focuser(unsigned int index = 0);
 	GuidePortPrx		guideport(unsigned int index = 0);
 	MountPrx		mount(unsigned int index = 0);
+	GuiderPrx		guider(unsigned int ccdindex = 0,
+					unsigned int guideportindex = 0,
+					unsigned int aoindex = 0);
 };
 
 } // namespace snowstar

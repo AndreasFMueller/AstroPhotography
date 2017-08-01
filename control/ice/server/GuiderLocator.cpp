@@ -27,6 +27,14 @@ void	GuiderLocator::add(const std::string& name, Ice::ObjectPtr guiderptr) {
 }
 
 /**
+ * \brief retrieve an object from the guider map
+ */
+bool	GuiderLocator::has(const std::string& guidername) {
+	Ice::ObjectPtr	guiderptr;	
+	return (guiders.find(guidername) != guiders.end());
+}
+
+/**
  * \brief locate a guider in the map
  */
 Ice::ObjectPtr	GuiderLocator::locate(const Ice::Current& current,
@@ -41,6 +49,7 @@ Ice::ObjectPtr	GuiderLocator::locate(const Ice::Current& current,
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 		throw NotFound(msg);
 	}
+	//debug(LOG_DEBUG, DEBUG_LOG, 0, "found Guider %s", guidername.c_str());
 	return i->second;
 }
 

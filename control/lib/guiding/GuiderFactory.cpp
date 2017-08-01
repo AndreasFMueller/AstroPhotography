@@ -36,7 +36,10 @@ GuiderPtr	GuiderFactory::get(const GuiderDescriptor& guiderdescriptor) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "check whether guider is in cache");
 	guidermap_t::iterator	i = guiders.find(guiderdescriptor);
 	if (i != guiders.end()) {
-		return i->second;
+		GuiderPtr	guider = i->second;
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "found guider '%s' in cache",
+			guider->name().c_str());
+		return guider;
 	}
 
 	// construct the name of the guider
@@ -55,7 +58,7 @@ GuiderPtr	GuiderFactory::get(const GuiderDescriptor& guiderdescriptor) {
 	} else {
 		std::string	msg = stringprintf("Guider %s has no CCD",
 			guiderdescriptor.toString().c_str());
-		debug(LOG_ERR, DEBUG_LOG, 0, "%s");
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 		throw std::runtime_error(msg);
 	}
 	GuidePortPtr	guideport;
@@ -69,7 +72,7 @@ GuiderPtr	GuiderFactory::get(const GuiderDescriptor& guiderdescriptor) {
 	} else {
 		std::string	msg = stringprintf("Guider %s has no Port",
 			guiderdescriptor.toString().c_str());
-		debug(LOG_WARNING, DEBUG_LOG, 0, "%s");
+		debug(LOG_WARNING, DEBUG_LOG, 0, "%s", msg.c_str());
 	}
 	AdaptiveOpticsPtr	adaptiveoptics;
 	if (guiderdescriptor.adaptiveoptics().size()) {
@@ -82,7 +85,7 @@ GuiderPtr	GuiderFactory::get(const GuiderDescriptor& guiderdescriptor) {
 	} else {
 		std::string	msg = stringprintf("Guider %s has no AO",
 			guiderdescriptor.toString().c_str());
-		debug(LOG_INFO, DEBUG_LOG, 0, "%s");
+		debug(LOG_INFO, DEBUG_LOG, 0, "%s", msg.c_str());
 	}
 
 	// with all these components we can now build a new guider

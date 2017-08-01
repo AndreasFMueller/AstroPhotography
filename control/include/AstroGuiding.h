@@ -907,7 +907,11 @@ public:
 		return _guideport;
 	}
 	std::string	guideportname() const {
-		return _guideport->name();
+		if (_guideport) {
+			return _guideport->name();
+		} else {
+			return std::string("");
+		}
 	}
 
 	bool	hasAdaptiveoptics() { return (_adaptiveoptics) ? true : false; }
@@ -915,7 +919,11 @@ public:
 		return _adaptiveoptics;
 	}
 	std::string	adaptiveopticsname() const {
-		return _adaptiveoptics->name();
+		if (_adaptiveoptics) {
+			return _adaptiveoptics->name();
+		} else {
+			return std::string("");
+		}
 	}
 
 	GuiderDescriptor	getDescriptor() const;
@@ -950,6 +958,7 @@ public:
 		camera::CcdPtr ccd, camera::GuidePortPtr guideport,
 		camera::AdaptiveOpticsPtr adaptiveoptics,
 		persistence::Database database = NULL);
+	~Guider();
 
 	/**
 	 * \brief Launch the calibration process

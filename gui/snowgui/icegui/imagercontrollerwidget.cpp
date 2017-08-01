@@ -1,10 +1,10 @@
 /*
- * ccdcontrollerwidget.cpp --  ccd controller implementation
+ * imagercontrollerwidget.cpp --  ccd controller implementation
  *
  * (c) 2016 Prof Dr Andreas Müller, Hochschule Rapperswil
  */
-#include "ccdcontrollerwidget.h"
-#include "ui_ccdcontrollerwidget.h"
+#include "imagercontrollerwidget.h"
+#include "ui_imagercontrollerwidget.h"
 #include <IceConversions.h>
 #include <algorithm>
 #include <QTimer>
@@ -21,30 +21,21 @@ namespace snowgui {
 /**
  * \brief Constructor for the CCD controller
  */
-ccdcontrollerwidget::ccdcontrollerwidget(QWidget *parent) :
-	InstrumentWidget(parent), ui(new Ui::ccdcontrollerwidget) {
+imagercontrollerwidget::imagercontrollerwidget(QWidget *parent) :
+	InstrumentWidget(parent), ui(new Ui::imagercontrollerwidget) {
 	// setup user interface components
 	ui->setupUi(this);
 
 	// install all internal connections
-	connect(ui->ccdSelectionBox, SIGNAL(currentIndexChanged(int)),
-		this, SLOT(ccdChanged(int)));
-
 	connect(ui->exposureSpinBox, SIGNAL(valueChanged(double)),
 		this, SLOT(guiChanged()));
 	connect(ui->binningSelectionBox, SIGNAL(currentIndexChanged(int)),
 		this, SLOT(guiChanged()));
-	connect(ui->shutterOpenBox, SIGNAL(toggled(bool)),
-		this, SLOT(guiChanged()));
-	connect(ui->purposeBox, SIGNAL(currentIndexChanged(int)),
-		this, SLOT(guiChanged()));
 
 	connect(ui->captureButton, SIGNAL(clicked()),
 		this, SLOT(captureClicked()));
-	connect(ui->cancelButton, SIGNAL(clicked()),
-		this, SLOT(cancelClicked()));
-	connect(ui->streamButton, SIGNAL(clicked()),
-		this, SLOT(streamClicked()));
+	connect(ui->darkButton, SIGNAL(clicked()),
+		this, SLOT(darkClicked()));
 
 	connect(ui->frameFullButton, SIGNAL(clicked()),
 		this, SLOT(guiChanged()));
@@ -53,11 +44,9 @@ ccdcontrollerwidget::ccdcontrollerwidget(QWidget *parent) :
 	connect(&statusTimer, SIGNAL(timeout()), this, SLOT(statusUpdate()));
 	statusTimer.setInterval(100);
 	ourexposure = false;
-	previousstate = snowstar::IDLE;
-	_guiderccdonly = false;
+	previousstate = snowstar::GuiderUNCONFIGURED;
 	_nosubframe = false;
 	_nobuttons = false;
-	_imageproxyonly = false;
 
 	// make sure the widget cannot be used unless a CCD is configured
 	ui->ccdInfo->setEnabled(false);
@@ -72,53 +61,26 @@ ccdcontrollerwidget::ccdcontrollerwidget(QWidget *parent) :
  * constructor called by the Designer generated code cannot include
  * this information, so we supply it later..
  */
-void	ccdcontrollerwidget::instrumentSetup(
+void	imagercontrollerwidget::instrumentSetup(
 		astro::discover::ServiceObject serviceobject,
 		snowstar::RemoteInstrument instrument) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "begin ccdcontrollerwidget::instrumentSetup()");
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "begin imagercontrollerwidget::instrumentSetup()");
 	// parent setup
 	InstrumentWidget::instrumentSetup(serviceobject, instrument);
 
 	// read information about CCDs available on this instrument, and 
 	// remember the first ccd you can find
-	int	index = 0;
-	if (!_guiderccdonly) {
-		while (_instrument.has(snowstar::InstrumentCCD, index)) {
-			try {
-				snowstar::CcdPrx	ccd = _instrument.ccd(index);
-				if (!_ccd) {
-					_ccd = ccd;
-				}
-				ui->ccdSelectionBox->addItem(QString(ccd->getName().c_str()));
-			} catch (const std::exception& x) {
-				debug(LOG_DEBUG, DEBUG_LOG, 0, "ignoring ccd %d", index);
-			}
-			index++;
-		}
-		index = 0;
-	}
-	while (_instrument.has(snowstar::InstrumentGuiderCCD, index)) {
-		try {
-			snowstar::CcdPrx	ccd = _instrument.guiderccd(index);
-			if (!_ccd) {
-				_ccd = ccd;
-			}
-			ui->ccdSelectionBox->addItem(QString(ccd->getName().c_str()));
-		} catch (const std::exception& x) {
-			debug(LOG_DEBUG, DEBUG_LOG, 0, "ignoring ccd %d", index);
-		}
-		index++;
-	}
+	_guider = instrument.guider(0, 0, 0);
 
 	// add additional information about this ccd
 	setupCcd();
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "end ccdcontrollerwidget::instrumentSetup()");
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "end imagercontrollerwidget::instrumentSetup()");
 }
 
 /**
  * \brief Destroy the CCD controller
  */
-ccdcontrollerwidget::~ccdcontrollerwidget() {
+imagercontrollerwidget::~imagercontrollerwidget() {
 	statusTimer.stop();
 	delete ui;
 }
@@ -126,13 +88,12 @@ ccdcontrollerwidget::~ccdcontrollerwidget() {
 /**
  * \brief Read information from the ccd and show it
  */
-void	ccdcontrollerwidget::setupCcd() {
+void	imagercontrollerwidget::setupCcd() {
 	// we set the previous state to idle, but if that is not correct, then
 	// then the first status update will fix it.
-	previousstate = snowstar::IDLE;
+	previousstate = snowstar::GuiderUNCONFIGURED;
 	ui->captureButton->setEnabled(true);
-	ui->cancelButton->setEnabled(false);
-	ui->streamButton->setEnabled(true);
+	ui->darkButton->setEnabled(true);
 
 	// make sure no signals are sent while setting up the CCD
 	ui->binningSelectionBox->setEnabled(false);
@@ -144,10 +105,15 @@ void	ccdcontrollerwidget::setupCcd() {
 	}
 
 	// propagate the information from the ccdinfo structure
-	if (_ccd) {
+	if (_guider) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "get info");
-		_ccdinfo = _ccd->getInfo();
+		_ccdinfo = _guider->getCcd()->getInfo();
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "got info");
+
+		// set name
+		ui->imagerInfoLabel->setText(QString(_ccdinfo.name.c_str()));
+
+		// get binning info
 		QComboBox	*binBox = ui->binningSelectionBox;
 		CcdInfo	ccdinfo(snowstar::convert(_ccdinfo));
 		std::for_each(ccdinfo.modes().begin(), ccdinfo.modes().end(),
@@ -188,11 +154,9 @@ void	ccdcontrollerwidget::setupCcd() {
  *
  * This method does not send any signals
  */
-void	ccdcontrollerwidget::displayExposure(Exposure e) {
+void	imagercontrollerwidget::displayExposure(Exposure e) {
 	displayBinning(e.mode());
 	displayExposureTime(e.exposuretime());
-	displayPurpose(e.purpose());
-	displayShutter(e.shutter());
 }
 
 /**
@@ -201,7 +165,7 @@ void	ccdcontrollerwidget::displayExposure(Exposure e) {
  * This method ensures that all the GUI elements are updated, and then sends 
  * the exposureChanged() signal to whatever widget is connected to it.
  */
-void	ccdcontrollerwidget::setExposure(Exposure e) {
+void	imagercontrollerwidget::setExposure(Exposure e) {
 	if (_exposure != e) {
 		return;
 	}
@@ -215,7 +179,7 @@ void	ccdcontrollerwidget::setExposure(Exposure e) {
  * This method ensures that the GUI element and the internal state are in
  * sync, but it does not send any signals.
  */
-void	ccdcontrollerwidget::displayFrame(ImageRectangle r) {
+void	imagercontrollerwidget::displayFrame(ImageRectangle r) {
 	// is the rectangle contained in the ccd
 	if (!snowstar::convert(_ccdinfo).size().bounds(r)) {
 		return;
@@ -244,7 +208,7 @@ void	ccdcontrollerwidget::displayFrame(ImageRectangle r) {
  *
  * This slot sends the exposureChanged signal
  */
-void	ccdcontrollerwidget::setFrame(ImageRectangle r) {
+void	imagercontrollerwidget::setFrame(ImageRectangle r) {
 	if (_exposure.frame() == r) {
 		return;
 	}
@@ -259,7 +223,7 @@ void	ccdcontrollerwidget::setFrame(ImageRectangle r) {
  * only this controller knows about the binning mode, so it has to compute
  * unbinned coordinates.
  */
-void	ccdcontrollerwidget::setSubframe(ImageRectangle r) {
+void	imagercontrollerwidget::setSubframe(ImageRectangle r) {
 	ImagePoint	origin = r.origin() + _exposure.frame().origin();
 	ImageRectangle	newrectangle
 		= ImageRectangle(origin, r.size()) * _exposure.mode();
@@ -271,7 +235,7 @@ void	ccdcontrollerwidget::setSubframe(ImageRectangle r) {
  *
  * This method does not send signals
  */
-void	ccdcontrollerwidget::displayBinning(Binning b) {
+void	imagercontrollerwidget::displayBinning(Binning b) {
 	// is binning mode supported by this camera?
 	if (!snowstar::convert(_ccdinfo).modes().permits(b)) {
 		// XXX should we send an exeption here?
@@ -292,7 +256,7 @@ void	ccdcontrollerwidget::displayBinning(Binning b) {
 /**
  * \brief private mtethod to get the binning mode from the selected item index
  */
-Binning	ccdcontrollerwidget::getBinning(int index) {
+Binning	imagercontrollerwidget::getBinning(int index) {
 	if ((index >= ui->binningSelectionBox->count()) && (index < 0)) {
 		std::string	msg = astro::stringprintf("invalid binning "
 			"index: %d", index);
@@ -306,7 +270,7 @@ Binning	ccdcontrollerwidget::getBinning(int index) {
 /**
  * \brief Display the binning mode based on the index
  */
-void	ccdcontrollerwidget::displayBinning(int index) {
+void	imagercontrollerwidget::displayBinning(int index) {
 	displayBinning(getBinning(index));
 }
 
@@ -316,7 +280,7 @@ void	ccdcontrollerwidget::displayBinning(int index) {
  * This method displays the new binning mode (if it is acceptable, i.e.
  * supported by the CCD in use), and then sends the exposureChanged signal.
  */
-void	ccdcontrollerwidget::setBinning(Binning b) {
+void	imagercontrollerwidget::setBinning(Binning b) {
 	if (_exposure.mode() == b) {
 		return;
 	}
@@ -329,7 +293,7 @@ void	ccdcontrollerwidget::setBinning(Binning b) {
  *
  * This method does not send any signals
  */
-void	ccdcontrollerwidget::displayExposureTime(double t) {
+void	imagercontrollerwidget::displayExposureTime(double t) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "new exposure time: %.3f", t);
 	_exposure.exposuretime(t);
 	ui->exposureSpinBox->blockSignals(true);
@@ -340,107 +304,21 @@ void	ccdcontrollerwidget::displayExposureTime(double t) {
 /**
  * \brief Set the exposure time
  */
-void	ccdcontrollerwidget::setExposureTime(double t) {
+void	imagercontrollerwidget::setExposureTime(double t) {
 	displayExposureTime(t);
-	emit exposureChanged(_exposure);
-}
-
-/**
- * \brief Get the purpose from the menu index
- */
-Exposure::purpose_t	ccdcontrollerwidget::getPurpose(int index) {
-	switch (index) {
-	case 0:	return Exposure::light;
-	case 1:	return Exposure::dark;
-	case 2:	return Exposure::flat;
-	case 3:	return Exposure::bias;
-	case 4:	return Exposure::test;
-	case 5:	return Exposure::guide;
-	case 6:	return Exposure::focus;
-	default:
-		break;
-	}
-	std::string	msg = astro::stringprintf("invalid purpose index: %d",
-		index);
-	debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
-	throw std::range_error(msg);
-}
-
-/**
- * \brief Display the new purpose
- *
- * This method does not send any signals
- */
-void	ccdcontrollerwidget::displayPurpose(Exposure::purpose_t p) {
-	_exposure.purpose(p);
-	ui->purposeBox->blockSignals(true);
-	ui->purposeBox->setCurrentIndex((int)p);
-	ui->purposeBox->blockSignals(false);
-}
-
-/**
- * \brief Set a new purpose for the next exposure
- *
- * This method sets the new purpose and then sends the exposureChanged()
- * signal.
- */
-void	ccdcontrollerwidget::setPurpose(Exposure::purpose_t p) {
-	if (_exposure.purpose() == p) {
-		return;
-	}
-	displayPurpose(p);
-	emit exposureChanged(_exposure);
-}
-
-/**
- * \brief Display the new shutter state
- *
- * This method does not send any signals
- */
-void	ccdcontrollerwidget::displayShutter(Shutter::state s) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "shutter state: %s",
-		(_exposure.shutter() == Shutter::OPEN) ? "open" : "closed");
-	_exposure.shutter(s);
-	ui->shutterOpenBox->blockSignals(true);
-	if (_exposure.shutter() == Shutter::OPEN) {
-		ui->shutterOpenBox->setChecked(true);
-	} else {
-		ui->shutterOpenBox->setChecked(false);
-	}
-	ui->shutterOpenBox->blockSignals(false);
-}
-
-/**
- * \brief Set new Shutter settings
- *
- * This method changes the shutter setting of the Exposure and then
- * sends the exposureChanged() signal
- */
-void	ccdcontrollerwidget::setShutter(Shutter::state s) {
-	if (s == _exposure.shutter()) {
-		return;
-	}
-	displayShutter(s);
 	emit exposureChanged(_exposure);
 }
 
 /**
  * \brief internal Slot activate when a gui element changes
  */
-void	ccdcontrollerwidget::guiChanged() {
+void	imagercontrollerwidget::guiChanged() {
 	if (sender() == ui->binningSelectionBox) {
 		displayBinning(getBinning(
 			ui->binningSelectionBox->currentIndex()));
 	}
 	if (sender() == ui->exposureSpinBox) {
 		displayExposureTime(ui->exposureSpinBox->value());
-	}
-	if (sender() == ui->purposeBox) {
-		displayPurpose(getPurpose(ui->purposeBox->currentIndex()));
-	}
-	if (sender() == ui->shutterOpenBox) {
-		displayShutter(ui->shutterOpenBox->isChecked()
-			? Shutter::OPEN : Shutter::CLOSED);
 	}
 	if (sender() == ui->frameFullButton) {
 		displayFrame(ImageRectangle(snowstar::convert(_ccdinfo).size()));
@@ -452,82 +330,39 @@ void	ccdcontrollerwidget::guiChanged() {
 /**
  * \brief Slot to handle a new image
  */
-void	ccdcontrollerwidget::setImage(ImagePtr image) {
+void	imagercontrollerwidget::setImage(ImagePtr image) {
 	_image = image;
 	emit imageReceived(_image);
 }
 
 /**
- * \brief Slot to handle a change of the selected CCD
- */
-void	ccdcontrollerwidget::ccdChanged(int index) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "CCD changed");
-	statusTimer.stop();
-	try {
-		if (_guiderccdonly) {
-			_ccd = _instrument.guiderccd(index);
-		} else {
-			int	nccds = _instrument.componentCount(
-						snowstar::InstrumentCCD);
-			if (index >= nccds) {
-				_ccd = _instrument.guiderccd(index - nccds);
-			} else {
-				_ccd = _instrument.ccd(index);
-			}
-		}
-	} catch (const std::exception& x) {
-		ccdFailed(x);
-		return;
-	}
-        setupCcd();
-	emit ccdSelected(index);
-}
-
-/**
  * \brief Slot to handle click on the "Capture" button
  */
-void	ccdcontrollerwidget::captureClicked() {
+void	imagercontrollerwidget::captureClicked() {
 	try {
 		debug(LOG_DEBUG, DEBUG_LOG, 0,
-			"start exposure with time=%.3f, shutter = %s",
-			_exposure.exposuretime(),
-			(_exposure.shutter() == Shutter::OPEN)
-				? "open" : "closed");
+			"start exposure with time=%.3f",
+			_exposure.exposuretime());
 		try {
-			_ccd->startExposure(snowstar::convert(_exposure));
+			_guider->startImaging(snowstar::convert(_exposure));
 		} catch (const std::exception& x) {
 			ccdFailed(x);
 			return;
 		}
 		ourexposure = true;
 		ui->captureButton->setEnabled(false);
-		ui->streamButton->setEnabled(false);
-		ui->cancelButton->setEnabled(true);
+		ui->darkButton->setEnabled(false);
 	} catch (const std::exception& x) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "cannot start exposure");
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "cannot start Imaging");
 	}
 }
 
 /**
  * \brief Slot tohandle click on the "Cancel" button
  */
-void	ccdcontrollerwidget::cancelClicked() {
+void	imagercontrollerwidget::darkClicked() {
 	try {
-		_ccd->cancelExposure();
-	} catch (const snowstar::BadState& x) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "bad state: %s", x.what());
-	} catch (const std::exception& x) {
-		ccdFailed(x);
-		return;
-	}
-}
-
-/**
- * \brief Slto to handle click on the "Stream" button
- */
-void	ccdcontrollerwidget::streamClicked() {
-	try {
-		_ccd->startStream(snowstar::convert(_exposure));
+		_guider->startDarkAcquire(_exposure.exposuretime(), 10);
 	} catch (const snowstar::BadState& x) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "bad state: %s", x.what());
 	} catch (const std::exception& x) {
@@ -542,7 +377,7 @@ void	ccdcontrollerwidget::streamClicked() {
  * This method retrieves an image from the remote server and then emits
  * the imageReceived signal
  */
-void	ccdcontrollerwidget::retrieveImage() {
+void	imagercontrollerwidget::retrieveImage() {
 	// it may happen that some other program initiated the exposure,
 	// so we check whether this is our exposure. If not, we give up
 	// at this point
@@ -552,22 +387,18 @@ void	ccdcontrollerwidget::retrieveImage() {
 	}
 	ourexposure = false;
 	try {
-		_imageproxy = _ccd->getImage();
+		_imageproxy = _guider->getImage();
 		if (!_imageproxy->hasMeta("INSTRUME")) {
 			snowstar::Metavalue	v;
 			v.keyword = "INSTRUME";
 			v.value = instrumentname();
 			_imageproxy->setMetavalue(v);
 		}
-		if (_imageproxyonly) {
-			emit imageproxyReceived(_imageproxy);
-			return;
-		}
 		ImagePtr	image = snowstar::convert(_imageproxy);
 		_image = image;
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "image frame: %s",
 			image->getFrame().toString().c_str());
-		_imageexposure = snowstar::convert(_ccd->getExposure());
+		_imageexposure = snowstar::convert(_guider->getCcd()->getExposure());
 		_imageproxy->remove();
 
 		// if the image size does not match the size requested, get the
@@ -596,13 +427,13 @@ void	ccdcontrollerwidget::retrieveImage() {
  *
  * This slot is called by the 
  */
-void	ccdcontrollerwidget::statusUpdate() {
-	if (!_ccd) {
+void	imagercontrollerwidget::statusUpdate() {
+	if (!_guider) {
 		return;
 	}
-	snowstar::ExposureState	newstate;
+	snowstar::GuiderState	newstate;
 	try {
-		newstate = _ccd->exposureStatus();
+		newstate = _guider->getState();
 	} catch (const std::exception& x) {
 		ccdFailed(x);
 		return;
@@ -610,64 +441,54 @@ void	ccdcontrollerwidget::statusUpdate() {
 	if (newstate == previousstate) {
 		return;
 	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "new state: %d (%d)", newstate,
+		previousstate);
+	if (previousstate == snowstar::GuiderIMAGING) {
+		snowstar::ImagePrx	image = _guider->getImage();
+		astro::image::ImagePtr	imageptr = snowstar::convert(image);
+		emit imageReceived(imageptr);
+	}
 	switch (newstate) {
-	case snowstar::IDLE:
+	case snowstar::GuiderIDLE:
+	case snowstar::GuiderUNCONFIGURED:
+	case snowstar::GuiderCALIBRATED:
 		ui->captureButton->setEnabled(true);
-		ui->cancelButton->setEnabled(false);
-		ui->streamButton->setEnabled(true);
-		ui->streamButton->setText(QString("Stream"));
+		ui->darkButton->setEnabled(true);
 		break;
-	case snowstar::EXPOSING:
+	case snowstar::GuiderCALIBRATING:
+	case snowstar::GuiderGUIDING:
+	case snowstar::GuiderDARKACQUIRE:
+	case snowstar::GuiderIMAGING:
 		ui->captureButton->setEnabled(false);
-		ui->cancelButton->setEnabled(true);
-		ui->streamButton->setEnabled(false);
-		break;
-	case snowstar::EXPOSED:
-		// if we get to this point, then an exposure just completed,
-		// and we we should retrieve the image
-		retrieveImage();
-		ui->captureButton->setEnabled(false);
-		ui->cancelButton->setEnabled(false);
-		ui->streamButton->setEnabled(false);
-		break;
-	case snowstar::CANCELLING:
-		ui->captureButton->setEnabled(false);
-		ui->cancelButton->setEnabled(false);
-		ui->streamButton->setEnabled(false);
-		break;
-	case snowstar::STREAMING:
-		ui->captureButton->setEnabled(false);
-		ui->cancelButton->setEnabled(false);
-		ui->streamButton->setEnabled(true);
-		ui->streamButton->setText(QString("Stop"));
+		ui->darkButton->setEnabled(false);
 		break;
 	}
 	previousstate = newstate;
 }
 
-void	ccdcontrollerwidget::hideSubframe(bool sf) {
+void	imagercontrollerwidget::hideSubframe(bool sf) {
 	_nosubframe = sf;
 	ui->frameWidget->setHidden(_nosubframe);
 }
 
-void	ccdcontrollerwidget::hideButtons(bool b) {
+void	imagercontrollerwidget::hideButtons(bool b) {
 	_nobuttons = b;
 	ui->buttonArea->setHidden(_nobuttons);
 }
 
-void	ccdcontrollerwidget::ccdFailed(const std::exception& x) {
-	_ccd = NULL;
+void	imagercontrollerwidget::ccdFailed(const std::exception& x) {
+	_guider = NULL;
 	ui->ccdInfo->setEnabled(false);
 	ui->frameWidget->setEnabled(false);
 	ui->buttonArea->setEnabled(false);
 	QMessageBox	message;
-	message.setText(QString("CCD failed"));
+	message.setText(QString("Guider failed"));
 	std::ostringstream	out;
-	out << "Communication with the CCD '";
-	out << ui->ccdSelectionBox->currentText().toLatin1().data();
+	out << "Communication with the Guider Imager '";
+	out << ui->imagerInfoLabel->text().toLatin1().data();
 	out << "' failed." << std::endl;
 	out << "The reason for the failure was: " << x.what() << std::endl;
-	out << "The CCD has been disabled and can no longer be used.";
+	out << "The Imager has been disabled and can no longer be used.";
 	message.setInformativeText(QString(out.str().c_str()));
 	message.exec();
 }

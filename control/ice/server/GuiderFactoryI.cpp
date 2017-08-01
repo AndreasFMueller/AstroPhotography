@@ -76,47 +76,64 @@ GuiderPrx	GuiderFactoryI::get(const GuiderDescriptor& descriptor,
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "request for guider named %s",
 		gn.c_str());
 
-	// get an GuiderPtr from the original factory
-	astro::guiding::GuiderPtr	guider = guiderfactory.get(d);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "got the guider");
+	// if the locator does not have the guide port, we have to create it
+	if (locator->has(gn)) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "guider '%s' already exists",
+			gn.c_str());
+	} else {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "building new guider for '%s'",
+			gn.c_str());
+		// get an GuiderPtr from the original factory
+		astro::guiding::GuiderPtr	guider = guiderfactory.get(d);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "got the guider");
 
-	// get the focallength from the instrument properties
-	astro::discover::InstrumentPtr	instrument
-		= astro::discover::InstrumentBackend::get(
-			descriptor.instrumentname);
-	try {
-		double	focallength
-			= instrument->getDouble("guiderfocallength");
-		guider->focallength(focallength);
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "focallength: %.3f",
-			focallength);
-	} catch (...) {
-		debug(LOG_ERR, DEBUG_LOG, 0, "no 'guiderfocallength' property "
-			"found, using default %f", guider->focallength());
+		// get the focallength from the instrument properties
+		astro::discover::InstrumentPtr	instrument
+			= astro::discover::InstrumentBackend::get(
+				descriptor.instrumentname);
+		try {
+			double	focallength
+				= instrument->getDouble("guiderfocallength");
+			guider->focallength(focallength);
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "focallength: %.3f",
+				focallength);
+		} catch (...) {
+			debug(LOG_ERR, DEBUG_LOG, 0, "no 'guiderfocallength' "
+				"property found, using default %f",
+				guider->focallength());
+		}
+		try {
+			double	guiderate = instrument->getDouble("guiderate");
+			guider->guiderate(guiderate);
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "guiderate: %.3f",
+				guiderate);
+		} catch (...) {
+			debug(LOG_ERR, DEBUG_LOG, 0, "no 'guiderate' property "
+				"found, using default %f", guider->guiderate());
+		}
+
+		// create a GuiderI object
+		Ice::ObjectPtr	guiderptr = new GuiderI(guider, database);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "got the guiderptr");
+
+		// add the guider we have constructed to the D
+		locator->add(gn, guiderptr);
+		astro::event(EVENT_CLASS, astro::events::Event::GUIDE,
+			astro::stringprintf("new guider: %s", gn.c_str()));
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "guider servant activated");
 	}
-	try {
-		double	guiderate = instrument->getDouble("guiderate");
-		guider->guiderate(guiderate);
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "guiderate: %.3f",
-			guiderate);
-	} catch (...) {
-		debug(LOG_ERR, DEBUG_LOG, 0, "no 'guiderate' property "
-			"found, using default %f", guider->guiderate());
-	}
-
-	// create a GuiderI object
-	Ice::ObjectPtr	guiderptr = new GuiderI(guider, database);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "got the guiderptr");
-
-	// add the guider we have constructed to the D
-	locator->add(gn, guiderptr);
-	astro::event(EVENT_CLASS, astro::events::Event::GUIDE,
-		astro::stringprintf("new guider: %s", gn.c_str()));
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "guider servant activated");
 
 	// create a proxy
 	std::string	ename = NameConverter::urlencode(gn);
-	return createProxy<GuiderPrx>("guider/" + ename, current, false);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "name for guider: %s", ename.c_str());
+	GuiderPrx	guiderprx = createProxy<GuiderPrx>("guider/" + ename,
+				current, false);
+	if (guiderprx) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "got a Guider proxy");
+	} else {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "failed to construct GuiderPrx");
+	}
+	return guiderprx;
 }
 
 /**

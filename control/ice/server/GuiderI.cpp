@@ -137,6 +137,7 @@ void	callback_adapter<CalibrationMonitorPrx>(CalibrationMonitorPrx& p,
 GuiderI::GuiderI(astro::guiding::GuiderPtr _guider,
 	astro::persistence::Database _database)
 	: guider(_guider), database(_database) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "guider at %p", &*_guider);
 	// set point to an invalid value to allow us to detect that it 
 	// has not been set
 	_point.x = -1;
@@ -184,6 +185,9 @@ GuiderState GuiderI::getState(const Ice::Current& /* current */) {
 }
 
 CcdPrx GuiderI::getCcd(const Ice::Current& current) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "getting ccd");
+	astro::guiding::GuiderDescriptor	descriptor
+		= guider->getDescriptor();
 	std::string	ccdname = guider->getDescriptor().ccd();
 	return CcdI::createProxy(ccdname, current);
 }

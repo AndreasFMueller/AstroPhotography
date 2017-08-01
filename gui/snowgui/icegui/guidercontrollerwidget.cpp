@@ -360,6 +360,10 @@ void	guidercontrollerwidget::statusUpdate() {
 		ui->guideButton->setText(QString("Stop Guiding"));
 		ui->guideButton->setEnabled(true);
 		break;
+	case snowstar::GuiderIMAGING:
+	case snowstar::GuiderDARKACQUIRE:
+		ui->guideButton->setText(QString("Guide"));
+		ui->guideButton->setEnabled(false);
 	}
 	_previousstate = state;
 }

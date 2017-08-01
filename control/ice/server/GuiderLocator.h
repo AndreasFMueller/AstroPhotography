@@ -16,6 +16,8 @@ class GuiderLocator : public Ice::ServantLocator {
 public:
 	GuiderLocator();
 
+	bool	has(const std::string& gn);
+
 	void	add(const std::string& name, Ice::ObjectPtr guiderptr);
 
 	virtual Ice::ObjectPtr	locate(const Ice::Current& current,

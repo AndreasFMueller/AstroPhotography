@@ -85,7 +85,7 @@
        <number>0</number>
       </property>
       <item>
-       <widget class="snowgui::ccdcontrollerwidget" name="ccdcontrollerWidget" native="true"/>
+       <widget class="snowgui::imagercontrollerwidget" name="imagercontrollerWidget" native="true"/>
       </item>
       <item>
        <widget class="QToolBox" name="toolBox">
@@ -93,11 +93,27 @@
          <number>0</number>
         </property>
         <widget class="snowgui::guideportcontrollerwidget" name="guideportcontrollerWidget">
+         <property name="geometry">
+          <rect>
+           <x>0</x>
+           <y>0</y>
+           <width>350</width>
+           <height>403</height>
+          </rect>
+         </property>
          <attribute name="label">
           <string>Guideport</string>
          </attribute>
         </widget>
         <widget class="snowgui::adaptiveopticscontrollerwidget" name="adaptiveopticscontrollerWidget">
+         <property name="geometry">
+          <rect>
+           <x>0</x>
+           <y>0</y>
+           <width>98</width>
+           <height>28</height>
+          </rect>
+         </property>
          <attribute name="label">
           <string>Adaptive Optics</string>
          </attribute>
@@ -107,8 +123,8 @@
           <rect>
            <x>0</x>
            <y>0</y>
-           <width>350</width>
-           <height>417</height>
+           <width>98</width>
+           <height>28</height>
           </rect>
          </property>
          <attribute name="label">
@@ -120,8 +136,8 @@
           <rect>
            <x>0</x>
            <y>0</y>
-           <width>350</width>
-           <height>417</height>
+           <width>98</width>
+           <height>28</height>
           </rect>
          </property>
          <attribute name="label">
@@ -133,8 +149,8 @@
           <rect>
            <x>0</x>
            <y>0</y>
-           <width>350</width>
-           <height>417</height>
+           <width>98</width>
+           <height>28</height>
           </rect>
          </property>
          <attribute name="label">
@@ -142,6 +158,14 @@
          </attribute>
         </widget>
         <widget class="snowgui::mountcontrollerwidget" name="mountcontrollerWidget">
+         <property name="geometry">
+          <rect>
+           <x>0</x>
+           <y>0</y>
+           <width>98</width>
+           <height>28</height>
+          </rect>
+         </property>
          <attribute name="label">
           <string>Mount</string>
          </attribute>
@@ -158,12 +182,6 @@
    <class>snowgui::imagedisplaywidget</class>
    <extends>QWidget</extends>
    <header location="global">imagedisplaywidget.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>snowgui::ccdcontrollerwidget</class>
-   <extends>QWidget</extends>
-   <header location="global">ccdcontrollerwidget.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
@@ -206,6 +224,12 @@
    <class>snowgui::mountcontrollerwidget</class>
    <extends>QWidget</extends>
    <header location="global">mountcontrollerwidget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>snowgui::imagercontrollerwidget</class>
+   <extends>QWidget</extends>
+   <header location="global">imagercontrollerwidget.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

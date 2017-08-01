@@ -69,6 +69,13 @@ Guider::Guider(const GuiderName& guidername,
 }
 
 /**
+ * \brief Destructor
+ */
+Guider::~Guider() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "destroying guider at %p", this);
+}
+
+/**
  * \brief update progress value
  */
 void	Guider::calibrationProgress(double p) {
@@ -539,8 +546,9 @@ void Guider::lastAction(double& actiontime, Point& offset, Point& activation) {
  * \brief Retrieve a descriptor
  */
 GuiderDescriptor	Guider::getDescriptor() const {
-	return GuiderDescriptor(name(), instrument(), ccdname(),
+	GuiderDescriptor	descriptor(name(), instrument(), ccdname(),
 		guideportname(), adaptiveopticsname());
+	return descriptor;
 }
 
 /**
