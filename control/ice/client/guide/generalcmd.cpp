@@ -81,6 +81,14 @@ void	Guide::usage(const char *progname) {
 		<< std::endl;
 
 	std::cout << std::endl;
+	std::cout << "  Image or dark acquisition:" << std::endl;
+	std::cout << std::endl;
+	std::cout << p << " [ options ] <service> <INSTRUMENT> image <filename.fits>"
+		<< std::endl;
+	std::cout << p << " [ options ] <service> <INSTRUMENT> dark"
+		<< std::endl;
+
+	std::cout << std::endl;
 
 	std::cout << "Options:" << std::endl;
 	std::cout << std::endl;
@@ -92,6 +100,8 @@ void	Guide::usage(const char *progname) {
 	std::cout << "  -e,--exposure=<e>     set exposure time to <e>";
 	std::cout << std::endl;
 	std::cout << "  -h,--help             display this help message and exit";
+	std::cout << std::endl;
+	std::cout << "  -I,--imagecount=<I>   number of images to take for a dark";
 	std::cout << std::endl;
 	std::cout << "  -i,--interval=<i>     perform an update ever i seconds when guiding";
 	std::cout << std::endl;

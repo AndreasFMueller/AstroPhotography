@@ -42,6 +42,22 @@ bool	GuiderStateMachine::canStartCalibrating() const {
 		|| (_state == Guide::idle);
 }
 
+bool	GuiderStateMachine::canStartDarkAcquire() const {
+	return (_state == Guide::idle) || (_state == Guide::calibrated);
+}
+
+bool	GuiderStateMachine::canEndDarkAcquire() const {
+	return (_state == Guide::darkacquire);
+}
+
+bool	GuiderStateMachine::canStartImaging() const {
+	return (_state == Guide::idle) || (_state == Guide::calibrated);
+}
+
+bool	GuiderStateMachine::canEndImaging() const {
+	return (_state == Guide::imaging);
+}
+
 void	GuiderStateMachine::configure() {
 	if (!canConfigure()) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "cannot configured in state %s",
@@ -95,6 +111,44 @@ void	GuiderStateMachine::stopGuiding() {
 		throw BadState("cannot stop guiding in this state");
 	}
 	_state = Guide::calibrated;
+}
+
+void	GuiderStateMachine::startDarkAcquire() {
+	if (!canStartDarkAcquire()) {
+		std::string	msg = stringprintf("cannot dark acquire in "
+			"state %s", statename());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw BadState(msg);
+	}
+	_prestate = _state;
+	_state = Guide::darkacquire;
+}
+
+void	GuiderStateMachine::endDarkAcquire() {
+	if (!canEndDarkAcquire()) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "Not acquireing dark image");
+		throw BadState("Not acquireing dark image");
+	}
+	_state = _prestate;
+}
+
+void	GuiderStateMachine::startImaging() {
+	if (!canStartImaging()) {
+		std::string	msg = stringprintf("cannot image in state %s",
+			statename());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw BadState(msg);
+	}
+	_prestate = _state;
+	_state = Guide::imaging;
+}
+
+void	GuiderStateMachine::endImaging() {
+	if (!canEndImaging()) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "Not imaging");
+		throw BadState("Not imaging");
+	}
+	_state = _prestate;
 }
 
 } // namespace guiding

@@ -142,6 +142,17 @@ public:
 	void	trackingUpdate(const astro::callback::CallbackDataPtr data);
 	void	calibrationUpdate(const astro::callback::CallbackDataPtr data);
 	void	trackingImageUpdate(const astro::callback::CallbackDataPtr data);
+
+	// methods used for dark image acquisition
+	virtual void	startDarkAcquire(double exposuretime, int imagecount,
+				const Ice::Current& current);
+	virtual bool	useDark(const Ice::Current& current);
+	virtual void	setUseDark(bool usedark, const Ice::Current& current);
+
+	// methods use to acquire images
+	virtual void	startImaging(const Exposure& exposure,
+				const Ice::Current& current);
+	virtual ImagePrx getImage(const Ice::Current& current);
 };
 
 /**

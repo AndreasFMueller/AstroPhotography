@@ -19,6 +19,7 @@ libastrodevice_la_SOURCES =						\
 	CcdInfo.cpp							\
 	CcdState.cpp							\
 	Cooler.cpp							\
+	DarkWork.cpp							\
 	Device.cpp							\
 	DeviceAccessor.cpp						\
 	DeviceDenicer.cpp						\
@@ -35,6 +36,8 @@ libastrodevice_la_SOURCES =						\
 	ImageQueueEntry.cpp						\
 	ImageStream.cpp							\
 	ImageStreamThread.cpp						\
+	ImageWork.cpp							\
+	ImageWorkImager.cpp						\
 	Module.cpp							\
 	ModuleDescriptor.cpp						\
 	Mount.cpp							\

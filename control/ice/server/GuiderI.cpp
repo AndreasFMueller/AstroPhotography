@@ -511,7 +511,7 @@ ImagePrx GuiderI::mostRecentImage(const Ice::Current& current) {
 	std::string	filename = imagedirectory.save(image);
 
 	// return a proxy for the image
-	return getImage(filename, image->bytesPerPixel(), current);
+	return snowstar::getImage(filename, image->bytesPerPixel(), current);
 }
 
 TrackingPoint GuiderI::mostRecentTrackingPoint(const Ice::Current& /* current */) {
@@ -695,6 +695,68 @@ void    GuiderI::setRepositoryName(const std::string& reponame,
  */
 std::string     GuiderI::getRepositoryName(const Ice::Current& current) {
 	return RepositoryUser::getRepositoryName(current);
+}
+
+/**
+ * \brief start the dark acquire process
+ */
+void	GuiderI::startDarkAcquire(double exposuretime, int imagecount,
+		const Ice::Current& /* current */) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "startDarkAcquire called");
+	try {
+		guider->startDark(exposuretime, imagecount);
+	} catch (const std::exception& x) {
+		BadState	exception;
+		exception.cause = std::string(x.what());
+		throw exception;
+	}
+}
+
+/**
+ * \brief query the use dark
+ */
+bool	GuiderI::useDark(const Ice::Current& /* current */) {
+	return guider->imager().darksubtract();
+}
+
+/**
+ * \brief set whether the dark images should be used (if present)
+ */
+void	GuiderI::setUseDark(bool usedark, const Ice::Current& /* current */) {
+	guider->imager().darksubtract(usedark);
+}
+
+/**
+ * \brief start imaging with a given exposure
+ */
+void	GuiderI::startImaging(const Exposure& exposure,
+                                const Ice::Current& /* current */) {
+	try {
+		astro::camera::Exposure	e = convert(exposure);
+		guider->startImaging(e);
+	} catch (const std::exception& x) {
+		BadState	exception;
+		exception.cause = std::string(x.what());
+		throw exception;
+	}
+}
+
+/**
+ * \brief retrieve the image
+ */
+ImagePrx	GuiderI::getImage(const Ice::Current& current) {
+	// retrieve image
+	astro::image::ImagePtr	image = guider->getImage();
+	if (!image) {
+		throw NotFound("no image available");
+	}
+
+	// store image in image directory
+	astro::image::ImageDirectory	imagedirectory;
+	std::string	filename = imagedirectory.save(image);
+
+	// return a proxy for the image
+	return snowstar::getImage(filename, image->bytesPerPixel(), current);
 }
 
 } // namespace snowstar

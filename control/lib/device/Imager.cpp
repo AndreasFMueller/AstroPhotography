@@ -63,13 +63,16 @@ void	Imager::startExposure(const Exposure& exposure) {
 /**
  * \brief Get a corrected image
  */
-ImagePtr	Imager::getImage() {
+ImagePtr	Imager::getImage(bool raw) {
 	// wait until there is an image
 	if (!ccd()->wait()) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "no image available after wait");
 		throw std::runtime_error("no image available");
 	}
 	ImagePtr	image = ccd()->getImage();
+	if (raw) {
+		return image;
+	}
 	this->operator()(image);
 	return image;
 }

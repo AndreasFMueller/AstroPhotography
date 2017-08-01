@@ -28,6 +28,7 @@ public:
 	bool	flipped;
 	bool	stepping;
 	TrackerMethod	method;
+	int	imagecount;
 private:
 	CommonMonitor	*monitor;
 public:
@@ -43,6 +44,7 @@ public:
 		method = TrackerUNDEFINED;
 		flipped = false;
 		stepping = false;
+		imagecount = 10;
 	}
 
 	// general commands
@@ -94,6 +96,10 @@ public:
 			ControlType type);
 	int	forget_command(GuiderFactoryPrx guiderfactory,
 			const std::list<int>& ids);
+
+	// commands related to dark correction
+	int	dark_command(GuiderPrx guider);
+	int	image_command(GuiderPrx guider, const std::string& filename);
 
 	// utility functions
 static	ControlType	string2type(const std::string& type);

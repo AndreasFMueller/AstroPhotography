@@ -18,6 +18,7 @@ noinst_HEADERS = display.h monitor.h guide.h
 
 snowguide_SOURCES = display.cpp monitor.cpp guide.cpp			\
 	guidecmd.cpp calcmd.cpp generalcmd.cpp monitorcmd.cpp 		\
+	darkcmd.cpp imagecmd.cpp					\
 	snowguide.cpp
 snowguide_DEPENDENCIES = $(ICEDEPENDENCIES)
 snowguide_LDADD = $(ICELDADD)

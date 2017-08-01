@@ -93,6 +93,10 @@ GuiderState	convert(const astro::guiding::Guide::state& state) {
 		return GuiderCALIBRATED;
 	case astro::guiding::Guide::guiding:
 		return GuiderGUIDING;
+	case astro::guiding::Guide::darkacquire:
+		return GuiderDARKACQUIRE;
+	case astro::guiding::Guide::imaging:
+		return GuiderIMAGING;
 	}
 	throw std::runtime_error("unknown guider state");
 }
@@ -109,6 +113,10 @@ astro::guiding::Guide::state	convert(const GuiderState& state) {
 		return astro::guiding::Guide::calibrated;
 	case GuiderGUIDING:
 		return astro::guiding::Guide::guiding;
+	case GuiderDARKACQUIRE:
+		return astro::guiding::Guide::darkacquire;
+	case GuiderIMAGING:
+		return astro::guiding::Guide::imaging;
 	}
 	throw std::runtime_error("unknown guider state");
 }

@@ -24,26 +24,27 @@ namespace snowguide {
  */
 static struct option	longopts[] = {
 { "adaptiveoptics",	required_argument,	NULL,	'a' }, /*  0 */
-{ "aointerval",		required_argument,	NULL,	'A' },
-{ "binning",		required_argument,	NULL,	'b' }, /*  0 */
-{ "ccd",		required_argument,	NULL,	'C' }, /*  1 */
-{ "config",		required_argument,	NULL,	'c' }, /*  2 */
-{ "csv",		no_argument,		NULL,	 1  }, /*  3 */
-{ "debug",		no_argument,		NULL,	'd' }, /*  4 */
-{ "exposure",		required_argument,	NULL,	'e' }, /*  5 */
-{ "flipped",		no_argument,		NULL,	'f' },
-{ "guideport",		required_argument,	NULL,	'G' }, /*  7 */
-{ "help",		no_argument,		NULL,	'h' }, /*  8 */
-{ "interval",		required_argument,	NULL,	'i' }, /*  9 */
-{ "method",		required_argument,	NULL,	'm' }, /* 10 */
-{ "prefix",		required_argument,	NULL,	'p' }, /* 11 */
-{ "rectangle",		required_argument,	NULL,	'r' }, /* 12 */
-{ "star",		required_argument,	NULL,	's' }, /* 13 */
-{ "stepping",		no_argument,		NULL,	'S' }, /* 14 */
-{ "temperature",	required_argument,	NULL,	't' }, /* 15 */
-{ "verbose",		no_argument,		NULL,	'v' }, /* 16 */
-{ "width",		required_argument,	NULL,	'w' }, /* 17 */
-{ NULL,			0,			NULL,    0  }  /* 18 */
+{ "aointerval",		required_argument,	NULL,	'A' }, /*  1 */
+{ "binning",		required_argument,	NULL,	'b' }, /*  2 */
+{ "ccd",		required_argument,	NULL,	'C' }, /*  3 */
+{ "config",		required_argument,	NULL,	'c' }, /*  4 */
+{ "csv",		no_argument,		NULL,	 1  }, /*  5 */
+{ "debug",		no_argument,		NULL,	'd' }, /*  6 */
+{ "exposure",		required_argument,	NULL,	'e' }, /*  7 */
+{ "flipped",		no_argument,		NULL,	'f' }, /*  8 */
+{ "guideport",		required_argument,	NULL,	'G' }, /*  9 */
+{ "help",		no_argument,		NULL,	'h' }, /* 10 */
+{ "interval",		required_argument,	NULL,	'i' }, /* 11 */
+{ "imagecount",		required_argument,	NULL,	'I' }, /* 12 */
+{ "method",		required_argument,	NULL,	'm' }, /* 13 */
+{ "prefix",		required_argument,	NULL,	'p' }, /* 14 */
+{ "rectangle",		required_argument,	NULL,	'r' }, /* 15 */
+{ "star",		required_argument,	NULL,	's' }, /* 16 */
+{ "stepping",		no_argument,		NULL,	'S' }, /* 17 */
+{ "temperature",	required_argument,	NULL,	't' }, /* 18 */
+{ "verbose",		no_argument,		NULL,	'v' }, /* 19 */
+{ "width",		required_argument,	NULL,	'w' }, /* 20 */
+{ NULL,			0,			NULL,    0  }  /* 21 */
 };
 
 /**
@@ -260,6 +261,16 @@ int	main(int argc, char *argv[]) {
 	}
 	if (command == "stop") {
 		return guide.stop_command(guider);
+	}
+	if (command == "dark") {
+		return guide.dark_command(guider);
+	}
+	if (command == "image") {
+		if (argc < optind) {
+			throw std::runtime_error("missing filename argument");
+		}
+		std::string	filename(argv[optind++]);
+		return guide.image_command(guider, filename);
 	}
 	if (command == "repository") {
 		if (argc > optind) {

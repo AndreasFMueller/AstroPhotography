@@ -827,7 +827,8 @@ Point	ControlDevice<camera::AdaptiveOptics,
 class Guide {
 public:
 	typedef enum {
-		unconfigured, idle, calibrating, calibrated, guiding
+		unconfigured, idle, calibrating, calibrated, guiding,
+		darkacquire, imaging
 	} state;
 static std::string	state2string(state s);
 static state	string2state(const std::string& s);
@@ -858,6 +859,10 @@ public:
 	bool	canAcceptCalibration() const;
 	bool	canFailCalibration() const;
 	bool	canStopGuiding() const;
+	bool	canStartDarkAcquire() const;
+	bool	canEndDarkAcquire() const;
+	bool	canStartImaging() const;
+	bool	canEndImaging() const;
 
 	// state change methods
 	void	configure();
@@ -866,7 +871,13 @@ public:
 	void	failCalibration();
 	void	startGuiding();
 	void	stopGuiding();
-
+private:
+	Guide::state	_prestate;
+public:
+	void	startDarkAcquire();
+	void	endDarkAcquire();
+	void	startImaging();
+	void	endImaging();
 };
 
 /**
@@ -1027,6 +1038,24 @@ public:
 	void lastAction(double& actiontime, Point& offset, Point& activation);
 
 	void	callback(const std::exception& ex);
+
+	// methods related to getting dark images
+private:
+	camera::DarkWorkImagerPtr	_darkwork;
+	camera::DarkWorkImagerThreadPtr	_darkthread;
+public:
+	void	startDark(double exposuretime, int imagecount);
+	void	endDark();
+
+	// acquiring an image
+private:
+	camera::ImageWorkImagerPtr	_imagework;
+	camera::ImageWorkImagerThreadPtr	_imagethread;
+	ImagePtr	_image;
+public:
+	void	startImaging(const camera::Exposure& exposure);
+	void	endImaging(ImagePtr image);
+	ImagePtr	getImage() { return _image; }
 };
 typedef std::shared_ptr<Guider>	GuiderPtr;
 

@@ -25,6 +25,9 @@ Guide::state	Guide::string2state(const std::string& s) {
 	if (s == "guiding") {
 		return guiding;
 	}
+	if (s == "darkacquire") {
+		return darkacquire;
+	}
 	throw std::runtime_error("unknown state string");
 }
 
@@ -40,6 +43,8 @@ std::string	Guide::state2string(state s) {
 		return std::string("calibrated");
 	case guiding:
 		return std::string("guiding");
+	case darkacquire:
+		return std::string("darkacquire");
 	}
 	throw std::runtime_error("unknown state ");
 }

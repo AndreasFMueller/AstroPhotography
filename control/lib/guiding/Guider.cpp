@@ -507,6 +507,16 @@ void	Guider::checkstate() {
 		break;
 	case Guide::guiding:
 		break;
+	case Guide::darkacquire:
+		if (!_darkthread->isrunning()) {
+			_state.endDarkAcquire();
+		}
+		break;
+	case Guide::imaging:
+		if (!_imagethread->isrunning()) {
+			endImaging(ImagePtr(NULL));
+		}
+		break;
 	}
 }
 
@@ -554,7 +564,132 @@ void	Guider::callback(const std::exception& /* ex */) {
 		// guiding failed, return to the configured state
 		//_state.stopGuiding();
 		break;
+	case Guide::darkacquire:
+		// XXX implementation required
+		_state.endDarkAcquire();
+		break;
+	case Guide::imaging:
+		// XXX ist this the right implementation?
+		endImaging(ImagePtr(NULL));
+		break;
 	}
+}
+
+/**
+ * \brief Callback class to signal the end of the guide process
+ */
+class DarkEndCallback : public Callback {
+	Guider&	_guider;
+public:
+	DarkEndCallback(Guider& guider) : _guider(guider) { }
+	CallbackDataPtr	operator()(CallbackDataPtr data) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "endDark callback called");
+		_guider.endDark();
+		return data;
+	}
+};
+
+/**
+ * \brief Start getting a dark image
+ *
+ * \param exposuretime	exposure time to use for darks
+ * \param imagecount	number of images to use to construct the dark
+ */
+void	Guider::startDark(double exposuretime, int imagecount) {
+	_state.startDarkAcquire();
+	try {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "start to acquire a dark");
+		// set up the dark work
+		_darkwork = DarkWorkImagerPtr(new DarkWorkImager(imager()));
+		_darkwork->exposuretime(exposuretime);
+		_darkwork->imagecount(imagecount);
+		_darkwork->endCallback(CallbackPtr(new DarkEndCallback(*this)));
+
+		// set iup the thread
+		DarkWorkImagerThread	*dwit
+			= new DarkWorkImagerThread(&*_darkwork);
+		_darkthread = DarkWorkImagerThreadPtr(dwit);
+
+		// start the thread
+		_darkthread->start();
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "dark acquire is running");
+	} catch (const std::exception& x) {
+		debug(LOG_ERR, DEBUG_LOG, 0,
+			"dark acquisition start failed: %s", x.what());
+		callback(x);
+	}
+}
+
+/**
+ * \brief Method to signal the end of the dark acquisition process
+ */
+void	Guider::endDark() {
+	_state.endDarkAcquire();
+}
+
+/**
+ * \brief Callback class to signal the end of the guide process
+ */
+class ImageEndCallback : public Callback {
+	Guider&	_guider;
+public:
+	ImageEndCallback(Guider& guider) : _guider(guider) { }
+	CallbackDataPtr	operator()(CallbackDataPtr data) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "endImage callback called");
+		if (!data) {
+			_guider.endImaging(ImagePtr(NULL));
+		} else {
+			ImageCallbackData	*icd
+				= dynamic_cast<ImageCallbackData*>(&*data);
+			if (icd) {
+				_guider.endImaging(icd->image());
+			} else {
+				_guider.endImaging(ImagePtr(NULL));
+			}
+		}
+		return data;
+	}
+};
+
+/**
+ * \brief Start acquiring an image via the imager
+ *
+ * \param exposure	exposure settings to use
+ */
+void	Guider::startImaging(const Exposure& exposure) {
+	_state.startImaging();
+	try {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "start to acquire image %s",
+			exposure.toString().c_str());
+		_imagework = ImageWorkImagerPtr(
+				new ImageWorkImager(imager(), exposure));
+		_imagework->endcallback(CallbackPtr(new ImageEndCallback(*this)));
+		// set iup the thread
+		ImageWorkImagerThread	*iwit
+			= new ImageWorkImagerThread(&*_imagework);
+		_imagethread = ImageWorkImagerThreadPtr(iwit);
+
+		// start the thread
+		_imagethread->start();
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "imaging process is running");
+	} catch (const std::exception& x) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "image acquisition failed: %s",
+			x.what());
+		callback(x);
+	}
+}
+
+/**
+ * \brief Method to signal the end of the image acquisition process
+ */
+void	Guider::endImaging(ImagePtr image) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "received an image");
+	_image = image;
+	if (_image) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "Image size: %s",
+			_image->size().toString().c_str());
+	}
+	_state.endImaging();
 }
 
 } // namespace guiding

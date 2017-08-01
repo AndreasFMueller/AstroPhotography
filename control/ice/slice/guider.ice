@@ -157,7 +157,11 @@ module snowstar {
 		// for guiding
 		GuiderCALIBRATED,
 		// The calibrated guider can be used for guiding
-		GuiderGUIDING
+		GuiderGUIDING,
+		// The imager is used to acquire a dark image
+		GuiderDARKACQUIRE,
+		// the imager is busy acquiring an image
+		GuiderIMAGING
 	};
 
 	enum TrackerMethod {
@@ -213,8 +217,7 @@ module snowstar {
 		// the position is only used as a reference point during 
 		// calibration. During guiding, the guide star is kept
 		// in this position.
-		void	setStar(Point star)
-				throws BadParameter, BadState;
+		void	setStar(Point star) throws BadParameter, BadState;
 		Point	getStar() throws BadState;
 
 		// if the repository name is set, then all images sent to the
@@ -290,6 +293,23 @@ module snowstar {
 		// callbacks for images during guiding _and_ calibration
 		void	registerImageMonitor(Ice::Identity imagemonitor);
 		void	unregisterImageMonitor(Ice::Identity imagemonitor);
+
+		/**
+		 * \brief start to acquire
+		 *
+		 * \param exposuretime	exposure time to use for dark images
+		 * \param imagecount	number of images to take for the dark
+		 */
+		void	startDarkAcquire(double exposuretime, int imagecount)
+				throws BadState;
+		bool	useDark() throws BadState;
+		void	setUseDark(bool usedark) throws BadState;
+
+		/**
+		 * \brief Start to acquire an image
+		 */
+		void	startImaging(Exposure expo) throws BadState;
+		Image*	getImage() throws BadState;
 	};
 
 	/**
