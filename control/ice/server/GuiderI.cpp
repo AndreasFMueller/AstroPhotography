@@ -756,7 +756,10 @@ ImagePrx	GuiderI::flatImage(const Ice::Current& current) {
  * \brief Whether or not the imager has a dark image
  */
 bool    GuiderI::hasDark(const Ice::Current& /* current */) {
-	return guider->imager().hasDark();
+	bool	hasdark = guider->imager().hasDark();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "has dark: %s",
+			(hasdark) ? "yes" : "no");
+	return hasdark;
 }
 
 /**

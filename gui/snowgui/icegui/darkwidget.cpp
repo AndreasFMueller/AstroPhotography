@@ -53,12 +53,34 @@ darkwidget::~darkwidget() {
 }
 
 /**
+ * \brief Check for a dark image
+ */
+void	darkwidget::checkImage() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "checking for an image");
+	try {
+		snowstar::ImagePrx	image = _guider->darkImage();
+		_darkimage = snowstar::convert(image);
+		image->remove();
+		if (_darkimage) {
+			ui->viewButton->setEnabled(true);
+		}
+		emit newImage(_darkimage);
+	} catch (const std::exception& x) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0,
+			"image acquire failed %s", x.what());
+	}
+}
+
+/**
  * \brief set the guider
  */
 void	darkwidget::guider(snowstar::GuiderPrx guider) {
 	statusTimer.stop();
+	_darkimage = astro::image::ImagePtr(NULL);
 	_guider = guider;
 	if (_guider) {
+		checkImage();
+		_guiderstate = snowstar::GuiderUNCONFIGURED;
 		statusTimer.start();
 	}
 }
@@ -100,18 +122,7 @@ void	darkwidget::statusUpdate() {
 	_guiderstate = newstate;
 	if (_acquiring && (newstate != snowstar::GuiderDARKACQUIRE)) {
 		// retrieve the image
-		try {
-			snowstar::ImagePrx	image = _guider->darkImage();
-			_darkimage = snowstar::convert(image);
-			image->remove();
-			if (_darkimage) {
-				ui->viewButton->setEnabled(true);
-			}
-		} catch (const std::exception& x) {
-			debug(LOG_DEBUG, DEBUG_LOG, 0,
-				"image acquire failed %s", x.what());
-		}
-		emit newImage(_darkimage);
+		checkImage();
 	}
 }
 

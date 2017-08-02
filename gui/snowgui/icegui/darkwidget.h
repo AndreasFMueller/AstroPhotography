@@ -34,6 +34,7 @@ public:
 
 	void	closeEvent(QCloseEvent *);
 	void	exposuretime(double e);
+	void	checkImage();
 
 signals:
 	void	newImage(astro::image::ImagePtr);

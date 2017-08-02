@@ -23,6 +23,7 @@ int	Guide::monitor_command(GuiderPrx guider) {
 	case GuiderCALIBRATED:
 	case GuiderIMAGING:
 	case GuiderDARKACQUIRE:
+	case GuiderFLATACQUIRE:
 		std::cout << "not in monitorable state" << std::endl;
 	case GuiderCALIBRATING:
 		return monitor_calibration(guider);

@@ -87,55 +87,91 @@ void	Guide::usage(const char *progname) {
 		<< std::endl;
 	std::cout << p << " [ options ] <service> <INSTRUMENT> dark"
 		<< std::endl;
+	std::cout << p << " [ options ] <service> <INSTRUMENT> darkimage <filename.fits>"
+		<< std::endl;
 	std::cout << p << " [ options ] <service> <INSTRUMENT> flat"
+		<< std::endl;
+	std::cout << p << " [ options ] <service> <INSTRUMENT> flatimage <filename.fits>"
 		<< std::endl;
 
 	std::cout << std::endl;
 
 	std::cout << "Options:" << std::endl;
 	std::cout << std::endl;
-	std::cout << "  -b,--binning=XxY      select XxY binning mode (default "
-		"1x1)" << std::endl;
-	std::cout << "  -c,--config=<cfg>     use configuration from file <cfg>";
+	std::cout << "  -a,--adaptiveoptics=<a>  index of adaptive optics "
+		"device to use";
 	std::cout << std::endl;
-	std::cout << "  -d,--debug            increase debug level" << std::endl;
-	std::cout << "  -e,--exposure=<e>     set exposure time to <e>";
+	std::cout << "  -A,--aointerval=<a>      adaptive optics interval";
 	std::cout << std::endl;
-	std::cout << "  -h,--help             display this help message and exit";
+	std::cout << "  -b,--binning=XxY         select XxY binning mode "
+		"(default 1x1)" << std::endl;
+	std::cout << "  -C,--ccd=<ccdindex>      guider CCD index to use";
 	std::cout << std::endl;
-	std::cout << "  -I,--imagecount=<I>   number of images to take for a dark";
+	std::cout << "  -c,--config=<cfg>        use configuration from file "
+		"<cfg>";
 	std::cout << std::endl;
-	std::cout << "  -i,--interval=<i>     perform an update ever i seconds when guiding";
+	std::cout << "  -d,--debug               increase debug level"
+		<< std::endl;
+	std::cout << "  -e,--exposure=<e>        set exposure time to <e>";
 	std::cout << std::endl;
-	std::cout << "  -m,--method=<m>       use tracking method <m>. Available methods are 'star'" << std::endl;
-	std::cout << "                        (centroid of a star), 'phase' (uses cross correlation" << std::endl;
-	std::cout << "                        to find image offsets), 'diff' (uses cross correlation" << std::endl;
-	std::cout << "                        on edges in the image to find image offsets)," << std::endl;
-	std::cout << "                        'laplace' (take laplace operator on image)," << std::endl;
-	std::cout << "                        'large' (keeps center of gravity of a large object in" << std::endl;
-	std::cout << "                        the center of the rectangle)," << std::endl;
-	std::cout << "                        'null' (always return offset 0)" << std::endl;
-	std::cout << "  -r,--rectangle=<rec>  expose only a subrectangle as "
+	std::cout << "  -f,--flipped             use the calibration flipped";
+	std::cout << std::endl;
+	std::cout << "  -g,--guideport=<g>       set guide port index";
+	std::cout << std::endl;
+	std::cout << "  -h,--help                display this help message and "
+		"exit";
+	std::cout << std::endl;
+	std::cout << "  -I,--imagecount=<I>      number of images to take for a "
+		"dark";
+	std::cout << std::endl;
+	std::cout << "  -i,--interval=<i>        perform an update ever i "
+		"seconds when guiding";
+	std::cout << std::endl;
+	std::cout << "  -I,--imagecount<i>       number of images to use for "
+		"dark or flats" << std::endl;
+	std::cout << "  -m,--method=<m>          use tracking method <m>. "
+		"Available methods are 'star'" << std::endl;
+	std::cout << "                           (centroid of a star), 'phase' "
+		"(uses cross correlation" << std::endl;
+	std::cout << "                           to find image offsets), 'diff' "
+		"(uses cross correlation" << std::endl;
+	std::cout << "                           on edges in the image to find "
+		"image offsets)," << std::endl;
+	std::cout << "                           'laplace' (take laplace "
+		"operator on image)," << std::endl;
+	std::cout << "                           'large' (keeps center of "
+		"gravity of a large object in" << std::endl;
+	std::cout << "                           the center of the rectangle),"
+		<< std::endl;
+	std::cout << "                           'null' (always return offset 0)"
+		<< std::endl;
+	std::cout << "  -p,--prefix=<p>          prefix to use for monitoring "
+		"images" << std::endl;
+	std::cout << "  -r,--rectangle=<rec>     expose only a subrectangle as "
 		"specified by <rec>." << std::endl;
-	std::cout << "                        <rec> must be of the form";
+	std::cout << "                           <rec> must be of the form";
 	std::cout << std::endl;
-	std::cout << "                        widthxheight@(xoffset,yoffset)";
+	std::cout << "                           widthxheight@(xoffset,yoffset)";
 	std::cout << std::endl;
-	std::cout << "                        if -s and -w are specified, the "
-		"subrectangle is";
+	std::cout << "                           if -s and -w are specified, "
+		"the subrectangle is";
 	std::cout << std::endl;
-	std::cout << "                        computed from these." << std::endl;
-	std::cout << "  -s,--star=<pos>       position of the star to calibrate "
-		"or guide on in the" << std::endl;
-	std::cout << "                        syntax (x,y), the parentheses are "
-		"optional" << std::endl;
-	std::cout << "  -S,--stepping         guide using one second steps instead of a single long" << std::endl;
-	std::cout << "                        correction" << std::endl;
-	std::cout << "  -t,--temperature=<t>  cool ccd to temperature <t>, "
+	std::cout << "                           computed from these."
+		<< std::endl;
+	std::cout << "  -s,--star=<pos>          position of the star to "
+		"calibrate or guide on in the" << std::endl;
+	std::cout << "                           syntax (x,y), the parentheses "
+		"are optional" << std::endl;
+	std::cout << "  -S,--stepping            guide using one second steps "
+		"instead of a single long" << std::endl;
+	std::cout << "                           correction" << std::endl;
+	std::cout << "  -t,--temperature=<t>     cool ccd to temperature <t>, "
 		"ignored if the instrument" << std::endl;
-	std::cout << "                        has no cooler" << std::endl;
-	std::cout << "  -v,--verbose          enable verbose mode" << std::endl;
-	std::cout << "  -w,--width=<w>        set the width and height of the area to expose" << std::endl;
+	std::cout << "                           has no cooler" << std::endl;
+	std::cout << "  -v,--verbose             enable verbose mode"
+		<< std::endl;
+	std::cout << "  -w,--width=<w>           set the width and height of "
+		"the area to expose" << std::endl;
 	std::cout << std::endl;
 }
 
@@ -150,10 +186,18 @@ int	Guide::help_command(const char *progname) {
 
 << std::endl << 
 "state" << std::endl <<
-"    display the current state of the guider. The states are idle (not doing" << std::endl <<
-"    anything), calibrating (trying to determine the calibration), calibrated"<< std::endl <<
-"    (ready to start guiding), guiding (control the guider port to keep a" << std::endl <<
-"    star in the same position on the guider CCD)." << std::endl
+"    display the current state of the guider. The states are idle (not doing"
+<< std::endl <<
+"    anything), calibrating (trying to determine the calibration), calibrated"
+<< std::endl <<
+"    (ready to start guiding), guiding (control the guider port to keep a"
+<< std::endl <<
+"    star in the same position on the guider CCD), darkacquire (acquiring a"
+<< std::endl <<
+"    dark image), flatacquire (acquiring a flat image) and imaging (acquiring a"
+<< std::endl <<
+"    light image)"
+<< std::endl
 
 << std::endl << 
 "calibrate [ <calibrationid> | <calibrationtype> ]" << std::endl <<
@@ -233,6 +277,14 @@ int	Guide::help_command(const char *progname) {
 "    operate as an image callback, and store all images sent from the server"
 << std::endl <<
 "    in the directory named <directory>." << std::endl
+
+<< std::endl <<
+"dark | flat" << std::endl <<
+"    create a dark or flat image" << std::endl
+
+<< std::endl <<
+"( darkimage | flatimage ) <filename.fits>" << std::endl <<
+"    store dark or flat image in the file named filename.fits" << std::endl
 
 << std::endl;
 	return EXIT_SUCCESS;

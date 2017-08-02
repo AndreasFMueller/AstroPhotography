@@ -275,6 +275,20 @@ int	main(int argc, char *argv[]) {
 		std::string	filename(argv[optind++]);
 		return guide.image_command(guider, filename);
 	}
+	if (command == "darkimage") {
+		if (argc < optind) {
+			throw std::runtime_error("missing filename argument");
+		}
+		std::string	filename(argv[optind++]);
+		return guide.darkimage_command(guider, filename);
+	}
+	if (command == "flatimage") {
+		if (argc < optind) {
+			throw std::runtime_error("missing filename argument");
+		}
+		std::string	filename(argv[optind++]);
+		return guide.flatimage_command(guider, filename);
+	}
 	if (command == "repository") {
 		if (argc > optind) {
 			try {

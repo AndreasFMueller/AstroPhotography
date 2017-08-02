@@ -34,15 +34,29 @@ Ice::ObjectPtr	ImageLocator::locate(const Ice::Current& current,
 	astro::image::ImagePtr	image = _imagedirectory.getImagePtr(name);
 
 	// find out how many bytes a pixel has
-	switch (astro::image::filter::bytespervalue(image)) {
-	case 1:	debug(LOG_DEBUG, DEBUG_LOG, 0, "creating byte image servant");
+	std::type_index	type = image->pixel_type();
+	if (type == typeid(unsigned char)) {
 		ptr = new ByteImageI(image, name);
-		break;
-	case 2:	debug(LOG_DEBUG, DEBUG_LOG, 0, "creating short image servant");
+	}
+	if (type == typeid(unsigned short)) {
 		ptr = new ShortImageI(image, name);
-		break;
-	default:
-		throw BadParameter("image of unknown pixel size");
+	}
+	if (type == typeid(unsigned short)) {
+		ptr = new IntImageI(image, name);
+	}
+	if (type == typeid(float)) {
+		ptr = new FloatImageI(image, name);
+	}
+	if (type == typeid(double)) {
+		ptr = new DoubleImageI(image, name);
+	}
+	if (!ptr) {
+		BadParameter	exception;
+		std::string	msg = astro::stringprintf("don't know how to "
+			"handle %s pixels",
+			astro::demangle(type.name()).c_str());
+		exception.cause = msg;
+		throw exception;
 	}
 
 	// add the servant to the cache
