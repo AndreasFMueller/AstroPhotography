@@ -7,6 +7,7 @@
 #include <AstroFormat.h>
 #include <AstroDebug.h>
 #include <AstroCalibration.h>
+#include <AstroIO.h>
 
 namespace astro {
 namespace camera {
@@ -83,7 +84,14 @@ ImagePtr	FlatWork::common(astro::thread::ThreadBase& /* thread */) {
 	_flatimage = flatfactory(images, _darkimage);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "got an %s flat image with %s pixels",
 		_flatimage->size().toString().c_str(),
-		_flatimage->pixel_type().name());
+		astro::demangle(_flatimage->pixel_type().name()).c_str());
+
+	// add additional information
+	exposure.addToImage(*_flatimage);
+	_flatimage->setMetadata(
+		astro::io::FITSKeywords::meta(std::string("IMGCOUNT"),
+			(long)_imagecount));
+
 	return _flatimage;
 }
 

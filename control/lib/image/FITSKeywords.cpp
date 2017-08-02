@@ -20,7 +20,7 @@ typedef struct {
 	bool	unique;
 } FITSKeyword;
 
-#define	Nkeywors	79
+#define	Nkeywors	80
 FITSKeyword	keywors[Nkeywors] = {
 // standard keywords
 { // 0
@@ -380,7 +380,7 @@ FITSKeyword	keywors[Nkeywors] = {
 },
 { // 59
 	std::string("FOCAL"),
-	std::string("focal length of instrumen in meteres"),
+	std::string("focal length of instrument in meteres"),
 	std::type_index(typeid(double)),
 	true
 },
@@ -495,6 +495,12 @@ FITSKeyword	keywors[Nkeywors] = {
 { // 78
 	std::string("BADPIXEL"),
 	std::string("Number of bad pixels"),
+	std::type_index(typeid(long)),
+	true
+},
+{ // 79
+	std::string("IMGCOUNT"),
+	std::string("Number of images used to build dark/flat"),
 	std::type_index(typeid(long)),
 	true
 },

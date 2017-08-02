@@ -7,6 +7,7 @@
 #include <AstroFormat.h>
 #include <AstroDebug.h>
 #include <AstroCalibration.h>
+#include <AstroIO.h>
 
 namespace astro {
 namespace camera {
@@ -83,7 +84,14 @@ ImagePtr	DarkWork::common(astro::thread::ThreadBase& /* thread */) {
 	_darkimage = darkfactory(images);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "got an %s dark image with %s pixels",
 		_darkimage->size().toString().c_str(),
-		_darkimage->pixel_type().name());
+		astro::demangle(_darkimage->pixel_type().name()).c_str());
+
+	// add additional information
+	exposure.addToImage(*_darkimage);
+	_darkimage->setMetadata(
+		astro::io::FITSKeywords::meta(std::string("IMGCOUNT"),
+			(long)_imagecount));
+
 	return _darkimage;
 }
 
