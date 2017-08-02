@@ -12,6 +12,7 @@
 #include <AstroImageops.h>
 #include <QMessageBox>
 #include "darkwidget.h"
+#include "flatwidget.h"
 
 using namespace astro::image;
 using namespace astro::io;
@@ -393,14 +394,20 @@ void	imagercontrollerwidget::darkClicked() {
  * \brief Slot to handle click on the "Flat" button
  */
 void	imagercontrollerwidget::flatClicked() {
-	try {
-		_guider->startFlatAcquire(_exposure.exposuretime(), 10);
-	} catch (const snowstar::BadState& x) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "bad state: %s", x.what());
-	} catch (const std::exception& x) {
-		ccdFailed(x);
+	if (!_guider) {
 		return;
 	}
+	flatwidget	*fw = new flatwidget(NULL);
+	fw->guider(_guider);
+
+	std::ostringstream	out;
+	out << "flat image for ";
+	astro::guiding::GuiderDescriptor	gd = convert(_guider->getDescriptor());
+	out << gd.toString();
+	
+	fw->setWindowTitle(QString(out.str().c_str()));
+	fw->exposuretime(_exposure.exposuretime());
+	fw->show();
 }
 
 /**
