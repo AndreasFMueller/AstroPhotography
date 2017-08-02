@@ -235,11 +235,11 @@ void    ImageI::remove(const Ice::Current& /* current */) {
 //////////////////////////////////////////////////////////////////////
 ByteImageI::ByteImageI(astro::image::ImagePtr image,
 	const std::string& filename) : ImageI(image, filename) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "building byte image, %d bytes per value",
-		_bytespervalue);
-	if (sizeof(unsigned char) != _bytespervalue) {
-		std::string	msg = astro::stringprintf("cannot build byte image "
-			"from %s", filename.c_str());
+	std::type_index	type = image->pixel_type();
+	if (type != typeid(unsigned char)) {
+		std::string	msg = astro::stringprintf("cannot build byte "
+			"image from %s, has %s pixel", filename.c_str());
+			astro::demangle(type.name()).c_str(),
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 		throw BadParameter(msg);
 	}
@@ -262,11 +262,11 @@ ByteSequence	ByteImageI::getBytes(const Ice::Current& /* current */) {
 //////////////////////////////////////////////////////////////////////
 ShortImageI::ShortImageI(astro::image::ImagePtr image,
 	const std::string& filename) : ImageI(image, filename) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "image has %d bytes per plane",
-		_bytespervalue);
-	if (sizeof(unsigned short) != _bytespervalue) {
+	std::type_index	type = image->pixel_type();
+	if (type != typeid(unsigned short)) {
 		std::string	msg = astro::stringprintf("cannot build "
-			"short image from %s", filename.c_str());
+			"short image from %s, has %s pixel", filename.c_str(),
+			astro::demangle(type.name()).c_str());
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 		throw BadParameter(msg);
 	}
@@ -289,11 +289,11 @@ ShortSequence	ShortImageI::getShorts(const Ice::Current& /* current */) {
 //////////////////////////////////////////////////////////////////////
 IntImageI::IntImageI(astro::image::ImagePtr image,
 	const std::string& filename) : ImageI(image, filename) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "image has %d bytes per plane",
-		_bytespervalue);
-	if (sizeof(unsigned int) != _bytespervalue) {
+	std::type_index	type = image->pixel_type();
+	if (type != typeid(unsigned int)) {
 		std::string	msg = astro::stringprintf("cannot build "
-			"short image from %s", filename.c_str());
+			"int image from %s, has %s pixel", filename.c_str(),
+			astro::demangle(type.name()).c_str());
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 		throw BadParameter(msg);
 	}
@@ -316,11 +316,11 @@ IntSequence	IntImageI::getInts(const Ice::Current& /* current */) {
 //////////////////////////////////////////////////////////////////////
 FloatImageI::FloatImageI(astro::image::ImagePtr image,
 	const std::string& filename) : ImageI(image, filename) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "image has type %s pixels",
-		astro::demangle(_type.name()).c_str());
-	if (sizeof(float) != _bytespervalue) {
+	std::type_index	type = image->pixel_type();
+	if (type != typeid(float)) {
 		std::string	msg = astro::stringprintf("cannot build "
-			"float image from %s", filename.c_str());
+			"float image from %s, has %s pixel", filename.c_str(),
+			astro::demangle(type.name()).c_str());
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 		throw BadParameter(msg);
 	}
@@ -343,11 +343,11 @@ FloatSequence	FloatImageI::getFloats(const Ice::Current& /* current */) {
 //////////////////////////////////////////////////////////////////////
 DoubleImageI::DoubleImageI(astro::image::ImagePtr image,
 	const std::string& filename) : ImageI(image, filename) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "image has %d bytes per plane",
-		_bytespervalue);
-	if (sizeof(double) != _bytespervalue) {
+	std::type_index	type = image->pixel_type();
+	if (type != typeid(double)) {
 		std::string	msg = astro::stringprintf("cannot build "
-			"short image from %s", filename.c_str());
+			"double image from %s, has %s pixel", filename.c_str(),
+			astro::demangle(type.name()).c_str());
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 		throw BadParameter(msg);
 	}

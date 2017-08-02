@@ -44,25 +44,32 @@ ImagePrx	getImage(const std::string& filename, std::type_index type,
 				const Ice::Current& current) {
 	// find the identity
 	std::string     identity = std::string("image/") + filename;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "getting image with %s pixels",
+		astro::demangle(type.name()).c_str());
 
 	// create the proxy
 	if (type == typeid(unsigned char)) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "unsigned char image");
 		return snowstar::createProxy<ByteImagePrx>(identity, current,
 			false);
 	}
 	if (type == typeid(unsigned short)) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "unsigned short image");
 		return snowstar::createProxy<ShortImagePrx>(identity, current,
 			false);
 	}
 	if (type == typeid(unsigned int)) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "unsigned int image");
 		return snowstar::createProxy<IntImagePrx>(identity, current,
 			false);
 	}
 	if (type == typeid(float)) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "float image");
 		return snowstar::createProxy<FloatImagePrx>(identity, current,
 			false);
 	}
 	if (type == typeid(double)) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "double image");
 		return snowstar::createProxy<DoubleImagePrx>(identity, current,
 			false);
 	}

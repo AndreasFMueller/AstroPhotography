@@ -41,7 +41,7 @@ Ice::ObjectPtr	ImageLocator::locate(const Ice::Current& current,
 	if (type == typeid(unsigned short)) {
 		ptr = new ShortImageI(image, name);
 	}
-	if (type == typeid(unsigned short)) {
+	if (type == typeid(unsigned int)) {
 		ptr = new IntImageI(image, name);
 	}
 	if (type == typeid(float)) {

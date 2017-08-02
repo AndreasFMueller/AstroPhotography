@@ -476,9 +476,20 @@ void	imagercontrollerwidget::statusUpdate() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "new state: %d (%d)", newstate,
 		previousstate);
 	if (previousstate == snowstar::GuiderIMAGING) {
-		snowstar::ImagePrx	image = _guider->getImage();
-		astro::image::ImagePtr	imageptr = snowstar::convert(image);
-		emit imageReceived(imageptr);
+		try {
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieving the image");
+			snowstar::ImagePrx	image = _guider->getImage();
+			astro::image::ImagePtr	imageptr = snowstar::convert(image);
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "image retrieved");
+			image->remove();
+			emit imageReceived(imageptr);
+		} catch (const snowstar::BadParameter& x) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "bad parameter: %s",
+				x.cause.c_str());
+		} catch (const std::exception& x) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "cannot get image: %s",
+				x.what());
+		}
 	}
 	switch (newstate) {
 	case snowstar::GuiderIDLE:
