@@ -43,11 +43,11 @@ imagercontrollerwidget::imagercontrollerwidget(QWidget *parent) :
 	connect(ui->frameFullButton, SIGNAL(clicked()),
 		this, SLOT(guiChanged()));
 
-	connect(ui->darkBox, SIGNAL(checked(bool)),
+	connect(ui->darkBox, SIGNAL(clicked(bool)),
 		this, SLOT(toggleDark(bool)));
-	connect(ui->flatBox, SIGNAL(checked(bool)),
+	connect(ui->flatBox, SIGNAL(clicked(bool)),
 		this, SLOT(toggleFlat(bool)));
-	connect(ui->interpolateBox, SIGNAL(checked(bool)),
+	connect(ui->interpolateBox, SIGNAL(clicked(bool)),
 		this, SLOT(toggleInterpolate(bool)));
 
 	// setup and connect the timer
