@@ -22,7 +22,7 @@
 namespace snowstar {
 
 ImageI::ImageI(astro::image::ImagePtr image, const std::string& filename)
-	: _image(image), _filename(filename) {
+	: _image(image), _filename(filename), _type(typeid(unsigned short)) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "creating image servant for %s",
 		_filename.c_str());
 	// check whether the filename contains a /, because that we want all
@@ -38,6 +38,8 @@ ImageI::ImageI(astro::image::ImagePtr image, const std::string& filename)
 	_origin = convert(_image->origin());
 	// size
 	_size = convert(_image->size());
+	// gype	
+	_type = _image->pixel_type();
 	// bytes per pixel
 	_bytesperpixel = _image->bytesPerPixel();
 	// bytes per value
@@ -228,11 +230,14 @@ void    ImageI::remove(const Ice::Current& /* current */) {
 	}								\
 }
 
+//////////////////////////////////////////////////////////////////////
+// Byte image implementation
+//////////////////////////////////////////////////////////////////////
 ByteImageI::ByteImageI(astro::image::ImagePtr image,
 	const std::string& filename) : ImageI(image, filename) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "building byte image, %d bytes per value",
 		_bytespervalue);
-	if (1 != _bytespervalue) {
+	if (sizeof(unsigned char) != _bytespervalue) {
 		std::string	msg = astro::stringprintf("cannot build byte image "
 			"from %s", filename.c_str());
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
@@ -252,11 +257,14 @@ ByteSequence	ByteImageI::getBytes(const Ice::Current& /* current */) {
 	return result;
 }
 
+//////////////////////////////////////////////////////////////////////
+// Short image implementation
+//////////////////////////////////////////////////////////////////////
 ShortImageI::ShortImageI(astro::image::ImagePtr image,
 	const std::string& filename) : ImageI(image, filename) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "image has %d bytes per plane",
 		_bytespervalue);
-	if (2 != _bytespervalue) {
+	if (sizeof(unsigned short) != _bytespervalue) {
 		std::string	msg = astro::stringprintf("cannot build "
 			"short image from %s", filename.c_str());
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
@@ -276,11 +284,95 @@ ShortSequence	ShortImageI::getShorts(const Ice::Current& /* current */) {
 	return result;
 }
 
+//////////////////////////////////////////////////////////////////////
+// Int image implementation
+//////////////////////////////////////////////////////////////////////
+IntImageI::IntImageI(astro::image::ImagePtr image,
+	const std::string& filename) : ImageI(image, filename) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "image has %d bytes per plane",
+		_bytespervalue);
+	if (sizeof(unsigned int) != _bytespervalue) {
+		std::string	msg = astro::stringprintf("cannot build "
+			"short image from %s", filename.c_str());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw BadParameter(msg);
+	}
+}
+
+IntImageI::~IntImageI() {
+}
+
+IntSequence	IntImageI::getInts(const Ice::Current& /* current */) {
+	IntSequence	result;
+	unsigned int	size = _image->size().getPixels();
+        sequence_mono(unsigned int, size);
+        sequence_yuyv(unsigned int, size);
+        sequence_rgb(unsigned int, size);
+	return result;
+}
+
+//////////////////////////////////////////////////////////////////////
+// Float image implementation
+//////////////////////////////////////////////////////////////////////
+FloatImageI::FloatImageI(astro::image::ImagePtr image,
+	const std::string& filename) : ImageI(image, filename) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "image has type %s pixels",
+		astro::demangle(_type.name()).c_str());
+	if (sizeof(float) != _bytespervalue) {
+		std::string	msg = astro::stringprintf("cannot build "
+			"float image from %s", filename.c_str());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw BadParameter(msg);
+	}
+}
+
+FloatImageI::~FloatImageI() {
+}
+
+FloatSequence	FloatImageI::getFloats(const Ice::Current& /* current */) {
+	FloatSequence	result;
+	unsigned int	size = _image->size().getPixels();
+        sequence_mono(float, size);
+        sequence_yuyv(float, size);
+        sequence_rgb(float, size);
+	return result;
+}
+
+//////////////////////////////////////////////////////////////////////
+// Double image implementation
+//////////////////////////////////////////////////////////////////////
+DoubleImageI::DoubleImageI(astro::image::ImagePtr image,
+	const std::string& filename) : ImageI(image, filename) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "image has %d bytes per plane",
+		_bytespervalue);
+	if (sizeof(double) != _bytespervalue) {
+		std::string	msg = astro::stringprintf("cannot build "
+			"short image from %s", filename.c_str());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw BadParameter(msg);
+	}
+}
+
+DoubleImageI::~DoubleImageI() {
+}
+
+DoubleSequence	DoubleImageI::getDoubles(const Ice::Current& /* current */) {
+	DoubleSequence	result;
+	unsigned int	size = _image->size().getPixels();
+        sequence_mono(double, size);
+        sequence_yuyv(double, size);
+        sequence_rgb(double, size);
+	return result;
+}
+
+/**
+ * \brief Build an image proxy
+ */
 ImagePrx	ImageI::createProxy(const std::string& filename,
 			const Ice::Current& current) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "create proxy for %d-size pixelvalues",
-		_bytespervalue);
-	return getImage(filename, _bytespervalue, current);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "create proxy for %s pixels",
+		astro::demangle(_type.name()).c_str());
+	return getImage(filename, _type, current);
 }
 
 } // namespace snowstar

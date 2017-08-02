@@ -146,8 +146,21 @@ public:
 	// methods used for dark image acquisition
 	virtual void	startDarkAcquire(double exposuretime, int imagecount,
 				const Ice::Current& current);
+	virtual ImagePrx	darkImage(const Ice::Current& current);
+	virtual bool	hasDark(const Ice::Current& current);
 	virtual bool	useDark(const Ice::Current& current);
 	virtual void	setUseDark(bool usedark, const Ice::Current& current);
+
+	virtual bool	interpolate(const Ice::Current& current);
+	virtual void	setInterpolate(bool interpolate,
+				const Ice::Current& current);
+
+	virtual void	startFlatAcquire(double exposuretime, int imagecount,
+				const Ice::Current& current);
+	virtual ImagePrx	flatImage(const Ice::Current& current);
+	virtual bool	hasFlat(const Ice::Current& current);
+	virtual bool	useFlat(const Ice::Current& current);
+	virtual void	setUseFlat(bool useflat, const Ice::Current& current);
 
 	// methods use to acquire images
 	virtual void	startImaging(const Exposure& exposure,

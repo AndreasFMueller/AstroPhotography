@@ -11,6 +11,7 @@
 #include <AstroIO.h>
 #include <AstroImageops.h>
 #include <QMessageBox>
+#include "darkwidget.h"
 
 using namespace astro::image;
 using namespace astro::io;
@@ -36,9 +37,18 @@ imagercontrollerwidget::imagercontrollerwidget(QWidget *parent) :
 		this, SLOT(captureClicked()));
 	connect(ui->darkButton, SIGNAL(clicked()),
 		this, SLOT(darkClicked()));
+	connect(ui->flatButton, SIGNAL(clicked()),
+		this, SLOT(flatClicked()));
 
 	connect(ui->frameFullButton, SIGNAL(clicked()),
 		this, SLOT(guiChanged()));
+
+	connect(ui->darkBox, SIGNAL(checked(bool)),
+		this, SLOT(toggleDark(bool)));
+	connect(ui->flatBox, SIGNAL(checked(bool)),
+		this, SLOT(toggleFlat(bool)));
+	connect(ui->interpolateBox, SIGNAL(checked(bool)),
+		this, SLOT(toggleInterpolate(bool)));
 
 	// setup and connect the timer
 	connect(&statusTimer, SIGNAL(timeout()), this, SLOT(statusUpdate()));
@@ -94,6 +104,7 @@ void	imagercontrollerwidget::setupCcd() {
 	previousstate = snowstar::GuiderUNCONFIGURED;
 	ui->captureButton->setEnabled(true);
 	ui->darkButton->setEnabled(true);
+	ui->flatButton->setEnabled(true);
 
 	// make sure no signals are sent while setting up the CCD
 	ui->binningSelectionBox->setEnabled(false);
@@ -352,17 +363,32 @@ void	imagercontrollerwidget::captureClicked() {
 		ourexposure = true;
 		ui->captureButton->setEnabled(false);
 		ui->darkButton->setEnabled(false);
+		ui->flatButton->setEnabled(false);
 	} catch (const std::exception& x) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "cannot start Imaging");
 	}
 }
 
 /**
- * \brief Slot tohandle click on the "Cancel" button
+ * \brief Slot tohandle click on the "Dark" button
  */
 void	imagercontrollerwidget::darkClicked() {
+	if (!_guider) {
+		return;
+	}
+	darkwidget	*dw = new darkwidget(NULL);
+	dw->guider(_guider);
+	dw->setModal(true);
+	dw->exposuretime(_exposure.exposuretime());
+	dw->show();
+}
+
+/**
+ * \brief Slot to handle click on the "Flat" button
+ */
+void	imagercontrollerwidget::flatClicked() {
 	try {
-		_guider->startDarkAcquire(_exposure.exposuretime(), 10);
+		_guider->startFlatAcquire(_exposure.exposuretime(), 10);
 	} catch (const snowstar::BadState& x) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "bad state: %s", x.what());
 	} catch (const std::exception& x) {
@@ -454,16 +480,38 @@ void	imagercontrollerwidget::statusUpdate() {
 	case snowstar::GuiderCALIBRATED:
 		ui->captureButton->setEnabled(true);
 		ui->darkButton->setEnabled(true);
+		ui->flatButton->setEnabled(true);
 		break;
 	case snowstar::GuiderCALIBRATING:
 	case snowstar::GuiderGUIDING:
 	case snowstar::GuiderDARKACQUIRE:
+	case snowstar::GuiderFLATACQUIRE:
 	case snowstar::GuiderIMAGING:
 		ui->captureButton->setEnabled(false);
 		ui->darkButton->setEnabled(false);
+		ui->flatButton->setEnabled(false);
 		break;
 	}
 	previousstate = newstate;
+
+	// find out whether the guider has dark/flat images
+	bool	hasdark = _guider->hasDark();
+	ui->darkBox->setEnabled(hasdark);
+	ui->interpolateBox->setEnabled(hasdark);
+	bool	hasflat = _guider->hasFlat();
+	ui->flatBox->setEnabled(hasflat);
+
+	ui->darkBox->blockSignals(true);
+	ui->darkBox->setChecked(_guider->useDark());
+	ui->darkBox->blockSignals(false);
+
+	ui->interpolateBox->blockSignals(true);
+	ui->interpolateBox->setChecked(_guider->interpolate());
+	ui->interpolateBox->blockSignals(false);
+
+	ui->flatBox->blockSignals(true);
+	ui->flatBox->setChecked(_guider->useFlat());
+	ui->flatBox->blockSignals(false);
 }
 
 void	imagercontrollerwidget::hideSubframe(bool sf) {
@@ -491,6 +539,27 @@ void	imagercontrollerwidget::ccdFailed(const std::exception& x) {
 	out << "The Imager has been disabled and can no longer be used.";
 	message.setInformativeText(QString(out.str().c_str()));
 	message.exec();
+}
+
+void	imagercontrollerwidget::toggleDark(bool t) {
+	try {
+		_guider->setUseDark(t);
+	} catch (...) {
+	}
+}
+
+void	imagercontrollerwidget::toggleFlat(bool t) {
+	try {
+		_guider->setUseFlat(t);
+	} catch (...) {
+	}
+}
+
+void	imagercontrollerwidget::toggleInterpolate(bool t) {
+	try {
+		_guider->setInterpolate(t);
+	} catch (...) {
+	}
 }
 
 } // namespace snowgui

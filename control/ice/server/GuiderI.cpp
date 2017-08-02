@@ -717,6 +717,49 @@ void	GuiderI::startDarkAcquire(double exposuretime, int imagecount,
 }
 
 /**
+ * \brief Return the dark image of the imager
+ */
+ImagePrx	GuiderI::darkImage(const Ice::Current& current) {
+	// retrieve image
+	astro::image::ImagePtr	darkimage = guider->imager().dark();
+	if (!darkimage) {
+		throw NotFound("no dark image available");
+	}
+
+	// store image in image directory
+	astro::image::ImageDirectory	imagedirectory;
+	std::string	filename = imagedirectory.save(darkimage);
+
+	// return a proxy for the image
+	return snowstar::getImage(filename, darkimage->pixel_type(), current);
+}
+
+/**
+ * \brief Return the flat image of the imager
+ */
+ImagePrx	GuiderI::flatImage(const Ice::Current& current) {
+	// retrieve image
+	astro::image::ImagePtr	flatimage = guider->imager().flat();
+	if (!flatimage) {
+		throw NotFound("no flat image available");
+	}
+
+	// store image in image directory
+	astro::image::ImageDirectory	imagedirectory;
+	std::string	filename = imagedirectory.save(flatimage);
+
+	// return a proxy for the image
+	return snowstar::getImage(filename, flatimage->bytesPerPixel(), current);
+}
+
+/**
+ * \brief Whether or not the imager has a dark image
+ */
+bool    GuiderI::hasDark(const Ice::Current& /* current */) {
+	return guider->imager().hasDark();
+}
+
+/**
  * \brief query the use dark
  */
 bool	GuiderI::useDark(const Ice::Current& /* current */) {
@@ -727,7 +770,83 @@ bool	GuiderI::useDark(const Ice::Current& /* current */) {
  * \brief set whether the dark images should be used (if present)
  */
 void	GuiderI::setUseDark(bool usedark, const Ice::Current& /* current */) {
-	guider->imager().darksubtract(usedark);
+	if (guider->imager().hasDark()) {
+		guider->imager().darksubtract(usedark);
+		return;
+	}
+	if (usedark) {
+		BadState	exception;
+		exception.cause = std::string("have no dark image");
+		throw exception;
+	}
+}
+
+/**
+ * \brief start acquisition of a flat image
+ */
+void    GuiderI::startFlatAcquire(double exposuretime, int imagecount,
+                                const Ice::Current& /* current */) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "startFlatAcquire(%.3f, %d) called",
+		exposuretime, imagecount);
+	try {
+		guider->startFlat(exposuretime, imagecount);
+	} catch (const std::exception& x) {
+		BadState	exception;
+		exception.cause = std::string(x.what());
+		throw exception;
+	}
+}
+
+/**
+ * \brief Whether or not the imager has a flat image to apply
+ */
+bool    GuiderI::hasFlat(const Ice::Current& /* current */) {
+	return guider->imager().hasFlat();
+}
+
+/**
+ * \brief Whether or not the imager acutally uses the flat image
+ */
+bool    GuiderI::useFlat(const Ice::Current& /* current */) {
+	return guider->imager().flatdivide();
+}
+
+/**
+ * \brief Whether or not the imager is supposed to use the flag image
+ */
+void    GuiderI::setUseFlat(bool useflat, const Ice::Current& /* current */) {
+	if (guider->imager().hasFlat()) {
+		guider->imager().flatdivide(useflat);
+		return;
+	}
+	if (useflat) {
+		BadState	exception;
+		exception.cause = std::string("have not flat image");
+		throw exception;
+	}
+}
+
+/**
+ * \brief Whether or not the imager currently uses interpolation
+ */
+bool    GuiderI::interpolate(const Ice::Current& /* current */) {
+	return guider->imager().interpolate();
+}
+
+/**
+ * \brief Whether or not the imager currently should use interpolation
+ */
+void    GuiderI::setInterpolate(bool interpolate, 
+			const Ice::Current& /* current */) {
+	if (guider->imager().hasDark()) {
+		guider->imager().interpolate(interpolate);
+		return;
+	}
+	if (interpolate) {
+		BadState	exception;
+		exception.cause = std::string("have not dark image");
+		throw exception;
+	}
 }
 
 /**

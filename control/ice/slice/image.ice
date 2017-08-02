@@ -138,6 +138,21 @@ module snowstar {
 		ShortSequence	getShorts();
 	};
 
+	sequence<int>	IntSequence;
+	interface IntImage extends Image {
+		IntSequence	getInts();
+	};
+
+	sequence<float>	FloatSequence;
+	interface FloatImage extends Image {
+		FloatSequence	getFloats();
+	};
+
+	sequence<double>	DoubleSequence;
+	interface DoubleImage extends Image {
+		DoubleSequence	getDoubles();
+	};
+
 	/**
 	 * \brief Image database interface
 	 *

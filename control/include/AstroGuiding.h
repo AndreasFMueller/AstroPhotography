@@ -828,7 +828,7 @@ class Guide {
 public:
 	typedef enum {
 		unconfigured, idle, calibrating, calibrated, guiding,
-		darkacquire, imaging
+		darkacquire, flatacquire, imaging
 	} state;
 static std::string	state2string(state s);
 static state	string2state(const std::string& s);
@@ -861,6 +861,8 @@ public:
 	bool	canStopGuiding() const;
 	bool	canStartDarkAcquire() const;
 	bool	canEndDarkAcquire() const;
+	bool	canStartFlatAcquire() const;
+	bool	canEndFlatAcquire() const;
 	bool	canStartImaging() const;
 	bool	canEndImaging() const;
 
@@ -876,6 +878,8 @@ private:
 public:
 	void	startDarkAcquire();
 	void	endDarkAcquire();
+	void	startFlatAcquire();
+	void	endFlatAcquire();
 	void	startImaging();
 	void	endImaging();
 };
@@ -1055,6 +1059,14 @@ private:
 public:
 	void	startDark(double exposuretime, int imagecount);
 	void	endDark();
+
+	// methods related to getting flat images
+private:
+	camera::FlatWorkImagerPtr	_flatwork;
+	camera::FlatWorkImagerThreadPtr	_flatthread;
+public:
+	void	startFlat(double exposuretime, int imagecount);
+	void	endFlat();
 
 	// acquiring an image
 private:

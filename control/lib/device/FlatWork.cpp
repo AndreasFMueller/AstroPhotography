@@ -1,5 +1,5 @@
 /*
- * DarkWork.cpp -- work to be done to build a Dark image for an imager
+ * FlatWork.cpp -- work to be done to build a Flat image for an imager
  *
  * (c) 2017 Prof Dr Andreas Müller, Hochschule Rapperswil
  */
@@ -12,15 +12,15 @@ namespace astro {
 namespace camera {
 
 //////////////////////////////////////////////////////////////////////
-// Implementation of the DarkWork class
+// Implementation of the FlatWork class
 //////////////////////////////////////////////////////////////////////
 
 /**
- * \brief Construct a new DarkWork object
+ * \brief Construct a new FlatWork object
  *
  * By default, 10 exposures at 1 second are made
  */
-DarkWork::DarkWork(CcdPtr ccd) : _ccd(ccd) {
+FlatWork::FlatWork(CcdPtr ccd) : _ccd(ccd) {
 	_exposuretime = 1.0;
 	_imagecount = 10;
 }
@@ -28,29 +28,29 @@ DarkWork::DarkWork(CcdPtr ccd) : _ccd(ccd) {
 /**
  * \brief Call the end callback if present
  */
-void	DarkWork::end() {
+void	FlatWork::end() {
 	if (_endCallback) {
 		(*_endCallback)(CallbackDataPtr());
 	}
 }
 
 /**
- * \brief Do the work of getting a dark image
+ * \brief Do the work of getting a flat image
  */
-void	DarkWork::main(astro::thread::Thread<DarkWork>& thread) {
-	ImagePtr	darkimage = common(thread);
+void	FlatWork::main(astro::thread::Thread<FlatWork>& thread) {
+	ImagePtr	flatimage = common(thread);
 	end();
 }
 
 /**
- * \brief Common work for all the dark building threads
+ * \brief Common work for all the flat building threads
  */
-ImagePtr	DarkWork::common(astro::thread::ThreadBase& /* thread */) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "DarkWork main function starts");
+ImagePtr	FlatWork::common(astro::thread::ThreadBase& /* thread */) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "FlatWork main function starts");
 	// first check that all the settings are ok
 	if ((_exposuretime <= 0) || (_imagecount <= 0)) {
 		std::string	msg = stringprintf("bad parameters for "
-			"DarkWork: exposuretime = %.3f, imagecount = %d",
+			"FlatWork: exposuretime = %.3f, imagecount = %d",
 			_exposuretime, _imagecount);
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 		throw std::runtime_error(msg);
@@ -59,9 +59,9 @@ ImagePtr	DarkWork::common(astro::thread::ThreadBase& /* thread */) {
 	// construct the exposure object
 	Exposure	exposure(_ccd->getInfo().getFrame(),
 				_exposuretime);
-	exposure.purpose(Exposure::dark);
+	exposure.purpose(Exposure::flat);
 	exposure.shutter(Shutter::CLOSED);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "start to build dark %s",
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "start to build flat %s",
 		exposure.toString().c_str());
 
 	// retrieve all the images
@@ -78,34 +78,33 @@ ImagePtr	DarkWork::common(astro::thread::ThreadBase& /* thread */) {
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "got %d images");
 
-	// construct the dark image from the images retrieved
-	calibration::DarkFrameFactory	darkfactory;
-	_darkimage = darkfactory(images);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "got an %s dark image with %s pixels",
-		_darkimage->size().toString().c_str(),
-		_darkimage->pixel_type().name());
-	return _darkimage;
+	// construct the flat image from the images retrieved
+	calibration::FlatFrameFactory	flatfactory;
+	_flatimage = flatfactory(images, _darkimage);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "got an %s flat image with %s pixels",
+		_flatimage->size().toString().c_str(),
+		_flatimage->pixel_type().name());
+	return _flatimage;
 }
 
 //////////////////////////////////////////////////////////////////////
-// Implementation of the DarkWorkImager class
+// Implementation of the FlatWorkImager class
 //////////////////////////////////////////////////////////////////////
 
 /**
  * \brief main function for the 
  */
-void	DarkWorkImager::main(astro::thread::Thread<DarkWorkImager>& thread) {
+void	FlatWorkImager::main(astro::thread::Thread<FlatWorkImager>& thread) {
 	// call the common method
-	ImagePtr	darkimage = common(thread);
-	if (!darkimage) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "no dark image received");
+	ImagePtr	flatimage = common(thread);
+	if (!flatimage) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "no flat image received");
 	}
 
-	// install the dark image in the imager
-	_imager.dark(darkimage);
-	_imager.darksubtract(true);
-	_imager.interpolate(true);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "dark image installed");
+	// install the flat image in the imager
+	_imager.flat(flatimage);
+	_imager.flatdivide(true);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "flat image installed");
 
 	// call the end callback
 	end();

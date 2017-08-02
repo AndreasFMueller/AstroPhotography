@@ -87,8 +87,12 @@ public slots:
 	void	guiChanged();
 	void	captureClicked();
 	void	darkClicked();
+	void	flatClicked();
 	void	hideSubframe(bool);
 	void	hideButtons(bool);
+	void	toggleDark(bool);
+	void	toggleFlat(bool);
+	void	toggleInterpolate(bool);
 
 	// needed internally for status udpates
 	void	statusUpdate();

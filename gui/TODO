@@ -39,7 +39,7 @@ trackingmonitorwindow:
       - show time when mouse moves over the tracking history
 
 guidingwindow:
-      -	adaptiveoptics tool missing
+      - disable guideport tool when guiding, calibrating or imaging
 
 adaptiveopticscontrollerwidget:
       - missing
@@ -62,3 +62,7 @@ focusercontrollerwidget:
 exposewidget:
       - progess indicator during image download
       - naming of downloaded files
+
+imagecontrollerwidget
+      -	controls to turn on/off use of dark, interpolation
+      - ability to retrieve dark image and to view it

@@ -9,8 +9,9 @@
 namespace astro {
 namespace guiding {
 
-static const char	*statenames[5] = {
-	"unconfigured", "idle", "calibrating", "calibrated", "guding"
+static const char	*statenames[8] = {
+	"unconfigured", "idle", "calibrating", "calibrated", "guiding",
+                "darkacquire", "flatacquire", "imaging"
 };
 
 const char	*GuiderStateMachine::statename() const {
@@ -47,6 +48,14 @@ bool	GuiderStateMachine::canStartDarkAcquire() const {
 }
 
 bool	GuiderStateMachine::canEndDarkAcquire() const {
+	return (_state == Guide::darkacquire);
+}
+
+bool	GuiderStateMachine::canStartFlatAcquire() const {
+	return (_state == Guide::idle) || (_state == Guide::calibrated);
+}
+
+bool	GuiderStateMachine::canEndFlatAcquire() const {
 	return (_state == Guide::darkacquire);
 }
 
@@ -126,8 +135,27 @@ void	GuiderStateMachine::startDarkAcquire() {
 
 void	GuiderStateMachine::endDarkAcquire() {
 	if (!canEndDarkAcquire()) {
-		debug(LOG_ERR, DEBUG_LOG, 0, "Not acquireing dark image");
+		debug(LOG_ERR, DEBUG_LOG, 0, "Not acquiring dark image");
 		throw BadState("Not acquireing dark image");
+	}
+	_state = _prestate;
+}
+
+void	GuiderStateMachine::startFlatAcquire() {
+	if (!canStartFlatAcquire()) {
+		std::string	msg = stringprintf("cannot flat acquire in "
+			"state %s", statename());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw BadState(msg);
+	}
+	_prestate = _state;
+	_state = Guide::darkacquire;
+}
+
+void	GuiderStateMachine::endFlatAcquire() {
+	if (!canEndFlatAcquire()) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "Not acquiring flat image");
+		throw BadState("Not acquireing flat image");
 	}
 	_state = _prestate;
 }

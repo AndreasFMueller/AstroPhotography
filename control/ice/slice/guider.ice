@@ -158,8 +158,9 @@ module snowstar {
 		GuiderCALIBRATED,
 		// The calibrated guider can be used for guiding
 		GuiderGUIDING,
-		// The imager is used to acquire a dark image
+		// The imager is used to acquire a dark or flat image
 		GuiderDARKACQUIRE,
+		GuiderFLATACQUIRE,
 		// the imager is busy acquiring an image
 		GuiderIMAGING
 	};
@@ -302,8 +303,20 @@ module snowstar {
 		 */
 		void	startDarkAcquire(double exposuretime, int imagecount)
 				throws BadState;
+		Image*	darkImage() throws BadState;
+		bool	hasDark();
 		bool	useDark() throws BadState;
 		void	setUseDark(bool usedark) throws BadState;
+
+		bool	interpolate() throws BadState;
+		void	setInterpolate(bool interpolate) throws BadState;
+
+		void	startFlatAcquire(double exposuretime, int imagecount)
+				throws BadState;
+		Image*	flatImage() throws BadState;
+		bool	hasFlat();
+		bool	useFlat() throws BadState;
+		void	setUseFlat(bool useflat) throws BadState;
 
 		/**
 		 * \brief Start to acquire an image

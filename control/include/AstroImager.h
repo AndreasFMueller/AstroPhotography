@@ -23,6 +23,7 @@ private:
 public:
 	ImagePtr	dark() const { return _dark; }
 	void	dark(ImagePtr dark) { _dark = dark; }
+	bool	hasDark() const { return (_dark) ? true : false; }
 
 private:
 	bool	_darksubtract;
@@ -35,6 +36,7 @@ private:
 public:
 	ImagePtr	flat() const { return _flat; }
 	void	flat(ImagePtr flat) { _flat = flat; }
+	bool	hasFlat() const { return (_flat) ? true : false; }
 
 private:
 	bool	_flatdivide;
@@ -121,6 +123,65 @@ typedef std::shared_ptr<DarkWorkImager>	DarkWorkImagerPtr;
 
 typedef astro::thread::Thread<DarkWorkImager>	DarkWorkImagerThread;
 typedef std::shared_ptr<DarkWorkImagerThread>	DarkWorkImagerThreadPtr;
+
+/**
+ * \brief Thread class to extract a flat image for a CCD
+ */
+class FlatWork {
+	double	_exposuretime;
+public:
+	double	exposuretime() const { return _exposuretime; }
+	void	exposuretime(double e) { _exposuretime = e; }
+private:
+	int	_imagecount;
+public:
+	int	imagecount() const { return _imagecount; }
+	void	imagecount(int n) { _imagecount = n; }
+private:
+	CallbackPtr	_endCallback;
+protected:
+	void	end();
+public:
+	void	endCallback(CallbackPtr e) { _endCallback = e; }
+private:
+	ImagePtr	_darkimage;
+public:
+	ImagePtr	darkimage() const { return _darkimage; }
+	void	darkimage(ImagePtr d) { _darkimage = d; }
+private:
+	ImagePtr	_flatimage;
+public:
+	ImagePtr	flatimage() const { return _flatimage; }
+private:
+	CcdPtr	_ccd;
+public:
+	FlatWork(CcdPtr ccd);
+protected:
+	ImagePtr	common(astro::thread::ThreadBase& thread);
+	void	main(astro::thread::Thread<FlatWork>& thread);
+friend class astro::thread::Thread<FlatWork>;
+};
+typedef std::shared_ptr<FlatWork>	FlatWorkPtr;
+
+typedef astro::thread::Thread<FlatWork>	FlatWorkThread;
+typedef std::shared_ptr<FlatWorkThread>	FlatWorkThreadPtr;
+
+/**
+ * \brief Thread class to extract a flat image for an Imager and install it
+ */
+class FlatWorkImager : public FlatWork {
+	Imager&	_imager;
+public:
+	FlatWorkImager(Imager& imager)
+		: FlatWork(imager.ccd()), _imager(imager) { }
+protected:
+	void	main(astro::thread::Thread<FlatWorkImager>& thread);
+friend class astro::thread::Thread<FlatWorkImager>;
+};
+typedef std::shared_ptr<FlatWorkImager>	FlatWorkImagerPtr;
+
+typedef astro::thread::Thread<FlatWorkImager>	FlatWorkImagerThread;
+typedef std::shared_ptr<FlatWorkImagerThread>	FlatWorkImagerThreadPtr;
 
 /**
  * \brief Work class for image acquisition through a CCD

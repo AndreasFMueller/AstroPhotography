@@ -130,6 +130,28 @@ int	ImageDirectory::bytesPerPlane(const std::string& filename) const {
 	return 1;
 }
 
+std::type_index	ImageDirectory::pixelType(const std::string& filename) const {
+	std::string	f = fullname(filename);
+	io::FITSinfileBase	infile(f);
+
+	switch (infile.getImgtype()) {
+	case BYTE_IMG:
+	case SBYTE_IMG:
+		return typeid(unsigned char);
+	case USHORT_IMG:
+	case SHORT_IMG:
+		return typeid(unsigned short);
+	case ULONG_IMG:
+	case LONG_IMG:
+		return typeid(unsigned int);
+	case FLOAT_IMG:
+		return typeid(float);
+	case DOUBLE_IMG:
+		return typeid(double);
+	}
+	throw std::runtime_error("pixel type not found");
+}
+
 /**
  * \brief Get a list of file names
  */

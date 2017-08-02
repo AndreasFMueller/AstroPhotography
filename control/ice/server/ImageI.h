@@ -8,6 +8,7 @@
 
 #include <image.h>
 #include <AstroImage.h>
+#include <typeindex>
 
 namespace snowstar {
 
@@ -19,6 +20,7 @@ private:
 	ImagePoint	_origin;
 	ImageSize	_size;
 protected:
+	std::type_index	_type;
 	int	_bytesperpixel;
 	int	_bytespervalue;
 	int	_planes;
@@ -61,6 +63,27 @@ public:
 	ShortImageI(astro::image::ImagePtr image, const std::string& filename);
 	virtual ~ShortImageI();
 	virtual ShortSequence	getShorts(const Ice::Current& current);
+};
+
+class IntImageI : virtual public IntImage, virtual public ImageI {
+public:
+	IntImageI(astro::image::ImagePtr image, const std::string& filename);
+	virtual ~IntImageI();
+	virtual IntSequence	getInts(const Ice::Current& current);
+};
+
+class FloatImageI : virtual public FloatImage, virtual public ImageI {
+public:
+	FloatImageI(astro::image::ImagePtr image, const std::string& filename);
+	virtual ~FloatImageI();
+	virtual FloatSequence	getFloats(const Ice::Current& current);
+};
+
+class DoubleImageI : virtual public DoubleImage, virtual public ImageI {
+public:
+	DoubleImageI(astro::image::ImagePtr image, const std::string& filename);
+	virtual ~DoubleImageI();
+	virtual DoubleSequence	getDoubles(const Ice::Current& current);
 };
 
 } // namespace snowstar

@@ -99,6 +99,7 @@ public:
 
 	// commands related to dark correction
 	int	dark_command(GuiderPrx guider);
+	int	flat_command(GuiderPrx guider);
 	int	image_command(GuiderPrx guider, const std::string& filename);
 
 	// utility functions

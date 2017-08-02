@@ -7,10 +7,11 @@
 #define _ImagesI_h
 
 #include <image.h>
+#include <typeindex>
 
 namespace snowstar {
 
-ImagePrx	getImage(const std::string& name, int bytesPerPixel,
+ImagePrx	getImage(const std::string& name, std::type_index type,
 			const Ice::Current& current);
 ImagePrx	getImage(const std::string& name,
 			const Ice::Current& current);

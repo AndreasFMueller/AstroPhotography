@@ -87,6 +87,8 @@ void	Guide::usage(const char *progname) {
 		<< std::endl;
 	std::cout << p << " [ options ] <service> <INSTRUMENT> dark"
 		<< std::endl;
+	std::cout << p << " [ options ] <service> <INSTRUMENT> flat"
+		<< std::endl;
 
 	std::cout << std::endl;
 

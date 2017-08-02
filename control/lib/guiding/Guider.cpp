@@ -519,6 +519,11 @@ void	Guider::checkstate() {
 			_state.endDarkAcquire();
 		}
 		break;
+	case Guide::flatacquire:
+		if (!_flatthread->isrunning()) {
+			_state.endFlatAcquire();
+		}
+		break;
 	case Guide::imaging:
 		if (!_imagethread->isrunning()) {
 			endImaging(ImagePtr(NULL));
@@ -575,6 +580,10 @@ void	Guider::callback(const std::exception& /* ex */) {
 	case Guide::darkacquire:
 		// XXX implementation required
 		_state.endDarkAcquire();
+		break;
+	case Guide::flatacquire:
+		// XXX implementation required
+		_state.endFlatAcquire();
 		break;
 	case Guide::imaging:
 		// XXX ist this the right implementation?
@@ -633,6 +642,59 @@ void	Guider::startDark(double exposuretime, int imagecount) {
  */
 void	Guider::endDark() {
 	_state.endDarkAcquire();
+}
+
+/**
+ * \brief Callback class to signal the end of the guide process
+ */
+class FlatEndCallback : public Callback {
+	Guider&	_guider;
+public:
+	FlatEndCallback(Guider& guider) : _guider(guider) { }
+	CallbackDataPtr	operator()(CallbackDataPtr data) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "endFlat callback called");
+		_guider.endFlat();
+		return data;
+	}
+};
+
+/**
+ * \brief Start getting a flat image
+ *
+ * \param exposuretime	exposure time to use for flats
+ * \param imagecount	number of images to use to construct the flat
+ */
+void	Guider::startFlat(double exposuretime, int imagecount) {
+	_state.startFlatAcquire();
+	try {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "start to acquire a flat");
+		// set up the flat work
+		_flatwork = FlatWorkImagerPtr(new FlatWorkImager(imager()));
+		_flatwork->exposuretime(exposuretime);
+		_flatwork->imagecount(imagecount);
+		_flatwork->darkimage(imager().dark());
+		_flatwork->endCallback(CallbackPtr(new FlatEndCallback(*this)));
+
+		// set iup the thread
+		FlatWorkImagerThread	*dwit
+			= new FlatWorkImagerThread(&*_flatwork);
+		_flatthread = FlatWorkImagerThreadPtr(dwit);
+
+		// start the thread
+		_flatthread->start();
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "flat acquire is running");
+	} catch (const std::exception& x) {
+		debug(LOG_ERR, DEBUG_LOG, 0,
+			"flat acquisition start failed: %s", x.what());
+		callback(x);
+	}
+}
+
+/**
+ * \brief Method to signal the end of the flat acquisition process
+ */
+void	Guider::endFlat() {
+	_state.endFlatAcquire();
 }
 
 /**

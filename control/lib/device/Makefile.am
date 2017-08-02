@@ -29,6 +29,7 @@ libastrodevice_la_SOURCES =						\
 	Devices.cpp							\
 	Exposure.cpp							\
 	FilterWheel.cpp							\
+	FlatWork.cpp							\
 	Focuser.cpp							\
 	GuidePort.cpp							\
 	Imager.cpp							\

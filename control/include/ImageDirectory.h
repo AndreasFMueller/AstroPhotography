@@ -10,6 +10,7 @@
 #include <list>
 #include <AstroImage.h>
 #include <AstroPersistence.h>
+#include <typeindex>
 
 namespace astro {
 namespace image {
@@ -35,6 +36,7 @@ public:
 	long	fileAge(const std::string& filename) const;
 	int	bytesPerPixel(const std::string& filename) const;
 	int	bytesPerPlane(const std::string& filename) const;
+	std::type_index	pixelType(const std::string& filename) const;
 	virtual std::list<std::string>	fileList();
 	virtual std::string	save(astro::image::ImagePtr image);
 protected:

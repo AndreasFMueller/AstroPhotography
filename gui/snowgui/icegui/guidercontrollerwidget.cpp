@@ -362,6 +362,7 @@ void	guidercontrollerwidget::statusUpdate() {
 		break;
 	case snowstar::GuiderIMAGING:
 	case snowstar::GuiderDARKACQUIRE:
+	case snowstar::GuiderFLATACQUIRE:
 		ui->guideButton->setText(QString("Guide"));
 		ui->guideButton->setEnabled(false);
 	}

@@ -30,6 +30,20 @@ int	Guide::dark_command(GuiderPrx guider) {
 	return EXIT_SUCCESS;
 }
 
+/**
+ * \brief Implementation of the flat command
+ */
+int	Guide::flat_command(GuiderPrx guider) {
+	try {
+		guider->startFlatAcquire(exposure.exposuretime, imagecount);
+	} catch (const std::exception& x) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "cannot start flat: %s", x.what());
+		return EXIT_FAILURE;
+	}
+
+	// we are done
+	return EXIT_SUCCESS;
+}
 
 } // namespace snowguide
 } // namespace app
