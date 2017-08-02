@@ -265,6 +265,9 @@ int	main(int argc, char *argv[]) {
 	if (command == "dark") {
 		return guide.dark_command(guider);
 	}
+	if (command == "flat") {
+		return guide.flat_command(guider);
+	}
 	if (command == "image") {
 		if (argc < optind) {
 			throw std::runtime_error("missing filename argument");

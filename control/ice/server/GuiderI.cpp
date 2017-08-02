@@ -515,7 +515,7 @@ ImagePrx GuiderI::mostRecentImage(const Ice::Current& current) {
 	std::string	filename = imagedirectory.save(image);
 
 	// return a proxy for the image
-	return snowstar::getImage(filename, image->bytesPerPixel(), current);
+	return snowstar::getImage(filename, image->pixel_type(), current);
 }
 
 TrackingPoint GuiderI::mostRecentTrackingPoint(const Ice::Current& /* current */) {
@@ -749,7 +749,7 @@ ImagePrx	GuiderI::flatImage(const Ice::Current& current) {
 	std::string	filename = imagedirectory.save(flatimage);
 
 	// return a proxy for the image
-	return snowstar::getImage(filename, flatimage->bytesPerPixel(), current);
+	return snowstar::getImage(filename, flatimage->pixel_type(), current);
 }
 
 /**
@@ -879,7 +879,7 @@ ImagePrx	GuiderI::getImage(const Ice::Current& current) {
 	std::string	filename = imagedirectory.save(image);
 
 	// return a proxy for the image
-	return snowstar::getImage(filename, image->bytesPerPixel(), current);
+	return snowstar::getImage(filename, image->pixel_type(), current);
 }
 
 } // namespace snowstar

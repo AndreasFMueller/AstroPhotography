@@ -27,6 +27,7 @@ int	Guide::image_command(GuiderPrx guider, const std::string& filename) {
 		} while (GuiderIMAGING == guider->getState());
 		ImagePrx	image = guider->getImage();
 		astro::image::ImagePtr	imageptr = convert(image);
+		image->remove();
 		astro::io::FITSout	out(filename);
 		out.write(imageptr);
 	} catch (const std::exception& x) {
