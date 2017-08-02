@@ -18,16 +18,12 @@ darkwidget::darkwidget(QWidget *parent)
 	: QDialog(parent), ui(new Ui::darkwidget) {
 	ui->setupUi(this);
 
-	// make the buttons disabled
-	ui->acquireButton->setEnabled(false);
-	ui->viewButton->setEnabled(false);
 
-	// set the table headers
-	QStringList	headerlist;
-	headerlist << "Property" << "Value";
-	ui->propertyTable->setHorizontalHeaderLabels(headerlist);
-	ui->propertyTable->horizontalHeader()->setStretchLastSection(true);
-	ui->propertyTable->setColumnWidth(0, 150);
+	// make the buttons disabled
+	ui->acquireButton->setAutoDefault(false);
+	ui->acquireButton->setEnabled(false);
+	ui->viewButton->setAutoDefault(false);
+	ui->viewButton->setEnabled(false);
 
 	// connections
 	connect(ui->acquireButton, SIGNAL(clicked()),
@@ -63,6 +59,7 @@ void	darkwidget::checkImage() {
 		image->remove();
 		if (_darkimage) {
 			ui->viewButton->setEnabled(true);
+			ui->propertyTable->setImage(_darkimage);
 		}
 		emit newImage(_darkimage);
 	} catch (const std::exception& x) {
@@ -154,6 +151,9 @@ void	darkwidget::viewClicked() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "view clicked");
 	imagedisplaywidget	*id = new imagedisplaywidget(NULL);
 	id->setImage(_darkimage);
+	std::string	title = astro::stringprintf("dark image for %s",
+		convert(_guider->getDescriptor()).toString().c_str());
+	id->setWindowTitle(QString(title.c_str()));
 	id->show();
 }
 

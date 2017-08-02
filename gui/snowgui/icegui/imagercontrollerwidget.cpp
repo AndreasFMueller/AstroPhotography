@@ -378,7 +378,13 @@ void	imagercontrollerwidget::darkClicked() {
 	}
 	darkwidget	*dw = new darkwidget(NULL);
 	dw->guider(_guider);
-	dw->setModal(true);
+
+	std::ostringstream	out;
+	out << "dark image for ";
+	astro::guiding::GuiderDescriptor	gd = convert(_guider->getDescriptor());
+	out << gd.toString();
+	
+	dw->setWindowTitle(QString(out.str().c_str()));
 	dw->exposuretime(_exposure.exposuretime());
 	dw->show();
 }

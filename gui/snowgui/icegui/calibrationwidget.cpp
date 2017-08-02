@@ -220,6 +220,12 @@ void	calibrationwidget::setupState() {
 		ui->calibrateButton->setEnabled(false);
 		ui->databaseButton->setEnabled(false);
 		break;
+	case snowstar::GuiderDARKACQUIRE:
+	case snowstar::GuiderFLATACQUIRE:
+	case snowstar::GuiderIMAGING:
+		ui->calibrateButton->setEnabled(false);
+		ui->databaseButton->setEnabled(false);
+		break;
 	}
 }
 

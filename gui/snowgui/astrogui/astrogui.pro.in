@@ -32,6 +32,7 @@ SOURCES += 								\
 	ChannelDisplayWidget.cpp					\
 	ColorArithmetic.cpp						\
 	ColorRectangles.cpp						\
+	FitsTable.cpp							\
 	FocusPoints.cpp							\
 	FocusPointsWidget.cpp						\
 	Histogram.cpp							\
@@ -46,6 +47,7 @@ HEADERS  += 								\
 	ChannelDisplayWidget.h						\
 	ColorArithmetic.h						\
 	ColorRectangles.h						\
+	FitsTable.h							\
 	FocusPoints.h							\
 	FocusPointsWidget.h						\
 	Histogram.h							\
