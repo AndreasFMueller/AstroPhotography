@@ -28,6 +28,12 @@ Guide::state	Guide::string2state(const std::string& s) {
 	if (s == "darkacquire") {
 		return darkacquire;
 	}
+	if (s == "flatacquire") {
+		return flatacquire;
+	}
+	if (s == "imaging") {
+		return imaging;
+	}
 	throw std::runtime_error("unknown state string");
 }
 
@@ -45,6 +51,10 @@ std::string	Guide::state2string(state s) {
 		return std::string("guiding");
 	case darkacquire:
 		return std::string("darkacquire");
+	case flatacquire:
+		return std::string("flatacquire");
+	case imaging:
+		return std::string("imaging");
 	}
 	throw std::runtime_error("unknown state ");
 }
