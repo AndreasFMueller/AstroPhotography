@@ -51,6 +51,10 @@ imagercontrollerwidget::imagercontrollerwidget(QWidget *parent) :
 	connect(ui->interpolateBox, SIGNAL(clicked(bool)),
 		this, SLOT(toggleInterpolate(bool)));
 
+	// initialize widget points
+	_flatwidget = NULL;
+	_darkwidget = NULL;
+
 	// setup and connect the timer
 	connect(&statusTimer, SIGNAL(timeout()), this, SLOT(statusUpdate()));
 	statusTimer.setInterval(100);
@@ -377,17 +381,22 @@ void	imagercontrollerwidget::darkClicked() {
 	if (!_guider) {
 		return;
 	}
-	darkwidget	*dw = new darkwidget(NULL);
-	dw->guider(_guider);
+	if (_darkwidget) {
+		_darkwidget->raise();
+		return;
+	}
+	_darkwidget = new darkwidget(this);
+	connect(_darkwidget, SIGNAL(closeWidget()), this, SLOT(darkClosed()));
+	_darkwidget->guider(_guider);
 
 	std::ostringstream	out;
 	out << "dark image for ";
 	astro::guiding::GuiderDescriptor	gd = convert(_guider->getDescriptor());
 	out << gd.toString();
 	
-	dw->setWindowTitle(QString(out.str().c_str()));
-	dw->exposuretime(_exposure.exposuretime());
-	dw->show();
+	_darkwidget->setWindowTitle(QString(out.str().c_str()));
+	_darkwidget->exposuretime(_exposure.exposuretime());
+	_darkwidget->show();
 }
 
 /**
@@ -397,17 +406,22 @@ void	imagercontrollerwidget::flatClicked() {
 	if (!_guider) {
 		return;
 	}
-	flatwidget	*fw = new flatwidget(NULL);
-	fw->guider(_guider);
+	if (_flatwidget) {
+		_flatwidget->raise();
+		return;
+	}
+	_flatwidget = new flatwidget(this);
+	connect(_flatwidget, SIGNAL(closeWidget()), this, SLOT(flatClosed()));
+	_flatwidget->guider(_guider);
 
 	std::ostringstream	out;
 	out << "flat image for ";
 	astro::guiding::GuiderDescriptor	gd = convert(_guider->getDescriptor());
 	out << gd.toString();
 	
-	fw->setWindowTitle(QString(out.str().c_str()));
-	fw->exposuretime(_exposure.exposuretime());
-	fw->show();
+	_flatwidget->setWindowTitle(QString(out.str().c_str()));
+	_flatwidget->exposuretime(_exposure.exposuretime());
+	_flatwidget->show();
 }
 
 /**
@@ -584,6 +598,14 @@ void	imagercontrollerwidget::toggleInterpolate(bool t) {
 		_guider->setInterpolate(t);
 	} catch (...) {
 	}
+}
+
+void	imagercontrollerwidget::darkClosed() {
+	_darkwidget = NULL;
+}
+
+void	imagercontrollerwidget::flatClosed() {
+	_flatwidget = NULL;
 }
 
 } // namespace snowgui

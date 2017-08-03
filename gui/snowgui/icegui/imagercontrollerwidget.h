@@ -10,6 +10,8 @@
 #include <AstroCamera.h>
 #include <image.h>
 #include <guider.h>
+#include "flatwidget.h"
+#include "darkwidget.h"
 #include <QTimer>
 
 namespace snowgui {
@@ -34,6 +36,9 @@ class imagercontrollerwidget : public InstrumentWidget {
 
 	bool	_nosubframe;
 	bool	_nobuttons;
+
+	flatwidget	*_flatwidget;
+	darkwidget	*_darkwidget;
 
 public:
 	explicit imagercontrollerwidget(QWidget *parent = NULL);
@@ -93,6 +98,9 @@ public slots:
 	void	toggleDark(bool);
 	void	toggleFlat(bool);
 	void	toggleInterpolate(bool);
+
+	void	darkClosed();
+	void	flatClosed();
 
 	// needed internally for status udpates
 	void	statusUpdate();

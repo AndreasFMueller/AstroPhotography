@@ -11,6 +11,7 @@
 #include <image.h>
 #include <guider.h>
 #include <QTimer>
+#include <imagedisplaywidget.h>
 
 namespace snowgui {
 
@@ -26,6 +27,7 @@ class flatwidget : public QDialog {
 	snowstar::GuiderPrx	_guider;
 	snowstar::GuiderState	_guiderstate;
 	bool	_acquiring;
+	imagedisplaywidget	*_imagedisplaywidget;
 public:
 	explicit flatwidget(QWidget *parent = 0);
 	~flatwidget();
@@ -38,11 +40,13 @@ public:
 
 signals:
 	void	newImage(astro::image::ImagePtr);
+	void	closeWidget();
 
 public slots:
 	void	statusUpdate();
 	void	acquireClicked();
 	void	viewClicked();
+	void	imageClosed();
 
 private:
 	Ui::flatwidget *ui;

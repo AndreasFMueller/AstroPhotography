@@ -45,6 +45,10 @@ flatwidget::flatwidget(QWidget *parent)
  */
 flatwidget::~flatwidget() {
 	statusTimer.stop();
+	if (_imagedisplaywidget) {
+		disconnect(_imagedisplaywidget, SLOT(destroyed()), 0, 0);
+		_imagedisplaywidget->close();
+	}
 	delete ui;
 }
 
@@ -153,12 +157,18 @@ void	flatwidget::acquireClicked() {
 
 void	flatwidget::viewClicked() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "view clicked");
-	imagedisplaywidget	*id = new imagedisplaywidget(NULL);
-	id->setImage(_flatimage);
-	std::string	title = astro::stringprintf("flat image for %s",
-		convert(_guider->getDescriptor()).toString().c_str());
-	id->setWindowTitle(QString(title.c_str()));
-	id->show();
+	if (_imagedisplaywidget) {
+		_imagedisplaywidget->raise();
+	} else {
+		_imagedisplaywidget = new imagedisplaywidget(NULL);
+		connect(_imagedisplaywidget, SIGNAL(destroyed()),
+			this, SLOT(imageClosed()));
+		std::string	title = astro::stringprintf("flat image for %s",
+			convert(_guider->getDescriptor()).name().c_str());
+		_imagedisplaywidget->setWindowTitle(QString(title.c_str()));
+		_imagedisplaywidget->show();
+	}
+	_imagedisplaywidget->setImage(_flatimage);
 }
 
 /**
@@ -168,7 +178,12 @@ void	flatwidget::viewClicked() {
  */
 void    flatwidget::closeEvent(QCloseEvent * /* event */) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "allow deletion");
+	emit closeWidget();
 	deleteLater();
+}
+
+void	flatwidget::imageClosed() {
+	_imagedisplaywidget = NULL;
 }
 
 } // namespace snowgui

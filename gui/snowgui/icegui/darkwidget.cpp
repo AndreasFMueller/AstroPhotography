@@ -18,6 +18,7 @@ darkwidget::darkwidget(QWidget *parent)
 	: QDialog(parent), ui(new Ui::darkwidget) {
 	ui->setupUi(this);
 
+	_imagedisplaywidget = NULL;
 
 	// make the buttons disabled
 	ui->acquireButton->setAutoDefault(false);
@@ -45,6 +46,10 @@ darkwidget::darkwidget(QWidget *parent)
  */
 darkwidget::~darkwidget() {
 	statusTimer.stop();
+	if (_imagedisplaywidget) {
+		disconnect(_imagedisplaywidget, SIGNAL(destroyed()), 0, 0);
+		_imagedisplaywidget->close();
+	}
 	delete ui;
 }
 
@@ -149,14 +154,23 @@ void	darkwidget::acquireClicked() {
 	}
 }
 
+/**
+ * \brief display the image
+ */
 void	darkwidget::viewClicked() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "view clicked");
-	imagedisplaywidget	*id = new imagedisplaywidget(NULL);
-	id->setImage(_darkimage);
-	std::string	title = astro::stringprintf("dark image for %s",
-		convert(_guider->getDescriptor()).toString().c_str());
-	id->setWindowTitle(QString(title.c_str()));
-	id->show();
+	if (_imagedisplaywidget) {
+		_imagedisplaywidget->raise();
+	} else {
+		_imagedisplaywidget = new imagedisplaywidget(NULL);
+		connect(_imagedisplaywidget, SIGNAL(destroyed()),
+			this, SLOT(imageClosed()));
+		std::string	title = astro::stringprintf("dark image for %s",
+			convert(_guider->getDescriptor()).name().c_str());
+		_imagedisplaywidget->setWindowTitle(QString(title.c_str()));
+		_imagedisplaywidget->show();
+	}
+	_imagedisplaywidget->setImage(_darkimage);
 }
 
 /**
@@ -166,7 +180,12 @@ void	darkwidget::viewClicked() {
  */
 void    darkwidget::closeEvent(QCloseEvent * /* event */) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "allow deletion");
+	emit closeWidget();
 	deleteLater();
+}
+
+void	darkwidget::imageClosed() {
+	_imagedisplaywidget = NULL;
 }
 
 } // namespace snowgui
