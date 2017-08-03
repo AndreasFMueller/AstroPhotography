@@ -14,6 +14,7 @@
 #include <sys/stat.h>
 #include "downloadthread.h"
 #include "exposedownloaddialog.h"
+#include <ImageForwarder.h>
 
 namespace snowgui {
 
@@ -309,6 +310,10 @@ void	exposewidget::openClicked() {
         imagedisplaywidget      *idw = new imagedisplaywidget(NULL);
         connect(idw, SIGNAL(rectangleSelected(astro::image::ImageRectangle)),
                 idw, SLOT(selectRectangle(QRect)));
+	connect(idw,
+		SIGNAL(offerImage(astro::image::ImagePtr, std::string)),
+		ImageForwarder::get(),
+		SLOT(sendImage(astro::image::ImagePtr, std::string)));
         idw->setRectangleSelectionEnabled(true);
         idw->setImage(imageptr);
 	std::string	title = astro::stringprintf("Image %d from Repository %s",

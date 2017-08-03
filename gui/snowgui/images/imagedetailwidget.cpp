@@ -11,6 +11,7 @@
 #include <IceConversions.h>
 #include <QFileDialog>
 #include <QMessageBox>
+#include <ImageForwarder.h>
 
 namespace snowgui {
 
@@ -25,6 +26,10 @@ imagedetailwidget::imagedetailwidget(QWidget *parent)
 		this, SLOT(saveImage()));
 	connect(ui->deleteButton, SIGNAL(clicked()),
 		this, SLOT(deleteImage()));
+	connect(this,
+		SIGNAL(offerImage(astro::image::ImagePtr, std::string)),
+		ImageForwarder::get(),
+		SLOT(sendImage(astro::image::ImagePtr, std::string)));
 }
 
 imagedetailwidget::~imagedetailwidget() {
@@ -75,6 +80,7 @@ void	imagedetailwidget::loadImage() {
 	_imageptr = snowstar::convertfile(file);
 	if (_imageptr) {
 		ui->saveButton->setEnabled(true);
+		emit offerImage(_imageptr, std::string());
 	}
 	emit imageReceived(_imageptr);
 }

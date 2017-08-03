@@ -28,6 +28,7 @@ public:
 signals:
 	void	imageReceived(astro::image::ImagePtr);
 	void	deleteCurrentImage();
+	void	offerImage(astro::image::ImagePtr, std::string);
 
 public slots:
 	void	loadImage();

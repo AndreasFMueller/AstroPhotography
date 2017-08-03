@@ -54,6 +54,7 @@ private:
 
 signals:
 	void	startExposure();
+	void	offerImage(astro::image::ImagePtr, std::string);
 
 public slots:
 	void	repositoryChanged(const QString&);
