@@ -36,8 +36,26 @@ void	FitsTable::setImage(astro::image::ImagePtr image) {
         headerlist << "Keyword" << "Value" << "Comment";
         setHorizontalHeaderLabels(headerlist);
 	QTableWidget	*table = this;
-	setRowCount(image->nMetadata());
+	setRowCount(image->nMetadata() + 3);
 	int	row = 0;
+	setRowHeight(row, 19);
+	setItem(row, 0, new QTableWidgetItem("width"));
+	setItem(row, 1, new QTableWidgetItem(astro::stringprintf("%d",
+		image->size().width()).c_str()));
+	setItem(row, 2, new QTableWidgetItem("width of the image"));
+	row++;
+	setRowHeight(row, 19);
+	setItem(row, 0, new QTableWidgetItem("height"));
+	setItem(row, 1, new QTableWidgetItem(astro::stringprintf("%d",
+		image->size().height()).c_str()));
+	setItem(row, 2, new QTableWidgetItem("height of the image"));
+	row++;
+	setRowHeight(row, 19);
+	setItem(row, 0, new QTableWidgetItem("type"));
+	setItem(row, 1, new QTableWidgetItem(
+			astro::demangle(image->pixel_type().name()).c_str()));
+	setItem(row, 2, new QTableWidgetItem("pixel type of the image"));
+	row++;
 	for_each(image->begin(), image->end(),
 		[table,row](const ImageMetadata::value_type& metadata) mutable {
 			table->setRowHeight(row, 19);
