@@ -33,6 +33,9 @@ imagedisplaywidget::imagedisplaywidget(QWidget *parent) :
 	connect(ui->bayerBox, SIGNAL(currentIndexChanged(int)),
 		this, SLOT(bayerChanged(int)));
 
+	// disable synthetic properties
+	ui->fitsinfoTable->synthetic(false);
+
 	// initialize the image
 	selectable = new SelectableImage();
 	connect(selectable, SIGNAL(rectangleSelected(QRect)),
