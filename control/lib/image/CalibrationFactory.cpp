@@ -510,7 +510,35 @@ ImagePtr	flat(const ImageSequence& images, const Image<T>& dark) {
 	T	maxvalue = maxfilter(*image);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "maximum value: %f", maxvalue);
 
-	// device the image by that value, so that the new maximum value
+	// devide the image by that value, so that the new maximum value
+	// is 1
+	for (int x = 0; x < image->size().width(); x++) {
+		for (int y = 0; y < image->size().height(); y++) {
+			image->pixel(x, y) /= maxvalue;
+		}
+	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "image normalized");
+
+	return result;
+}
+
+ImagePtr	flat(const ImageSequence& images) {
+	// we first compute the pixelwise mean, but we have to eliminate
+	// possible cosmic ray artefacts, so we let the thing compute
+	// the variance nevertheless
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "compute mean of images");
+	ImageMean<float>	im(images, true);
+
+	// extract the image
+	ImagePtr	result = im.getImagePtr();
+	Image<float>	*image = dynamic_cast<Image<float> *>(&*result);
+
+	// find the maximum value of the image
+	Max<float, double>	maxfilter;
+	float	maxvalue = maxfilter(*image);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "maximum value: %f", maxvalue);
+
+	// devide the image by that value, so that the new maximum value
 	// is 1
 	for (int x = 0; x < image->size().width(); x++) {
 		for (int y = 0; y < image->size().height(); y++) {
@@ -540,7 +568,8 @@ ImagePtr	FlatFrameFactory::operator()(const ImageSequence& images,
 			countnans(*floatdark));
 		return flat(images, *floatdark);
 	}
-	throw std::runtime_error("unknown dark image type");
+	// no useful dark image supplied
+	return flat(images);
 }
 
 //////////////////////////////////////////////////////////////////////

@@ -122,7 +122,7 @@ void	flatwidget::statusUpdate() {
 		checkImage();
 	}
 	try {
-		ui->usedarkCheck->setEnabled(_guider->hasDark());
+		ui->usedarkBox->setEnabled(_guider->hasDark());
 	} catch (...) { }
 }
 
@@ -141,7 +141,8 @@ void	flatwidget::acquireClicked() {
 	try {
 		double	exposuretime = ui->exposureBox->value();
 		int	imagecount = ui->numberBox->value();
-		_guider->startFlatAcquire(exposuretime, imagecount);
+		bool	usedark = ui->usedarkBox->isChecked();
+		_guider->startFlatAcquire(exposuretime, imagecount, usedark);
 		_acquiring = true;
 	} catch (const snowstar::BadState& x) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "bad state: %s", x.cause.c_str());

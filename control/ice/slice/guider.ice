@@ -306,7 +306,7 @@ module snowstar {
 		void	startDarkAcquire(double exposuretime, int imagecount,
 				double badpixellimit)
 				throws BadState;
-		Image*	darkImage() throws BadState;
+		Image*	darkImage() throws BadState, NotFound;
 		bool	hasDark();
 		bool	useDark() throws BadState;
 		void	setUseDark(bool usedark) throws BadState;
@@ -316,7 +316,7 @@ module snowstar {
 
 		void	startFlatAcquire(double exposuretime, int imagecount,
 				bool useDark) throws BadState;
-		Image*	flatImage() throws BadState;
+		Image*	flatImage() throws BadState, NotFound;
 		bool	hasFlat();
 		bool	useFlat() throws BadState;
 		void	setUseFlat(bool useflat) throws BadState;

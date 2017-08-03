@@ -723,7 +723,9 @@ ImagePrx	GuiderI::darkImage(const Ice::Current& current) {
 	// retrieve image
 	astro::image::ImagePtr	darkimage = guider->imager().dark();
 	if (!darkimage) {
-		throw NotFound("no dark image available");
+		NotFound	exception;
+		exception.cause = std::string("no dark image available");
+		throw exception;
 	}
 
 	// store image in image directory
@@ -741,7 +743,9 @@ ImagePrx	GuiderI::flatImage(const Ice::Current& current) {
 	// retrieve image
 	astro::image::ImagePtr	flatimage = guider->imager().flat();
 	if (!flatimage) {
-		throw NotFound("no flat image available");
+		NotFound	exception;
+		exception.cause = std::string("no flat image available");
+		throw exception;
 	}
 
 	// store image in image directory
