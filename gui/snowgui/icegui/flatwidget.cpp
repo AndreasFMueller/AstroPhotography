@@ -8,6 +8,7 @@
 #include <AstroDebug.h>
 #include <IceConversions.h>
 #include <imagedisplaywidget.h>
+#include <ImageForwarder.h>
 
 namespace snowgui {
 
@@ -60,6 +61,7 @@ void	flatwidget::checkImage() {
 	try {
 		snowstar::ImagePrx	image = _guider->flatImage();
 		_flatimage = snowstar::convert(image);
+		emit offerImage(_flatimage, std::string("flat"));
 		image->remove();
 		if (_flatimage) {
 			ui->viewButton->setEnabled(true);
@@ -163,6 +165,10 @@ void	flatwidget::viewClicked() {
 		_imagedisplaywidget = new imagedisplaywidget(NULL);
 		connect(_imagedisplaywidget, SIGNAL(destroyed()),
 			this, SLOT(imageClosed()));
+		connect(_imagedisplaywidget,
+			SIGNAL(offerImage(astro::image::ImagePtr, std::string)),
+			ImageForwarder::get(),
+			SLOT(sendImage(astro::image::ImagePtr, std::string)));
 		std::string	title = astro::stringprintf("flat image for %s",
 			convert(_guider->getDescriptor()).name().c_str());
 		_imagedisplaywidget->setWindowTitle(QString(title.c_str()));
@@ -184,6 +190,13 @@ void    flatwidget::closeEvent(QCloseEvent * /* event */) {
 
 void	flatwidget::imageClosed() {
 	_imagedisplaywidget = NULL;
+}
+
+void	flatwidget::changeEvent(QEvent *event) {
+	if (this->window()->isActiveWindow()) {
+		emit offerImage(_flatimage, std::string("flat"));
+	}
+	QWidget::changeEvent(event);
 }
 
 } // namespace snowgui

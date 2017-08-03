@@ -87,24 +87,24 @@ void	focusingwindow::instrumentSetup(
  * 
  * Furthermore it adds a focus point to the focusinghistoryWidget.
  */
-void	focusingwindow::receiveImage(ImagePtr image) {
+void	focusingwindow::receiveImage(ImagePtr _image) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "new %s image received",
-		image->size().toString().c_str());
-	_image = image;
+		_image->size().toString().c_str());
+	image(_image);
 
 	// inform other widgets
-	ui->imageWidget->setImage(image);
+	ui->imageWidget->setImage(_image);
 	Exposure	imageexposure
 		= ui->ccdcontrollerWidget->imageexposure();
 	ui->ccdcontrollerWidget->setExposure(imageexposure);
 
 	// add the point to the focuspointwidgeth
 	int	pos = ui->focusercontrollerWidget->getCurrentPosition();
-	ui->focusinghistoryWidget->add(image, pos);
+	ui->focusinghistoryWidget->add(_image, pos);
 
 	// emit a signal for saving
 	if (_image) {
-		emit offerImage(_image);
+		sendImage(_image, std::string("focusing image"));
 	}
 }
 
@@ -124,16 +124,6 @@ void	focusingwindow::rectangleSelected(ImageRectangle rectangle) {
  */
 void	focusingwindow::closeEvent(QCloseEvent * /* event */) {
 	deleteLater();
-}
-
-/**
- * \brief Event fired when the window changes state
- */
-void	focusingwindow::changeEvent(QEvent *event) {
-	if (this->window()->isActiveWindow()) {
-		emit offerImage(_image);
-	}
-	QWidget::changeEvent(event);
 }
 
 } // namespace snowgui

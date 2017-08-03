@@ -78,10 +78,9 @@ void	guidingwindow::instrumentSetup(
 /**
  * \brief New image received
  */
-void	guidingwindow::newImage(astro::image::ImagePtr image) {
+void	guidingwindow::newImage(astro::image::ImagePtr _image) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "new image received, offer for saving");
-	_image = image;
-	emit offerImage(_image);
+	sendImage(_image, std::string("guiding image"));
 }
 
 /**
@@ -91,19 +90,8 @@ void	guidingwindow::newImage(astro::image::ImagePtr image) {
  */
 void	guidingwindow::closeEvent(QCloseEvent * /* event */) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "allow deletion");
-	emit offerImage(astro::image::ImagePtr(NULL));
+	sendImage(astro::image::ImagePtr(NULL), std::string());
 	deleteLater();
-}
-
-/**
- * \brief offer our image if the image raises to the top
- */
-void	guidingwindow::changeEvent(QEvent *event) {
-	if (this->window()->isActiveWindow()) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "window on top");
-		emit offerImage(_image);
-	}
-	QWidget::changeEvent(event);
 }
 
 } // namespace snowgui

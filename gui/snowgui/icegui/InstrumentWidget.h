@@ -15,9 +15,13 @@ namespace snowgui {
 class InstrumentWidget : public QWidget {
 	Q_OBJECT
 	std::string	_appname;
+	std::string	_title;
+	astro::image::ImagePtr	_image;
 public:
 	void	setAppname(const std::string& appname);
 	const std::string&	appname() const { return _appname; }
+	astro::image::ImagePtr	image() { return _image; }
+	void	image(astro::image::ImagePtr i) { _image = i; }
 protected:
 	astro::discover::ServiceKey	_servicekey;
 	snowstar::RemoteInstrument	_instrument;
@@ -28,6 +32,10 @@ public:
 				astro::discover::ServiceObject serviceobject,
 				snowstar::RemoteInstrument instrument);
 	std::string	instrumentname();
+	void	sendImage(astro::image::ImagePtr image, std::string title);
+	void	changeEvent(QEvent *);
+signals:
+	void	offerImage(astro::image::ImagePtr, std::string);
 };
 
 } // namespace snowgui

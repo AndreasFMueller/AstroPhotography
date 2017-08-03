@@ -63,7 +63,6 @@ private:
 
 signals:
 	void	imageUpdated();
-	void	offerImage(astro::image::ImagePtr image);
 
 public slots:
 

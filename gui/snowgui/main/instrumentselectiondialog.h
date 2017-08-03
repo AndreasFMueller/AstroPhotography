@@ -61,9 +61,6 @@ public:
 		// to the imageForSaving option
 		MainWindow	*mainwindow = (MainWindow*)parentWidget();
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "connect offerImage()");
-		connect(a, SIGNAL(offerImage(astro::image::ImagePtr)),
-			mainwindow,
-			SLOT(imageForSaving(astro::image::ImagePtr)));
 		a->instrumentSetup(_serviceobject, ri);
 		a->show();
 		QApplication::setActiveWindow(a);

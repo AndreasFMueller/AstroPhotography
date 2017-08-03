@@ -24,6 +24,7 @@
 #include <AstroIO.h>
 #include <imagedisplaywidget.h>
 #include <browserwindow.h>
+#include <ImageForwarder.h>
 
 using namespace astro::discover;
 
@@ -94,6 +95,12 @@ MainWindow::MainWindow(QWidget *parent,
 	if (_serviceobject.has(ServiceSubset::IMAGES)) {
 		ui->appImagesButton->setEnabled(true);
 	}
+
+	// image forwarding
+	connect(ImageForwarder::get(),
+		SIGNAL(offerImage(astro::image::ImagePtr, std::string)),
+		this,
+		SLOT(imageForSaving(astro::image::ImagePtr, std::string)));
 
 	// add menu
 	createActions();
@@ -467,13 +474,24 @@ QLabel	*MainWindow::serviceLabel(ServiceSubset::service_type t) {
 	return NULL;
 }
 
-void	MainWindow::imageForSaving(astro::image::ImagePtr image) {
+void	MainWindow::imageForSaving(astro::image::ImagePtr image,
+		std::string imagestring) {
 	_image = image;
+	_imagestring = imagestring;
 	if (_image) {
+		std::string     title("Save ");
+		title = title + _imagestring + std::string(" image ");
+                title = title + _image->size().toString();
+                title = title + std::string("<");
+                title = title + astro::demangle(_image->pixel_type().name());
+                title = title + std::string(">");
 		saveAction->setEnabled(true);
+		saveAction->setText(title.c_str());
 	} else {
 		saveAction->setEnabled(false);
+		saveAction->setText("Save image");
 	}
 }
 
 } // namespace snowgui
+

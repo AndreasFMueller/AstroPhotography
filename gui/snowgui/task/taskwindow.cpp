@@ -114,6 +114,7 @@ void	taskwindow::receiveImage(ImagePtr image) {
 		image->size().toString().c_str());
 	ui->feedbackWidget->setCurrentIndex(1);
 	emit imageReceived(image);
+	sendImage(image, std::string("task image"));
 }
 
 /**

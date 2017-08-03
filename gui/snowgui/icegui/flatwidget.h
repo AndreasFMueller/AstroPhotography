@@ -37,10 +37,13 @@ public:
 	void	closeEvent(QCloseEvent *);
 	void	exposuretime(double e);
 	void	checkImage();
+protected:
+	void	changeEvent(QEvent*);
 
 signals:
 	void	newImage(astro::image::ImagePtr);
 	void	closeWidget();
+	void	offerImage(astro::image::ImagePtr, std::string);
 
 public slots:
 	void	statusUpdate();

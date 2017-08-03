@@ -429,6 +429,7 @@ void	imagedisplaywidget::setImage(astro::image::ImagePtr image) {
 		image->size().toString().c_str());
 	_image = image;
 	emit imageUpdated();
+	emit offerImage(image, std::string());
 }
 
 /**
@@ -930,6 +931,12 @@ void	imagedisplaywidget::blueOffsetChanged(double o) {
 	processNewSettings();
 }
 
-
+void	imagedisplaywidget::changeEvent(QEvent *event) {
+	if (this->window()->isActiveWindow()) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "offer image");
+		emit offerImage(_image, std::string());
+	}
+	QWidget::changeEvent(event);
+}
 
 } // namespace snowgui

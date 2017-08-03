@@ -8,6 +8,7 @@
 #include <AstroDebug.h>
 #include <IceConversions.h>
 #include <imagedisplaywidget.h>
+#include <ImageForwarder.h>
 
 namespace snowgui {
 
@@ -61,6 +62,7 @@ void	darkwidget::checkImage() {
 	try {
 		snowstar::ImagePrx	image = _guider->darkImage();
 		_darkimage = snowstar::convert(image);
+		emit offerImage(_darkimage, std::string("dark"));
 		image->remove();
 		if (_darkimage) {
 			ui->viewButton->setEnabled(true);
@@ -165,6 +167,10 @@ void	darkwidget::viewClicked() {
 		_imagedisplaywidget = new imagedisplaywidget(NULL);
 		connect(_imagedisplaywidget, SIGNAL(destroyed()),
 			this, SLOT(imageClosed()));
+		connect(_imagedisplaywidget,
+			SIGNAL(offerImage(astro::image::ImagePtr, std::string)),
+			ImageForwarder::get(),
+			SLOT(sendImage(astro::image::ImagePtr, std::string)));
 		std::string	title = astro::stringprintf("dark image for %s",
 			convert(_guider->getDescriptor()).name().c_str());
 		_imagedisplaywidget->setWindowTitle(QString(title.c_str()));
@@ -186,6 +192,13 @@ void    darkwidget::closeEvent(QCloseEvent * /* event */) {
 
 void	darkwidget::imageClosed() {
 	_imagedisplaywidget = NULL;
+}
+
+void	darkwidget::changeEvent(QEvent *event) {
+	if (this->window()->isActiveWindow()) {
+		emit offerImage(_darkimage, std::string("dark"));
+	}
+	QWidget::changeEvent(event);
 }
 
 } // namespace snowgui

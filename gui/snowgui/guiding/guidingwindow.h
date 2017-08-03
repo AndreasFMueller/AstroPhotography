@@ -18,17 +18,12 @@ namespace Ui {
 class guidingwindow : public InstrumentWidget {
 	Q_OBJECT
 
-	astro::image::ImagePtr	_image;
-
 public:
 	explicit guidingwindow(QWidget *parent = 0);
 	virtual void	instrumentSetup(
 		astro::discover::ServiceObject serviceobject,
 		snowstar::RemoteInstrument instrument);
 	~guidingwindow();
-
-signals:
-	void	offerImage(astro::image::ImagePtr image);
 
 public slots:
 	void	newImage(astro::image::ImagePtr image);
@@ -38,7 +33,6 @@ private:
 
 protected:
 	void	closeEvent(QCloseEvent *);
-	void	changeEvent(QEvent *);
 };
 
 } // namespace snowgui

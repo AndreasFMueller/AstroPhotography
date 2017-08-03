@@ -116,6 +116,7 @@ signals:
 	void	imageUpdated();
 	void	rectangleSelected(astro::image::ImageRectangle);
 	void	pointSelected(astro::image::ImagePoint);
+	void	offerImage(astro::image::ImagePtr, std::string);
 
 public slots:
 	void	processNewImage();
@@ -134,6 +135,7 @@ public slots:
 	void	blueOffsetChanged(double);
 private:
 	void	closeEvent(QCloseEvent *);
+	void	changeEvent(QEvent *);
 };
 
 } // namespace snowgui

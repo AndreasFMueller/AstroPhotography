@@ -13,6 +13,7 @@
 #include <QMessageBox>
 #include "darkwidget.h"
 #include "flatwidget.h"
+#include <ImageForwarder.h>
 
 using namespace astro::image;
 using namespace astro::io;
@@ -383,10 +384,15 @@ void	imagercontrollerwidget::darkClicked() {
 	}
 	if (_darkwidget) {
 		_darkwidget->raise();
+		QApplication::setActiveWindow(_darkwidget);
 		return;
 	}
 	_darkwidget = new darkwidget(this);
 	connect(_darkwidget, SIGNAL(closeWidget()), this, SLOT(darkClosed()));
+	connect(_darkwidget,
+		SIGNAL(offerImage(astro::image::ImagePtr, std::string)),
+		ImageForwarder::get(),
+		SLOT(sendImage(astro::image::ImagePtr, std::string)));
 	_darkwidget->guider(_guider);
 
 	std::ostringstream	out;
@@ -408,10 +414,15 @@ void	imagercontrollerwidget::flatClicked() {
 	}
 	if (_flatwidget) {
 		_flatwidget->raise();
+		QApplication::setActiveWindow(_flatwidget);
 		return;
 	}
 	_flatwidget = new flatwidget(this);
 	connect(_flatwidget, SIGNAL(closeWidget()), this, SLOT(flatClosed()));
+	connect(_flatwidget,
+		SIGNAL(offerImage(astro::image::ImagePtr, std::string)),
+		ImageForwarder::get(),
+		SLOT(sendImage(astro::image::ImagePtr, std::string)));
 	_flatwidget->guider(_guider);
 
 	std::ostringstream	out;

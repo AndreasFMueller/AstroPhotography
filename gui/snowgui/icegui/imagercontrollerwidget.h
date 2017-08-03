@@ -104,7 +104,6 @@ public slots:
 
 	// needed internally for status udpates
 	void	statusUpdate();
-
 };
 
 } // namespace snowgui

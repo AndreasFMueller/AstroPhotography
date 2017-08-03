@@ -33,7 +33,7 @@ public slots:
 	void	receiveImage(astro::image::ImagePtr image);
 	void	rectangleSelected(astro::image::ImageRectangle);
 protected:
-	void	closeEvent(QCloseEvent *);
+	void    closeEvent(QCloseEvent *);
 };
 
 } // namespace snowgui

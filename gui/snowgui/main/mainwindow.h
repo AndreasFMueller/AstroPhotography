@@ -25,6 +25,7 @@ class MainWindow : public QMainWindow
 	void	setServiceLabelEnabled(astro::discover::ServiceSubset::service_type t);
 
 	astro::image::ImagePtr	_image;
+	std::string	_imagestring;
 public:
 	explicit MainWindow(QWidget *parent,
 		const astro::discover::ServiceObject serviceobject);
@@ -40,7 +41,7 @@ public slots:
 	void	launchConfiguration();
 	void	launchImages();
 	void	launchExpose();
-	void	imageForSaving(astro::image::ImagePtr image);
+	void	imageForSaving(astro::image::ImagePtr image, std::string);
 
 private:
 	Ui::MainWindow *ui;
