@@ -45,12 +45,6 @@ imagedisplaywidget::imagedisplaywidget(QWidget *parent) :
 	connect(this, SIGNAL(imageUpdated()), this,
 		SLOT(processNewImage()), Qt::QueuedConnection);
 
-	// set headers in fits info table
-	QStringList	headerlist;
-	headerlist << "Keyword" << "Value" << "Comment";
-	ui->fitsinfoTable->setHorizontalHeaderLabels(headerlist);
-	ui->fitsinfoTable->horizontalHeader()->setStretchLastSection(true);
-
 	// make sure the subframe is disabled, it only becomes enabled
 	// when an image is added
 	ui->subframeGroup->setEnabled(false);
@@ -532,24 +526,7 @@ void	imagedisplaywidget::processNewImageInfo(ImagePtr image) {
 	}
 
 	// read meta data from the image and display in the FITS info area
-	QTableWidget	*table = ui->fitsinfoTable;
-	table->setRowCount(image->nMetadata());
-	int	row = 0;
-	for_each(image->begin(), image->end(),
-		[table,row](const ImageMetadata::value_type& metadata) mutable {
-			table->setRowHeight(row, 19);
-			Metavalue	v = metadata.second;
-			QTableWidgetItem	*i;
-			i = new QTableWidgetItem(v.getKeyword().c_str());
-			table->setItem(row, 0, i);
-			i = new QTableWidgetItem(v.getValue().c_str());
-			table->setItem(row, 1, i);
-			i = new QTableWidgetItem(v.getComment().c_str());
-			table->setItem(row, 2, i);
-			row++;
-		}
-	);
-	ui->fitsinfoTable->resizeColumnsToContents();
+	ui->fitsinfoTable->setImage(image);
 }
 
 /**
