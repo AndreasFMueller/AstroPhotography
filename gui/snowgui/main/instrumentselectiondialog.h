@@ -10,6 +10,7 @@
 #include <QDialog>
 #include <QApplication>
 #include <AstroDiscovery.h>
+#include <AstroDebug.h>
 #include <instruments.h>
 #include <RemoteInstrument.h>
 
@@ -41,6 +42,8 @@ private:
 
 };
 
+class MainWindow;
+
 /**
  * \brief Template to launch the right application
  */
@@ -48,12 +51,19 @@ template<typename application>
 class InstrumentSelectionApplication : public InstrumentSelectionDialog {
 public:
 	InstrumentSelectionApplication(QWidget *parent,
-		astro::discover::ServiceObject serviceobject)
+	 	astro::discover::ServiceObject serviceobject)
 		: InstrumentSelectionDialog(parent, serviceobject) {
 	}
 	virtual void	launch(const std::string& instrumentname) {
 		snowstar::RemoteInstrument	ri(instruments, instrumentname);
 		application	*a = new application(NULL);
+		// get the main window and connect the offerImage signal
+		// to the imageForSaving option
+		MainWindow	*mainwindow = (MainWindow*)parentWidget();
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "connect offerImage()");
+		connect(a, SIGNAL(offerImage(astro::image::ImagePtr)),
+			mainwindow,
+			SLOT(imageForSaving(astro::image::ImagePtr)));
 		a->instrumentSetup(_serviceobject, ri);
 		a->show();
 		QApplication::setActiveWindow(a);

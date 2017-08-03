@@ -82,6 +82,10 @@ void    takeimagewindow::receiveImage(ImagePtr image) {
 	Exposure        imageexposure
 		= ui->ccdcontrollerWidget->imageexposure();
 	ui->ccdcontrollerWidget->setExposure(imageexposure);
+	_image = image;
+	if (_image) {
+		emit offerImage(image);
+	}
 }
 
 /**
@@ -100,6 +104,17 @@ void    takeimagewindow::rectangleSelected(ImageRectangle rectangle) {
  */
 void    takeimagewindow::closeEvent(QCloseEvent * /* event */) {
 	deleteLater();
+}
+
+/**
+ * \brief offer our image if the image raises to the top
+ */
+void    takeimagewindow::changeEvent(QEvent *event) {
+	if (this->window()->isActiveWindow()) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "window on top");
+		emit offerImage(_image);
+	}
+	QWidget::changeEvent(event);
 }
 
 } // namespace snowgui

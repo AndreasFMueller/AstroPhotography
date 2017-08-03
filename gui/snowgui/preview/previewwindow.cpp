@@ -142,8 +142,12 @@ PreviewWindow::~PreviewWindow() {
 }
 
 void	PreviewWindow::setImage(astro::image::ImagePtr image) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "new image received");
 	_image = image;
 	emit imageUpdated();
+	if (_image) {
+		emit offerImage(_image);
+	}
 }
 
 void	PreviewWindow::processImage() {
@@ -642,6 +646,17 @@ void	PreviewWindow::guideportActivated() {
 	} catch (...) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "unkown exception");
 	}
+}
+
+/**
+ * \brief offer our image if the image raises to the top
+ */
+void    PreviewWindow::changeEvent(QEvent *event) {
+	if (this->window()->isActiveWindow()) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "window on top");
+		emit offerImage(_image);
+	}
+	QWidget::changeEvent(event);
 }
 
 } // namespace snowgui

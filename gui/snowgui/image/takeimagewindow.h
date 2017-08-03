@@ -17,6 +17,8 @@ namespace Ui {
 class takeimagewindow : public snowgui::InstrumentWidget {
 	Q_OBJECT
 
+	astro::image::ImagePtr	_image;
+
 public:
 	explicit takeimagewindow(QWidget *parent = 0);
 	virtual void	instrumentSetup(
@@ -27,11 +29,16 @@ public:
 private:
 	Ui::takeimagewindow *ui;
 
+signals:
+	void	offerImage(astro::image::ImagePtr);
+
 public slots:
 	void	receiveImage(astro::image::ImagePtr image);
 	void	rectangleSelected(astro::image::ImageRectangle);
+
 protected:
 	void	closeEvent(QCloseEvent *);
+	void	changeEvent(QEvent *);
 };
 
 

@@ -375,6 +375,31 @@ void	MainWindow::browseDirectory() {
 }
 
 /**
+ * \brief Save the image currently offered for saving
+ */
+void	MainWindow::saveImage() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "save an image");
+	if (!_image) {
+		return;
+	}
+
+	QFileDialog     filedialog(this);
+	filedialog.setAcceptMode(QFileDialog::AcceptSave);
+	filedialog.setFileMode(QFileDialog::AnyFile);
+        filedialog.setDefaultSuffix(QString("fits"));
+	if (!filedialog.exec()) {
+		return;
+	}
+	QStringList     list = filedialog.selectedFiles();
+	std::string     filename(list.begin()->toLatin1().data());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "file: %s",
+		filename.c_str());
+
+	astro::io::FITSout	out(filename);
+	out.write(_image);
+}
+
+/**
  * \brief Create the actions in the menu
  */
 void	MainWindow::createActions() {
@@ -389,6 +414,11 @@ void	MainWindow::createActions() {
 	browseAction = new QAction(QString("Browse"), this);
 	connect(browseAction, &QAction::triggered, this,
 		&MainWindow::browseDirectory);
+
+	saveAction = new QAction(QString("Save"), this);
+	saveAction->setEnabled(false);
+	connect(saveAction, &QAction::triggered, this,
+		&MainWindow::saveImage);
 }
 
 /**
@@ -399,6 +429,7 @@ void	MainWindow::createMenus() {
 	fileMenu->addAction(connectAction);
 	fileMenu->addAction(openAction);
 	fileMenu->addAction(browseAction);
+	fileMenu->addAction(saveAction);
 }
 
 /**
@@ -434,6 +465,15 @@ QLabel	*MainWindow::serviceLabel(ServiceSubset::service_type t) {
 		return ui->repositoryLabel;
 	}
 	return NULL;
+}
+
+void	MainWindow::imageForSaving(astro::image::ImagePtr image) {
+	_image = image;
+	if (_image) {
+		saveAction->setEnabled(true);
+	} else {
+		saveAction->setEnabled(false);
+	}
 }
 
 } // namespace snowgui

@@ -63,6 +63,7 @@ private:
 
 signals:
 	void	imageUpdated();
+	void	offerImage(astro::image::ImagePtr image);
 
 public slots:
 
@@ -87,9 +88,13 @@ public slots:
 	void	guideportActivated();
 
 	void	statusUpdate();
+	
 private:
 	Ui::PreviewWindow *ui;
 	QTimer	*statusTimer;
+
+protected:
+	void	changeEvent(QEvent *);
 };
 
 } // namespace snowgui

@@ -6,6 +6,7 @@
 #include "instrumentselectiondialog.h"
 #include "ui_instrumentselectiondialog.h"
 #include <CommunicatorSingleton.h>
+#include "mainwindow.h"
 
 using namespace astro::discover;
 

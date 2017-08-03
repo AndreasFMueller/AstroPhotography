@@ -1,9 +1,15 @@
+/**
+ * \brief global main window class
+ *
+ * (c) 2017 Prof Dr Andreas Mueller, Hochschule Rapperswil
+ */
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
 #include <QMainWindow>
 #include <AstroDiscovery.h>
 #include <QLabel>
+#include <AstroImage.h>
 
 namespace snowgui {
 
@@ -17,6 +23,8 @@ class MainWindow : public QMainWindow
 	const astro::discover::ServiceObject	_serviceobject;
 	QLabel	*serviceLabel(astro::discover::ServiceSubset::service_type t);
 	void	setServiceLabelEnabled(astro::discover::ServiceSubset::service_type t);
+
+	astro::image::ImagePtr	_image;
 public:
 	explicit MainWindow(QWidget *parent,
 		const astro::discover::ServiceObject serviceobject);
@@ -32,6 +40,7 @@ public slots:
 	void	launchConfiguration();
 	void	launchImages();
 	void	launchExpose();
+	void	imageForSaving(astro::image::ImagePtr image);
 
 private:
 	Ui::MainWindow *ui;
@@ -46,6 +55,9 @@ private:
 
 	QAction	*browseAction;
 	void	browseDirectory();
+
+	QAction	*saveAction;
+	void	saveImage();
 
 	void	createActions();
 	void	createMenus();
