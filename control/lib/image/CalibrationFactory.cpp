@@ -360,7 +360,7 @@ ImagePtr	ImageMean<T>::getImagePtr() {
  */
 template<typename T>
 size_t	subdark(const ImageSequence&, ImageMean<T>& im,
-	const Subgrid grid, unsigned int k = 3) {
+	const Subgrid grid, unsigned int badpixellimit = 3) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "processing subgrid %s",
 		grid.toString().c_str());
 	// we also need the mean of the image to decide which pixels are
@@ -371,9 +371,9 @@ size_t	subdark(const ImageSequence&, ImageMean<T>& im,
 	// now find out which pixels are bad, and mark them using NaNs.
 	// we consider pixels bad if the deviate from the mean by more
 	// than three standard deviations
-	T	stddevk = k * sqrt(var);
+	T	stddevk = badpixellimit * sqrt(var);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "found mean: %f, variance: %f, "
-		"stddev%u = %f", mean, var, k, stddevk);
+		"stddev*%.1f = %f", mean, var, badpixellimit, stddevk);
 	size_t	badpixelcount = 0;
 	SubgridAdapter<T>	sga(*im.image, grid);
 	ImageSize	size = sga.getSize();
@@ -404,25 +404,30 @@ size_t	subdark(const ImageSequence&, ImageMean<T>& im,
  * This allows 
  * \param images	sequence of images to use to compute the 
  *			dark image
+ * \param badpixellimit	number of standard deviations to consider a pixel bad
  */
 template<typename T>
-ImagePtr	dark_plain(const ImageSequence& images) {
+ImagePtr	dark_plain(const ImageSequence& images,
+			double badpixellimit = 3) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "plain dark processing");
 	ImageMean<T>	im(images, true);
-	size_t	badpixels = subdark<T>(images, im, Subgrid());
+	size_t	badpixels = subdark<T>(images, im, Subgrid(), badpixellimit);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "total bad pixels: %d", badpixels);
 	
 	// that's it, we now have a dark image
 	ImagePtr	darkimg = im.getImagePtr();
 	darkimg->setMetadata(FITSKeywords::meta("BADPIXEL", (long)badpixels));
+	darkimg->setMetadata(FITSKeywords::meta("BDPXLLIM",
+		(double)badpixellimit));
 	return darkimg;
 }
 
 template<typename T>
-ImagePtr	dark(const ImageSequence& images, bool gridded = false) {
+ImagePtr	dark(const ImageSequence& images, double badpixellimit = 3,
+			bool gridded = false) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "gridded: %s", (gridded) ? "YES" : "NO");
 	if (!gridded) {
-		return dark_plain<T>(images);
+		return dark_plain<T>(images, badpixellimit);
 	}
 
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "gridded dark processing");
@@ -430,13 +435,19 @@ ImagePtr	dark(const ImageSequence& images, bool gridded = false) {
 	// perform the dark computation for each individual subgrid
 	size_t	badpixels = 0;
 	ImageSize	step(2, 2);
-	badpixels += subdark<T>(images, im, Subgrid(ImagePoint(0, 0), step));
-	badpixels += subdark<T>(images, im, Subgrid(ImagePoint(1, 0), step));
-	badpixels += subdark<T>(images, im, Subgrid(ImagePoint(0, 1), step));
-	badpixels += subdark<T>(images, im, Subgrid(ImagePoint(1, 1), step));
+	badpixels += subdark<T>(images, im, Subgrid(ImagePoint(0, 0), step),
+			badpixellimit);
+	badpixels += subdark<T>(images, im, Subgrid(ImagePoint(1, 0), step),
+			badpixellimit);
+	badpixels += subdark<T>(images, im, Subgrid(ImagePoint(0, 1), step),
+			badpixellimit);
+	badpixels += subdark<T>(images, im, Subgrid(ImagePoint(1, 1), step),
+			badpixellimit);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "total bad pixels: %d", badpixels);
 	ImagePtr	darkimg = im.getImagePtr();
 	darkimg->setMetadata(FITSKeywords::meta("BADPIXEL", (long)badpixels));
+	darkimg->setMetadata(FITSKeywords::meta("BDPXLLIM",
+		(double)badpixellimit));
 	return darkimg;
 }
 
@@ -465,9 +476,9 @@ ImagePtr DarkFrameFactory::operator()(const ImageSequence& images) const {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "float limit is %u", floatlimit);
 	ImagePtr	result;
 	if (firstimage->bitsPerPlane() <= floatlimit) {
-		result = dark<float>(images, gridded);
+		result = dark<float>(images, _badpixellimit, gridded);
 	} else {
-		result = dark<double>(images, gridded);
+		result = dark<double>(images, _badpixellimit, gridded);
 	}
 	if (firstimage->hasMetadata("INSTRUME")) {
 		result->setMetadata(firstimage->getMetadata("INSTRUME"));

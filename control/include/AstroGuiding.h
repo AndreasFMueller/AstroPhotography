@@ -1057,7 +1057,8 @@ private:
 	camera::DarkWorkImagerPtr	_darkwork;
 	camera::DarkWorkImagerThreadPtr	_darkthread;
 public:
-	void	startDark(double exposuretime, int imagecount);
+	void	startDark(double exposuretime, int imagecount,
+			double badpixellimit);
 	void	endDark();
 
 	// methods related to getting flat images

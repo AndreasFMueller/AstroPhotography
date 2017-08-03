@@ -705,10 +705,10 @@ std::string     GuiderI::getRepositoryName(const Ice::Current& current) {
  * \brief start the dark acquire process
  */
 void	GuiderI::startDarkAcquire(double exposuretime, int imagecount,
-		const Ice::Current& /* current */) {
+		double badpixellimit, const Ice::Current& /* current */) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "startDarkAcquire called");
 	try {
-		guider->startDark(exposuretime, imagecount);
+		guider->startDark(exposuretime, imagecount, badpixellimit);
 	} catch (const std::exception& x) {
 		BadState	exception;
 		exception.cause = std::string(x.what());

@@ -84,6 +84,11 @@ public:
 	int	imagecount() const { return _imagecount; }
 	void	imagecount(int n) { _imagecount = n; }
 private:
+	double	_badpixellimit; // number of std devs for bad pixels
+public:
+	double	badpixellimit() const { return _badpixellimit; }
+	void	badpixellimit(double b) { _badpixellimit = b; }
+private:
 	CallbackPtr	_endCallback;
 protected:
 	void	end();

@@ -24,6 +24,7 @@ public:
 	volatile bool	completed;
 	double	guideinterval;
 	double	aointerval;
+	double	badpixellimit;
 	bool	csv;
 	bool	flipped;
 	bool	stepping;
@@ -45,6 +46,7 @@ public:
 		flipped = false;
 		stepping = false;
 		imagecount = 10;
+		badpixellimit = 3;
 	}
 
 	// general commands

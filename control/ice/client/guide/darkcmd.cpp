@@ -20,7 +20,8 @@ namespace snowguide {
  */
 int	Guide::dark_command(GuiderPrx guider) {
 	try {
-		guider->startDarkAcquire(exposure.exposuretime, imagecount);
+		guider->startDarkAcquire(exposure.exposuretime, imagecount,
+			badpixellimit);
 	} catch (const std::exception& x) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "cannot start dark: %s", x.what());
 		return EXIT_FAILURE;

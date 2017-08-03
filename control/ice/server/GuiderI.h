@@ -145,6 +145,7 @@ public:
 
 	// methods used for dark image acquisition
 	virtual void	startDarkAcquire(double exposuretime, int imagecount,
+				double badpixellimit,
 				const Ice::Current& current);
 	virtual ImagePrx	darkImage(const Ice::Current& current);
 	virtual bool	hasDark(const Ice::Current& current);

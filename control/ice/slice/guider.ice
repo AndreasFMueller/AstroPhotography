@@ -300,8 +300,11 @@ module snowstar {
 		 *
 		 * \param exposuretime	exposure time to use for dark images
 		 * \param imagecount	number of images to take for the dark
+		 * \param badpixellimit	number of standard deviations a pixel
+		 *			may be off the mean to consider it bad
 		 */
-		void	startDarkAcquire(double exposuretime, int imagecount)
+		void	startDarkAcquire(double exposuretime, int imagecount,
+				double badpixellimit)
 				throws BadState;
 		Image*	darkImage() throws BadState;
 		bool	hasDark();

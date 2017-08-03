@@ -612,7 +612,8 @@ public:
  * \param exposuretime	exposure time to use for darks
  * \param imagecount	number of images to use to construct the dark
  */
-void	Guider::startDark(double exposuretime, int imagecount) {
+void	Guider::startDark(double exposuretime, int imagecount,
+		double badpixellimit) {
 	_state.startDarkAcquire();
 	try {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "start to acquire a dark");
@@ -620,6 +621,7 @@ void	Guider::startDark(double exposuretime, int imagecount) {
 		_darkwork = DarkWorkImagerPtr(new DarkWorkImager(imager()));
 		_darkwork->exposuretime(exposuretime);
 		_darkwork->imagecount(imagecount);
+		_darkwork->badpixellimit(badpixellimit);
 		_darkwork->endCallback(CallbackPtr(new DarkEndCallback(*this)));
 
 		// set iup the thread

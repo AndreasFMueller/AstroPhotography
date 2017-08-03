@@ -36,15 +36,16 @@ static struct option	longopts[] = {
 { "help",		no_argument,		NULL,	'h' }, /* 10 */
 { "interval",		required_argument,	NULL,	'i' }, /* 11 */
 { "imagecount",		required_argument,	NULL,	'I' }, /* 12 */
-{ "method",		required_argument,	NULL,	'm' }, /* 13 */
-{ "prefix",		required_argument,	NULL,	'p' }, /* 14 */
-{ "rectangle",		required_argument,	NULL,	'r' }, /* 15 */
-{ "star",		required_argument,	NULL,	's' }, /* 16 */
-{ "stepping",		no_argument,		NULL,	'S' }, /* 17 */
-{ "temperature",	required_argument,	NULL,	't' }, /* 18 */
-{ "verbose",		no_argument,		NULL,	'v' }, /* 19 */
-{ "width",		required_argument,	NULL,	'w' }, /* 20 */
-{ NULL,			0,			NULL,    0  }  /* 21 */
+{ "limit",		required_argument,	NULL,	'l' }, /* 13 */
+{ "method",		required_argument,	NULL,	'm' }, /* 14 */
+{ "prefix",		required_argument,	NULL,	'p' }, /* 15 */
+{ "rectangle",		required_argument,	NULL,	'r' }, /* 16 */
+{ "star",		required_argument,	NULL,	's' }, /* 17 */
+{ "stepping",		no_argument,		NULL,	'S' }, /* 18 */
+{ "temperature",	required_argument,	NULL,	't' }, /* 19 */
+{ "verbose",		no_argument,		NULL,	'v' }, /* 20 */
+{ "width",		required_argument,	NULL,	'w' }, /* 21 */
+{ NULL,			0,			NULL,    0  }  /* 22 */
 };
 
 /**
@@ -102,6 +103,9 @@ int	main(int argc, char *argv[]) {
 			return EXIT_SUCCESS;
 		case 'i':
 			guide.guideinterval = std::stod(optarg);
+			break;
+		case 'l':
+			guide.badpixellimit = std::stod(optarg);
 			break;
 		case 'm': {
 			std::string	m(optarg);

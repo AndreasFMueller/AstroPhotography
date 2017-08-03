@@ -24,6 +24,7 @@ namespace camera {
 DarkWork::DarkWork(CcdPtr ccd) : _ccd(ccd) {
 	_exposuretime = 1.0;
 	_imagecount = 10;
+	_badpixellimit = 3;
 }
 
 /**
@@ -80,7 +81,7 @@ ImagePtr	DarkWork::common(astro::thread::ThreadBase& /* thread */) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "got %d images");
 
 	// construct the dark image from the images retrieved
-	calibration::DarkFrameFactory	darkfactory;
+	calibration::DarkFrameFactory	darkfactory(_badpixellimit);
 	_darkimage = darkfactory(images);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "got an %s dark image with %s pixels",
 		_darkimage->size().toString().c_str(),
@@ -91,6 +92,9 @@ ImagePtr	DarkWork::common(astro::thread::ThreadBase& /* thread */) {
 	_darkimage->setMetadata(
 		astro::io::FITSKeywords::meta(std::string("IMGCOUNT"),
 			(long)_imagecount));
+	_darkimage->setMetadata(
+		astro::io::FITSKeywords::meta(std::string("BDPXLLIM"),
+			(double)_badpixellimit));
 
 	return _darkimage;
 }

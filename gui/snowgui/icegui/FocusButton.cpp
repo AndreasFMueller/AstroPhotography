@@ -17,7 +17,7 @@ FocusButton::FocusButton(QWidget *parent) : QPushButton(parent) {
 FocusButton::~FocusButton() {
 }
 
-void	FocusButton::paintEvent(QPaintEvent *event) {
+void	FocusButton::paintEvent(QPaintEvent * /* event */) {
 	draw();
 }
 

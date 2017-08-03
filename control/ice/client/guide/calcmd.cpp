@@ -67,6 +67,11 @@ int	Guide::calibration_command(GuiderFactoryPrx guiderfactory,
 	case GuiderGUIDING:
 		calibration_show(guider->getCalibration(caltype));
 		break;
+	case GuiderIMAGING:
+	case GuiderDARKACQUIRE:
+	case GuiderFLATACQUIRE:
+		std::cerr << "imager currently busy" << std::endl;
+		return EXIT_FAILURE;
 	}
 	return EXIT_SUCCESS;
 

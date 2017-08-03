@@ -138,7 +138,9 @@ void	darkwidget::acquireClicked() {
 	try {
 		double	exposuretime = ui->exposureBox->value();
 		int	imagecount = ui->numberBox->value();
-		_guider->startDarkAcquire(exposuretime, imagecount);
+		double	badpixellimit = ui->hotlimitBox->value();
+		_guider->startDarkAcquire(exposuretime, imagecount,
+			badpixellimit);
 		_acquiring = true;
 	} catch (const snowstar::BadState& x) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "bad state: %s", x.cause.c_str());
