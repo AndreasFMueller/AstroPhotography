@@ -259,8 +259,8 @@ void	instrumentdisplay::allproperties() {
 		return;
 	}
 	ui->propertyTable->blockSignals(true);
-	property(0, "focallength", "Focal length of main camera");
-	property(1, "guiderfocallength", "Focal length of guide camera");
+	property(0, "focallength", "Focal length [m] of main camera");
+	property(1, "guiderfocallength", "Focal length [m] of guide camera");
 	property(2, "guiderate", "mount rate wrt. siderial rate");
 	ui->propertyTable->blockSignals(false);
 }
@@ -279,6 +279,7 @@ void    instrumentdisplay::property(int row, const std::string& propertyname,
 		p.value = std::string();
 		p.description = description;
 	}
+	ui->propertyTable->setRowHeight(row, 19);
 	QTableWidgetItem	*i;
 	i = new QTableWidgetItem(p.property.c_str());
 	i->setFlags(Qt::NoItemFlags);
