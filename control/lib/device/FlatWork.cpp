@@ -77,7 +77,7 @@ ImagePtr	FlatWork::common(astro::thread::ThreadBase& /* thread */) {
 		ImagePtr	image = _ccd->getImage();
 		images.push_back(image);
 	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "got %d images");
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "got %d images", _imagecount);
 
 	// construct the flat image from the images retrieved
 	calibration::FlatFrameFactory	flatfactory;

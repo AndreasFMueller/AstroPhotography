@@ -552,6 +552,10 @@ ImagePtr	flat(const ImageSequence& images) {
 
 ImagePtr	FlatFrameFactory::operator()(const ImageSequence& images,
 			const ImagePtr darkimage) const {
+	if (!darkimage) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "not using a dark image");
+		return flat(images);
+	}
 	Image<double>	*doubledark = dynamic_cast<Image<double>*>(&*darkimage);
 	Image<float>	*floatdark = dynamic_cast<Image<float>*>(&*darkimage);
 	if (doubledark) {
@@ -568,8 +572,7 @@ ImagePtr	FlatFrameFactory::operator()(const ImageSequence& images,
 			countnans(*floatdark));
 		return flat(images, *floatdark);
 	}
-	// no useful dark image supplied
-	return flat(images);
+	throw std::runtime_error("no useful flat image supplied");
 }
 
 //////////////////////////////////////////////////////////////////////
