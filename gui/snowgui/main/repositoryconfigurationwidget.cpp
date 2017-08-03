@@ -23,6 +23,7 @@ repositoryconfigurationwidget::repositoryconfigurationwidget(QWidget *parent)
 	QStringList	headers;
 	headers << "Repository" << "enabled" << "Directory";
 	ui->repositoryTable->setHorizontalHeaderLabels(headers);
+	ui->repositoryTable->horizontalHeader()->setStretchLastSection(true);
 
 	connect(ui->createButton, SIGNAL(clicked()),
 		this, SLOT(createClicked()));
@@ -65,6 +66,9 @@ void	repositoryconfigurationwidget::readRepositories() {
 		std::string	reponame = summary.name;
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "found repository: %s",
 			summary.name.c_str());
+
+		ui->repositoryTable->setRowHeight(row, 19);
+
 		QTableWidgetItem	*i;
 		i = new QTableWidgetItem(reponame.c_str());
 		ui->repositoryTable->setItem(row, 0, i);

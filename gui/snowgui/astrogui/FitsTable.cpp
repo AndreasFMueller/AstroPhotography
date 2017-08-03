@@ -48,7 +48,8 @@ static void	metaItem(int& row, QTableWidget* table,
 void	FitsTable::setImage(astro::image::ImagePtr image) {
 	QStringList	headerlist;
         headerlist << "Keyword" << "Value" << "Comment";
-        setHorizontalHeaderLabels(headerlist);
+        this->setHorizontalHeaderLabels(headerlist);
+        this->horizontalHeader()->setStretchLastSection(true);
 	QTableWidget	*table = this;
 	setRowCount(image->nMetadata() + ((synthetic()) ? 3 : 0));
 	int	row = 0;
