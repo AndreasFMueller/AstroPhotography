@@ -407,7 +407,7 @@ void	MainWindow::createActions() {
 	connect(connectAction, &QAction::triggered, this,
 		&MainWindow::connectFile);
 
-	openAction = new QAction(QString("Open"), this);
+	openAction = new QAction(QString("Open Image"), this);
 	connect(openAction, &QAction::triggered, this,
 		&MainWindow::openFile);
 
@@ -415,7 +415,7 @@ void	MainWindow::createActions() {
 	connect(browseAction, &QAction::triggered, this,
 		&MainWindow::browseDirectory);
 
-	saveAction = new QAction(QString("Save"), this);
+	saveAction = new QAction(QString("Save Image"), this);
 	saveAction->setEnabled(false);
 	connect(saveAction, &QAction::triggered, this,
 		&MainWindow::saveImage);
