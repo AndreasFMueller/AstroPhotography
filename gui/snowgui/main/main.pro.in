@@ -39,6 +39,9 @@ INCLUDEPATH += ../icegui ../astrogui ../image ../focusing ../guiding
 INCLUDEPATH += ../instruments ../images ../repository ../expose
 INCLUDEPATH += ../task ../browser
 
+RC_ICONS = snowgui.ico
+ICON = snowgui.icns
+
 ASTROGUISOURCES = 							\
 	Application.cpp							\
         mainwindow.cpp 							\
