@@ -117,10 +117,13 @@ void	flatwidget::statusUpdate() {
 		break;
 	}
 	_guiderstate = newstate;
-	if (_acquiring && (newstate != snowstar::GuiderDARKACQUIRE)) {
+	if (_acquiring && (newstate != snowstar::GuiderFLATACQUIRE)) {
 		// retrieve the image
 		checkImage();
 	}
+	try {
+		ui->usedarkCheck->setEnabled(_guider->hasDark());
+	} catch (...) { }
 }
 
 /**

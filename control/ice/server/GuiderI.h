@@ -157,7 +157,7 @@ public:
 				const Ice::Current& current);
 
 	virtual void	startFlatAcquire(double exposuretime, int imagecount,
-				const Ice::Current& current);
+				bool useDark, const Ice::Current& current);
 	virtual ImagePrx	flatImage(const Ice::Current& current);
 	virtual bool	hasFlat(const Ice::Current& current);
 	virtual bool	useFlat(const Ice::Current& current);

@@ -314,8 +314,8 @@ module snowstar {
 		bool	interpolate() throws BadState;
 		void	setInterpolate(bool interpolate) throws BadState;
 
-		void	startFlatAcquire(double exposuretime, int imagecount)
-				throws BadState;
+		void	startFlatAcquire(double exposuretime, int imagecount,
+				bool useDark) throws BadState;
 		Image*	flatImage() throws BadState;
 		bool	hasFlat();
 		bool	useFlat() throws BadState;

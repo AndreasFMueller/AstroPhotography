@@ -36,7 +36,8 @@ int	Guide::dark_command(GuiderPrx guider) {
  */
 int	Guide::flat_command(GuiderPrx guider) {
 	try {
-		guider->startFlatAcquire(exposure.exposuretime, imagecount);
+		guider->startFlatAcquire(exposure.exposuretime, imagecount,
+			usedark);
 	} catch (const std::exception& x) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "cannot start flat: %s", x.what());
 		return EXIT_FAILURE;

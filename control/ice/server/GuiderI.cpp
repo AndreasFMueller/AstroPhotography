@@ -785,11 +785,12 @@ void	GuiderI::setUseDark(bool usedark, const Ice::Current& /* current */) {
  * \brief start acquisition of a flat image
  */
 void    GuiderI::startFlatAcquire(double exposuretime, int imagecount,
-                                const Ice::Current& /* current */) {
+				bool useDark,
+				const Ice::Current& /* current */) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "startFlatAcquire(%.3f, %d) called",
 		exposuretime, imagecount);
 	try {
-		guider->startFlat(exposuretime, imagecount);
+		guider->startFlat(exposuretime, imagecount, useDark);
 	} catch (const std::exception& x) {
 		BadState	exception;
 		exception.cause = std::string(x.what());

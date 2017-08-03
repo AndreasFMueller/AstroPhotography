@@ -666,7 +666,7 @@ public:
  * \param exposuretime	exposure time to use for flats
  * \param imagecount	number of images to use to construct the flat
  */
-void	Guider::startFlat(double exposuretime, int imagecount) {
+void	Guider::startFlat(double exposuretime, int imagecount, bool useDark) {
 	_state.startFlatAcquire();
 	try {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "start to acquire a flat");
@@ -674,7 +674,9 @@ void	Guider::startFlat(double exposuretime, int imagecount) {
 		_flatwork = FlatWorkImagerPtr(new FlatWorkImager(imager()));
 		_flatwork->exposuretime(exposuretime);
 		_flatwork->imagecount(imagecount);
-		_flatwork->darkimage(imager().dark());
+		if (useDark) {
+			_flatwork->darkimage(imager().dark());
+		}
 		_flatwork->endCallback(CallbackPtr(new FlatEndCallback(*this)));
 
 		// set iup the thread

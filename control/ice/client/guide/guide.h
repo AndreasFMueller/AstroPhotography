@@ -24,12 +24,13 @@ public:
 	volatile bool	completed;
 	double	guideinterval;
 	double	aointerval;
-	double	badpixellimit;
 	bool	csv;
 	bool	flipped;
 	bool	stepping;
 	TrackerMethod	method;
 	int	imagecount;
+	double	badpixellimit;
+	bool	usedark;
 private:
 	CommonMonitor	*monitor;
 public:
@@ -47,6 +48,7 @@ public:
 		stepping = false;
 		imagecount = 10;
 		badpixellimit = 3;
+		usedark = false;
 	}
 
 	// general commands

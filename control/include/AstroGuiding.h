@@ -1066,7 +1066,7 @@ private:
 	camera::FlatWorkImagerPtr	_flatwork;
 	camera::FlatWorkImagerThreadPtr	_flatthread;
 public:
-	void	startFlat(double exposuretime, int imagecount);
+	void	startFlat(double exposuretime, int imagecount, bool useDark);
 	void	endFlat();
 
 	// acquiring an image

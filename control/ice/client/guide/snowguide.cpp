@@ -30,22 +30,23 @@ static struct option	longopts[] = {
 { "config",		required_argument,	NULL,	'c' }, /*  4 */
 { "csv",		no_argument,		NULL,	 1  }, /*  5 */
 { "debug",		no_argument,		NULL,	'd' }, /*  6 */
-{ "exposure",		required_argument,	NULL,	'e' }, /*  7 */
-{ "flipped",		no_argument,		NULL,	'f' }, /*  8 */
-{ "guideport",		required_argument,	NULL,	'G' }, /*  9 */
-{ "help",		no_argument,		NULL,	'h' }, /* 10 */
-{ "interval",		required_argument,	NULL,	'i' }, /* 11 */
-{ "imagecount",		required_argument,	NULL,	'I' }, /* 12 */
-{ "limit",		required_argument,	NULL,	'l' }, /* 13 */
-{ "method",		required_argument,	NULL,	'm' }, /* 14 */
-{ "prefix",		required_argument,	NULL,	'p' }, /* 15 */
-{ "rectangle",		required_argument,	NULL,	'r' }, /* 16 */
-{ "star",		required_argument,	NULL,	's' }, /* 17 */
-{ "stepping",		no_argument,		NULL,	'S' }, /* 18 */
-{ "temperature",	required_argument,	NULL,	't' }, /* 19 */
-{ "verbose",		no_argument,		NULL,	'v' }, /* 20 */
-{ "width",		required_argument,	NULL,	'w' }, /* 21 */
-{ NULL,			0,			NULL,    0  }  /* 22 */
+{ "dark",		no_argument,		NULL,	'D' }, /*  7 */
+{ "exposure",		required_argument,	NULL,	'e' }, /*  8 */
+{ "flipped",		no_argument,		NULL,	'f' }, /*  9 */
+{ "guideport",		required_argument,	NULL,	'G' }, /* 10 */
+{ "help",		no_argument,		NULL,	'h' }, /* 11 */
+{ "interval",		required_argument,	NULL,	'i' }, /* 12 */
+{ "imagecount",		required_argument,	NULL,	'I' }, /* 13 */
+{ "limit",		required_argument,	NULL,	'l' }, /* 14 */
+{ "method",		required_argument,	NULL,	'm' }, /* 15 */
+{ "prefix",		required_argument,	NULL,	'p' }, /* 16 */
+{ "rectangle",		required_argument,	NULL,	'r' }, /* 17 */
+{ "star",		required_argument,	NULL,	's' }, /* 18 */
+{ "stepping",		no_argument,		NULL,	'S' }, /* 19 */
+{ "temperature",	required_argument,	NULL,	't' }, /* 20 */
+{ "verbose",		no_argument,		NULL,	'v' }, /* 21 */
+{ "width",		required_argument,	NULL,	'w' }, /* 22 */
+{ NULL,			0,			NULL,    0  }  /* 23 */
 };
 
 /**
@@ -88,6 +89,9 @@ int	main(int argc, char *argv[]) {
 			break;
 		case 'd':
 			debuglevel = LOG_DEBUG;
+			break;
+		case 'D':
+			guide.usedark = true;
 			break;
 		case 'e':
 			guide.exposure.exposuretime = std::stod(optarg);
