@@ -187,6 +187,7 @@ void	darkwidget::viewClicked() {
 void    darkwidget::closeEvent(QCloseEvent * /* event */) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "allow deletion");
 	emit closeWidget();
+	emit offerImage(ImagePtr(NULL), std::string());
 	deleteLater();
 }
 

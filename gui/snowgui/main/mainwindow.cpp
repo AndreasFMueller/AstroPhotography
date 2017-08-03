@@ -476,6 +476,8 @@ QLabel	*MainWindow::serviceLabel(ServiceSubset::service_type t) {
 
 void	MainWindow::imageForSaving(astro::image::ImagePtr image,
 		std::string imagestring) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "accepting image '%s'",
+		imagestring.c_str());
 	_image = image;
 	_imagestring = imagestring;
 	if (_image) {
@@ -485,11 +487,13 @@ void	MainWindow::imageForSaving(astro::image::ImagePtr image,
                 title = title + std::string("<");
                 title = title + astro::demangle(_image->pixel_type().name());
                 title = title + std::string(">");
-		saveAction->setEnabled(true);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "new save title: '%s'",
+			title.c_str());
 		saveAction->setText(title.c_str());
+		saveAction->setEnabled(true);
 	} else {
-		saveAction->setEnabled(false);
 		saveAction->setText("Save image");
+		saveAction->setEnabled(false);
 	}
 }
 

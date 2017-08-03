@@ -80,7 +80,7 @@ void	guidingwindow::instrumentSetup(
  */
 void	guidingwindow::newImage(astro::image::ImagePtr _image) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "new image received, offer for saving");
-	sendImage(_image, std::string("guiding image"));
+	sendImage(_image, std::string("guiding"));
 }
 
 /**

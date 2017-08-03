@@ -67,6 +67,7 @@ void	exposewindow::instrumentSetup(
  * \brief Handle the close event
  */
 void	exposewindow::closeEvent(QCloseEvent *) {
+	sendImage(astro::image::ImagePtr(NULL), std::string());
 	deleteLater();
 }
 

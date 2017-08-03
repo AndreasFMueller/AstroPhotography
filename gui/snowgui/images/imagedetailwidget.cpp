@@ -131,4 +131,8 @@ void	imagedetailwidget::saveImage() {
 	}
 }
 
+void	imagedetailwidget::closeEvent(QCloseEvent * /* event */) {
+        emit offerImage(ImagePtr(NULL), std::string());
+}
+
 } // namespace snowgui

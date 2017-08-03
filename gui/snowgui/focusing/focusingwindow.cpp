@@ -104,7 +104,7 @@ void	focusingwindow::receiveImage(ImagePtr _image) {
 
 	// emit a signal for saving
 	if (_image) {
-		sendImage(_image, std::string("focusing image"));
+		sendImage(_image, std::string("focusing"));
 	}
 }
 
@@ -123,6 +123,7 @@ void	focusingwindow::rectangleSelected(ImageRectangle rectangle) {
  * \brief Make sure object is destroyed when the window closes
  */
 void	focusingwindow::closeEvent(QCloseEvent * /* event */) {
+	sendImage(ImagePtr(NULL), std::string());
 	deleteLater();
 }
 

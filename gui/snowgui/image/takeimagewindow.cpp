@@ -82,7 +82,7 @@ void    takeimagewindow::receiveImage(ImagePtr image) {
 	Exposure        imageexposure
 		= ui->ccdcontrollerWidget->imageexposure();
 	ui->ccdcontrollerWidget->setExposure(imageexposure);
-	sendImage(image, std::string("preview image"));
+	sendImage(image, std::string("preview"));
 }
 
 /**

@@ -103,6 +103,7 @@ void	taskwindow::instrumentSetup(
  * \brief Handle closing of this window
  */
 void	taskwindow::closeEvent(QCloseEvent * /* event */) {
+	sendImage(ImagePtr(NULL), std::string());
 	deleteLater();
 }
 
@@ -114,7 +115,7 @@ void	taskwindow::receiveImage(ImagePtr image) {
 		image->size().toString().c_str());
 	ui->feedbackWidget->setCurrentIndex(1);
 	emit imageReceived(image);
-	sendImage(image, std::string("task image"));
+	sendImage(image, std::string("task"));
 }
 
 /**

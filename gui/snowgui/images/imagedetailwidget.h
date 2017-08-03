@@ -34,6 +34,8 @@ public slots:
 	void	loadImage();
 	void	deleteImage();
 	void	saveImage();
+protected:
+	void	closeEvent(QCloseEvent *);
 
 private:
 	Ui::imagedetailwidget *ui;

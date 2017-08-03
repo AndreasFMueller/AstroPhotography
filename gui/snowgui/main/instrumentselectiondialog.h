@@ -59,7 +59,6 @@ public:
 		application	*a = new application(NULL);
 		// get the main window and connect the offerImage signal
 		// to the imageForSaving option
-		MainWindow	*mainwindow = (MainWindow*)parentWidget();
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "connect offerImage()");
 		a->instrumentSetup(_serviceobject, ri);
 		a->show();
