@@ -10,6 +10,9 @@
 
 namespace snowgui {
 
+/**
+ * \brief create a new singletrackwidget
+ */
 singletrackwidget::singletrackwidget(QWidget *parent) :
 	QWidget(parent), ui(new Ui::singletrackwidget) {
 	ui->setupUi(this);
@@ -34,15 +37,52 @@ singletrackwidget::singletrackwidget(QWidget *parent) :
 		ui->dataWidget, SLOT(setScale(int)));
 }
 
+/**
+ * \brief Destroy the widget
+ */
 singletrackwidget::~singletrackwidget() {
     delete ui;
 }
 
+/**
+ * \brief convert a point to the form used by the ChannelDisplayWidget
+ *
+ * \param point		tracking point to convert
+ */
+std::vector<double>	singletrackwidget::convert(
+				const snowstar::TrackingPoint& point) const {
+	std::vector<double>	a;
+	double	x, y;
+	switch (_datatype) {
+	case offsetPx:
+		x = point.trackingoffset.x;
+		y = point.trackingoffset.y;
+		break;
+	case offsetArcsec:
+		x = point.trackingoffset.x * _masperpixel / 1000;
+		y = point.trackingoffset.y * _masperpixel / 1000;
+		break;
+	case correction:
+		x = point.activation.x;
+		y = point.activation.y;
+		break;
+	}
+	a.push_back(x);
+	a.push_back(y);
+	return a;
+}
+
+/**
+ * \brief add a new TrackingPoint
+ */
 void	singletrackwidget::add(const snowstar::TrackingPoint& point) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "new point");
 	snowstar::TrackingPoint	p = point;
 	p.timeago = astro::Timer::gettime() - point.timeago;
 	_points.push_back(p);
+
+	// add the point in the right format to the 
+	ui->dataWidget->add(p.timeago, convert(point));
 }
 
 /**
@@ -58,29 +98,10 @@ void	singletrackwidget::updateData() {
 	ChannelDisplayWidget	*cdw = ui->dataWidget;
 	cdw->clearData();
 	int	counter = 0;
-	double	scale = _masperpixel / 1000;
-	datatype_t	dt = _datatype;
+	singletrackwidget	*stw = this;
 	std::for_each(_points.begin(), _points.end(),
-		[cdw,&counter,dt,scale](const snowstar::TrackingPoint& p) mutable {
-			std::vector<double>	a;
-			double	x, y;
-			switch (dt) {
-			case offsetPx:
-				x = p.trackingoffset.x;
-				y = p.trackingoffset.y;
-				break;
-			case offsetArcsec:
-				x = p.trackingoffset.x * scale;
-				y = p.trackingoffset.y * scale;
-				break;
-			case correction:
-				x = p.activation.x;
-				y = p.activation.y;
-				break;
-			}
-			a.push_back(x);
-			a.push_back(y);
-			cdw->add(p.timeago, a);
+		[cdw,&counter,stw](const snowstar::TrackingPoint& p) mutable {
+			cdw->add(p.timeago, stw->convert(p));
 			counter++;
 		}
 	);
@@ -103,17 +124,35 @@ void	singletrackwidget::buttonToggled(bool t) {
 	}
 	if (sender() == ui->offsetPxButton) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "data type changed to offsetPx");
-		_datatype = offsetPx;
+		if (_datatype != offsetPx) {
+			_datatype = offsetPx;
+			updateData();
+		}
 	}
 	if (sender() == ui->offsetArcsecButton) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "data type changed to offsetArcsec");
-		_datatype = offsetArcsec;
+		debug(LOG_DEBUG, DEBUG_LOG, 0,
+			"data type changed to offsetArcsec");
+		if (_datatype != offsetArcsec) {
+			_datatype = offsetArcsec;
+			updateData();
+		}
 	}
 	if (sender() == ui->correctionButton) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "data type changed to correction");
-		_datatype = correction;
+		debug(LOG_DEBUG, DEBUG_LOG, 0,
+			"data type changed to correction");
+		if (_datatype != correction) {
+			_datatype = correction;
+			updateData();
+		}
 	}
-	updateData();
+}
+
+/**
+ * \brief clear the data
+ */
+void	singletrackwidget::clearData() {
+	_points.clear();
+	ui->dataWidget->clearData();
 }
 
 } // namespace snowgui

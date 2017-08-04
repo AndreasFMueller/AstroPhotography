@@ -60,7 +60,8 @@ void	TrackingMonitorController::stop(const Ice::Current&) {
  */
 void	TrackingMonitorController::update(const snowstar::TrackingPoint& point,
 		const Ice::Current&) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "new tracking point received");
+	debug(LOG_DEBUG, DEBUG_LOG, 0,
+		"new tracking point received (timeago = %.1f)", point.timeago);
 	_dialog->add(point);
 	emit dataUpdated();
 }
@@ -70,7 +71,7 @@ void	TrackingMonitorController::update(const snowstar::TrackingPoint& point,
  */
 void	TrackingMonitorController::refreshDisplay() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "refresh slot called");
-	_dialog->updateData();
+	_dialog->repaint();
 }
 
 

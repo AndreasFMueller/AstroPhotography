@@ -22,6 +22,8 @@ class singletrackwidget : public QWidget {
 	std::vector<snowstar::TrackingPoint>	_points;
 	datatype_t	_datatype;
 	double	_masperpixel;
+private:
+	std::vector<double>	convert(const snowstar::TrackingPoint& point) const;
 public:
 	explicit singletrackwidget(QWidget *parent = 0);
 	~singletrackwidget();
@@ -30,6 +32,7 @@ public:
 	double	masperpixel() const { return _masperpixel; }
 	void	masperpixel(double m) { _masperpixel = m; }
 	void	updateData();
+	void	clearData();
 
 public slots:
 	void	buttonToggled(bool);

@@ -25,6 +25,7 @@ public:
 	void	add(const snowstar::TrackingHistory& history);
 	void	add(const snowstar::TrackingPoint& point);
 	void	updateData();
+	void	clearData();
 
 	void	gpMasperpixel(double masperpixel);
 	void	aoMasperpixel(double masperpixel);

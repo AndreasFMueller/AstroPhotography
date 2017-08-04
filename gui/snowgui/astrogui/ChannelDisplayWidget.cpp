@@ -63,6 +63,7 @@ void	ChannelDisplayWidget::add(double time, std::vector<double> values) {
 	// compute new width
 	double	duration = _channels.allLast() - _channels.allFirst();
 	int	newwidth = duration / _timescale;
+	//debug(LOG_DEBUG, DEBUG_LOG, 0, "newwidth = %d", newwidth);
 	this->setMinimumSize(newwidth, 0);
 }
 
