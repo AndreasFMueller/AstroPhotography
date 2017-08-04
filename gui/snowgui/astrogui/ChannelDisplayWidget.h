@@ -24,8 +24,19 @@ class ChannelDisplayWidget : public QWidget {
 	ChannelDataVector	_channels;
 	std::vector<QColor>	_colors;
 
+	bool	_autorange;
+public:
+	bool	autorange() const { return _autorange; }
+	void	setAutorange(bool a) { _autorange = a; }
+
 private:
-	void	draw();
+	double	_timescale;
+public:
+	double	timescale() const { return _timescale; }
+	void	setTimescale(double t) { _timescale = t; }
+
+private:
+	void	draw(double notbefore, double notafter);
 
 public: 
 	explicit ChannelDisplayWidget(QWidget *parent = NULL);

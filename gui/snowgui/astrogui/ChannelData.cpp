@@ -175,6 +175,20 @@ cleanup:
 	return m;
 }
 
+double	ChannelData::first() const {
+	if (size() == 0) {
+		return std::numeric_limits<double>::infinity();
+	}
+	return begin()->time;
+}
+
+double	ChannelData::last() const {
+	if (size() == 0) {
+		return -std::numeric_limits<double>::infinity();
+	}
+	return rbegin()->time;
+}
+
 //////////////////////////////////////////////////////////////////////
 // ChannelDataVector implementation
 //////////////////////////////////////////////////////////////////////
@@ -278,6 +292,26 @@ std::vector<double>	ChannelDataVector::max(double notbefore, double notafter) co
 	return result;
 }
 
+std::vector<double>	ChannelDataVector::last() const {
+	std::vector<double>	result;
+	std::for_each(begin(), end(),
+		[&result](const ChannelData& channel) mutable {
+			result.push_back(channel.last());
+		}
+	);
+	return result;
+}
+
+std::vector<double>	ChannelDataVector::first() const {
+	std::vector<double>	result;
+	std::for_each(begin(), end(),
+		[&result](const ChannelData& channel) mutable {
+			result.push_back(channel.first());
+		}
+	);
+	return result;
+}
+
 double	ChannelDataVector::allMin(int lastn) const {
 	std::vector<double>	minima = min(lastn);
 	if (size() == 0) {
@@ -312,6 +346,22 @@ double	ChannelDataVector::allMax(double notbefore, double notafter) const {
 	}
 	double m = *max_element(maxima.begin(), maxima.end());
 	return m;
+}
+
+double	ChannelDataVector::allFirst() const {
+	if (size() == 0) {
+		return std::numeric_limits<double>::infinity();
+	}
+	std::vector<double>	f = first();
+	return *min_element(f.begin(), f.end());
+}
+
+double	ChannelDataVector::allLast() const {
+	if (size() == 0) {
+		return -std::numeric_limits<double>::infinity();
+	}
+	std::vector<double>	l = last();
+	return *max_element(l.begin(), l.end());
 }
 
 void	ChannelDataVector::clear() {

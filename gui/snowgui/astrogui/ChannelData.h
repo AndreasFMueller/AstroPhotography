@@ -57,6 +57,9 @@ public:
 	double	stddev(int lastn) const;
 	double	stddev(double notbefore, double notafter) const;
 
+	double	last() const;
+	double	first() const;
+
 	void	push_back(const ChannelDataPoint& p);
 };
 
@@ -64,20 +67,30 @@ class ChannelDataVector : public std::vector<ChannelData> {
 public:
 	std::vector<double>	min(int lastn) const;
 	std::vector<double>	min(double notbefore, double notafter) const;
+
 	std::vector<double>	max(int lastn) const;
 	std::vector<double>	max(double notbefore, double notafter) const;
+
 	std::vector<double>	mean(int lastn) const;
 	std::vector<double>	mean(double notbefore, double notafter) const;
+
 	std::vector<double>	var(int lastn) const;
 	std::vector<double>	var(double notbefore, double notafter) const;
+
 	std::vector<double>	stddev(int lastn) const;
 	std::vector<double>	stddev(double notbefore, double notafter) const;
+
+	std::vector<double>	last() const;
+	std::vector<double>	first() const;
 
 	double	allMin(int lastn) const;
 	double	allMin(double notbefore, double notafter) const;
 
 	double	allMax(int lastn) const;
 	double	allMax(double notbefore, double notafter) const;
+
+	double	allLast() const;
+	double	allFirst() const;
 
 	void	clear();
 };

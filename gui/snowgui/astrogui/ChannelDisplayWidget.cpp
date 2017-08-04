@@ -15,6 +15,7 @@ namespace snowgui {
  * \brief Construct a new channel display widget
  */
 ChannelDisplayWidget::ChannelDisplayWidget(QWidget *parent) : QWidget(parent) {
+	_timescale = 1;
 }
 
 /**
@@ -64,13 +65,18 @@ void	ChannelDisplayWidget::add(double time, std::vector<double> values) {
  * This simply calls the 
  */
 void	ChannelDisplayWidget::paintEvent(QPaintEvent * /* event */) {
-	draw();
+	double	notafter = _channels.allLast();
+	double	notbefore = notafter - width() / _timescale;
+	draw(notbefore, notafter);
 }
 
 /**
  * \brief Perform the drawing itself
  */
-void	ChannelDisplayWidget::draw() {
+void	ChannelDisplayWidget::draw(double notbefore, double notafter) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0,
+		"plotting between %.1f and %.1f (%.1f seconds)",
+		notbefore, notafter, notafter - notbefore);
 	// draw the white background
 	QPainter	painter(this);
 	painter.setRenderHint(QPainter::Antialiasing);
@@ -94,6 +100,7 @@ void	ChannelDisplayWidget::draw() {
 
 	// ensure that the range is at list 3 pixels
 	if (M <  1.5) { M =  1.5; }
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "M = %f", M);
 
 	// compute the scale in such a way that the maximum value is at least
 	// one pixel away from the border. With this value of the scale,
@@ -116,6 +123,7 @@ void	ChannelDisplayWidget::draw() {
 		rectangles.addRange(top, bottom, color);
 	}
 	rectangles.draw(painter, width());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "rectangles drawn");
 
 	// prepare a pen
 	QPen	pen(Qt::SolidLine);
