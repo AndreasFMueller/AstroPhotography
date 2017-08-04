@@ -146,16 +146,47 @@ void	ChannelDisplayWidget::draw(double notbefore, double notafter) {
 	double	y = height() / 2.;
 	painter.drawLine(QPointF(0, y), QPointF(width()-1, y));
 
+	// set the font size
+	QFont   labelfont;
+        labelfont.setPointSize(10);
+        painter.setFont(labelfont);
+
 	// draw the various level lines
-	pen.setColor(QColor(180., 180., 180.));
-	painter.setPen(pen);
-	int	m = 1;
+	int	deltam = 1;
+	while ((yscale * deltam * _vscale) < 15) {
+		deltam *= 10;
+	}
+	int	m = deltam;
 	while ((m * yscale) < (height() / 2)) {
 		double	y = m * yscale + height() / 2.;
+		pen.setColor(QColor(180., 180., 180.));
+		painter.setPen(pen);
 		painter.drawLine(QPointF(0, y), QPointF(width() - 1, y));
+		pen.setColor(QColor(0., 0., 0.));
+		painter.setPen(pen);
+		double	x = width() - 20;
+		while (x > 0) {
+			painter.drawText(x - 40, y - 6, 40, 12,
+				Qt::AlignRight,
+				QString(astro::stringprintf("%d", -m).c_str()));
+			x -= 300;
+		}
+
 		y = -m * yscale + height() / 2.;
+		pen.setColor(QColor(180., 180., 180.));
+		painter.setPen(pen);
 		painter.drawLine(QPointF(0, y), QPointF(width() - 1, y));
-		m++;
+		pen.setColor(QColor(0., 0., 0.));
+		painter.setPen(pen);
+		x = width() - 20;
+		while (x > 0) {
+			painter.drawText(x - 40, y - 6, 40, 12,
+				Qt::AlignRight,
+				QString(astro::stringprintf("%d", m).c_str()));
+			x -= 300;
+		}
+
+		m += deltam;
 	}
 
 	// draw the channels
@@ -167,6 +198,8 @@ void	ChannelDisplayWidget::draw(double notbefore, double notafter) {
 	channelpainter.height(height());
 
 	// draw the time lines
+	pen.setColor(QColor(180., 180., 180.));
+	painter.setPen(pen);
 	double	timestep = 60;
 	double	ticdistance = timestep * width() / (notafter - notbefore);
 	if (ticdistance < 50) {
@@ -188,10 +221,6 @@ void	ChannelDisplayWidget::draw(double notbefore, double notafter) {
 
 	pen.setColor(QColor(0., 0., 0.));
 	painter.setPen(pen);
-
-	QFont   labelfont;
-        labelfont.setPointSize(10);
-        painter.setFont(labelfont);
 
 	// draw the time labels
 	t = timestep * floor(notafter / timestep);
