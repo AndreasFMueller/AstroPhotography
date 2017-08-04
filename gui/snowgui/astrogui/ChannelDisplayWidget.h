@@ -8,17 +8,21 @@
 #define _ChannelDisplayWidget_h
 
 #include <QWidget>
-#include <deque>
 #include <vector>
 #include <cmath>
+#include <AstroUtils.h>
+#include "ChannelData.h"
 
 namespace snowgui {
 
+/**
+ * \brief A Widget to display multiple data channels
+ */	
 class ChannelDisplayWidget : public QWidget {
 	Q_OBJECT
 
-	std::vector<std::deque<double> >	_channels;
-	std::vector<QColor>			_colors;
+	ChannelDataVector	_channels;
+	std::vector<QColor>	_colors;
 
 private:
 	void	draw();
@@ -33,14 +37,14 @@ public:
 
 	int	channels() const;
 	void	addChannel(QColor color);
-	void	update(int channel, double value);
+	void	update(int channel, ChannelDataPoint p);
 
 	void	paintEvent(QPaintEvent *event);
 
 	void	clearData();
 
 public slots:
-	void	add(std::vector<double> values);
+	void	add(double time, std::vector<double> values);
 
 private slots:
 

@@ -165,7 +165,7 @@ void	trackviewdialog::updateData() {
 			}
 			a.push_back(x);
 			a.push_back(y);
-			cdw->add(a);
+			cdw->add(p.timeago, a);
 			counter++;
 		}
 	);

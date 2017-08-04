@@ -6,6 +6,7 @@
 #include "singletrackwidget.h"
 #include "ui_singletrackwidget.h"
 #include <AstroDebug.h>
+#include <AstroUtils.h>
 
 namespace snowgui {
 
@@ -37,7 +38,9 @@ singletrackwidget::~singletrackwidget() {
 
 void	singletrackwidget::add(const snowstar::TrackingPoint& point) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "new point");
-	_points.push_back(point);
+	snowstar::TrackingPoint	p = point;
+	p.timeago = astro::Timer::gettime() - point.timeago;
+	_points.push_back(p);
 }
 
 /**
@@ -75,7 +78,7 @@ void	singletrackwidget::updateData() {
 			}
 			a.push_back(x);
 			a.push_back(y);
-			cdw->add(a);
+			cdw->add(p.timeago, a);
 			counter++;
 		}
 	);

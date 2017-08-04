@@ -36,7 +36,7 @@ int	ChannelDisplayWidget::channels() const {
  * Make sure you call repaint after this event so that the display gets updated
  */
 void	ChannelDisplayWidget::addChannel(QColor color) {
-	std::deque<double>	newchannel;
+	ChannelData	newchannel;
 	_channels.push_back(newchannel);
 	_colors.push_back(color);
 }
@@ -44,7 +44,7 @@ void	ChannelDisplayWidget::addChannel(QColor color) {
 /**
  * \brief Add a new point
  */
-void	ChannelDisplayWidget::add(std::vector<double> values) {
+void	ChannelDisplayWidget::add(double time, std::vector<double> values) {
 	int	nvalues = values.size();
 	if (nvalues != channels()) {
 		std::string	msg = astro::stringprintf("wrong number of "
@@ -53,7 +53,8 @@ void	ChannelDisplayWidget::add(std::vector<double> values) {
 		throw std::range_error(msg);
 	}
 	for (int i = 0; i < nvalues; i++) {
-		_channels[i].push_back(values[i]);
+		ChannelDataPoint	datapoint(time, values[i]);
+		_channels[i].push_back(datapoint);
 	}
 }
 
@@ -100,33 +101,14 @@ void	ChannelDisplayWidget::draw() {
 	double	yscale = (height() - 2) / (2 * M);
 
 	// compute standard deviations and means
-	std::vector<double>	mean;
-	std::vector<double>	stddev;
-	for (int i = 0; i < channels(); i++) {
-		const std::deque<double>&	channel = _channels[i];
-		std::deque<double>::const_reverse_iterator	r;
-		r = channel.crbegin();
-		double	sum = 0;
-		double	sum2 = 0;
-		int	w = 1;
-		do {
-			double	y = *r;
-			sum += y;
-			sum2 += y * y;
-			r++;
-			w++;
-		} while ((w <= width()) && (r != channel.crend()));
-		double	m = sum / w;
-		mean.push_back(m);
-		double	s = sqrt((w / (w - 1.)) * (sum2 / w) - m * m);
-		debug(LOG_DEBUG, DEBUG_LOG, 0,
-			"channel %d: mean = %.3f, stddev = %.3f", i, m, s);
-		stddev.push_back(s);
-	}
+	std::vector<double>	mean = _channels.mean(width());
+	std::vector<double>	stddev = _channels.stddev(width());
 
 	// construct color rectangles
 	ColorRectangles	rectangles;
 	for (size_t i = 0; i < mean.size(); i++) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "mean[%d] = %f, stddev[%d] = %f",
+			i, mean[i], i, stddev[i]);
 		double	h  = height() / 2 - 1;
 		double	bottom = h - (mean[i] - stddev[i]) * yscale;
 		double	top = h - (mean[i] + stddev[i]) * yscale;
@@ -161,21 +143,20 @@ void	ChannelDisplayWidget::draw() {
 	for (int i = 0; i < channels(); i++) {
 		pen.setColor(_colors[i]);
 		painter.setPen(pen);
-		const std::deque<double>&	channel = _channels[i];
-		std::deque<double>::const_reverse_iterator	r;
+		const ChannelData&	channel = _channels[i];
+		ChannelData::const_reverse_iterator	r;
 		r = channel.crbegin();
 		int	w = 1;
-		double	y = *r;
+		double	y = r->value;
 		QPoint	p(width() - w, height() / 2 - 1 - yscale * y);
 		r++; w++;
 		do {
-			y = *r;
+			y = r->value;
 			QPoint	q(width() - w, height() / 2 - 1 - yscale * y);
 			painter.drawLine(p, q);
 			p = q;
 			r++; w++;
 		} while ((w <= width()) && (r != channel.crend()));
-		// compute std deviation
 	}
 }
 
@@ -187,6 +168,9 @@ double	ChannelDisplayWidget::allMin() {
 	for (int i = 0; i < channels(); i++) {
 		minima.push_back(channelMin(i));
 	}
+	if (minima.size() == 0) {
+		return 0;
+	}
 	return *min_element(minima.begin(), minima.end());
 }
 
@@ -196,41 +180,31 @@ double	ChannelDisplayWidget::allMin() {
 double	ChannelDisplayWidget::allMax() {
 	std::vector<double>	maxima;
 	for (int i = 0; i < channels(); i++) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "retriev max for channel %d", i);
 		maxima.push_back(channelMax(i));
 	}
-	return *max_element(maxima.begin(), maxima.end());
+	if (maxima.size() == 0) {
+		return 0;
+	}
+	double m = *max_element(maxima.begin(), maxima.end());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "found %d maxima: %f", maxima.size(), m);
+	return m;
 }
 
 /**
  * \brief Find the minimum value a a given channel
  */
 double	ChannelDisplayWidget::channelMin(int channelid) {
-	int	l = _channels[channelid].size();
-	std::deque<double>::const_reverse_iterator	b
-		= _channels[channelid].rbegin();
-	std::deque<double>::const_reverse_iterator	e;
-	if (l >= width()) {
-		e = b + width() - 1;
-	} else {
-		e = _channels[channelid].rend();
-	}
-	return *min_element(b, e);
+	return _channels[channelid].min(width());
 }
 
 /**
  * \brief Find the maximum value a a given channel
  */
 double	ChannelDisplayWidget::channelMax(int channelid) {
-	int	l = _channels[channelid].size();
-	std::deque<double>::const_reverse_iterator	b
-		= _channels[channelid].rbegin();
-	std::deque<double>::const_reverse_iterator	e;
-	if (l >= width()) {
-		e = b + width() - 1;
-	} else {
-		e = _channels[channelid].rend();
-	}
-	return *max_element(b, e);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "get max for channel %d, width %d",
+		channelid, width());
+	return _channels[channelid].max(width());
 }
 
 /**
@@ -238,7 +212,7 @@ double	ChannelDisplayWidget::channelMax(int channelid) {
  */
 void	ChannelDisplayWidget::clearData() {
 	std::for_each(_channels.begin(), _channels.end(),
-		[](std::deque<double>& channel) mutable {
+		[](ChannelData& channel) mutable {
 			channel.clear();
 		}
 	);

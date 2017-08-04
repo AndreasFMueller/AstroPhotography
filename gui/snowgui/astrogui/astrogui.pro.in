@@ -29,6 +29,7 @@ WIDGETHEADERS =								\
 
 SOURCES += 								\
 	AutoGain.cpp							\
+	ChannelData.cpp							\
 	ChannelDisplayWidget.cpp					\
 	ColorArithmetic.cpp						\
 	ColorRectangles.cpp						\
@@ -44,6 +45,7 @@ SOURCES += 								\
 
 HEADERS  += 								\
 	AutoGain.h							\
+	ChannelData.h							\
 	ChannelDisplayWidget.h						\
 	ColorArithmetic.h						\
 	ColorRectangles.h						\
