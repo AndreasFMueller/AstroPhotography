@@ -35,6 +35,8 @@ singletrackwidget::singletrackwidget(QWidget *parent) :
 		this, SLOT(buttonToggled(bool)));
 	connect(ui->scaleDial, SIGNAL(valueChanged(int)),
 		ui->dataWidget, SLOT(setScale(int)));
+	connect(ui->timeDial, SIGNAL(valueChanged(int)),
+		ui->dataWidget, SLOT(setTime(int)));
 }
 
 /**

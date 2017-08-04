@@ -64,7 +64,7 @@ public:
 	void	setAutorange(bool a) { _autorange = a; }
 
 private:
-	double	_timescale;
+	double	_timescale;	// [s/pixel]
 public:
 	double	timescale() const { return _timescale; }
 	void	setTimescale(double t) { _timescale = t; }
@@ -98,6 +98,7 @@ public:
 public slots:
 	void	add(double time, std::vector<double> values);
 	void	setScale(int);
+	void	setTime(int);
 
 private slots:
 

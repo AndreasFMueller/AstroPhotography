@@ -26,7 +26,7 @@ void	ChannelPainter::width(double x) {
 
 
 double	ChannelPainter::X(double t) const {
-	return width() - (notafter() - t) * _tscale;
+	return width() - (notafter() - t) / _tscale;
 }
 
 double	ChannelPainter::Y(double y) const {

@@ -70,27 +70,34 @@ public:
  */
 class ChannelDataVector : public std::vector<ChannelData> {
 public:
+	std::vector<double>	min() const;
 	std::vector<double>	min(int lastn) const;
 	std::vector<double>	min(double notbefore, double notafter) const;
 
+	std::vector<double>	max() const;
 	std::vector<double>	max(int lastn) const;
 	std::vector<double>	max(double notbefore, double notafter) const;
 
+	std::vector<double>	mean() const;
 	std::vector<double>	mean(int lastn) const;
 	std::vector<double>	mean(double notbefore, double notafter) const;
 
+	std::vector<double>	var() const;
 	std::vector<double>	var(int lastn) const;
 	std::vector<double>	var(double notbefore, double notafter) const;
 
+	std::vector<double>	stddev() const;
 	std::vector<double>	stddev(int lastn) const;
 	std::vector<double>	stddev(double notbefore, double notafter) const;
 
 	std::vector<double>	last() const;
 	std::vector<double>	first() const;
 
+	double	allMin() const;
 	double	allMin(int lastn) const;
 	double	allMin(double notbefore, double notafter) const;
 
+	double	allMax() const;
 	double	allMax(int lastn) const;
 	double	allMax(double notbefore, double notafter) const;
 

@@ -76,7 +76,7 @@ void	ChannelDisplayWidget::paintEvent(QPaintEvent * /* event */) {
 	if (autorange()) {
 		_notafter = _channels.allLast();
 	}
-	double	notbefore = _notafter - width() / _timescale;
+	double	notbefore = _channels.allFirst();
 	// draw contents
 	draw(notbefore, _notafter);
 }
@@ -85,9 +85,17 @@ void	ChannelDisplayWidget::paintEvent(QPaintEvent * /* event */) {
  * \brief Perform the drawing itself
  */
 void	ChannelDisplayWidget::draw(double notbefore, double notafter) {
+	double	duration = notafter - notbefore;
 	debug(LOG_DEBUG, DEBUG_LOG, 0,
 		"plotting between %.1f and %.1f (%.1f seconds)",
-		notbefore, notafter, notafter - notbefore);
+		notbefore, notafter, duration);
+
+	int	newwidth = duration / _timescale; // [timescale] = [s/pixel]
+	debug(LOG_DEBUG, DEBUG_LOG, 0,
+		"timescale = %f, newwidth = %d, width = %f",
+		_timescale, newwidth, (double)width());
+	this->setMinimumSize(newwidth, 0);
+
 	// draw the white background
 	QPainter	painter(this);
 	painter.setRenderHint(QPainter::Antialiasing);
@@ -107,11 +115,10 @@ void	ChannelDisplayWidget::draw(double notbefore, double notafter) {
 		channels(), l);
 
 	// find the maximum and minimum of all channels
-	double	M = std::max(_channels.allMax(width()),
-			-_channels.allMin(width()));
+	double	M = std::max(_channels.allMax(), -_channels.allMin());
 
-	// ensure that the range is at list 3 pixels
-	if (M <  1.5) { M =  1.5; }
+	// ensure that the range is at least 3 pixels
+	if (M < 1.5) { M = 1.5; }
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "M = %f", M);
 
 	// compute the scale in such a way that the maximum value is at least
@@ -194,21 +201,17 @@ void	ChannelDisplayWidget::draw(double notbefore, double notafter) {
 	channelpainter.notbefore(notbefore);
 	channelpainter.notafter(notafter);
 	channelpainter.yscale(yscale);
-	channelpainter.width(width());
+	channelpainter.width(newwidth);
 	channelpainter.height(height());
 
 	// draw the time lines
 	pen.setColor(QColor(180., 180., 180.));
 	painter.setPen(pen);
 	double	timestep = 60;
-	double	ticdistance = timestep * width() / (notafter - notbefore);
-	if (ticdistance < 50) {
-		timestep *= 5;
-		ticdistance *= 5;
-	}
-	if (ticdistance < 50) {
-		timestep *= 2;
-		ticdistance *= 2;
+	double	ticdistance = timestep / _timescale; // [_timescale] = [s/pixel]
+	while (ticdistance < 50) {
+		timestep *= 10;
+		ticdistance *= 10;
 	}
 	double	t = timestep * floor(notafter / timestep);
 	while (t > notbefore) {
@@ -252,6 +255,15 @@ void	ChannelDisplayWidget::clearData() {
  */
 void	ChannelDisplayWidget::setScale(int v) {
 	setVscale(v);
+	repaint();
+}
+
+/**
+ * \brief change the time scale
+ */
+void	ChannelDisplayWidget::setTime(int t) {
+	// [timescale] = [s/pixel]
+	setTimescale(pow(2, -t));
 	repaint();
 }
 
