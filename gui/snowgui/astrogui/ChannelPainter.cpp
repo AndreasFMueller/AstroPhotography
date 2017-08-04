@@ -9,6 +9,22 @@
 
 namespace snowgui {
 
+void	ChannelPainter::notbefore(double x) {
+	_notbefore = x;
+	_tscale = (notafter() - notbefore()) / width();
+}
+
+void	ChannelPainter::notafter(double x) {
+	_notafter = x;
+	_tscale = (notafter() - notbefore()) / width();
+}
+
+void	ChannelPainter::width(double x) {
+	_width = x;
+	_tscale = (notafter() - notbefore()) / width();
+}
+
+
 double	ChannelPainter::X(double t) const {
 	return width() - (notafter() - t) * _tscale;
 }
@@ -27,8 +43,6 @@ void	ChannelPainter::operator()(const ChannelData& channel,
         pen.setWidth(1);
         pen.setColor(color);
 	_painter.setPen(pen);
-
-	_tscale = (notafter() - notbefore()) / width();
 
 	ChannelData::const_reverse_iterator	r;
 	r = channel.crbegin();

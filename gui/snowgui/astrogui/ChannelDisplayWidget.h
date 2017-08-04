@@ -31,10 +31,10 @@ public:
 	double	yscale() const { return _yscale; }
 	double	width() const { return _width; }
 	double	height() const { return _height; }
-	void	notbefore(double x) { _notbefore = x; }
-	void	notafter(double x) { _notafter = x; }
+	void	notbefore(double x);
+	void	notafter(double x);
 	void	yscale(double x) { _yscale = x; }
-	void	width(double x) { _width = x; }
+	void	width(double x);
 	void	height(double x) { _height = x; }
 
 	double	X(double t) const;
@@ -68,6 +68,17 @@ private:
 public:
 	double	timescale() const { return _timescale; }
 	void	setTimescale(double t) { _timescale = t; }
+private:
+	double	_notafter;
+public:
+	double	notafter() const { return _notafter; }
+	void	setNotafter(double n) { _notafter = n; }
+
+private:
+	double	_vscale;
+public:
+	double	vscale() const { return _vscale; }
+	void	setVscale(double v) { _vscale = v; }
 
 private:
 	void	draw(double notbefore, double notafter);
@@ -86,6 +97,7 @@ public:
 
 public slots:
 	void	add(double time, std::vector<double> values);
+	void	setScale(int);
 
 private slots:
 

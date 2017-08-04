@@ -38,6 +38,6 @@ private:
 	Ui::singletrackwidget *ui;
 };
 
-
 } // namespace snowgui
+
 #endif // SNOWGUI_SINGLETRACKWIDGET_H

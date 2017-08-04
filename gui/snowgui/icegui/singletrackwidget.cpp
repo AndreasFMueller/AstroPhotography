@@ -30,6 +30,8 @@ singletrackwidget::singletrackwidget(QWidget *parent) :
 		this, SLOT(buttonToggled(bool)));
 	connect(ui->correctionButton, SIGNAL(toggled(bool)),
 		this, SLOT(buttonToggled(bool)));
+	connect(ui->scaleDial, SIGNAL(valueChanged(int)),
+		ui->dataWidget, SLOT(setScale(int)));
 }
 
 singletrackwidget::~singletrackwidget() {

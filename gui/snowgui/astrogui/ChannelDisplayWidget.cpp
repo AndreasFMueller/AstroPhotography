@@ -1,5 +1,5 @@
 /*
- * ChannelDisplayWidget.cpp
+ * ChannelDisplayWidget.cpp -- implementation of ChannelDisplayWidget
  *
  * (c) 2016 Prof Dr Andreas Müller, Hochschule Rapperswil
  */
@@ -8,6 +8,8 @@
 #include <AstroDebug.h>
 #include <AstroFormat.h>
 #include "ColorRectangles.h"
+#include <QScrollArea>
+#include <QScrollBar>
 
 namespace snowgui {
 
@@ -16,6 +18,7 @@ namespace snowgui {
  */
 ChannelDisplayWidget::ChannelDisplayWidget(QWidget *parent) : QWidget(parent) {
 	_timescale = 1;
+	_vscale = 1;
 }
 
 /**
@@ -57,6 +60,10 @@ void	ChannelDisplayWidget::add(double time, std::vector<double> values) {
 		ChannelDataPoint	datapoint(time, values[i]);
 		_channels[i].push_back(datapoint);
 	}
+	// compute new width
+	double	duration = _channels.allLast() - _channels.allFirst();
+	int	newwidth = duration / _timescale;
+	this->setMinimumSize(newwidth, 0);
 }
 
 /**
@@ -65,9 +72,12 @@ void	ChannelDisplayWidget::add(double time, std::vector<double> values) {
  * This simply calls the 
  */
 void	ChannelDisplayWidget::paintEvent(QPaintEvent * /* event */) {
-	double	notafter = _channels.allLast();
-	double	notbefore = notafter - width() / _timescale;
-	draw(notbefore, notafter);
+	if (autorange()) {
+		_notafter = _channels.allLast();
+	}
+	double	notbefore = _notafter - width() / _timescale;
+	// draw contents
+	draw(notbefore, _notafter);
 }
 
 /**
@@ -106,7 +116,7 @@ void	ChannelDisplayWidget::draw(double notbefore, double notafter) {
 	// compute the scale in such a way that the maximum value is at least
 	// one pixel away from the border. With this value of the scale,
 	// y coordinates are coputed as y * yscale + height() / 2
-	double	yscale = (height() - 2) / (2 * M);
+	double	yscale = _vscale * (height() - 2) / (2 * M);
 
 	// compute standard deviations and means
 	std::vector<double>	mean = _channels.mean(notbefore, notafter);
@@ -124,7 +134,6 @@ void	ChannelDisplayWidget::draw(double notbefore, double notafter) {
 		rectangles.addRange(top, bottom, color);
 	}
 	rectangles.draw(painter, width());
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "rectangles drawn");
 
 	// prepare a pen
 	QPen	pen(Qt::SolidLine);
@@ -148,6 +157,7 @@ void	ChannelDisplayWidget::draw(double notbefore, double notafter) {
 		m++;
 	}
 
+	// draw the channels
 	ChannelPainter	channelpainter(painter);
 	channelpainter.notbefore(notbefore);
 	channelpainter.notafter(notafter);
@@ -155,14 +165,64 @@ void	ChannelDisplayWidget::draw(double notbefore, double notafter) {
 	channelpainter.width(width());
 	channelpainter.height(height());
 
+	// draw the time lines
+	double	timestep = 60;
+	double	ticdistance = timestep * width() / (notafter - notbefore);
+	if (ticdistance < 50) {
+		timestep *= 5;
+		ticdistance *= 5;
+	}
+	if (ticdistance < 50) {
+		timestep *= 2;
+		ticdistance *= 2;
+	}
+	double	t = timestep * floor(notafter / timestep);
+	while (t > notbefore) {
+		double	x = channelpainter.X(t);
+		painter.drawLine(QPoint(x, 0), QPoint(x, height()));
+		t -= timestep;
+	}
+
 	channelpainter(_channels, _colors);
+
+	pen.setColor(QColor(0., 0., 0.));
+	painter.setPen(pen);
+
+	QFont   labelfont;
+        labelfont.setPointSize(10);
+        painter.setFont(labelfont);
+
+	// draw the time labels
+	t = timestep * floor(notafter / timestep);
+	while (t > notbefore) {
+		// format the time
+		time_t	tt = t;
+		struct tm	*tp = localtime(&tt);
+		std::string	timelabel = astro::stringprintf("%02d:%02d",
+					tp->tm_hour, tp->tm_min);
+		
+		// draw the time label
+		QPoint	p(channelpainter.X(t), 0);
+		painter.drawText(p.x() - 20, p.y(), 40, 15,
+			Qt::AlignCenter, QString(timelabel.c_str()));
+		t -= timestep;
+	}
 }
 
 /**
  * \brief Clear the data
  */
 void	ChannelDisplayWidget::clearData() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "clearing data");
 	_channels.clear();
+}
+
+/**
+ * \brief change the scale 
+ */
+void	ChannelDisplayWidget::setScale(int v) {
+	setVscale(v);
+	repaint();
 }
 
 } // namespace snowgui
