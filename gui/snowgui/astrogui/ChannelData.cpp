@@ -52,6 +52,7 @@ double	ChannelData::mean(double notbefore, double notafter) const {
 		if (notbefore <= i->time) {
 			if (i->time <= notafter) {
 				sum += i->value;
+				n++;
 			} else {
 				goto cleanup;
 			}
@@ -90,6 +91,7 @@ double	ChannelData::var(double notbefore, double notafter) const {
 			if (i->time <= notafter) {
 				sum += i->value;
 				sum2 += sqr(i->value);
+				n++;
 			} else {
 				goto cleanup;
 			}

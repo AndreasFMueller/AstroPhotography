@@ -16,6 +16,40 @@
 namespace snowgui {
 
 /**
+ * \brief Class to draw a single channel
+ */
+class ChannelPainter {
+	double		_notbefore;
+	double		_notafter;
+	double		_yscale;
+	double		_tscale;
+	double		_width;
+	double		_height;
+public:
+	double	notbefore() const { return _notbefore; }
+	double	notafter() const { return _notafter; }
+	double	yscale() const { return _yscale; }
+	double	width() const { return _width; }
+	double	height() const { return _height; }
+	void	notbefore(double x) { _notbefore = x; }
+	void	notafter(double x) { _notafter = x; }
+	void	yscale(double x) { _yscale = x; }
+	void	width(double x) { _width = x; }
+	void	height(double x) { _height = x; }
+
+	double	X(double t) const;
+	double	Y(double y) const;
+	QPoint	P(double t, double y) const;
+private:
+	QPainter&	_painter;
+public:
+	ChannelPainter(QPainter& painter) : _painter(painter) { }
+	void	operator()(const ChannelData& channel, const QColor& color);
+	void	operator()(const ChannelDataVector& channels,
+			const std::vector<QColor>& colors);
+};
+
+/**
  * \brief A Widget to display multiple data channels
  */	
 class ChannelDisplayWidget : public QWidget {

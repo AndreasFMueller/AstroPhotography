@@ -96,7 +96,8 @@ void	ChannelDisplayWidget::draw(double notbefore, double notafter) {
 		channels(), l);
 
 	// find the maximum and minimum of all channels
-	double	M = std::max(_channels.allMax(width()), -_channels.allMin(width()));
+	double	M = std::max(_channels.allMax(width()),
+			-_channels.allMin(width()));
 
 	// ensure that the range is at list 3 pixels
 	if (M <  1.5) { M =  1.5; }
@@ -108,8 +109,8 @@ void	ChannelDisplayWidget::draw(double notbefore, double notafter) {
 	double	yscale = (height() - 2) / (2 * M);
 
 	// compute standard deviations and means
-	std::vector<double>	mean = _channels.mean(width());
-	std::vector<double>	stddev = _channels.stddev(width());
+	std::vector<double>	mean = _channels.mean(notbefore, notafter);
+	std::vector<double>	stddev = _channels.stddev(notbefore, notafter);
 
 	// construct color rectangles
 	ColorRectangles	rectangles;
@@ -147,25 +148,14 @@ void	ChannelDisplayWidget::draw(double notbefore, double notafter) {
 		m++;
 	}
 
-	// draw channels
-	for (int i = 0; i < channels(); i++) {
-		pen.setColor(_colors[i]);
-		painter.setPen(pen);
-		const ChannelData&	channel = _channels[i];
-		ChannelData::const_reverse_iterator	r;
-		r = channel.crbegin();
-		int	w = 1;
-		double	y = r->value;
-		QPoint	p(width() - w, height() / 2 - 1 - yscale * y);
-		r++; w++;
-		do {
-			y = r->value;
-			QPoint	q(width() - w, height() / 2 - 1 - yscale * y);
-			painter.drawLine(p, q);
-			p = q;
-			r++; w++;
-		} while ((w <= width()) && (r != channel.crend()));
-	}
+	ChannelPainter	channelpainter(painter);
+	channelpainter.notbefore(notbefore);
+	channelpainter.notafter(notafter);
+	channelpainter.yscale(yscale);
+	channelpainter.width(width());
+	channelpainter.height(height());
+
+	channelpainter(_channels, _colors);
 }
 
 /**
