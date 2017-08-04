@@ -63,6 +63,11 @@ public:
 	void	push_back(const ChannelDataPoint& p);
 };
 
+/**
+ * \brief Vector of ChannelData
+ *
+ * This object is used as the data container for the ChannelDisplayWidget
+ */
 class ChannelDataVector : public std::vector<ChannelData> {
 public:
 	std::vector<double>	min(int lastn) const;
