@@ -90,7 +90,7 @@ void	ChannelDisplayWidget::draw() {
 		channels(), l);
 
 	// find the maximum and minimum of all channels
-	double	M = std::max(allMax(), -allMin());
+	double	M = std::max(_channels.allMax(width()), -_channels.allMin(width()));
 
 	// ensure that the range is at list 3 pixels
 	if (M <  1.5) { M =  1.5; }
@@ -161,61 +161,10 @@ void	ChannelDisplayWidget::draw() {
 }
 
 /**
- * \brief Find the minimum value of all channels
- */
-double	ChannelDisplayWidget::allMin() {
-	std::vector<double>	minima;
-	for (int i = 0; i < channels(); i++) {
-		minima.push_back(channelMin(i));
-	}
-	if (minima.size() == 0) {
-		return 0;
-	}
-	return *min_element(minima.begin(), minima.end());
-}
-
-/**
- * \brief Find the maximum value of all channels
- */
-double	ChannelDisplayWidget::allMax() {
-	std::vector<double>	maxima;
-	for (int i = 0; i < channels(); i++) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "retriev max for channel %d", i);
-		maxima.push_back(channelMax(i));
-	}
-	if (maxima.size() == 0) {
-		return 0;
-	}
-	double m = *max_element(maxima.begin(), maxima.end());
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "found %d maxima: %f", maxima.size(), m);
-	return m;
-}
-
-/**
- * \brief Find the minimum value a a given channel
- */
-double	ChannelDisplayWidget::channelMin(int channelid) {
-	return _channels[channelid].min(width());
-}
-
-/**
- * \brief Find the maximum value a a given channel
- */
-double	ChannelDisplayWidget::channelMax(int channelid) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "get max for channel %d, width %d",
-		channelid, width());
-	return _channels[channelid].max(width());
-}
-
-/**
  * \brief Clear the data
  */
 void	ChannelDisplayWidget::clearData() {
-	std::for_each(_channels.begin(), _channels.end(),
-		[](ChannelData& channel) mutable {
-			channel.clear();
-		}
-	);
+	_channels.clear();
 }
 
 } // namespace snowgui

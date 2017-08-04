@@ -44,6 +44,23 @@ double	ChannelData::mean(int lastn) const {
 	return sum / n;
 }
 
+double	ChannelData::mean(double notbefore, double notafter) const {
+	double	sum = 0;
+	int	n = 0;
+	ChannelData::const_iterator	i = begin();
+	for (i = begin(); i != end(); i++) {
+		if (notbefore <= i->time) {
+			if (i->time <= notafter) {
+				sum += i->value;
+			} else {
+				goto cleanup;
+			}
+		}
+	}
+cleanup:
+	return sum / n;
+}
+
 double	ChannelData::var() const {
 	double	n = size();
 	return (n / (n-1)) * ((_sum2 / n) - sqr(_sum / n));
@@ -63,12 +80,35 @@ double	ChannelData::var(int lastn) const {
 	return (n / (n - 1)) * ((sum2 / n) - sqr(sum / n));
 }
 
+double	ChannelData::var(double notbefore, double notafter) const {
+	double	sum = 0;
+	double	sum2 = 0;
+	int	n = 0;
+	ChannelData::const_iterator	i = begin();
+	for (i = begin(); i != end(); i++) {
+		if (notbefore <= i->time) {
+			if (i->time <= notafter) {
+				sum += i->value;
+				sum2 += sqr(i->value);
+			} else {
+				goto cleanup;
+			}
+		}
+	}
+cleanup:
+	return (n / (n-1)) * ((sum2 / n) - sqr(sum / n));
+}
+
 double	ChannelData::stddev() const {
 	return sqrt(var());
 }
 
 double	ChannelData::stddev(int lastn) const {
 	return sqrt(var(lastn));
+}
+
+double	ChannelData::stddev(double notbefore, double notafter) const {
+	return sqrt(var(notbefore, notafter));
 }
 
 double	ChannelData::min(int lastn) const {
@@ -82,6 +122,24 @@ double	ChannelData::min(int lastn) const {
 		r++;
 		counter++;
 	}
+	return m;
+}
+
+double	ChannelData::min(double notbefore, double notafter) const {
+	double	m = std::numeric_limits<double>::infinity();
+	ChannelData::const_iterator	i;
+	for (i = begin(); i != end(); i++) {
+		if (notbefore <= i->time) {
+			if (i->time <= notafter) {
+				if (i->value < m) {
+					m = i->value;
+				}
+			} else {
+				goto cleanup;
+			}
+		}
+	}
+cleanup:
 	return m;
 }
 
@@ -99,6 +157,24 @@ double	ChannelData::max(int lastn) const {
 	return m;
 }
 
+double	ChannelData::max(double notbefore, double notafter) const {
+	double	m = -std::numeric_limits<double>::infinity();
+	ChannelData::const_iterator	i;
+	for (i = begin(); i != end(); i++) {
+		if (notbefore <= i->time) {
+			if (i->time <= notafter) {
+				if (i->value > m) {
+					m = i->value;
+				}
+			} else {
+				goto cleanup;
+			}
+		}
+	}
+cleanup:
+	return m;
+}
+
 //////////////////////////////////////////////////////////////////////
 // ChannelDataVector implementation
 //////////////////////////////////////////////////////////////////////
@@ -107,6 +183,16 @@ std::vector<double>	ChannelDataVector::mean(int lastn) const {
 	std::for_each(begin(), end(),
 		[&result,lastn](const ChannelData& channel) mutable {
 			result.push_back(channel.mean(lastn));
+		}
+	);
+	return result;
+}
+
+std::vector<double>	ChannelDataVector::mean(double notbefore, double notafter) const {
+	std::vector<double>	result;
+	std::for_each(begin(), end(),
+		[&result,notbefore,notafter](const ChannelData& channel) mutable {
+			result.push_back(channel.mean(notbefore, notafter));
 		}
 	);
 	return result;
@@ -122,6 +208,16 @@ std::vector<double>	ChannelDataVector::var(int lastn) const {
 	return result;
 }
 
+std::vector<double>	ChannelDataVector::var(double notbefore, double notafter) const {
+	std::vector<double>	result;
+	std::for_each(begin(), end(),
+		[&result,notbefore,notafter](const ChannelData& channel) mutable {
+			result.push_back(channel.var(notbefore, notafter));
+		}
+	);
+	return result;
+}
+
 std::vector<double>	ChannelDataVector::stddev(int lastn) const {
 	std::vector<double>	result;
 	std::for_each(begin(), end(),
@@ -130,6 +226,98 @@ std::vector<double>	ChannelDataVector::stddev(int lastn) const {
 		}
 	);
 	return result;
+}
+
+std::vector<double>	ChannelDataVector::stddev(double notbefore, double notafter) const {
+	std::vector<double>	result;
+	std::for_each(begin(), end(),
+		[&result,notbefore,notafter](const ChannelData& channel) mutable {
+			result.push_back(channel.stddev(notbefore, notafter));
+		}
+	);
+	return result;
+}
+
+std::vector<double>	ChannelDataVector::min(int lastn) const {
+	std::vector<double>	result;
+	std::for_each(begin(), end(),
+		[&result,lastn](const ChannelData& channel) mutable {
+			result.push_back(channel.min(lastn));
+		}
+	);
+	return result;
+}
+
+std::vector<double>	ChannelDataVector::min(double notbefore, double notafter) const {
+	std::vector<double>	result;
+	std::for_each(begin(), end(),
+		[&result,notbefore,notafter](const ChannelData& channel) mutable {
+			result.push_back(channel.min(notbefore, notafter));
+		}
+	);
+	return result;
+}
+
+std::vector<double>	ChannelDataVector::max(int lastn) const {
+	std::vector<double>	result;
+	std::for_each(begin(), end(),
+		[&result,lastn](const ChannelData& channel) mutable {
+			result.push_back(channel.max(lastn));
+		}
+	);
+	return result;
+}
+
+std::vector<double>	ChannelDataVector::max(double notbefore, double notafter) const {
+	std::vector<double>	result;
+	std::for_each(begin(), end(),
+		[&result,notbefore,notafter](const ChannelData& channel) mutable {
+			result.push_back(channel.max(notbefore, notafter));
+		}
+	);
+	return result;
+}
+
+double	ChannelDataVector::allMin(int lastn) const {
+	std::vector<double>	minima = min(lastn);
+	if (size() == 0) {
+		return std::numeric_limits<double>::infinity();
+	}
+	double m = *min_element(minima.begin(), minima.end());
+	return m;
+}
+
+double	ChannelDataVector::allMin(double notbefore, double notafter) const {
+	std::vector<double>	minima = min(notbefore, notafter);
+	if (size() == 0) {
+		return std::numeric_limits<double>::infinity();
+	}
+	double m = *min_element(minima.begin(), minima.end());
+	return m;
+}
+
+double	ChannelDataVector::allMax(int lastn) const {
+	std::vector<double>	maxima = min(lastn);
+	if (size() == 0) {
+		return -std::numeric_limits<double>::infinity();
+	}
+	double m = *max_element(maxima.begin(), maxima.end());
+	return m;
+}
+
+double	ChannelDataVector::allMax(double notbefore, double notafter) const {
+	std::vector<double>	maxima = max(notbefore, notafter);
+	if (size() == 0) {
+		return std::numeric_limits<double>::infinity();
+	}
+	double m = *max_element(maxima.begin(), maxima.end());
+	return m;
+}
+
+void	ChannelDataVector::clear() {
+	std::for_each(begin(), end(), 
+		[](ChannelData& channel) mutable { channel.clear(); }
+	);
 }
 
 } // namespace snowgui

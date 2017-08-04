@@ -26,10 +26,6 @@ class ChannelDisplayWidget : public QWidget {
 
 private:
 	void	draw();
-	double	channelMin(int channelid);
-	double	channelMax(int channelid);
-	double	allMin();
-	double	allMax();
 
 public: 
 	explicit ChannelDisplayWidget(QWidget *parent = NULL);
