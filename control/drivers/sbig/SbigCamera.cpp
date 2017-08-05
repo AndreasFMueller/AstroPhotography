@@ -256,6 +256,23 @@ CcdInfo	SbigCamera::get_ccd_info(unsigned short request,
 		ccd.pixelheight(pixelsize(h));
 		ccd.shutter(true);
 
+		// exposure time range
+		switch (cameraType) {
+		case STI_CAMERA:
+			ccd.minexposuretime(0.001);
+			break;
+		case STL_CAMERA:
+			ccd.minexposuretime(0.12);
+			break;
+		case STX_CAMERA:
+		case STT_CAMERA:
+		case STF_CAMERA:
+		default:
+			ccd.minexposuretime(0.1);
+			break;
+		}
+		ccd.maxexposuretime(3600);
+
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "found imageing ccd: %s",
 			ccd.toString().c_str());
 		for (int i = 0; i < ccdinforesult.readoutModes; i++) {

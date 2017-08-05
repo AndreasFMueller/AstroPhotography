@@ -203,6 +203,10 @@ SxCamera::SxCamera(DevicePtr& _deviceptr)
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "pixel size: %.2fum x %.2fum",
 		1000000 * ccd0.pixelwidth(), 1000000 * ccd0.pixelheight());
 
+	// exposure times
+	ccd0.minexposuretime(0.001);
+	ccd0.maxexposuretime(3600);
+
 	// add the CCDinfo to the ccdinfo array
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "Imaging CCD: %s",
 		ccd0.toString().c_str());

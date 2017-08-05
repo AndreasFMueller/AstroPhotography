@@ -50,6 +50,8 @@ CcdInfo	convert(const astro::camera::CcdInfo& info) {
 	result.binningmodes = convert(info.modes());
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "ccdinfo has %d binning modes",
 		result.binningmodes.size());
+	result.minexposuretime = info.minexposuretime();
+	result.maxexposuretime = info.maxexposuretime();
 	return result;
 }
 
@@ -59,6 +61,8 @@ astro::camera::CcdInfo	convert(const CcdInfo& info) {
 	result.pixelwidth(info.pixelwidth);
 	result.pixelheight(info.pixelheight);
 	result.addModes(convert(info.binningmodes));
+	result.minexposuretime(info.minexposuretime);
+	result.maxexposuretime(info.maxexposuretime);
 	return result;
 }
 

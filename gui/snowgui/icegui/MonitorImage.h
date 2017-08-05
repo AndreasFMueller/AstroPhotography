@@ -26,6 +26,7 @@ class MonitorImage : public QObject, public snowstar::ImageMonitor {
 	QPixmap	*_pixmap;
 	int	_scale;
 	bool	_freeze;
+	bool	_inverse;
 	snowstar::SimpleImage	_image;
 	void	rebuildImage();
 protected:
@@ -47,6 +48,8 @@ public:
 	// control image display
 	int	scale() const { return _scale; }
 	bool	freeze() const { return _freeze; }
+	bool	inverse() const { return _inverse; }
+	void	setInverse(bool i) { _inverse = i; }
 signals:
 	void	streamStopped();
 	void	imageUpdated();

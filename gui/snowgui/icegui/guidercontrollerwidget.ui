@@ -346,9 +346,16 @@
           <number>0</number>
          </property>
          <item>
-          <widget class="QRadioButton" name="freezeButton">
+          <widget class="QCheckBox" name="freezeButton">
            <property name="text">
             <string>Freeze</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QCheckBox" name="inverseBox">
+           <property name="text">
+            <string>inverse</string>
            </property>
           </widget>
          </item>
@@ -392,15 +399,15 @@
  </widget>
  <customwidgets>
   <customwidget>
+   <class>snowgui::LogSpinBox</class>
+   <extends>QDoubleSpinBox</extends>
+   <header location="global">LogSpinBox.h</header>
+  </customwidget>
+  <customwidget>
    <class>snowgui::calibrationwidget</class>
    <extends>QWidget</extends>
    <header location="global">calibrationwidget.h</header>
    <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>snowgui::LogSpinBox</class>
-   <extends>QDoubleSpinBox</extends>
-   <header location="global">LogSpinBox.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

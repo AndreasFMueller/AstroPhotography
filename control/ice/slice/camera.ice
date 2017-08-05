@@ -83,6 +83,8 @@ module snowstar {
 		bool	shutter;
 		float	pixelwidth;
 		float	pixelheight;
+		float	minexposuretime;
+		float	maxexposuretime;
 	};
 
 	interface Cooler;

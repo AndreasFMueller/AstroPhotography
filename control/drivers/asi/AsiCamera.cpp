@@ -99,6 +99,10 @@ AsiCamera::AsiCamera(int index) : Camera(asiCameraName(index)), _index(index) {
 		info.pixelwidth(camerainfo.PixelSize * 1e-6);
 		info.pixelheight(camerainfo.PixelSize * 1e-6);
 
+		// exposure time range
+		info.minexposuretime(0.0001); // tested with ASI120MM-S
+		info.maxexposuretime(3600);
+
 		// add all binning modes
 		int	binindex = 0;
 		while (camerainfo.SupportedBins[binindex]) {

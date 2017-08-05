@@ -129,8 +129,14 @@ void	MonitorImage::rebuildImage() {
 		min, max);
 	struct conversion_parameters	cp;
 	cp.scale = 255. / (max - min);
-	cp.offset = min;
-	cp.limit = 1 << _scale;
+	if (_inverse) {
+		cp.offset = max;
+		cp.scale = -cp.scale;
+		cp.limit = 1 << _scale;
+	} else {
+		cp.offset = min;
+		cp.limit = 1 << _scale;
+	}
 
 	// convert the SimpleImage received into a QImage
 	cp.width = _image.size.width;

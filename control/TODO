@@ -10,6 +10,8 @@ Devices:
       - Some CCDs have different modes (download speed, image quality,
 	whether or not to turn of the amplifier to prevent amplifier bloom),
 	which should be made available through the CCD interface
+      - Need minimum/maximum exposure time for gui (make available through
+	properties?)
 
 Guiding:
       -	Missing configuration itmes should result in useful error messages

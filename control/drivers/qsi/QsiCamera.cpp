@@ -46,6 +46,14 @@ QsiCamera::QsiCamera(const std::string& _name) : Camera(_name) {
 	camera().get_PixelSizeY(&pixelsize);
 	info.pixelheight(pixelsize / 1000000.);
 
+	// get the exposure time limits
+	double	minexposuretime;
+	camera().get_MinExposureTime(&minexposuretime);
+	info.minexposuretime(minexposuretime);
+	double	maxexposuretime;
+	camera().get_MaxExposureTime(&maxexposuretime);
+	info.maxexposuretime(maxexposuretime);
+
 	// get the binning modes
 	bool	p2bin;
 	camera().get_PowerOfTwoBinning(&p2bin);

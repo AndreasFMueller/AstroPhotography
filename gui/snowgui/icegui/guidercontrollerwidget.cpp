@@ -62,6 +62,8 @@ guidercontrollerwidget::guidercontrollerwidget(QWidget *parent)
 
 	connect(ui->freezeButton, SIGNAL(toggled(bool)),
 		this, SLOT(toggleFreeze(bool)));
+	connect(ui->inverseBox, SIGNAL(toggled(bool)),
+		this, SLOT(toggleInverse(bool)));
 	connect(ui->imageStepSpinBox, SIGNAL(valueChanged(int)),
 		_trackingmonitorimage, SLOT(setScale(int)));
 	connect(ui->monitorButton, SIGNAL(clicked()),
@@ -448,6 +450,15 @@ void	guidercontrollerwidget::trackSelected(snowstar::TrackingHistory track) {
 void	guidercontrollerwidget::toggleFreeze(bool state) {
 	if (_trackingmonitorimage) {
 		_trackingmonitorimage->setFreeze(state);
+	}
+}
+
+/**
+ * \brief Toggle 
+ */
+void	guidercontrollerwidget::toggleInverse(bool state) {
+	if (_trackingmonitorimage) {
+		_trackingmonitorimage->setInverse(state);
 	}
 }
 

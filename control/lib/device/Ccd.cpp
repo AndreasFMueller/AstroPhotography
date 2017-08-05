@@ -79,6 +79,15 @@ void    Ccd::startExposure(const Exposure& _exposure) {
                 throw BadParameter("exposure does not fit ccd");
         }
 
+	// make sure the exposure time is in the interval specified in 
+	// the ccdinfo
+	if (exposure.exposuretime() > info.maxexposuretime()) {
+		exposure.exposuretime(info.maxexposuretime());
+	}
+	if (exposure.exposuretime() < info.minexposuretime()) {
+		exposure.exposuretime(info.minexposuretime());
+	}
+
 	// remember the start time of the exposure, this will be useful
 	// if we later want to wait for the exposure to complete.
 	time(&lastexposurestart);

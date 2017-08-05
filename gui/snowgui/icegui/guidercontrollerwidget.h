@@ -83,6 +83,7 @@ public slots:
 	void	statusUpdate();
 
 	void	toggleFreeze(bool);
+	void	toggleInverse(bool);
 	void	launchMonitor();
 	void	imageUpdated();
 };

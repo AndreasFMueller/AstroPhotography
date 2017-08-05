@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
  <class>snowgui::focusscancontroller</class>
- <widget class="QWidget" name="focusscancontroller">
+ <widget class="QWidget" name="snowgui::focusscancontroller">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -75,7 +75,7 @@
       <number>1</number>
      </property>
      <property name="maximum">
-      <number>200</number>
+      <number>1000</number>
      </property>
      <property name="value">
       <number>1</number>
@@ -125,13 +125,13 @@
       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
      </property>
      <property name="maximum">
-      <number>65535</number>
+      <number>16777214</number>
      </property>
      <property name="singleStep">
-      <number>100</number>
+      <number>1000</number>
      </property>
      <property name="value">
-      <number>32676</number>
+      <number>8000000</number>
      </property>
     </widget>
    </item>

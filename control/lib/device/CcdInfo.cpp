@@ -31,6 +31,8 @@ CcdInfo::CcdInfo(const std::string& name, const ImageSize& size, int _ccdid)
 	// it is not known yet
 	_pixelwidth = 0;
 	_pixelheight = 0;
+	_minexposuretime = 0.001;
+	_maxexposuretime = 3600;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "constructor: %s",
 		this->toString().c_str());
 }
@@ -38,7 +40,9 @@ CcdInfo::CcdInfo(const std::string& name, const ImageSize& size, int _ccdid)
 CcdInfo::CcdInfo(const CcdInfo& other)
 	: _name(other.name()), _size(other.size()), ccdid(other.getId()),
 	  binningmodes(other.modes()), _shutter(other.shutter()),
-	  _pixelwidth(other.pixelwidth()), _pixelheight(other.pixelheight()) {
+	  _pixelwidth(other.pixelwidth()), _pixelheight(other.pixelheight()),
+	  _maxexposuretime(other.maxexposuretime()),
+	  _minexposuretime(other.minexposuretime()) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0,
 		"copy constructor: %s <- %s",
 		this->toString().c_str(), other.toString().c_str(),
@@ -53,6 +57,8 @@ CcdInfo&	CcdInfo::operator=(const CcdInfo& other) {
 	_shutter = other.shutter();
 	_pixelwidth = other.pixelwidth();
 	_pixelheight = other.pixelheight();
+	_minexposuretime = other.minexposuretime();
+	_maxexposuretime = other.maxexposuretime();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "assignment operator: %s <- %s",
 		this->toString().c_str(), other.toString().c_str());
 	return *this;

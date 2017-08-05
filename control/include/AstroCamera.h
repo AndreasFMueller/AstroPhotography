@@ -226,6 +226,15 @@ public:
 	void	pixelwidth(float pixelwidth) { _pixelwidth = pixelwidth; }
 	void	pixelheight(float pixelheight) { _pixelheight = pixelheight; }
 
+private:
+	float	_maxexposuretime;
+	float	_minexposuretime;
+public:
+	float	maxexposuretime() const { return _maxexposuretime; }
+	float	minexposuretime() const { return _minexposuretime; }
+	void	maxexposuretime(float t) { _maxexposuretime = t; }
+	void	minexposuretime(float t) { _minexposuretime = t; }
+
 public:
 	// constructors
 	CcdInfo(const std::string& name, const astro::image::ImageSize& size,

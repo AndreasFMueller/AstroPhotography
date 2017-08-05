@@ -35,6 +35,15 @@ AtikCamera::AtikCamera(::AtikCamera *camera)
 	}
 	info.pixelwidth(capa.pixelSizeX * 1e-6);
 	info.pixelheight(capa.pixelSizeY * 1e-6);
+
+	// exposure times
+	if (capa.supportsLongExposure) {
+		info.maxexposuretime(3600);
+	} else {
+		info.maxexposuretime(capa.maxShortExposure);
+	}
+	info.minexposuretime(0.2);
+
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "add ccdinfo %s",
 		info.toString().c_str());
 	ccdinfo.push_back(info);

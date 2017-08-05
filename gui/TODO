@@ -1,3 +1,6 @@
+general:
+      - should be able to close windows with cmd-w in Mac OS X
+
 ccdcontrollerwidget:
       -	add gain and offset controls
       -	add controls for image quality and other special properties that

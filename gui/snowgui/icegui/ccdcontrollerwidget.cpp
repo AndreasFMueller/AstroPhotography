@@ -169,6 +169,15 @@ void	ccdcontrollerwidget::setupCcd() {
 		// use the frame size as the default rectangle
 		displayFrame(ImageRectangle(ccdinfo.size()));
 
+		// set the exposure time range
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "exposure time range: %f - %f",
+			ccdinfo.minexposuretime(), ccdinfo.maxexposuretime());
+		ui->exposureSpinBox->setMinimum(ccdinfo.minexposuretime());
+		ui->exposureSpinBox->setMaximum(ccdinfo.maxexposuretime());
+		int	dec = round(log10(ccdinfo.minexposuretime()));
+		if (dec > 0) { dec = 0; } else { dec = -dec; }
+		ui->exposureSpinBox->setDecimals(dec);
+
 		// start the timer
 		statusTimer.start();
 	}
