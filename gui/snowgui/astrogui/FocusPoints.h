@@ -27,19 +27,19 @@ class FocusPoints;
  */
 class FocusPoint {
 	int		_sequence;
-	unsigned short	_position;
+	long		_position;
 	double		_when;
 	double		_l1norm;
 	double		_fwhm;
 	double		_brenner;
 public:
 	int	sequence() const { return _sequence; }
-	unsigned short	position() const { return _position; }
+	long	position() const { return _position; }
 	double	l1norm() const { return _l1norm; }
 	double	fwhm() const { return _fwhm; }
 	double	brenner() const { return _brenner; }
 	double	when() const { return _when; }
-	FocusPoint(astro::image::ImagePtr image, unsigned short position = 0);
+	FocusPoint(astro::image::ImagePtr image, long position = 0);
 	std::string	toString() const;
 friend class FocusPoints;
 };
@@ -115,7 +115,7 @@ class FocusPoints : public std::list<FocusPoint> {
 public:
 	FocusPoints();
 	void	add(const FocusPoint& point);
-	void	add(astro::image::ImagePtr image, unsigned short position = 0);
+	void	add(astro::image::ImagePtr image, long position = 0);
 
 	// x-ranges
 	double	minposition() const;

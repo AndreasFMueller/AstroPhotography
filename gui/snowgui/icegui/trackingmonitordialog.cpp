@@ -50,7 +50,7 @@ void	trackingmonitordialog::add(const snowstar::TrackingHistory& history) {
 
 	int	counter = 0;
 	std::for_each(history.points.begin(), history.points.end(),
-		[myself,&counter](snowstar::TrackingPoint p) {
+		[myself,&counter](snowstar::TrackingPoint p) mutable {
 			myself->add(p);
 			counter++;
 		}
@@ -87,6 +87,25 @@ void	trackingmonitordialog::gpMasperpixel(double masperpixel) {
  */
 void	trackingmonitordialog::aoMasperpixel(double masperpixel) {
 	ui->gpTrack->masperpixel(masperpixel);
+}
+
+/**
+ * \brief Set the mas per pixel scale from a calibration
+ */
+void    trackingmonitordialog::calibration(const snowstar::Calibration& calibration) {
+	switch (calibration.type) {
+	case snowstar::ControlGuidePort:
+		gpMasperpixel(calibration.masPerPixel);
+		break;
+	case snowstar::ControlAdaptiveOptics:
+		aoMasperpixel(calibration.masPerPixel);
+		break;
+	}
+}
+
+void	trackingmonitordialog::refreshDisplay() {
+	ui->gpTrack->refreshDisplay();
+	ui->aoTrack->refreshDisplay();
 }
 
 } // namespace snowgui

@@ -71,7 +71,7 @@ void	TrackingMonitorController::update(const snowstar::TrackingPoint& point,
  */
 void	TrackingMonitorController::refreshDisplay() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "refresh slot called");
-	_dialog->repaint();
+	_dialog->refreshDisplay();
 }
 
 

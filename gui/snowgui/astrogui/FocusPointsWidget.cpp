@@ -32,7 +32,7 @@ FocusPointsWidget::~FocusPointsWidget() {
 /**
  * \brief Add a new image and position to the focuspoints
  */
-void	FocusPointsWidget::add(ImagePtr image, unsigned short position) {
+void	FocusPointsWidget::add(ImagePtr image, long position) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "adding new focus point");
 	_focuspoints.add(image, position);
 	repaint();

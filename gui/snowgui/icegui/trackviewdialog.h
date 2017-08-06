@@ -20,21 +20,14 @@ class trackviewdialog : public QDialog {
 
 	snowstar::TrackingHistory	_track;
 	snowstar::GuiderFactoryPrx	_guiderfactory;
-	snowstar::Calibration	_gpcalibration;
-	snowstar::Calibration	_aocalibration;
 public:
 	explicit trackviewdialog(QWidget *parent = 0);
 	~trackviewdialog();
 
 	void	setGuiderFactory(snowstar::GuiderFactoryPrx);
 
-	typedef enum datatype_e { offsetPx, offsetArcsec, correction } datatype_t;
-	datatype_t	_datatype;
-	void	updateData();
-
 public slots:
 	void	setTrack(snowstar::TrackingHistory track);
-	void	buttonToggled(bool);
 
 private:
 	Ui::trackviewdialog *ui;

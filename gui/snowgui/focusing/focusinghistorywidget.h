@@ -22,7 +22,7 @@ public:
 	explicit focusinghistorywidget(QWidget *parent = 0);
 	~focusinghistorywidget();
 
-	void	add(astro::image::ImagePtr, unsigned short);
+	void	add(astro::image::ImagePtr, long);
 
 signals:
 	void	positionSelected(int);

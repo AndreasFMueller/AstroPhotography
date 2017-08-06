@@ -29,8 +29,11 @@ public:
 
 	void	gpMasperpixel(double masperpixel);
 	void	aoMasperpixel(double masperpixel);
+	void	calibration(const snowstar::Calibration& calibration);
 private:
 	Ui::trackingmonitordialog *ui;
+public slots:
+	void	refreshDisplay();
 };
 
 } // namespace snowgui

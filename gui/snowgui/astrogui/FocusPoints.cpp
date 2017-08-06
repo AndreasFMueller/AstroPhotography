@@ -17,7 +17,7 @@ namespace snowgui {
 //////////////////////////////////////////////////////////////////////
 // FocusPoint implementation
 //////////////////////////////////////////////////////////////////////
-FocusPoint::FocusPoint(astro::image::ImagePtr image, unsigned short position)
+FocusPoint::FocusPoint(astro::image::ImagePtr image, long position)
 	: _position(position) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "analyzing %s image",
 		image->size().toString().c_str());
@@ -89,7 +89,7 @@ void	FocusPoints::add(const FocusPoint& focuspoint) {
 	push_back(f);
 }
 
-void	FocusPoints::add(ImagePtr image, unsigned short position) {
+void	FocusPoints::add(ImagePtr image, long position) {
 	add(FocusPoint(image, position));
 }
 

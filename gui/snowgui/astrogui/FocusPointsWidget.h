@@ -27,7 +27,7 @@ public:
 	explicit FocusPointsWidget(QWidget *parent = NULL);
 	~FocusPointsWidget();
 
-	void	add(astro::image::ImagePtr, unsigned short position);
+	void	add(astro::image::ImagePtr, long position);
 
 	void	paintEvent(QPaintEvent *event);
 	void	setOrder(FocusPointOrder::order_t);

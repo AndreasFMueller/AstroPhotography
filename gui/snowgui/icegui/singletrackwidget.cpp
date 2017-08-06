@@ -17,7 +17,8 @@ singletrackwidget::singletrackwidget(QWidget *parent) :
 	QWidget(parent), ui(new Ui::singletrackwidget) {
 	ui->setupUi(this);
 
-	_masperpixel = 1000;
+	_masperpixel = 0;
+	ui->offsetArcsecButton->setEnabled(false);
 
 	// two channels
 	ui->dataWidget->addChannel(QColor(0, 255, 0));
@@ -44,6 +45,22 @@ singletrackwidget::singletrackwidget(QWidget *parent) :
  */
 singletrackwidget::~singletrackwidget() {
     delete ui;
+}
+
+/**
+ * \brief set angular scale
+ */
+void	singletrackwidget::masperpixel(double m) {
+	_masperpixel = m;
+	ui->offsetArcsecButton->setEnabled(m > 0);
+}
+
+/**
+ * \brief Get the arcsec scale from the calibration
+ */
+void	singletrackwidget::calibration(
+		const snowstar::Calibration& calibration) {
+	masperpixel(calibration.masPerPixel);
 }
 
 /**
@@ -85,6 +102,23 @@ void	singletrackwidget::add(const snowstar::TrackingPoint& point) {
 
 	// add the point in the right format to the 
 	ui->dataWidget->add(p.timeago, convert(point));
+}
+
+/**
+ * \brief add a track of a certain type
+ */
+void	singletrackwidget::add(const snowstar::TrackingHistory& track,
+		const snowstar::ControlType type) {
+	clearData();
+	singletrackwidget	*stw = this;
+	std::for_each(track.points.begin(), track.points.end(),
+		[stw,type](const snowstar::TrackingPoint& point) mutable {
+			if (point.type == type) {
+				stw->add(point);
+			}
+		}
+	);
+	updateData();
 }
 
 /**
@@ -155,6 +189,10 @@ void	singletrackwidget::buttonToggled(bool t) {
 void	singletrackwidget::clearData() {
 	_points.clear();
 	ui->dataWidget->clearData();
+}
+
+void	singletrackwidget::refreshDisplay() {
+	ui->dataWidget->repaint();
 }
 
 } // namespace snowgui

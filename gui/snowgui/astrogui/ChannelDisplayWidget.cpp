@@ -19,6 +19,7 @@ namespace snowgui {
 ChannelDisplayWidget::ChannelDisplayWidget(QWidget *parent) : QWidget(parent) {
 	_timescale = 1;
 	_vscale = 1;
+	_autorange = true;
 }
 
 /**
@@ -89,6 +90,16 @@ void	ChannelDisplayWidget::draw(double notbefore, double notafter) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0,
 		"plotting between %.1f and %.1f (%.1f seconds)",
 		notbefore, notafter, duration);
+	if (duration <= 0) {
+		std::string	msg("duration must be positive");
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		return;
+	}
+	if (duration > 86400) {
+		std::string	msg("cannot display tracks longer than a day");
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		return;
+	}
 
 	int	newwidth = duration / _timescale; // [timescale] = [s/pixel]
 	debug(LOG_DEBUG, DEBUG_LOG, 0,

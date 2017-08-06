@@ -47,7 +47,7 @@ focusinghistorywidget::~focusinghistorywidget() {
  * the actual computation and display
  */
 void	focusinghistorywidget::add(astro::image::ImagePtr image,
-		unsigned short position) {
+		long position) {
 	ui->focuspointsWidget->add(image, position);
 }
 

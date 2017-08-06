@@ -29,13 +29,17 @@ public:
 	~singletrackwidget();
 
 	void	add(const snowstar::TrackingPoint& point);
+	void	add(const snowstar::TrackingHistory& track,
+			const snowstar::ControlType type);
 	double	masperpixel() const { return _masperpixel; }
-	void	masperpixel(double m) { _masperpixel = m; }
+	void	masperpixel(double m);
+	void	calibration(const snowstar::Calibration& calibration);
 	void	updateData();
 	void	clearData();
 
 public slots:
 	void	buttonToggled(bool);
+	void	refreshDisplay();
 
 private:
 	Ui::singletrackwidget *ui;

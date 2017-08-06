@@ -436,12 +436,24 @@ void	guidercontrollerwidget::selectTrack() {
 void	guidercontrollerwidget::trackSelected(snowstar::TrackingHistory track) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "open view on track %d",
 		track.trackid);
-	trackviewdialog	*tvd = new trackviewdialog(this);
-	tvd->setGuiderFactory(_guiderfactory);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "set track");
-	tvd->setTrack(track);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "show dialog");
-	tvd->show();
+	trackingmonitordialog	*tmd = new trackingmonitordialog(this);
+	tmd->add(track);
+	if (track.guideportcalid > 0) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieve GP cal %d",
+			track.guideportcalid);
+		snowstar::Calibration cal = _guiderfactory
+			->getCalibration(track.guideportcalid);
+		tmd->calibration(cal);
+	}
+	if (track.adaptiveopticscalid > 0) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieve AO cal %d",
+			track.adaptiveopticscalid);
+		snowstar::Calibration cal = _guiderfactory
+			->getCalibration(track.adaptiveopticscalid);
+		tmd->calibration(cal);
+	}
+	tmd->show();
+	tmd->updateData();
 }
 
 /**
@@ -489,14 +501,16 @@ void	guidercontrollerwidget::launchMonitor() {
 			history.guideportcalid);
 		snowstar::Calibration cal = _guiderfactory
 			->getCalibration(history.guideportcalid);
-		_trackingdialog->gpMasperpixel(cal.masPerPixel);
+		_trackingdialog->calibration(cal);
+		//_trackingdialog->gpMasperpixel(cal.masPerPixel);
 	}
 	if (history.adaptiveopticscalid > 0) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieve AO cal %d",
 			history.adaptiveopticscalid);
 		snowstar::Calibration cal = _guiderfactory
 			->getCalibration(history.adaptiveopticscalid);
-		_trackingdialog->aoMasperpixel(cal.masPerPixel);
+		_trackingdialog->calibration(cal);
+		//_trackingdialog->aoMasperpixel(cal.masPerPixel);
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "calibrations installed");
 
