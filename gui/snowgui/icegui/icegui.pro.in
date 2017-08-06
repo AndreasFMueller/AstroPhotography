@@ -90,6 +90,8 @@ WIDGETHEADERS =								\
 SOURCES += 								\
 	AdaptiveOpticsWidget.cpp					\
 	CalibrationDisplayWidget.cpp					\
+	CalibrationImageMonitor.cpp					\
+	calibrationimagewidget.cpp					\
 	CoolerActive.cpp						\
 	FilterWheelBusy.cpp						\
 	FocusButton.cpp							\
@@ -105,6 +107,7 @@ SOURCES += 								\
 HEADERS  += 								\
 	AdaptiveOpticsWidget.h						\
 	CalibrationDisplayWidget.h					\
+	calibrationimagewidget.h					\
 	CoolerActive.h							\
 	FilterWheelBusy.h						\
 	FocusButton.h							\

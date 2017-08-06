@@ -12,6 +12,7 @@
 #include <guider.h>
 #include <QTimer>
 #include <imagedisplaywidget.h>
+#include "calibrationimagewidget.h"
 
 namespace snowgui {
 
@@ -19,37 +20,22 @@ namespace Ui {
 	class darkwidget;
 }
 
-class darkwidget : public QDialog {
+class darkwidget : public calibrationimagewidget {
 	Q_OBJECT
 
-	astro::image::ImagePtr	_darkimage;
-	QTimer		statusTimer;
-	snowstar::GuiderPrx	_guider;
-	snowstar::GuiderState	_guiderstate;
-	bool	_acquiring;
-	imagedisplaywidget	*_imagedisplaywidget;
 public:
 	explicit darkwidget(QWidget *parent = 0);
-	~darkwidget();
+	virtual ~darkwidget();
 
-	void	guider(snowstar::GuiderPrx guider);
-
-	void	closeEvent(QCloseEvent *);
 	void	exposuretime(double e);
-	void	checkImage();
-protected:
-	void	changeEvent(QEvent*);
-
-signals:
-	void	newImage(astro::image::ImagePtr);
-	void	closeWidget();
-	void	offerImage(astro::image::ImagePtr, std::string);
+	virtual void	checkImage();
+	virtual std::string 	imagetype() { return std::string("dark"); }
 
 public slots:
 	void	statusUpdate();
 	void	acquireClicked();
-	void	viewClicked();
-	void	imageClosed();
+	void	signalUpdated(snowstar::CalibrationImageProgress);
+	void	stopped();
 
 private:
 	Ui::darkwidget *ui;

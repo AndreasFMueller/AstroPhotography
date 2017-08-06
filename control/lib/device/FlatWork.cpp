@@ -23,16 +23,7 @@ namespace camera {
  */
 FlatWork::FlatWork(CcdPtr ccd) : _ccd(ccd) {
 	_exposuretime = 1.0;
-	_imagecount = 10;
-}
-
-/**
- * \brief Call the end callback if present
- */
-void	FlatWork::end() {
-	if (_endCallback) {
-		(*_endCallback)(CallbackDataPtr());
-	}
+	imagecount(10);
 }
 
 /**
@@ -49,10 +40,10 @@ void	FlatWork::main(astro::thread::Thread<FlatWork>& thread) {
 ImagePtr	FlatWork::common(astro::thread::ThreadBase& /* thread */) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "FlatWork main function starts");
 	// first check that all the settings are ok
-	if ((_exposuretime <= 0) || (_imagecount <= 0)) {
+	if ((_exposuretime <= 0) || (imagecount() <= 0)) {
 		std::string	msg = stringprintf("bad parameters for "
 			"FlatWork: exposuretime = %.3f, imagecount = %d",
-			_exposuretime, _imagecount);
+			_exposuretime, imagecount());
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 		throw std::runtime_error(msg);
 	}
@@ -67,17 +58,18 @@ ImagePtr	FlatWork::common(astro::thread::ThreadBase& /* thread */) {
 
 	// retrieve all the images
 	ImageSequence	images;
-	for (int imageno = 0; imageno < _imagecount; imageno++) {
+	for (_imageno = 0; _imageno < imagecount(); _imageno++) {
 		_ccd->startExposure(exposure);
 		if (!_ccd->wait()) {
 			debug(LOG_ERR, DEBUG_LOG, 0,
-				"exposure %d failed, aborting",  imageno);
+				"exposure %d failed, aborting",  _imageno);
 			return ImagePtr(NULL);
 		}
 		ImagePtr	image = _ccd->getImage();
 		images.push_back(image);
+		update();
 	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "got %d images", _imagecount);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "got %d images", imagecount());
 
 	// construct the flat image from the images retrieved
 	calibration::FlatFrameFactory	flatfactory;
@@ -90,7 +82,7 @@ ImagePtr	FlatWork::common(astro::thread::ThreadBase& /* thread */) {
 	exposure.addToImage(*_flatimage);
 	_flatimage->setMetadata(
 		astro::io::FITSKeywords::meta(std::string("IMGCOUNT"),
-			(long)_imagecount));
+			(long)imagecount()));
 
 	return _flatimage;
 }

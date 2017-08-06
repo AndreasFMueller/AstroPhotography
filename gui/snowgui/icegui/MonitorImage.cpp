@@ -23,6 +23,7 @@ MonitorImage::MonitorImage(QObject *parent, QLabel *label)
 	_freeze = false;
 	_image.size.width = 0;
 	_image.size.height = 0;
+	_inverse = false;
 }
 
 /**

@@ -464,4 +464,18 @@ ControlType	string2calibrationtype(const std::string& caltype) {
 	throw std::runtime_error(cause);
 }
 
+CalibrationImageProgress        convert(const astro::camera::CalibrationImageProgress prog) {
+	CalibrationImageProgress	result;
+	result.imageno = prog.imageno;
+	result.imagecount = prog.imagecount;
+	return result;
+}
+
+astro::camera::CalibrationImageProgress        convert(const CalibrationImageProgress prog) {
+	astro::camera::CalibrationImageProgress	result;
+	result.imageno = prog.imageno;
+	result.imagecount = prog.imagecount;
+	return result;
+}
+
 } // namespace snowstar

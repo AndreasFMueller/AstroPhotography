@@ -496,6 +496,8 @@ public:
  */
 typedef callback::CallbackDataEnvelope<CalibrationPtr>	CalibrationCallbackData;
 
+typedef callback::CallbackDataEnvelope<CalibrationPoint>	CalibrationPointCallbackData;
+
 /**
  * \brief Progress indicator
  */
@@ -508,11 +510,6 @@ public:
 typedef callback::CallbackDataEnvelope<ProgressInfo>	ProgressInfoCallbackData;
 
 std::ostream&	operator<<(std::ostream& out, const CalibrationPoint& cal);
-
-/**
- * \brief Calibration Point encapsulation as callback argument
- */
-typedef callback::CallbackDataEnvelope<CalibrationPoint>	CalibrationPointCallbackData;
 
 /**
  * \brief Class to report data 
@@ -664,23 +661,27 @@ private:
 	callback::CallbackSet	_calibrationcallback;
 	callback::CallbackSet	_progresscallback;
 	callback::CallbackSet	_trackingcallback;
+	callback::CallbackSet	_calibrationimagecallback;
 public:
 	void	addImageCallback(callback::CallbackPtr i);
 	void	addCalibrationCallback(callback::CallbackPtr c);
 	void	addProgressCallback(callback::CallbackPtr c);
 	void	addGuidercalibrationCallback(callback::CallbackPtr c);
 	void	addTrackingCallback(callback::CallbackPtr t);
+	void	addCalibrationImageCallback(callback::CallbackPtr t);
 
 	void	removeImageCallback(callback::CallbackPtr i);
 	void	removeCalibrationCallback(callback::CallbackPtr c);
 	void	removeProgressCallback(callback::CallbackPtr c);
 	void	removeTrackingCallback(callback::CallbackPtr t);
+	void	removeCalibrationImageCallback(callback::CallbackPtr t);
 	
 	void	callback(image::ImagePtr image);
 	void	callback(const CalibrationPoint& point);
 	void	callback(const ProgressInfo& point);
 	void	callback(const CalibrationPtr cal);
 	void	callback(const TrackingPoint& point);
+	void	callback(const astro::camera::CalibrationImageProgress& calimageprogress);
 	virtual void	callback(const std::exception& ex) = 0;
 
 	// constructor

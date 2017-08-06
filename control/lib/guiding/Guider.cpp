@@ -595,13 +595,22 @@ void	Guider::callback(const std::exception& /* ex */) {
 /**
  * \brief Callback class to signal the end of the guide process
  */
-class DarkEndCallback : public Callback {
+class DarkCallback : public Callback {
 	Guider&	_guider;
 public:
-	DarkEndCallback(Guider& guider) : _guider(guider) { }
+	DarkCallback(Guider& guider) : _guider(guider) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "DarkCallback created");
+	}
 	CallbackDataPtr	operator()(CallbackDataPtr data) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "endDark callback called");
-		_guider.endDark();
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "DarkCallback callback called");
+		CalibrationImageProgressData	*d
+			= dynamic_cast<CalibrationImageProgressData*>(&*data);
+		if (d) {
+			_guider.GuiderBase::callback(d->data());
+			if (d->data().imageno < 0) {
+				_guider.endDark();
+			}
+		}
 		return data;
 	}
 };
@@ -617,12 +626,16 @@ void	Guider::startDark(double exposuretime, int imagecount,
 	_state.startDarkAcquire();
 	try {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "start to acquire a dark");
+		// set up the collback
+		DarkCallback	*darkcallback = new DarkCallback(*this);
+		CallbackPtr	darkcallbackptr(darkcallback);
+
 		// set up the dark work
 		_darkwork = DarkWorkImagerPtr(new DarkWorkImager(imager()));
 		_darkwork->exposuretime(exposuretime);
 		_darkwork->imagecount(imagecount);
 		_darkwork->badpixellimit(badpixellimit);
-		_darkwork->endCallback(CallbackPtr(new DarkEndCallback(*this)));
+		_darkwork->callback(darkcallbackptr);
 
 		// set iup the thread
 		DarkWorkImagerThread	*dwit
@@ -643,19 +656,32 @@ void	Guider::startDark(double exposuretime, int imagecount,
  * \brief Method to signal the end of the dark acquisition process
  */
 void	Guider::endDark() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "dark ended");
 	_state.endDarkAcquire();
 }
 
 /**
  * \brief Callback class to signal the end of the guide process
  */
-class FlatEndCallback : public Callback {
+class FlatCallback : public Callback {
 	Guider&	_guider;
 public:
-	FlatEndCallback(Guider& guider) : _guider(guider) { }
+	FlatCallback(Guider& guider) : _guider(guider) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "create FlatCallback");
+	}
 	CallbackDataPtr	operator()(CallbackDataPtr data) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "endFlat callback called");
-		_guider.endFlat();
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "FlatCallback called");
+		if (!data) {
+			return data;
+		}
+		CalibrationImageProgressData	*d
+			= dynamic_cast<CalibrationImageProgressData*>(&*data);
+		if (d) {
+			_guider.GuiderBase::callback(d->data());
+			if (d->data().imageno < 0) {
+				_guider.endFlat();
+			}
+		}
 		return data;
 	}
 };
@@ -670,6 +696,10 @@ void	Guider::startFlat(double exposuretime, int imagecount, bool useDark) {
 	_state.startFlatAcquire();
 	try {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "start to acquire a flat");
+		// preparing the flat callback
+		FlatCallback	*flatcallback = new FlatCallback(*this);
+		CallbackPtr	flatcallbackptr(flatcallback);
+
 		// set up the flat work
 		_flatwork = FlatWorkImagerPtr(new FlatWorkImager(imager()));
 		_flatwork->exposuretime(exposuretime);
@@ -677,7 +707,7 @@ void	Guider::startFlat(double exposuretime, int imagecount, bool useDark) {
 		if (useDark) {
 			_flatwork->darkimage(imager().dark());
 		}
-		_flatwork->endCallback(CallbackPtr(new FlatEndCallback(*this)));
+		_flatwork->callback(flatcallbackptr);
 
 		// set iup the thread
 		FlatWorkImagerThread	*dwit

@@ -16,8 +16,8 @@ namespace guiding {
  * \brief processing method to process callback 
  */
 CallbackDataPtr	ControlDeviceCallback::operator()(CallbackDataPtr data) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0,
-		"control device callback called");
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "control device callback called");
+
 	// handle calibration point upates
 	{
 		CalibrationPointCallbackData	*cal
@@ -28,6 +28,7 @@ CallbackDataPtr	ControlDeviceCallback::operator()(CallbackDataPtr data) {
 			return data;
 		}
 	}
+
 	// handle the calibration when it completes
 	{
 		CalibrationCallbackData   *cal
@@ -38,6 +39,7 @@ CallbackDataPtr	ControlDeviceCallback::operator()(CallbackDataPtr data) {
 			return data;
 		}
 	}
+
 	// handle progress information
 	{
 		ProgressInfoCallbackData	*cal

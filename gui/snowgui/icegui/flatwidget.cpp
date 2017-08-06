@@ -16,9 +16,9 @@ namespace snowgui {
  * \brief Construct a new flat widget
  */
 flatwidget::flatwidget(QWidget *parent)
-	: QDialog(parent), ui(new Ui::flatwidget) {
+	: calibrationimagewidget(parent), ui(new Ui::flatwidget) {
 	ui->setupUi(this);
-
+	ui->progressWidget->setVisible(false);
 
 	// make the buttons disabled
 	ui->acquireButton->setAutoDefault(false);
@@ -34,22 +34,17 @@ flatwidget::flatwidget(QWidget *parent)
 
 	// program the timer
 	connect(&statusTimer, SIGNAL(timeout()), this, SLOT(statusUpdate()));
-        statusTimer.setInterval(100);
 
-	// application state
-	_guiderstate = snowstar::GuiderUNCONFIGURED;
-	_acquiring = false;
+	// connect the progress info singal
+	connect(this, SIGNAL(updateSignal(snowstar::CalibrationImageProgress)),
+		this, SLOT(signalUpdated(snowstar::CalibrationImageProgress)));
+	connect(this, SIGNAL(stopSignal()), this, SLOT(stopped()));
 }
 
 /**
  * \brief Destroy the flat widget
  */
 flatwidget::~flatwidget() {
-	statusTimer.stop();
-	if (_imagedisplaywidget) {
-		disconnect(_imagedisplaywidget, SLOT(destroyed()), 0, 0);
-		_imagedisplaywidget->close();
-	}
 	delete ui;
 }
 
@@ -60,31 +55,20 @@ void	flatwidget::checkImage() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "checking for an image");
 	try {
 		snowstar::ImagePrx	image = _guider->flatImage();
-		_flatimage = snowstar::convert(image);
-		emit offerImage(_flatimage, std::string("flat"));
+		_image = snowstar::convert(image);
+		emit offerImage(_image, imagetype());
 		image->remove();
-		if (_flatimage) {
+		_acquiring = false;
+		if (_image) {
 			ui->viewButton->setEnabled(true);
-			ui->propertyTable->setImage(_flatimage);
+			ui->propertyTable->setImage(_image);
+		} else {
+			ui->viewButton->setEnabled(false);
 		}
-		emit newImage(_flatimage);
+		emit newImage(_image);
 	} catch (const std::exception& x) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0,
 			"image acquire failed %s", x.what());
-	}
-}
-
-/**
- * \brief set the guider
- */
-void	flatwidget::guider(snowstar::GuiderPrx guider) {
-	statusTimer.stop();
-	_flatimage = astro::image::ImagePtr(NULL);
-	_guider = guider;
-	if (_guider) {
-		checkImage();
-		_guiderstate = snowstar::GuiderUNCONFIGURED;
-		statusTimer.start();
 	}
 }
 
@@ -104,32 +88,41 @@ void	flatwidget::statusUpdate() {
 	if (_guiderstate == newstate) {
 		return;
 	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "processing statusUpdate %d != %d",
+		newstate, _guiderstate);
+	try {
+		ui->usedarkBox->setEnabled(_guider->hasDark());
+	} catch (...) { }
 	switch (newstate) {
 	case snowstar::GuiderUNCONFIGURED:
 	case snowstar::GuiderIDLE:
 	case snowstar::GuiderCALIBRATED:
 		ui->acquireButton->setEnabled(true);
-		if (_flatimage) {
+		if (_image) {
 			ui->viewButton->setEnabled(true);
 		}
+		ui->exposureBox->setEnabled(true);
+		ui->numberBox->setEnabled(true);
+		ui->usedarkBox->setEnabled(true);
 		break;
+	case snowstar::GuiderFLATACQUIRE:
+		ui->exposureBox->setEnabled(false);
+		ui->numberBox->setEnabled(false);
+		ui->usedarkBox->setEnabled(false);
 	case snowstar::GuiderCALIBRATING:
 	case snowstar::GuiderGUIDING:
 	case snowstar::GuiderDARKACQUIRE:
-	case snowstar::GuiderFLATACQUIRE:
 	case snowstar::GuiderIMAGING:
 		ui->acquireButton->setEnabled(false);
-		ui->viewButton->setEnabled(false);
 		break;
 	}
 	_guiderstate = newstate;
 	if (_acquiring && (newstate != snowstar::GuiderFLATACQUIRE)) {
+		ui->propertyBox->setVisible(true);
+		ui->progressWidget->setVisible(false);
 		// retrieve the image
 		checkImage();
 	}
-	try {
-		ui->usedarkBox->setEnabled(_guider->hasDark());
-	} catch (...) { }
 }
 
 /**
@@ -150,6 +143,15 @@ void	flatwidget::acquireClicked() {
 		bool	usedark = ui->usedarkBox->isChecked();
 		_guider->startFlatAcquire(exposuretime, imagecount, usedark);
 		_acquiring = true;
+		snowstar::CalibrationImageProgress	prog;
+		prog.imagecount = ui->numberBox->value();
+		prog.imageno = 0;
+		signalUpdated(prog);
+		ui->propertyBox->setVisible(false);
+		ui->progressWidget->setVisible(true);
+		ui->exposureBox->setEnabled(false);
+		ui->numberBox->setEnabled(false);
+		ui->usedarkBox->setEnabled(false);
 	} catch (const snowstar::BadState& x) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "bad state: %s", x.cause.c_str());
 	} catch (const std::exception& x) {
@@ -157,46 +159,20 @@ void	flatwidget::acquireClicked() {
 	}
 }
 
-void	flatwidget::viewClicked() {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "view clicked");
-	if (_imagedisplaywidget) {
-		_imagedisplaywidget->raise();
-	} else {
-		_imagedisplaywidget = new imagedisplaywidget(NULL);
-		connect(_imagedisplaywidget, SIGNAL(destroyed()),
-			this, SLOT(imageClosed()));
-		connect(_imagedisplaywidget,
-			SIGNAL(offerImage(astro::image::ImagePtr, std::string)),
-			ImageForwarder::get(),
-			SLOT(sendImage(astro::image::ImagePtr, std::string)));
-		std::string	title = astro::stringprintf("flat image for %s",
-			convert(_guider->getDescriptor()).name().c_str());
-		_imagedisplaywidget->setWindowTitle(QString(title.c_str()));
-		_imagedisplaywidget->show();
-	}
-	_imagedisplaywidget->setImage(_flatimage);
+void	flatwidget::signalUpdated(snowstar::CalibrationImageProgress prog) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "new signal received: imageno = %d",
+		prog.imageno);
+	ui->progressLabel->setText(QString(
+		astro::stringprintf("Flat image progress: %d images of %d",
+			prog.imageno, prog.imagecount).c_str()));
+	ui->progressBar->setValue(100.0 * prog.imageno / prog.imagecount);
 }
 
 /**
- * \brief handle window close event
- *
- * This event handler makes sure the window is destroyed when it is closed
+ * \brief Stop the flat image process
  */
-void    flatwidget::closeEvent(QCloseEvent * /* event */) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "allow deletion");
-	emit closeWidget();
-	deleteLater();
-}
-
-void	flatwidget::imageClosed() {
-	_imagedisplaywidget = NULL;
-}
-
-void	flatwidget::changeEvent(QEvent *event) {
-	if (this->window()->isActiveWindow()) {
-		emit offerImage(_flatimage, std::string("flat"));
-	}
-	QWidget::changeEvent(event);
+void    flatwidget::stopped() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "stop");
 }
 
 } // namespace snowgui

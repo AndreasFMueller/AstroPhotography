@@ -37,8 +37,8 @@ class imagercontrollerwidget : public InstrumentWidget {
 	bool	_nosubframe;
 	bool	_nobuttons;
 
-	flatwidget	*_flatwidget;
 	darkwidget	*_darkwidget;
+	flatwidget	*_flatwidget;
 
 public:
 	explicit imagercontrollerwidget(QWidget *parent = NULL);

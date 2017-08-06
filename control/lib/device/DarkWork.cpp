@@ -23,17 +23,8 @@ namespace camera {
  */
 DarkWork::DarkWork(CcdPtr ccd) : _ccd(ccd) {
 	_exposuretime = 1.0;
-	_imagecount = 10;
+	imagecount(10);
 	_badpixellimit = 3;
-}
-
-/**
- * \brief Call the end callback if present
- */
-void	DarkWork::end() {
-	if (_endCallback) {
-		(*_endCallback)(CallbackDataPtr());
-	}
 }
 
 /**
@@ -50,10 +41,10 @@ void	DarkWork::main(astro::thread::Thread<DarkWork>& thread) {
 ImagePtr	DarkWork::common(astro::thread::ThreadBase& /* thread */) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "DarkWork main function starts");
 	// first check that all the settings are ok
-	if ((_exposuretime <= 0) || (_imagecount <= 0)) {
+	if ((_exposuretime <= 0) || (imagecount() <= 0)) {
 		std::string	msg = stringprintf("bad parameters for "
 			"DarkWork: exposuretime = %.3f, imagecount = %d",
-			_exposuretime, _imagecount);
+			_exposuretime, imagecount());
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 		throw std::runtime_error(msg);
 	}
@@ -68,17 +59,18 @@ ImagePtr	DarkWork::common(astro::thread::ThreadBase& /* thread */) {
 
 	// retrieve all the images
 	ImageSequence	images;
-	for (int imageno = 0; imageno < _imagecount; imageno++) {
+	for (_imageno = 0; _imageno < imagecount(); _imageno++) {
 		_ccd->startExposure(exposure);
 		if (!_ccd->wait()) {
 			debug(LOG_ERR, DEBUG_LOG, 0,
-				"exposure %d failed, aborting",  imageno);
+				"exposure %d failed, aborting",  _imageno);
 			return ImagePtr(NULL);
 		}
 		ImagePtr	image = _ccd->getImage();
 		images.push_back(image);
+		update();
 	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "got %d images");
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "got %d images", _imageno);
 
 	// construct the dark image from the images retrieved
 	calibration::DarkFrameFactory	darkfactory(_badpixellimit);
@@ -91,7 +83,7 @@ ImagePtr	DarkWork::common(astro::thread::ThreadBase& /* thread */) {
 	exposure.addToImage(*_darkimage);
 	_darkimage->setMetadata(
 		astro::io::FITSKeywords::meta(std::string("IMGCOUNT"),
-			(long)_imagecount));
+			(long)imagecount()));
 	_darkimage->setMetadata(
 		astro::io::FITSKeywords::meta(std::string("BDPXLLIM"),
 			(double)_badpixellimit));

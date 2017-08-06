@@ -16,10 +16,9 @@ namespace snowgui {
  * \brief Construct a new dark widget
  */
 darkwidget::darkwidget(QWidget *parent)
-	: QDialog(parent), ui(new Ui::darkwidget) {
+	: calibrationimagewidget(parent), ui(new Ui::darkwidget) {
 	ui->setupUi(this);
-
-	_imagedisplaywidget = NULL;
+	ui->progressWidget->setVisible(false);
 
 	// make the buttons disabled
 	ui->acquireButton->setAutoDefault(false);
@@ -35,22 +34,17 @@ darkwidget::darkwidget(QWidget *parent)
 
 	// program the timer
 	connect(&statusTimer, SIGNAL(timeout()), this, SLOT(statusUpdate()));
-        statusTimer.setInterval(100);
 
-	// application state
-	_guiderstate = snowstar::GuiderUNCONFIGURED;
-	_acquiring = false;
+	// connect the progress info singal
+	connect(this, SIGNAL(updateSignal(snowstar::CalibrationImageProgress)),
+		this, SLOT(signalUpdated(snowstar::CalibrationImageProgress)));
+	connect(this, SIGNAL(stopSignal()), this, SLOT(stopped()));
 }
 
 /**
  * \brief Destroy the dark widget
  */
 darkwidget::~darkwidget() {
-	statusTimer.stop();
-	if (_imagedisplaywidget) {
-		disconnect(_imagedisplaywidget, SIGNAL(destroyed()), 0, 0);
-		_imagedisplaywidget->close();
-	}
 	delete ui;
 }
 
@@ -61,31 +55,20 @@ void	darkwidget::checkImage() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "checking for an image");
 	try {
 		snowstar::ImagePrx	image = _guider->darkImage();
-		_darkimage = snowstar::convert(image);
-		emit offerImage(_darkimage, std::string("dark"));
+		_image = snowstar::convert(image);
+		emit offerImage(_image, std::string("dark"));
 		image->remove();
-		if (_darkimage) {
+		_acquiring = false;
+		if (_image) {
 			ui->viewButton->setEnabled(true);
-			ui->propertyTable->setImage(_darkimage);
+			ui->propertyTable->setImage(_image);
+		} else {
+			ui->viewButton->setEnabled(false);
 		}
-		emit newImage(_darkimage);
+		emit newImage(_image);
 	} catch (const std::exception& x) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0,
 			"image acquire failed %s", x.what());
-	}
-}
-
-/**
- * \brief set the guider
- */
-void	darkwidget::guider(snowstar::GuiderPrx guider) {
-	statusTimer.stop();
-	_darkimage = astro::image::ImagePtr(NULL);
-	_guider = guider;
-	if (_guider) {
-		checkImage();
-		_guiderstate = snowstar::GuiderUNCONFIGURED;
-		statusTimer.start();
 	}
 }
 
@@ -110,21 +93,28 @@ void	darkwidget::statusUpdate() {
 	case snowstar::GuiderIDLE:
 	case snowstar::GuiderCALIBRATED:
 		ui->acquireButton->setEnabled(true);
-		if (_darkimage) {
+		if (_image) {
 			ui->viewButton->setEnabled(true);
 		}
+		ui->exposureBox->setEnabled(true);
+		ui->hotlimitBox->setEnabled(true);
+		ui->numberBox->setEnabled(true);
 		break;
+	case snowstar::GuiderDARKACQUIRE:
+		ui->exposureBox->setEnabled(false);
+		ui->hotlimitBox->setEnabled(false);
+		ui->numberBox->setEnabled(false);
 	case snowstar::GuiderCALIBRATING:
 	case snowstar::GuiderGUIDING:
-	case snowstar::GuiderDARKACQUIRE:
 	case snowstar::GuiderFLATACQUIRE:
 	case snowstar::GuiderIMAGING:
 		ui->acquireButton->setEnabled(false);
-		ui->viewButton->setEnabled(false);
 		break;
 	}
 	_guiderstate = newstate;
 	if (_acquiring && (newstate != snowstar::GuiderDARKACQUIRE)) {
+		ui->propertyBox->setVisible(true);
+		ui->progressWidget->setVisible(false);
 		// retrieve the image
 		checkImage();
 	}
@@ -149,6 +139,15 @@ void	darkwidget::acquireClicked() {
 		_guider->startDarkAcquire(exposuretime, imagecount,
 			badpixellimit);
 		_acquiring = true;
+		snowstar::CalibrationImageProgress	prog;
+		prog.imagecount = ui->numberBox->value();
+		prog.imageno = 0;
+		signalUpdated(prog);
+		ui->propertyBox->setVisible(false);
+		ui->progressWidget->setVisible(true);
+		ui->exposureBox->setEnabled(false);
+		ui->hotlimitBox->setEnabled(false);
+		ui->numberBox->setEnabled(false);
 	} catch (const snowstar::BadState& x) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "bad state: %s", x.cause.c_str());
 	} catch (const std::exception& x) {
@@ -157,49 +156,22 @@ void	darkwidget::acquireClicked() {
 }
 
 /**
- * \brief display the image
+ * \brief Update the progress indicator
  */
-void	darkwidget::viewClicked() {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "view clicked");
-	if (_imagedisplaywidget) {
-		_imagedisplaywidget->raise();
-	} else {
-		_imagedisplaywidget = new imagedisplaywidget(NULL);
-		connect(_imagedisplaywidget, SIGNAL(destroyed()),
-			this, SLOT(imageClosed()));
-		connect(_imagedisplaywidget,
-			SIGNAL(offerImage(astro::image::ImagePtr, std::string)),
-			ImageForwarder::get(),
-			SLOT(sendImage(astro::image::ImagePtr, std::string)));
-		std::string	title = astro::stringprintf("dark image for %s",
-			convert(_guider->getDescriptor()).name().c_str());
-		_imagedisplaywidget->setWindowTitle(QString(title.c_str()));
-		_imagedisplaywidget->show();
-	}
-	_imagedisplaywidget->setImage(_darkimage);
+void	darkwidget::signalUpdated(snowstar::CalibrationImageProgress prog) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "new signal received: imageno = %d",
+		prog.imageno);
+	ui->progressLabel->setText(QString(
+		astro::stringprintf("Dark image progress: %d images of %d",
+			prog.imageno, prog.imagecount).c_str()));
+	ui->progressBar->setValue(100.0 * prog.imageno / prog.imagecount);
 }
 
 /**
- * \brief handle window close event
- *
- * This event handler makes sure the window is destroyed when it is closed
+ * \brief Stop the dark image process
  */
-void    darkwidget::closeEvent(QCloseEvent * /* event */) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "allow deletion");
-	emit closeWidget();
-	emit offerImage(ImagePtr(NULL), std::string());
-	deleteLater();
-}
-
-void	darkwidget::imageClosed() {
-	_imagedisplaywidget = NULL;
-}
-
-void	darkwidget::changeEvent(QEvent *event) {
-	if (this->window()->isActiveWindow()) {
-		emit offerImage(_darkimage, std::string("dark"));
-	}
-	QWidget::changeEvent(event);
+void	darkwidget::stopped() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "stop");
 }
 
 } // namespace snowgui

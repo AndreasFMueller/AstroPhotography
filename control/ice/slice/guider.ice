@@ -143,6 +143,24 @@ module snowstar {
 	};
 
 	/**
+	 * \brief Information about Calibration image progress
+	 */
+	struct CalibrationImageProgress {
+		int	imageno;
+		int	imagecount;
+	};
+
+	/**
+	 * \brief Interface for calibration image process updates
+	 *
+	 * The calibration image monitor processes updates when new images
+	 * have beena acquired.
+	 */
+	interface CalibrationImageMonitor extends Callback {
+		void	update(CalibrationImageProgress calimgprog);
+	};
+
+	/**
 	 * \brief States of the guider
 	 */
 	enum GuiderState {
@@ -322,6 +340,9 @@ module snowstar {
 		bool	hasFlat();
 		bool	useFlat() throws BadState;
 		void	setUseFlat(bool useflat) throws BadState;
+
+		void	registerCalibrationImageMonitor(Ice::Identity monitor);
+		void	unregisterCalibrationImageMonitor(Ice::Identity monitor);
 
 		/**
 		 * \brief Start to acquire an image

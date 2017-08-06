@@ -28,6 +28,11 @@ template<>
 void	callback_adapter<CalibrationMonitorPrx>(CalibrationMonitorPrx& p,
 		const astro::callback::CallbackDataPtr d);
 
+template<>
+void	callback_adapter<CalibrationImageMonitorPrx>(
+		CalibrationImageMonitorPrx& p,
+		const astro::callback::CallbackDataPtr d);
+
 /**
  * \brief Guider servant class
  *
@@ -49,6 +54,7 @@ class GuiderI : virtual public Guider, virtual public RepositoryUser {
 	astro::callback::CallbackPtr	_imagecallback;
 	astro::callback::CallbackPtr	_calibrationcallback;
 	astro::callback::CallbackPtr	_trackingcallback;
+	astro::callback::CallbackPtr	_calibrationimagecallback;
 
 	// public interface starts here
 public:
@@ -114,6 +120,7 @@ private:
 	SnowCallback<ImageMonitorPrx>	imagecallbacks;
 	SnowCallback<TrackingMonitorPrx>	trackingcallbacks;
 	SnowCallback<CalibrationMonitorPrx>	calibrationcallbacks;
+	SnowCallback<CalibrationImageMonitorPrx>	calibrationimagecallbacks;
 
 	// methods for registration and unregistration of callbacks
 public:
@@ -163,6 +170,14 @@ public:
 	virtual bool	useFlat(const Ice::Current& current);
 	virtual void	setUseFlat(bool useflat, const Ice::Current& current);
 
+	virtual void	registerCalibrationImageMonitor(
+				const Ice::Identity& calibrationimagecallback,
+				const Ice::Current& current);
+	virtual void	unregisterCalibrationImageMonitor(
+				const Ice::Identity& calibrationimagecallback,
+				const Ice::Current& current);
+	void	calibrationImageUpdate(const astro::callback::CallbackDataPtr data);
+
 	// methods use to acquire images
 	virtual void	startImaging(const Exposure& exposure,
 				const Ice::Current& current);
@@ -211,6 +226,20 @@ public:
 	virtual astro::callback::CallbackDataPtr	operator()(
 		astro::callback::CallbackDataPtr data) {
 		_guider.trackingImageUpdate(data);
+		return data;
+	}
+};
+
+/**
+ * \brief Adapter class for calibration image callback
+ */
+class GuiderICalibrationImageCallback : public astro::callback::Callback {
+	GuiderI&	_guider;
+public:
+	GuiderICalibrationImageCallback(GuiderI& guider) : _guider(guider) { }
+	virtual astro::callback::CallbackDataPtr	operator()(
+		astro::callback::CallbackDataPtr data) {
+		_guider.calibrationImageUpdate(data);
 		return data;
 	}
 };

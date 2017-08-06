@@ -14,6 +14,7 @@ libastrodevice_la_SOURCES =						\
 	AdaptiveOptics.cpp						\
 	BasicGuideport.cpp						\
 	BinningSet.cpp							\
+	CalimageWork.cpp						\
 	Camera.cpp							\
 	Ccd.cpp								\
 	CcdInfo.cpp							\

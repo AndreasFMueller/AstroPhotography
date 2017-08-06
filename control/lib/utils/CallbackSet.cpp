@@ -25,6 +25,11 @@ public:
 		std::string cb = demangle(typeid(&*callback).name());
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "callback %s on %s",
 			cb.c_str(),  cbdata.c_str());
+		// check whether the callback actual exists
+		if (!callback) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "no callback");
+			return CallbackDataPtr(NULL);
+		}
 		// apply the callback carefully, catching alle exceptions
 		try {
 			callback->operator()(_data);

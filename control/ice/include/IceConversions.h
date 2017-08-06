@@ -148,6 +148,10 @@ astro::guiding::CalibrationPtr	convert(const Calibration& cal);
 std::string	guiderdescriptor2name(const GuiderDescriptor& descriptor);
 GuiderDescriptor	guiderdescriptorParse(const std::string &name);
 
+// Calibration image related
+CalibrationImageProgress	convert(const astro::camera::CalibrationImageProgress);
+astro::camera::CalibrationImageProgress	convert(const CalibrationImageProgress);
+
 // TaskQueue
 TaskState	convert(const astro::task::TaskInfo::taskstate& state);
 astro::task::TaskInfo::taskstate	convert(const TaskState& state);

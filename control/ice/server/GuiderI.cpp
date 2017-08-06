@@ -132,6 +132,34 @@ void	callback_adapter<CalibrationMonitorPrx>(CalibrationMonitorPrx& p,
 }
 
 /**
+ * \brief callback adapter for Image Calibration Monitor
+ */
+template<>
+void	callback_adapter<CalibrationImageMonitorPrx>(CalibrationImageMonitorPrx& p,
+		const astro::callback::CallbackDataPtr data) {
+	astro::camera::CalibrationImageProgressData	*calimgp
+		= dynamic_cast<astro::camera::CalibrationImageProgressData*>(&*data);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "Calibration Image callback called");
+
+	if (NULL != calimgp) {
+		int	imageno = calimgp->data().imageno;
+		int	imagecount = calimgp->data().imagecount;
+		if (imageno < 0) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0,
+				"got end of calibration image run");
+			p->stop();
+		} else {
+			debug(LOG_DEBUG, DEBUG_LOG, 0,
+				"calibration image progress: %d/%d",
+				imageno, imagecount);
+			p->update(convert(calimgp->data()));
+		}
+		return;
+	}
+
+}
+
+/**
  * \brief Constructor for the Guider servant
  */
 GuiderI::GuiderI(astro::guiding::GuiderPtr _guider,
@@ -166,6 +194,13 @@ GuiderI::GuiderI(astro::guiding::GuiderPtr _guider,
 	GuiderITrackingCallback	*tcallback = new GuiderITrackingCallback(*this);
 	_trackingcallback = astro::callback::CallbackPtr(tcallback);
 	guider->addTrackingCallback(_trackingcallback);
+
+	// calibration image callback, called when the calibration image
+	// callback sends en update
+	GuiderICalibrationImageCallback	*cicallback
+		= new GuiderICalibrationImageCallback(*this);
+	_calibrationimagecallback = astro::callback::CallbackPtr(cicallback);
+	guider->addCalibrationImageCallback(_calibrationimagecallback);
 }
 
 /**
@@ -855,6 +890,24 @@ void    GuiderI::setInterpolate(bool interpolate,
 }
 
 /**
+ * \brief Register a callback for images taken during the process
+ */
+void    GuiderI::registerCalibrationImageMonitor(const Ice::Identity& imagecallback,
+		const Ice::Current& current) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "register an image callback");
+	calibrationimagecallbacks.registerCallback(imagecallback, current);
+}
+
+/**
+ * \brief Unregister a callback for images
+ */
+void    GuiderI::unregisterCalibrationImageMonitor(const Ice::Identity& imagecallback,
+		const Ice::Current& current) {
+	calibrationimagecallbacks.unregisterCallback(imagecallback, current);
+}
+
+
+/**
  * \brief start imaging with a given exposure
  */
 void	GuiderI::startImaging(const Exposure& exposure,
@@ -885,6 +938,15 @@ ImagePrx	GuiderI::getImage(const Ice::Current& current) {
 
 	// return a proxy for the image
 	return snowstar::getImage(filename, image->pixel_type(), current);
+}
+
+/**
+ * \brief Update information about the image
+ */
+void	GuiderI::calibrationImageUpdate(
+		const astro::callback::CallbackDataPtr data) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "calibrationImageUpdate called");
+	calibrationimagecallbacks(data);
 }
 
 } // namespace snowstar

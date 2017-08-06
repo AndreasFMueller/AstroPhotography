@@ -69,6 +69,12 @@ void	GuiderBase::addTrackingCallback(callback::CallbackPtr callback) {
 		_trackingcallback.size());
 }
 
+void	GuiderBase::addCalibrationImageCallback(callback::CallbackPtr callback) {
+	_calibrationimagecallback.insert(callback);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "now %d calibration image callbacks",
+		_calibrationimagecallback.size());
+}
+
 
 
 
@@ -86,6 +92,10 @@ void	GuiderBase::removeProgressCallback(callback::CallbackPtr callback) {
 
 void	GuiderBase::removeTrackingCallback(callback::CallbackPtr callback) {
 	_trackingcallback.erase(callback);
+}
+
+void	GuiderBase::removeCalibrationImageCallback(callback::CallbackPtr callback) {
+	_calibrationimagecallback.erase(callback);
 }
 
 /**
@@ -147,6 +157,19 @@ void	GuiderBase::callback(const CalibrationPtr cal) {
 	astro::callback::CallbackDataPtr	data(
                         new CalibrationCallbackData(cal));
 	_calibrationcallback(data);
+}
+
+/**
+ * \brief Callback for number of calibration images
+ *
+ * This callback informs the guider that the calibration image process
+ * has acquired a new image.
+ */
+void	GuiderBase::callback(const astro::camera::CalibrationImageProgress& prog) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "callback(imageno = %d/%d)",
+		prog.imageno, prog.imagecount);
+	astro::callback::CallbackDataPtr	data(new astro::camera::CalibrationImageProgressData(prog));
+	_calibrationimagecallback(data);
 }
 
 /**

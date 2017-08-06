@@ -71,29 +71,50 @@ public:
 typedef std::shared_ptr<Imager>	ImagerPtr;
 
 /**
- * \brief Thread class to extract a dark image for a CCD
+ * \brief Calibration image progress
  */
-class DarkWork {
-	double	_exposuretime;
+class CalibrationImageProgress {
 public:
-	double	exposuretime() const { return _exposuretime; }
-	void	exposuretime(double e) { _exposuretime = e; }
+	int	imagecount;
+	int	imageno;
+};
+typedef CallbackDataEnvelope<CalibrationImageProgress>	CalibrationImageProgressData;
+
+/**
+ * \brief common base class for the work done for darks/flats for the imager
+ */
+class CalimageWork {
 private:
 	int	_imagecount;
 public:
 	int	imagecount() const { return _imagecount; }
 	void	imagecount(int n) { _imagecount = n; }
+protected:
+	int	_imageno;
+private:
+	CallbackPtr	_callback;
+protected:
+	void	end();
+	void	update();
+public:
+	void	callback(CallbackPtr e) { _callback = e; }
+
+	CalimageWork() : _imagecount(0) { }
+};
+
+/**
+ * \brief Thread class to extract a dark image for a CCD
+ */
+class DarkWork : public CalimageWork {
+	double	_exposuretime;
+public:
+	double	exposuretime() const { return _exposuretime; }
+	void	exposuretime(double e) { _exposuretime = e; }
 private:
 	double	_badpixellimit; // number of std devs for bad pixels
 public:
 	double	badpixellimit() const { return _badpixellimit; }
 	void	badpixellimit(double b) { _badpixellimit = b; }
-private:
-	CallbackPtr	_endCallback;
-protected:
-	void	end();
-public:
-	void	endCallback(CallbackPtr e) { _endCallback = e; }
 private:
 	ImagePtr	_darkimage;
 public:
@@ -132,22 +153,11 @@ typedef std::shared_ptr<DarkWorkImagerThread>	DarkWorkImagerThreadPtr;
 /**
  * \brief Thread class to extract a flat image for a CCD
  */
-class FlatWork {
+class FlatWork : public CalimageWork {
 	double	_exposuretime;
 public:
 	double	exposuretime() const { return _exposuretime; }
 	void	exposuretime(double e) { _exposuretime = e; }
-private:
-	int	_imagecount;
-public:
-	int	imagecount() const { return _imagecount; }
-	void	imagecount(int n) { _imagecount = n; }
-private:
-	CallbackPtr	_endCallback;
-protected:
-	void	end();
-public:
-	void	endCallback(CallbackPtr e) { _endCallback = e; }
 private:
 	ImagePtr	_darkimage;
 public:

@@ -368,8 +368,6 @@ void	imagercontrollerwidget::captureClicked() {
 		}
 		ourexposure = true;
 		ui->captureButton->setEnabled(false);
-		ui->darkButton->setEnabled(false);
-		ui->flatButton->setEnabled(false);
 	} catch (const std::exception& x) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "cannot start Imaging");
 	}
@@ -393,16 +391,20 @@ void	imagercontrollerwidget::darkClicked() {
 		SIGNAL(offerImage(astro::image::ImagePtr, std::string)),
 		ImageForwarder::get(),
 		SLOT(sendImage(astro::image::ImagePtr, std::string)));
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "configuring widget with guider");
 	_darkwidget->guider(_guider);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "widget configured with guider");
 
 	std::ostringstream	out;
 	out << "dark image for ";
-	astro::guiding::GuiderDescriptor	gd = convert(_guider->getDescriptor());
+	astro::guiding::GuiderDescriptor	gd
+		= convert(_guider->getDescriptor());
 	out << gd.name();
 	
 	_darkwidget->setWindowTitle(QString(out.str().c_str()));
 	_darkwidget->exposuretime(_exposure.exposuretime());
 	_darkwidget->show();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "dark widget displayed");
 }
 
 /**
@@ -528,8 +530,6 @@ void	imagercontrollerwidget::statusUpdate() {
 	case snowstar::GuiderUNCONFIGURED:
 	case snowstar::GuiderCALIBRATED:
 		ui->captureButton->setEnabled(true);
-		ui->darkButton->setEnabled(true);
-		ui->flatButton->setEnabled(true);
 		break;
 	case snowstar::GuiderCALIBRATING:
 	case snowstar::GuiderGUIDING:
@@ -537,8 +537,6 @@ void	imagercontrollerwidget::statusUpdate() {
 	case snowstar::GuiderFLATACQUIRE:
 	case snowstar::GuiderIMAGING:
 		ui->captureButton->setEnabled(false);
-		ui->darkButton->setEnabled(false);
-		ui->flatButton->setEnabled(false);
 		break;
 	}
 	previousstate = newstate;

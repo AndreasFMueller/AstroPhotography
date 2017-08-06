@@ -56,7 +56,7 @@ bool	GuiderStateMachine::canStartFlatAcquire() const {
 }
 
 bool	GuiderStateMachine::canEndFlatAcquire() const {
-	return (_state == Guide::darkacquire);
+	return (_state == Guide::flatacquire);
 }
 
 bool	GuiderStateMachine::canStartImaging() const {
@@ -149,7 +149,7 @@ void	GuiderStateMachine::startFlatAcquire() {
 		throw BadState(msg);
 	}
 	_prestate = _state;
-	_state = Guide::darkacquire;
+	_state = Guide::flatacquire;
 }
 
 void	GuiderStateMachine::endFlatAcquire() {
