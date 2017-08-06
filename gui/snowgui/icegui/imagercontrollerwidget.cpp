@@ -391,13 +391,6 @@ void	imagercontrollerwidget::darkClicked() {
 		SIGNAL(offerImage(astro::image::ImagePtr, std::string)),
 		ImageForwarder::get(),
 		SLOT(sendImage(astro::image::ImagePtr, std::string)));
-#if 0
-	connect(_darkwidget,
-		SIGNAL(updateSignal(snowstar::CalibrationImageProgress)),
-                _darkwidget,
-		SLOT(signalUpdated(snowstar::CalibrationImageProgress)));
-        connect(_darkwidget, SIGNAL(CalibrationImageMonitor::stopSignal()), _darkwidget, SLOT(stopped()));
-#endif
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "configuring widget with guider");
 	_darkwidget->guider(_guider);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "widget configured with guider");

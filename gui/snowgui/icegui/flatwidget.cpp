@@ -36,11 +36,9 @@ flatwidget::flatwidget(QWidget *parent)
 	connect(&statusTimer, SIGNAL(timeout()), this, SLOT(statusUpdate()));
 
 	// connect the progress info singal
-#if 0
 	connect(this, SIGNAL(updateSignal(snowstar::CalibrationImageProgress)),
 		this, SLOT(signalUpdated(snowstar::CalibrationImageProgress)));
 	connect(this, SIGNAL(stopSignal()), this, SLOT(stopped()));
-#endif
 }
 
 /**
