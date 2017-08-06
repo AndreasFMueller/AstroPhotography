@@ -61,6 +61,7 @@ public:
 	double	first() const;
 
 	void	push_back(const ChannelDataPoint& p);
+	void	clear();
 };
 
 /**

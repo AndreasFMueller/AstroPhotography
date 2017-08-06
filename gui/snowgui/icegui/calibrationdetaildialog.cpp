@@ -65,6 +65,8 @@ void	calibrationdetaildialog::setCalibration(snowstar::Calibration calibration) 
 		_calibration.guider.adaptiveopticsIndex).c_str()));
 	ui->resolutionField->setText(QString(astro::stringprintf("%.1f\"/px",
 		_calibration.masPerPixel / 1000).c_str()));
+	ui->intervalField->setText(QString(astro::stringprintf("%.1fs",
+		_calibration.interval).c_str()));
 	char	buffer[100];
 	time_t	when = snowstar::converttime(_calibration.timeago);
 	struct tm	*tmp = localtime(&when);

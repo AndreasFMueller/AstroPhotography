@@ -430,6 +430,12 @@ public:
 	double	masPerPixel() const { return _masPerPixel; }
 	void	masPerPixel(double m) { _masPerPixel = m; }
 
+private:
+	double	_interval;
+public:
+	double	interval() const { return _interval; }
+	void	interval(double i) { _interval = i; }
+
 	// string representation of the baseic 
 	std::string	toString() const;
 
@@ -1156,6 +1162,8 @@ public:
 	int	complete;
 	double	masPerPixel;
 	int	controltype;
+	double	interval;
+	double	guiderate;
 	PersistentCalibration();
 	PersistentCalibration(const BasicCalibration& other);
 	PersistentCalibration&	operator=(const BasicCalibration& other);

@@ -125,6 +125,8 @@ module snowstar {
 		bool	complete;
 		double	focallength;
 		double	masPerPixel;
+		double	guiderate;
+		double	interval;
 		ControlType	type;
 		bool	flipped;
 		CalibrationSequence	points;

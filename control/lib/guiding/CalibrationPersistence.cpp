@@ -22,6 +22,8 @@ PersistentCalibration::PersistentCalibration() {
 	complete = 0;
 	masPerPixel = 0;
 	controltype = 0;
+	interval = 0;
+	guiderate = 0.5;
 }
 
 PersistentCalibration::PersistentCalibration(const BasicCalibration& other) {
@@ -45,8 +47,10 @@ PersistentCalibration::PersistentCalibration(const BasicCalibration& other) {
 	det = other.det();
 
 	// only available in the guidercalibration
-	focallength = 0;
-	masPerPixel = 0;
+	focallength = other.focallength();
+	masPerPixel = other.masPerPixel();
+	interval = other.interval();
+	guiderate = other.guiderate();
 }
 
 PersistentCalibration&	PersistentCalibration::operator=(
@@ -86,6 +90,8 @@ std::string	CalibrationTableAdapter::createstatement() {
 	"    complete int not null default 0,\n"
 	"    focallength double not null default 0,\n"
 	"    masperpixel double not null default 1,\n"
+	"    guiderate double not null default 0.5,\n"
+	"    interval double not null default 5,\n"
 	"    controltype int not null default 0,\n"
 	"    primary key(id)\n"
 	")\n"
@@ -112,6 +118,8 @@ CalibrationRecord	CalibrationTableAdapter::row_to_object(int objectid,
 	result.focallength = row["focallength"]->doubleValue();
 	result.masPerPixel = row["masperpixel"]->doubleValue();
 	result.controltype = row["controltype"]->intValue();
+	result.interval = row["interval"]->intValue();
+	result.guiderate = row["guiderate"]->intValue();
 	return result;
 }
 
@@ -135,6 +143,8 @@ UpdateSpec	CalibrationTableAdapter::object_to_updatespec(const CalibrationRecord
 	spec.insert(Field("focallength", factory.get(calibration.focallength)));
 	spec.insert(Field("masperpixel", factory.get(calibration.masPerPixel)));
 	spec.insert(Field("controltype", factory.get(calibration.controltype)));
+	spec.insert(Field("interval", factory.get(calibration.interval)));
+	spec.insert(Field("guiderate", factory.get(calibration.guiderate)));
 	return spec;
 }
 

@@ -398,7 +398,7 @@ void	imagercontrollerwidget::darkClicked() {
 	std::ostringstream	out;
 	out << "dark image for ";
 	astro::guiding::GuiderDescriptor	gd = convert(_guider->getDescriptor());
-	out << gd.toString();
+	out << gd.name();
 	
 	_darkwidget->setWindowTitle(QString(out.str().c_str()));
 	_darkwidget->exposuretime(_exposure.exposuretime());
@@ -428,7 +428,7 @@ void	imagercontrollerwidget::flatClicked() {
 	std::ostringstream	out;
 	out << "flat image for ";
 	astro::guiding::GuiderDescriptor	gd = convert(_guider->getDescriptor());
-	out << gd.toString();
+	out << gd.name();
 	
 	_flatwidget->setWindowTitle(QString(out.str().c_str()));
 	_flatwidget->exposuretime(_exposure.exposuretime());

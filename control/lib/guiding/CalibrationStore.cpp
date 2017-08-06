@@ -110,6 +110,7 @@ CalibrationPtr	CalibrationStore::getCalibration(long id) {
 	calibration->complete((r.complete) ? true : false);
 	calibration->focallength(r.focallength);
 	calibration->masPerPixel(r.masPerPixel);
+	calibration->interval(r.interval);
 	debug(LOG_DEBUG, DEBUG_LOG, 0,
 		"found calibration with masPerPixel=%.3f", r.masPerPixel);
 

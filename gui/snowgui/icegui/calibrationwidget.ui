@@ -60,6 +60,13 @@
         </property>
        </widget>
       </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="numberLabel">
+        <property name="text">
+         <string>Points:</string>
+        </property>
+       </widget>
+      </item>
       <item row="1" column="1">
        <widget class="QLabel" name="numberField">
         <property name="text">
@@ -67,10 +74,43 @@
         </property>
        </widget>
       </item>
+      <item row="0" column="2">
+       <widget class="snowgui::CalibrationDisplayWidget" name="calibrationdisplayWidget" native="true">
+        <property name="minimumSize">
+         <size>
+          <width>100</width>
+          <height>100</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>100</width>
+          <height>100</height>
+         </size>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="0">
+       <widget class="QLabel" name="calibrationIDLabel">
+        <property name="text">
+         <string>ID:</string>
+        </property>
+       </widget>
+      </item>
       <item row="3" column="1">
        <widget class="QLabel" name="qualityField">
         <property name="text">
          <string>0</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QLabel" name="calibrationIDField">
+        <property name="text">
+         <string>0</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
         </property>
        </widget>
       </item>
@@ -88,43 +128,17 @@
         </property>
        </widget>
       </item>
-      <item row="0" column="1">
-       <widget class="QLabel" name="calibrationIDField">
+      <item row="4" column="0">
+       <widget class="QLabel" name="intervalLabel">
         <property name="text">
-         <string>0</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+         <string>Interval:</string>
         </property>
        </widget>
       </item>
-      <item row="0" column="0">
-       <widget class="QLabel" name="calibrationIDLabel">
+      <item row="4" column="1">
+       <widget class="QLabel" name="intervalField">
         <property name="text">
-         <string>ID:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="0">
-       <widget class="QLabel" name="numberLabel">
-        <property name="text">
-         <string>Points:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="2">
-       <widget class="snowgui::CalibrationDisplayWidget" name="calibrationdisplayWidget" native="true">
-        <property name="minimumSize">
-         <size>
-          <width>100</width>
-          <height>100</height>
-         </size>
-        </property>
-        <property name="maximumSize">
-         <size>
-          <width>100</width>
-          <height>100</height>
-         </size>
+         <string/>
         </property>
        </widget>
       </item>

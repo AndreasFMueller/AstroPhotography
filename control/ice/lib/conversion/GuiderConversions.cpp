@@ -95,6 +95,8 @@ GuiderState	convert(const astro::guiding::Guide::state& state) {
 		return GuiderGUIDING;
 	case astro::guiding::Guide::darkacquire:
 		return GuiderDARKACQUIRE;
+	case astro::guiding::Guide::flatacquire:
+		return GuiderFLATACQUIRE;
 	case astro::guiding::Guide::imaging:
 		return GuiderIMAGING;
 	}
@@ -115,6 +117,8 @@ astro::guiding::Guide::state	convert(const GuiderState& state) {
 		return astro::guiding::Guide::guiding;
 	case GuiderDARKACQUIRE:
 		return astro::guiding::Guide::darkacquire;
+	case GuiderFLATACQUIRE:
+		return astro::guiding::Guide::flatacquire;
 	case GuiderIMAGING:
 		return astro::guiding::Guide::imaging;
 	}
@@ -320,6 +324,8 @@ Calibration     convert(const astro::guiding::CalibrationPtr cal) {
 	result.type = convertcontroltype(cal->calibrationtype());
 	result.focallength = cal->focallength();
 	result.masPerPixel = cal->masPerPixel();
+	result.interval = cal->interval();
+	result.guiderate = cal->guiderate();
 	for (int i = 0; i < 6; i++) {
 		result.coefficients.push_back(cal->a[i]);
 	}
@@ -360,6 +366,8 @@ astro::guiding::CalibrationPtr	convert(const Calibration& cal) {
 	result->flipped(cal.flipped);
 	result->masPerPixel(cal.masPerPixel);
 	result->focallength(cal.focallength);
+	result->interval(cal.interval);
+	result->guiderate(cal.guiderate);
 
 	for (int i = 0; i < cal.points.size(); i++) {
 		result->push_back(convert(cal.points[i]));

@@ -116,12 +116,15 @@ void	calibrationwidget::displayCalibration() {
 		ui->numberField->setText(QString(""));
 		ui->qualityField->setText(QString(""));
 		ui->resolutionField->setText(QString(""));
+		ui->intervalField->setText(QString(""));
 		return;
 	}
 	ui->calibrationIDField->setText(QString::number(_calibration.id));
 	ui->numberField->setText(QString::number(_calibration.points.size()));
 	ui->qualityField->setText(QString(astro::stringprintf("%.1f%%",
 		_calibration.quality * 100).c_str()));
+	ui->intervalField->setText(QString(astro::stringprintf("%.1fs",
+		_calibration.interval).c_str()));
 	ui->resolutionField->setText(QString(astro::stringprintf("%.0f\"/px",
 		_calibration.masPerPixel / 1000.).c_str()));
 }

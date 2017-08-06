@@ -234,7 +234,9 @@ void	GPCalibrationProcess::main2(astro::thread::Thread<GPCalibrationProcess>& _t
 	// use a smaller grid constant. The default value of 10 is a good
 	// choice for a 100mm guide scope and 7u pixels as for the SBIG
 	// ST-i guider kit
+	calibration()->guiderate(guiderate());
 	grid = gridconstant(_focallength, guider()->pixelsize(), guiderate());
+	calibration()->interval(grid);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "grid constant: %f", grid);
 
 	// measure the initial point
@@ -305,56 +307,70 @@ void	GPCalibrationProcess::main2(astro::thread::Thread<GPCalibrationProcess>& _t
  * pixels size. Smaller pixels are larger focallength allow to
  * use a smaller grid constant.
  *
- * The grid constant is chosen so as to generate an offset of about 5
- * pixels on the guide CCD. It is assumed that standard guider rate
- * of 15"/second are used.
+ * The grid constant is chosen so as to generate an offset of at least 10
+ * pixels on the guide CCD, but also one of at least 15 arc seconds.
  */
 double	GPCalibrationProcess::gridconstant(double focallength,
 	double pixelsize, double guiderate) const {
-	// the default guide rate is just half the rotation of the earth
-	// this is the default guide rate 
-	//radians/sec                     15" / sec    * radians/degree
-	static double	siderial_rate = ((15. / 3600.) * (M_PI / 180.));
+	// if we don't have the focal length, there is no way we can compute
+	// reasonable grid constant, so we just use 5 seconds, which should
+	// at least be larger to compensate for backlash
+	if (focallength <= 0) {
+		return 0;
+	}
+
+	// not having a pixel size is an error
+	if (pixelsize <= 0) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "pixel size is required");
+		throw std::runtime_error("no pixel size specified");
+	}
+
+	// compute the conversion factor from pixels to arc secons
+	double arcsecperpixel = (180 * 3600 / M_PI) * (pixelsize / focallength);
+
+	// the default guide rate is just half the rate of rotation of
+	// the earth this is the default guide rate of 15" per second
+	double	siderial_rate = 15 / arcsecperpixel;		// [pixel/s]
 	if (0 == guiderate) {
 		// the default guide rate is just half the rotation of the earth
 		// this is the default guide rate on celestron telescopes
 		guiderate = 0.5;
 	}
-	guiderate *= siderial_rate;
-
+	guiderate *= siderial_rate;				// [pixel/s]
+ 
+	// what we compute the grid constant for
 	debug(LOG_DEBUG, DEBUG_LOG, 0,
 		"grid constant for focallength = %.0fmm, pixelsize = %.1fum, "
-		"guiderate %.1f, %.1f arc sec/sec",
+		"guiderate %.1f, %.1f pixel/sec",
 		1000 * focallength, 1000000 * pixelsize,
-		guiderate / siderial_rate, guiderate * 3600 * 180 / M_PI);
+		guiderate / siderial_rate, guiderate);
+
+	// we want a displacement of at least 10 pixels (this makes sure 
+	// we get enough discernible displacement when the focal length
+	// is short)
+	static double	pixelgridsize = 10;			// [pixel]
+	double	pixelgridconstant = pixelgridsize / guiderate;	// [s]
 
 	// computing the grid constant (seconds displacement of calibration
 	// points). Default grid constant is 5 seconds, which should be
 	// good enough for most guiders.
-	double	gridconstant = 5;
+	static double	anglegridsize = 30 / arcsecperpixel;	// [pixel]
+	double	anglegridconstant = anglegridsize / guiderate;	// [s]
 
-	// if we have information about focal length and pixel size,
-	// we can compute a better value, one that will give us 10 pixels
- 	// displacement on the guide chip.
-	// XXX However, there is a problem here. For long focal lengths,
-	// XXX 10 pixel might be too small, because the star image may
-	// XXX already be of that order of magnitude. So we should computet
-	// XXX an expected star size and expected turbulence influence, and
-	// XXX use this value as a basis instead of the 10 pixels
-	if ((focallength > 0) && (pixelsize > 0)) {
-		//                           radians/pixel
-		double	angular_resolution = pixelsize / focallength;
-		//      pixel/sec
-		double 	pixel_rate = guiderate / angular_resolution;
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "pixel rate: %f", pixel_rate);
+	// now get the larger of the two
+	debug(LOG_DEBUG, DEBUG_LOG, 0,
+		"time for displacement of 30\": %.1f[s], 15 pixel: %.1f[s]",
+		pixelgridconstant, anglegridconstant);
+	double	gridconstant = (pixelgridconstant > anglegridconstant)
+			? pixelgridconstant : anglegridconstant;
 
-		// never make the grid constant smaller than 2 (2 second
-		// drives), and we want at least 10 pixels
-		gridconstant = std::max(2., ceil(10 / pixel_rate));
-		gridconstant = std::min(gridconstant, 10.);
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "using grid time constant %.3fs",
-			gridconstant);
+	// make sure it is at least 5 seconds
+	if (gridconstant < 5) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0,
+			"grid constant %.1f too small, using 5", gridconstant);
+		gridconstant = 5;
 	}
+
 	return gridconstant;
 }
 

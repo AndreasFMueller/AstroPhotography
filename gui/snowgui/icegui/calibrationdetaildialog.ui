@@ -108,52 +108,45 @@
       <property name="bottomMargin">
        <number>0</number>
       </property>
-      <item row="3" column="0">
-       <widget class="QLabel" name="dateLabel">
-        <property name="text">
-         <string>Date:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="4" column="0">
-       <widget class="QLabel" name="qualityLabel">
-        <property name="text">
-         <string>Quality:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="0">
-       <widget class="QLabel" name="resolutionLabel">
-        <property name="text">
-         <string>Resolution:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="5" column="0">
-       <widget class="QLabel" name="angleLabel">
-        <property name="text">
-         <string>Angle:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="1">
+      <item row="3" column="1">
        <widget class="QLabel" name="resolutionField">
         <property name="text">
          <string>3.4&quot;/px</string>
         </property>
        </widget>
       </item>
-      <item row="6" column="0">
+      <item row="8" column="1">
+       <widget class="QLabel" name="pointsField">
+        <property name="text">
+         <string>18</string>
+        </property>
+       </widget>
+      </item>
+      <item row="8" column="0">
        <widget class="QLabel" name="pointsLabel">
         <property name="text">
          <string>Points:</string>
         </property>
        </widget>
       </item>
-      <item row="4" column="1">
-       <widget class="QLabel" name="qualityField">
+      <item row="5" column="1">
+       <widget class="QLabel" name="dateField">
         <property name="text">
-         <string>99%</string>
+         <string>2016-08-26</string>
+        </property>
+       </widget>
+      </item>
+      <item row="7" column="0">
+       <widget class="QLabel" name="angleLabel">
+        <property name="text">
+         <string>Angle:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="0">
+       <widget class="QLabel" name="resolutionLabel">
+        <property name="text">
+         <string>Resolution:</string>
         </property>
        </widget>
       </item>
@@ -161,6 +154,13 @@
        <widget class="QLabel" name="instrumenLabel">
         <property name="text">
          <string>Instrument:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="1">
+       <widget class="QLabel" name="ccdField">
+        <property name="text">
+         <string/>
         </property>
        </widget>
       </item>
@@ -172,37 +172,23 @@
        </widget>
       </item>
       <item row="6" column="1">
-       <widget class="QLabel" name="pointsField">
+       <widget class="QLabel" name="qualityField">
         <property name="text">
-         <string>18</string>
+         <string>99%</string>
         </property>
        </widget>
       </item>
-      <item row="3" column="1">
-       <widget class="QLabel" name="dateField">
-        <property name="text">
-         <string>2016-08-26</string>
-        </property>
-       </widget>
-      </item>
-      <item row="5" column="1">
-       <widget class="QLabel" name="angleField">
-        <property name="text">
-         <string>88°</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="1">
-       <widget class="QLabel" name="ccdField">
-        <property name="text">
-         <string/>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="0">
+      <item row="2" column="0">
        <widget class="QLabel" name="ccdLabel">
         <property name="text">
          <string>CCD/GP/AO:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="7" column="1">
+       <widget class="QLabel" name="angleField">
+        <property name="text">
+         <string>88°</string>
         </property>
        </widget>
       </item>
@@ -218,6 +204,34 @@
          </size>
         </property>
        </spacer>
+      </item>
+      <item row="6" column="0">
+       <widget class="QLabel" name="qualityLabel">
+        <property name="text">
+         <string>Quality:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="0">
+       <widget class="QLabel" name="dateLabel">
+        <property name="text">
+         <string>Date:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="0">
+       <widget class="QLabel" name="intervalLabel">
+        <property name="text">
+         <string>Interval:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="1">
+       <widget class="QLabel" name="intervalField">
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
       </item>
      </layout>
     </widget>

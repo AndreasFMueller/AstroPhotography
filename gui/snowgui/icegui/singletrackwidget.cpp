@@ -129,7 +129,7 @@ void	singletrackwidget::add(const snowstar::TrackingHistory& track,
  * offset.
  */
 void	singletrackwidget::updateData() {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "%d points", _points.size());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "updateData: %d points", _points.size());
 	// copy the data to the channels
 	ChannelDisplayWidget	*cdw = ui->dataWidget;
 	cdw->clearData();

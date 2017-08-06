@@ -28,6 +28,14 @@ void	ChannelData::push_back(const ChannelDataPoint& p) {
 	std::deque<ChannelDataPoint>::push_back(p);
 }
 
+void	ChannelData::clear() {
+	_sum = 0;
+	_sum2 = 0;
+	_min = std::numeric_limits<double>::infinity();
+	_max = -std::numeric_limits<double>::infinity();
+	std::deque<ChannelDataPoint>::clear();
+}
+
 double	ChannelData::mean() const {
 	return _sum / size();
 }

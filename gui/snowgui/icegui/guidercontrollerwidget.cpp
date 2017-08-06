@@ -502,7 +502,6 @@ void	guidercontrollerwidget::launchMonitor() {
 		snowstar::Calibration cal = _guiderfactory
 			->getCalibration(history.guideportcalid);
 		_trackingdialog->calibration(cal);
-		//_trackingdialog->gpMasperpixel(cal.masPerPixel);
 	}
 	if (history.adaptiveopticscalid > 0) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieve AO cal %d",
@@ -510,7 +509,6 @@ void	guidercontrollerwidget::launchMonitor() {
 		snowstar::Calibration cal = _guiderfactory
 			->getCalibration(history.adaptiveopticscalid);
 		_trackingdialog->calibration(cal);
-		//_trackingdialog->aoMasperpixel(cal.masPerPixel);
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "calibrations installed");
 
