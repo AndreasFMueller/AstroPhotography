@@ -348,13 +348,13 @@ double	GPCalibrationProcess::gridconstant(double focallength,
 	// we want a displacement of at least 10 pixels (this makes sure 
 	// we get enough discernible displacement when the focal length
 	// is short)
-	static double	pixelgridsize = 10;			// [pixel]
+	static double	pixelgridsize = 30;			// [pixel]
 	double	pixelgridconstant = pixelgridsize / guiderate;	// [s]
 
 	// computing the grid constant (seconds displacement of calibration
 	// points). Default grid constant is 5 seconds, which should be
 	// good enough for most guiders.
-	static double	anglegridsize = 30 / arcsecperpixel;	// [pixel]
+	static double	anglegridsize = 60 / arcsecperpixel;	// [pixel]
 	double	anglegridconstant = anglegridsize / guiderate;	// [s]
 
 	// now get the larger of the two

@@ -35,10 +35,12 @@ darkwidget::darkwidget(QWidget *parent)
 	// program the timer
 	connect(&statusTimer, SIGNAL(timeout()), this, SLOT(statusUpdate()));
 
+#if 1
 	// connect the progress info singal
 	connect(this, SIGNAL(updateSignal(snowstar::CalibrationImageProgress)),
 		this, SLOT(signalUpdated(snowstar::CalibrationImageProgress)));
 	connect(this, SIGNAL(stopSignal()), this, SLOT(stopped()));
+#endif
 }
 
 /**

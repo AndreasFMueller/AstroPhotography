@@ -21,6 +21,7 @@ calibrationimagewidget::calibrationimagewidget(QWidget *parent)
 	statusTimer.setInterval(100);
 	_guiderstate = snowstar::GuiderUNCONFIGURED;
 	_acquiring = false;
+	_monitor = NULL;
 
 	qRegisterMetaType<snowstar::CalibrationImageProgress>("snowstar::CalibrationImageProgress");
 }
@@ -77,6 +78,9 @@ void	calibrationimagewidget::guider(snowstar::GuiderPrx guider) {
  * \brief Unregister the widget as a servant
  */
 void	calibrationimagewidget::do_unregister() {
+	if (NULL == _monitor) {
+		return;
+	}
 	disconnect(_monitor, SIGNAL(stopSignal()), 0, 0);
 	disconnect(_monitor,
 		SIGNAL(updateSignal(snowstar::CalibrationImageProgress)),
@@ -143,5 +147,14 @@ void	calibrationimagewidget::changeEvent(QEvent *event) {
 void	calibrationimagewidget::imageClosed() {
 	_imagedisplaywidget = NULL;
 }
+
+void	calibrationimagewidget::stopped() {
+	emit stopSignal();
+}
+
+void	calibrationimagewidget::signalUpdated(snowstar::CalibrationImageProgress prog) {
+	emit updateSignal(prog);
+}
+
 
 } // namespace snowgui
