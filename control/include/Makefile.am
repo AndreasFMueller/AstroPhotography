@@ -53,6 +53,7 @@ include_HEADERS =							\
 	AstroViewer.h
 
 noinst_HEADERS =							\
+	Backlash.h							\
 	BasicGuideport.h						\
 	Blurr.h								\
 	CancellableWork.h						\

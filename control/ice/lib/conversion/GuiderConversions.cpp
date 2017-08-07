@@ -99,6 +99,8 @@ GuiderState	convert(const astro::guiding::Guide::state& state) {
 		return GuiderFLATACQUIRE;
 	case astro::guiding::Guide::imaging:
 		return GuiderIMAGING;
+	case astro::guiding::Guide::backlash:
+		return GuiderBACKLASH;
 	}
 	throw std::runtime_error("unknown guider state");
 }
@@ -121,6 +123,8 @@ astro::guiding::Guide::state	convert(const GuiderState& state) {
 		return astro::guiding::Guide::flatacquire;
 	case GuiderIMAGING:
 		return astro::guiding::Guide::imaging;
+	case GuiderBACKLASH:
+		return astro::guiding::Guide::backlash;
 	}
 	throw std::runtime_error("unknown guider state");
 }

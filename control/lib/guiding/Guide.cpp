@@ -34,6 +34,9 @@ Guide::state	Guide::string2state(const std::string& s) {
 	if (s == "imaging") {
 		return imaging;
 	}
+	if (s == "backlash") {
+		return backlash;
+	}
 	throw std::runtime_error("unknown state string");
 }
 
@@ -55,6 +58,8 @@ std::string	Guide::state2string(state s) {
 		return std::string("flatacquire");
 	case imaging:
 		return std::string("imaging");
+	case backlash:
+		return std::string("backlash");
 	}
 	throw std::runtime_error("unknown state ");
 }

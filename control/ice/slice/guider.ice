@@ -182,7 +182,9 @@ module snowstar {
 		GuiderDARKACQUIRE,
 		GuiderFLATACQUIRE,
 		// the imager is busy acquiring an image
-		GuiderIMAGING
+		GuiderIMAGING,
+		// the guider is busy characterizing the backlash of the mount
+		GuiderBACKLASH
 	};
 
 	enum TrackerMethod {

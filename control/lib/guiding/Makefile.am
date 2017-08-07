@@ -16,12 +16,18 @@ noinst_HEADERS = 							\
 	ControlDeviceCallback.h						\
 	GPCalibrationProcess.h						\
 	GuidePortAction.h						\
+	LinearRegression.h						\
 	TrackingPersistence.h						\
 	TrackingProcess.h
 
 libastroguiding_la_SOURCES = 						\
 	AOCalibrationProcess.cpp					\
 	AdaptiveOpticsCalibration.cpp					\
+	BacklashPoint.cpp						\
+	BacklashResult.cpp						\
+	BacklashData.cpp						\
+	BacklashAnalysis.cpp						\
+	BacklashWork.cpp						\
 	BasicCalibration.cpp						\
 	BasicProcess.cpp						\
 	BasicSummary.cpp						\
@@ -47,6 +53,7 @@ libastroguiding_la_SOURCES = 						\
 	GuidePortProcess.cpp						\
 	GuiderStateMachine.cpp						\
 	LargeTracker.cpp						\
+	LinearRegression.cpp						\
 	NullTracker.cpp							\
 	RefreshingTracker.cpp						\
 	SaveImageCallback.cpp						\

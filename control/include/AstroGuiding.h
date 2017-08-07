@@ -835,11 +835,27 @@ class Guide {
 public:
 	typedef enum {
 		unconfigured, idle, calibrating, calibrated, guiding,
-		darkacquire, flatacquire, imaging
+		darkacquire, flatacquire, imaging, backlash
 	} state;
 static std::string	state2string(state s);
 static state	string2state(const std::string& s);
 };
+
+// forward declarations for the backlash stuff
+class BacklashPoint;
+typedef std::shared_ptr<BacklashPoint>	BacklashPointPtr;
+class BacklashResult;
+typedef std::shared_ptr<BacklashResult>	BacklashResultPtr;
+class BacklashData;
+typedef std::shared_ptr<BacklashData>	BacklashDataPtr;
+class BacklashWork;
+typedef std::shared_ptr<BacklashWork>	BacklashWorkPtr;
+class BacklashThread;
+typedef std::shared_ptr<BacklashThread>	BacklashThreadPtr;
+typedef callback::CallbackDataEnvelope<BacklashPoint>	CallbackBacklashPoint;
+typedef std::shared_ptr<CallbackBacklashPoint>	CallbackBacklashPointPtr;
+typedef callback::CallbackDataEnvelope<BacklashResult>	CallbackBacklashResult;
+typedef std::shared_ptr<CallbackBacklashResult>	CallbackBacklashResultPtr;
 
 /**
  * \brief State machine class for the Guider
@@ -1085,6 +1101,15 @@ public:
 	void	startImaging(const camera::Exposure& exposure);
 	void	endImaging(ImagePtr image);
 	ImagePtr	getImage() { return _image; }
+
+	// backlash characterisation 
+private:
+	BacklashWorkPtr		_backlashwork;
+	BacklashThreadPtr	_backlashthread;
+public:
+	void	startBacklash(double interval);
+	BacklashDataPtr	backlashData();
+	void	stopBacklash();
 };
 typedef std::shared_ptr<Guider>	GuiderPtr;
 
