@@ -274,7 +274,6 @@ astro::image::ImagePtr	AsiCcd::getRawImage() {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "get RAW8 image");
 		{
 		Image<unsigned char>	*image = new Image<unsigned char>(size);
-		image->setOrigin(origin);
 		for (int x = 0; x < size.width(); x++) {
 			for (int y = 0; y < size.height(); y++) {
 				image->pixel(x, h - 1 - y)
@@ -289,7 +288,6 @@ astro::image::ImagePtr	AsiCcd::getRawImage() {
 		{
 		Image<RGB<unsigned char> >	*image
 			= new Image<RGB<unsigned char> >(size);
-		image->setOrigin(origin);
 		for (int x = 0; x < size.width(); x++) {
 			for (int y = 0; y < size.height(); y++) {
 				long	offset = (x + size.width() * y) * 3;
@@ -304,7 +302,6 @@ astro::image::ImagePtr	AsiCcd::getRawImage() {
 		{
 		Image<unsigned short>	*image
 			= new Image<unsigned short>(size);
-		image->setOrigin(origin);
 		unsigned short	*sb = (unsigned short *)buffer;
 		for (int x = 0; x < size.width(); x++) {
 			for (int y = 0; y < size.height(); y++) {
@@ -318,7 +315,6 @@ astro::image::ImagePtr	AsiCcd::getRawImage() {
 	case ASI_IMG_Y8: // convert 8bit YUYV image to Image<YUYV<unsigned char> >
 		debug(LOG_ERR, DEBUG_LOG, 0, "Y8 format not implemented");
 		throw std::runtime_error("Y8 format not implemented");
-		break;
 	default: {
 		std::string	msg = stringprintf("%s: unknown type %d",
 			name().toString().c_str(), imgtype);
@@ -326,6 +322,7 @@ astro::image::ImagePtr	AsiCcd::getRawImage() {
 		throw std::runtime_error(msg);
 		}
 	}
+	result->setOrigin(origin);
 	free(buffer);
 	return result;
 }
