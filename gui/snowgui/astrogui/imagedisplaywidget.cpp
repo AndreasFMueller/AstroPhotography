@@ -425,8 +425,9 @@ void	imagedisplaywidget::displayRectangle(const ImageRectangle& r) {
  * method to actually display the image.
  */
 void	imagedisplaywidget::setImage(astro::image::ImagePtr image) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "new %s image received",
-		image->size().toString().c_str());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "new %s image received, frame=%s",
+		image->size().toString().c_str(),
+		image->getFrame().toString().c_str());
 	_image = image;
 	emit imageUpdated();
 	emit offerImage(image, std::string());

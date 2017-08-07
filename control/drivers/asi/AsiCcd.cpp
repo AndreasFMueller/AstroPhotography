@@ -274,6 +274,7 @@ astro::image::ImagePtr	AsiCcd::getRawImage() {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "get RAW8 image");
 		{
 		Image<unsigned char>	*image = new Image<unsigned char>(size);
+		image->setOrigin(origin);
 		for (int x = 0; x < size.width(); x++) {
 			for (int y = 0; y < size.height(); y++) {
 				image->pixel(x, h - 1 - y)
@@ -288,6 +289,7 @@ astro::image::ImagePtr	AsiCcd::getRawImage() {
 		{
 		Image<RGB<unsigned char> >	*image
 			= new Image<RGB<unsigned char> >(size);
+		image->setOrigin(origin);
 		for (int x = 0; x < size.width(); x++) {
 			for (int y = 0; y < size.height(); y++) {
 				long	offset = (x + size.width() * y) * 3;
@@ -302,6 +304,7 @@ astro::image::ImagePtr	AsiCcd::getRawImage() {
 		{
 		Image<unsigned short>	*image
 			= new Image<unsigned short>(size);
+		image->setOrigin(origin);
 		unsigned short	*sb = (unsigned short *)buffer;
 		for (int x = 0; x < size.width(); x++) {
 			for (int y = 0; y < size.height(); y++) {
