@@ -24,6 +24,7 @@ public:
 	double	time;
 	double	xoffset;
 	double	yoffset;
+	std::string	toString() const;
 };
 typedef callback::CallbackDataEnvelope<BacklashPoint>	CallbackBacklashPoint;
 typedef std::shared_ptr<CallbackBacklashPoint>	CallbackBacklashPointPtr;
@@ -96,6 +97,8 @@ public:
 private:
 	TrackerPtr	_tracker;
 	camera::GuidePortPtr	_guideport;
+
+	// callbacks
 	callback::CallbackPtr	_pointcallback;
 	callback::CallbackPtr	_resultcallback;
 public:

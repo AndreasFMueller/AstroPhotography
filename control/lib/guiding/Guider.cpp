@@ -15,6 +15,7 @@
 #include "CalibrationPersistence.h"
 #include "CalibrationRedirector.h"
 #include "TrackingProcess.h"
+#include <Backlash.h>
 
 using namespace astro::image;
 using namespace astro::camera;
@@ -529,6 +530,11 @@ void	Guider::checkstate() {
 			endImaging(ImagePtr(NULL));
 		}
 		break;
+	case Guide::backlash:
+		if (!_backlashthread->isrunning()) {
+			_state.endBacklash();
+		}
+		break;
 	}
 }
 
@@ -589,9 +595,13 @@ void	Guider::callback(const std::exception& /* ex */) {
 		// XXX ist this the right implementation?
 		endImaging(ImagePtr(NULL));
 		break;
+	case Guide::backlash:
+		_state.endBacklash();
+		break;
 	}
 }
 
+#if 0
 /**
  * \brief Callback class to signal the end of the guide process
  */
@@ -795,6 +805,7 @@ void	Guider::endImaging(ImagePtr image) {
 	}
 	_state.endImaging();
 }
+#endif
 
 } // namespace guiding
 } // namespace astro

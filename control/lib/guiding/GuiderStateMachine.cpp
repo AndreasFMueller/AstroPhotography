@@ -67,6 +67,14 @@ bool	GuiderStateMachine::canEndImaging() const {
 	return (_state == Guide::imaging);
 }
 
+bool	GuiderStateMachine::canStartBacklash() const {
+	return (_state == Guide::idle) || (_state == Guide::calibrated);
+}
+
+bool	GuiderStateMachine::canEndBacklash() const {
+	return (_state == Guide::backlash);
+}
+
 void	GuiderStateMachine::configure() {
 	if (!canConfigure()) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "cannot configured in state %s",
@@ -177,6 +185,25 @@ void	GuiderStateMachine::endImaging() {
 		throw BadState("Not imaging");
 	}
 	_state = _prestate;
+}
+
+void	GuiderStateMachine::startBacklash() {
+	if (!canStartImaging()) {
+		std::string	msg = stringprintf("cannot backlash in state %s",
+			statename());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw BadState(msg);
+	}
+	_prestate = _state;
+	_state = Guide::imaging;
+}
+
+void	GuiderStateMachine::endBacklash() {
+	if (!canEndImaging()) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "Not backlash characterization");
+		throw BadState("Not backlashing");
+	}
+	_prestate = _state;
 }
 
 } // namespace guiding

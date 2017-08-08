@@ -850,8 +850,10 @@ class BacklashData;
 typedef std::shared_ptr<BacklashData>	BacklashDataPtr;
 class BacklashWork;
 typedef std::shared_ptr<BacklashWork>	BacklashWorkPtr;
-class BacklashThread;
+
+typedef astro::thread::Thread<BacklashWork>	BacklashThread;
 typedef std::shared_ptr<BacklashThread>	BacklashThreadPtr;
+
 typedef callback::CallbackDataEnvelope<BacklashPoint>	CallbackBacklashPoint;
 typedef std::shared_ptr<CallbackBacklashPoint>	CallbackBacklashPointPtr;
 typedef callback::CallbackDataEnvelope<BacklashResult>	CallbackBacklashResult;
@@ -888,6 +890,8 @@ public:
 	bool	canEndFlatAcquire() const;
 	bool	canStartImaging() const;
 	bool	canEndImaging() const;
+	bool	canStartBacklash() const;
+	bool	canEndBacklash() const;
 
 	// state change methods
 	void	configure();
@@ -905,6 +909,8 @@ public:
 	void	endFlatAcquire();
 	void	startImaging();
 	void	endImaging();
+	void	startBacklash();
+	void	endBacklash();
 };
 
 /**
