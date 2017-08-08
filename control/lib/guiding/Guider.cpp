@@ -76,6 +76,7 @@ Guider::~Guider() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "destroying guider at %p", this);
 }
 
+#if 0
 /**
  * \brief update progress value
  */
@@ -83,6 +84,7 @@ void	Guider::calibrationProgress(double p) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "PROGRESS %f", p);
 	_progress = p;
 }
+#endif
 
 /**
  * \brief Retrieve the state 
@@ -128,6 +130,7 @@ Guide::state	Guider::state() {
 	return resultnew;
 }
 
+#if 0
 /**
  * \brief Cleanup for calibration processes
  *
@@ -348,6 +351,7 @@ bool	Guider::waitCalibration(double timeout) {
 	// ever arrive at this point
 	return true;
 }
+#endif
 
 /**
  * \brief get a default tracker

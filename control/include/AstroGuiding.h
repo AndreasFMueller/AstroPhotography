@@ -609,6 +609,24 @@ class BasicProcess;
 typedef std::shared_ptr<BasicProcess>	BasicProcessPtr;
 class PersistentCalibration;
 
+// forward declarations for the backlash stuff
+class BacklashPoint;
+typedef std::shared_ptr<BacklashPoint>	BacklashPointPtr;
+class BacklashResult;
+typedef std::shared_ptr<BacklashResult>	BacklashResultPtr;
+class BacklashData;
+typedef std::shared_ptr<BacklashData>	BacklashDataPtr;
+class BacklashWork;
+typedef std::shared_ptr<BacklashWork>	BacklashWorkPtr;
+
+typedef astro::thread::Thread<BacklashWork>	BacklashThread;
+typedef std::shared_ptr<BacklashThread>	BacklashThreadPtr;
+
+typedef callback::CallbackDataEnvelope<BacklashPoint>	CallbackBacklashPoint;
+typedef std::shared_ptr<CallbackBacklashPoint>	CallbackBacklashPointPtr;
+typedef callback::CallbackDataEnvelope<BacklashResult>	CallbackBacklashResult;
+typedef std::shared_ptr<CallbackBacklashResult>	CallbackBacklashResultPtr;
+
 /**
  * \brief Base class for the guider
  *
@@ -662,6 +680,8 @@ private:
 	callback::CallbackSet	_progresscallback;
 	callback::CallbackSet	_trackingcallback;
 	callback::CallbackSet	_calibrationimagecallback;
+	callback::CallbackSet	_backlashpointcallback;
+	callback::CallbackSet	_backlashresultcallback;
 public:
 	void	addImageCallback(callback::CallbackPtr i);
 	void	addCalibrationCallback(callback::CallbackPtr c);
@@ -669,12 +689,16 @@ public:
 	void	addGuidercalibrationCallback(callback::CallbackPtr c);
 	void	addTrackingCallback(callback::CallbackPtr t);
 	void	addCalibrationImageCallback(callback::CallbackPtr t);
+	void	addBacklashPointCallback(callback::CallbackPtr t);
+	void	addBacklashResultCallback(callback::CallbackPtr t);
 
 	void	removeImageCallback(callback::CallbackPtr i);
 	void	removeCalibrationCallback(callback::CallbackPtr c);
 	void	removeProgressCallback(callback::CallbackPtr c);
 	void	removeTrackingCallback(callback::CallbackPtr t);
 	void	removeCalibrationImageCallback(callback::CallbackPtr t);
+	void	removeBacklashPointCallback(callback::CallbackPtr t);
+	void	removeBacklashResultCallback(callback::CallbackPtr t);
 	
 	void	callback(image::ImagePtr image);
 	void	callback(const CalibrationPoint& point);
@@ -682,6 +706,8 @@ public:
 	void	callback(const CalibrationPtr cal);
 	void	callback(const TrackingPoint& point);
 	void	callback(const astro::camera::CalibrationImageProgress& calimageprogress);
+	void	callback(const BacklashPoint& point);
+	void	callback(const BacklashResult& result);
 	virtual void	callback(const std::exception& ex) = 0;
 
 	// constructor
@@ -841,23 +867,6 @@ static std::string	state2string(state s);
 static state	string2state(const std::string& s);
 };
 
-// forward declarations for the backlash stuff
-class BacklashPoint;
-typedef std::shared_ptr<BacklashPoint>	BacklashPointPtr;
-class BacklashResult;
-typedef std::shared_ptr<BacklashResult>	BacklashResultPtr;
-class BacklashData;
-typedef std::shared_ptr<BacklashData>	BacklashDataPtr;
-class BacklashWork;
-typedef std::shared_ptr<BacklashWork>	BacklashWorkPtr;
-
-typedef astro::thread::Thread<BacklashWork>	BacklashThread;
-typedef std::shared_ptr<BacklashThread>	BacklashThreadPtr;
-
-typedef callback::CallbackDataEnvelope<BacklashPoint>	CallbackBacklashPoint;
-typedef std::shared_ptr<CallbackBacklashPoint>	CallbackBacklashPointPtr;
-typedef callback::CallbackDataEnvelope<BacklashResult>	CallbackBacklashResult;
-typedef std::shared_ptr<CallbackBacklashResult>	CallbackBacklashResultPtr;
 
 /**
  * \brief State machine class for the Guider
@@ -1113,7 +1122,7 @@ private:
 	BacklashWorkPtr		_backlashwork;
 	BacklashThreadPtr	_backlashthread;
 public:
-	void	startBacklash(double interval);
+	void	startBacklash(TrackerPtr tracker, double interval);
 	BacklashDataPtr	backlashData();
 	void	stopBacklash();
 };

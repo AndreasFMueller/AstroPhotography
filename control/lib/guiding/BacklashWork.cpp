@@ -17,7 +17,7 @@ namespace guiding {
  * This constructor also installs the imager, tracker and the guideport
  * that is needed.
  */
-BacklashWork::BacklashWork(camera::ImagerPtr imager, TrackerPtr tracker,
+BacklashWork::BacklashWork(camera::Imager& imager, TrackerPtr tracker,
 		camera::GuidePortPtr guideport)
 	: _imager(imager), _tracker(tracker), _guideport(guideport) {
 	_interval = 5;
@@ -65,9 +65,9 @@ void	BacklashWork::main(astro::thread::Thread<BacklashWork>& thread) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "start backlash measuring cycle");
 		do {
 			// get an image (need a imager for this)
-			_imager->startExposure(_exposure);
-			_imager->wait();
-			ImagePtr	image = _imager->getImage();
+			_imager.startExposure(_exposure);
+			_imager.wait();
+			ImagePtr	image = _imager.getImage();
 			
 			// find the offset
 			Point	imagepoint = (*_tracker)(image);

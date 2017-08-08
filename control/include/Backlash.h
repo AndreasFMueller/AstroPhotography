@@ -89,7 +89,7 @@ public:
 	double	interval() const { return _interval; }
 	void	interval(double i) { _interval = i; }
 private:
-	camera::ImagerPtr	_imager;
+	camera::Imager&	_imager;
 	camera::Exposure	_exposure;
 public:
 	camera::Exposure	exposure() const { return _exposure; }
@@ -113,7 +113,7 @@ private:
 	void	result(const BacklashResult&);
 	void	move(double i);
 public:
-	BacklashWork(camera::ImagerPtr imager, TrackerPtr tracker,
+	BacklashWork(camera::Imager& imager, TrackerPtr tracker,
 			camera::GuidePortPtr guideport);
 	void	main(astro::thread::Thread<BacklashWork>& thread);
 	void	stop();

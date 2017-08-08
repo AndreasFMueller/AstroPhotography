@@ -44,7 +44,9 @@ libastroguiding_la_SOURCES = 						\
 	GPCalibrationProcess.cpp					\
 	Guide.cpp							\
 	Guider.cpp							\
+	GuiderBacklash.cpp						\
 	GuiderBase.cpp							\
+	GuiderCal.cpp							\
 	GuiderCalibration.cpp						\
 	GuiderDescriptor.cpp						\
 	GuiderFactory.cpp						\
