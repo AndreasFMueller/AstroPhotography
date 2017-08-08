@@ -84,8 +84,16 @@ public:
 	backlash_t	direction() const { return _direction; }
 private:
 	double	_interval;
+public:
+	double	interval() const { return _interval; }
+	void	interval(double i) { _interval = i; }
+private:
 	camera::ImagerPtr	_imager;
 	camera::Exposure	_exposure;
+public:
+	camera::Exposure	exposure() const { return _exposure; }
+	void	exposure(const camera::Exposure& e) { _exposure = e; }
+private:
 	TrackerPtr	_tracker;
 	camera::GuidePortPtr	_guideport;
 	callback::CallbackPtr	_pointcallback;

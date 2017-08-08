@@ -41,19 +41,12 @@ void	BacklashWork::move(double interval) {
 void	BacklashWork::main(astro::thread::Thread<BacklashWork>& thread) {
 	// setup
 	std::vector<BacklashPoint>	data;
-	double	t = Timer::gettime();
+	double	starttime = Timer::gettime();
 	int	counter = 0;
 	move(-_interval);
 
 	// repeat up/down movement
-	{
-		// move the guideport
-		if ((counter >> 1) % 2) {
-			move(-_interval);
-		} else {
-			move(+_interval);
-		}
-		
+	do {
 		// get an image (need a imager for this)
 		_imager->startExposure(_exposure);
 		_imager->wait();
@@ -61,12 +54,16 @@ void	BacklashWork::main(astro::thread::Thread<BacklashWork>& thread) {
 		
 		// find the offset
 		Point	imagepoint = (*_tracker)(image);
+
+		// convert to a BacklashPoint
 		BacklashPoint	p;
 		p.id = counter++;
-		p.time = Timer::gettime() - t;
+		p.time = Timer::gettime() - starttime;
 		p.xoffset = imagepoint.x();
 		p.yoffset = imagepoint.y();
 		data.push_back(p);
+
+		// send it through the callback
 		point(p);
 
 		// if we have enough data, create a new analysis
@@ -74,10 +71,21 @@ void	BacklashWork::main(astro::thread::Thread<BacklashWork>& thread) {
 			BacklashAnalysis	analysis(_direction);
 			result(analysis(data));
 		}
+
+		// move the guideport
+		if ((counter >> 1) % 2) {
+			move(-_interval);
+		} else {
+			move(+_interval);
+		}
 	}
+
+	// we should tell via a callback, that the sequence has ended,
+	// maybe with a point with negative id?
 }
 
 void	BacklashWork::stop() {
+	// XXX missing
 }
 
 void	BacklashWork::point(const BacklashPoint& bp) {
