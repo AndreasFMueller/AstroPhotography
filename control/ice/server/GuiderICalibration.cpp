@@ -159,7 +159,6 @@ void	callback_adapter<CalibrationImageMonitorPrx>(CalibrationImageMonitorPrx& p,
 	}
 
 }
-#endif
 
 /**
  * \brief Constructor for the Guider servant
@@ -203,12 +202,6 @@ GuiderI::GuiderI(astro::guiding::GuiderPtr _guider,
 		= new GuiderICalibrationImageCallback(*this);
 	_calibrationimagecallback = astro::callback::CallbackPtr(cicallback);
 	guider->addCalibrationImageCallback(_calibrationimagecallback);
-
-	// Callback for backlash data
-	GuiderIBacklashCallback	*blcallback
-		= new GuiderIBacklashCallback(*this);
-	_backlashcallback = astro::callback::CallbackPtr(blcallback);
-	guider->addBacklashCallback(_backlashcallback);
 }
 
 /**
@@ -221,8 +214,6 @@ GuiderI::~GuiderI() {
 	guider->removeCalibrationCallback(_calibrationcallback);
 	guider->removeImageCallback(_imagecallback);
 	guider->removeTrackingCallback(_trackingcallback);
-	guider->removeCalibrationImageCallback(_calibrationimagecallback);
-	guider->removeBacklashCallback(_backlashcallback);
 }
 
 GuiderState GuiderI::getState(const Ice::Current& /* current */) {
@@ -285,8 +276,8 @@ void	GuiderI::setTrackerMethod(TrackerMethod method,
 				(method == TrackerPHASE) ? "phase" : "diff")));
 	_method = method;
 }
+#endif
 
-#if 0
 /**
  * \brief Use a calibration
  *
@@ -456,8 +447,8 @@ bool GuiderI::waitCalibration(Ice::Double timeout,
 	const Ice::Current& /* current */) {
 	return guider->guidePortDevice->waitCalibration(timeout);
 }
-#endif
 
+#if 0
 /**
  * \brief build a tracker
  */
@@ -513,7 +504,6 @@ astro::guiding::TrackerPtr	 GuiderI::getTracker() {
 	throw BadState("tracking method");
 }
 
-#if 0
 /**
  * \brief Start guiding
  */
@@ -610,7 +600,6 @@ TrackingHistory GuiderI::getTrackingHistoryType(Ice::Int id,
 }
 #endif
 
-#if 0
 /**
  * \brief Register a callback for the calibration process
  */
@@ -635,8 +624,8 @@ void	GuiderI::unregisterCalibrationMonitor(const Ice::Identity& calibrationcallb
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "calibration callback unregistered");
 	calibrationcallbacks.unregisterCallback(calibrationcallback, current);
 }
-#endif
 
+#if 0
 /**
  * \brief Register a callback for images taken during the process
  */
@@ -654,7 +643,6 @@ void    GuiderI::unregisterImageMonitor(const Ice::Identity& imagecallback,
 	imagecallbacks.unregisterCallback(imagecallback, current);
 }
 
-#if 0
 /**
  * \brief Register a callback for monitoring the tracking
  */
@@ -715,7 +703,6 @@ void	GuiderI::trackingImageUpdate(const astro::callback::CallbackDataPtr data) {
 }
 #endif
 
-#if 0
 /**
  * \brief Handle an update from the calibration process
  */
@@ -724,7 +711,6 @@ void	GuiderI::calibrationUpdate(const astro::callback::CallbackDataPtr data) {
 	// send calibration callbacks to the registered callbacks
 	calibrationcallbacks(data);
 }
-#endif
 
 #if 0
 /**
@@ -741,7 +727,6 @@ TrackingSummary	GuiderI::getTrackingSummary(const Ice::Current& /* current */) {
 	}
 	return convert(guider->summary());
 }
-#endif
 
 /**
  * \brief Set the repository name
@@ -758,7 +743,6 @@ std::string     GuiderI::getRepositoryName(const Ice::Current& current) {
 	return RepositoryUser::getRepositoryName(current);
 }
 
-#if 0
 /**
  * \brief start the dark acquire process
  */
@@ -972,5 +956,32 @@ void	GuiderI::calibrationImageUpdate(
 	calibrationimagecallbacks(data);
 }
 #endif
+
+/**
+ * \brief calback adapter for Calibration monitor
+ */
+template<>
+void	callback_adapter<CalibrationMonitorPrx>(CalibrationMonitorPrx& p,
+		const astro::callback::CallbackDataPtr data) {
+	// handle a calibration point callback call
+	astro::guiding::CalibrationPointCallbackData	*calibrationpoint
+		= dynamic_cast<astro::guiding::CalibrationPointCallbackData *>(&*data);
+	if (NULL != calibrationpoint) {
+		// convert the calibration point into
+		CalibrationPoint	point
+			= convert(calibrationpoint->data());
+		p->update(point);
+		return;
+	}
+
+	// handle a completed calibration callback call, by sending the stop
+	// signal
+	astro::guiding::CalibrationCallbackData	*calibration
+		= dynamic_cast<astro::guiding::CalibrationCallbackData *>(&*data);
+	if (NULL != calibration) {
+		p->stop();
+		return;
+	}
+}
 
 } // namespace snowstar

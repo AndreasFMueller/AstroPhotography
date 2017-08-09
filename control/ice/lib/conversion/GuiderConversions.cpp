@@ -10,6 +10,7 @@
 #include <AstroFormat.h>
 #include <iostream>
 #include <sstream>
+#include <Backlash.h>
 
 namespace snowstar {
 
@@ -480,6 +481,93 @@ astro::camera::CalibrationImageProgress        convert(const CalibrationImagePro
 	result.imageno = prog.imageno;
 	result.imagecount = prog.imagecount;
 	return result;
+}
+
+// methods related to backlash characterization process
+BacklashPoint   convert(const astro::guiding::BacklashPoint& point) {
+	BacklashPoint	p;
+	p.seqno = point.id;
+	p.time = point.time;
+	p.xoffset = point.xoffset;
+	p.yoffset = point.yoffset;
+	return p;
+}
+
+astro::guiding::BacklashPoint   convert(const BacklashPoint& point) {
+	astro::guiding::BacklashPoint	p;
+	p.id = point.seqno;
+	p.time = point.time;
+	p.xoffset = point.xoffset;
+	p.yoffset = point.yoffset;
+	return p;
+}
+
+BacklashPoints  convert(const astro::guiding::BacklashPoints& points) {
+	BacklashPoints	ps;
+	std::for_each(points.begin(), points.end(),
+		[&ps](const astro::guiding::BacklashPoint& p) mutable {
+			ps.push_back(convert(p));
+		}
+	);
+	return ps;
+}
+
+astro::guiding::BacklashPoints  convert(const BacklashPoints& points) {
+	astro::guiding::BacklashPoints	ps;
+	std::for_each(points.begin(), points.end(),
+		[&ps](const BacklashPoint& p) mutable {
+			ps.push_back(convert(p));
+		}
+	);
+	return ps;
+}
+
+BacklashResult  convert(const astro::guiding::BacklashResult& result) {
+	BacklashResult	r;
+	r.direction = (result.direction == astro::guiding::backlash_dec)
+			? BacklashDEC : BacklashRA;
+	r.x = result.x;
+	r.y = result.y;
+	r.longitudinal = result.longitudinal;
+	r.lateral = result.lateral;
+	r.forward = result.forward;
+	r.backward = result.backward;
+	r.f = result.f;
+	r.b = result.b;
+	r.offset = result.offset;
+	r.drift = result.drift;
+	return r;
+}
+
+astro::guiding::BacklashResult  convert(const BacklashResult& result) {
+	astro::guiding::BacklashResult	r;
+	r.direction = (result.direction == BacklashDEC)
+			? astro::guiding::backlash_dec
+			: astro::guiding::backlash_ra;
+	r.x = result.x;
+	r.y = result.y;
+	r.longitudinal = result.longitudinal;
+	r.lateral = result.lateral;
+	r.forward = result.forward;
+	r.backward = result.backward;
+	r.f = result.f;
+	r.b = result.b;
+	r.offset = result.offset;
+	r.drift = result.drift;
+	return r;
+}
+
+BacklashData    convert(const astro::guiding::BacklashData& data) {
+	BacklashData	d;
+	d.points = convert(data.points);
+	d.result = convert(data.result);
+	return d;
+}
+
+astro::guiding::BacklashData    convert(const BacklashData& data) {
+	astro::guiding::BacklashData	d;
+	d.points = convert(data.points);
+	d.result = convert(data.result);
 }
 
 } // namespace snowstar

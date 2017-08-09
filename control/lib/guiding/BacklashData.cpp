@@ -9,7 +9,7 @@ namespace astro {
 namespace guiding {
 
 std::ostream&	operator<<(std::ostream& out, const BacklashData& bd) {
-	out << bd.results << std::endl;
+	out << bd.result << std::endl;
 	out << bd.points;
 	return out;
 }

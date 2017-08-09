@@ -75,7 +75,11 @@ void	GuiderBase::addCalibrationImageCallback(callback::CallbackPtr callback) {
 		_calibrationimagecallback.size());
 }
 
-
+void	GuiderBase::addBacklashCallback(callback::CallbackPtr callback) {
+	_backlashcallback.insert(callback);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "now %d backlash callbacks",
+		_trackingcallback.size());
+}
 
 
 void	GuiderBase::removeImageCallback(callback::CallbackPtr callback) {
@@ -96,6 +100,10 @@ void	GuiderBase::removeTrackingCallback(callback::CallbackPtr callback) {
 
 void	GuiderBase::removeCalibrationImageCallback(callback::CallbackPtr callback) {
 	_calibrationimagecallback.erase(callback);
+}
+
+void	GuiderBase::removeBacklashCallback(callback::CallbackPtr callback) {
+	_backlashcallback.erase(callback);
 }
 
 /**

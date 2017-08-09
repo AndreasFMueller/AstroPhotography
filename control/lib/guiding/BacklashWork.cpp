@@ -125,9 +125,9 @@ void	BacklashWork::main(astro::thread::Thread<BacklashWork>& thread) {
  * \brief Method to send a single point information to the callback
  */
 void	BacklashWork::point(const BacklashPoint& bp) {
-	if (_pointcallback) {
+	if (_callback) {
 		CallbackBacklashPointPtr p(new CallbackBacklashPoint(bp));
-		(*_pointcallback)(p);
+		(*_callback)(p);
 	}
 }
 
@@ -135,9 +135,9 @@ void	BacklashWork::point(const BacklashPoint& bp) {
  * \brief Method to send the analysis results to the callback
  */
 void	BacklashWork::result(const BacklashResult& br) {
-	if (_resultcallback) {
+	if (_callback) {
 		CallbackBacklashResultPtr p(new CallbackBacklashResult(br));
-		(*_resultcallback)(p);
+		(*_callback)(p);
 	}
 }
 

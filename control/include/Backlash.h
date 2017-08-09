@@ -13,6 +13,7 @@
 namespace astro {
 namespace guiding {
 
+#if 0
 typedef enum backlash_e { backlash_dec = 0, backlash_ra = 1 } backlash_t;
 
 /**
@@ -26,13 +27,15 @@ public:
 	double	yoffset;
 	std::string	toString() const;
 };
+typedef std::vector<BacklashPoint>	BacklashPoints;
 typedef callback::CallbackDataEnvelope<BacklashPoint>	CallbackBacklashPoint;
 typedef std::shared_ptr<CallbackBacklashPoint>	CallbackBacklashPointPtr;
+#endif
 
 std::ostream&	operator<<(std::ostream& out, const BacklashPoint& point);
-std::ostream&	operator<<(std::ostream& out,
-			const std::vector<BacklashPoint>& points);
+std::ostream&	operator<<(std::ostream& out, const BacklashPoints& points);
 
+#if 0
 /**
  * \brief A holder class for the Backlash analysis results
  */
@@ -49,17 +52,20 @@ public:
 };
 typedef callback::CallbackDataEnvelope<BacklashResult>	CallbackBacklashResult;
 typedef std::shared_ptr<CallbackBacklashResult>	CallbackBacklashResultPtr;
+#endif
 
 std::ostream&	operator<<(std::ostream& out, const BacklashResult&);
 
+#if 0
 /**
  * \brief a holder class for backlash data and analysis results
  */
 class BacklashData {
 public:
 	BacklashResult	results;
-	std::vector<BacklashPoint>	points;
+	BacklashPoints	points;
 };
+#endif
 std::ostream&	operator<<(std::ostream& out, const BacklashData&);
 
 /**
@@ -99,14 +105,10 @@ private:
 	camera::GuidePortPtr	_guideport;
 
 	// callbacks
-	callback::CallbackPtr	_pointcallback;
-	callback::CallbackPtr	_resultcallback;
+	callback::CallbackPtr	_callback;
 public:
-	void	pointcallback(callback::CallbackPtr pcb) {
-			_pointcallback = pcb;
-	}
-	void	resultcallback(callback::CallbackPtr rcb) {
-			_resultcallback = rcb;
+	void	callback(callback::CallbackPtr pcb) {
+			_callback = pcb;
 	}
 private:
 	void	point(const BacklashPoint&);

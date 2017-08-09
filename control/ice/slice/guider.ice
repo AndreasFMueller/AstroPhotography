@@ -196,6 +196,45 @@ module snowstar {
 		TrackerLAPLACE,
 		TrackerLARGE
 	};
+
+	enum BacklashDirection {
+		BacklashDEC,
+		BacklashRA
+	};
+
+	struct BacklashPoint {
+		int	seqno;
+		float	time;
+		float	xoffset;
+		float	yoffset;
+	};
+
+	sequence<BacklashPoint>	BacklashPoints;
+
+	struct BacklashResult {
+		BacklashDirection	direction;
+		float	x;
+		float	y;
+		float	longitudinal;
+		float	lateral;
+		float	forward;
+		float	backward;
+		float	f;
+		float	b;
+		float	offset;
+		float	drift;
+	};
+
+	struct BacklashData {
+		BacklashPoints	points;
+		BacklashResult	result;
+	};
+
+	interface BacklashMonitor extends Callback {
+		void	updatePoint(BacklashPoint point);
+		void	updateResult(BacklashResult result);
+	};
+
 	/**
 	 * \brief Interface for guiders
 	 *
@@ -280,7 +319,7 @@ module snowstar {
 
 		// The following methods are used to monitor the calibration
 		// or the guiding. The guider keeps the most recent image
-		// so that a GUI application can fetch thosei mages and 
+		// so that a GUI application can fetch those images and 
 		// display them to the user
 		/**
 		 * \brief 
@@ -351,6 +390,16 @@ module snowstar {
 		 */
 		void	startImaging(Exposure expo) throws BadState;
 		Image*	getImage() throws BadState;
+
+		/**
+		 * \brief control the backlash characterization process
+		 */
+		void	startBacklash(double interval) throws BadState;
+		void	stopBacklash() throws BadState;
+		BacklashData	getBacklashData() throws BadState, NotFound;
+
+		void	registerBacklashMonitor(Ice::Identity monitor);
+		void	unregisterBacklashMonitor(Ice::Identity monitor);
 	};
 
 	/**

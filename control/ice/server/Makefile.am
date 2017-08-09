@@ -30,6 +30,8 @@ noinst_HEADERS =							\
 	GuidePortI.h							\
 	GuiderFactoryI.h						\
 	GuiderI.h							\
+	GuiderI.h							\
+	GuiderITemplates.h						\
 	GuiderLocator.h							\
 	ImageI.h							\
 	ImageLocator.h							\
@@ -73,6 +75,10 @@ snowstar_SOURCES = snowstar.cpp 					\
 	FocusingLocator.cpp						\
 	GuidePortI.cpp							\
 	GuiderFactoryI.cpp						\
+	GuiderIBacklash.cpp						\
+	GuiderICalibrationImage.cpp					\
+	GuiderICalibration.cpp						\
+	GuiderIGuiding.cpp						\
 	GuiderI.cpp							\
 	GuiderLocator.cpp						\
 	ImageI.cpp							\

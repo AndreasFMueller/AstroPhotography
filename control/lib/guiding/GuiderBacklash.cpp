@@ -12,32 +12,20 @@ namespace guiding {
 /**
  * \brief BacklashPoint Callback to install in the guider class
  */
-class BacklashPointCallback : public callback::Callback {
+class BacklashCallback : public callback::Callback {
 	Guider&	_guider;
 public:
-	BacklashPointCallback(Guider& guider) : _guider(guider) { }
+	BacklashCallback(Guider& guider) : _guider(guider) { }
 	CallbackDataPtr	operator()(CallbackDataPtr data) {
-		CallbackBacklashPoint	*b
+		CallbackBacklashPoint	*p
 			= dynamic_cast<CallbackBacklashPoint*>(&*data);
-		if (!b) {
-			_guider.GuiderBase::callback(b->data());
+		if (!p) {
+			_guider.GuiderBase::callback(p->data());
 		}
-		return data;
-	}
-};
-
-/**
- * \brief BacklashResult Callback to install in the guider class
- */
-class BacklashResultCallback : public callback::Callback {
-	Guider&	_guider;
-public:
-	BacklashResultCallback(Guider& guider) : _guider(guider) { }
-	CallbackDataPtr	operator()(CallbackDataPtr data) {
-		CallbackBacklashResult	*b
+		CallbackBacklashResult	*r
 			= dynamic_cast<CallbackBacklashResult*>(&*data);
-		if (!b) {
-			_guider.GuiderBase::callback(b->data());
+		if (!r) {
+			_guider.GuiderBase::callback(r->data());
 		}
 		return data;
 	}
@@ -62,10 +50,8 @@ void	Guider::startBacklash(TrackerPtr tracker, double interval) {
 		_backlashwork->exposure(exposure());
 
 		// create the callbacks and install them
-		CallbackPtr _pointcallback(new BacklashPointCallback(*this));
-		_backlashwork->pointcallback(_pointcallback);
-		CallbackPtr _resultcallback(new BacklashResultCallback(*this));
-		_backlashwork->resultcallback(_resultcallback);
+		CallbackPtr _callback(new BacklashCallback(*this));
+		_backlashwork->callback(_callback);
 
 		// create the backlash thread
 		BacklashThread	*backlashthread

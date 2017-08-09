@@ -55,6 +55,7 @@ class GuiderI : virtual public Guider, virtual public RepositoryUser {
 	astro::callback::CallbackPtr	_calibrationcallback;
 	astro::callback::CallbackPtr	_trackingcallback;
 	astro::callback::CallbackPtr	_calibrationimagecallback;
+	astro::callback::CallbackPtr	_backlashcallback;
 
 	// public interface starts here
 public:
@@ -121,6 +122,7 @@ private:
 	SnowCallback<TrackingMonitorPrx>	trackingcallbacks;
 	SnowCallback<CalibrationMonitorPrx>	calibrationcallbacks;
 	SnowCallback<CalibrationImageMonitorPrx>	calibrationimagecallbacks;
+	SnowCallback<BacklashMonitorPrx>	backlashmonitorcallbacks;
 
 	// methods for registration and unregistration of callbacks
 public:
@@ -182,6 +184,20 @@ public:
 	virtual void	startImaging(const Exposure& exposure,
 				const Ice::Current& current);
 	virtual ImagePrx getImage(const Ice::Current& current);
+
+	// methods for backlash characterization
+	virtual void	startBacklash(double interval,
+				const Ice::Current& current);
+	virtual void	stopBacklash(const Ice::Current& current);
+	BacklashData	getBacklashData(const Ice::Current& current);
+
+	virtual void	registerBacklashMonitor(
+				const Ice::Identity& calibrationimagecallback,
+				const Ice::Current& current);
+	virtual void	unregisterBacklashMonitor(
+				const Ice::Identity& calibrationimagecallback,
+				const Ice::Current& current);
+	void	backlashUpdate(const astro::callback::CallbackDataPtr data);
 };
 
 /**
@@ -240,6 +256,20 @@ public:
 	virtual astro::callback::CallbackDataPtr	operator()(
 		astro::callback::CallbackDataPtr data) {
 		_guider.calibrationImageUpdate(data);
+		return data;
+	}
+};
+
+/**
+ * \brief Adapter class for Backlash  callback
+ */
+class GuiderIBacklashCallback : public astro::callback::Callback {
+	GuiderI&	_guider;
+public:
+	GuiderIBacklashCallback(GuiderI& guider) : _guider(guider) { }
+	virtual astro::callback::CallbackDataPtr	operator()(
+		astro::callback::CallbackDataPtr data) {
+		_guider.backlashUpdate(data);
 		return data;
 	}
 };

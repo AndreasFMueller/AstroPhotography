@@ -609,16 +609,53 @@ class BasicProcess;
 typedef std::shared_ptr<BasicProcess>	BasicProcessPtr;
 class PersistentCalibration;
 
-// forward declarations for the backlash stuff
-class BacklashPoint;
-typedef std::shared_ptr<BacklashPoint>	BacklashPointPtr;
-class BacklashResult;
-typedef std::shared_ptr<BacklashResult>	BacklashResultPtr;
-class BacklashData;
+// declarations for the backlash stuff
+typedef enum backlash_e { backlash_dec = 0, backlash_ra = 1 } backlash_t;
+
+/**
+ * \brief Backlash raw data point
+ */
+class BacklashPoint {
+public:
+	int	id;
+	double	time;
+	double	xoffset;
+	double	yoffset;
+	std::string	toString() const;
+};
+typedef std::vector<BacklashPoint>	BacklashPoints;
+typedef callback::CallbackDataEnvelope<BacklashPoint>	CallbackBacklashPoint;
+typedef std::shared_ptr<CallbackBacklashPoint>	CallbackBacklashPointPtr;
+
+/**
+ * \brief A holder class for the Backlash analysis results
+ */
+class BacklashResult {
+public:
+	backlash_t	direction;	// direction
+	double	x, y;			// primary direction
+	double	longitudinal, lateral;	// errors
+	double	forward, backward;	// movements
+	double	f, b;			// forward/backward 
+	double	offset, drift;
+	std::string	toString() const;
+	double	operator()(const int k[4], const BacklashPoint& p);
+};
+typedef callback::CallbackDataEnvelope<BacklashResult>	CallbackBacklashResult;
+typedef std::shared_ptr<CallbackBacklashResult>	CallbackBacklashResultPtr;
+
+/**
+ * \brief a holder class for backlash data and analysis results
+ */
+class BacklashData {
+public:
+	BacklashResult	result;
+	BacklashPoints	points;
+};
 typedef std::shared_ptr<BacklashData>	BacklashDataPtr;
+
 class BacklashWork;
 typedef std::shared_ptr<BacklashWork>	BacklashWorkPtr;
-
 typedef astro::thread::Thread<BacklashWork>	BacklashThread;
 typedef std::shared_ptr<BacklashThread>	BacklashThreadPtr;
 
@@ -680,8 +717,7 @@ private:
 	callback::CallbackSet	_progresscallback;
 	callback::CallbackSet	_trackingcallback;
 	callback::CallbackSet	_calibrationimagecallback;
-	callback::CallbackSet	_backlashpointcallback;
-	callback::CallbackSet	_backlashresultcallback;
+	callback::CallbackSet	_backlashcallback;
 public:
 	void	addImageCallback(callback::CallbackPtr i);
 	void	addCalibrationCallback(callback::CallbackPtr c);
@@ -689,16 +725,14 @@ public:
 	void	addGuidercalibrationCallback(callback::CallbackPtr c);
 	void	addTrackingCallback(callback::CallbackPtr t);
 	void	addCalibrationImageCallback(callback::CallbackPtr t);
-	void	addBacklashPointCallback(callback::CallbackPtr t);
-	void	addBacklashResultCallback(callback::CallbackPtr t);
+	void	addBacklashCallback(callback::CallbackPtr t);
 
 	void	removeImageCallback(callback::CallbackPtr i);
 	void	removeCalibrationCallback(callback::CallbackPtr c);
 	void	removeProgressCallback(callback::CallbackPtr c);
 	void	removeTrackingCallback(callback::CallbackPtr t);
 	void	removeCalibrationImageCallback(callback::CallbackPtr t);
-	void	removeBacklashPointCallback(callback::CallbackPtr t);
-	void	removeBacklashResultCallback(callback::CallbackPtr t);
+	void	removeBacklashCallback(callback::CallbackPtr t);
 	
 	void	callback(image::ImagePtr image);
 	void	callback(const CalibrationPoint& point);

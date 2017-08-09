@@ -152,6 +152,19 @@ GuiderDescriptor	guiderdescriptorParse(const std::string &name);
 CalibrationImageProgress	convert(const astro::camera::CalibrationImageProgress);
 astro::camera::CalibrationImageProgress	convert(const CalibrationImageProgress);
 
+// Backlash related
+BacklashPoint	convert(const astro::guiding::BacklashPoint& point);
+astro::guiding::BacklashPoint	convert(const BacklashPoint& point);
+
+BacklashPoints	convert(const astro::guiding::BacklashPoints& points);
+astro::guiding::BacklashPoints	convert(const BacklashPoints& points);
+
+BacklashResult	convert(const astro::guiding::BacklashResult& result);
+astro::guiding::BacklashResult	convert(const BacklashResult& result);
+
+BacklashData	convert(const astro::guiding::BacklashData& data);
+astro::guiding::BacklashData	convert(const BacklashData& data);
+
 // TaskQueue
 TaskState	convert(const astro::task::TaskInfo::taskstate& state);
 astro::task::TaskInfo::taskstate	convert(const TaskState& state);
