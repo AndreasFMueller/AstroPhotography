@@ -81,8 +81,7 @@ UVCBulkTransfer::~UVCBulkTransfer() {
  *
  * \param devhandle
  */
-void	UVCBulkTransfer::submit(libusb_device_handle *devhandle)
-	throw(USBError) {
+void	UVCBulkTransfer::submit(libusb_device_handle *devhandle) {
 	// fill all the transfers
 	for (int i = 0; i < queuesize; i++) {
 		libusb_fill_bulk_transfer(transfers[i], devhandle,
@@ -256,8 +255,7 @@ UVCIsochronousTransfer::~UVCIsochronousTransfer() {
  *
  * \param devhandle	libusb device handle to use during transfer.
  */
-void	UVCIsochronousTransfer::submit(libusb_device_handle *dev_handle)
-	throw(USBError) {
+void	UVCIsochronousTransfer::submit(libusb_device_handle *dev_handle) {
 	// fill all the transfers
 	int	buffersize = packetsize * isochunk;
 	for (int i = 0; i < queuesize; i++) {

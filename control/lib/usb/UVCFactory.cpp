@@ -42,8 +42,7 @@ uint8_t	UVCDescriptorFactory::bdescriptorsubtype(const void *data) const {
  * \param length	length of the data block
  */
 USBDescriptorPtr	UVCDescriptorFactory::descriptor(const void *data,
-	int length)
-	throw(std::length_error, UnknownDescriptorError) {
+	int length) {
 	// if there is not enough data even to find out what type of
 	// descriptor comes next, then this is an error
 	if (length < 2) {
@@ -130,8 +129,7 @@ USBDescriptorPtr	VideoControlDescriptorFactory::header(
  * \param length	maximum length of the data block to parse
  */
 USBDescriptorPtr	VideoControlDescriptorFactory::descriptor(
-	const void *data, int length)
-	throw(std::length_error, UnknownDescriptorError) {
+	const void *data, int length) {
 
 	// if there is not enough data even to find out what type of
 	// descriptor comes next, then this is an error
@@ -363,8 +361,7 @@ cleanup:
  * \param length	length of the data block
  */
 USBDescriptorPtr	VideoStreamingDescriptorFactory::descriptor(
-	const void *data, int length)
-		throw(std::length_error, UnknownDescriptorError) {
+	const void *data, int length) {
 
 	// if there is not enough data even to find out what type of
 	// descriptor comes next, then this is an error
