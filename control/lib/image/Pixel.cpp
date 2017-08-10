@@ -97,16 +97,13 @@ float	Color<float>::clip(const double& value) {
  * types, which have almost no limits to the size of the pixels, a
  * comparable integer type has to be specified.
  */
-#define	COLOR_CONSTANTS(T, P)						\
-template<>								\
-const Color<T>::value_type Color<T>::pedestal				\
-	= ((P)16) << ((sizeof(P) - 1) << 3);				\
-template<>								\
-const Color<T>::value_type Color<T>::zero				\
-	= ((P)128) << ((sizeof(P) - 1) << 3);				\
-template<>								\
-const Color<T>::value_type Color<T>::limit				\
-	= (sizeof(T) == 8) ? (unsigned long)0xffffffffffffffff : (P)-1;
+#define COLOR_CONSTANTS(T, P)                                           \
+template<>                                                              \
+const Color<T>::value_type Color<T>::pedestal                           \
+        = ((P)16) << ((sizeof(P) - 1) << 3);                            \
+template<>                                                              \
+const Color<T>::value_type Color<T>::zero                               \
+        = ((P)128) << ((sizeof(P) - 1) << 3);
 
 COLOR_CONSTANTS(unsigned char, unsigned char)
 COLOR_CONSTANTS(unsigned short, unsigned short)
@@ -120,6 +117,25 @@ COLOR_CONSTANTS(unsigned long, unsigned long)
  */
 COLOR_CONSTANTS(float, unsigned int)
 COLOR_CONSTANTS(double, unsigned long)
+
+template<>
+const Color<unsigned char>::value_type 
+        Color<unsigned char>::limit = 0xff;
+template<>
+const Color<unsigned short>::value_type 
+        Color<unsigned short>::limit = 0xffff;
+template<>
+const Color<unsigned int>::value_type 
+        Color<unsigned int>::limit = 0xffffffff;
+template<>
+const Color<unsigned long>::value_type 
+        Color<unsigned long>::limit = 0xffffffffffffffff;
+template<>
+const Color<float>::value_type 
+        Color<float>::limit = 0xffffffff;
+template<>
+const Color<double>::value_type 
+        Color<double>::limit = 0xffffffffffffffff;
 
 template<>
 unsigned char   conversionFunction<unsigned char, float>(const float& src) {

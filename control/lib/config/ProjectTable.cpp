@@ -313,7 +313,7 @@ long	PartTable::id(long projectid, long partno) {
 void	PartTable::update(long projectid, const Part& part) {
 	int	objectid = id(projectid, part.partno());
 	PartRecord	partrecord(objectid, projectid, part);
-	update(objectid, partrecord);
+	Table<PartRecord, PartTableAdapter>::update(objectid, partrecord);
 }
 
 bool	PartTable::has(long projectid, long partno) {

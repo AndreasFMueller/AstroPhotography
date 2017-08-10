@@ -94,8 +94,7 @@ void	UVCCamera::getCur(uint8_t interface) {
  * XXX apparently the force parameter is never used, so the question should be
  *     asked whether we can remove it.
  */
-UVCCamera::UVCCamera(Device& _device, bool /* force */) throw(USBError)
-	: device(_device) {
+UVCCamera::UVCCamera(Device& _device, bool /* force */) : device(_device) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "create a UVC camera object");
 
 	// make sure the camera is open, this most probably will not have
@@ -272,8 +271,7 @@ const InterfaceAssociationDescriptor&	UVCCamera::iad() const {
  * Internally we need the index into the video streaming. 
  * \param interfacenumber    USB interface number for this streaming interface
  */
-size_t	UVCCamera::streamingInterfaceIndex(size_t interfacenumber) const
-	throw(std::range_error) {
+size_t	UVCCamera::streamingInterfaceIndex(size_t interfacenumber) const {
 	uint8_t	cifn = controlInterfaceNumber();
 	if (interfacenumber <= cifn) {
 		throw std::range_error("interface number too small");
@@ -289,13 +287,11 @@ size_t	UVCCamera::numberVideoStreamingInterfaces() const {
 	return iad().bInterfaceCount() - 1;
 }
 
-const USBDescriptorPtr&	UVCCamera::operator[](size_t interfacenumber) const 
-	throw(std::range_error) {
+const USBDescriptorPtr&	UVCCamera::operator[](size_t interfacenumber) const {
 	return videostreaming[streamingInterfaceIndex(interfacenumber)];
 }
 
-USBDescriptorPtr&	UVCCamera::operator[](size_t interfacenumber) 
-	throw(std::range_error) {
+USBDescriptorPtr&	UVCCamera::operator[](size_t interfacenumber) {
 	return videostreaming[streamingInterfaceIndex(interfacenumber)];
 }
 
@@ -551,7 +547,7 @@ std::ostream&	operator<<(std::ostream& out, const UVCCamera& camera) {
  *			frame descriptor
  */
 uint32_t	UVCCamera::minFrameInterval(uint8_t interface, uint8_t format,
-	uint8_t frame) throw(std::range_error,USBError) {
+	uint8_t frame) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieve minFrameInterval for "
 		"interface = %d, format = %d, frame = %d",
 		interface, format, frame);
@@ -586,7 +582,7 @@ uint32_t	UVCCamera::minFrameInterval(uint8_t interface, uint8_t format,
  *			frame descriptor
  */
 void	UVCCamera::selectFormatAndFrame(uint8_t interface,
-		uint8_t format, uint8_t frame) throw(USBError) {
+		uint8_t format, uint8_t frame) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0,
 		"select interface %d, format %d, frame %d",
 		interface, format, frame);
@@ -654,7 +650,7 @@ void	UVCCamera::selectFormatAndFrame(uint8_t interface,
  * \param interface	interface number of the streaming interface
  */
 std::pair<uint8_t, uint8_t>	UVCCamera::getFormatAndFrame(uint8_t interface)
-	throw(USBError) {
+	{
 	InterfacePtr	interfaceptr = (*device.activeConfig())[interface];
 	VideoStreamingProbeControlRequest	r(interfaceptr, GET_CUR);
 	device.controlRequest(&r);

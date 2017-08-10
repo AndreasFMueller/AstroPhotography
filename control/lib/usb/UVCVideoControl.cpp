@@ -38,8 +38,7 @@ uint8_t	InterfaceHeaderDescriptor::bInCollection() const {
 	return uint8At(11);
 }
 
-uint8_t	InterfaceHeaderDescriptor::baInterface(int index) const
-	throw(std::range_error) {
+uint8_t	InterfaceHeaderDescriptor::baInterface(int index) const {
 	if ((index < 0) || (index >= bInCollection())) {
 		throw std::range_error("baInterface(index) out of range");
 	}
