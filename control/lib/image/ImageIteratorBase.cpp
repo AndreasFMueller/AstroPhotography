@@ -150,7 +150,7 @@ bool    ImageIteratorBase::invalid() const {
  * \throws Throws a std::range_error if the iterator no longer points to
  *         a point inside the row or column.
  */
-unsigned int	ImageIteratorBase::pixeloffset() const throw(std::range_error) {
+unsigned int	ImageIteratorBase::pixeloffset() const {
 	if (offset == std::numeric_limits<unsigned int>::max()) {
 		throw std::range_error("image iterator out of range");
 	}

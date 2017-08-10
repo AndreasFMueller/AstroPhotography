@@ -56,7 +56,7 @@ void	Focusing::start(int min, int max) {
 	_status = IDLE;
 
 	// create the focus work
-	FocusWork	*work;
+	FocusWork	*work = NULL;
 	switch (method()) {
 	case Focusing::BRENNER:
 		evaluator(FocusEvaluatorFactory::get(

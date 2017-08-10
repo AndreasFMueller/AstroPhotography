@@ -106,7 +106,7 @@ static const char	*usb_status_name(int status) {
  * and only returns when the complete flag is set.
  * \param dev_handle    the libusb device handle
  */
-void	BulkTransfer::submit(libusb_device_handle *dev_handle) throw(USBError) {
+void	BulkTransfer::submit(libusb_device_handle *dev_handle) {
 	// allocate the transfer structure
 	transfer = libusb_alloc_transfer(0);
 

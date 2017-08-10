@@ -9,7 +9,8 @@ namespace astro {
 namespace focusing {
 
 int	CentroidSolver::position(const FocusItems& /* focusitems */) {
-	
+	// XXX implementation missing
+	throw std::runtime_error("implementation missing");
 };
 
 CentroidSolver::CentroidSolver() {

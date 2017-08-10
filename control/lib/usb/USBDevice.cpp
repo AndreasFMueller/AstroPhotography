@@ -30,7 +30,7 @@ bool	Device::isOpen() const {
  * is to just get a device, but not to open it. This method also opens
  * the device.
  */
-void	Device::open() throw(USBError) {
+void	Device::open() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "open the device");
 	// handle the case where the device has already been opened
 	if (isOpen()) {
@@ -97,8 +97,7 @@ Device::~Device() {
 	libusb_unref_device(dev);
 }
 
-std::string	Device::getStringDescriptor(uint8_t index)
-	const throw(USBError) {
+std::string	Device::getStringDescriptor(uint8_t index) const {
 	if (NULL == dev_handle) {
 		return std::string("(device not open)");
 	}
@@ -112,7 +111,7 @@ std::string	Device::getStringDescriptor(uint8_t index)
 	return std::string();
 }
 
-DeviceDescriptorPtr	Device::descriptor() throw(USBError) {
+DeviceDescriptorPtr	Device::descriptor() {
 	// get the device descriptor
 	libusb_device_descriptor	d;
 	int	rc = libusb_get_device_descriptor(dev, &d);
@@ -125,7 +124,7 @@ DeviceDescriptorPtr	Device::descriptor() throw(USBError) {
 	return DeviceDescriptorPtr(devdesc);
 }
 
-ConfigurationPtr	Device::config(uint8_t index) throw(USBError) {
+ConfigurationPtr	Device::config(uint8_t index) {
 	struct libusb_config_descriptor	*config = NULL;
 	int	rc = libusb_get_config_descriptor(dev, index, &config);
 	if (rc != LIBUSB_SUCCESS) {
@@ -160,7 +159,7 @@ ContextHolderPtr	Device::getContext() const {
  * in Linux cannot inadvertently trigger this bug and cause segementation
  * faults on Mac OS X.
  */
-ConfigurationPtr	Device::activeConfig() throw(USBError) {
+ConfigurationPtr	Device::activeConfig() {
 	if (!isOpen()) {
 		throw USBError("device not open");
 	}
@@ -179,7 +178,7 @@ ConfigurationPtr	Device::activeConfig() throw(USBError) {
  *
  * \param value	configuration value to search for.
  */
-ConfigurationPtr	Device::configValue(uint8_t value) throw(USBError) {
+ConfigurationPtr	Device::configValue(uint8_t value) {
 	struct libusb_config_descriptor	*config;
 	int	rc = libusb_get_config_descriptor_by_value(dev, value, &config);
 	if (rc != LIBUSB_SUCCESS) {
@@ -215,7 +214,7 @@ int	Device::getBroken() const {
 	return broken;
 }
 
-void	Device::claimInterface(uint8_t interface) throw(USBError) {
+void	Device::claimInterface(uint8_t interface) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "claiming interface %d", interface);
 	int	rc = libusb_claim_interface(dev_handle, interface);
 	if (rc != LIBUSB_SUCCESS) {
@@ -225,7 +224,7 @@ void	Device::claimInterface(uint8_t interface) throw(USBError) {
 	}
 }
 
-void	Device::releaseInterface(uint8_t interface) throw(USBError) {
+void	Device::releaseInterface(uint8_t interface) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "releasing interface %d", interface);
 	int	rc = libusb_release_interface(dev_handle, interface);
 	rc = libusb_release_interface(dev_handle, interface);
@@ -242,7 +241,7 @@ void	Device::releaseInterface(uint8_t interface) throw(USBError) {
  *
  * \return configuration number
  */
-int	Device::getConfiguration() throw(USBError) {
+int	Device::getConfiguration() {
 	int	result;
 	int	rc = libusb_get_configuration(dev_handle, &result);
 	if (rc != LIBUSB_SUCCESS) {
@@ -258,7 +257,7 @@ int	Device::getConfiguration() throw(USBError) {
  *
  * \param configuration	number of the configuration to select.
  */
-void	Device::setConfiguration(uint8_t configuration) throw (USBError) {
+void	Device::setConfiguration(uint8_t configuration) {
 	int	rc = libusb_set_configuration(dev_handle, configuration);
 	if (rc != LIBUSB_SUCCESS) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "cannot set configuration %d: %s",
@@ -274,8 +273,7 @@ void	Device::setConfiguration(uint8_t configuration) throw (USBError) {
  * \param interface	interface number
  * \param altsetting	number of alternate setting
  */
-void	Device::setInterfaceAltSetting(uint8_t interface, uint8_t altsetting)
-		throw(USBError) {
+void	Device::setInterfaceAltSetting(uint8_t interface, uint8_t altsetting) {
 	int	rc = libusb_set_interface_alt_setting(dev_handle,
 			interface, altsetting);
 	if (rc != LIBUSB_SUCCESS) {
@@ -296,7 +294,7 @@ void	Device::setInterfaceAltSetting(uint8_t interface, uint8_t altsetting)
  *
  * \param request	pointer to the control request
  */
-void	Device::controlRequest(RequestBase *request) throw(USBError) {
+void	Device::controlRequest(RequestBase *request) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "bmRequest = %02x, bRequest = %02x, "
 		"wValue = %04x, wIndex = %04x, wLength = %d",
 		request->bmRequestType(), request->bRequest(),
@@ -363,12 +361,12 @@ int	Device::maxIsoPacketSize(uint8_t endpoint) const {
  * class.
  * \param transfer	A Transfer instance.
  */
-void	Device::submit(Transfer *transfer) throw(USBError) {
+void	Device::submit(Transfer *transfer) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "submit transfer");
 	transfer->submit(dev_handle);
 }
 
-bool	Device::kernelDriverActive(uint8_t interface) const throw(USBError) {
+bool	Device::kernelDriverActive(uint8_t interface) const {
 	int	rc = libusb_kernel_driver_active(dev_handle, interface);
 	if (rc < 0) {
 		throw USBError(libusb_error_name(rc));
@@ -376,7 +374,7 @@ bool	Device::kernelDriverActive(uint8_t interface) const throw(USBError) {
 	return (rc) ? true : false;
 }
 
-void	Device::detachKernelDriver(uint8_t interface) const throw(USBError) {
+void	Device::detachKernelDriver(uint8_t interface) const {
 	int	rc = libusb_detach_kernel_driver(dev_handle, interface);
 	if (rc < 0) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "cannot detach kernel driver: %s",
@@ -385,7 +383,7 @@ void	Device::detachKernelDriver(uint8_t interface) const throw(USBError) {
 	}
 }
 
-void	Device::attachKernelDriver(uint8_t interface) const throw(USBError) {
+void	Device::attachKernelDriver(uint8_t interface) const {
 	int	rc = libusb_attach_kernel_driver(dev_handle, interface);
 	if (rc < 0) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "cannot attach kernel driver: %s",
@@ -398,7 +396,7 @@ void	Device::attachKernelDriver(uint8_t interface) const throw(USBError) {
  * \brief Get a list of interface association Descriptors from the device
  */
 std::list<USBDescriptorPtr>	Device::interfaceAssociationDescriptors(
-					bool videoonly) throw(USBError) {
+					bool videoonly) {
 	std::list<USBDescriptorPtr>	iadescriptors;
 
 	// see whether there is any additional data that could contain

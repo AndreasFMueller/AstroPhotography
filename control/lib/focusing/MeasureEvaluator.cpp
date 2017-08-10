@@ -18,7 +18,7 @@ namespace focusing {
 MeasureEvaluator::MeasureEvaluator() {
 }
 
-MeasureEvaluator::MeasureEvaluator(const ImageRectangle& roi) {
+MeasureEvaluator::MeasureEvaluator(const ImageRectangle& /* roi */) {
 }
 
 double	MeasureEvaluator::operator()(const ImagePtr image) {

@@ -88,6 +88,7 @@ bool	Exposure::needsshutteropen() const {
 	case bias:
 		return false;
 	}
+	throw std::runtime_error("unknown purpose");
 }
 
 std::string	Exposure::purpose2string(purpose_t p) {

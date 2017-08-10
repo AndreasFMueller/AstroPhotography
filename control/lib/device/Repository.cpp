@@ -62,16 +62,15 @@ public:
 private:
 	typedef	std::map<std::string, ModulePtr>	modulemap;
 	modulemap	modulecache;
-	void	checkpath(const std::string& path) const throw(repository_error);
+	void	checkpath(const std::string& path) const;
 public:
-	RepositoryBackend() throw (repository_error);
-	RepositoryBackend(const std::string& path) throw (repository_error);
+	RepositoryBackend();
+	RepositoryBackend(const std::string& path);
 	long	numberOfModules() const;
 	std::vector<std::string>	moduleNames() const;
 	std::vector<ModulePtr>	modules() const;
 	bool	contains(const std::string& modulename) const;
-	ModulePtr	getModule(const std::string& modulename)
-		throw (repository_error);
+	ModulePtr	getModule(const std::string& modulename);
 };
 
 /**
@@ -109,8 +108,7 @@ RepositoryBackendPtr	Repositories::get(const std::string& path) {
  * \throws repository_error	is thrown when there is any problem with the
  *				directory specified
  */
-void	RepositoryBackend::checkpath(const std::string& path) const
-	throw(repository_error) {
+void	RepositoryBackend::checkpath(const std::string& path) const {
 	// verify that the path exists and is a directory
 	struct stat	sb;
 	if (stat(path.c_str(), &sb) < 0) {
@@ -133,8 +131,7 @@ void	RepositoryBackend::checkpath(const std::string& path) const
  *
  * \param path		path to the directory containing the modules
  */
-RepositoryBackend::RepositoryBackend(const std::string& path)
-	throw (repository_error) : _path(path) {
+RepositoryBackend::RepositoryBackend(const std::string& path) : _path(path) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "creating repository backend at %s",
 		path.c_str());
 	if (_path.size() == 0) {
@@ -151,8 +148,7 @@ RepositoryBackend::RepositoryBackend(const std::string& path)
  * modules and thus rely on the modules being installed in the pkgdir
  * directory.
  */
-RepositoryBackend::RepositoryBackend() throw (repository_error)
-	: _path(PKGLIBDIR) {
+RepositoryBackend::RepositoryBackend() : _path(PKGLIBDIR) {
 	checkpath(_path);
 }
 
@@ -253,7 +249,7 @@ bool	RepositoryBackend::contains(const std::string& modulename) const {
  *				has a corrupt .la file or the code file
  *				is missing.
  */
-ModulePtr	RepositoryBackend::getModule(const std::string& modulename) throw(repository_error) {
+ModulePtr	RepositoryBackend::getModule(const std::string& modulename) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "get module '%s'", modulename.c_str());
 	try {
 		if (modulecache.find(modulename) == modulecache.end()) {
@@ -271,10 +267,9 @@ ModulePtr	RepositoryBackend::getModule(const std::string& modulename) throw(repo
 //////////////////////////////////////////////////////////////////////
 // Repository wrapper class implementation
 //////////////////////////////////////////////////////////////////////
-Repository::Repository() throw (repository_error) : _path() { }
+Repository::Repository() : _path() { }
 
-Repository::Repository(const std::string& path) throw (repository_error)
-	: _path(path) { }
+Repository::Repository(const std::string& path) : _path(path) { }
 
 long    Repository::numberOfModules() const {
 	return repositories.get(_path)->numberOfModules();
@@ -292,7 +287,7 @@ bool    Repository::contains(const std::string& modulename) const {
 	return repositories.get(_path)->contains(modulename);
 }
 
-ModulePtr       Repository::getModule(const std::string& modulename) throw (repository_error) {
+ModulePtr       Repository::getModule(const std::string& modulename) {
 	return repositories.get(_path)->getModule(modulename);
 }
 

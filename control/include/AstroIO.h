@@ -147,13 +147,13 @@ protected:
 	/**
 	 * \brief Size of the image we are about to read
 	 */
-	void	readkeys() throw (FITSexception);
+	void	readkeys();
 	ImageSize	size;
-	void	*readdata() throw (FITSexception);
+	void	*readdata();
 protected:
 	void	addHeaders(ImageBase *image) const;
 public:
-	FITSinfileBase(const std::string& filename) throw (FITSexception);
+	FITSinfileBase(const std::string& filename);
 	ImageSize	getSize() const { return size; }
 	// header access
 	bool	hasHeader(const std::string& key) const;
@@ -167,7 +167,7 @@ template<typename Pixel>
 class FITSinfile : public FITSinfileBase {
 public:
 	FITSinfile(const std::string& filename) : FITSinfileBase(filename) { }
-	Image<Pixel>	*read() throw(FITSexception);
+	Image<Pixel>	*read();
 };
 
 /**
@@ -269,8 +269,7 @@ void	convertFITSpixels(Pixel *pixels, srctype *srcpixels,
  * function.
  */
 template<typename Pixel>
-Image<Pixel>	*FITSinfile<Pixel>::read()
-	throw (FITSexception) {
+Image<Pixel>	*FITSinfile<Pixel>::read() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "reading FITS file");
 	Image<Pixel>	*image = new Image<Pixel>(size);
 
@@ -324,11 +323,9 @@ class FITSoutfileBase : public FITSfile {
 	bool	_precious;
 public:
 	FITSoutfileBase(const std::string & filename,
-		int _pixeltype, int _planes, int _imgtype)
-		throw (FITSexception);
-	void	write(const ImageBase& image)
-			throw (FITSexception);
-	void	postwrite() throw (FITSexception);
+		int _pixeltype, int _planes, int _imgtype);
+	void	write(const ImageBase& image);
+	void	postwrite();
 	bool	precious() const { return _precious; }
 	void	setPrecious(bool precious) { _precious = precious; }	
 };
@@ -339,9 +336,8 @@ public:
 template<class Pixel>
 class FITSoutfile : public FITSoutfileBase {
 public:
-	FITSoutfile(const std::string& filename) throw (FITSexception);
-	void	write(const Image<Pixel>& image)
-			throw (FITSexception);
+	FITSoutfile(const std::string& filename);
+	void	write(const Image<Pixel>& image);
 };
 
 /**
@@ -349,7 +345,7 @@ public:
  */
 template<class Pixel>
 FITSoutfile<Pixel>::FITSoutfile(const std::string& filename)
-	throw (FITSexception) : FITSoutfileBase(filename, TBYTE, 1, BYTE_IMG) {
+	: FITSoutfileBase(filename, TBYTE, 1, BYTE_IMG) {
 }
 
 // Specializations for just about any type. They are all needed, because
@@ -357,8 +353,7 @@ FITSoutfile<Pixel>::FITSoutfile(const std::string& filename)
 // CFITSIO library to C++ types
 #define	FITS_OUTFILE_SPECIALIZATION(T)					\
 template<>								\
-FITSoutfile<T >::FITSoutfile(const std::string& filename)		\
-	throw (FITSexception);
+FITSoutfile<T >::FITSoutfile(const std::string& filename);
 
 FITS_OUTFILE_SPECIALIZATION(unsigned char)
 FITS_OUTFILE_SPECIALIZATION(unsigned short)
@@ -383,8 +378,7 @@ FITS_OUTFILE_SPECIALIZATION(YUYV<double>)
 
 #define	FITS_OUTFILE_SPECIALIZATION_MULTI(T, N)				\
 template<>								\
-FITSoutfile<Multiplane<T, N> >::FITSoutfile(const std::string& filename)\
-	throw (FITSexception);
+FITSoutfile<Multiplane<T, N> >::FITSoutfile(const std::string& filename);\
 
 FITS_OUTFILE_SPECIALIZATION_MULTI(unsigned char, 1)
 FITS_OUTFILE_SPECIALIZATION_MULTI(unsigned short, 1)
@@ -602,8 +596,7 @@ int	IteratorData<Pixel, colortype>::workfunc(const long totaln, long offset,
  * color plane is extracted and sent to the FITS file.
  */
 template<typename Pixel>
-void	FITSoutfile<Pixel>::write(const Image<Pixel>& image)
-	throw (FITSexception) {
+void	FITSoutfile<Pixel>::write(const Image<Pixel>& image) {
 	// create the header
 	FITSoutfileBase::write(image);
 
@@ -651,7 +644,7 @@ public:
 	void	unlink();
 	bool	precious() const { return _precious; }
 	void	setPrecious(bool precious) { _precious = precious; }
-	void	write(const ImagePtr image) throw (FITSexception);
+	void	write(const ImagePtr image);
 };
 
 /**
@@ -664,7 +657,7 @@ class FITSin {
 	std::string	filename;
 public:
 	FITSin(const std::string& filename);
-	ImagePtr	read() throw (FITSexception);
+	ImagePtr	read();
 };
 
 /**

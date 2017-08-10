@@ -25,7 +25,7 @@ FITSin::FITSin(const std::string& _filename) : filename(_filename) {
  * in a new ImagePtr and reset the old type specific pointer.
  */
 template<typename P>
-static ImagePtr	do_read(const std::string& filename) throw (FITSexception) {
+static ImagePtr	do_read(const std::string& filename) {
 	FITSinfile<P>	reader(filename);
 	Image<P>	*image = reader.read();
 	ImagePtr	result(image);
@@ -37,7 +37,7 @@ static ImagePtr	do_read(const std::string& filename) throw (FITSexception) {
 /**
  * \brief Read a file.
  */
-ImagePtr	FITSin::read() throw (FITSexception) {
+ImagePtr	FITSin::read() {
 	FITSinfileBase	infile(filename);
 	ImagePtr	result;
 

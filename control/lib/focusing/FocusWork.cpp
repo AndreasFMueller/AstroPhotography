@@ -104,7 +104,7 @@ void	FocusWork::callback(Focusing::state_type state) {
 /**
  * \brief default main function for focusing
  */
-void	FocusWork::main(astro::thread::Thread<FocusWork>& thread) {
+void	FocusWork::main(astro::thread::Thread<FocusWork>& /* thread */) {
 	if (!complete()) {
 		debug(LOG_ERR, DEBUG_LOG, 0,
 			"FocusWork is not completely configured");

@@ -64,7 +64,7 @@ void	AvahiDiscovery::browse_callback(
 			const char *name,
 			const char *type,
 			const char *domain,
-			AvahiLookupResultFlags flags) {
+			AvahiLookupResultFlags /* flags */) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0,
 		"browse_callback interface=%d, protocol=%d, name=%s, type=%s, "
 		"domain=%s", interface, protocol, name, type, domain);

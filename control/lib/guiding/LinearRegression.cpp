@@ -6,6 +6,7 @@
 #include "LinearRegression.h"
 #include <AstroDebug.h>
 #include <AstroFormat.h>
+#include <stdexcept>
 
 #ifdef HAVE_ACCELERATE_ACCELERATE_H
 #include <Accelerate/Accelerate.h>

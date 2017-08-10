@@ -29,6 +29,7 @@ CatalogPtr	CatalogFactory::get(BackendType type,
 	case Database:
 		return CatalogPtr(new DatabaseBackend(parameter));;
 	}
+	throw std::runtime_error("unknown catalog");
 }
 
 } // namespace catalog

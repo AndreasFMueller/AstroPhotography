@@ -160,46 +160,44 @@ public:
 	enum usb_speed	getDeviceSpeed() const;
 
 	// descriptor access
-	DeviceDescriptorPtr	descriptor() throw(USBError);
-	ConfigurationPtr	config(uint8_t index) throw(USBError);
-	ConfigurationPtr	activeConfig() throw(USBError);
-	ConfigurationPtr	configValue(uint8_t value) throw(USBError);
-	std::string	getStringDescriptor(uint8_t index) const throw(USBError);
+	DeviceDescriptorPtr	descriptor();
+	ConfigurationPtr	config(uint8_t index);
+	ConfigurationPtr	activeConfig();
+	ConfigurationPtr	configValue(uint8_t value);
+	std::string	getStringDescriptor(uint8_t index) const;
 	ContextHolderPtr	getContext() const;
 
 	// find all the interface association descriptors
-	std::list<USBDescriptorPtr>	interfaceAssociationDescriptors(bool videoonly)
-		throw (USBError);
+	std::list<USBDescriptorPtr>	interfaceAssociationDescriptors(bool videoonly);
 	bool	isVideoDevice();
 
 	// make sure the device is open
 	bool	isOpen() const;
-	void	open() throw(USBError);
+	void	open();
 	void	close();
 
 	// set a configuration
-	void	setConfiguration(uint8_t configuration) throw(USBError);
-	int	getConfiguration() throw(USBError);
+	void	setConfiguration(uint8_t configuration);
+	int	getConfiguration();
 
 	// claim and release an interface
-	void	claimInterface(uint8_t interface) throw(USBError);
-	void	releaseInterface(uint8_t interface) throw(USBError);
+	void	claimInterface(uint8_t interface);
+	void	releaseInterface(uint8_t interface);
 
 	// request the alternate setting of an interface
-	void	setInterfaceAltSetting(uint8_t interface, uint8_t altsetting)
-		throw(USBError);
+	void	setInterfaceAltSetting(uint8_t interface, uint8_t altsetting);
 
 	// having requests processed by the device
-	void	controlRequest(RequestBase *request) throw(USBError);
-	void	submit(Transfer *request) throw(USBError);
+	void	controlRequest(RequestBase *request);
+	void	submit(Transfer *request);
 
 	//  some more accessors
 	int	maxIsoPacketSize(uint8_t endpoint) const;
 
 	// kernel drivers
-	bool	kernelDriverActive(uint8_t interface) const throw(USBError);
-	void	detachKernelDriver(uint8_t interface) const throw(USBError);
-	void	attachKernelDriver(uint8_t interface) const throw(USBError);
+	bool	kernelDriverActive(uint8_t interface) const;
+	void	detachKernelDriver(uint8_t interface) const;
+	void	attachKernelDriver(uint8_t interface) const;
 
 	// Context is a friend class, it acts as a factory for Devices
 	friend class Context;
@@ -220,14 +218,13 @@ class	Context {
 	ContextHolderPtr	context;
 	Context(const Context& other);
 public:
-	Context() throw(USBError);
+	Context();
 	~Context();
-	void	setDebugLevel(int level) throw(std::range_error);
+	void	setDebugLevel(int level);
 
 	// factory functions to create Devices
-	std::vector<DevicePtr>	devices() throw (USBError);
-	DevicePtr	find(uint16_t vendor_id, uint16_t product_id)
-		throw(USBError);
+	std::vector<DevicePtr>	devices();
+	DevicePtr	find(uint16_t vendor_id, uint16_t product_id);
 	libusb_context	*getLibusbContext() const;
 };
 
@@ -469,8 +466,7 @@ protected:
 	bool	complete;
 	libusb_context	*getContext();
 private:
-	virtual void	submit(libusb_device_handle *devhandle)
-		throw(USBError) = 0;
+	virtual void	submit(libusb_device_handle *devhandle) = 0;
 public:
 	virtual void	callback(libusb_transfer *transfer) = 0;
 	Transfer(EndpointDescriptorPtr endpoint);
@@ -496,7 +492,7 @@ private:
 public:
 	virtual void	callback(libusb_transfer *transfer);
 private:
-	virtual void	submit(libusb_device_handle *devhandle) throw(USBError);
+	virtual void	submit(libusb_device_handle *devhandle);
 	void	init(int length, unsigned char *data);
 public:
 	BulkTransfer(EndpointDescriptorPtr endpoint,
@@ -536,9 +532,9 @@ class IsoSegment {
 public:
 	IsoSegment(EndpointDescriptorPtr endpoint, int packets,
 		IsoTransfer *isotransfer, libusb_device_handle *dev_handle,
-		int timeout) throw(USBError);
+		int timeout);
 	~IsoSegment();
-	void	submit() throw(USBError);
+	void	submit();
 	int	extract(std::list<std::string>& packets);
 };
 
@@ -565,7 +561,7 @@ public:
 	virtual void	callback(libusb_transfer *transfer);
 	virtual void	handlevents();
 private:
-	virtual void	submit(libusb_device_handle *devhandle) throw(USBError);
+	virtual void	submit(libusb_device_handle *devhandle);
 public:
 	IsoTransfer(EndpointDescriptorPtr endpoint, int totalpackets);
 	virtual ~IsoTransfer();
@@ -707,7 +703,7 @@ public:
 	const std::string&	iInterface() const;
 
 	// use this interface descriptors alt setting
-	void	altSetting() throw(USBError);
+	void	altSetting();
 
 	// access the various endpoint descriptors (int the cases we are
 	// interested in, there is only a single endpoint descriptor)
@@ -741,15 +737,15 @@ public:
 	uint8_t	interfaceNumber() const;
 	const InterfaceDescriptorPtr&	operator[](size_t index) const;
 	InterfaceDescriptorPtr&	operator[](size_t index);
-	void	claim() throw(USBError);
-	void	release() throw(USBError);
+	void	claim();
+	void	release();
 	std::string	toString() const;
 
 	// checking whether there is a kernel driver attached to the
 	// interface
 	bool	kernelDriverActive() const;
-	void	detachKernelDriver() throw(USBError);
-	void	attachKernelDriver() const throw(USBError);
+	void	detachKernelDriver();
+	void	attachKernelDriver() const;
 };
 
 typedef std::shared_ptr<Interface>	InterfacePtr;
@@ -776,7 +772,7 @@ public:
 	uint8_t	MaxPower() const;
 
 	// configure this configuration
-	void	configure() throw(USBError);
+	void	configure();
 
 	// access to the interfaces of this configuration
 	const std::vector<InterfacePtr>&	interfaces() const;
@@ -872,24 +868,20 @@ std::ostream&	operator<<(std::ostream& out,
 class DescriptorFactory {
 protected:
 	Device&	device;
-	uint8_t	blength(const void *data) throw(std::length_error);
+	uint8_t	blength(const void *data);
 	uint8_t	bdescriptortype(const void *data);
 	DescriptorFactory(const DescriptorFactory& other);
 public:
 	DescriptorFactory(Device& device);
 
-	virtual USBDescriptorPtr	descriptor(const void *data, int length)
-		throw(std::length_error, UnknownDescriptorError);
+	virtual USBDescriptorPtr	descriptor(const void *data, int length);
 
-	USBDescriptorPtr	descriptor(const std::string& data)
-		throw(std::length_error, UnknownDescriptorError);
+	USBDescriptorPtr	descriptor(const std::string& data);
 
 	virtual std::vector<USBDescriptorPtr>	descriptors(const void *data,
-		int length)
-		throw(std::length_error, UnknownDescriptorError);
+		int length);
 
-	std::vector<USBDescriptorPtr>	descriptors(const std::string& data)
-		throw(std::length_error, UnknownDescriptorError);
+	std::vector<USBDescriptorPtr>	descriptors(const std::string& data);
 };
 
 std::ostream&	operator<<(std::ostream& out,

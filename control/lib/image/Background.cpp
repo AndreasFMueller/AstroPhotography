@@ -533,6 +533,7 @@ Background<float> BackgroundExtractor::operator()(const ImagePoint& center,
 	switch (f) {
 	case CONSTANT:
 		symmetric = true;
+		__attribute__ ((fallthrough));
 	case LINEAR:
 		return getBackground(center, symmetric, alpha, image,
 			function_tag<LinearFunction>());
@@ -549,6 +550,7 @@ Background<float> BackgroundExtractor::operator()(const ImagePoint& center,
 	switch (f) {
 	case CONSTANT:
 		symmetric = true;
+		__attribute__ ((fallthrough));
 	case LINEAR:
 		return getBackground(center, symmetric, alpha, image,
 			function_tag<LinearFunction>());

@@ -19,7 +19,7 @@ namespace usb {
  * We keep a reference to the context so that we can be sure that the context
  * is closed only when all other USB structures have been deallocated.
  */
-Context::Context() throw(USBError) {
+Context::Context() {
 	context = ContextHolderPtr(new ContextHolder());
 }
 
@@ -34,7 +34,7 @@ Context::~Context() {
  *
  * \param level	The debug level is identical to the libusb debug level.
  */
-void	Context::setDebugLevel(int level) throw (std::range_error) {
+void	Context::setDebugLevel(int level) {
 	if ((level < 0) || (level > 4)) {
 		throw std::range_error("invalid USB debug level");
 	}
@@ -44,7 +44,7 @@ void	Context::setDebugLevel(int level) throw (std::range_error) {
 /**
  * \brief Retrieve a list of devices available within this context
  */
-std::vector<DevicePtr>	Context::devices() throw (USBError) {
+std::vector<DevicePtr>	Context::devices() {
 	std::vector<DevicePtr>	result;
 	libusb_device	**devlist;
 	ssize_t	length = libusb_get_device_list(context->context(), &devlist);
@@ -67,8 +67,7 @@ std::vector<DevicePtr>	Context::devices() throw (USBError) {
 /**
  * \brief Open device based on vendor_id and product_id
  */
-DevicePtr	Context::find(uint16_t vendor_id, uint16_t product_id)
-	throw(USBError) {
+DevicePtr	Context::find(uint16_t vendor_id, uint16_t product_id) {
 	// open the device handle
 	libusb_device_handle	*dev_handle = libusb_open_device_with_vid_pid(
 		context->context(), vendor_id, product_id);

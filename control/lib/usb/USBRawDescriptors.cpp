@@ -132,7 +132,7 @@ UnknownDescriptorError::UnknownDescriptorError(uint8_t length, uint8_t type,
 DescriptorFactory::DescriptorFactory(Device& _device) : device(_device) {
 }
 
-uint8_t	DescriptorFactory::blength(const void *data) throw(std::length_error) {
+uint8_t	DescriptorFactory::blength(const void *data) {
 	uint8_t	b = ((uint8_t *)data)[0];
 	if (b < 3) {
 		throw std::length_error("not enough data for descriptor");
@@ -145,8 +145,7 @@ uint8_t	DescriptorFactory::bdescriptortype(const void *data) {
 }
 
 USBDescriptorPtr	DescriptorFactory::descriptor(const void *data,
-	int length)
-	throw(std::length_error, UnknownDescriptorError) {
+	int length) {
 	if (blength(data) > length) {
 		throw std::length_error("data to small for descriptor");
 	}
@@ -168,8 +167,7 @@ USBDescriptorPtr	DescriptorFactory::descriptor(const void *data,
 	return dp;
 }
 
-USBDescriptorPtr	DescriptorFactory::descriptor(const std::string& data)
-	throw(std::length_error, UnknownDescriptorError) {
+USBDescriptorPtr	DescriptorFactory::descriptor(const std::string& data) {
 	return this->descriptor(data.c_str(), data.size());
 }
 
@@ -185,8 +183,7 @@ USBDescriptorPtr	DescriptorFactory::descriptor(const std::string& data)
  * \return A vector of descriptors parsed from the data block
  */
 std::vector<USBDescriptorPtr>	DescriptorFactory::descriptors(
-	const void *data, int length)
-	throw(std::length_error, UnknownDescriptorError) {
+	const void *data, int length) {
 	std::vector<USBDescriptorPtr>	result;
 	int	offset = 0;
 	do {
@@ -215,8 +212,7 @@ std::vector<USBDescriptorPtr>	DescriptorFactory::descriptors(
  * \param data	extra data to parse.
  */
 std::vector<USBDescriptorPtr>	DescriptorFactory::descriptors(
-		const std::string& data)
-		throw(std::length_error, UnknownDescriptorError) {
+		const std::string& data) {
 	if (data.size() == 0) {
 		return std::vector<USBDescriptorPtr>();
 	}

@@ -48,7 +48,7 @@ BinningSet::BinningSet() {
  * \throws std::range_error	is thrown if the binning mode contains
  *				wildcards
  */
-bool	BinningSet::permits(const Binning& binning) const throw (std::range_error) {
+bool	BinningSet::permits(const Binning& binning) const {
 	BinningSet::const_iterator	i = find(binning);
 	return (end() != i);
 }

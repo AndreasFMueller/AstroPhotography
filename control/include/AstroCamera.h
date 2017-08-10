@@ -46,7 +46,7 @@ static state	string2state(const std::string& s);
 class	BinningSet : public std::set<Binning> {
 public:
 	BinningSet();
-	bool	permits(const Binning& binning) const throw (std::range_error);
+	bool	permits(const Binning& binning) const;
 	virtual std::string	toString() const;
 };
 std::ostream&	operator<<(std::ostream& out, const BinningSet& binningset);
@@ -312,7 +312,7 @@ private:
 public:
 	ImageQueue(unsigned long maxqueuelength = 10);
 	bool	hasEntry();
-	ImageQueueEntry	getEntry(bool block) throw (EmptyQueue);
+	ImageQueueEntry	getEntry(bool block);
 	void	add(const Exposure& exposure, ImagePtr image);
 	void	add(ImageQueueEntry& entry);
 };

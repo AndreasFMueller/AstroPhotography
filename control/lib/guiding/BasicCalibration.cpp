@@ -90,7 +90,7 @@ BasicCalibration::BasicCalibration(const ControlDeviceName& name,
  * \brief Construct from another basic calibration
  */
 BasicCalibration::BasicCalibration(const BasicCalibration& other)
-	: _name(other.name()) {
+	: std::vector<CalibrationPoint>(), _name(other.name()) {
 	_calibrationid = -1;
 	copy(other);
 }

@@ -53,6 +53,7 @@ static void	writefile(const std::string& filename, ImagePtr image) {
 	out.write(*imagep);
 }
 
+#if 0 // apparently unused
 /**
  * \brief Reporting function for the image normalizer
  */
@@ -63,6 +64,7 @@ static void	reporting(int iterations, const Chart& chart,
 	writefile(stringprintf("foo-%d-projected.fits", iterations),
 		projected);
 }
+#endif
 
 /**
  * \brief Compute the true 

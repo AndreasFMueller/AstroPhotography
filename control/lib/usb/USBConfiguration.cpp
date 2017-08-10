@@ -86,7 +86,7 @@ void	Configuration::getInterfaces() {
 	}
 }
 
-void	Configuration::configure() throw(USBError) {
+void	Configuration::configure() {
 	dev.setConfiguration(bConfigurationValue());
 }
 

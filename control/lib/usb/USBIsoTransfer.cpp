@@ -43,8 +43,7 @@ static void isotransfer_callback(libusb_transfer *transfer) {
  */
 IsoSegment::IsoSegment(EndpointDescriptorPtr _endpoint, int packets,
 	IsoTransfer *_isotransfer, libusb_device_handle *dev_handle,
-	int timeout)
-	throw(USBError) : endpoint(_endpoint), isotransfer(_isotransfer) {
+	int timeout) : endpoint(_endpoint), isotransfer(_isotransfer) {
 	// compute the packet size for the packets that we need
 	int	packetsize = endpoint->maxPacketSize()
 			* endpoint->transactionOpportunities();
@@ -86,7 +85,7 @@ IsoSegment::~IsoSegment() {
 /**
  * \brief Submit an IsoSegment 
  */
-void	IsoSegment::submit() throw(USBError) {
+void	IsoSegment::submit() {
 	libusb_submit_transfer(transfer);
 }
 
@@ -150,7 +149,7 @@ void	IsoTransfer::handlevents() {
  * transfer has to be resubmitted each time a few packets have been received.
  * \param dev_handle	libusb_device_handle to use for the transfer
  */
-void	IsoTransfer::submit(libusb_device_handle *dev_handle) throw(USBError) {
+void	IsoTransfer::submit(libusb_device_handle *dev_handle) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "preparing isochronous transfer");
 
 	// find the packet size that the endpoint can handle

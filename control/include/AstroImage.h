@@ -474,7 +474,7 @@ public:
 	// image iterators are equal, if they point to the same pixel
 	bool	operator==(const ImageIteratorBase& other) const;
 	bool	operator!=(const ImageIteratorBase& other) const;
-	unsigned int	pixeloffset() const throw(std::range_error);
+	unsigned int	pixeloffset() const;
 	unsigned int	f() const { return first; }
 	unsigned int	l() const { return last; }
 };

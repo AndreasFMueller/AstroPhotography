@@ -58,7 +58,8 @@ FITSfile::~FITSfile() {
 	}
 	int	status = 0;
 	if (fits_close_file(fptr, &status)) {
-		throw FITSexception(errormsg(status));
+		// XXX what do I do if the close fails?
+		// throw FITSexception(errormsg(status));
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "close FITS file %s",
 		filename.c_str());
@@ -129,7 +130,6 @@ ImageMetadata	FITSfile::getAllMetadata() const {
  * \param filename	name of the file to read the image from
  */
 FITSinfileBase::FITSinfileBase(const std::string& filename)
-	throw (FITSexception)
 	: FITSfile(filename, 0, 0, 0) {
 	int	status = 0;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "open FITS file '%s'",
@@ -180,7 +180,7 @@ FITSinfileBase::FITSinfileBase(const std::string& filename)
 /**
  * \brief Read the raw data
  */
-void	*FITSinfileBase::readdata() throw (FITSexception) {
+void	*FITSinfileBase::readdata() {
 	int	typesize = 0;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "reading an image with image type %d",
 		imgtype);
@@ -289,7 +289,7 @@ static bool	isStandardComment(const FITShdu& hdu) {
  * PCOUNT, GCOUNT, XTENSION are ignored, as defined in the ignored
  * function.
  */
-void	FITSinfileBase::readkeys() throw (FITSexception) {
+void	FITSinfileBase::readkeys() {
 	int	status = 0;
 	int	keynum = 1;
 	char	keyname[100];
@@ -354,7 +354,7 @@ std::string	FITSinfileBase::getHeader(const std::string& key) const {
  * \brief Create a FITS file for writing
  */
 FITSoutfileBase::FITSoutfileBase(const std::string &filename,
-	int pixeltype, int planes, int imgtype) throw (FITSexception)
+	int pixeltype, int planes, int imgtype) 
 	: FITSfile(filename, pixeltype, planes, imgtype) {
 	_precious = true;
 }
@@ -362,7 +362,7 @@ FITSoutfileBase::FITSoutfileBase(const std::string &filename,
 /**
  * \brief write the image format information to the header
  */
-void	FITSoutfileBase::write(const ImageBase& image) throw (FITSexception) {
+void	FITSoutfileBase::write(const ImageBase& image) {
 	// if the file exists but is not precious, and writable, unlink it
 	struct stat	sb;
 	int	rc = stat(filename.c_str(), &sb);
@@ -543,7 +543,7 @@ void	FITSoutfileBase::write(const ImageBase& image) throw (FITSexception) {
 /**
  * \brief Fix permissions on precious files
  */
-void	FITSoutfileBase::postwrite() throw (FITSexception) {
+void	FITSoutfileBase::postwrite() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "postwrite called");
 	// not precious, do nothing
 	if (!precious()) {
@@ -574,7 +574,6 @@ void	FITSoutfileBase::postwrite() throw (FITSexception) {
 #define FITS_OUT_CONSTRUCTOR(T, pix, planes, img)			\
 template<>								\
 FITSoutfile<T >::FITSoutfile(const std::string& filename)		\
-	throw (FITSexception)						\
 	: FITSoutfileBase(filename, pix, planes, img) {			\
 }
 
@@ -605,7 +604,6 @@ FITS_OUT_CONSTRUCTOR(YUYV<double>, TDOUBLE, 3, DOUBLE_IMG)
 #define FITS_OUT_CONSTRUCTOR_MULTI(T, pix, planes, img)			\
 template<>								\
 FITSoutfile<Multiplane<T, planes> >::FITSoutfile(const std::string& filename)		\
-	throw (FITSexception)						\
 	: FITSoutfileBase(filename, pix, planes, img) {			\
 }
 

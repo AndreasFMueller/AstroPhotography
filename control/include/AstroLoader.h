@@ -129,14 +129,13 @@ class	Repository {
 public:
 	const std::string&	path() const { return _path; }
 public:
-	Repository() throw (repository_error);
-	Repository(const std::string& path) throw (repository_error);
+	Repository();
+	Repository(const std::string& path);
 	long	numberOfModules() const;
 	std::vector<std::string>	moduleNames() const;
 	std::vector<ModulePtr>	modules() const;
 	bool	contains(const std::string& modulename) const;
-	ModulePtr	getModule(const std::string& modulename) 
-		throw (repository_error);
+	ModulePtr	getModule(const std::string& modulename) ;
 };
 
 /**

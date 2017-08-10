@@ -38,7 +38,7 @@ bool	ImageQueue::hasEntry() {
  * \param block		whether or not to wait for a new image to arrive
  *			in the queue
  */
-ImageQueueEntry	ImageQueue::getEntry(bool block) throw (EmptyQueue) {
+ImageQueueEntry	ImageQueue::getEntry(bool block) {
 	std::unique_lock<std::mutex>	lock(mutex);
 	while (true) {
 		if (queue.size() > 0) {

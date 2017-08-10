@@ -178,8 +178,7 @@ protected:
 	uint8_t	bdescriptorsubtype(const void *data) const;
 public:
 	UVCDescriptorFactory(Device& device);
-	virtual USBDescriptorPtr	descriptor(const void *data, int length)
-		throw(std::length_error, UnknownDescriptorError);
+	virtual USBDescriptorPtr	descriptor(const void *data, int length);
 	using DescriptorFactory::descriptor; // unhide
 };
 
@@ -200,8 +199,7 @@ protected:
 	USBDescriptorPtr	header(const void *data, int length);
 public:
 	VideoControlDescriptorFactory(Device& device);
-	virtual USBDescriptorPtr	descriptor(const void *data, int length)
-		throw(std::length_error, UnknownDescriptorError);
+	virtual USBDescriptorPtr	descriptor(const void *data, int length);
 	using DescriptorFactory::descriptor; // unhide
 };
 
@@ -224,8 +222,7 @@ class VideoStreamingDescriptorFactory : public UVCDescriptorFactory {
 	VideoStreamingDescriptorFactory(const VideoStreamingDescriptorFactory& other);
 public:
 	VideoStreamingDescriptorFactory(Device& device);
-	virtual USBDescriptorPtr	descriptor(const void *data, int length)
-		throw(std::length_error, UnknownDescriptorError);
+	virtual USBDescriptorPtr	descriptor(const void *data, int length);
 	using DescriptorFactory::descriptor; // unhide
 };
 
@@ -251,7 +248,7 @@ public:
 	uint16_t	wTotalLength() const;
 	uint32_t	dwClockFrequency() const;
 	uint8_t		bInCollection() const;
-	uint8_t		baInterface(int index) const throw(std::range_error);
+	uint8_t		baInterface(int index) const;
 	virtual	std::string	toString() const;
 
 	// access to the units
@@ -1297,20 +1294,17 @@ public:
 	uint32_t	maxpayloadtransfersize;
 public:
 	// constructors
-	UVCCamera(Device& device, bool force = false) throw(USBError);
+	UVCCamera(Device& device, bool force = false);
 	~UVCCamera();
 
 	// accessors to the video streaming interfaces
 private:
-	size_t		streamingInterfaceIndex(size_t interfacenumber) const
-		throw(std::range_error);
+	size_t		streamingInterfaceIndex(size_t interfacenumber) const;
 	void	getCur(uint8_t interface);
 public:
 	size_t	numberVideoStreamingInterfaces() const;
-	const USBDescriptorPtr&	operator[](size_t interfacenumber) const
-		throw(std::range_error);
-	USBDescriptorPtr&	operator[](size_t interfacenumber)
-		throw(std::range_error);
+	const USBDescriptorPtr&	operator[](size_t interfacenumber) const;
+	USBDescriptorPtr&	operator[](size_t interfacenumber);
 
 	// access to format and frame descriptors
 	USBDescriptorPtr	getHeaderDescriptor(uint8_t interfacenumber);
@@ -1321,11 +1315,10 @@ public:
 
 	// selecting format and frame
 	uint32_t	minFrameInterval(uint8_t interfacenumber,
-		uint8_t format, uint8_t frame) throw(std::range_error,USBError);
+		uint8_t format, uint8_t frame);
 	void	selectFormatAndFrame(uint8_t interfacenumber,
-			uint8_t format, uint8_t frame) throw(USBError);
-	std::pair<uint8_t, uint8_t>	getFormatAndFrame(uint8_t interfacenumber)
-		throw(USBError);
+			uint8_t format, uint8_t frame);
+	std::pair<uint8_t, uint8_t>	getFormatAndFrame(uint8_t interfacenumber);
 
 	// alternate setting selection for transfer
 private:
@@ -1571,7 +1564,7 @@ class UVCBulkTransfer : public Transfer {
 	libusb_transfer	**transfers;
 	unsigned char	**buffers;
 private:
-        virtual void    submit(libusb_device_handle *devhandle) throw(USBError);
+        virtual void    submit(libusb_device_handle *devhandle);
 public:
 	std::vector<FramePtr>	frames;
 	std::list<std::string>	packets;
@@ -1599,7 +1592,7 @@ class UVCIsochronousTransfer : public Transfer {
 	libusb_transfer	**transfers;
 	unsigned char	**buffers;
 private:
-        virtual void    submit(libusb_device_handle *devhandle) throw(USBError);
+        virtual void    submit(libusb_device_handle *devhandle);
 public:
 	std::vector<FramePtr>	frames;
 	std::list<std::string>	packets;

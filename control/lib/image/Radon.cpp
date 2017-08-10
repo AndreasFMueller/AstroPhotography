@@ -99,6 +99,7 @@ public:
 			deltas += scalar(d, 1);
 			return ImagePoint(point.x() + d, point.y() + 1);
 		}
+		throw std::runtime_error("bad direction");
 	}
 	typedef std::pair<ImagePoint, ImagePoint>	pointpair;
 	pointpair	endpoints(double s, const ImageSize& size) const;

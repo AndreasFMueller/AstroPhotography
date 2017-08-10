@@ -77,7 +77,7 @@ EndpointDescriptorPtr	InterfaceDescriptor::operator[](size_t index) const {
 	return endpointlist[index];
 }
 
-void	InterfaceDescriptor::altSetting() throw(USBError) {
+void	InterfaceDescriptor::altSetting() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "select alt setting %d on interface %d",
 		bAlternateSetting(), bInterfaceNumber());
 	dev.setInterfaceAltSetting(bInterfaceNumber(), bAlternateSetting());
@@ -180,11 +180,11 @@ InterfaceDescriptorPtr&	Interface::operator[](size_t index) {
 	return altsettingvector[index];
 }
 
-void	Interface::claim() throw(USBError) {
+void	Interface::claim() {
 	dev.claimInterface(interfaceNumber());
 }
 
-void	Interface::release() throw(USBError) {
+void	Interface::release() {
 	dev.releaseInterface(interfaceNumber());
 }
 
@@ -216,7 +216,7 @@ bool	Interface::kernelDriverActive() const {
  * If a kernel driver is active, then this method detaches it. When the
  * Interface is deallocated, then the kernel driver is reattached.
  */
-void	Interface::detachKernelDriver() throw(USBError) {
+void	Interface::detachKernelDriver() {
 	if (kernelDriverActive()) {
 		reattach = true;
 	} else {
@@ -225,7 +225,7 @@ void	Interface::detachKernelDriver() throw(USBError) {
 	dev.detachKernelDriver(interfaceNumber());
 }
 
-void	Interface::attachKernelDriver() const throw(USBError) {
+void	Interface::attachKernelDriver() const {
 	dev.attachKernelDriver(interfaceNumber());
 }
 
