@@ -24,6 +24,12 @@ Guiding:
       - reservation of relevant devices during calibraiton and guiding
       - during guiding, should we introduce a damping factor to prevent 
 	oscillations at the price of somewhat slower corrections?
+      - Preparation of calibration, in particular computation of the grid
+	constant should happen earlier, so that we can throw a useful
+	exception already in the startCalibration call.
+      - All calls should test whether the instrument is really available
+	and throw a useful exception for the user (particularly important
+	for calls via ICE)
 
 Focusing:
       - FWHM does not work reliably

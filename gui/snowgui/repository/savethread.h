@@ -28,7 +28,7 @@ public:
 	~downloadstatus() {
 	}
 	downloadstatus(const downloadstatus& other)
-		: _reponame(other._reponame), _imageid(other._imageid) {
+		: QObject(), _reponame(other._reponame), _imageid(other._imageid) {
 	}
 };
 

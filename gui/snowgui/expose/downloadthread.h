@@ -55,7 +55,8 @@ public:
 	downloaditem() : _imageid(-1) { }
 
 	downloaditem(const downloaditem& other)
-		: _imageid(other._imageid), _reponame(other._reponame),
+		: QObject(),
+		  _imageid(other._imageid), _reponame(other._reponame),
 		  _targetdirectory(other._targetdirectory),
 		  _targetfile(other._targetfile) {
 	}

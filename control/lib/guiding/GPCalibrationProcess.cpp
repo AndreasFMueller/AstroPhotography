@@ -370,6 +370,19 @@ double	GPCalibrationProcess::gridconstant(double focallength,
 			"grid constant %.1f too small, using 5", gridconstant);
 		gridconstant = 5;
 	}
+	if (gridconstant > 60) {
+		std::string	msg = stringprintf(
+				"grid constant %.1f is excessive",
+				gridconstant);
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw std::runtime_error(msg);
+	}
+	if (gridconstant > 15) {
+		debug(LOG_ERR, DEBUG_LOG, 0,
+			"grid constant %.1f is rather large, reduce to 15",
+			gridconstant);
+		gridconstant = 15;
+	}
 
 	return gridconstant;
 }

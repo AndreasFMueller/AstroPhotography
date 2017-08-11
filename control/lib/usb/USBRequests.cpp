@@ -127,7 +127,7 @@ std::string	RequestBase::payloadHex() const {
 			break;
 		case 8:
 			out << " ";
-			__attribute__ ((fallthrough));
+			[[fallthrough]];
 		default:
 			out << " ";
 		}

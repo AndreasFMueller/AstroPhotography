@@ -84,6 +84,9 @@ class AvahiResolver : public ServiceResolver {
 	// to signal completion of the resolution
 	std::shared_ptr<std::future<bool> >	fut;
 	std::shared_ptr<std::promise<bool> >	prom;
+	// prevent copying
+	AvahiResolver(const AvahiResolver& other);
+	AvahiResolver&	operator=(const AvahiResolver& other);
 public:
 	AvahiResolver(const ServiceKey& key, AvahiClient *client);
 	~AvahiResolver();

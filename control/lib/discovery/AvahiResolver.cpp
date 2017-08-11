@@ -16,11 +16,12 @@ namespace discover {
 
 AvahiResolver::AvahiResolver(const ServiceKey& key, AvahiClient *client)
 	: ServiceResolver(key), _client(client) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "AvahiResolver constructed for %s",
-		key.toString().c_str());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "AvahiResolver constructed for %s at %p",
+		key.toString().c_str(), this);
 }
 
 AvahiResolver::~AvahiResolver() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "resolver %p goes out of scope", this);
 }
 
 /**
@@ -44,9 +45,15 @@ static void	resolve_callback(
 			AvahiLookupResultFlags flags,
 			void* userdata) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0,
-		"resolver callback event=%s, name=%s, domain=%s, host_name=%s",
+		"resolver callback event=%s, name=%s, domain=%s, host_name=%s, "
+		"userdata=%p",
 		(event == AVAHI_RESOLVER_FOUND) ? "FOUND" : "FAILURE",
-		name, domain, host_name);
+		name, domain, host_name, userdata);
+	if (NULL == userdata) {
+		debug(LOG_ERR, DEBUG_LOG, 0,
+			"no resolver provided in userdata, giving up");
+		return;
+	}
 	AvahiResolver	*ares = ((AvahiResolver *)userdata);
 	ares->resolve_callback(resolver, interface, protocol, event,
 		name, type, domain, host_name, address, port, txt, flags);
@@ -112,7 +119,7 @@ void	AvahiResolver::resolve_callback(
 	debug(LOG_DEBUG, DEBUG_LOG, 0,
 		"resolve_callback interface=%d protocol=%d, name=%s, type=%s, "
 		"domain=%s, host_name=%s",
-		interface, protocol, name, type, domain);
+		interface, protocol, name, type, domain, host_name);
 	if (event == AVAHI_RESOLVER_FAILURE) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "resolver failure");
 		return;
