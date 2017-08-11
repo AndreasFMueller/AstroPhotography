@@ -181,6 +181,31 @@ void	GuiderBase::callback(const astro::camera::CalibrationImageProgress& prog) {
 }
 
 /**
+ * \brief Callback for backlash measurement points
+ *
+ * This Callback sends backlash measurement points to monitors
+ */
+void	GuiderBase::callback(const BacklashPoint& point) {
+	// we cannot handle the case of termination here, because the state
+	// machine is not part of the base class (this should probably be
+	// changed) XXX
+
+	astro::callback::CallbackDataPtr data(new CallbackBacklashPoint(point));
+	_backlashcallback(data);
+}
+
+/**
+ * \brief Callback for backlash analysis results
+ *
+ * This callbacks informs the guider of changes in the backlash analysis
+ */
+void	GuiderBase::callback(const BacklashResult& result) {
+	astro::callback::CallbackDataPtr	data(
+		new CallbackBacklashResult(result));
+	_backlashcallback(data);
+}
+
+/**
  * \brief get a good measure for the pixel size of the CCD
  *
  * This method returns the average of the pixel dimensions, this will
