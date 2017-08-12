@@ -35,6 +35,8 @@ testcase_CPPFLAGS = -DTARGET=@SBIGTARGET@ @SBIGINCLUDE@
 testcase_LDFLAGS = @SBIGLDFLAGS@
 testcase_LDADD = @SBIGLIBRARY@
 
+
+
 endif
 
 sbig_la_SOURCES = SbigLocator.cpp utils.cpp SbigCamera.cpp SbigCcd.cpp \
@@ -46,3 +48,4 @@ sbig_la_LIBADD = ../../lib/libastro.la @SBIGLIBRARY@
 sbig_la_CPPFLAGS = -DTARGET=@SBIGTARGET@ @SBIGINCLUDE@
 
 endif
+

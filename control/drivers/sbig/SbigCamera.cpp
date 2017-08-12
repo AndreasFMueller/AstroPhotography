@@ -211,6 +211,9 @@ SbigCamera::SbigCamera(int usbno) : Camera(cameraname(usbno)) {
 		// ignore
 	}
 
+	// The following is completely wrong, I have no idea how we could
+	// get information about the external guide head from the library
+#if 0
 	// external tracking ccd, if present
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "querying external tracking CCD info");
 	try {
@@ -221,6 +224,7 @@ SbigCamera::SbigCamera(int usbno) : Camera(cameraname(usbno)) {
 	} catch (...) {
 		// ignore
 	}
+#endif
 
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "camera constructor complete");
 }
@@ -234,59 +238,75 @@ SbigCamera::SbigCamera(int usbno) : Camera(cameraname(usbno)) {
  */
 CcdInfo	SbigCamera::get_ccd_info(unsigned short request,
 		const std::string& basename, unsigned int ccdindex) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "query ccd %d for base %s", ccdindex,
+		basename.c_str());
+	if (ccdindex > 1) {
+		std::string	msg = stringprintf("cannot request ccd %d",
+			ccdindex);
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw std::logic_error(msg);
+	}
 	GetCCDInfoParams	ccdinfoparams;
 	GetCCDInfoResults0	ccdinforesult;
 	ccdinfoparams.request = request;
 	short	e = SBIGUnivDrvCommand(CC_GET_CCD_INFO, &ccdinfoparams,
 			&ccdinforesult);
 	if (e != CE_NO_ERROR) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "no imaging ccd");
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "no ccd");
 		throw SbigError(e);
-	} else {
-		// here we assume that the largest readout mode is
-		// delivered first, otherwise we would have to scan
-		// the readout modes for one with mode == 0 (RM_1X1)
-		ImageSize	ccdsize(ccdinforesult.readoutInfo[0].width,
-			ccdinforesult.readoutInfo[0].height);
-		DeviceName	ccdname(name(), DeviceName::Ccd, basename);
-		CcdInfo	ccd(ccdname, ccdsize, ccdindex);
-		long	w = ccdinforesult.readoutInfo[0].pixelWidth;
-		long	h = ccdinforesult.readoutInfo[0].pixelHeight;
-		ccd.pixelwidth(pixelsize(w));
-		ccd.pixelheight(pixelsize(h));
-		ccd.shutter(true);
-
-		// exposure time range
-		switch (cameraType) {
-		case STI_CAMERA:
-			ccd.minexposuretime(0.001);
-			break;
-		case STL_CAMERA:
-			ccd.minexposuretime(0.12);
-			break;
-		case STX_CAMERA:
-		case STT_CAMERA:
-		case STF_CAMERA:
-		default:
-			ccd.minexposuretime(0.1);
-			break;
-		}
-		ccd.maxexposuretime(3600);
-
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "found imageing ccd: %s",
-			ccd.toString().c_str());
-		for (int i = 0; i < ccdinforesult.readoutModes; i++) {
-			SbigBinningAdd(ccd, ccdinforesult.readoutInfo[i].mode);
-			debug(LOG_DEBUG, DEBUG_LOG, 0,
-				"mode[%d]: %d x %d (%04x)",
-				i, 
-				ccdinforesult.readoutInfo[i].width,
-				ccdinforesult.readoutInfo[i].height,
-				ccdinforesult.readoutInfo[i].mode);
-		}
-		ccd.shutter(true);
-		return ccd;
 	}
+
+	// make sure what we get is consistent
+	if (ccdinforesult.readoutModes > 20) {
+		std::string	msg = stringprintf("too many readout modes: %d",
+			ccdinforesult.readoutModes);
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw std::logic_error(msg);
+	}
+
+	// here we assume that the largest readout mode is
+	// delivered first, otherwise we would have to scan
+	// the readout modes for one with mode == 0 (RM_1X1)
+	ImageSize	ccdsize(ccdinforesult.readoutInfo[0].width,
+		ccdinforesult.readoutInfo[0].height);
+	DeviceName	ccdname(name(), DeviceName::Ccd, basename);
+	CcdInfo	ccd(ccdname, ccdsize, ccdindex);
+	long	w = ccdinforesult.readoutInfo[0].pixelWidth;
+	long	h = ccdinforesult.readoutInfo[0].pixelHeight;
+	ccd.pixelwidth(pixelsize(w));
+	ccd.pixelheight(pixelsize(h));
+	ccd.shutter(true);
+
+	// exposure time range
+	switch (cameraType) {
+	case STI_CAMERA:
+		ccd.minexposuretime(0.001);
+		break;
+	case STL_CAMERA:
+		ccd.minexposuretime(0.12);
+		break;
+	case STX_CAMERA:
+	case STT_CAMERA:
+	case STF_CAMERA:
+	default:
+		ccd.minexposuretime(0.1);
+		break;
+	}
+	ccd.maxexposuretime(3600);
+
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "found ccd: %s",
+		ccd.toString().c_str());
+	for (int i = 0; i < ccdinforesult.readoutModes; i++) {
+		SbigBinningAdd(ccd, ccdinforesult.readoutInfo[i].mode);
+		debug(LOG_DEBUG, DEBUG_LOG, 0,
+			"mode[%d]: %d x %d (%04x)",
+			i, 
+			ccdinforesult.readoutInfo[i].width,
+			ccdinforesult.readoutInfo[i].height,
+			ccdinforesult.readoutInfo[i].mode);
+	}
+	ccd.shutter(true);
+	return ccd;
 }
 
 /**

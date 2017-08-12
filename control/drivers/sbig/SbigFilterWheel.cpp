@@ -32,7 +32,12 @@ void	SbigFilterWheel::cfw(CFWParams *params, CFWResults *results,
 		const std::string& msg) {
 	SbigLock	lock;
 	camera.sethandle();
+	debug(LOG_DEBUG, DEBUG_LOG, 0,
+		"CFW command, model=%d, command=%d, param1=%lu, param2=%lu",
+		params->cfwModel, params->cfwCommand,
+		params->cfwParam1, params->cfwParam2);
 	short	e = SBIGUnivDrvCommand(CC_CFW, &params, &results);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "error code=%hd", e);
 	if (e != CE_NO_ERROR) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s: %s", msg.c_str(),
 			sbig_error(e).c_str());
@@ -69,6 +74,7 @@ void	SbigFilterWheel::init() {
  */
 void	SbigFilterWheel::wait() {
 	CFWParams	params;
+	memset(&params, 0, sizeof(params));
 	CFWResults	results;
 	params.cfwCommand = CFWC_QUERY;
 	params.cfwModel = CFWSEL_AUTO;
@@ -113,9 +119,11 @@ SbigFilterWheel::SbigFilterWheel(SbigCamera& _camera)
 
 	// find out what type of filter wheel we have
 	CFWParams	params;
+	memset(&params, 0, sizeof(params));
 	CFWResults	results;
 	params.cfwCommand = CFWC_OPEN_DEVICE;
 	params.cfwModel = CFWSEL_AUTO;
+	params.cfwParam1 = CFWPORT_COM1;
 	cfw(&params, &results, "cannot open filter wheel");
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "filter wheel version: %hu, "
 		"position: %hu, status %hu",
@@ -186,9 +194,10 @@ void	SbigFilterWheel::select(size_t filterindex) {
 	}
 #endif
 	CFWParams	params;
-	CFWResults	results;
+	memset(&params, 0, sizeof(params));
 	params.cfwCommand = CFWC_GOTO;
 	params.cfwModel = CFWSEL_AUTO;
+	CFWResults	results;
 	params.cfwParam1 = filterindex + 1;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "positioning on %hu", params.cfwParam1);
 	try {
@@ -221,9 +230,10 @@ FilterWheel::State	SbigFilterWheel::getState() {
 
 FilterWheel::State	SbigFilterWheel::state() {
 	CFWParams	params;
-	CFWResults	results;
+	memset(&params, 0, sizeof(params));
 	params.cfwCommand = CFWC_QUERY;
 	params.cfwModel = CFWSEL_AUTO;
+	CFWResults	results;
 	try {
 		cfw(&params, &results, "cannot open filter wheel");
 	} catch (...) {

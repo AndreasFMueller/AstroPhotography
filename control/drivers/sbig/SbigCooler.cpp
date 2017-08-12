@@ -62,7 +62,7 @@ void	SbigCooler::query_temperature_status(
  * \brief Query the set temperature
  */
 float	SbigCooler::getSetTemperature() {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieve set temperature form %hd",
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieve set temperature from %hd",
 		camera.handle);
 
 	QueryTemperatureStatusResults2	results;
@@ -104,7 +104,7 @@ void	SbigCooler::set_temperature_regulation2(
 	SbigLock	lock;
 	camera.sethandle();
 	short	e = SBIGUnivDrvCommand(CC_SET_TEMPERATURE_REGULATION2,
-		&params, NULL);
+		params, NULL);
 	if (e != CE_NO_ERROR) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "cannot control temperature "
 			"regulation: %s", sbig_error(e).c_str());

@@ -20,7 +20,7 @@ void	SbigDevice::query_command_status(QueryCommandStatusParams *params,
 	SbigLock	lock;
 	camera.sethandle();
         short   e = SBIGUnivDrvCommand(CC_QUERY_COMMAND_STATUS,
-                &params, &results);
+                params, results);
         if (e != CE_NO_ERROR) {
                 debug(LOG_ERR, DEBUG_LOG, 0, "cannot query command status: %s",
                         sbig_error(e).c_str());

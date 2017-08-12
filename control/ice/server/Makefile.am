@@ -107,6 +107,10 @@ snowstar_LDADD = -L$(top_builddir)/lib -lastro \
 snowstar_CPPFLAGS = -I$(top_builddir)/ice/include -I$(top_builddir)/ice/slice \
 	@ICEINCLUDE@ -DPIDDIR=\"@PIDDIR@\"
 
+COMMONFLAGS = --debug --foreground --name=$${servername} --base=`pwd`/images \
+	--database=`pwd`/testdb.db --config=`pwd`/testdb.db
+EFENCE = EF_PROTECT_FREE=1 EF_FILL=255
+
 test:	snowstar
 	if [ -r servername ]; \
 	then \
@@ -114,9 +118,7 @@ test:	snowstar
 	else \
 		servername=server; \
 	fi; \
-	./snowstar --debug --base=`pwd`/images --database=`pwd`/testdb.db \
-		--config=`pwd`/testdb.db --name=$${servername} --foreground \
-		2>&1 | tee test.log
+	$(EFENCE) ./snowstar $(COMMONFLAGS) 2>&1 | tee test.log
 #		--lines=100 --files=10 --logfile=test.log
 
 testsun:	snowstar
@@ -126,9 +128,7 @@ testsun:	snowstar
 	else \
 		servername=server; \
 	fi; \
-	STARCONTENT=SUN ./snowstar --debug --base=`pwd`/images \
-		--database=`pwd`/testdb.db --config=testdb.db \
-		--name=$${servername} --foreground 2>&1 | tee test.log
+	STARCONTENT=SUN ./snowstar $(COMMONFLAGS) 2>&1 | tee test.log
 
 testplanet:	snowstar
 	if [ -r servername ]; \
@@ -137,9 +137,7 @@ testplanet:	snowstar
 	else \
 		servername=server; \
 	fi; \
-	STARCONTENT=PLANET ./snowstar --debug --base=`pwd`/images \
-		--database=`pwd`/testdb.db --config=testdb.db \
-		--name=$${servername} --foreground 2>&1 | tee test.log
+	STARCONTENT=PLANET ./snowstar $(COMMONFLAGS) 2>&1 | tee test.log
 
 valgrind:
 	if [ -r servername ]; \
@@ -149,7 +147,4 @@ valgrind:
 		servername=server; \
 	fi; \
 	valgrind --redzone-size=1024 --trace-children=yes --log-file=valgrind.log \
-		./snowstar --debug --base=`pwd`/images \
-		--database=`pwd`/testdb.db \
-		--config=`pwd`/testdb.db --name=$${servername} --foreground \
-		2>&1 | tee test.log
+		./snowstar $(COMMONFLAGS) 2>&1 | tee test.log

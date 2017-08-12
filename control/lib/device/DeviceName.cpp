@@ -47,6 +47,8 @@ DeviceName::DeviceName(const device_type& type,
 
 DeviceName::DeviceName(const DeviceName& name, const device_type& type,
 	const std::string& unitname) : _type(type) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "copy %d device name components",
+		name.size());
 	std::copy(name.begin(), name.end(), back_inserter(*this));
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "unit name = %s", unitname.c_str());
 	push_back(unitname);

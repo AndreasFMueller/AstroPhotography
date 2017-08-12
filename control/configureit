@@ -142,9 +142,10 @@ else
 fi
 case ${systemtype} in
 Linux)
+	LDFLAGS="-lefence"
 	CXXFLAGS="${CFLAGS} --std=c++11"
-	export CXXFLAGS
-	./configure --prefix=${prefix} ${commonflags} ${sbigoption}
+	export LDFLAGS CXXFLAGS
+	./configure --prefix=${prefix} ${commonflags} ${sbigoption} --enable-unittests
 	;;
 Debian)
 	CXXFLAGS="${CXXFLAGS} --std=c++11"
@@ -154,7 +155,7 @@ Debian)
 		${sbigoption}
 	;;
 SuSE)
-	LDFLAGS="-L/usr/local/lib64 -lusb-1.0"
+	LDFLAGS="-L/usr/local/lib64 -lusb-1.0 -lefence"
 	if [ -d /usr/include/unicap ]
 	then
 		CFLAGS="${CFLAGS} -I/usr/include/unicap"

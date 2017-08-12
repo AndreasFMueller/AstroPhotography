@@ -87,8 +87,9 @@ ServiceObject	AvahiResolver::do_resolve() {
 			avahi_strerror(avahi_client_errno(_client)));
 		throw std::runtime_error("cannot construct a resolver");
 	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "resolver created at %p", resolver);
 
-	// now wat for the resolver to produce a result
+	// now wait for the resolver to produce a result
 	fut->get();
 	fut.reset();
 
