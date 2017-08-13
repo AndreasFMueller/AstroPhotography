@@ -112,39 +112,41 @@ COMMONFLAGS = --debug --foreground --name=$${servername} --base=`pwd`/images \
 EFENCE = EF_PROTECT_FREE=1 EF_FILL=255
 
 test:	snowstar
-	if [ -r servername ]; \
-	then \
-		servername=`cat servername`; \
-	else \
-		servername=server; \
-	fi; \
+	if [ -r servername ];						\
+	then								\
+		servername=`cat servername`;				\
+	else								\
+		servername=server;					\
+	fi;								\
 	$(EFENCE) ./snowstar $(COMMONFLAGS) 2>&1 | tee test.log
+
 #		--lines=100 --files=10 --logfile=test.log
 
 testsun:	snowstar
-	if [ -r servername ]; \
-	then \
-		servername=`cat servername`; \
-	else \
-		servername=server; \
-	fi; \
+	if [ -r servername ];						\
+	then								\
+		servername=`cat servername`;				\
+	else								\
+		servername=server;					\
+	fi;								\
 	STARCONTENT=SUN ./snowstar $(COMMONFLAGS) 2>&1 | tee test.log
 
 testplanet:	snowstar
-	if [ -r servername ]; \
-	then \
-		servername=`cat servername`; \
-	else \
-		servername=server; \
-	fi; \
+	if [ -r servername ];						\
+	then								\
+		servername=`cat servername`;				\
+	else								\
+		servername=server;					\
+	fi;								\
 	STARCONTENT=PLANET ./snowstar $(COMMONFLAGS) 2>&1 | tee test.log
 
 valgrind:
-	if [ -r servername ]; \
-	then \
-		servername=`cat servername`; \
-	else \
-		servername=server; \
-	fi; \
-	valgrind --redzone-size=1024 --trace-children=yes --log-file=valgrind.log \
+	if [ -r servername ];						\
+	then								\
+		servername=`cat servername`;				\
+	else								\
+		servername=server;					\
+	fi;								\
+	valgrind --redzone-size=1024 --trace-children=yes 		\
+		--log-file=valgrind.log 				\
 		./snowstar $(COMMONFLAGS) 2>&1 | tee test.log

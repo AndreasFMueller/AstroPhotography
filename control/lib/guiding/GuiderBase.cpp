@@ -186,9 +186,17 @@ void	GuiderBase::callback(const astro::camera::CalibrationImageProgress& prog) {
  * This Callback sends backlash measurement points to monitors
  */
 void	GuiderBase::callback(const BacklashPoint& point) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "new point: %s",
+		point.toString().c_str());
+	_backlashdata.points.push_back(point);
 	// we cannot handle the case of termination here, because the state
 	// machine is not part of the base class (this should probably be
-	// changed) XXX
+	// changed) 
+	if (point.id < 0) {
+		_state.endBacklash();
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "set the state back: %s",
+			Guide::state2string(_state.state()).c_str());
+	}
 
 	astro::callback::CallbackDataPtr data(new CallbackBacklashPoint(point));
 	_backlashcallback(data);
@@ -200,6 +208,9 @@ void	GuiderBase::callback(const BacklashPoint& point) {
  * This callbacks informs the guider of changes in the backlash analysis
  */
 void	GuiderBase::callback(const BacklashResult& result) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "new result: %s",
+		result.toString().c_str());
+	_backlashdata.result = result;
 	astro::callback::CallbackDataPtr	data(
 		new CallbackBacklashResult(result));
 	_backlashcallback(data);
@@ -221,6 +232,12 @@ double  GuiderBase::pixelsize() const {
 	return _pixelsize;
 }
 
+/**
+ * \brief Retrieve the state
+ */
+Guide::state    GuiderBase::state() {
+	return _state.state();
+}
 
 } // namespace guiding
 } // namespace astro

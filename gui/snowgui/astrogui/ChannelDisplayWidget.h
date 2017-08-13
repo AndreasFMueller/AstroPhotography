@@ -81,6 +81,12 @@ public:
 	void	setVscale(double v) { _vscale = v; }
 
 private:
+	bool	_drawstddev;
+public:
+	bool	drawstddev() const { return _drawstddev; }
+	void	drawstddev(bool d) { _drawstddev = d; }
+
+private:
 	void	draw(double notbefore, double notafter);
 
 public: 
@@ -94,6 +100,8 @@ public:
 	void	paintEvent(QPaintEvent *event);
 
 	void	clearData();
+
+
 
 public slots:
 	void	add(double time, std::vector<double> values);

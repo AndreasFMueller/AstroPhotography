@@ -541,6 +541,7 @@ void	imagercontrollerwidget::statusUpdate() {
 	case snowstar::GuiderDARKACQUIRE:
 	case snowstar::GuiderFLATACQUIRE:
 	case snowstar::GuiderIMAGING:
+	case snowstar::GuiderBACKLASH:
 		ui->captureButton->setEnabled(false);
 		break;
 	}

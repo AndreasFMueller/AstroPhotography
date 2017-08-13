@@ -108,6 +108,7 @@ void	darkwidget::statusUpdate() {
 	case snowstar::GuiderGUIDING:
 	case snowstar::GuiderFLATACQUIRE:
 	case snowstar::GuiderIMAGING:
+	case snowstar::GuiderBACKLASH:
 		ui->acquireButton->setEnabled(false);
 		break;
 	}

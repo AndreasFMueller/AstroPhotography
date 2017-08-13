@@ -20,6 +20,7 @@ ChannelDisplayWidget::ChannelDisplayWidget(QWidget *parent) : QWidget(parent) {
 	_timescale = 1;
 	_vscale = 1;
 	_autorange = true;
+	drawstddev(true);
 }
 
 /**
@@ -137,22 +138,27 @@ void	ChannelDisplayWidget::draw(double notbefore, double notafter) {
 	// y coordinates are coputed as y * yscale + height() / 2
 	double	yscale = _vscale * (height() - 2) / (2 * M);
 
-	// compute standard deviations and means
-	std::vector<double>	mean = _channels.mean(notbefore, notafter);
-	std::vector<double>	stddev = _channels.stddev(notbefore, notafter);
+	if (drawstddev()) {
+		// compute standard deviations and means
+		std::vector<double>	mean
+			= _channels.mean(notbefore, notafter);
+		std::vector<double>	stddev
+			= _channels.stddev(notbefore, notafter);
 
-	// construct color rectangles
-	ColorRectangles	rectangles;
-	for (size_t i = 0; i < mean.size(); i++) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "mean[%d] = %f, stddev[%d] = %f",
-			i, mean[i], i, stddev[i]);
+		// construct color rectangles
+		ColorRectangles	rectangles;
+		for (size_t i = 0; i < mean.size(); i++) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0,
+				"mean[%d] = %f, stddev[%d] = %f",
+				i, mean[i], i, stddev[i]);
 		double	h  = height() / 2 - 1;
-		double	bottom = h - (mean[i] - stddev[i]) * yscale;
-		double	top = h - (mean[i] + stddev[i]) * yscale;
-		Color	color = Color(_colors[i]) * 0.1;
-		rectangles.addRange(top, bottom, color);
+			double	bottom = h - (mean[i] - stddev[i]) * yscale;
+			double	top = h - (mean[i] + stddev[i]) * yscale;
+			Color	color = Color(_colors[i]) * 0.1;
+			rectangles.addRange(top, bottom, color);
+		}
+		rectangles.draw(painter, width());
 	}
-	rectangles.draw(painter, width());
 
 	// prepare a pen
 	QPen	pen(Qt::SolidLine);

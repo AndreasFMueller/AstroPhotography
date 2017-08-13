@@ -394,7 +394,8 @@ module snowstar {
 		/**
 		 * \brief control the backlash characterization process
 		 */
-		void	startBacklash(double interval) throws BadState;
+		void	startBacklash(double interval, BacklashDirection dir)
+				throws BadState;
 		void	stopBacklash() throws BadState;
 		BacklashData	getBacklashData() throws BadState, NotFound;
 

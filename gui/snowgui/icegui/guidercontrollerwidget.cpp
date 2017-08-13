@@ -72,7 +72,13 @@ guidercontrollerwidget::guidercontrollerwidget(QWidget *parent)
 	connect(_trackingmonitorimage, SIGNAL(imageUpdated()),
 		this, SLOT(imageUpdated()));
 
+	connect(ui->decBacklashButton, SIGNAL(clicked()),
+		this, SLOT(backlashDECClicked()));
+	connect(ui->raBacklashButton, SIGNAL(clicked()),
+		this, SLOT(backlashRAClicked()));
+
 	// some other fields
+	_backlashDialog = NULL;
 	_previousstate = snowstar::GuiderIDLE;
 	statusTimer.setInterval(100);
 	connect(&statusTimer, SIGNAL(timeout()), this, SLOT(statusUpdate()));
@@ -365,6 +371,7 @@ void	guidercontrollerwidget::statusUpdate() {
 	case snowstar::GuiderIMAGING:
 	case snowstar::GuiderDARKACQUIRE:
 	case snowstar::GuiderFLATACQUIRE:
+	case snowstar::GuiderBACKLASH:
 		ui->guideButton->setText(QString("Guide"));
 		ui->guideButton->setEnabled(false);
 	}
@@ -536,5 +543,38 @@ void	guidercontrollerwidget::imageUpdated() {
 	ui->trackingLabel->setText(QString(label.c_str()));
 }
 
+/**
+ * \brief What to do to characterize RA backlash
+ */
+void	guidercontrollerwidget::backlashRAClicked() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "backlash RA clicked");
+	if (!_backlashDialog) {
+		_backlashDialog = new BacklashDialog();
+		_backlashDialog->show();
+		_backlashDialog->guider(_guider);
+	} else {
+		_backlashDialog->raise();
+		QApplication::setActiveWindow(_backlashDialog);
+	}
+	_backlashDialog->direction(snowstar::BacklashRA);
+	_backlashDialog->setWindowTitle("RA Backlash");
+}
+
+/**
+ * \brief What to do to characterize DEC backlash
+ */
+void	guidercontrollerwidget::backlashDECClicked() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "backlash DEC clicked");
+	if (!_backlashDialog) {
+		_backlashDialog = new BacklashDialog();
+		_backlashDialog->guider(_guider);
+		_backlashDialog->show();
+	} else {
+		_backlashDialog->raise();
+		QApplication::setActiveWindow(_backlashDialog);
+	}
+	_backlashDialog->direction(snowstar::BacklashDEC);
+	_backlashDialog->setWindowTitle("DEC Backlash");
+}
 
 } // namespade snowgui

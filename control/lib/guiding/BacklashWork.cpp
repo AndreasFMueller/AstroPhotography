@@ -46,7 +46,7 @@ void	BacklashWork::move(double interval) {
 		}
 		break;
 	}
-	Timer::sleep(interval);
+	Timer::sleep(i);
 }
 
 /**
@@ -54,10 +54,20 @@ void	BacklashWork::move(double interval) {
  */
 void	BacklashWork::main(astro::thread::Thread<BacklashWork>& thread) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "start backlash main method");
+	double	starttime = Timer::gettime();
 	try {
+		// get an image (need a imager for this)
+		_imager.startExposure(_exposure);
+		_imager.wait();
+		ImagePtr	image = _imager.getImage();
+		
+		// find the offset
+		Point	originpoint = (*_tracker)(image);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "point = %s",
+			originpoint.toString().c_str());
+
 		// setup of the common variables
 		std::vector<BacklashPoint>	data;
-		double	starttime = Timer::gettime();
 		int	counter = 0;
 		move(-_interval);
 
@@ -70,13 +80,13 @@ void	BacklashWork::main(astro::thread::Thread<BacklashWork>& thread) {
 			ImagePtr	image = _imager.getImage();
 			
 			// find the offset
-			Point	imagepoint = (*_tracker)(image);
+			Point	imagepoint = (*_tracker)(image) - originpoint;
 			debug(LOG_DEBUG, DEBUG_LOG, 0, "point = %s",
 				imagepoint.toString().c_str());
 
 			// convert to a BacklashPoint
 			BacklashPoint	backlashpoint;
-			backlashpoint.id = counter++;
+			backlashpoint.id = counter;
 			backlashpoint.time = Timer::gettime() - starttime;
 			backlashpoint.xoffset = imagepoint.x();
 			backlashpoint.yoffset = imagepoint.y();
@@ -89,7 +99,7 @@ void	BacklashWork::main(astro::thread::Thread<BacklashWork>& thread) {
 			point(backlashpoint);
 
 			// if we have enough data, create a new analysis
-			if (data.size() >= 5) {
+			if (data.size() >= 8) {
 				BacklashAnalysis	analysis(_direction);
 				BacklashResult	r = analysis(data);
 				result(r);
@@ -105,19 +115,21 @@ void	BacklashWork::main(astro::thread::Thread<BacklashWork>& thread) {
 			} else {
 				move(+_interval);
 			}
+			counter++;
 		} while (!thread.terminate());
-
-		// we should tell via a callback, that the sequence has ended,
-		// maybe with a point with negative id?
-		BacklashPoint	backlashpoint;
-		backlashpoint.id = -1;
-		backlashpoint.time = starttime;
-		point(backlashpoint);
 	} catch (const std::exception& x) {
 		debug(LOG_ERR, DEBUG_LOG, 0,
 			"BacklashWork::main terminated by exception: %s",
 			x.what());
 	}
+
+	// we should tell via a callback, that the sequence has ended,
+	// maybe with a point with negative id?
+	BacklashPoint	backlashpoint;
+	backlashpoint.id = -1;
+	backlashpoint.time = starttime;
+	point(backlashpoint);
+
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "BacklashWork::main terminates");
 }
 
@@ -125,6 +137,7 @@ void	BacklashWork::main(astro::thread::Thread<BacklashWork>& thread) {
  * \brief Method to send a single point information to the callback
  */
 void	BacklashWork::point(const BacklashPoint& bp) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "add a BacklashPoint");
 	if (_callback) {
 		CallbackBacklashPointPtr p(new CallbackBacklashPoint(bp));
 		(*_callback)(p);
@@ -135,6 +148,7 @@ void	BacklashWork::point(const BacklashPoint& bp) {
  * \brief Method to send the analysis results to the callback
  */
 void	BacklashWork::result(const BacklashResult& br) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "add a BacklashResult");
 	if (_callback) {
 		CallbackBacklashResultPtr p(new CallbackBacklashResult(br));
 		(*_callback)(p);

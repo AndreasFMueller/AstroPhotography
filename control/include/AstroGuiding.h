@@ -639,6 +639,7 @@ public:
 	double	f, b;			// forward/backward 
 	double	offset, drift;
 	std::string	toString() const;
+	void	clear();
 	double	operator()(const int k[4], const BacklashPoint& p);
 };
 typedef callback::CallbackDataEnvelope<BacklashResult>	CallbackBacklashResult;
@@ -665,6 +666,74 @@ typedef callback::CallbackDataEnvelope<BacklashResult>	CallbackBacklashResult;
 typedef std::shared_ptr<CallbackBacklashResult>	CallbackBacklashResultPtr;
 
 /**
+ * \brief enumeration type for the state of the guider
+ */
+class Guide {
+public:
+	typedef enum {
+		unconfigured, idle, calibrating, calibrated, guiding,
+		darkacquire, flatacquire, imaging, backlash
+	} state;
+static std::string	state2string(state s);
+static state	string2state(const std::string& s);
+};
+
+
+/**
+ * \brief State machine class for the Guider
+ *
+ * The state machine ensures that any change is only accepted only if
+ * all prerequisites are met.
+ */
+class GuiderStateMachine {
+	Guide::state	_state;
+	const char	*statename() const;
+public:
+	const Guide::state&	state() const { return _state; }
+	operator Guide::state () { return _state; }
+	operator Guide::state () const { return _state; }
+
+	// construct the state machine
+	GuiderStateMachine() : _state(Guide::unconfigured) { }
+
+	// methods to find out whether we can accept a configuration, or
+	// start calibration or guiding
+	bool	canConfigure() const;
+	bool	canStartGuiding() const;
+	bool	canStartCalibrating() const;
+	bool	canAcceptCalibration() const;
+	bool	canFailCalibration() const;
+	bool	canStopGuiding() const;
+	bool	canStartDarkAcquire() const;
+	bool	canEndDarkAcquire() const;
+	bool	canStartFlatAcquire() const;
+	bool	canEndFlatAcquire() const;
+	bool	canStartImaging() const;
+	bool	canEndImaging() const;
+	bool	canStartBacklash() const;
+	bool	canEndBacklash() const;
+
+	// state change methods
+	void	configure();
+	void	startCalibrating();
+	void	addCalibration();
+	void	failCalibration();
+	void	startGuiding();
+	void	stopGuiding();
+private:
+	Guide::state	_prestate;
+public:
+	void	startDarkAcquire();
+	void	endDarkAcquire();
+	void	startFlatAcquire();
+	void	endFlatAcquire();
+	void	startImaging();
+	void	endImaging();
+	void	startBacklash();
+	void	endBacklash();
+};
+
+/**
  * \brief Base class for the guider
  *
  * This class provides everything that the a calibration or guiding process
@@ -674,6 +743,10 @@ typedef std::shared_ptr<CallbackBacklashResult>	CallbackBacklashResultPtr;
  * It also includes all the callbacks and methods the send data to them.
  */
 class GuiderBase : public GuiderName {
+protected:
+	GuiderStateMachine	_state;
+public:
+	virtual Guide::state	state();
 	// stuff related to the imager
 private:
 	camera::Imager	_imager;
@@ -751,6 +824,12 @@ public:
 	// virtual interface
 	virtual void	saveCalibration() = 0;
 	virtual void	forgetCalibration() = 0;
+
+	// handle the backlash data
+protected:
+	BacklashData	_backlashdata;
+public:
+	const BacklashData&	backlashData() const { return _backlashdata; }
 };
 
 /**
@@ -889,74 +968,6 @@ Point	ControlDevice<camera::AdaptiveOptics,
 			double Deltat, bool stepping);
 
 /**
- * \brief enumeration type for the state of the guider
- */
-class Guide {
-public:
-	typedef enum {
-		unconfigured, idle, calibrating, calibrated, guiding,
-		darkacquire, flatacquire, imaging, backlash
-	} state;
-static std::string	state2string(state s);
-static state	string2state(const std::string& s);
-};
-
-
-/**
- * \brief State machine class for the Guider
- *
- * The state machine ensures that any change is only accepted only if
- * all prerequisites are met.
- */
-class GuiderStateMachine {
-	Guide::state	_state;
-	const char	*statename() const;
-public:
-	const Guide::state&	state() const { return _state; }
-	operator Guide::state () { return _state; }
-	operator Guide::state () const { return _state; }
-
-	// construct the state machine
-	GuiderStateMachine() : _state(Guide::unconfigured) { }
-
-	// methods to find out whether we can accept a configuration, or
-	// start calibration or guiding
-	bool	canConfigure() const;
-	bool	canStartGuiding() const;
-	bool	canStartCalibrating() const;
-	bool	canAcceptCalibration() const;
-	bool	canFailCalibration() const;
-	bool	canStopGuiding() const;
-	bool	canStartDarkAcquire() const;
-	bool	canEndDarkAcquire() const;
-	bool	canStartFlatAcquire() const;
-	bool	canEndFlatAcquire() const;
-	bool	canStartImaging() const;
-	bool	canEndImaging() const;
-	bool	canStartBacklash() const;
-	bool	canEndBacklash() const;
-
-	// state change methods
-	void	configure();
-	void	startCalibrating();
-	void	addCalibration();
-	void	failCalibration();
-	void	startGuiding();
-	void	stopGuiding();
-private:
-	Guide::state	_prestate;
-public:
-	void	startDarkAcquire();
-	void	endDarkAcquire();
-	void	startFlatAcquire();
-	void	endFlatAcquire();
-	void	startImaging();
-	void	endImaging();
-	void	startBacklash();
-	void	endBacklash();
-};
-
-/**
  * \brief Guider class
  * 
  * The guider class unifies all the operations needed for guiding.
@@ -967,10 +978,8 @@ public:
  */
 class Guider : public GuiderBase {
 	void	checkstate();
-private:
-	GuiderStateMachine	_state;
 public:
-	Guide::state	state();
+	virtual Guide::state	state();
 	// The guider is essentially composed of a camera and a guideport
 	// we will hardly need access to the camera, but we don't want to
 	// loose the reference to it either, so we keep it handy here
@@ -1156,8 +1165,8 @@ private:
 	BacklashWorkPtr		_backlashwork;
 	BacklashThreadPtr	_backlashthread;
 public:
-	void	startBacklash(TrackerPtr tracker, double interval);
-	BacklashDataPtr	backlashData();
+	void	startBacklash(TrackerPtr tracker, double interval,
+			backlash_t dir);
 	void	stopBacklash();
 };
 typedef std::shared_ptr<Guider>	GuiderPtr;

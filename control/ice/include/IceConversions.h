@@ -165,6 +165,9 @@ astro::guiding::BacklashResult	convert(const BacklashResult& result);
 BacklashData	convert(const astro::guiding::BacklashData& data);
 astro::guiding::BacklashData	convert(const BacklashData& data);
 
+BacklashDirection	convert(const astro::guiding::backlash_t);
+astro::guiding::backlash_t	convert(BacklashDirection);
+
 // TaskQueue
 TaskState	convert(const astro::task::TaskInfo::taskstate& state);
 astro::task::TaskInfo::taskstate	convert(const TaskState& state);

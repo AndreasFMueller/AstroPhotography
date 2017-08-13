@@ -188,22 +188,26 @@ void	GuiderStateMachine::endImaging() {
 }
 
 void	GuiderStateMachine::startBacklash() {
-	if (!canStartImaging()) {
+	if (!canStartBacklash()) {
 		std::string	msg = stringprintf("cannot backlash in state %s",
 			statename());
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 		throw BadState(msg);
 	}
 	_prestate = _state;
-	_state = Guide::imaging;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "backlash prestate: %s",
+		Guide::state2string(_prestate).c_str());
+	_state = Guide::backlash;
 }
 
 void	GuiderStateMachine::endBacklash() {
-	if (!canEndImaging()) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "end backlash: %s",
+		Guide::state2string(_state).c_str());
+	if (!canEndBacklash()) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "Not backlash characterization");
 		throw BadState("Not backlashing");
 	}
-	_prestate = _state;
+	_state = _prestate;
 }
 
 } // namespace guiding

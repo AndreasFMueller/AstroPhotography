@@ -568,6 +568,21 @@ astro::guiding::BacklashData    convert(const BacklashData& data) {
 	astro::guiding::BacklashData	d;
 	d.points = convert(data.points);
 	d.result = convert(data.result);
+	return d;
+}
+
+astro::guiding::backlash_t	convert(BacklashDirection dir) {
+	switch (dir) {
+	case BacklashDEC:	return astro::guiding::backlash_dec;
+	case BacklashRA:	return astro::guiding::backlash_ra;
+	}
+}
+
+BacklashDirection	convert(astro::guiding::backlash_t dir) {
+	switch (dir) {
+	case astro::guiding::backlash_dec: return BacklashDEC;
+	case astro::guiding::backlash_ra: return BacklashRA;
+	}
 }
 
 } // namespace snowstar

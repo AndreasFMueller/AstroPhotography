@@ -92,8 +92,8 @@ BacklashResult	BacklashAnalysis::operator()(
 	double	det = C[0] * C[3] - C[1] * C[2];
 	double	lambda1 = trace/2 + sqrt(sqr(trace)/4 - det);
 	double	lambda2 = trace/2 - sqrt(sqr(trace)/4 - det);
-	r.x = lambda1 - C[2];
-	r.y = C[3];
+	r.x = lambda1 - C[3];
+	r.y = C[2];
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "lambda1 = %f, lambda2 = %f",
 		lambda1, lambda2);
 

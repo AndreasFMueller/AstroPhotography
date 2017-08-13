@@ -133,6 +133,8 @@ int	snowstar_main(int argc, char *argv[]) {
 			astro::image::ImageDirectory::basedir(optarg);
 			break;
 		case 'c':
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "configuration: %s",
+				optarg);
 			astro::config::Configuration::set_default(optarg);
 			break;
 		case 'd':

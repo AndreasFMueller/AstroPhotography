@@ -17,14 +17,20 @@ class BacklashCallback : public callback::Callback {
 public:
 	BacklashCallback(Guider& guider) : _guider(guider) { }
 	CallbackDataPtr	operator()(CallbackDataPtr data) {
+		if (!data) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "no data");
+			return data;
+		}
 		CallbackBacklashPoint	*p
 			= dynamic_cast<CallbackBacklashPoint*>(&*data);
-		if (!p) {
+		if (NULL != p) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "new point");
 			_guider.GuiderBase::callback(p->data());
 		}
 		CallbackBacklashResult	*r
 			= dynamic_cast<CallbackBacklashResult*>(&*data);
-		if (!r) {
+		if (NULL != r) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "new results");
 			_guider.GuiderBase::callback(r->data());
 		}
 		return data;
@@ -34,11 +40,16 @@ public:
 /**
  * \brief start the backlash thread
  */
-void	Guider::startBacklash(TrackerPtr tracker, double interval) {
+void	Guider::startBacklash(TrackerPtr tracker, double interval,
+		backlash_t direction) {
 	// check that we have everything
 	if (!hasGuideport()) {
 		throw std::runtime_error("no guide port");
 	}
+	_backlashdata.points.clear();
+	_backlashdata.result.clear();
+	_backlashdata.result.direction = direction;
+        _state.startBacklash();
 	try {
 		// create the work object
 		BacklashWork	*backlashwork = new BacklashWork(imager(),
@@ -67,20 +78,18 @@ void	Guider::startBacklash(TrackerPtr tracker, double interval) {
 	}
 }
 
-BacklashDataPtr	Guider::backlashData() {
-	// XXX needs implementation
-	return BacklashDataPtr(NULL);
-}
-
 /**
  * \brief Stop the backlash process
  */
 void	Guider::stopBacklash() {
 	if (!_backlashthread) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "no backlash thread");
 		return;
 	}
-	if (!_backlashthread->isrunning()) {
+	if (_backlashthread->isrunning()) {
 		_backlashthread->stop();
+	} else {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "backlash thread not running");
 	}
 }
 

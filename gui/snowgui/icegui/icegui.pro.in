@@ -29,6 +29,7 @@ INCLUDEPATH += ../astrogui ../icegui
 
 FORMS    +=								\
 	adaptiveopticscontrollerwidget.ui				\
+	backlashdialog.ui						\
 	calibrationdetaildialog.ui					\
 	calibrationselectiondialog.ui					\
 	calibrationwidget.ui						\
@@ -49,6 +50,7 @@ FORMS    +=								\
 
 WIDGETSOURCES =								\
 	adaptiveopticscontrollerwidget.cpp				\
+	backlashdialog.cpp						\
 	calibrationdetaildialog.cpp					\
 	calibrationselectiondialog.cpp					\
 	calibrationwidget.cpp						\
@@ -69,6 +71,7 @@ WIDGETSOURCES =								\
 
 WIDGETHEADERS =								\
 	adaptiveopticscontrollerwidget.h				\
+	backlashdialog.h						\
 	calibrationdetaildialog.h					\
 	calibrationselectiondialog.h					\
 	calibrationwidget.h						\
@@ -89,6 +92,7 @@ WIDGETHEADERS =								\
 
 SOURCES += 								\
 	AdaptiveOpticsWidget.cpp					\
+	BacklashMonitor.cpp						\
 	CalibrationDisplayWidget.cpp					\
 	CalibrationImageMonitor.cpp					\
 	calibrationimagewidget.cpp					\
@@ -106,6 +110,7 @@ SOURCES += 								\
 
 HEADERS  += 								\
 	AdaptiveOpticsWidget.h						\
+	BacklashMonitor.h						\
 	CalibrationDisplayWidget.h					\
 	calibrationimagewidget.h					\
 	CoolerActive.h							\

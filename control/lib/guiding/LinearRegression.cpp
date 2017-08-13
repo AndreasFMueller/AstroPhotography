@@ -22,6 +22,7 @@ namespace linear {
  */
 LinearRegression::LinearRegression(const std::vector<std::pair<double, double> >& data) {
 	int	n = data.size();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "linear regression for %d points", n);
 	int	m = 2;
 	double	A[n * m];
 	double	b[n];

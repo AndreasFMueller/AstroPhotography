@@ -20,29 +20,29 @@ namespace snowstar {
 /**
  * \brief Register a callback for backlash information
  */
-void    GuiderI::registerBacklashMonitor(const Ice::Identity& imagecallback,
+void    GuiderI::registerBacklashMonitor(const Ice::Identity& backlashcallback,
 		const Ice::Current& current) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "register an image callback");
-	calibrationimagecallbacks.registerCallback(imagecallback, current);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "register a backlash callback");
+	backlashmonitorcallbacks.registerCallback(backlashcallback, current);
 }
 
 /**
  * \brief Unregister a callback for backlash information
  */
-void    GuiderI::unregisterBacklashMonitor(const Ice::Identity& imagecallback,
+void    GuiderI::unregisterBacklashMonitor(const Ice::Identity& backlashcallback,
 		const Ice::Current& current) {
-	calibrationimagecallbacks.unregisterCallback(imagecallback, current);
+	backlashmonitorcallbacks.unregisterCallback(backlashcallback, current);
 }
 
 /**
  * \brief Start backlash process
  */
-void	GuiderI::startBacklash(double interval,
+void	GuiderI::startBacklash(double interval, BacklashDirection direction,
 		const Ice::Current& /* current */) {
 	try {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "start backlash");
 		astro::guiding::TrackerPtr	tracker = getTracker();
-		guider->startBacklash(tracker, interval);
+		guider->startBacklash(tracker, interval, convert(direction));
 	} catch (const std::exception& x) {
 		BadState	exception;
 		exception.cause = std::string(x.what());
@@ -71,53 +71,49 @@ void	GuiderI::backlashUpdate(astro::callback::CallbackDataPtr data) {
  */
 BacklashData	GuiderI::getBacklashData(const Ice::Current& /* current */) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "backlash data call");
-	astro::guiding::BacklashDataPtr	data = guider->backlashData();
-	return convert(*data);
+	return convert(guider->backlashData());
 }
 
-#if 0
-/**
- * \brief start imaging with a given exposure
- */
-void	GuiderI::startImaging(const Exposure& exposure,
-                                const Ice::Current& /* current */) {
-	try {
-		astro::camera::Exposure	e = convert(exposure);
-		guider->startImaging(e);
-	} catch (const std::exception& x) {
-		BadState	exception;
-		exception.cause = std::string(x.what());
-		throw exception;
-	}
-}
 
-/**
- * \brief retrieve the image
- */
-ImagePrx	GuiderI::getImage(const Ice::Current& current) {
-	// retrieve image
-	astro::image::ImagePtr	image = guider->getImage();
-	if (!image) {
-		throw NotFound("no image available");
-	}
-
-	// store image in image directory
-	astro::image::ImageDirectory	imagedirectory;
-	std::string	filename = imagedirectory.save(image);
-
-	// return a proxy for the image
-	return snowstar::getImage(filename, image->pixel_type(), current);
-}
-
-/**
- * \brief Update information about the image
- */
-void	GuiderI::calibrationImageUpdate(
+template<>
+void	callback_adapter<BacklashMonitorPrx>(BacklashMonitorPrx& p,
 		const astro::callback::CallbackDataPtr data) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "calibrationImageUpdate called");
-	calibrationimagecallbacks(data);
+	debug(LOG_DEBUG, DEBUG_LOG, 0,
+		"callback_adapter<BacklashMonitorPrx> called");
+	if (!data) {
+		return;
+	}
+		
+	// Handle case of a backlash point
+	astro::guiding::CallbackBacklashPoint   *backlashpoint
+		= dynamic_cast<astro::guiding::CallbackBacklashPoint *>(&*data);
+	if (NULL != backlashpoint) {
+		if (backlashpoint->data().id < 0) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "negative id, stopping");
+			p->stop();
+			return;
+		}
+		BacklashPoint	bp = convert(backlashpoint->data());
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "send a point %s",
+			backlashpoint->data().toString().c_str());
+		p->updatePoint(bp);
+		return;
+	}
+
+	// handle case of backlash result
+	astro::guiding::CallbackBacklashResult   *backlashresult
+		= dynamic_cast<astro::guiding::CallbackBacklashResult *>(&*data);
+	if (NULL != backlashresult) {
+		BacklashResult	r = convert(backlashresult->data());
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "send a result %s",
+			backlashresult->data().toString().c_str());
+		p->updateResult(r);
+		return;
+	}
+
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "unknown type data type: %s",
+		typeid(*data).name());
 }
 
-#endif
 
 } // namespace snowstar

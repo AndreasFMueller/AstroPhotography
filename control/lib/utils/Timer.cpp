@@ -33,6 +33,11 @@ double	Timer::elapsed() {
 
 void    Timer::sleep(double t) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "sleep for %.3f seconds", t);
+	if (t < 0) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "negative delay, "
+			"return immediately");
+		return;
+	}
 	unsigned int    tt = 1000000 * t;
 	usleep(tt);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "sleep complete");

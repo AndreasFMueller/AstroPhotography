@@ -187,15 +187,16 @@ public:
 
 	// methods for backlash characterization
 	virtual void	startBacklash(double interval,
+				BacklashDirection direction,
 				const Ice::Current& current);
 	virtual void	stopBacklash(const Ice::Current& current);
 	BacklashData	getBacklashData(const Ice::Current& current);
 
 	virtual void	registerBacklashMonitor(
-				const Ice::Identity& calibrationimagecallback,
+				const Ice::Identity& backlashcallback,
 				const Ice::Current& current);
 	virtual void	unregisterBacklashMonitor(
-				const Ice::Identity& calibrationimagecallback,
+				const Ice::Identity& backlashcallback,
 				const Ice::Current& current);
 	void	backlashUpdate(const astro::callback::CallbackDataPtr data);
 };

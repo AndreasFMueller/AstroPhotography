@@ -13,6 +13,7 @@
 #include <TrackingMonitorImage.h>
 #include <TrackingMonitorController.h>
 #include <QTimer>
+#include "backlashdialog.h"
 
 namespace snowgui {
 
@@ -44,6 +45,8 @@ class guidercontrollerwidget : public InstrumentWidget {
 
 	TrackingMonitorController	*_trackingmonitor;
 	Ice::ObjectPtr	_trackingmonitorptr;
+
+	BacklashDialog	*_backlashDialog;
 
 	void	setupGuider();
 
@@ -86,6 +89,9 @@ public slots:
 	void	toggleInverse(bool);
 	void	launchMonitor();
 	void	imageUpdated();
+
+	void	backlashRAClicked();
+	void	backlashDECClicked();
 };
 
 } // namespace snowgui

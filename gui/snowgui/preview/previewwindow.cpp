@@ -292,7 +292,7 @@ void	PreviewWindow::setupFilterwheel() {
 			case snowstar::FwIDLE:
 				ui->filternameBox->setCurrentIndex(
 					_filterwheel->currentPosition());
-				__attribute__ ((fallthrough));
+				[[fallthrough]];
 			case snowstar::FwUNKNOWN:
 				ui->filterwheelStatus->setEnabled(false);
 				ui->filterwheelStatus->setValue(-1);
@@ -380,7 +380,7 @@ void	PreviewWindow::statusUpdate() {
 		case snowstar::FwIDLE:
 			ui->filternameBox->setCurrentIndex(
 				_filterwheel->currentPosition());
-			__attribute__ ((fallthrough));
+			[[fallthrough]];
 		default:
 			ui->filterwheelStatus->setEnabled(false);
 			ui->filterwheelStatus->setValue(-1);

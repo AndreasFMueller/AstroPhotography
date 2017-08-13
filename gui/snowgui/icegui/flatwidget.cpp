@@ -113,6 +113,7 @@ void	flatwidget::statusUpdate() {
 	case snowstar::GuiderGUIDING:
 	case snowstar::GuiderDARKACQUIRE:
 	case snowstar::GuiderIMAGING:
+	case snowstar::GuiderBACKLASH:
 		ui->acquireButton->setEnabled(false);
 		break;
 	}
