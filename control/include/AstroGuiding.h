@@ -633,6 +633,7 @@ typedef std::shared_ptr<CallbackBacklashPoint>	CallbackBacklashPointPtr;
 class BacklashResult {
 public:
 	backlash_t	direction;	// direction
+	int	lastpoints;		// how many points to include
 	double	x, y;			// primary direction
 	double	longitudinal, lateral;	// errors
 	double	forward, backward;	// movements
@@ -1167,6 +1168,7 @@ private:
 public:
 	void	startBacklash(TrackerPtr tracker, double interval,
 			backlash_t dir);
+	void	setLastPoints(int n);
 	void	stopBacklash();
 };
 typedef std::shared_ptr<Guider>	GuiderPtr;

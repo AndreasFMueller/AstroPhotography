@@ -55,6 +55,7 @@ public slots:
 	void	stopSignaled();
 	void	updatePointSignaled(snowstar::BacklashPoint);
 	void	updateResultSignaled(snowstar::BacklashResult);
+	void	lastpointsChanged(int);
 };
 
 } // namespace snowgui

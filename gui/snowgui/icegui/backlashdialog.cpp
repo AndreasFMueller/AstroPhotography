@@ -36,6 +36,8 @@ BacklashDialog::BacklashDialog(QWidget *parent) :
 
 	// connect widgets
 	connect(ui->startButton, SIGNAL(clicked()), this, SLOT(startClicked()));
+	connect(ui->lastpointsSpinBox, SIGNAL(valueChanged(int)),
+		this, SLOT(lastpointsChanged(int)));
 }
 
 /**
@@ -281,6 +283,7 @@ void	BacklashDialog::showResult() {
 		ui->backlashField2->setText("");
 		ui->offsetField->setText("");
 		ui->offsetField2->setText("");
+		ui->lastpointsField->setText("");
 		return;
 	}
 	ui->directionField->setText(
@@ -307,6 +310,25 @@ void	BacklashDialog::showResult() {
 		astro::stringprintf("%.1f [px],", _data.result.offset).c_str());
 	ui->offsetField2->setText(
 		astro::stringprintf("%.3f [px/s]", _data.result.drift).c_str());
+
+	if (0 == _data.result.lastpoints) {
+		ui->lastpointsField->setText("all");
+	} else {
+		ui->lastpointsField->setText(astro::stringprintf("%d",
+			_data.result.lastpoints).c_str());
+	}
+}
+
+void	BacklashDialog::lastpointsChanged(int lastpoints) {
+	if (!_guider) {
+		return;
+	}
+	try {
+		_guider->setLastPoints(lastpoints);
+	} catch (const std::exception& x) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "cannot set last points: %d",
+			lastpoints);
+	}
 }
 
 } // namespace snowgui

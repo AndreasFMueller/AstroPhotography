@@ -74,6 +74,11 @@ BacklashData	GuiderI::getBacklashData(const Ice::Current& /* current */) {
 	return convert(guider->backlashData());
 }
 
+void	GuiderI::setLastPoints(int n, const Ice::Current& /* current */) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "set last points to %d", n);
+	guider->setLastPoints(n);
+}
+
 
 template<>
 void	callback_adapter<BacklashMonitorPrx>(BacklashMonitorPrx& p,

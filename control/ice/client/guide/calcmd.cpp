@@ -70,6 +70,7 @@ int	Guide::calibration_command(GuiderFactoryPrx guiderfactory,
 	case GuiderIMAGING:
 	case GuiderDARKACQUIRE:
 	case GuiderFLATACQUIRE:
+	case GuiderBACKLASH:
 		std::cerr << "imager currently busy" << std::endl;
 		return EXIT_FAILURE;
 	}

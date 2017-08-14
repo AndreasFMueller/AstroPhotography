@@ -190,7 +190,8 @@ public:
 				BacklashDirection direction,
 				const Ice::Current& current);
 	virtual void	stopBacklash(const Ice::Current& current);
-	BacklashData	getBacklashData(const Ice::Current& current);
+	virtual BacklashData	getBacklashData(const Ice::Current& current);
+	virtual void	setLastPoints(int n, const Ice::Current& current);
 
 	virtual void	registerBacklashMonitor(
 				const Ice::Identity& backlashcallback,

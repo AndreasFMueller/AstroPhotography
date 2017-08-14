@@ -73,11 +73,14 @@ std::ostream&	operator<<(std::ostream& out, const BacklashData&);
  */
 class BacklashAnalysis {
 	backlash_t	_direction;
+	int	_lastpoints;
 	double	drift(const std::vector<BacklashPoint>& points,
 			const BacklashResult& r) const;
+	std::vector<BacklashPoint>::const_iterator	begin(const std::vector<BacklashPoint>& points) const;
 public:
-	BacklashAnalysis(backlash_t direction = backlash_dec)
-		: _direction(direction) { }
+	BacklashAnalysis(backlash_t direction = backlash_dec,
+		int lastpoints = 0 )
+		: _direction(direction), _lastpoints(lastpoints) { }
 	BacklashResult	operator()(const std::vector<BacklashPoint>& points);
 };
 
@@ -94,6 +97,11 @@ private:
 public:
 	double	interval() const { return _interval; }
 	void	interval(double i) { _interval = i; }
+private:
+	int	_lastpoints;
+public:
+	int	lastPoints() const { return _lastpoints; }
+	void	lastPoints(int n);
 private:
 	camera::Imager&	_imager;
 	camera::Exposure	_exposure;

@@ -213,6 +213,7 @@ module snowstar {
 
 	struct BacklashResult {
 		BacklashDirection	direction;
+		int	lastpoints;
 		float	x;
 		float	y;
 		float	longitudinal;
@@ -398,6 +399,7 @@ module snowstar {
 				throws BadState;
 		void	stopBacklash() throws BadState;
 		BacklashData	getBacklashData() throws BadState, NotFound;
+		void	setLastPoints(int n) throws BadState;
 
 		void	registerBacklashMonitor(Ice::Identity monitor);
 		void	unregisterBacklashMonitor(Ice::Identity monitor);

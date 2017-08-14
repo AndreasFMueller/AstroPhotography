@@ -93,5 +93,12 @@ void	Guider::stopBacklash() {
 	}
 }
 
+/**
+ * \brief Tell the guider how many points to evaluate
+ */
+void	Guider::setLastPoints(int n) {
+	_backlashwork->lastPoints(n);
+}
+
 } // namespace guiding
 } // namespace astro

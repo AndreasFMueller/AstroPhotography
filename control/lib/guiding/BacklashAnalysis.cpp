@@ -46,6 +46,25 @@ double	BacklashAnalysis::drift(const std::vector<BacklashPoint>& points,
 }
 
 /**
+ * \brief Skip a suitable number of points
+ *
+ * If _lastpoints is 0, all points are used
+ */
+std::vector<BacklashPoint>::const_iterator	BacklashAnalysis::begin(const std::vector<BacklashPoint>& points) const {
+	std::vector<BacklashPoint>::const_iterator	i = points.begin();
+	if (_lastpoints == 0) {
+		return i;
+	}
+	int	n = points.size();
+	int	counter = 0;
+	while (counter < (n - _lastpoints - 4)) {
+		i += 4;
+		counter += 4;
+	}
+	return i;
+}
+
+/**
  * \brief Perform an Analysis of the backlash data
  *
  * \param points	data points to use to analyze 
@@ -54,13 +73,13 @@ BacklashResult	BacklashAnalysis::operator()(
 	const std::vector<BacklashPoint>& points) {
 	BacklashResult	r;
 	r.direction = _direction;
-	int	n = points.size();
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "analyzing %d points", n);
+	int	n = 0;
 
 	// compute the covariance matrix of the points
 	double	C[4] = { 0, 0, 0, 0 };
 	double	M[2] = { 0, 0 };
-	std::vector<BacklashPoint>::const_iterator	i = points.begin();
+	std::vector<BacklashPoint>::const_iterator	start = begin(points);
+	std::vector<BacklashPoint>::const_iterator	i = start;
 	while (i != points.end()) {
 		double	x = i->xoffset;
 		double	y = i->yoffset;
@@ -71,7 +90,9 @@ BacklashResult	BacklashAnalysis::operator()(
 		C[2] += y * x;
 		C[3] += y * y;
 		i++;
+		n++;
 	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "analyzing %d points", n);
 	for (int k = 0; k < 2; k++) {
 		M[k] /= n;
 	}
@@ -109,7 +130,7 @@ BacklashResult	BacklashAnalysis::operator()(
 
 	// project the direction to find the X-array
 	double	X[n];
-	i = points.begin();
+	i = start;
 	int	k = 0;
 	l = 0;
 	double	l2 = 0;
@@ -130,7 +151,7 @@ BacklashResult	BacklashAnalysis::operator()(
 	int	m = 5;
 	double	A[n * m];
 	double	b[n];
-	i = points.begin();
+	i = start;
 	int	K[4] = {0, 0, 0, 0};
 	int	s = 0;
 	while (points.end() != i) {
@@ -205,10 +226,11 @@ BacklashResult	BacklashAnalysis::operator()(
 	r.b = b[2];
 	r.backward = b[3];
 	r.offset = b[4];
+	r.lastpoints = _lastpoints;
 
 	// compute the offset variance
 	l = 0; l2 = 0;
-	i = points.begin();
+	i = start;
 	for (int t = 0; t < 4; t++) { K[t] = 0; }
 	s = 0;
 	while (points.end() != i) {

@@ -526,6 +526,7 @@ BacklashResult  convert(const astro::guiding::BacklashResult& result) {
 	BacklashResult	r;
 	r.direction = (result.direction == astro::guiding::backlash_dec)
 			? BacklashDEC : BacklashRA;
+	r.lastpoints = result.lastpoints;
 	r.x = result.x;
 	r.y = result.y;
 	r.longitudinal = result.longitudinal;
@@ -544,6 +545,7 @@ astro::guiding::BacklashResult  convert(const BacklashResult& result) {
 	r.direction = (result.direction == BacklashDEC)
 			? astro::guiding::backlash_dec
 			: astro::guiding::backlash_ra;
+	r.lastpoints = result.lastpoints;
 	r.x = result.x;
 	r.y = result.y;
 	r.longitudinal = result.longitudinal;

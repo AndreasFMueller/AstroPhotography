@@ -21,7 +21,22 @@ BacklashWork::BacklashWork(camera::Imager& imager, TrackerPtr tracker,
 		camera::GuidePortPtr guideport)
 	: _imager(imager), _tracker(tracker), _guideport(guideport) {
 	_interval = 5;
+	_lastpoints = 0;
 };
+
+/**
+ * \brief set the number of points to include
+ */
+void	BacklashWork::lastPoints(int n) {
+	if (n == 0) {
+		_lastpoints = 0;
+		return;
+	}
+	if (n < 8) {
+		throw std::range_error("need at least 8 points");
+	}
+	_lastpoints = n;
+}
 
 /**
  * \brief Move and wait until move is complete
@@ -100,7 +115,8 @@ void	BacklashWork::main(astro::thread::Thread<BacklashWork>& thread) {
 
 			// if we have enough data, create a new analysis
 			if (data.size() >= 8) {
-				BacklashAnalysis	analysis(_direction);
+				BacklashAnalysis	analysis(_direction,
+								_lastpoints);
 				BacklashResult	r = analysis(data);
 				result(r);
 				debug(LOG_DEBUG, DEBUG_LOG, 0,
