@@ -116,7 +116,7 @@ void	BacklashWork::main(astro::thread::Thread<BacklashWork>& thread) {
 			// if we have enough data, create a new analysis
 			if (data.size() >= 8) {
 				BacklashAnalysis	analysis(_direction,
-								_lastpoints);
+					_interval, _lastpoints);
 				BacklashResult	r = analysis(data);
 				result(r);
 				debug(LOG_DEBUG, DEBUG_LOG, 0,

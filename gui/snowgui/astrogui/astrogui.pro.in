@@ -9,6 +9,9 @@ QT       += core gui widgets
 TEMPLATE = lib
 CONFIG += staticlib
 
+QMAKE_CXXFLAGS += @EXTRA_CXXFLAGS@
+QMAKE_LFLAGS += @EXTRA_LDFLAGS@
+
 # Directories for the astrophotography library
 ASTROPATH = @ASTROPATH@
 ASTROLIBDIR = @ASTROLIBDIR@

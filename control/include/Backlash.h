@@ -13,59 +13,11 @@
 namespace astro {
 namespace guiding {
 
-#if 0
-typedef enum backlash_e { backlash_dec = 0, backlash_ra = 1 } backlash_t;
-
-/**
- * \brief Backlash raw data point
- */
-class BacklashPoint {
-public:
-	int	id;
-	double	time;
-	double	xoffset;
-	double	yoffset;
-	std::string	toString() const;
-};
-typedef std::vector<BacklashPoint>	BacklashPoints;
-typedef callback::CallbackDataEnvelope<BacklashPoint>	CallbackBacklashPoint;
-typedef std::shared_ptr<CallbackBacklashPoint>	CallbackBacklashPointPtr;
-#endif
-
 std::ostream&	operator<<(std::ostream& out, const BacklashPoint& point);
 std::ostream&	operator<<(std::ostream& out, const BacklashPoints& points);
 
-#if 0
-/**
- * \brief A holder class for the Backlash analysis results
- */
-class BacklashResult {
-public:
-	backlash_t	direction;	// direction
-	double	x, y;			// primary direction
-	double	longitudinal, lateral;	// errors
-	double	forward, backward;	// movements
-	double	f, b;			// forward/backward 
-	double	offset, drift;
-	std::string	toString() const;
-	double	operator()(const int k[4], const BacklashPoint& p);
-};
-typedef callback::CallbackDataEnvelope<BacklashResult>	CallbackBacklashResult;
-typedef std::shared_ptr<CallbackBacklashResult>	CallbackBacklashResultPtr;
-#endif
-
 std::ostream&	operator<<(std::ostream& out, const BacklashResult&);
 
-#if 0
-/**
- * \brief a holder class for backlash data and analysis results
- */
-class BacklashData {
-public:
-	BacklashResult	results;
-	BacklashPoints	points;
-};
-#endif
 std::ostream&	operator<<(std::ostream& out, const BacklashData&);
 
 /**
@@ -73,14 +25,16 @@ std::ostream&	operator<<(std::ostream& out, const BacklashData&);
  */
 class BacklashAnalysis {
 	backlash_t	_direction;
+	double	_interval;
 	int	_lastpoints;
 	double	drift(const std::vector<BacklashPoint>& points,
 			const BacklashResult& r) const;
 	std::vector<BacklashPoint>::const_iterator	begin(const std::vector<BacklashPoint>& points) const;
 public:
 	BacklashAnalysis(backlash_t direction = backlash_dec,
-		int lastpoints = 0 )
-		: _direction(direction), _lastpoints(lastpoints) { }
+		double interval = 5, int lastpoints = 0)
+		: _direction(direction), _interval(interval),
+		  _lastpoints(lastpoints) { }
 	BacklashResult	operator()(const std::vector<BacklashPoint>& points);
 };
 

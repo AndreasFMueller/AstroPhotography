@@ -73,6 +73,8 @@ BacklashResult	BacklashAnalysis::operator()(
 	const std::vector<BacklashPoint>& points) {
 	BacklashResult	r;
 	r.direction = _direction;
+	r.interval = _interval;
+	r.lastpoints = _lastpoints;
 	int	n = 0;
 
 	// compute the covariance matrix of the points
@@ -226,7 +228,6 @@ BacklashResult	BacklashAnalysis::operator()(
 	r.b = b[2];
 	r.backward = b[3];
 	r.offset = b[4];
-	r.lastpoints = _lastpoints;
 
 	// compute the offset variance
 	l = 0; l2 = 0;

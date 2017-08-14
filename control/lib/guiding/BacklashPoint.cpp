@@ -1,5 +1,5 @@
 /*
- * BacklashPoint.h -- methods associated with Backlash raw data
+ * BacklashPoint.cpp -- methods associated with Backlash raw data
  *
  * (c) 2017 Prof Dr Andreas Müller, Hochschule Rapperswil
  */

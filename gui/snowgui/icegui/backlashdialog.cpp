@@ -217,7 +217,6 @@ void	BacklashDialog::addPoint(const snowstar::BacklashPoint& point) {
 		values.push_back(0);
 	}
 	ui->dataWidget->add(point.time, values);
-	ui->dataWidget->repaint();
 }
 
 void	BacklashDialog::windowTitle() {
@@ -238,7 +237,7 @@ void	BacklashDialog::updatePointSignaled(snowstar::BacklashPoint point) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "new point: %s",
 		convert(point).toString().c_str());
 	_data.points.push_back(point);
-	reloadPoints();
+	addPoint(point);
 	windowTitle();
 }
 
@@ -317,6 +316,9 @@ void	BacklashDialog::showResult() {
 		ui->lastpointsField->setText(astro::stringprintf("%d",
 			_data.result.lastpoints).c_str());
 	}
+	ui->lastpointsSpinBox->blockSignals(true);
+	ui->lastpointsSpinBox->setValue(_data.result.lastpoints);
+	ui->lastpointsSpinBox->blockSignals(false);
 }
 
 void	BacklashDialog::lastpointsChanged(int lastpoints) {

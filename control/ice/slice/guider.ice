@@ -214,6 +214,7 @@ module snowstar {
 	struct BacklashResult {
 		BacklashDirection	direction;
 		int	lastpoints;
+		double	interval;
 		float	x;
 		float	y;
 		float	longitudinal;

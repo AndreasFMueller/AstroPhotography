@@ -634,6 +634,7 @@ class BacklashResult {
 public:
 	backlash_t	direction;	// direction
 	int	lastpoints;		// how many points to include
+	double	interval;		// drive interval
 	double	x, y;			// primary direction
 	double	longitudinal, lateral;	// errors
 	double	forward, backward;	// movements
