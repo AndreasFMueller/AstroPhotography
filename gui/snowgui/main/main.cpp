@@ -12,6 +12,8 @@
 #include <AstroDiscovery.h>
 #include <getopt.h>
 #include <CommunicatorSingleton.h>
+#include <QFile>
+#include <QString>
 
 namespace snowgui {
 
@@ -28,6 +30,9 @@ static void	usage(const char *progname) {
 	std::cout << "  -d,--debug          increase debug level" << std::endl;
 	std::cout << "  -h,-?,--help        show this help message and exit"
 		<< std::endl;
+	std::cout << "  -s,--server=<s>     name of the server" << std::endl;
+	std::cout << "  -q,-qss=<style>     use the stylesheet named <style>"
+		<< std::endl;
 }
 
 /**
@@ -38,6 +43,7 @@ static struct option	longopts[] = {
 { "debug",		no_argument,		NULL,	'd' },
 { "help",		no_argument,		NULL,	'h' },
 { "server",		required_argument,	NULL,	's' },
+{ "qss",		required_argument,	NULL,	'q' },
 { NULL,			0,			NULL,	 0  }
 };
 
@@ -60,7 +66,8 @@ int main(int argc, char *argv[]) {
 	// parse the command line
 	int	c;
 	int	longindex;
-	while (EOF != (c = getopt_long(argc, argv, "c:dh?s:",
+	char	*qssfilename = NULL;
+	while (EOF != (c = getopt_long(argc, argv, "c:dh?s:q:",
 		longopts, &longindex)))
 		switch (c) {
 		case 'c':
@@ -76,6 +83,9 @@ int main(int argc, char *argv[]) {
 		case 's':
 			servername = std::string(optarg);
 			break;
+		case 'q':
+			qssfilename = optarg;
+			break;
 		}
 	
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "snowgui starting up");
@@ -83,6 +93,16 @@ int main(int argc, char *argv[]) {
 	// start the application
 	Application a(argc, argv);
 	a.setApplicationDisplayName(QString("SnowGUI"));
+
+	// load the style sheet
+	if (qssfilename) {
+		QFile	stylefile(qssfilename);
+		stylefile.open(QFile::ReadOnly);
+		QString	styleSheet = QLatin1String(stylefile.readAll());
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "style sheet: %s",
+			styleSheet.toLatin1().data());
+		a.setStyleSheet(styleSheet);
+	}
 
 	// get the service discovery object
 	astro::discover::ServiceDiscoveryPtr	servicediscovery
