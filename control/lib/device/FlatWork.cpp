@@ -8,6 +8,7 @@
 #include <AstroDebug.h>
 #include <AstroCalibration.h>
 #include <AstroIO.h>
+#include <AstroEvent.h>
 
 namespace astro {
 namespace camera {
@@ -39,6 +40,10 @@ void	FlatWork::main(astro::thread::Thread<FlatWork>& thread) {
  */
 ImagePtr	FlatWork::common(astro::thread::ThreadBase& /* thread */) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "FlatWork main function starts");
+
+	std::string	msg = stringprintf("start flat acquisition for %s",
+		_ccd->name().toString().c_str());
+	astro::event(EVENT_CLASS, astro::events::Event::DEVICE, msg);
 	// first check that all the settings are ok
 	if ((_exposuretime <= 0) || (imagecount() <= 0)) {
 		std::string	msg = stringprintf("bad parameters for "

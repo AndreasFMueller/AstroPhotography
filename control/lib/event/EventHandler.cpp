@@ -91,6 +91,9 @@ void	EventHandler::process(const std::string& file, int line,
 	case Event::TASK:
 		record.subsystem = "task";
 		break;
+	case Event::UTILITIES:
+		record.subsystem = "utilities";
+		break;
 	}
 	record.message = message;
 	record.classname = classname;

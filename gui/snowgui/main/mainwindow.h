@@ -41,6 +41,7 @@ public slots:
 	void	launchConfiguration();
 	void	launchImages();
 	void	launchExpose();
+	void	launchEvents();
 	void	imageForSaving(astro::image::ImagePtr image, std::string);
 
 private:

@@ -7,6 +7,7 @@
 #include <AstroCalibration.h>
 #include <AstroInterpolation.h>
 #include <AstroDebug.h>
+#include <AstroEvent.h>
 
 using namespace astro::calibration;
 using namespace astro::interpolation;
@@ -21,6 +22,23 @@ Imager::Imager(CcdPtr ccd) : _ccd(ccd) {
 	_darksubtract = false;
 	_flatdivide = false;
 	_interpolate = false;
+}
+
+
+void	Imager::dark(ImagePtr dark) {
+	std::string	msg = stringprintf("install %s dark image in %s",
+		dark->size().toString().c_str(),
+		_ccd->name().toString().c_str());
+	astro::event(EVENT_CLASS, astro::events::Event::DEVICE, msg);
+	_dark = dark;
+}
+
+void	Imager::flat(ImagePtr flat) {
+	std::string	msg = stringprintf("install %s flat image in %s",
+		flat->size().toString().c_str(),
+		_ccd->name().toString().c_str());
+	astro::event(EVENT_CLASS, astro::events::Event::DEVICE, msg);
+	_flat = flat;
 }
 
 /**

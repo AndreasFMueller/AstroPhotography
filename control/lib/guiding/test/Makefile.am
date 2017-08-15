@@ -10,10 +10,12 @@ guiding_ldadd = -lcppunit 						\
 	-L$(top_builddir)/lib/device -lastrodevice 			\
 	-L$(top_builddir)/lib/image -lastroimage 			\
 	-L$(top_builddir)/lib/discovery -lastrodiscovery 		\
+	-L$(top_builddir)/lib/event -lastroevent			\
 	-L$(top_builddir)/lib/persistence -lastropersistence		\
 	-L$(top_builddir)/lib/utils -lastroutils
 guiding_dependencies = 							\
 	$(top_builddir)/lib/utils/libastroutils.la  			\
+	$(top_builddir)/lib/event/libastroevent.la  			\
 	$(top_builddir)/lib/image/libastroimage.la  			\
 	$(top_builddir)/lib/persistence/libastropersistence.la		\
 	$(top_builddir)/lib/discovery/libastrodiscovery.la		\

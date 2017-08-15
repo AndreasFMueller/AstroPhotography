@@ -36,7 +36,8 @@ public:
 		MODULE,
 		REPOSITORY,
 		SERVER,
-		TASK
+		TASK,
+		UTILITIES
 	} Subsystem;
 };
 

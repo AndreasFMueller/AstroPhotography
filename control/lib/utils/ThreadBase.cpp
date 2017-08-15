@@ -10,6 +10,7 @@
 #include <stdexcept>
 #include <chrono>
 #include <sstream>
+#include <AstroEvent.h>
 
 namespace astro {
 namespace thread {
@@ -55,12 +56,21 @@ static void	springboard_main(ThreadBase *threadbase) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "main of %s completed",
 			classname.c_str());
 	} catch (const std::exception& x) {
-		debug(LOG_ERR, DEBUG_LOG, 0, "main of %s terminated by %s: %s",
+		std::string	msg = stringprintf("main of %s terminated "
+			"by %s: %s",
 			classname.c_str(), demangle(typeid(x).name()).c_str(),
 			x.what());
+		astro::event(__FILE__, __LINE__,
+			astro::demangle(typeid(*threadbase).name()),
+			astro::events::Event::UTILITIES, msg);
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 	} catch (...) {
-		debug(LOG_ERR, DEBUG_LOG, 0, "main of %s terminated (unknown)",
-			classname.c_str());
+		std::string	msg = stringprintf(
+			"main of %s terminated (unknown)", classname.c_str());
+		astro::event(__FILE__, __LINE__,
+			astro::demangle(typeid(*threadbase).name()),
+			astro::events::Event::UTILITIES, msg);
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 	}
 }
 

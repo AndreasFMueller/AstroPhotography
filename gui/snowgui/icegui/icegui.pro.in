@@ -36,6 +36,7 @@ FORMS    +=								\
 	ccdcontrollerwidget.ui						\
 	coolercontrollerwidget.ui					\
 	darkwidget.ui							\
+	eventdisplaywidget.ui						\
 	filterwheelcontrollerwidget.ui					\
 	flatwidget.ui							\
 	focusercontrollerwidget.ui					\
@@ -57,6 +58,7 @@ WIDGETSOURCES =								\
 	ccdcontrollerwidget.cpp						\
 	coolercontrollerwidget.cpp					\
 	darkwidget.cpp							\
+	eventdisplaywidget.cpp						\
 	filterwheelcontrollerwidget.cpp					\
 	flatwidget.cpp							\
 	focusercontrollerwidget.cpp					\
@@ -78,6 +80,7 @@ WIDGETHEADERS =								\
 	ccdcontrollerwidget.h						\
 	coolercontrollerwidget.h					\
 	darkwidget.h							\
+	eventdisplaywidget.h						\
 	filterwheelcontrollerwidget.h					\
 	flatwidget.h							\
 	focusercontrollerwidget.h					\
@@ -97,6 +100,7 @@ SOURCES += 								\
 	CalibrationImageMonitor.cpp					\
 	calibrationimagewidget.cpp					\
 	CoolerActive.cpp						\
+	EventMonitor.cpp						\
 	FilterWheelBusy.cpp						\
 	FocusButton.cpp							\
 	GuiderButton.cpp						\
@@ -114,6 +118,7 @@ HEADERS  += 								\
 	CalibrationDisplayWidget.h					\
 	calibrationimagewidget.h					\
 	CoolerActive.h							\
+	EventMonitor.h							\
 	FilterWheelBusy.h						\
 	FocusButton.h							\
 	GuiderButton.h							\

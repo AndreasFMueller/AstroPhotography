@@ -22,7 +22,7 @@ private:
 	ImagePtr	_dark;
 public:
 	ImagePtr	dark() const { return _dark; }
-	void	dark(ImagePtr dark) { _dark = dark; }
+	void	dark(ImagePtr dark);
 	bool	hasDark() const { return (_dark) ? true : false; }
 
 private:
@@ -35,7 +35,7 @@ private:
 	ImagePtr	_flat;
 public:
 	ImagePtr	flat() const { return _flat; }
-	void	flat(ImagePtr flat) { _flat = flat; }
+	void	flat(ImagePtr flat);
 	bool	hasFlat() const { return (_flat) ? true : false; }
 
 private:

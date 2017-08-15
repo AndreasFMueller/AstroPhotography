@@ -25,6 +25,7 @@
 #include <imagedisplaywidget.h>
 #include <browserwindow.h>
 #include <ImageForwarder.h>
+#include <eventdisplaywidget.h>
 
 using namespace astro::discover;
 
@@ -59,6 +60,8 @@ MainWindow::MainWindow(QWidget *parent,
 		this, SLOT(launchImages()));
 	connect(ui->appExposeButton, SIGNAL(clicked()),
 		this, SLOT(launchExpose()));
+	connect(ui->appEventsButton, SIGNAL(clicked()),
+		this, SLOT(launchEvents()));
 
 	// initialize application specific stuff
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "starting main window with server %s",
@@ -494,6 +497,30 @@ void	MainWindow::imageForSaving(astro::image::ImagePtr image,
 	} else {
 		saveAction->setText("Save image");
 		saveAction->setEnabled(false);
+	}
+}
+
+/**
+ * \brief Launch the Event monitoring subapp
+ */
+void	MainWindow::launchEvents() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "launchEvents()");
+	try {
+		EventDisplayWidget	*edw = new EventDisplayWidget(NULL,
+						_serviceobject);
+		edw->show();
+	} catch (const std::exception& x) {
+		QMessageBox	*message = new QMessageBox(this);
+		message->setText(QString("Connection failure"));
+		std::ostringstream	out;
+		out << "Failed to connect to the 'Events' service on ";
+		out << _serviceobject.toString();
+		out << ". Repository window cannot be constructed.";
+		out << "Cause: ";
+		out << x.what();
+		message->setInformativeText(QString(out.str().c_str()));
+		message->exec();
+		delete message;
 	}
 }
 

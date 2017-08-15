@@ -6,6 +6,7 @@
 #include <AstroImager.h>
 #include <AstroDebug.h>
 #include <AstroGuiding.h>
+#include <AstroEvent.h>
 #include <Backlash.h>
 
 namespace astro {
@@ -69,6 +70,11 @@ void	BacklashWork::move(double interval) {
  */
 void	BacklashWork::main(astro::thread::Thread<BacklashWork>& thread) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "start backlash main method");
+
+	std::string	msg = stringprintf(
+		"start backlash characterization guideport %s",
+		_guideport->name().toString().c_str());
+	astro::event(EVENT_CLASS, astro::events::Event::GUIDE, msg);
 	double	starttime = Timer::gettime();
 	try {
 		// get an image (need a imager for this)
@@ -137,6 +143,11 @@ void	BacklashWork::main(astro::thread::Thread<BacklashWork>& thread) {
 		debug(LOG_ERR, DEBUG_LOG, 0,
 			"BacklashWork::main terminated by exception: %s",
 			x.what());
+		msg = stringprintf("backlash characterization with guideport %s "
+			"terminated by exception %s",
+			_guideport->name().toString().c_str(),
+			demangle(typeid(x).name()).c_str());
+		astro::event(EVENT_CLASS, astro::events::Event::GUIDE, msg);
 	}
 
 	// we should tell via a callback, that the sequence has ended,
@@ -145,6 +156,10 @@ void	BacklashWork::main(astro::thread::Thread<BacklashWork>& thread) {
 	backlashpoint.id = -1;
 	backlashpoint.time = starttime;
 	point(backlashpoint);
+
+	msg = stringprintf("end backlash characterization with guideport %s",
+		_guideport->name().toString().c_str());
+	astro::event(EVENT_CLASS, astro::events::Event::GUIDE, msg);
 
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "BacklashWork::main terminates");
 }
