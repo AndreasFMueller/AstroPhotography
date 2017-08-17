@@ -82,9 +82,12 @@ ImagePrx	getImage(const std::string& filename, std::type_index type,
 
 ImagePrx	getImage(const std::string& filename,
 				const Ice::Current& current) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "get image named %s", filename.c_str());
 	// find the number bytes per pixel
 	astro::image::ImageDirectory	imagedirectory;
 	std::type_index	type = imagedirectory.pixelType(filename);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "pixel type: %s",
+		astro::demangle(typeid(type).name()).c_str());
 
 	// create the proxy
 	return getImage(filename, type, current);

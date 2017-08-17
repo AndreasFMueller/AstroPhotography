@@ -22,6 +22,8 @@ Ice::ObjectPtr	ImageLocator::locate(const Ice::Current& current,
 	// see whether we can satisfy the request from the cache
 	imagemap::iterator	i = images.find(name);
 	if (i != images.end()) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "%s found in cache",
+			name.c_str());
 		return i->second;
 	}
 
@@ -29,25 +31,41 @@ Ice::ObjectPtr	ImageLocator::locate(const Ice::Current& current,
 	astro::image::ImageDirectory	_imagedirectory;
 	Ice::ObjectPtr	ptr;
 	if (!_imagedirectory.isFile(name)) {
-		throw NotFound("image file not found");
+		std::string	msg = astro::stringprintf(
+			"image file %s not found", name.c_str());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw NotFound(msg);
 	}
 	astro::image::ImagePtr	image = _imagedirectory.getImagePtr(name);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "found %s image with %s pixels",
+		image->size().toString().c_str(),
+		astro::demangle(image->pixel_type().name()).c_str());
 
-	// find out how many bytes a pixel has
+	// find build the image proxy matching the pixel type
 	std::type_index	type = image->pixel_type();
-	if (type == typeid(unsigned char)) {
+	if ((type == typeid(unsigned char))
+		|| (type == typeid(astro::image::YUYV<unsigned char>))
+		|| (type == typeid(astro::image::RGB<unsigned char>))) {
 		ptr = new ByteImageI(image, name);
 	}
-	if (type == typeid(unsigned short)) {
+	if ((type == typeid(unsigned short))
+		|| (type == typeid(astro::image::YUYV<unsigned short>))
+		|| (type == typeid(astro::image::RGB<unsigned short>))) {
 		ptr = new ShortImageI(image, name);
 	}
-	if (type == typeid(unsigned int)) {
+	if ((type == typeid(unsigned int))
+		|| (type == typeid(astro::image::YUYV<unsigned int>))
+		|| (type == typeid(astro::image::RGB<unsigned int>))) {
 		ptr = new IntImageI(image, name);
 	}
-	if (type == typeid(float)) {
+	if ((type == typeid(float))
+		|| (type == typeid(astro::image::YUYV<float>))
+		|| (type == typeid(astro::image::RGB<float>))) {
 		ptr = new FloatImageI(image, name);
 	}
-	if (type == typeid(double)) {
+	if ((type == typeid(double))
+		|| (type == typeid(astro::image::YUYV<double>))
+		|| (type == typeid(astro::image::RGB<double>))) {
 		ptr = new DoubleImageI(image, name);
 	}
 	if (!ptr) {
@@ -56,6 +74,7 @@ Ice::ObjectPtr	ImageLocator::locate(const Ice::Current& current,
 			"handle %s pixels",
 			astro::demangle(type.name()).c_str());
 		exception.cause = msg;
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 		throw exception;
 	}
 

@@ -24,6 +24,7 @@ prx createProxy(const std::string& name, const Ice::Current& current,
 	if (encoded) {
 		ename = NameConverter::urlencode(name);
 	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "encoded name: %s", ename.c_str());
 	return prx::uncheckedCast(a->createProxy(ic->stringToIdentity(ename)));
 }
 

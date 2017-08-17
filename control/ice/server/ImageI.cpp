@@ -23,8 +23,9 @@ namespace snowstar {
 
 ImageI::ImageI(astro::image::ImagePtr image, const std::string& filename)
 	: _image(image), _filename(filename), _type(typeid(unsigned short)) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "creating image servant for %s",
-		_filename.c_str());
+	debug(LOG_DEBUG, DEBUG_LOG, 0,
+		"creating image servant for %s, pixel type %s",
+		_filename.c_str(), _image->pixel_type().name());
 	// check whether the filename contains a /, because that we want all
 	// images to be in the top level
 	if (std::string::npos != _filename.find('/')) {
@@ -38,7 +39,7 @@ ImageI::ImageI(astro::image::ImagePtr image, const std::string& filename)
 	_origin = convert(_image->origin());
 	// size
 	_size = convert(_image->size());
-	// gype	
+	// type	
 	_type = _image->pixel_type();
 	// bytes per pixel
 	_bytesperpixel = _image->bytesPerPixel();
@@ -236,7 +237,9 @@ void    ImageI::remove(const Ice::Current& /* current */) {
 ByteImageI::ByteImageI(astro::image::ImagePtr image,
 	const std::string& filename) : ImageI(image, filename) {
 	std::type_index	type = image->pixel_type();
-	if (type != typeid(unsigned char)) {
+	if ((type != typeid(unsigned char))
+		&& (type != typeid(astro::image::YUYV<unsigned char>))
+		&& (type != typeid(astro::image::RGB<unsigned char>))) {
 		std::string	msg = astro::stringprintf("cannot build byte "
 			"image from %s, has %s pixel", filename.c_str());
 			astro::demangle(type.name()).c_str(),
@@ -263,7 +266,9 @@ ByteSequence	ByteImageI::getBytes(const Ice::Current& /* current */) {
 ShortImageI::ShortImageI(astro::image::ImagePtr image,
 	const std::string& filename) : ImageI(image, filename) {
 	std::type_index	type = image->pixel_type();
-	if (type != typeid(unsigned short)) {
+	if ((type != typeid(unsigned short))
+		&& (type != typeid(astro::image::YUYV<unsigned short>))
+		&& (type != typeid(astro::image::RGB<unsigned short>))) {
 		std::string	msg = astro::stringprintf("cannot build "
 			"short image from %s, has %s pixel", filename.c_str(),
 			astro::demangle(type.name()).c_str());
@@ -290,7 +295,9 @@ ShortSequence	ShortImageI::getShorts(const Ice::Current& /* current */) {
 IntImageI::IntImageI(astro::image::ImagePtr image,
 	const std::string& filename) : ImageI(image, filename) {
 	std::type_index	type = image->pixel_type();
-	if (type != typeid(unsigned int)) {
+	if ((type != typeid(unsigned int))
+		&& (type != typeid(astro::image::YUYV<unsigned int>))
+		&& (type != typeid(astro::image::RGB<unsigned int>))) {
 		std::string	msg = astro::stringprintf("cannot build "
 			"int image from %s, has %s pixel", filename.c_str(),
 			astro::demangle(type.name()).c_str());
@@ -317,7 +324,9 @@ IntSequence	IntImageI::getInts(const Ice::Current& /* current */) {
 FloatImageI::FloatImageI(astro::image::ImagePtr image,
 	const std::string& filename) : ImageI(image, filename) {
 	std::type_index	type = image->pixel_type();
-	if (type != typeid(float)) {
+	if ((type != typeid(float))
+		&& (type != typeid(astro::image::YUYV<float>))
+		&& (type != typeid(astro::image::RGB<float>))) {
 		std::string	msg = astro::stringprintf("cannot build "
 			"float image from %s, has %s pixel", filename.c_str(),
 			astro::demangle(type.name()).c_str());
@@ -344,7 +353,9 @@ FloatSequence	FloatImageI::getFloats(const Ice::Current& /* current */) {
 DoubleImageI::DoubleImageI(astro::image::ImagePtr image,
 	const std::string& filename) : ImageI(image, filename) {
 	std::type_index	type = image->pixel_type();
-	if (type != typeid(double)) {
+	if ((type != typeid(double)) 
+		&& (type != typeid(astro::image::YUYV<double>))
+		&& (type != typeid(astro::image::RGB<double>))) {
 		std::string	msg = astro::stringprintf("cannot build "
 			"double image from %s, has %s pixel", filename.c_str(),
 			astro::demangle(type.name()).c_str());
