@@ -150,8 +150,14 @@ Debian)
 	CXXFLAGS="${CXXFLAGS} --std=c++11"
 	LDFLAGS="${LDFLAGS} -Wl,-rpath -Wl,/usr/local/lib"
 	export CXXFLAGS LDFLAGS
+	if [ -d /usr/share/slice ]
+	then
+		sliceoption=--with-slice=/usr/share/slice
+	else
+		sliceoption=
+	fi
 	./configure --prefix=${prefix} ${commonflags} \
-		${sbigoption}
+		${sbigoption} ${sliceoption}
 	;;
 SuSE)
 	LDFLAGS="-L/usr/local/lib64 -lusb-1.0 -lefence"
