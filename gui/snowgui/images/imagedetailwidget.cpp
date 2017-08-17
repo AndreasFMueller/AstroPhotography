@@ -42,7 +42,13 @@ void	imagedetailwidget::setImage(snowstar::ImagePrx image) {
 		return;
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "got an new image");
-	std::string	s = _image->name();
+	std::string	s;
+	try {
+		s = _image->name();
+	} catch (const std::exception& x) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "cannot get image name: %s",
+			x.what());
+	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "new image %s", s.c_str());
 
 	ui->nameField->setText(QString(s.c_str()));
