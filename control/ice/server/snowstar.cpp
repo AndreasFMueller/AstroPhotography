@@ -296,8 +296,8 @@ int	snowstar_main(int argc, char *argv[]) {
 	if (ic) {
 		ic->destroy();
 	}
-	astro::event(EVENT_GLOBAL, astro::events::Event::SERVER,
-		"snowstar server shutdown");
+	astro::event(EVENT_GLOBAL, astro::events::INFO,
+		astro::events::Event::SERVER, "snowstar server shutdown");
 
 	restart.exec();
 

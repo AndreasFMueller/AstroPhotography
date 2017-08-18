@@ -18,6 +18,7 @@ std::string	EventTableAdapter::createstatement() {
 	return std::string(
 		"create table events (\n"
 		"    id integer not null,\n"
+		"    level integer not null default 0,\n"
 		"    pid integer not null,\n"
 		"    service varchar(32) not null,\n"
 		"    eventtime double not null,\n"
@@ -33,6 +34,7 @@ std::string	EventTableAdapter::createstatement() {
 
 EventRecord	EventTableAdapter::row_to_object(int objectid, const Row& row) {
 	EventRecord	record(objectid);
+	record.level = (eventlevel_t)row["level"]->intValue();
 	record.pid = row["pid"]->intValue();
 	record.service = row["service"]->stringValue();
 	record.eventtime = row["eventtime"]->timevalValue();
@@ -47,6 +49,7 @@ EventRecord	EventTableAdapter::row_to_object(int objectid, const Row& row) {
 UpdateSpec	EventTableAdapter::object_to_updatespec(const EventRecord& event) {
 	UpdateSpec	spec;
 	FieldValueFactory	factory;
+	spec.insert(Field("level", factory.get(event.level)));
 	spec.insert(Field("pid", factory.get(event.pid)));
 	spec.insert(Field("service", factory.get(event.service)));
 	spec.insert(Field("eventtime", factory.getTimeval(event.eventtime)));

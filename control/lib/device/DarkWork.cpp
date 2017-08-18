@@ -43,7 +43,8 @@ ImagePtr	DarkWork::common(astro::thread::ThreadBase& /* thread */) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "DarkWork main function starts");
 	std::string	msg = stringprintf("start dark acquisition for %s",
 		_ccd->name().toString().c_str());
-	astro::event(EVENT_CLASS, astro::events::Event::DEVICE, msg);
+	astro::event(EVENT_CLASS, astro::events::INFO,
+		astro::events::Event::DEVICE, msg);
 	// first check that all the settings are ok
 	if ((_exposuretime <= 0) || (imagecount() <= 0)) {
 		std::string	msg = stringprintf("bad parameters for "

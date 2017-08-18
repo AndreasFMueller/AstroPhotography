@@ -62,6 +62,7 @@ static void	springboard_main(ThreadBase *threadbase) {
 			x.what());
 		astro::event(__FILE__, __LINE__,
 			astro::demangle(typeid(*threadbase).name()),
+			astro::events::ERR,
 			astro::events::Event::UTILITIES, msg);
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 	} catch (...) {
@@ -69,6 +70,7 @@ static void	springboard_main(ThreadBase *threadbase) {
 			"main of %s terminated (unknown)", classname.c_str());
 		astro::event(__FILE__, __LINE__,
 			astro::demangle(typeid(*threadbase).name()),
+			astro::events::ERR,
 			astro::events::Event::UTILITIES, msg);
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 	}

@@ -34,6 +34,7 @@ EventDisplayWidget::EventDisplayWidget(QWidget *parent,
 	// configure the table
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "configure table");
 	QStringList	headers;
+	headers << "Level";
 	headers << "PID";
 	headers << "service";
 	headers << "time";
@@ -138,11 +139,16 @@ void	EventDisplayWidget::insertEvent(int row, const snowstar::Event& event) {
 	ui->eventTable->setRowHeight(row, 19);
 
 	QTableWidgetItem	*item;
-	item = new QTableWidgetItem(astro::stringprintf("%d", event.pid).c_str());
+
+	std::string	levelstring = astro::events::level2string(snowstar::convert(event.level));
+	item = new QTableWidgetItem(levelstring.c_str());
 	ui->eventTable->setItem(row, 0, item);
 
-	item = new QTableWidgetItem(event.service.c_str());
+	item = new QTableWidgetItem(astro::stringprintf("%d", event.pid).c_str());
 	ui->eventTable->setItem(row, 1, item);
+
+	item = new QTableWidgetItem(event.service.c_str());
+	ui->eventTable->setItem(row, 2, item);
 
 	struct timeval	when = snowstar::converttimeval(event.timeago);
 	time_t	t = when.tv_sec;
@@ -152,23 +158,23 @@ void	EventDisplayWidget::insertEvent(int row, const snowstar::Event& event) {
 	snprintf(timestamp + 8, sizeof(timestamp) - 8, ".%03d",
 			when.tv_usec / 1000);
 	item = new QTableWidgetItem(timestamp);
-	ui->eventTable->setItem(row, 2, item);
-
-	item = new QTableWidgetItem(event.subsystem.c_str());
 	ui->eventTable->setItem(row, 3, item);
 
-	item = new QTableWidgetItem(event.message.c_str());
+	item = new QTableWidgetItem(event.subsystem.c_str());
 	ui->eventTable->setItem(row, 4, item);
 
-	item = new QTableWidgetItem(event.classname.c_str());
+	item = new QTableWidgetItem(event.message.c_str());
 	ui->eventTable->setItem(row, 5, item);
 
-	item = new QTableWidgetItem(event.file.c_str());
+	item = new QTableWidgetItem(event.classname.c_str());
 	ui->eventTable->setItem(row, 6, item);
+
+	item = new QTableWidgetItem(event.file.c_str());
+	ui->eventTable->setItem(row, 7, item);
 
 	item = new QTableWidgetItem(astro::stringprintf("%d", event.line).c_str());
 	item->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter);
-	ui->eventTable->setItem(row, 7, item);
+	ui->eventTable->setItem(row, 8, item);
 }
 
 /**

@@ -264,6 +264,9 @@ astro::discover::InstrumentPropertyList	convert(const InstrumentPropertyList& pr
 InstrumentPropertyList	convert(const astro::discover::InstrumentPropertyList& properties);
 
 // Events
+snowstar::EventLevel	convert(astro::events::eventlevel_t);
+astro::events::eventlevel_t	convert(snowstar::EventLevel);
+
 snowstar::Event	convert(const astro::events::Event& e);
 astro::events::Event	convert(const snowstar::Event& e);
 

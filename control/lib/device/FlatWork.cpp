@@ -43,7 +43,8 @@ ImagePtr	FlatWork::common(astro::thread::ThreadBase& /* thread */) {
 
 	std::string	msg = stringprintf("start flat acquisition for %s",
 		_ccd->name().toString().c_str());
-	astro::event(EVENT_CLASS, astro::events::Event::DEVICE, msg);
+	astro::event(EVENT_CLASS, astro::events::INFO,
+		astro::events::Event::DEVICE, msg);
 	// first check that all the settings are ok
 	if ((_exposuretime <= 0) || (imagecount() <= 0)) {
 		std::string	msg = stringprintf("bad parameters for "

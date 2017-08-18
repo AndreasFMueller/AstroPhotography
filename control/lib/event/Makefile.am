@@ -8,6 +8,7 @@
 noinst_LTLIBRARIES = libastroevent.la
 
 libastroevent_la_SOURCES = 						\
+	Event.cpp							\
 	EventHandler.cpp						\
 	EventPersistence.cpp
 

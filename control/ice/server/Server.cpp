@@ -84,7 +84,8 @@ void	Server::add_devices_servant() {
 		= new DeviceServantLocator(repository);
 	adapter->addServantLocator(deviceservantlocator, "");
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "devices servant added");
-	astro::event(EVENT_GLOBAL, astro::events::Event::DEVICE,
+	astro::event(EVENT_GLOBAL, astro::events::INFO,
+		astro::events::Event::DEVICE,
 		"Device server ready");
 
 	// add a servant for the modules
@@ -99,14 +100,16 @@ void	Server::add_devices_servant() {
 		= new DeviceLocatorLocator(repository);
 	adapter->addServantLocator(devicelocatorlocator, "devicelocator");
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "Modules servant added");
-	astro::event(EVENT_GLOBAL, astro::events::Event::MODULE,
+	astro::event(EVENT_GLOBAL, astro::events::INFO,
+		astro::events::Event::MODULE,
 		"Module server ready");
 }
 
 void	Server::add_event_servant() {
 	Ice::ObjectPtr	object = new EventHandlerI();
 	adapter->add(object, ic->stringToIdentity("Events"));
-	astro::event(EVENT_GLOBAL, astro::events::Event::DEBUG,
+	astro::event(EVENT_GLOBAL, astro::events::INFO,
+		astro::events::Event::DEBUG,
 		"Event server added");
 }
 
@@ -115,7 +118,8 @@ void	Server::add_configuration_servant() {
 		= astro::config::Configuration::get();
 	Ice::ObjectPtr	object = new ConfigurationI(configuration);
 	adapter->add(object, ic->stringToIdentity("Configuration"));
-	astro::event(EVENT_GLOBAL, astro::events::Event::DEBUG,
+	astro::event(EVENT_GLOBAL, astro::events::INFO,
+		astro::events::Event::DEBUG,
 		"Configuration server added");
 }
 
@@ -125,7 +129,8 @@ void	Server::add_images_servant() {
 	ImageLocator	*imagelocator = new ImageLocator();
 	adapter->addServantLocator(imagelocator, "image");
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "images servant locator added");
-	astro::event(EVENT_GLOBAL, astro::events::Event::IMAGE,
+	astro::event(EVENT_GLOBAL, astro::events::INFO,
+		astro::events::Event::IMAGE,
 		"Image server ready");
 }
 
@@ -135,7 +140,8 @@ void	Server::add_tasks_servant() {
 	TaskLocator	*tasklocator = new TaskLocator(database);
 	adapter->addServantLocator(tasklocator, "task");
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "task locator added");
-	astro::event(EVENT_GLOBAL, astro::events::Event::TASK,
+	astro::event(EVENT_GLOBAL, astro::events::INFO,
+		astro::events::Event::TASK,
 		"Task server ready");
 }
 
@@ -146,7 +152,8 @@ void	Server::add_instruments_servant() {
 	InstrumentLocator	*instrumentlocator = new InstrumentLocator();
 	adapter->addServantLocator(instrumentlocator, "instrument");
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "Instrument servant added");
-	astro::event(EVENT_GLOBAL, astro::events::Event::INSTRUMENT,
+	astro::event(EVENT_GLOBAL, astro::events::INFO,
+		astro::events::Event::INSTRUMENT,
 		"Instrument server ready");
 }
 
@@ -157,7 +164,8 @@ void	Server::add_repository_servant() {
 	RepositoryLocator	*repolocator = new RepositoryLocator();
 	adapter->addServantLocator(repolocator, "repository");
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "Repository servant added");
-	astro::event(EVENT_GLOBAL, astro::events::Event::REPOSITORY,
+	astro::event(EVENT_GLOBAL, astro::events::INFO,
+		astro::events::Event::REPOSITORY,
 		"Repository server ready");
 }
 
@@ -167,7 +175,8 @@ void	Server::add_guiding_servant() {
 		guiderlocator);
 	adapter->add(object, ic->stringToIdentity("Guiders"));
 	adapter->addServantLocator(guiderlocator, "guider");
-	astro::event(EVENT_GLOBAL, astro::events::Event::GUIDE,
+	astro::event(EVENT_GLOBAL, astro::events::INFO,
+		astro::events::Event::GUIDE,
 		"Guider server ready");
 }
 
@@ -177,7 +186,8 @@ void	Server::add_focusing_servant() {
 	FocusingLocator	*focusinglocator = new FocusingLocator();
 	adapter->addServantLocator(focusinglocator, "focusing");
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "Focusing servant added");
-	astro::event(EVENT_GLOBAL, astro::events::Event::FOCUS,
+	astro::event(EVENT_GLOBAL, astro::events::INFO,
+		astro::events::Event::FOCUS,
 		"Focusing server ready");
 }
 
@@ -195,7 +205,8 @@ Server::Server(Ice::CommunicatorPtr _ic, const std::string& dbfilename)
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "creating a server");
 	// activate the event log
 	astro::events::EventHandler::active(true);
-	astro::event(EVENT_GLOBAL, astro::events::Event::SERVER,
+	astro::event(EVENT_GLOBAL, astro::events::INFO,
+		astro::events::Event::SERVER,
 		"snowstar server startup");
 
 	// determine which service name to use

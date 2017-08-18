@@ -118,7 +118,8 @@ GuiderPrx	GuiderFactoryI::get(const GuiderDescriptor& descriptor,
 
 		// add the guider we have constructed to the D
 		locator->add(gn, guiderptr);
-		astro::event(EVENT_CLASS, astro::events::Event::GUIDE,
+		astro::event(EVENT_CLASS, astro::events::INFO,
+			astro::events::Event::GUIDE,
 			astro::stringprintf("new guider: %s", gn.c_str()));
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "guider servant activated");
 	}

@@ -9,6 +9,7 @@
 #include <cstdlib>
 #include <cerrno>
 #include <cstring>
+#include <AstroEvent.h>
 
 namespace snowstar {
 
@@ -31,9 +32,17 @@ void	Restart::shutdown_instead(bool s) {
 void	Restart::exec() {
 	if (_shutdown_instead) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "shutdown requested instead");
+		astro::event(__FILE__, __LINE__, "snowstar::Restart",
+			astro::events::WARNING,
+			astro::events::Event::SERVER,
+			"server is shutting down");
 		return;
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "restarting process");
+	astro::event(__FILE__, __LINE__, "snowstar::Restart",
+		astro::events::WARNING,
+		astro::events::Event::SERVER,
+		"server is restarting now");
 	int	rc = execve(arguments[0], arguments, NULL);
 	debug(LOG_ERR, DEBUG_LOG, 0, "restart failed: %s", strerror(errno));
 }

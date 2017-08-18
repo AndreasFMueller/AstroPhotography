@@ -159,18 +159,30 @@ module snowstar {
 		string	parameterValueString(string name);
 	};
 
+	enum EventLevel {
+		EventLevelDEBUG,
+		EventLevelINFO,
+		EventLevelNOTICE,
+		EventLevelWARNING,
+		EventLevelERR,
+		EventLevelCRIT,
+		EventLevelALERT,
+		EventLevelEMERG
+	};
+
 	/**
  	 * \brief An event record
 	 */
 	struct Event {
-		int	pid;
-		string	service;
-		double	timeago;
-		string	subsystem;
-		string	message;
-		string	classname;
-		string	file;
-		int	line;
+		EventLevel	level;
+		int		pid;
+		string		service;
+		double		timeago;
+		string		subsystem;
+		string		message;
+		string		classname;
+		string		file;
+		int		line;
 	};
 	sequence<Event>	eventlist;
 

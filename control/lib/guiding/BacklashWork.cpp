@@ -74,7 +74,8 @@ void	BacklashWork::main(astro::thread::Thread<BacklashWork>& thread) {
 	std::string	msg = stringprintf(
 		"start backlash characterization guideport %s",
 		_guideport->name().toString().c_str());
-	astro::event(EVENT_CLASS, astro::events::Event::GUIDE, msg);
+	astro::event(EVENT_CLASS, astro::events::INFO,
+		astro::events::Event::GUIDE, msg);
 	double	starttime = Timer::gettime();
 	try {
 		// get an image (need a imager for this)
@@ -147,7 +148,8 @@ void	BacklashWork::main(astro::thread::Thread<BacklashWork>& thread) {
 			"terminated by exception %s",
 			_guideport->name().toString().c_str(),
 			demangle(typeid(x).name()).c_str());
-		astro::event(EVENT_CLASS, astro::events::Event::GUIDE, msg);
+		astro::event(EVENT_CLASS, astro::events::ERR,
+			astro::events::Event::GUIDE, msg);
 	}
 
 	// we should tell via a callback, that the sequence has ended,
@@ -159,7 +161,8 @@ void	BacklashWork::main(astro::thread::Thread<BacklashWork>& thread) {
 
 	msg = stringprintf("end backlash characterization with guideport %s",
 		_guideport->name().toString().c_str());
-	astro::event(EVENT_CLASS, astro::events::Event::GUIDE, msg);
+	astro::event(EVENT_CLASS, astro::events::INFO,
+		astro::events::Event::GUIDE, msg);
 
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "BacklashWork::main terminates");
 }

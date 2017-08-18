@@ -31,7 +31,8 @@ void GuiderI::startGuiding(Ice::Float gpinterval, Ice::Float aointerval,
 	// start guiding
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "start guiding");
 	guider->startGuiding(tracker, gpinterval, aointerval, stepping);
-	astro::event(EVENT_CLASS, astro::events::Event::GUIDE,
+	astro::event(EVENT_CLASS, astro::events::INFO,
+		astro::events::Event::GUIDE,
 		astro::stringprintf("start guiding %s",
 		guider->name().c_str()));
 }
@@ -49,7 +50,8 @@ void GuiderI::stopGuiding(const Ice::Current& /* current */) {
 
 	// remove the callback
 	//guider->trackingcallback(NULL);
-	astro::event(EVENT_CLASS, astro::events::Event::GUIDE,
+	astro::event(EVENT_CLASS, astro::events::INFO,
+		astro::events::Event::GUIDE,
 		astro::stringprintf("stop guiding %s",
 		guider->name().c_str()));
 }

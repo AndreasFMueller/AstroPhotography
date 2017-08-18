@@ -13,11 +13,18 @@
 namespace astro {
 namespace events {
 
+typedef enum eventlevel_e {
+	DEBUG=0, INFO, NOTICE, WARNING, ERR, CRIT, ALERT, EMERG
+} eventlevel_t;
+
+std::string	level2string(eventlevel_t level);
+
 /**
  * \brief Event class, encapsulates complete event info
  */
 class Event {
 public:
+	eventlevel_t	level;
 	int		pid;
 	std::string	service;
 	struct timeval	eventtime;
@@ -39,6 +46,9 @@ public:
 		TASK,
 		UTILITIES
 	} Subsystem;
+	std::string	subsystem2string(Subsystem) const;
+	Subsystem	string2subsystem(const std::string&) const;
+	std::string	toString() const;
 };
 
 /**
@@ -85,11 +95,13 @@ public:
 static EventHandler&	get();
 static void	consume(const std::string& file, int line,
 			const std::string& classname,
+			eventlevel_t level,
 			const Event::Subsystem subsystem,
 			const std::string& message);
 private:
 	void	process(const std::string& file, int line,
 			const std::string& classname,
+			eventlevel_t level,
 			const Event::Subsystem subsystem,
 			const std::string& message);
 };
@@ -101,6 +113,7 @@ private:
 #define	EVENT_GLOBAL	__FILE__, __LINE__, ""
 
 extern void	event(const char *file, int line, const std::string& classname,
+			events::eventlevel_t level,
 			const events::Event::Subsystem subsystem,
 			const std::string& message);
 
