@@ -93,6 +93,7 @@ int main(int argc, char *argv[]) {
 	// start the application
 	Application a(argc, argv);
 	a.setApplicationDisplayName(QString("SnowGUI"));
+	a.setWindowIcon(QIcon(":snowgui.ico"));
 
 	// load the style sheet
 	if (qssfilename) {

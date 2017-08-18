@@ -74,3 +74,4 @@ SOURCES += main.cpp $${ASTROGUISOURCES} 				\
 
 HEADERS  += $${ASTROGUIHEADERS}						\
 
+RESOURCES += main.qrc
