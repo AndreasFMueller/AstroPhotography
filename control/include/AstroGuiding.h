@@ -1156,11 +1156,11 @@ public:
 private:
 	camera::ImageWorkImagerPtr	_imagework;
 	camera::ImageWorkImagerThreadPtr	_imagethread;
-	ImagePtr	_image;
+	ImagePtr	_imaging;
 public:
 	void	startImaging(const camera::Exposure& exposure);
 	void	endImaging(ImagePtr image);
-	ImagePtr	getImage() { return _image; }
+	ImagePtr	getImaging() { return _imaging; }
 
 	// backlash characterisation 
 private:

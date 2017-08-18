@@ -26,8 +26,9 @@ GuiderI::GuiderI(astro::guiding::GuiderPtr _guider,
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "guider at %p", &*_guider);
 	// set point to an invalid value to allow us to detect that it 
 	// has not been set
-	_point.x = -1;
-	_point.y = -1;
+	astro::image::ImagePoint	p = _guider->getCcdInfo().getFrame().center();
+	_point.x = p.x();
+	_point.y = p.y();
 	// default tracking method is star
 	_method = TrackerSTAR;
 

@@ -72,21 +72,23 @@ void	BacklashWork::main(astro::thread::Thread<BacklashWork>& thread) {
 
 	std::string	msg = stringprintf(
 		"start backlash characterization guideport %s",
-		_guideport->name().toString().c_str());
+		_guider.guideport()->name().toString().c_str());
 	astro::event(EVENT_CLASS, astro::events::INFO,
 		astro::events::Event::GUIDE, msg);
 	double	starttime = Timer::gettime();
 	try {
-#if 0
-		// get an image (need a imager for this)
-		_imager.startExposure(_exposure);
-		_imager.wait();
-		ImagePtr	image = _imager.getImage();
-#else
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "guider exposure: %s",
+			_exposure.toString().c_str());
 		_guider.exposure(_exposure);
-		_guider.startExposure();
-		ImagePtr	image = _guider.getImage();
-#endif
+		ImagePtr	image = _guider.GuiderBase::getImage();
+
+		if (!image) {
+			debug(LOG_ERR, DEBUG_LOG, 0, "no image");
+			throw std::runtime_error("no image");
+		}
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "new image retrieved");
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "image: %s",
+			image->size().toString().c_str());
 		
 		// find the offset
 		Point	originpoint = (*_tracker)(image);
@@ -102,15 +104,8 @@ void	BacklashWork::main(astro::thread::Thread<BacklashWork>& thread) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "start backlash measuring cycle");
 		do {
 			// get an image (need a imager for this)
-#if 0
-			_imager.startExposure(_exposure);
-			_imager.wait();
-			ImagePtr	image = _imager.getImage();
-#else
 			_guider.exposure(_exposure);
-			_guider.startExposure();
 			ImagePtr	image = _guider.getImage();
-#endif
 			
 			// find the offset
 			Point	imagepoint = (*_tracker)(image) - originpoint;

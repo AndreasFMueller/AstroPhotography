@@ -26,8 +26,11 @@ void	GuiderBase::startExposure() {
 ImagePtr	GuiderBase::getImage() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "getImage() called");
 	imager().startExposure(exposure());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "exposure started");
 	imager().wait();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "wait complete");
 	ImagePtr	image = imager().getImage();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "image retrieved");
 	if (!image->hasMetadata(std::string("INSTRUME"))) {
 		image->setMetadata(astro::io::FITSKeywords::meta(
 			std::string("INSTRUME"), instrument()));

@@ -10,6 +10,7 @@
 #include <IceConversions.h>
 #include <time.h>
 #include <EventMonitor.h>
+#include <AstroUtils.h>
 
 namespace snowgui {
 
@@ -150,14 +151,13 @@ void	EventDisplayWidget::insertEvent(int row, const snowstar::Event& event) {
 	item = new QTableWidgetItem(event.service.c_str());
 	ui->eventTable->setItem(row, 2, item);
 
+
 	struct timeval	when = snowstar::converttimeval(event.timeago);
-	time_t	t = when.tv_sec;
-	struct tm	*tmp = ::localtime(&t);
-	char	timestamp[32];
-	strftime(timestamp, sizeof(timestamp), "%H:%M:%S", tmp);
-	snprintf(timestamp + 8, sizeof(timestamp) - 8, ".%03d",
-			when.tv_usec / 1000);
-	item = new QTableWidgetItem(timestamp);
+	std::string	timestamp = astro::Timer::timestamp(when, 3);
+	item = new QTableWidgetItem(timestamp.c_str());
+	QFont   f("Microsoft Sans Serif");;
+        f.setStyleHint(QFont::Monospace);
+        item->setFont(f);
 	ui->eventTable->setItem(row, 3, item);
 
 	item = new QTableWidgetItem(event.subsystem.c_str());

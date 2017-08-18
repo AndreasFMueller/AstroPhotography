@@ -214,10 +214,10 @@ void	Guider::startImaging(const Exposure& exposure) {
  */
 void	Guider::endImaging(ImagePtr image) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "received an image");
-	_image = image;
-	if (_image) {
+	_imaging = image;
+	if (_imaging) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "Image size: %s",
-			_image->size().toString().c_str());
+			_imaging->size().toString().c_str());
 	}
 	_state.endImaging();
 }

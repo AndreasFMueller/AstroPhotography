@@ -9,6 +9,7 @@
 #include <CommunicatorSingleton.h>
 #include <IceConversions.h>
 #include <AstroCamera.h>
+#include <AstroUtils.h>
 #include <algorithm>
 #include "trackselectiondialog.h"
 #include "trackviewdialog.h"
@@ -54,6 +55,7 @@ guidercontrollerwidget::guidercontrollerwidget(QWidget *parent)
 		this, SLOT(selectTrack()));
 
 	// create the tracking monitor
+	_trackingmonitordialog = NULL;
 	_trackingmonitor = NULL;
 	_trackinglabel = new QLabel(NULL);
 	ui->trackingImageArea->setWidget(_trackinglabel);
@@ -76,6 +78,11 @@ guidercontrollerwidget::guidercontrollerwidget(QWidget *parent)
 		this, SLOT(backlashDECClicked()));
 	connect(ui->raBacklashButton, SIGNAL(clicked()),
 		this, SLOT(backlashRAClicked()));
+
+	// set the font for the time
+	QFont	f("Microsoft Sans Serif");;
+	f.setStyleHint(QFont::Monospace);
+	ui->timeLabel->setFont(f);
 
 	// some other fields
 	_backlashDialog = NULL;
@@ -173,6 +180,9 @@ void	guidercontrollerwidget::setupGuider() {
 	_exposure = snowstar::convert(_guider->getExposure());
 	astro::Point	ps = snowstar::convert(_guider->getStar());
 	_star = ImagePoint((int)ps.x(), (int)ps.y());
+
+	ui->starxField->setText(QString::number(_star.x()));
+	ui->staryField->setText(QString::number(_star.y()));
 
 	// do all the registration stuff
 	_trackingmonitorimage->setGuider(_guider, _trackingmonitorimageptr);
@@ -342,6 +352,7 @@ void	guidercontrollerwidget::statusUpdate() {
 	if (!_guider) {
 		return;
 	}
+	ui->timeLabel->setText(QString(astro::Timer::timestamp(1).c_str()));
 	snowstar::GuiderState	state = _guider->getState();
 	if (state == _previousstate) {
 		return;
@@ -489,9 +500,11 @@ void	guidercontrollerwidget::launchMonitor() {
 	if (!_guider) {
 		return;
 	}
-	trackingmonitordialog	*_trackingdialog
-		= new trackingmonitordialog(this);
-	_trackingmonitor = new TrackingMonitorController(NULL, _trackingdialog);
+	if (!_trackingmonitordialog) {
+		_trackingmonitordialog = new trackingmonitordialog(this);
+	}
+	_trackingmonitor = new TrackingMonitorController(NULL,
+				_trackingmonitordialog);
 	_trackingmonitorptr = Ice::ObjectPtr(_trackingmonitor);
 
 	// get the history of the track
@@ -500,7 +513,7 @@ void	guidercontrollerwidget::launchMonitor() {
 	snowstar::TrackingHistory	history
 		= _guider->getTrackingHistory(summary.trackid);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "got %d points", history.points.size());
-	_trackingdialog->add(history);
+	_trackingmonitordialog->add(history);
 
 	// retrieve the calibrations
 	if (history.guideportcalid > 0) {
@@ -508,14 +521,14 @@ void	guidercontrollerwidget::launchMonitor() {
 			history.guideportcalid);
 		snowstar::Calibration cal = _guiderfactory
 			->getCalibration(history.guideportcalid);
-		_trackingdialog->calibration(cal);
+		_trackingmonitordialog->calibration(cal);
 	}
 	if (history.adaptiveopticscalid > 0) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieve AO cal %d",
 			history.adaptiveopticscalid);
 		snowstar::Calibration cal = _guiderfactory
 			->getCalibration(history.adaptiveopticscalid);
-		_trackingdialog->calibration(cal);
+		_trackingmonitordialog->calibration(cal);
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "calibrations installed");
 
@@ -524,7 +537,8 @@ void	guidercontrollerwidget::launchMonitor() {
 	_trackingmonitor->setGuider(_guider, _trackingmonitorptr);
 
 	// display the dialog
-	_trackingdialog->show();
+	_trackingmonitordialog->show();
+	_trackingmonitordialog->raise();
 }
 
 /**
@@ -548,6 +562,7 @@ void	guidercontrollerwidget::imageUpdated() {
  */
 void	guidercontrollerwidget::backlashRAClicked() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "backlash RA clicked");
+	setupTracker();
 	if (!_backlashDialog) {
 		_backlashDialog = new BacklashDialog();
 		_backlashDialog->guider(_guider);
@@ -566,6 +581,7 @@ void	guidercontrollerwidget::backlashRAClicked() {
  */
 void	guidercontrollerwidget::backlashDECClicked() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "backlash DEC clicked");
+	setupTracker();
 	if (!_backlashDialog) {
 		_backlashDialog = new BacklashDialog();
 		_backlashDialog->guider(_guider);

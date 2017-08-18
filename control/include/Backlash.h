@@ -64,7 +64,6 @@ public:
 	void	exposure(const camera::Exposure& e) { _exposure = e; }
 private:
 	TrackerPtr	_tracker;
-	camera::GuidePortPtr	_guideport;
 
 	// callbacks
 	callback::CallbackPtr	_callback;

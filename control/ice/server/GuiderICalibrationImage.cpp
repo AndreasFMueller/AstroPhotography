@@ -236,7 +236,7 @@ void	GuiderI::startImaging(const Exposure& exposure,
  */
 ImagePrx	GuiderI::getImage(const Ice::Current& current) {
 	// retrieve image
-	astro::image::ImagePtr	image = guider->getImage();
+	astro::image::ImagePtr	image = guider->getImaging();
 	if (!image) {
 		throw NotFound("no image available");
 	}

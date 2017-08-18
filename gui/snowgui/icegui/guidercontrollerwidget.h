@@ -45,6 +45,7 @@ class guidercontrollerwidget : public InstrumentWidget {
 
 	TrackingMonitorController	*_trackingmonitor;
 	Ice::ObjectPtr	_trackingmonitorptr;
+	trackingmonitordialog	*_trackingmonitordialog;
 
 	BacklashDialog	*_backlashDialog;
 

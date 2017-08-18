@@ -64,6 +64,9 @@ public:
 	void	start();
 	void	end();
 	double	elapsed();
+	static std::string	timestamp(int resolution);
+	static std::string	timestamp(const struct timeval& tv,
+					int resolution);
 };
 
 /**

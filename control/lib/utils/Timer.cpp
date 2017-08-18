@@ -43,4 +43,29 @@ void    Timer::sleep(double t) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "sleep complete");
 }
 
+std::string	Timer::timestamp(const struct timeval& tv, int resolution) {
+	if (resolution > 6) {
+		resolution = 6;
+	}
+	if (resolution < 0) {
+		resolution = 0;
+	}
+	char	buffer[32];
+	struct tm	*tmp = localtime(&tv.tv_sec);
+	strftime(buffer, sizeof(buffer), "%H:%M:%S", tmp);
+	int	divider = 1;
+	for (int i = 0; i < 6 - resolution; i++) {
+		divider *= 10;
+	}
+	int	sec = tv.tv_usec / divider;
+	snprintf(buffer + 8, sizeof(buffer) - 8, ".%0*d", resolution, sec);
+	return std::string(buffer);
+}
+
+std::string	Timer::timestamp(int resolution) {
+	struct timeval	tv;
+	gettimeofday(&tv, NULL);
+	return timestamp(tv, resolution);
+}
+
 } // namespace astro
