@@ -103,6 +103,7 @@ public:
 private:
 	unsigned int	_componentcount;
 public:
+	Concatenator(const Concatenator& other);
 	unsigned int	componentcount() const { return _componentcount; }
 public:
 	Concatenator(const std::string& separator)

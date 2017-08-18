@@ -18,9 +18,8 @@ namespace guiding {
  * This constructor also installs the imager, tracker and the guideport
  * that is needed.
  */
-BacklashWork::BacklashWork(camera::Imager& imager, TrackerPtr tracker,
-		camera::GuidePortPtr guideport)
-	: _imager(imager), _tracker(tracker), _guideport(guideport) {
+BacklashWork::BacklashWork(guiding::Guider& guider, TrackerPtr tracker)
+	: _guider(guider), _tracker(tracker) {
 	_interval = 5;
 	_lastpoints = 0;
 };
@@ -49,16 +48,16 @@ void	BacklashWork::move(double interval) {
 	switch (_direction) {
 	case backlash_dec:
 		if (interval > 0) {
-			_guideport->activate(0, 0, i, 0);
+			_guider.guideport()->activate(0, 0, i, 0);
 		} else {
-			_guideport->activate(0, 0, 0, i);
+			_guider.guideport()->activate(0, 0, 0, i);
 		}
 		break;
 	case backlash_ra:
 		if (interval > 0) {
-			_guideport->activate(i, 0, 0, 0);
+			_guider.guideport()->activate(i, 0, 0, 0);
 		} else {
-			_guideport->activate(0, i, 0, 0);
+			_guider.guideport()->activate(0, i, 0, 0);
 		}
 		break;
 	}
@@ -78,10 +77,16 @@ void	BacklashWork::main(astro::thread::Thread<BacklashWork>& thread) {
 		astro::events::Event::GUIDE, msg);
 	double	starttime = Timer::gettime();
 	try {
+#if 0
 		// get an image (need a imager for this)
 		_imager.startExposure(_exposure);
 		_imager.wait();
 		ImagePtr	image = _imager.getImage();
+#else
+		_guider.exposure(_exposure);
+		_guider.startExposure();
+		ImagePtr	image = _guider.getImage();
+#endif
 		
 		// find the offset
 		Point	originpoint = (*_tracker)(image);
@@ -97,9 +102,15 @@ void	BacklashWork::main(astro::thread::Thread<BacklashWork>& thread) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "start backlash measuring cycle");
 		do {
 			// get an image (need a imager for this)
+#if 0
 			_imager.startExposure(_exposure);
 			_imager.wait();
 			ImagePtr	image = _imager.getImage();
+#else
+			_guider.exposure(_exposure);
+			_guider.startExposure();
+			ImagePtr	image = _guider.getImage();
+#endif
 			
 			// find the offset
 			Point	imagepoint = (*_tracker)(image) - originpoint;
@@ -146,7 +157,7 @@ void	BacklashWork::main(astro::thread::Thread<BacklashWork>& thread) {
 			x.what());
 		msg = stringprintf("backlash characterization with guideport %s "
 			"terminated by exception %s",
-			_guideport->name().toString().c_str(),
+			_guider.guideport()->name().toString().c_str(),
 			demangle(typeid(x).name()).c_str());
 		astro::event(EVENT_CLASS, astro::events::ERR,
 			astro::events::Event::GUIDE, msg);
@@ -160,7 +171,7 @@ void	BacklashWork::main(astro::thread::Thread<BacklashWork>& thread) {
 	point(backlashpoint);
 
 	msg = stringprintf("end backlash characterization with guideport %s",
-		_guideport->name().toString().c_str());
+		_guider.guideport()->name().toString().c_str());
 	astro::event(EVENT_CLASS, astro::events::INFO,
 		astro::events::Event::GUIDE, msg);
 

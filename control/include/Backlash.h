@@ -57,7 +57,7 @@ public:
 	int	lastPoints() const { return _lastpoints; }
 	void	lastPoints(int n);
 private:
-	camera::Imager&	_imager;
+	guiding::Guider&	_guider;
 	camera::Exposure	_exposure;
 public:
 	camera::Exposure	exposure() const { return _exposure; }
@@ -77,8 +77,7 @@ private:
 	void	result(const BacklashResult&);
 	void	move(double i);
 public:
-	BacklashWork(camera::Imager& imager, TrackerPtr tracker,
-			camera::GuidePortPtr guideport);
+	BacklashWork(guiding::Guider& imager, TrackerPtr tracker);
 	void	main(astro::thread::Thread<BacklashWork>& thread);
 	void	stop();
 };

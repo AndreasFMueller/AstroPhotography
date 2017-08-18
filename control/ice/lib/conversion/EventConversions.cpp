@@ -21,6 +21,7 @@ EventLevel	convert(astro::events::eventlevel_t l) {
 	case astro::events::ALERT:	return EventLevelALERT;
 	case astro::events::EMERG:	return EventLevelEMERG;
 	}
+	throw std::runtime_error("unknown level");
 }
 
 astro::events::eventlevel_t	convert(EventLevel l) {
@@ -34,6 +35,7 @@ astro::events::eventlevel_t	convert(EventLevel l) {
 	case EventLevelALERT:	return astro::events::ALERT;
 	case EventLevelEMERG:	return astro::events::EMERG;
 	}
+	throw std::runtime_error("unknown level");
 }
 
 Event	convert(const astro::events::Event& e) {

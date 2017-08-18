@@ -285,7 +285,7 @@ Sqlite3Backend::Sqlite3Backend(const std::string& filename)
 	if (sqlite3_open(_filename.c_str(), &_database)) {
 		std::string	cause
 			= stringprintf("cannot open/create db on file '%s': %s",
-				filename.c_str(), sqlite3_errcode(_database));
+				filename.c_str(), sqlite3_errmsg(_database));
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", cause.c_str());
 		throw BadDatabase(cause);
 	}

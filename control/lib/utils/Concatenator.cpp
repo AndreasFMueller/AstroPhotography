@@ -10,6 +10,11 @@
 
 namespace astro {
 
+Concatenator::Concatenator(const Concatenator& other)
+	: _separator(other._separator), _result(other._result) {
+	_componentcount = 0;
+}
+
 void	Concatenator::operator()(const std::string& component) {
 	if (_componentcount++) {
 		_result.append(_separator);

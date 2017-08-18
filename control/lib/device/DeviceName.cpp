@@ -19,6 +19,12 @@ DeviceName::DeviceName(const std::string& name) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "parsing name '%s'", name.c_str());
 	// parse the device URL
 	std::string::size_type	pos = name.find(":");
+	if (pos == std::string::npos) {
+		std::string	msg = stringprintf("device name '%s' lacks ':'",
+			name.c_str());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw std::runtime_error(msg);
+	}
 	_type = string2type(name.substr(0, pos));
 	std::string	path = name.substr(pos + 1);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "path: %s", path.c_str());
@@ -158,7 +164,12 @@ bool	DeviceName::hasType(const device_type& t) const {
 }
 
 DeviceName::operator std::string() const {
-	return typestring() + ":" + Concatenator::concat(*this, "/");
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "converting name");
+	std::string	result = typestring();
+	result.append(":");
+	result.append(Concatenator::concat(*this, std::string("/")));
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "converted name: %s", result.c_str());
+	return result;
 }
 
 class comparator {
@@ -192,7 +203,8 @@ bool	DeviceName::operator<(const DeviceName& other) const {
 }
 
 std::ostream&	operator<<(std::ostream& out, const DeviceName& name) {
-	return out << (std::string)name;
+	std::string	n = name;
+	return out << n;
 }
 
 DeviceName	DeviceName::parent(const DeviceName::device_type& devicetype) const {

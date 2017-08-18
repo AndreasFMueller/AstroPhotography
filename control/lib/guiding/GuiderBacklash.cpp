@@ -52,8 +52,8 @@ void	Guider::startBacklash(TrackerPtr tracker, double interval,
         _state.startBacklash();
 	try {
 		// create the work object
-		BacklashWork	*backlashwork = new BacklashWork(imager(),
-			tracker, guideport());
+		BacklashWork	*backlashwork = new BacklashWork(*this,
+			tracker);
 		_backlashwork	= BacklashWorkPtr(backlashwork);
 
 		// configure the intervaland the exposure
