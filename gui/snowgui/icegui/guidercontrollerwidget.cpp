@@ -550,9 +550,10 @@ void	guidercontrollerwidget::backlashRAClicked() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "backlash RA clicked");
 	if (!_backlashDialog) {
 		_backlashDialog = new BacklashDialog();
-		_backlashDialog->show();
 		_backlashDialog->guider(_guider);
+		_backlashDialog->show();
 	} else {
+		_backlashDialog->show();
 		_backlashDialog->raise();
 		QApplication::setActiveWindow(_backlashDialog);
 	}
@@ -570,6 +571,7 @@ void	guidercontrollerwidget::backlashDECClicked() {
 		_backlashDialog->guider(_guider);
 		_backlashDialog->show();
 	} else {
+		_backlashDialog->show();
 		_backlashDialog->raise();
 		QApplication::setActiveWindow(_backlashDialog);
 	}
