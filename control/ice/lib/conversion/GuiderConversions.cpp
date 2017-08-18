@@ -293,6 +293,7 @@ ControlType     convertcontroltype(
 	case astro::guiding::AO:
 		return ControlAdaptiveOptics;
 	}
+	throw std::runtime_error("unknown control device type");
 }
 
 astro::guiding::ControlDeviceType       convertcontroltype(
@@ -303,6 +304,7 @@ astro::guiding::ControlDeviceType       convertcontroltype(
 	case ControlAdaptiveOptics:
 		return astro::guiding::AO;
 	}
+	throw std::runtime_error("unknown control device type");
 }
 
 CalibrationPoint        convert(const astro::guiding::CalibrationPoint& cp) {
@@ -580,6 +582,7 @@ astro::guiding::backlash_t	convert(BacklashDirection dir) {
 	case BacklashDEC:	return astro::guiding::backlash_dec;
 	case BacklashRA:	return astro::guiding::backlash_ra;
 	}
+	throw std::runtime_error("unknown backlash direction");
 }
 
 BacklashDirection	convert(astro::guiding::backlash_t dir) {
@@ -587,6 +590,7 @@ BacklashDirection	convert(astro::guiding::backlash_t dir) {
 	case astro::guiding::backlash_dec: return BacklashDEC;
 	case astro::guiding::backlash_ra: return BacklashRA;
 	}
+	throw std::runtime_error("unknown backlash direction");
 }
 
 } // namespace snowstar
