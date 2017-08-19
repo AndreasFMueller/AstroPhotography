@@ -16,6 +16,8 @@ namespace snowgui {
 trackingmonitordialog::trackingmonitordialog(QWidget *parent) :
 	QDialog(parent), ui(new Ui::trackingmonitordialog) {
 	ui->setupUi(this);
+	ui->gpWidget->setVisible(false);
+	ui->aoWidget->setVisible(false);
 }
 
 /**
@@ -56,6 +58,8 @@ void	trackingmonitordialog::add(const snowstar::TrackingHistory& history) {
 		}
 	);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "added %d points", counter);
+	ui->gpWidget->setVisible(ui->gpTrack->hasData());
+	ui->aoWidget->setVisible(ui->aoTrack->hasData());
 }
 
 /**
@@ -105,7 +109,9 @@ void    trackingmonitordialog::calibration(const snowstar::Calibration& calibrat
 
 void	trackingmonitordialog::refreshDisplay() {
 	ui->gpTrack->refreshDisplay();
+	ui->gpWidget->setVisible(ui->gpTrack->hasData());
 	ui->aoTrack->refreshDisplay();
+	ui->aoWidget->setVisible(ui->aoTrack->hasData());
 }
 
 } // namespace snowgui

@@ -36,6 +36,7 @@ public:
 	void	calibration(const snowstar::Calibration& calibration);
 	void	updateData();
 	void	clearData();
+	bool	hasData() const;
 
 public slots:
 	void	buttonToggled(bool);

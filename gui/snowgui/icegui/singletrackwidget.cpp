@@ -195,4 +195,8 @@ void	singletrackwidget::refreshDisplay() {
 	ui->dataWidget->repaint();
 }
 
+bool	singletrackwidget::hasData() const {
+	return (_points.size() > 0);
+}
+
 } // namespace snowgui
