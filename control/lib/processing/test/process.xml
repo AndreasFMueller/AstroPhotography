@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<process>
+	<darkimage name="dark">
+		<fileimage file="dark1.fits" />
+		<fileimage file="dark2.fits" />
+		<fileimage file="dark3.fits" />
+		<fileimage file="dark4.fits" />
+		<fileimage file="dark5.fits" />
+	</darkimage>
+	<flatimage dark="flat">
+		<calibrate dark="dark">
+			<fileimage file="flat1.fits" />
+		</calibrate>
+		<calibrate dark="dark">
+			<fileimage file="flat2.fits" />
+		</calibrate>
+		<calibrate dark="dark">
+			<fileimage file="flat3.fits" />
+		</calibrate>
+		<calibrate dark="dark">
+			<fileimage file="flat4.fits" />
+		</calibrate>
+		<calibrate dark="dark">
+			<fileimage file="flat5.fits" />
+		</calibrate>
+	</flatimage>
+</process>

@@ -116,6 +116,8 @@ typedef std::shared_ptr<ProcessingStep>	ProcessingStepPtr;
 class ProcessingThread;
 typedef std::shared_ptr<ProcessingThread>	ProcessingThreadPtr;
 
+class ProcessorParser;
+
 /**
  * \brief ProcessingStep base class
  *
@@ -126,10 +128,29 @@ typedef std::shared_ptr<ProcessingThread>	ProcessingThreadPtr;
  * 
  */
 class ProcessingStep {
+public:
+	static int	newid();
+	static void	remember(ProcessingStepPtr step);
+	static bool	exists(int id);
+	static ProcessingStepPtr	byid(int id);
+	static void	forget(int id);
+	static bool	inuse(int id);
+private:
+	// each processing step has an id, and the library ensures that the
+	// ids are unique
+	int	_id;
+public:
+	int	id() const { return _id; }
+private:
+	std::string	_name;
+public:
+	const std::string&	name() const { return _name; }
+	void	name(const std::string& n) { _name = n; }
+
 	// precursors and successors of each step, these turn the processing
 	// steps into directed graph
 public:	
-	typedef	std::list<ProcessingStep *>	steps;
+	typedef	std::list<int>	steps;
 private:
 	steps	_precursors;
 	steps	_successors;
@@ -140,19 +161,30 @@ protected:
 	const steps&	successors() const {
 		return _successors;
 	}
+public:
+	int	precursorCount() const { return _precursors.size(); }
+	int	successorCount() const { return _successors.size(); }
+	bool	hasSuccessor(int id) const;
+	bool	hasPrecursor(int id) const;
+	bool	hasSuccessor(ProcessingStepPtr step) const;
+	bool	hasPrecursor(ProcessingStepPtr step) const;
 protected:
 	// derived classes may have their own methods to handle their inputs,
 	// but they use the methods here to maintain the dependency graph
-	void	add_precursor(ProcessingStep *step);
-	void	remove_precursor(ProcessingStep *step);
-	void	add_successor(ProcessingStep *step);
-	void	remove_successor(ProcessingStep *step);
-	// Derived classes may need access to precursors
-private:
+	// this methods 
 	void	add_precursor(ProcessingStepPtr step);
 	void	remove_precursor(ProcessingStepPtr step);
 	void	add_successor(ProcessingStepPtr step);
 	void	remove_successor(ProcessingStepPtr step);
+	friend class ProcessorParser;
+private:
+	// these methods do not also add the other 
+	void	add_precursor(int id);
+	void	add_successor(int id);
+	void	remove_precursor(int id);
+	void	remove_successor(int id);
+	// Derived classes may need access to precursors
+private:
 	friend class ProcessingController;
 	// allow test class access
 	friend class astro::test::ProcessingStepTest;
@@ -349,7 +381,11 @@ public:
 };
 
 /**
- * \brief Create an image from the input an 
+ * \brief Create an image from the input and keep a copy of it in memory
+ *
+ * This type of processin step ensures that recomputations are keept to
+ * a minimum. This type of step should be included whenever lots of access
+ * to the same pixel by the successors are expected.
  */
 class ImageBufferStep : public ImageStep {
 	Image<double>	*image;
@@ -617,6 +653,39 @@ public:
  */
 class RGBDemosaicingStep : public ImageStep {
 public:
+};
+
+/**
+ * \brief Controller Class to manage a complete 
+ */
+class ProcessorNetwork {
+	typedef std::map<int, ProcessingStepPtr>	stepmap_t;
+	typedef std::map<int, std::string>		id2namemap_t;
+	typedef std::multimap<std::string, int>		name2idmap_t;
+
+	stepmap_t	_steps;
+	id2namemap_t	_id2names;
+	name2idmap_t	_name2ids;
+public:
+	ProcessorNetwork();
+	void	add(ProcessingStepPtr step);
+	ProcessingStepPtr	byid(int id) const;
+	ProcessingStepPtr	byname(const std::string& name) const;
+	ProcessingStepPtr	bynameid(const std::string& name) const;
+	std::set<ProcessingStepPtr>	terminals() const;
+	std::set<ProcessingStepPtr>	initials() const;
+};
+typedef std::shared_ptr<ProcessorNetwork>	ProcessorNetworkPtr;
+
+/**
+ * \brief Factory class to build processing networks from files or strings
+ */
+class ProcessorFactory {
+public:
+	ProcessorFactory();
+	ProcessorNetworkPtr	operator()(void);
+	ProcessorNetworkPtr	operator()(const std::string& filename);
+	ProcessorNetworkPtr	operator()(const char *data, int size);
 };
 
 } // namespace process

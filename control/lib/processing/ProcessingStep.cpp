@@ -18,6 +18,62 @@ using namespace astro::adapter;
 namespace astro {
 namespace process {
 
+#if 0
+static int	_process_id = 0;
+
+typedef std::map<int, ProcessingStepPtr>	stepmap_t;
+static stepmap_t	allsteps;
+
+void	ProcessingStep::remember(ProcessingStepPtr step) {
+	if (allsteps.end() != allsteps.find(step->id())) {
+		return;
+	}
+	allsteps.insert(std::make_pair(step->id(), step));
+}
+
+bool	ProcessingStep::exists(int id) {
+	return (allsteps.end() != allsteps.find(id));
+}
+
+void	ProcessingStep::remove(int id) {
+	stepmap_t::const_iterator	i = allsteps.find(id);
+	if (i != allsteps.end()) {
+		allsteps.erase(i);
+	}
+}
+
+ProcessingStepPtr	ProcessingStep::byid(int id) {
+	stepmap_t::const_iterator	i = allsteps.find(id);
+	if (i != allsteps.end()) {
+		return i->second;
+	}
+	throw ProcessingStePtr(NULL);
+}
+
+bool	ProcessingStep::inuse(int id) {
+	stepmap_t::const_iterator	i;
+	i = std::find_if(allsteps.begin(), allsteps.end(),
+		[id](const std::pair<int, ProcessingStepPtr>& p) {
+			return p->hasPrecursor(id) || p->hasSuccessor(id);
+		}
+	);
+	return (i != allsteps.end());
+}
+
+void	ProcessingStep::forget(int id) {
+	if (inuse(id)) {
+		return;
+	}
+	stepmap_t::const_iterator	i;
+	i = std::find_if(allsteps.begin(), allsteps.end(),
+		[id](const std::pair<int, ProcessingStepPtr>>& p) {
+			return p->first == id;
+		}
+	);
+	allsteps.erase(i);
+}
+#endif
+
 //////////////////////////////////////////////////////////////////////
 // Construction and Destruction
 //////////////////////////////////////////////////////////////////////
@@ -25,15 +81,17 @@ namespace process {
  * \brief Create a new processing step
  */
 ProcessingStep::ProcessingStep() {
+	_id = newid();
 	_status = idle;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "new processing step %d created", _id);
 }
 
 /**
  * \brief Destroy the processing step
  */
 ProcessingStep::~ProcessingStep() {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "destroying %s @ %p",
-		type_name().c_str(),  this);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "destroying %s @ %p, (id=%d, name=%s)",
+		type_name().c_str(),  this, id(), name().c_str());
 	// ensure we are neither precursor nor successor of any other step
 	remove_me();
 }
@@ -51,92 +109,161 @@ std::string	ProcessingStep::type_name() const {
 }
 
 //////////////////////////////////////////////////////////////////////
+//
+//////////////////////////////////////////////////////////////////////
+bool	ProcessingStep::hasPrecursor(ProcessingStepPtr step) const {
+	return hasPrecursor(step->id());
+}
+
+bool	ProcessingStep::hasPrecursor(int id) const {
+	return _precursors.end() != std::find_if(_precursors.begin(),
+		_precursors.end(),
+		[id](int x) {
+			return x == id;
+		}
+	);
+}
+
+bool	ProcessingStep::hasSuccessor(ProcessingStepPtr step) const {
+	return hasSuccessor(step->id());
+}
+
+bool	ProcessingStep::hasSuccessor(int id) const {
+	return _successors.end() != std::find_if(_successors.begin(),
+		_successors.end(),
+		[id](int x) {
+			return x == id;
+		}
+	);
+}
+
+//////////////////////////////////////////////////////////////////////
 // Dependency tracking
 //////////////////////////////////////////////////////////////////////
 /**
  * \brief add a precursor
  */
-void	ProcessingStep::add_precursor(ProcessingStep *step) {
+void	ProcessingStep::add_precursor(ProcessingStepPtr step) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "add precursor %s @ %p",
-		get_typename(step).c_str(),  step);
-	// don't add if already present
-	if (_precursors.end()
-		!= std::find(_precursors.begin(), _precursors.end(), step)) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "precursor %p already present",
-			step);
+		get_typename(&*step).c_str(),  &*step);
+	// make sure this node is registered
+	if (!exists(id())) {
+		std::string	msg = stringprintf("%d not registered", id());
+		throw std::runtime_error(msg);
+	}
+	remember(step);
+
+	// check whether step is already a precursor
+	if (hasPrecursor(step)) {
 		return;
 	}
 
-	// add to the precursors vector
-	_precursors.push_back(step);
-	// tell the step that it has a new successor
-	step->add_successor(this);
-}
-
-void	ProcessingStep::add_precursor(ProcessingStepPtr step) {
-	add_precursor(&*step);
+	// mutually add links
+	add_precursor(step->id());
+	step->add_successor(id());
 }
 
 /**
  * \brief add a successor
  */
-void	ProcessingStep::add_successor(ProcessingStep *step) {
+void	ProcessingStep::add_successor(ProcessingStepPtr step) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "add successor %s @ %p",
-		get_typename(step).c_str(),  step);
-	// don't add if already present
-	if (_successors.end()
-		!= std::find(_successors.begin(), _successors.end(), step)) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "%p alread present", step);
+		get_typename(&*step).c_str(),  &*step);
+	// make sure this node is registered
+	if (!exists(id())) {
+		std::string	msg = stringprintf("%d not registered", id());
+		throw std::runtime_error(msg);
+	}
+	remember(step);
+
+	// check whether the step is already a successor
+	if (hasSuccessor(step)) {
 		return;
 	}
-	// add to the successors vector
-	_successors.push_back(step);
-	// tell the new step that we are it's precursor
-	step->add_precursor(this);
-}
 
-void	ProcessingStep::add_successor(ProcessingStepPtr step) {
-	add_successor(&*step);
+	// mutually add links
+	add_successor(step->id());
+	step->add_precursor(id());
 }
 
 /**
  * \brief add a precursor
  */
-void	ProcessingStep::remove_precursor(ProcessingStep *step) {
-	// no need for work if not present
-	steps::iterator	s = std::find(_precursors.begin(), _precursors.end(),
-					step);
-	if (_precursors.end() == s) {
+void	ProcessingStep::remove_precursor(ProcessingStepPtr step) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "remove precursor %d", step->id());
+	if (!hasPrecursor(step->id())) {
 		return;
 	}
-	// remove the precursor
-	_precursors.erase(s);
-	// tell the step that we are no longer a successor
-	step->remove_successor(this);
-}
-
-void	ProcessingStep::remove_precursor(ProcessingStepPtr step) {
-	remove_precursor(&*step);
+	remove_precursor(step->id());
+	step->remove_successor(id());
 }
 
 /**
  * \brief remove a successor
  */
-void	ProcessingStep::remove_successor(ProcessingStep *step) {
-	// no need for work if not present
-	steps::iterator	s = std::find(_successors.begin(), _successors.end(),
-					step);
-	if (_successors.end() == s) {
+void	ProcessingStep::remove_successor(ProcessingStepPtr step) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "remove successor %d", step->id());
+	if (!hasSuccessor(step->id())) {
 		return;
 	}
-	// remove from the successor list
-	_successors.erase(s);
-	// tell the successor that we are no longer a precursor
-	step->remove_precursor(this);
+	remove_successor(step->id());
+	step->remove_precursor(id());
 }
 
-void	ProcessingStep::remove_successor(ProcessingStepPtr step) {
-	remove_successor(&*step);
+/**
+ * \brief add a successor id
+ */
+void	ProcessingStep::add_successor(int id) {
+	if (!exists(id)) {
+		std::string	msg = stringprintf("id %d not found", id);
+		throw std::runtime_error(msg);
+	}
+	if (hasSuccessor(id)) { return; }
+	_successors.push_back(id);
+}
+
+/**
+ * \brief add a precursor id
+ */
+void	ProcessingStep::add_precursor(int id) {
+	if (!exists(id)) {
+		std::string	msg = stringprintf("id %d not found", id);
+		throw std::runtime_error(msg);
+	}
+	if (hasPrecursor(id)) { return; }
+	_precursors.push_back(id);
+}
+
+/**
+ * \brief remove a successor with a given id
+ */
+void	ProcessingStep::remove_successor(int id) {
+	steps::iterator	s;
+	while (_precursors.end() != (s
+		= std::find_if(_successors.begin(), _successors.end(),
+			[id](const int successorid) {
+				ProcessingStepPtr	p = byid(successorid);
+				return (id == p->id());
+			}
+		))) {
+		_successors.erase(s);
+	}
+}
+
+/**
+ * \brief remove a precursor with a given id
+ */
+void	ProcessingStep::remove_precursor(int id) {
+	steps::iterator	s;
+	while (_precursors.end() != (s
+		= std::find_if(_precursors.begin(), _precursors.end(),
+			[id](const int precursorid) {
+				ProcessingStepPtr	p = byid(precursorid);
+				return (id == p->id());
+			}
+		))) {
+		_precursors.erase(s);
+	}
 }
 
 /**
@@ -146,24 +273,19 @@ void	ProcessingStep::remove_me() {
 	// remove me from precursors
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "remove from precursors of %s @ %p",
 		type_name().c_str(), this);
-	steps	stepvector = _precursors;
-	std::for_each(stepvector.begin(), stepvector.end(),
-		[this](steps::value_type& x) {
-			debug(LOG_DEBUG, DEBUG_LOG, 0, "remove precursor %s",
-				get_typename(x).c_str());
-			x->remove_successor(this);
+	int	myid = _id;
+	std::for_each(_precursors.begin(), _precursors.end(),
+		[myid](int precursorid) {
+			byid(precursorid)->remove_successor(myid);
 		}
 	);
 
 	// remove me from successors
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "remove from successors of %s @ %p",
 		type_name().c_str(), this);
-	stepvector = _successors;
-	std::for_each(stepvector.begin(), stepvector.end(),
-		[this](steps::value_type& x) {
-			debug(LOG_DEBUG, DEBUG_LOG, 0, "remove successor %s",
-				get_typename(x).c_str());
-			x->remove_precursor(this);
+	std::for_each(_successors.begin(), _successors.end(),
+		[myid](int successorid) {
+			byid(successorid)->remove_precursor(myid);
 		}
 	);
 }
@@ -234,12 +356,13 @@ ProcessingStep::state	ProcessingStep::precursorstate() const {
 	}
 
 	// if there are any precursors, we have to check their minimum state
-	state	minstate = (*std::min_element(_precursors.begin(),
+	int	minid = *std::min_element(_precursors.begin(),
 		_precursors.end(),
-		[](const ProcessingStep *a, const ProcessingStep *b) {
-			return a->status() < b->status();
+		[](const int a, const int b) {
+			return byid(a)->status() < byid(b)->status();
 		}
-	))->status();
+	);
+	state	minstate = byid(minid)->status();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "precursor state: %s",
 		statename(minstate).c_str());
 	return minstate;
@@ -285,7 +408,11 @@ ProcessingStep::state	ProcessingStep::checkstate() {
 		statename(minstate).c_str());
 	_status = newstate;
 	std::for_each(_successors.begin(), _successors.end(),
-		[](steps::value_type x) { x->checkstate(); });
+		[](int stepid) {
+			ProcessingStepPtr	step = byid(stepid);
+			step->checkstate();
+		}
+	);
 
 	// return the new state
 	return status();
@@ -302,7 +429,10 @@ ProcessingStep::state	ProcessingStep::status(state newstate) {
 	}
 	_status = newstate;
 	std::for_each(_successors.begin(), _successors.end(),
-		[](steps::value_type x) { x->checkstate(); });
+		[](int successorid) {
+			byid(successorid)->checkstate();
+		}
+	);
 	return _status;
 }
 

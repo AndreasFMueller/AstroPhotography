@@ -41,10 +41,11 @@ const CalibrationImageStep	*ImageCalibrationStep::calimage(
 		= std::find_if(precursors().begin(), precursors().end(),
 		// lambda predicate to find precursor steps that are 
 		// calibration images and of the correct type
-		[t](const ProcessingStep *step) {
+		[t](const int stepid) {
+			ProcessingStepPtr	step = ProcessingStep::byid(stepid);
 			// check whether its a calibration image
 			const CalibrationImageStep	*image
-				= dynamic_cast<const CalibrationImageStep *>(step);
+				= dynamic_cast<const CalibrationImageStep *>(&*step);
 			if (image == NULL) {
 				return false;
 			}
@@ -59,8 +60,9 @@ const CalibrationImageStep	*ImageCalibrationStep::calimage(
 			stringprintf("no precursor of type %s found",
 				CalibrationImageStep::caltypename(t).c_str()));
 	}
+	ProcessingStepPtr	step = ProcessingStep::byid(*i);
 	const CalibrationImageStep	*result
-		= dynamic_cast<const CalibrationImageStep *>(*i);
+		= dynamic_cast<const CalibrationImageStep *>(&*step);
 	if (NULL == result) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "precursor is not a "
 			"calibration image");
@@ -183,14 +185,15 @@ ProcessingStep::state	ImageCalibrationStep::do_work() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "looking for different image");
 	ProcessingStep::steps::const_iterator	i
 		= std::find_if(precursors().begin(), precursors().end(),
-		[dark, flat](ProcessingStep *step) {
-			if (NULL == dynamic_cast<ImageStep *>(step)) {
+		[dark, flat](int stepid) {
+			ProcessingStepPtr	step = ProcessingStep::byid(stepid);
+			if (NULL == dynamic_cast<ImageStep *>(&*step)) {
 				return false;
 			}
 			debug(LOG_DEBUG, DEBUG_LOG, 0,
 				"step = %p, dark = %p, flat = %p",
-				step, dark, flat);
-			return ((step != dark) && (step != flat));
+				&*step, &*dark, &*flat);
+			return ((&*step != &*dark) && (&*step != &*flat));
 		}
 	);
 	if (i == precursors().end()) {
@@ -198,7 +201,8 @@ ProcessingStep::state	ImageCalibrationStep::do_work() {
 		return ProcessingStep::idle;
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "found an image to calibrate");
-	ImageStep	*image = dynamic_cast<ImageStep *>(*i);
+	ProcessingStepPtr	step = ProcessingStep::byid(*i);
+	ImageStep	*image = dynamic_cast<ImageStep *>(&*step);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "image to calibration: size=%s",
 		image->out().getSize().toString().c_str());
 

@@ -2,9 +2,10 @@
 # Makefile.am -- tests for image processing functions
 # 
 # (c) 2015 Prof Dr Andreas Mueller, Hochschule Rapperswil
-# $Id$
 #
 noinst_HEADERS = 
+
+noinst_DATA = process.xml
 
 test_ldadd = -lcppunit 							\
 	-L$(top_builddir)/lib/processing -lastroprocessing		\
@@ -20,7 +21,8 @@ if ENABLE_UNITTESTS
 noinst_PROGRAMS = tests singletest
 
 # single test
-singletest_SOURCES = singletest.cpp
+singletest_SOURCES = singletest.cpp					\
+	ProcessorParserTest.cpp
 singletest_LDADD = $(test_ldadd)
 singletest_DEPENDENCIES = $(test_dependencies)
 

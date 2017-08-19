@@ -5,7 +5,8 @@
 #
 SUBDIRS = . test
 
-noinst_HEADERS =
+noinst_HEADERS =							\
+	ProcessorParser.h
 
 noinst_LTLIBRARIES = libastroprocessing.la
 
@@ -19,8 +20,13 @@ libastroprocessing_la_SOURCES =						\
 	InterpolationStep.cpp						\
 	PreviewAdapter.cpp						\
 	ProcessingController.cpp					\
+	ProcessingStatic.cpp						\
 	ProcessingStep.cpp						\
 	ProcessingThread.cpp						\
+	ProcessorFactory.cpp						\
+	ProcessorNetwork.cpp						\
+	ProcessorParser.cpp						\
+	ParserSteps.cpp							\
 	RawImageFileStep.cpp						\
 	WriteImageStep.cpp
 

@@ -85,8 +85,9 @@ class extension_aggregator : public aggregator {
 public:
 	extension_aggregator(const std::string& name) : _name(name) {
 	}
-	void	operator()(ProcessingStep *step) {
-		ImageStep	*imagestep = dynamic_cast<ImageStep *>(step);
+	void	operator()(int stepid) {
+		ProcessingStepPtr	step = ProcessingStep::byid(stepid);
+		ImageStep	*imagestep = dynamic_cast<ImageStep *>(&*step);
 		if (NULL == imagestep) {
 			return;
 		}
@@ -165,8 +166,9 @@ class has_metadata {
 	std::string	_name;
 public:
 	has_metadata(const std::string& name) : _name(name) { }
-	bool	operator()(ProcessingStep *step) const {
-		ImageStep	*imagestep = dynamic_cast<ImageStep *>(step);
+	bool	operator()(int stepid) const {
+		ProcessingStepPtr	step = ProcessingStep::byid(stepid);
+		ImageStep	*imagestep = dynamic_cast<ImageStep *>(&*step);
 		if (NULL == imagestep) {
 			return false;
 		}
@@ -185,8 +187,9 @@ public:
 	has_same_metadata(const std::string& name) : _name(name) {
 		has_value = false;
 	}
-	bool	operator()(ProcessingStep *step) {
-		ImageStep	*imagestep = dynamic_cast<ImageStep *>(step);
+	bool	operator()(int stepid) {
+		ProcessingStepPtr	step = ProcessingStep::byid(stepid);
+		ImageStep	*imagestep = dynamic_cast<ImageStep *>(&*step);
 		if (NULL == imagestep) {
 			return false;
 		}
@@ -376,8 +379,9 @@ size_t	CalibrationProcessorStep::getPrecursors() {
 	int	n = 0;
 	int	*np = &n;
 	std::for_each(precursors().begin(), precursors().end(),
-		[ri,np](ProcessingStep *step) mutable {
-			ImageStep	*f = dynamic_cast<ImageStep *>(step);
+		[ri,np](int stepid) mutable {
+			ProcessingStepPtr step = ProcessingStep::byid(stepid);
+			ImageStep	*f = dynamic_cast<ImageStep *>(&*step);
 			if (NULL != f) {
 				ri[(*np)++] = f;
 			}

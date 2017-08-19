@@ -144,6 +144,8 @@ Mandatory packages:
  - UUID, library for unique ids, used to tag FITS files so that duplicates
    can be recognized (Ubuntu: uuid-dev)
 
+ - libxml2, library used for parsing XML files
+
  - The std::regex class of the C++11 standard is used, but g++, although it
    does come with the appropriate headers, does not implement the std::regex
    class. In this case, the regex class from the boost library must be used,
@@ -182,6 +184,7 @@ Ubuntu:
 	uuid-dev
         libfftw3-dev
 	libavahi-client-dev
+	libxml2-dev
    Optional:
 	zeroc-ice35
 	libunicap2-dev

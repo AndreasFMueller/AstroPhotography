@@ -65,6 +65,20 @@ else
 AC_CHECK_LIB([uuid], [uuid_parse])
 fi
 
+## LIBXML2 ###########################################################
+if pkg-config --exists libxml-2.0
+then
+	LIBS="${LIBS} `pkg-config --libs libxml-2.0`"
+	CXXFLAGS="${CXXFLAGS} `pkg-config --cflags libxml-2.0`"
+else
+	CXXFLAGS="${CXXFLAGS} -I/usr/include/libxml2"
+	AC_LANG_PUSH([C++])
+	AC_CHECK_HEADERS(libxml/parser.h, ,
+		[AC_MSG_ERROR([libxml2 header not found])])
+	AC_LANG_POP([C++])
+	AC_CHECK_LIB([xml2], [xmlSAXUserParseFile])
+fi
+
 ## DNS-DS ############################################################
 servicediscovery=
 case `uname` in

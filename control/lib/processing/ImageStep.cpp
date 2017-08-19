@@ -72,16 +72,19 @@ ImageStep	*ImageStep::input() const {
 	// get the precursor
 	steps::const_iterator	pp =
 		find_if(precursors().begin(), precursors().end(),
-			[](ProcessingStep *step) {
-				return (dynamic_cast<ImageStep *>(step)
+			[](int stepid) {
+				ProcessingStepPtr	step
+					= ProcessingStep::byid(stepid);
+				return (dynamic_cast<ImageStep *>(&*step)
 					!= NULL);
 			}
 		);
 	if (pp == precursors().end()) {
 		throw std::runtime_error("no precursor image");
 	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "precursor: %p", *pp);
-	ImageStep	*precursor = dynamic_cast<ImageStep *>(*pp);
+	ProcessingStepPtr	step = ProcessingStep::byid(*pp);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "precursor: %p", &*step);
+	ImageStep	*precursor = dynamic_cast<ImageStep *>(&*step);
 	return precursor;
 }
 
