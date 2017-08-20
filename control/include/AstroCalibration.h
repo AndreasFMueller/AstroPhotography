@@ -29,6 +29,8 @@ astro::image::ImagePtr	operator()(const astro::image::ImageSequence& images) con
 class DarkFrameFactory : public CalibrationFrameFactory {
 	double	_badpixellimit;
 public:
+	double	badpixellimit() const { return _badpixellimit; }
+	void	badpixellimit(double b) { _badpixellimit = b; }
 	DarkFrameFactory(double badpixellimit = 3)
 		: _badpixellimit(badpixellimit) {
 	}

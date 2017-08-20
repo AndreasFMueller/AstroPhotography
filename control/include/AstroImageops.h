@@ -58,6 +58,8 @@ Image<Pixel>	*cut(const Image<Pixel>& source, const ImageRectangle& rect) {
 
 ImagePtr	cut(ImagePtr source, const ImageRectangle& rect);
 
+ImagePtr	duplicate(ImagePtr image);
+
 } // namespace ops
 } // namespace image
 } // namespace astro

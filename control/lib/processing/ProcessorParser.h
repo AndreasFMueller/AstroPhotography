@@ -23,6 +23,7 @@ class ProcessorParser {
 	ProcessorNetworkPtr	_network;
 	std::stack<ProcessingStepPtr>	_stepstack;
 	std::stack<std::string>		_basestack;
+	std::string	fullname(const std::string& filename) const;
 	// private methods for handling different types of processing steps
 	void	startCommon(const attr_t& attrs);
 	void	endCommon();
@@ -36,6 +37,8 @@ class ProcessorParser {
 	void	endFlatimage();
 	void	startCalibrate(const attr_t& attrs);
 	void	endCalibrate();
+	void	startWritefileimage(const attr_t& attrs);
+	void	endWritefileimage();
 public:
 	ProcessorParser();
 	void	startElement(const std::string& name, const attr_t& attrs);

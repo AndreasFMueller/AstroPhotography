@@ -28,7 +28,7 @@ Imager::Imager(CcdPtr ccd) : _ccd(ccd) {
 void	Imager::dark(ImagePtr dark) {
 	std::string	msg = stringprintf("install %s dark image in %s",
 		dark->size().toString().c_str(),
-		_ccd->name().toString().c_str());
+		(_ccd) ? _ccd->name().toString().c_str() : "unknown");
 	astro::event(EVENT_CLASS, astro::events::INFO,
 		astro::events::Event::DEVICE, msg);
 	_dark = dark;
@@ -37,7 +37,7 @@ void	Imager::dark(ImagePtr dark) {
 void	Imager::flat(ImagePtr flat) {
 	std::string	msg = stringprintf("install %s flat image in %s",
 		flat->size().toString().c_str(),
-		_ccd->name().toString().c_str());
+		(_ccd) ? _ccd->name().toString().c_str() : "unknown");
 	astro::event(EVENT_CLASS, astro::events::INFO,
 		astro::events::Event::DEVICE, msg);
 	_flat = flat;

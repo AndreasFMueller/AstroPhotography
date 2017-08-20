@@ -10,6 +10,7 @@
 namespace astro {
 namespace process {
 
+#if 0
 //////////////////////////////////////////////////////////////////////
 // Construction an destruction
 //////////////////////////////////////////////////////////////////////
@@ -225,6 +226,7 @@ void	ProcessingController::execute(size_t nthreads) {
 		// start again
 	}
 }
+#endif
 
 } // namespace process
 } // namespace astro

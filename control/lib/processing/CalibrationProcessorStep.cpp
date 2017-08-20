@@ -18,6 +18,7 @@ using namespace astro::io;
 namespace astro {
 namespace process {
 
+#if 0
 //////////////////////////////////////////////////////////////////////
 // some auxiliary functions
 //////////////////////////////////////////////////////////////////////
@@ -819,6 +820,7 @@ ProcessingStep::state	FlatProcessorStep::do_work() {
 	// cheat
 	return ProcessingStep::complete;
 }
+#endif
 
 } // namespace process
 } // namespace astro

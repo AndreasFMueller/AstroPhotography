@@ -16,6 +16,7 @@ using namespace astro::adapter;
 namespace astro {
 namespace process {
 
+#if 0
 //////////////////////////////////////////////////////////////////////
 // Construction and Destruction
 //////////////////////////////////////////////////////////////////////
@@ -112,6 +113,7 @@ ImageMetadata::const_iterator	ImageStep::begin() const {
 ImageMetadata::const_iterator	ImageStep::end() const {
 	return input()->end();
 }
+#endif
 
 } // namespace process
 } // namespace astro

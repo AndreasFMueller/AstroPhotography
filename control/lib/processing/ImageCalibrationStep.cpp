@@ -6,6 +6,12 @@
 #include <AstroProcess.h>
 #include <AstroDebug.h>
 #include <AstroFormat.h>
+#include <AstroCalibration.h>
+#include <AstroInterpolation.h>
+#include <AstroDemosaic.h>
+#include <AstroOperators.h>
+#include <AstroImager.h>
+#include <AstroImageops.h>
 #include <algorithm>
 
 using namespace astro::image;
@@ -14,6 +20,7 @@ using namespace astro::adapter;
 namespace astro {
 namespace process {
 
+#if 0
 /**
  * \brief Create an Image Calibration step
  */
@@ -237,6 +244,99 @@ ProcessingStep::state	ImageCalibrationStep::do_work() {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "windowed calibration adapter "
 			"for subframe %s created", window.toString().c_str());
 	}
+	return ProcessingStep::complete;
+}
+#endif
+
+/**
+ * \brief Construct a new Image step
+ */
+ImageCalibrationStep::ImageCalibrationStep() {
+	_interpolate = false;
+	_demosaic = false;
+	_flip = false;
+}
+
+/**
+ * \brief Perform the step
+ */
+ProcessingStep::state	ImageCalibrationStep::do_work() {
+	int	darkid = -1;
+	int	flatid = -1;
+
+	astro::camera::Imager	imager;
+
+	// check for the dark image
+	if (_dark) {
+		darkid = _dark->id();
+		ImageStep	*imagestep = dynamic_cast<ImageStep*>(&*_dark);
+		if (imagestep) {
+			ImagePtr	darkimage = imagestep->image();
+			imager.dark(darkimage);
+			imager.darksubtract(true);
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "found %s dark image",
+				darkimage->size().toString().c_str());
+		} else {
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "dark image not found");
+		}
+	}
+
+	// check for the flat image
+	if (_flat) {
+		flatid = _flat->id();
+		ImageStep	*imagestep = dynamic_cast<ImageStep*>(&*_flat);
+		if (imagestep) {
+			ImagePtr	flatimage = imagestep->image();
+			imager.flat(flatimage);
+			imager.flatdivide(true);
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "found %s flat image",
+				flatimage->size().toString().c_str());
+		} else {
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "flat image not found");
+		}
+	}
+
+	// get the unique precursor that is not 
+	steps::const_iterator	i;
+	i = std::find_if(precursors().begin(), precursors().end(),
+		[darkid,flatid](int id) -> bool {
+			return (darkid != id) && (flatid != id);
+		}
+	);
+	if (i == precursors().end()) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "no precursor step");
+		return ProcessingStep::failed;
+	}
+	ProcessingStepPtr	precursor = byid(*i);
+	ImageStep	*imagestep = dynamic_cast<ImageStep*>(&*precursor);
+	if (NULL == imagestep) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "no precursor image");
+		return ProcessingStep::failed;
+	}
+	_image = astro::image::ops::duplicate(imagestep->image());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "precursor image duplicate: %s",
+		_image->size().toString().c_str(),
+		demangle(typeid(_image->pixel_type()).name()).c_str());
+
+	// perform interpolation
+	imager.interpolate(_interpolate);
+
+	// perform processing
+	imager(_image);
+
+	// perform debayering
+	if (_demosaic) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "demosaicing");
+		_image = demosaic_bilinear(_image);
+	}
+
+	// perform flip the image
+	if (_flip) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "flipping");
+		astro::image::operators::flip(_image);
+	}
+
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "image calibration complete");
 	return ProcessingStep::complete;
 }
 

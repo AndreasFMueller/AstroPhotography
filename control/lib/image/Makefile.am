@@ -44,6 +44,7 @@ libastroimage_la_SOURCES = 						\
 	Destar.cpp							\
 	DiskImage.cpp							\
 	DisplayConverter.cpp						\
+	duplicate.cpp							\
 	EuclideanDisplacement.cpp					\
 	EuclideanDisplacementConvolve.cpp				\
 	FITS.cpp							\

@@ -38,12 +38,20 @@ void	ProcessorParser::startElement(const std::string& name,
 		startFileimage(attrs);
 		return;
 	}
+	if (name == std::string("writefileimage")) {
+		startWritefileimage(attrs);
+		return;
+	}
 	if (name == std::string("darkimage")) {
 		startDarkimage(attrs);
 		return;
 	}
 	if (name == std::string("flatimage")) {
 		startFlatimage(attrs);
+		return;
+	}
+	if (name == std::string("calibrate")) {
+		startCalibrate(attrs);
 		return;
 	}
 	std::string	msg = stringprintf("don't know how to handle <%s>",
@@ -64,12 +72,20 @@ void	ProcessorParser::endElement(const std::string& name) {
 		endFileimage();
 		return;
 	}
+	if (name == std::string("writefileimage")) {
+		endWritefileimage();
+		return;
+	}
 	if (name == std::string("darkimage")) {
 		endDarkimage();
 		return;
 	}
 	if (name == std::string("flatimage")) {
 		endFlatimage();
+		return;
+	}
+	if (name == std::string("calibrate")) {
+		endCalibrate();
 		return;
 	}
 	std::string	msg = stringprintf("don't know how to handle </%s>",
@@ -121,6 +137,15 @@ ProcessorNetworkPtr	ProcessorParser::parse(const char *data, int size) {
 		throw std::runtime_error("parse error");
 	}
 	return _network;
+}
+
+std::string	ProcessorParser::fullname(const std::string& f) const {
+	// we need a file attribute
+	std::string     filename = f;
+	if (filename[0] != '/') {
+		filename = _basestack.top() + "/" + filename;
+	}
+	return filename;
 }
 
 } // namespace process

@@ -13,6 +13,9 @@ noinst_LTLIBRARIES = libastroprocessing.la
 libastroprocessing_la_SOURCES =						\
 	CalibrationImageStep.cpp					\
 	CalibrationProcessorStep.cpp					\
+	DarkImageStep.cpp						\
+	FileImageStep.cpp						\
+	FlatImageStep.cpp						\
 	ImageBufferStep.cpp						\
 	ImageCalibrationStep.cpp					\
 	ImageProcessing.cpp						\
@@ -28,7 +31,8 @@ libastroprocessing_la_SOURCES =						\
 	ProcessorParser.cpp						\
 	ParserSteps.cpp							\
 	RawImageFileStep.cpp						\
-	WriteImageStep.cpp
+	WriteImageStep.cpp						\
+	WriteableFileImageStep.cpp
 
 libastroprocessing_la_CPPFLAGS = -DPKGLIBDIR=\"$(pkglibdir)\" \
 	-DDEVICEPROPERTIES=\"@DEVICEPROPERTIES@\"

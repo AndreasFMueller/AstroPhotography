@@ -371,14 +371,16 @@ class ImageBase : public Typename {
 	 *
 	 * Some of the Metadata is not accessible 
  	 */
-	ImageMetadata	metadata;
+	ImageMetadata	_metadata;
 public:
 	// access to metadata
+	const ImageMetadata	metadata() const { return _metadata; }
+	void	metadata(const ImageMetadata& im) { _metadata = im; }
 	bool	hasMetadata(const std::string& name) const;
 	Metavalue	getMetadata(const std::string& name) const;
 	void	removeMetadata(const std::string& name);
 	void	setMetadata(const Metavalue& mv);
-	int	nMetadata() const { return metadata.size(); }
+	int	nMetadata() const { return _metadata.size(); }
 	ImageMetadata::const_iterator	begin() const;
 	ImageMetadata::const_iterator	end() const;
 	void	dump_metadata() const;

@@ -9,6 +9,7 @@
 namespace astro {
 namespace process {
 
+#if 0
 //////////////////////////////////////////////////////////////////////
 // adapter to do the interpolation
 //////////////////////////////////////////////////////////////////////
@@ -119,6 +120,7 @@ ProcessingStep::state	InterpolationStep::do_work() {
 	// that's it
 	return ProcessingStep::complete;
 }
+#endif
 
 } // namespace process
 } // namespace stro

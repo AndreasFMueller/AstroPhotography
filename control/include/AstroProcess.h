@@ -10,6 +10,7 @@
 #include <list>
 #include <AstroImage.h>
 #include <AstroAdapter.h>
+#include <AstroUtils.h>
 
 namespace astro {
 namespace adapter {
@@ -113,10 +114,9 @@ class ProcessingController;
 typedef std::shared_ptr<ProcessingController>	ProcessingControllerPtr;
 class ProcessingStep;
 typedef std::shared_ptr<ProcessingStep>	ProcessingStepPtr;
-class ProcessingThread;
-typedef std::shared_ptr<ProcessingThread>	ProcessingThreadPtr;
 
 class ProcessorParser;
+class ProcessorNetwork;
 
 /**
  * \brief ProcessingStep base class
@@ -135,6 +135,7 @@ public:
 	static ProcessingStepPtr	byid(int id);
 	static void	forget(int id);
 	static bool	inuse(int id);
+	static void	checkstate();
 private:
 	// each processing step has an id, and the library ensures that the
 	// ids are unique
@@ -204,15 +205,17 @@ public:
 	 * needswork: the processing step is completely configured, but
 	 *            it needs to work before it can provide any results.
 	 *            This state is also reached when the state of a previous
-	 *            has changed.
-	 * working:   the processing step is current being worked on by some
+	 *            has changed. Such process is runnable.
+	 * working:   the processing step is currently being worked on by some
 	 *            thread
 	 * complete:  the work for this processing step is complete
+	 * failed:    the work for this processing step failed
 	 */
-	typedef enum { idle, needswork, working, complete } state; 
+	typedef enum { idle, needswork, working, complete, failed } state; 
 static std::string	statename(state s);
 private:
 	state	precursorstate() const;
+	void	checkyourstate();
 protected:
 	state	_status;
 	volatile float	_completion;
@@ -220,9 +223,11 @@ public:
 	float	completion() const { return _completion; }
 	state	status() const { return _status; }
 	state	status(state newsstate);
-	virtual state	checkstate();
-	void	work(ProcessingThread *thread = NULL);
+	void	work();
 	virtual void	cancel();
+private:
+	astro::thread::Barrier	_barrier;
+	friend class ProcessorNetwork;
 protected:
 	virtual state	do_work();
 	// constructor
@@ -234,10 +239,21 @@ private:	// prevent copying
 	ProcessingStep&	operator=(const ProcessingStep& other);
 public:
 	std::string	type_name() const;
+#if 0
 	virtual bool	hasMetadata(const std::string& name) const;
 	virtual Metavalue	getMetadata(const std::string& name) const;
+#endif
+	// dependency tracking
+private:
+	time_t	_when;
+protected:
+	void	when(time_t w) { _when = w; }
+public:
+	virtual time_t	when() { return _when; }
+	std::list<int>	unsatisfied_dependencies();
 };
 
+#if 0
 /**
  * \brief Processing unit of work is executed by a thread
  *
@@ -261,7 +277,9 @@ public:
 	ProcessingStep::state	status() const { return _step->status(); }
 static ProcessingThreadPtr	get(ProcessingStepPtr step);
 };
+#endif
 
+#if 0
 /**
  * \brief Manage a network of processing steps
  *
@@ -301,7 +319,80 @@ public:
 private:
 	stepmap::iterator	stepneedingwork();
 };
+#endif
 
+class ImageStep : public ProcessingStep {
+protected:
+	ImagePtr	_image;
+public:
+	virtual ImagePtr	image() { return _image; }
+	ImageStep() : ProcessingStep() { }
+	ImageSequence	precursorimages();
+	virtual ProcessingStep::state	do_work() = 0;
+};
+
+class FileImageStep : public ImageStep {
+protected:
+	std::string	_filename;
+	bool	exists();
+public:
+	FileImageStep(const std::string& filename);
+	virtual time_t	when();
+	virtual ImagePtr image();
+	virtual ProcessingStep::state	do_work();
+};
+
+class WriteableFileImageStep : public FileImageStep {
+public:
+	WriteableFileImageStep(const std::string& filename);
+private:
+	virtual ProcessingStep::state	do_work();
+};
+
+class DarkImageStep : public ImageStep {
+public:
+	DarkImageStep();
+private:
+	double	_badpixellimit;
+public:
+	double	badpixellimit() const { return _badpixellimit; }
+	void	badpixellimit(double b) { _badpixellimit = b; }
+private:
+	virtual ProcessingStep::state	do_work();
+};
+
+class FlatImageStep : public ImageStep {
+	ProcessingStepPtr	_dark;
+public:
+	ProcessingStepPtr	dark() const { return _dark; }
+	void	dark(ProcessingStepPtr d) { _dark = d; }
+	FlatImageStep();
+private:
+	virtual ProcessingStep::state	do_work();
+};
+
+class ImageCalibrationStep : public ImageStep {
+	ProcessingStepPtr	_dark;
+	ProcessingStepPtr	_flat;
+	bool	_interpolate;
+	bool	_demosaic;
+	bool	_flip;
+public:
+	ProcessingStepPtr	dark() const { return _dark; }
+	void	dark(ProcessingStepPtr d) { _dark = d; }
+	ProcessingStepPtr	flat() const { return _flat; }
+	void	flat(ProcessingStepPtr f) { _flat = f; }
+	bool	interpolate() const { return _interpolate; }
+	void	interpolate(bool i) { _interpolate = i; }
+	bool	demosaic() const { return _demosaic; }
+	void	demosaic(bool d) { _demosaic = d; }
+	bool	flip() const { return _flip; }
+	void	flip(bool f) { _flip = f; }
+	ImageCalibrationStep();
+	virtual ProcessingStep::state	do_work();
+};
+
+#if 0
 /**
  * \brief Image Steps also have image output and preview
  *
@@ -654,9 +745,10 @@ public:
 class RGBDemosaicingStep : public ImageStep {
 public:
 };
+#endif
 
 /**
- * \brief Controller Class to manage a complete 
+ * \brief Network Class to manage a complete network of interdependen steps
  */
 class ProcessorNetwork {
 	typedef std::map<int, ProcessingStepPtr>	stepmap_t;
@@ -674,6 +766,18 @@ public:
 	ProcessingStepPtr	bynameid(const std::string& name) const;
 	std::set<ProcessingStepPtr>	terminals() const;
 	std::set<ProcessingStepPtr>	initials() const;
+private:
+	int	_maxthreads;
+public:
+	int	maxthreads() const { return _maxthreads; }
+	void	maxthreads(int m) { _maxthreads = m; }
+private:
+	typedef std::shared_ptr<std::thread>	thread_ptr;
+	std::vector<thread_ptr>	_threads;
+public:
+	void	checkstate();
+	bool	hasneedswork();
+	void	process();
 };
 typedef std::shared_ptr<ProcessorNetwork>	ProcessorNetworkPtr;
 

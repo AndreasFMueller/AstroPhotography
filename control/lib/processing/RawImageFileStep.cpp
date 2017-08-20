@@ -17,6 +17,7 @@ using namespace astro::io;
 namespace astro {
 namespace process {
 
+#if 0
 //////////////////////////////////////////////////////////////////////
 // Raw image in memory
 //////////////////////////////////////////////////////////////////////
@@ -131,6 +132,7 @@ ProcessingStep::state	RawImageFileStep::do_work() {
 	// if we succeed in all this, then the new state should be complete
 	return common_work();
 }
+#endif
 
 } // namespace process
 } // namespace astro

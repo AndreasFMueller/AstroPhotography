@@ -14,6 +14,7 @@ using namespace astro::adapter;
 namespace astro {
 namespace process {
 
+#if 0
 //////////////////////////////////////////////////////////////////////
 // the calibration image base class implementation
 //////////////////////////////////////////////////////////////////////
@@ -112,6 +113,7 @@ astro::image::Metavalue	CalibrationImageStep::getMetadata(const std::string& nam
 	}
 	return _image->getMetadata(name);
 }
+#endif
 
 } // namespace process
 } // namespace astro

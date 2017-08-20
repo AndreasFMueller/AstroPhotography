@@ -64,9 +64,9 @@ void	ImageBase::setMosaicType(MosaicType::mosaic_type _mosaic) {
 	mosaic.setMosaicType(_mosaic);
 
 	// remove the key
-	ImageMetadata::iterator	i = metadata.find(mosaic_key);
-	if (i != metadata.end()) {
-		metadata.erase(i);
+	ImageMetadata::iterator	i = _metadata.find(mosaic_key);
+	if (i != _metadata.end()) {
+		_metadata.erase(i);
 	}
 
 	// compute the new key value
@@ -93,7 +93,7 @@ void	ImageBase::setMosaicType(MosaicType::mosaic_type _mosaic) {
 	if (value.size() > 0) {
 		Metavalue	mv("BAYER", value, std::string("Bayer Color Matrix"));
 		std::pair<std::string, Metavalue>	p(mosaic_key, mv);
-		metadata.insert(metadata.begin(), p);
+		_metadata.insert(_metadata.begin(), p);
 	}
 }
 
@@ -137,34 +137,34 @@ void	ImageBase::setMosaicType(const std::string& mosaic_name) {
  * \param name	 name of the metadata element
  */
 bool	ImageBase::hasMetadata(const std::string& name) const {
-	return metadata.hasMetadata(name);
+	return _metadata.hasMetadata(name);
 }
 
 /**
  * \brief Retrieve metadata
  */
 Metavalue	ImageBase::getMetadata(const std::string& name) const {
-	return metadata.getMetadata(name);
+	return _metadata.getMetadata(name);
 }
 
 /**
  * \brief Remove the metadata of a given type
  */
 void	ImageBase::removeMetadata(const std::string& name) {
-	metadata.remove(name);
+	_metadata.remove(name);
 }
 
 /**
  * \brief Update metadata
  */
 void	ImageBase::setMetadata(const Metavalue& mv) {
-	metadata.setMetadata(mv);
+	_metadata.setMetadata(mv);
 }
 
 std::ostream&	operator<<(std::ostream& out, const ImageBase& image) {
 	out << "size: " << image.frame.size().toString() << std::endl;
 	ImageMetadata::const_iterator	i;
-	for (i = image.metadata.begin(); i != image.metadata.end(); i++) {
+	for (i = image._metadata.begin(); i != image._metadata.end(); i++) {
 		out << i->first << ": ";
 		out << i->second.getValue() << " / ";
 		out << i->second.getComment() << std::endl;
@@ -173,11 +173,11 @@ std::ostream&	operator<<(std::ostream& out, const ImageBase& image) {
 }
 
 ImageMetadata::const_iterator	ImageBase::begin() const {
-	return metadata.begin();
+	return _metadata.begin();
 }
 
 ImageMetadata::const_iterator	ImageBase::end() const {
-	return metadata.end();
+	return _metadata.end();
 }
 
 std::type_index	ImageBase::pixel_type() const {
@@ -185,7 +185,7 @@ std::type_index	ImageBase::pixel_type() const {
 }
 
 void	ImageBase::dump_metadata() const {
-	metadata.dump();
+	_metadata.dump();
 }
 
 } // namespace image

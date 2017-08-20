@@ -13,6 +13,7 @@
 namespace astro {
 namespace process {
 
+#if 0
 //////////////////////////////////////////////////////////////////////
 // Derived Implementation class for Processing Threads
 //////////////////////////////////////////////////////////////////////
@@ -212,6 +213,7 @@ ProcessingThreadPtr	ProcessingThread::get(ProcessingStepPtr step) {
 // really gets a vtable
 ProcessingThread::~ProcessingThread() {
 }
+#endif
 
 } // namespace process
 } // namespace astro

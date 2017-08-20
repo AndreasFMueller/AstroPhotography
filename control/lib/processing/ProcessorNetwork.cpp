@@ -16,6 +16,7 @@ namespace process {
  * \brief Construct a new processor network
  */
 ProcessorNetwork::ProcessorNetwork() {
+	_maxthreads = 1;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "create a new processor network");
 }
 
@@ -39,6 +40,7 @@ void	ProcessorNetwork::add(ProcessingStepPtr step) {
 	}
 	_id2names.insert(std::make_pair(id, name));
 	_name2ids.insert(std::make_pair(name, id));
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "add name %s", name.c_str());
 }
 
 /**
@@ -58,8 +60,9 @@ ProcessingStepPtr	ProcessorNetwork::byid(int id) const {
  * \brief Retrieve a step from the network by name
  */
 ProcessingStepPtr	ProcessorNetwork::byname(const std::string& name) const {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "looking for step '%s'", name.c_str());
 	int	n = _name2ids.count(name);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "looking for step '%s': %d entries",
+		name.c_str(), n);
 	if (n == 0) {
 		std::string	msg = stringprintf("no step named '%s'",
 			name.c_str());
@@ -118,6 +121,45 @@ std::set<ProcessingStepPtr>	ProcessorNetwork::initials() const {
 		}
 	);
 	return result;
+}
+
+void	ProcessorNetwork::checkstate() {
+	std::for_each(_steps.begin(), _steps.end(),
+		[](const std::pair<int, ProcessingStepPtr>& p) mutable {
+			ProcessingStepPtr       step = p.second;
+			step->checkyourstate();
+		}
+	);
+}
+
+bool	ProcessorNetwork::hasneedswork() {
+	stepmap_t::const_iterator	i;
+	i = std::find_if(_steps.begin(), _steps.end(),
+		[](const std::pair<int, ProcessingStepPtr>& p) ->bool {
+			return ProcessingStep::needswork == p.second->status();
+		}
+	);
+	return (i != _steps.end());
+}
+
+/**
+ * \brief Process the complete network
+ */
+void	ProcessorNetwork::process() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "start processing");
+	checkstate();
+	do {
+		stepmap_t::const_iterator	i;
+		i = std::find_if(_steps.begin(), _steps.end(),
+			[](const std::pair<int, ProcessingStepPtr>& p) ->bool {
+				return ProcessingStep::needswork
+					== p.second->status();
+			}
+		);
+		i->second->work();
+		checkstate();
+	} while (hasneedswork());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "end processing");
 }
 
 } // namespace process

@@ -12,6 +12,7 @@ using namespace astro::adapter;
 namespace astro {
 namespace process {
 
+#if 0
 /**
  * \brief Constructor
  */
@@ -80,6 +81,7 @@ ImageMetadata::const_iterator	ImageBufferStep::end() const {
 	}
 	return input()->end();
 }
+#endif
 
 } // namespace process
 } // namespace astro

@@ -55,8 +55,10 @@ ProcessingStepPtr	ProcessingStep::byid(int id) {
 	std::unique_lock<std::recursive_mutex>	lock(process_mutex);
 	stepmap_t::const_iterator	i = allsteps.find(id);
 	if (i != allsteps.end()) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "found %d", id);
 		return i->second;
 	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "%d not found", id);
 	return ProcessingStepPtr(NULL);
 }
 
@@ -88,6 +90,19 @@ void	ProcessingStep::forget(int id) {
 	if (i != allsteps.end()) {
 		allsteps.erase(i);
 	}
+}
+
+/**
+ * \brief check the state of all the steps remembered by the system
+ */
+void	ProcessingStep::checkstate() {
+	std::unique_lock<std::recursive_mutex>	lock(process_mutex);
+	std::for_each(allsteps.begin(), allsteps.end(),
+		[](const std::pair<int, ProcessingStepPtr>& p) mutable {
+			ProcessingStepPtr	step = p.second;
+			step->checkyourstate();
+		}
+	);
 }
 
 } // namespace process

@@ -13,6 +13,7 @@ using namespace astro::adapter;
 namespace astro {
 namespace process {
 
+#if 0
 /**
  * \brief Construct an image writer
  */
@@ -65,6 +66,7 @@ PreviewAdapterPtr	WriteImageStep::preview() const {
 const ConstImageAdapter<double>&        WriteImageStep::out() const {
 	return input()->out();
 }
+#endif
 
 } // namespace process
 } // namespace astro

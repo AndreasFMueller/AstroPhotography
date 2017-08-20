@@ -70,7 +70,9 @@ int	main(int argc, char *argv[]) {
 	ProcessorNetworkPtr	network = factory(filename);
 
 	// execute the network
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "XXX implement execution");
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "start execution");
+	network->process();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "processing complete");
 
 	// that's it
 	return EXIT_SUCCESS;

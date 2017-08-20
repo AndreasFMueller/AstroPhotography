@@ -24,7 +24,7 @@ namespace process {
 /**
  * \brief Create a new processing step
  */
-ProcessingStep::ProcessingStep() {
+ProcessingStep::ProcessingStep() : _barrier(2) {
 	_id = newid();
 	_status = idle;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "new processing step %d created", _id);
@@ -197,9 +197,11 @@ public:
  */
 void	ProcessingStep::remove_successor(int id) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "remove successor %d from %d", id, _id);
-	steps::iterator	s = std::find_if(_successors.begin(), _successors.end(),
+	steps::const_iterator	s = std::find_if(_successors.begin(), _successors.end(),
 		findid(id));
 	if (s != _successors.end()) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "found successor %d in %d",
+			id, _id);
 		_successors.erase(s);
 	}
 }
@@ -209,9 +211,11 @@ void	ProcessingStep::remove_successor(int id) {
  */
 void	ProcessingStep::remove_precursor(int id) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "remove precursor %d from %d", id, _id);
-	steps::iterator	s = std::find_if(_precursors.begin(), _precursors.end(),
+	steps::const_iterator	s = std::find_if(_precursors.begin(), _precursors.end(),
 		findid(id));
 	if (s != _precursors.end()) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "found precursor %d in %d",
+			id, _id);
 		_precursors.erase(s);
 	}
 }
@@ -227,24 +231,30 @@ void	ProcessingStep::remove_me() {
 	// remove me from precursors
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "remove %d from precursors", myid);
 	std::for_each(_precursors.begin(), _precursors.end(),
-		[myid](int precursorid) {
-			debug(LOG_DEBUG, DEBUG_LOG, 0, "remove %d from %d",
+		[myid](int precursorid) mutable {
+			debug(LOG_DEBUG, DEBUG_LOG, 0,
+				"remove %d from precursor %d",
 				myid, precursorid);
 			ProcessingStepPtr	pre = byid(precursorid);
 			if (pre) {
+				debug(LOG_DEBUG, DEBUG_LOG, 0,
+					"removing %d from %d", myid, pre->id());
 				pre->remove_successor(myid);
 			}
 		}
 	);
 
 	// remove me from successors
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "remove %d successors", myid);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "remove %d from successors", myid);
 	std::for_each(_successors.begin(), _successors.end(),
-		[myid](int successorid) {
-			debug(LOG_DEBUG, DEBUG_LOG, 0, "remove %d from %d",
+		[myid](int successorid) mutable {
+			debug(LOG_DEBUG, DEBUG_LOG, 0,
+				"remove %d from successor %d",
 				myid, successorid);
 			ProcessingStepPtr	suc = byid(successorid);
 			if (suc) {
+				debug(LOG_DEBUG, DEBUG_LOG, 0,
+					"removing %d from %d", myid, suc->id());
 				suc->remove_precursor(myid);
 			}
 		}
@@ -258,7 +268,7 @@ void	ProcessingStep::remove_me() {
 /**
  * \brief Work on this step
  */
-void	ProcessingStep::work(ProcessingThread *thread) {
+void	ProcessingStep::work() {
 	// ensure that we really are in state needswork, by checking all
 	// precursors
 	if (_status != needswork) {
@@ -268,14 +278,26 @@ void	ProcessingStep::work(ProcessingThread *thread) {
 
 	// set the status to working
 	status(working);
+	state	_resultstate = working;
 
-	// signal to the calling thread that we have started up
-	if (thread != NULL) {
-		thread->started();
-	}
-	
+	// use the barrier to make sure the calling 
+	//_barrier.await();
+
 	// if there is need for work, do the work
-	status(do_work());
+	try {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "%d calling do_work()", id());
+		_resultstate = do_work();
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "%d do_work() completed", id());
+	} catch (const std::exception& x) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "processing step failed: %s",
+			x.what());
+		_resultstate = failed;
+	} catch (...) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0,
+			"processing step failed, unknown reason");
+		_resultstate = failed;
+	}
+	status(_resultstate);
 }
 
 /**
@@ -306,6 +328,7 @@ std::string	ProcessingStep::statename(state s) {
 	case needswork:	return std::string("needswork");
 	case working:	return std::string("working");
 	case complete:	return std::string("complete");
+	case failed:	return std::string("failed");
 	}
 	throw std::runtime_error("internal error: unknown state");
 }
@@ -319,16 +342,47 @@ ProcessingStep::state	ProcessingStep::precursorstate() const {
 	// if there are any precursors, we have to check their minimum state
 	int	minid = *std::min_element(_precursors.begin(),
 		_precursors.end(),
-		[](const int a, const int b) {
+		[](const int a, const int b) -> bool {
 			return byid(a)->status() < byid(b)->status();
 		}
 	);
 	state	minstate = byid(minid)->status();
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "precursor state: %s",
-		statename(minstate).c_str());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "%d precursor state of %d: %s",
+		_id, minid, statename(minstate).c_str());
 	return minstate;
 }
 
+void	ProcessingStep::checkyourstate() {
+	// if any precursor is in failed state, you are in failed state as well
+	steps::const_iterator	failedprecursor;
+	failedprecursor = std::find_if(_precursors.begin(), _precursors.end(),
+		[](int precursorid) -> bool {
+			return ProcessingStep::failed
+				== byid(precursorid)->status();
+		}
+	);
+	if (failedprecursor != _precursors.end()) {
+		ProcessingStep::status(failed);
+	}
+
+	// use the precursorstate
+	switch (precursorstate()) {
+	case idle:
+	case needswork:
+	case working:
+		ProcessingStep::status(idle);
+		break;
+	case complete:
+		if (status() != complete)
+			ProcessingStep::status(needswork);
+		break;
+	case failed:
+		ProcessingStep::status(failed);
+		break;
+	}
+}
+
+#if 0
 /**
  * \brief verify the current state of the step
  *
@@ -378,6 +432,7 @@ ProcessingStep::state	ProcessingStep::checkstate() {
 	// return the new state
 	return status();
 }
+#endif
 
 ProcessingStep::state	ProcessingStep::status(state newstate) {
 	// first check the maximum state we can possible have
@@ -389,14 +444,17 @@ ProcessingStep::state	ProcessingStep::status(state newstate) {
 		return _status;
 	}
 	_status = newstate;
+#if 0
 	std::for_each(_successors.begin(), _successors.end(),
 		[](int successorid) {
 			byid(successorid)->checkstate();
 		}
 	);
+#endif
 	return _status;
 }
 
+#if 0
 //////////////////////////////////////////////////////////////////////
 // meta data access
 //////////////////////////////////////////////////////////////////////
@@ -414,6 +472,21 @@ astro::image::Metavalue	ProcessingStep::getMetadata(const std::string& name) con
 	std::string	msg = stringprintf("unknown extensions '%s'",
 		name.c_str());
 	throw std::runtime_error(msg);
+}
+#endif
+
+/**
+ * \brief Give a list of dependencies that are not satisfied
+ */
+std::list<int>	ProcessingStep::unsatisfied_dependencies() {
+	std::list<int>	result;
+	steps::const_iterator	i;
+	for (i = _precursors.begin(); i != _precursors.end(); i++) {
+		if (byid(*i)->when() > when()) {
+			result.push_back(*i);
+		}
+	}
+	return result;
 }
 
 } // namespace process

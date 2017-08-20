@@ -21,8 +21,7 @@ if ENABLE_UNITTESTS
 noinst_PROGRAMS = tests singletest
 
 # single test
-singletest_SOURCES = singletest.cpp					\
-	ProcessorParserTest.cpp
+singletest_SOURCES = singletest.cpp	
 singletest_LDADD = $(test_ldadd)
 singletest_DEPENDENCIES = $(test_dependencies)
 

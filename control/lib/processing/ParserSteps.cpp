@@ -68,18 +68,20 @@ void	ProcessorParser::startFileimage(const attr_t& attrs) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "no file name");
 		throw std::runtime_error("no file name");
 	}
-	std::string	filename = i->second;
+	std::string	filename = fullname(i->second);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "filename: %s", filename.c_str());
-	RawImageFileStep	*filestep = new RawImageFileStep(filename);
+	FileImageStep	*filestep = new FileImageStep(filename);
 	ProcessingStepPtr	step(filestep);
 	ProcessingStep::remember(step);
-	_network->add(step);
 
 	// check whether there is a name attribute
 	i = attrs.find(std::string("name"));
 	if (i != attrs.end()) {
 		step->name(i->second);
 	}
+
+	// add to the network
+	_network->add(step);
 
 	// push the process on the stack
 	_stepstack.push(step);
@@ -101,19 +103,19 @@ void	ProcessorParser::startDarkimage(const attr_t& attrs) {
 	startCommon(attrs);
 
 	// create a new dark process
-	DarkProcessorStep	*dark = new DarkProcessorStep();
+	DarkImageStep	*dark = new DarkImageStep();
 	ProcessingStepPtr	step(dark);
 
 	// remember the step everywhere
 	_stepstack.push(step);
 	ProcessingStep::remember(step);
-	_network->add(step);
 
 	// check whether there is a name attribute
 	attr_t::const_iterator	i = attrs.find(std::string("name"));
 	if (i != attrs.end()) {
 		step->name(i->second);
 	}
+	_network->add(step);
 }
 
 /**
@@ -132,19 +134,21 @@ void	ProcessorParser::startFlatimage(const attr_t& attrs) {
 	startCommon(attrs);
 
 	// create a new flat process
-	FlatProcessorStep	*flat = new FlatProcessorStep();
+	FlatImageStep	*flat = new FlatImageStep();
 	ProcessingStepPtr	step(flat);
 
 	// remember the step everywhere
 	_stepstack.push(step);
 	ProcessingStep::remember(step);
-	_network->add(step);
 
 	// add a dark image if the dark attribute is present
 	attr_t::const_iterator	i = attrs.find(std::string("dark"));
 	if (attrs.end() != i) {
 		std::string	darkname = i->second;
 		ProcessingStepPtr	darkstep = _network->byname(darkname);
+		debug(LOG_DEBUG, DEBUG_LOG, 0,
+			"dark attribute found: %s, step %d",
+			darkname.c_str(), darkstep->id());
 		step->add_precursor(darkstep);
 	}
 	
@@ -153,6 +157,7 @@ void	ProcessorParser::startFlatimage(const attr_t& attrs) {
 	if (i != attrs.end()) {
 		step->name(i->second);
 	}
+	_network->add(step);
 }
 
 /**
@@ -177,7 +182,6 @@ void	ProcessorParser::startCalibrate(const attr_t& attrs) {
 	// remember the step everywhere
 	_stepstack.push(step);
 	ProcessingStep::remember(step);
-	_network->add(step);
 
 	// get the dark image
 	attr_t::const_iterator	i = attrs.find(std::string("dark"));
@@ -185,6 +189,7 @@ void	ProcessorParser::startCalibrate(const attr_t& attrs) {
 		std::string	name = i->second;
 		ProcessingStepPtr	dark = _network->bynameid(name);
 		cal->add_precursor(dark);
+		cal->dark(dark);
 	}
 
 	// get the flat image
@@ -193,12 +198,39 @@ void	ProcessorParser::startCalibrate(const attr_t& attrs) {
 		std::string	name = i->second;
 		ProcessingStepPtr	flat = _network->bynameid(name);
 		cal->add_precursor(flat);
+		cal->flat(flat);
 	}
 
 	// check whether there is a name attribute
 	i = attrs.find(std::string("name"));
 	if (i != attrs.end()) {
 		step->name(i->second);
+	}
+	_network->add(step);
+
+	// check other attributes
+	i = attrs.find(std::string("demosaic"));
+	if (i != attrs.end()) {
+		if ((i->second == std::string("yes"))
+			|| (i->second == std::string("true"))) {
+			cal->demosaic(true);
+		}
+	}
+
+	i = attrs.find(std::string("interpolate"));
+	if (i != attrs.end()) {
+		if ((i->second == std::string("yes"))
+			|| (i->second == std::string("true"))) {
+			cal->interpolate(true);
+		}
+	}
+
+	i = attrs.find(std::string("flip"));
+	if (i != attrs.end()) {
+		if ((i->second == std::string("yes"))
+			|| (i->second == std::string("true"))) {
+			cal->flip(true);
+		}
 	}
 }
 
@@ -252,6 +284,44 @@ void	ProcessorParser::startProcess(const attr_t& attrs) {
  */
 void	ProcessorParser::endProcess() {
 	_basestack.pop();
+}
+
+/**
+ * \brief start the writefileimage element
+ */
+void	ProcessorParser::startWritefileimage(const attr_t& attrs) {
+	startCommon(attrs);
+
+	// we need a file attribute
+	attr_t::const_iterator	i = attrs.find(std::string("file"));
+	if (i == attrs.end()) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "missing file attribute");
+		throw std::runtime_error("missing file attribute");
+	}
+	std::string	filename = fullname(i->second);
+
+	// create a new dark process
+	WriteableFileImageStep	*writeable
+		= new WriteableFileImageStep(filename);
+	ProcessingStepPtr	step(writeable);
+
+	// remember the step everywhere
+	_stepstack.push(step);
+	ProcessingStep::remember(step);
+
+	// check whether there is a name attribute
+	i = attrs.find(std::string("name"));
+	if (i != attrs.end()) {
+		step->name(i->second);
+	}
+	_network->add(step);
+}
+
+/**
+ * \brief end the writefileimage element
+ */
+void	ProcessorParser::endWritefileimage() {
+	endCommon();
 }
 
 } // namespace process
