@@ -21,9 +21,13 @@ typedef std::map<std::string, std::string>	attr_t;
 class ProcessorParser {
 	xmlSAXHandler		_handler;
 	ProcessorNetworkPtr	_network;
-	std::stack<ProcessingStepPtr>	_stack;
+	std::stack<ProcessingStepPtr>	_stepstack;
+	std::stack<std::string>		_basestack;
 	// private methods for handling different types of processing steps
+	void	startCommon(const attr_t& attrs);
 	void	endCommon();
+	void	startProcess(const attr_t& attrs);
+	void	endProcess();
 	void	startFileimage(const attr_t& attrs);
 	void	endFileimage();
 	void	startDarkimage(const attr_t& attrs);

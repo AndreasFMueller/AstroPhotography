@@ -18,62 +18,6 @@ using namespace astro::adapter;
 namespace astro {
 namespace process {
 
-#if 0
-static int	_process_id = 0;
-
-typedef std::map<int, ProcessingStepPtr>	stepmap_t;
-static stepmap_t	allsteps;
-
-void	ProcessingStep::remember(ProcessingStepPtr step) {
-	if (allsteps.end() != allsteps.find(step->id())) {
-		return;
-	}
-	allsteps.insert(std::make_pair(step->id(), step));
-}
-
-bool	ProcessingStep::exists(int id) {
-	return (allsteps.end() != allsteps.find(id));
-}
-
-void	ProcessingStep::remove(int id) {
-	stepmap_t::const_iterator	i = allsteps.find(id);
-	if (i != allsteps.end()) {
-		allsteps.erase(i);
-	}
-}
-
-ProcessingStepPtr	ProcessingStep::byid(int id) {
-	stepmap_t::const_iterator	i = allsteps.find(id);
-	if (i != allsteps.end()) {
-		return i->second;
-	}
-	throw ProcessingStePtr(NULL);
-}
-
-bool	ProcessingStep::inuse(int id) {
-	stepmap_t::const_iterator	i;
-	i = std::find_if(allsteps.begin(), allsteps.end(),
-		[id](const std::pair<int, ProcessingStepPtr>& p) {
-			return p->hasPrecursor(id) || p->hasSuccessor(id);
-		}
-	);
-	return (i != allsteps.end());
-}
-
-void	ProcessingStep::forget(int id) {
-	if (inuse(id)) {
-		return;
-	}
-	stepmap_t::const_iterator	i;
-	i = std::find_if(allsteps.begin(), allsteps.end(),
-		[id](const std::pair<int, ProcessingStepPtr>>& p) {
-			return p->first == id;
-		}
-	);
-	allsteps.erase(i);
-}
-#endif
-
 //////////////////////////////////////////////////////////////////////
 // Construction and Destruction
 //////////////////////////////////////////////////////////////////////
@@ -235,17 +179,27 @@ void	ProcessingStep::add_precursor(int id) {
 }
 
 /**
+ * \brief Predicate class to find ids
+ */
+class	findid {
+	int	_id;
+public:
+	findid(int id) : _id(id) { }
+	bool	operator()(const int id) {
+		return id == _id;
+	}
+};
+
+/**
  * \brief remove a successor with a given id
+ *
+ * This method only changes the _successor list, it does not remove 
  */
 void	ProcessingStep::remove_successor(int id) {
-	steps::iterator	s;
-	while (_precursors.end() != (s
-		= std::find_if(_successors.begin(), _successors.end(),
-			[id](const int successorid) {
-				ProcessingStepPtr	p = byid(successorid);
-				return (id == p->id());
-			}
-		))) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "remove successor %d from %d", id, _id);
+	steps::iterator	s = std::find_if(_successors.begin(), _successors.end(),
+		findid(id));
+	if (s != _successors.end()) {
 		_successors.erase(s);
 	}
 }
@@ -254,14 +208,10 @@ void	ProcessingStep::remove_successor(int id) {
  * \brief remove a precursor with a given id
  */
 void	ProcessingStep::remove_precursor(int id) {
-	steps::iterator	s;
-	while (_precursors.end() != (s
-		= std::find_if(_precursors.begin(), _precursors.end(),
-			[id](const int precursorid) {
-				ProcessingStepPtr	p = byid(precursorid);
-				return (id == p->id());
-			}
-		))) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "remove precursor %d from %d", id, _id);
+	steps::iterator	s = std::find_if(_precursors.begin(), _precursors.end(),
+		findid(id));
+	if (s != _precursors.end()) {
 		_precursors.erase(s);
 	}
 }
@@ -270,22 +220,33 @@ void	ProcessingStep::remove_precursor(int id) {
  * \brief Remove a processing step
  */
 void	ProcessingStep::remove_me() {
-	// remove me from precursors
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "remove from precursors of %s @ %p",
-		type_name().c_str(), this);
 	int	myid = _id;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "remove myself (%d) from linked nodes",
+		myid);
+
+	// remove me from precursors
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "remove %d from precursors", myid);
 	std::for_each(_precursors.begin(), _precursors.end(),
 		[myid](int precursorid) {
-			byid(precursorid)->remove_successor(myid);
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "remove %d from %d",
+				myid, precursorid);
+			ProcessingStepPtr	pre = byid(precursorid);
+			if (pre) {
+				pre->remove_successor(myid);
+			}
 		}
 	);
 
 	// remove me from successors
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "remove from successors of %s @ %p",
-		type_name().c_str(), this);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "remove %d successors", myid);
 	std::for_each(_successors.begin(), _successors.end(),
 		[myid](int successorid) {
-			byid(successorid)->remove_precursor(myid);
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "remove %d from %d",
+				myid, successorid);
+			ProcessingStepPtr	suc = byid(successorid);
+			if (suc) {
+				suc->remove_precursor(myid);
+			}
 		}
 	);
 }

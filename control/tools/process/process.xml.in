@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+<!--
+
+  process.xml == test case process 
+
+  (c) 2017 Prof Dr Andreas Müller, Hochschule Rapperswil
+
+-->
+<process base="@top_srcdir@/tools/process/test">
+	<darkimage name="dark" base="dark">
+		<fileimage file="20161230-180.fits" name="dark-src-0"/>
+		<fileimage file="20161230-181.fits" name="dark-src-1"/>
+		<fileimage file="20161230-182.fits" name="dark-src-2"/>
+		<fileimage file="20161230-183.fits" name="dark-src-3"/>
+		<fileimage file="20161230-184.fits" name="dark-src-4"/>
+		<fileimage file="20161230-185.fits" name="dark-src-5"/>
+		<fileimage file="20161230-186.fits" name="dark-src-6"/>
+		<fileimage file="20161230-187.fits" name="dark-src-7"/>
+		<fileimage file="20161230-188.fits" name="dark-src-8"/>
+		<fileimage file="20161230-189.fits" name="dark-src-9"/>
+	</darkimage>
+	<flatimage name="flat" base="flat" dark="dark">
+		<fileimage file="20161230-190.fits" name="flat-src-0"/>
+		<fileimage file="20161230-191.fits" name="flat-src-1"/>
+		<fileimage file="20161230-192.fits" name="flat-src-2"/>
+		<fileimage file="20161230-193.fits" name="flat-src-3"/>
+		<fileimage file="20161230-194.fits" name="flat-src-4"/>
+		<fileimage file="20161230-195.fits" name="flat-src-5"/>
+		<fileimage file="20161230-196.fits" name="flat-src-6"/>
+		<fileimage file="20161230-197.fits" name="flat-src-7"/>
+		<fileimage file="20161230-198.fits" name="flat-src-8"/>
+		<fileimage file="20161230-199.fits" name="flat-src-9"/>
+		<fileimage file="20161230-200.fits" name="flat-src-10"/>
+		<fileimage file="20161230-201.fits" name="flat-src-11"/>
+	</flatimage>
+</process>

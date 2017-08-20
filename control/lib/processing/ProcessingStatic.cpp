@@ -48,23 +48,6 @@ bool	ProcessingStep::exists(int id) {
 	return (allsteps.end() != allsteps.find(id));
 }
 
-#if 0
-/**
- * \brief Remove a processing step if it is no longer in use
- */
-void	ProcessingStep::forget(int id) {
-	std::unique_lock<std::recursive_mutex>	lock(process_mutex);
-	if (inuse(id)) {
-		std::string	msg = stringprintf("id %d still in use", id);
-		throw std::runtime_error(msg);
-	}
-	stepmap_t::const_iterator	i = allsteps.find(id);
-	if (i != allsteps.end()) {
-		allsteps.erase(i);
-	}
-}
-#endif
-
 /**
  * \brief Find a processing step given the id
  */
@@ -74,7 +57,7 @@ ProcessingStepPtr	ProcessingStep::byid(int id) {
 	if (i != allsteps.end()) {
 		return i->second;
 	}
-	throw ProcessingStepPtr(NULL);
+	return ProcessingStepPtr(NULL);
 }
 
 /**
