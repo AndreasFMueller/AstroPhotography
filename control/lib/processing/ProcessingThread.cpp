@@ -215,5 +215,29 @@ ProcessingThread::~ProcessingThread() {
 }
 #endif
 
+void	start_work(ProcessingThread *t) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "thread start");
+	t->work();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "thread complete");
+}
+
+ProcessingThread::ProcessingThread(ProcessingStepPtr step)
+	: std::thread(start_work, this), _step(step) {
+	detach();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "barrier comming up");
+	sleep(1);
+	_step->_barrier.await();
+}
+
+void	ProcessingThread::work() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "ProcessingThread::work() start");
+	_step->work();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "ProcessingThread::work() end");
+}
+
+ProcessingThread::~ProcessingThread() {
+	//join();
+}
+
 } // namespace process
 } // namespace astro

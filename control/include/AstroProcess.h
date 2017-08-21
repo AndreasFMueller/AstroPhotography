@@ -11,6 +11,7 @@
 #include <AstroImage.h>
 #include <AstroAdapter.h>
 #include <AstroUtils.h>
+#include <thread>
 
 namespace astro {
 namespace adapter {
@@ -117,6 +118,7 @@ typedef std::shared_ptr<ProcessingStep>	ProcessingStepPtr;
 
 class ProcessorParser;
 class ProcessorNetwork;
+class ProcessingThread;
 
 /**
  * \brief ProcessingStep base class
@@ -232,6 +234,7 @@ public:
 private:
 	astro::thread::Barrier	_barrier;
 	friend class ProcessorNetwork;
+	friend class ProcessingThread;
 protected:
 	virtual state	do_work();
 	// constructor
@@ -283,6 +286,16 @@ public:
 static ProcessingThreadPtr	get(ProcessingStepPtr step);
 };
 #endif
+
+class ProcessingThread : public std::thread {
+	ProcessingStepPtr	_step;
+public:
+	ProcessingStepPtr	step() const { return _step; }
+	ProcessingThread(ProcessingStepPtr step);
+	~ProcessingThread();
+	void	work();
+};
+typedef std::shared_ptr<ProcessingThread>	ProcessingThreadPtr;
 
 #if 0
 /**
@@ -788,8 +801,7 @@ public:
 	int	maxthreads() const { return _maxthreads; }
 	void	maxthreads(int m) { _maxthreads = m; }
 private:
-	typedef std::shared_ptr<std::thread>	thread_ptr;
-	std::vector<thread_ptr>	_threads;
+	std::vector<ProcessingThreadPtr>	_threads;
 public:
 	void	checkstate();
 	bool	hasneedswork();

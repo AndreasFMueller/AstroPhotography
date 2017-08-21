@@ -199,7 +199,9 @@ void	ProcessorNetwork::process() {
 		ProcessingStepPtr	step = ProcessingStep::byid(id);
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "working on %d '%s'", id,
 			step->name().c_str());
-		step->work();
+		ProcessingThreadPtr	t(new ProcessingThread(step));
+		t->join();
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "wait for thread to complete");
 	} 
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "end processing");
 }

@@ -45,6 +45,7 @@ static struct option	longopts[] = {
 int	main(int argc, char *argv[]) {
 	int	c;
 	int	longindex;
+	debugthreads = 1;
 	while (EOF != (c = getopt_long(argc, argv, "dh?v",
 			longopts, &longindex)))
 		switch (c) {

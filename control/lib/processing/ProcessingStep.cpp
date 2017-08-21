@@ -282,7 +282,7 @@ void	ProcessingStep::work() {
 	state	_resultstate = failed;
 
 	// use the barrier to make sure the calling 
-	//_barrier.await();
+	_barrier.await();
 
 	// show what you are doing
 	std::string	msg = stringprintf("%d start %s", _id, what().c_str());
