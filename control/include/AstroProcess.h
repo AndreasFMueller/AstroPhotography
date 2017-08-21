@@ -136,6 +136,8 @@ public:
 	static void	forget(int id);
 	static bool	inuse(int id);
 	static void	checkstate();
+	static void	verbose(bool v);
+	static bool	verbose();
 private:
 	// each processing step has an id, and the library ensures that the
 	// ids are unique
@@ -218,11 +220,13 @@ private:
 	void	checkyourstate();
 protected:
 	state	_status;
+public:
+	virtual state	status() const;
+	state	status(state newsstate);
+protected:
 	volatile float	_completion;
 public:
 	float	completion() const { return _completion; }
-	state	status() const { return _status; }
-	state	status(state newsstate);
 	void	work();
 	virtual void	cancel();
 private:
@@ -244,13 +248,14 @@ public:
 	virtual Metavalue	getMetadata(const std::string& name) const;
 #endif
 	// dependency tracking
-private:
-	time_t	_when;
 protected:
+	time_t	_when;
 	void	when(time_t w) { _when = w; }
 public:
-	virtual time_t	when() { return _when; }
+	virtual time_t	when() const;
 	std::list<int>	unsatisfied_dependencies();
+
+	virtual std::string	what() const = 0;
 };
 
 #if 0
@@ -332,14 +337,17 @@ public:
 };
 
 class FileImageStep : public ImageStep {
+	time_t	_lastread;
 protected:
 	std::string	_filename;
-	bool	exists();
+	bool	exists() const;
 public:
 	FileImageStep(const std::string& filename);
-	virtual time_t	when();
+	virtual time_t	when() const;
+	virtual ProcessingStep::state	status() const;
 	virtual ImagePtr image();
 	virtual ProcessingStep::state	do_work();
+	virtual std::string	what() const;
 };
 
 class WriteableFileImageStep : public FileImageStep {
@@ -347,6 +355,8 @@ public:
 	WriteableFileImageStep(const std::string& filename);
 private:
 	virtual ProcessingStep::state	do_work();
+	virtual ProcessingStep::state	status() const;
+	virtual std::string	what() const;
 };
 
 class DarkImageStep : public ImageStep {
@@ -359,6 +369,8 @@ public:
 	void	badpixellimit(double b) { _badpixellimit = b; }
 private:
 	virtual ProcessingStep::state	do_work();
+public:
+	virtual std::string	what() const;
 };
 
 class FlatImageStep : public ImageStep {
@@ -369,6 +381,8 @@ public:
 	FlatImageStep();
 private:
 	virtual ProcessingStep::state	do_work();
+public:
+	virtual std::string	what() const;
 };
 
 class ImageCalibrationStep : public ImageStep {
@@ -390,6 +404,8 @@ public:
 	void	flip(bool f) { _flip = f; }
 	ImageCalibrationStep();
 	virtual ProcessingStep::state	do_work();
+	virtual ProcessingStep::state	status() const;
+	virtual std::string	what() const;
 };
 
 #if 0
@@ -764,8 +780,8 @@ public:
 	ProcessingStepPtr	byid(int id) const;
 	ProcessingStepPtr	byname(const std::string& name) const;
 	ProcessingStepPtr	bynameid(const std::string& name) const;
-	std::set<ProcessingStepPtr>	terminals() const;
-	std::set<ProcessingStepPtr>	initials() const;
+	ProcessingStep::steps	terminals() const;
+	ProcessingStep::steps	initials() const;
 private:
 	int	_maxthreads;
 public:
@@ -778,6 +794,8 @@ public:
 	void	checkstate();
 	bool	hasneedswork();
 	void	process();
+	int	process(int id);
+	int	process(const ProcessingStep::steps& steps);
 };
 typedef std::shared_ptr<ProcessorNetwork>	ProcessorNetworkPtr;
 

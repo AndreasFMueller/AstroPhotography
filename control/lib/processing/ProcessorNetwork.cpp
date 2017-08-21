@@ -94,12 +94,12 @@ ProcessingStepPtr	ProcessorNetwork::bynameid(const std::string& name) const {
  *
  * Terminal processing nodes are ones that have no successors
  */
-std::set<ProcessingStepPtr>	ProcessorNetwork::terminals() const {
-	std::set<ProcessingStepPtr>	result;
+ProcessingStep::steps	ProcessorNetwork::terminals() const {
+	ProcessingStep::steps	result;
 	std::for_each(_steps.begin(), _steps.end(),
 		[&result](const std::pair<int, ProcessingStepPtr>& p) mutable {
 			if (p.second->successorCount() == 0) {
-				result.insert(p.second);
+				result.push_back(p.first);
 			}
 		}
 	);
@@ -111,12 +111,12 @@ std::set<ProcessingStepPtr>	ProcessorNetwork::terminals() const {
  *
  * initial processing nodes are the ones that have no predecessores
  */
-std::set<ProcessingStepPtr>	ProcessorNetwork::initials() const {
-	std::set<ProcessingStepPtr>	result;
+ProcessingStep::steps	ProcessorNetwork::initials() const {
+	ProcessingStep::steps	result;
 	std::for_each(_steps.begin(), _steps.end(),
 		[&result](const std::pair<int, ProcessingStepPtr>& p) mutable {
 			if (p.second->precursorCount() == 0) {
-				result.insert(p.second);
+				result.push_back(p.first);
 			}
 		}
 	);
@@ -143,22 +143,64 @@ bool	ProcessorNetwork::hasneedswork() {
 }
 
 /**
+ * \brief finds the topmost node that needs work
+ */
+int	ProcessorNetwork::process(int id) {
+	// check the current node
+	ProcessingStepPtr	current = ProcessingStep::byid(id);
+	ProcessingStep::state	s = current->status();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "process(%d, %s, %d) %s", id,
+		current->name().c_str(), s,
+		demangle(typeid(*current).name()).c_str());
+	switch (s) {
+		case ProcessingStep::needswork:
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "%d needs work", id);
+			return id;
+		case ProcessingStep::idle:
+			// check all precursors
+			return process(current->precursors());
+		// never check below working, complete or failed nodes
+		case ProcessingStep::working:
+		case ProcessingStep::complete:
+		case ProcessingStep::failed:
+			return -1;
+	}
+	throw std::runtime_error("should not happen");
+}
+
+/**
+ * \brief Check a list of steps for a possible node that needs work
+ */
+int	ProcessorNetwork::process(const ProcessingStep::steps& steps) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "checking %lu steps for work",
+		steps.size());
+	ProcessingStep::steps::const_iterator	i;
+	for (i = steps.begin(); i != steps.end(); i++) {
+		int	id = process(*i);
+		if (id >= 0) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0,
+				"found %d in need of work", id);
+			return id;
+		}
+	}
+	return -1;
+}
+
+/**
  * \brief Process the complete network
  */
 void	ProcessorNetwork::process() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "start processing");
 	checkstate();
-	do {
-		stepmap_t::const_iterator	i;
-		i = std::find_if(_steps.begin(), _steps.end(),
-			[](const std::pair<int, ProcessingStepPtr>& p) ->bool {
-				return ProcessingStep::needswork
-					== p.second->status();
-			}
-		);
-		i->second->work();
-		checkstate();
-	} while (hasneedswork());
+	ProcessingStep::steps	t = terminals();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "found %d terminals", t.size());
+	int	id;
+	while (0 <= (id = process(t))) {
+		ProcessingStepPtr	step = ProcessingStep::byid(id);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "working on %d '%s'", id,
+			step->name().c_str());
+		step->work();
+	} 
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "end processing");
 }
 

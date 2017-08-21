@@ -13,6 +13,7 @@
 #include <AstroImager.h>
 #include <AstroImageops.h>
 #include <algorithm>
+#include <sstream>
 
 using namespace astro::image;
 using namespace astro::adapter;
@@ -338,6 +339,42 @@ ProcessingStep::state	ImageCalibrationStep::do_work() {
 
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "image calibration complete");
 	return ProcessingStep::complete;
+}
+
+ProcessingStep::state	ImageCalibrationStep::status() const {
+	if (_image) {
+		return ProcessingStep::complete;
+	}
+	// if all precursors are complete, we can perform the calibration
+	if (std::all_of(precursors().begin(), precursors().end(),
+			[](int precursorid) -> bool {
+				ProcessingStepPtr	step = byid(precursorid);
+				return (step->status() == ProcessingStep::complete);
+			}
+		)) {
+		return ProcessingStep::needswork;
+	} else {
+		return ProcessingStep::idle;
+	}
+}
+
+std::string	ImageCalibrationStep::what() const {
+	std::ostringstream	out;
+	out << "calibrating: ";
+	if (_dark) {
+		out << "dark='" << _dark->name() << "(" << _dark->id() << "), ";
+	} else {
+		out << "no dark, ";
+	}
+	if (_flat) {
+		out << "flat='" << _flat->name() << "(" << _flat->id() << "), ";
+	} else {
+		out << "no flat, ";
+	}
+	out << ((!_interpolate) ? "don't " : "") << "interpolate, ";
+	out << ((!_demosaic) ? "don't " : "") << "demosaic, ";
+	out << ((!_flip) ? "don't " : "") << "flip";
+	return out.str();
 }
 
 } // namespace process

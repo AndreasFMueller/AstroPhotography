@@ -21,6 +21,7 @@ static int	_process_id = 0;
 typedef std::map<int, ProcessingStepPtr>	stepmap_t;
 static stepmap_t	allsteps;
 
+
 /**
  * \brief Retreive the next available id
  */
@@ -55,7 +56,6 @@ ProcessingStepPtr	ProcessingStep::byid(int id) {
 	std::unique_lock<std::recursive_mutex>	lock(process_mutex);
 	stepmap_t::const_iterator	i = allsteps.find(id);
 	if (i != allsteps.end()) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "found %d", id);
 		return i->second;
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "%d not found", id);
@@ -104,6 +104,17 @@ void	ProcessingStep::checkstate() {
 		}
 	);
 }
+
+static bool	_verbose = false;
+
+bool	ProcessingStep::verbose() {
+	return _verbose;
+}
+
+void	ProcessingStep::verbose(bool v) {
+	_verbose = v;
+}
+
 
 } // namespace process
 } // namespace astro

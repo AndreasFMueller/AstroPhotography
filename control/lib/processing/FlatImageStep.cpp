@@ -5,6 +5,7 @@
  */
 #include <AstroProcess.h>
 #include <AstroCalibration.h>
+#include <sstream>
 
 namespace astro {
 namespace process {
@@ -69,6 +70,17 @@ ProcessingStep::state	FlatImageStep::do_work() {
 
 	// return completion state
 	return ProcessingStep::complete;
+}
+
+std::string	FlatImageStep::what() const {
+	std::ostringstream	out;
+	out << "build flat from ";
+	int	images = precursors().size() - ((_dark) ? 1 : 0);
+	out << images << " images";
+	if (_dark) {
+		out << ", dark='" << _dark->name() << "'(" << _dark->id() << ")";
+	}
+	return out.str();
 }
 
 } // namespace process

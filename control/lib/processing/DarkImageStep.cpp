@@ -5,6 +5,7 @@
  */
 #include <AstroProcess.h>
 #include <AstroCalibration.h>
+#include <sstream>
 
 namespace astro {
 namespace process {
@@ -56,6 +57,17 @@ ProcessingStep::state	DarkImageStep::do_work() {
 
 	// return completion status
 	return ProcessingStep::complete;
+}
+
+std::string	DarkImageStep::what() const {
+	std::ostringstream	out;
+	out << "build dark from " << precursors().size() << " images:";
+	std::for_each(precursors().begin(), precursors().end(),
+		[&out](int pid) mutable {
+			out << " " << pid;
+		}
+	);
+	return out.str();
 }
 
 } // namespace process

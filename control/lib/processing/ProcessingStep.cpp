@@ -27,6 +27,7 @@ namespace process {
 ProcessingStep::ProcessingStep() : _barrier(2) {
 	_id = newid();
 	_status = idle;
+	_when = 0;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "new processing step %d created", _id);
 }
 
@@ -271,31 +272,48 @@ void	ProcessingStep::remove_me() {
 void	ProcessingStep::work() {
 	// ensure that we really are in state needswork, by checking all
 	// precursors
-	if (_status != needswork) {
+	if (status() != needswork) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "no work needed");
 		return;
 	}
 
 	// set the status to working
 	status(working);
-	state	_resultstate = working;
+	state	_resultstate = failed;
 
 	// use the barrier to make sure the calling 
 	//_barrier.await();
 
+	// show what you are doing
+	std::string	msg = stringprintf("%d start %s", _id, what().c_str());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "%s", msg.c_str());
+	if (verbose()) {
+		std::cout << msg << std::endl;
+	}
+	Timer	timer;
+	timer.start();
+
 	// if there is need for work, do the work
 	try {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "%d calling do_work()", id());
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "%d calling %s::do_work()",
+			id(), demangle(typeid(*this).name()).c_str());
 		_resultstate = do_work();
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "%d do_work() completed", id());
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "%d %s::do_work() completed: %d",
+			id(), demangle(typeid(*this).name()).c_str(),
+			_resultstate);
 	} catch (const std::exception& x) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "processing step failed: %s",
 			x.what());
-		_resultstate = failed;
 	} catch (...) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0,
 			"processing step failed, unknown reason");
-		_resultstate = failed;
+	}
+
+	timer.end();
+	msg = stringprintf("%d takes %.3fs", _id, timer.elapsed());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "%s", msg.c_str());
+	if (verbose()) {
+		std::cout << msg << std::endl;
 	}
 	status(_resultstate);
 }
@@ -336,23 +354,27 @@ std::string	ProcessingStep::statename(state s) {
 ProcessingStep::state	ProcessingStep::precursorstate() const {
 	// if there is no precursor, then we can consider them all complete
 	if (_precursors.size() == 0) {
-		return complete;
+		throw std::logic_error("cannot query precursor state without precursors");
 	}
 
 	// if there are any precursors, we have to check their minimum state
-	int	minid = *std::min_element(_precursors.begin(),
-		_precursors.end(),
-		[](const int a, const int b) -> bool {
-			return byid(a)->status() < byid(b)->status();
+	state	minstate = failed;
+	steps::const_iterator	i;
+	for (i = _precursors.begin(); i != _precursors.end(); i++) {
+		state	newstatus = byid(*i)->status();
+		if (newstatus < minstate) {
+			minstate = newstatus;
 		}
-	);
-	state	minstate = byid(minid)->status();
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "%d precursor state of %d: %s",
-		_id, minid, statename(minstate).c_str());
+	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0,
+		"'%s' (%d) %s minimum precursor state for %d precursors: %s",
+		_name.c_str(), _id, demangle(typeid(*this).name()).c_str(),
+		_precursors.size(), statename(minstate).c_str());
 	return minstate;
 }
 
 void	ProcessingStep::checkyourstate() {
+#if 0
 	// if any precursor is in failed state, you are in failed state as well
 	steps::const_iterator	failedprecursor;
 	failedprecursor = std::find_if(_precursors.begin(), _precursors.end(),
@@ -380,6 +402,7 @@ void	ProcessingStep::checkyourstate() {
 		ProcessingStep::status(failed);
 		break;
 	}
+#endif
 }
 
 #if 0
@@ -435,6 +458,8 @@ ProcessingStep::state	ProcessingStep::checkstate() {
 #endif
 
 ProcessingStep::state	ProcessingStep::status(state newstate) {
+	_status = newstate;
+#if 0
 	// first check the maximum state we can possible have
 	state	pc = precursorstate();
 	if (newstate > pc) {
@@ -450,6 +475,7 @@ ProcessingStep::state	ProcessingStep::status(state newstate) {
 			byid(successorid)->checkstate();
 		}
 	);
+#endif
 #endif
 	return _status;
 }
@@ -487,6 +513,88 @@ std::list<int>	ProcessingStep::unsatisfied_dependencies() {
 		}
 	}
 	return result;
+}
+
+/**
+ * \brief Compute the time
+ *
+ * By default the time is the maximum time of all precursors.
+ */
+time_t	ProcessingStep::when() const {
+	// if this step has no precursors, then we return the time it was
+	// last computed
+	if (_precursors.size() == 0) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0,
+			"step %d '%s' (%s) no precursors, when = %d",
+			_id, _name.c_str(),
+			demangle(typeid(*this).name()).c_str(), _when);
+		return _when;
+	}
+
+	// look for the largest time in all the precursors. For all nodes
+	// except for the file nodes this is the right dependency time
+	time_t	maxtime = 0;
+	ProcessingStep::steps::const_iterator	i;
+	for (i = _precursors.begin(); i != _precursors.end(); i++) {
+		ProcessingStepPtr	step = byid(*i);
+		time_t	newtime = step->when();
+		if (newtime > maxtime) {
+			maxtime = newtime;
+		}
+	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0,
+		"step %d '%s' (%s) has %d prec, when = %d",
+		_id, _name.c_str(), demangle(typeid(*this).name()).c_str(),
+		_precursors.size(), maxtime);
+	return maxtime;
+}
+
+/**
+ * \brief default status query implementation
+ */
+ProcessingStep::state	ProcessingStep::status() const {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "find status of '%s' (%d) %s",
+		_name.c_str(), _id,
+		demangle(typeid(*this).name()).c_str());
+		
+	// if we have no precursors, then our own style decides
+	if (0 == _precursors.size()) {
+		return _status;
+	}
+
+	// if any precursor is in failed state, you are in failed state as well
+	if (std::any_of(_precursors.begin(), _precursors.end(),
+		[](int precursorid) -> bool {
+			return ProcessingStep::failed
+				== byid(precursorid)->status();
+		}
+	)) {
+		return ProcessingStep::failed;
+	}
+
+	// use the precursorstate
+	switch (precursorstate()) {
+	case idle:
+	case needswork:
+	case working:
+		debug(LOG_DEBUG, DEBUG_LOG, 0,
+			"not all precursors of '%s' (%d) %s are complete",
+			_name.c_str(), _id,
+			demangle(typeid(*this).name()).c_str());
+		return ProcessingStep::idle;
+	case complete:
+		debug(LOG_DEBUG, DEBUG_LOG, 0,
+			"precursors of '%s' (%d) %s are all complete",
+			_name.c_str(), _id,
+			demangle(typeid(*this).name()).c_str());
+		if (_status != complete)
+			return ProcessingStep::needswork;
+		else
+			return ProcessingStep::complete;
+	case failed:
+		return ProcessingStep::failed;
+	}
+	throw std::runtime_error("cannot determine my status");
 }
 
 } // namespace process

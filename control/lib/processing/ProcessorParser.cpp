@@ -7,6 +7,7 @@
 #include <AstroProcess.h>
 #include <AstroDebug.h>
 #include <AstroFormat.h>
+#include <includes.h>
 
 namespace astro {
 namespace process {

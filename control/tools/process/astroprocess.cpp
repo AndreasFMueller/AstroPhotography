@@ -35,6 +35,7 @@ void	usage(const char *progname) {
 static struct option	longopts[] = {
 { "debug",	no_argument,	NULL,	'd' },
 { "help",	no_argument,	NULL,	'h' },
+{ "verbose",	no_argument,	NULL,	'v' },
 { NULL,		0,		NULL,	 0  }
 };
 
@@ -44,7 +45,7 @@ static struct option	longopts[] = {
 int	main(int argc, char *argv[]) {
 	int	c;
 	int	longindex;
-	while (EOF != (c = getopt_long(argc, argv, "dh?",
+	while (EOF != (c = getopt_long(argc, argv, "dh?v",
 			longopts, &longindex)))
 		switch (c) {
 		case 'd':
@@ -53,6 +54,9 @@ int	main(int argc, char *argv[]) {
 		case 'h':
 			usage(argv[0]);
 			return EXIT_SUCCESS;
+		case 'v':
+			ProcessingStep::verbose(true);
+			break;
 		}
 
 	// next argument must be the filename

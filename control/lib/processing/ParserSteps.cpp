@@ -257,7 +257,9 @@ void	ProcessorParser::startProcess(const attr_t& attrs) {
 	attr_t::const_iterator	i = attrs.find(std::string("base"));
 	if (i == attrs.end()) {
 		char	buffer[PATH_MAX];
-		getcwd(buffer, sizeof(buffer));
+		if (NULL == getcwd(buffer, sizeof(buffer))) {
+			throw std::runtime_error("cannot get cwd");
+		}
 		_basestack.push(std::string(buffer));
 	} else {
 		_basestack.push(i->second);

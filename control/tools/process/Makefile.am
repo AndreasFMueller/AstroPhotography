@@ -11,3 +11,6 @@ astroprocess_LDADD = -L$(top_builddir)/lib -lastro
 
 test:	astroprocess process.xml
 	./astroprocess --debug process.xml 2>&1 | tee test.log
+
+debug:	astroprocess process.xml
+	libtool --mode=execute gdb ./astroprocess
