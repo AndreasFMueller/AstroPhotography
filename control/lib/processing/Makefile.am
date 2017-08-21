@@ -37,3 +37,4 @@ libastroprocessing_la_SOURCES =						\
 libastroprocessing_la_CPPFLAGS = -DPKGLIBDIR=\"$(pkglibdir)\" \
 	-DDEVICEPROPERTIES=\"@DEVICEPROPERTIES@\"
 
+# test
