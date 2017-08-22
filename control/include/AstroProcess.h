@@ -130,6 +130,10 @@ class ProcessingThread;
  * 
  */
 class ProcessingStep {
+	static std::recursive_mutex	_process_mutex;
+	static int	_process_id;
+	typedef std::map<int, ProcessingStepPtr>	stepmap_t;
+	static stepmap_t	allsteps;
 public:
 	static int	newid();
 	static void	remember(ProcessingStepPtr step);
