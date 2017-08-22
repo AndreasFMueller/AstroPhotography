@@ -179,7 +179,7 @@ typedef std::map<std::thread::id, int>	thread_map_t;
 static	thread_map_t	thread_map;
 static	int	nextthreadid = 1;
 
-static int	lookupthreadid(const std::thread::id& id) {
+static int	lookupthreadid(std::thread::id id) {
 	std::unique_lock<std::mutex>	lock(mtx);
 	thread_map_t::const_iterator	i = thread_map.find(id);
 	if (i != thread_map.end()) {

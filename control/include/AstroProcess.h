@@ -349,6 +349,11 @@ public:
 	virtual ProcessingStep::state	do_work() = 0;
 };
 
+/**
+ * \brief File Image step class definition
+ *
+ * A processing step that is based on a file
+ */
 class FileImageStep : public ImageStep {
 	time_t	_lastread;
 protected:
@@ -356,6 +361,7 @@ protected:
 	bool	exists() const;
 public:
 	FileImageStep(const std::string& filename);
+	~FileImageStep();
 	virtual time_t	when() const;
 	virtual ProcessingStep::state	status() const;
 	virtual ImagePtr image();

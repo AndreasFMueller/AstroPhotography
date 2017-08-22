@@ -21,7 +21,6 @@ static int	_process_id = 0;
 typedef std::map<int, ProcessingStepPtr>	stepmap_t;
 static stepmap_t	allsteps;
 
-
 /**
  * \brief Retreive the next available id
  */
@@ -107,14 +106,19 @@ void	ProcessingStep::checkstate() {
 
 static bool	_verbose = false;
 
+/**
+ * \brief check the verbose flat
+ */
 bool	ProcessingStep::verbose() {
 	return _verbose;
 }
 
+/**
+ * \brief change the global singleton verbose flag
+ */
 void	ProcessingStep::verbose(bool v) {
 	_verbose = v;
 }
-
 
 } // namespace process
 } // namespace astro

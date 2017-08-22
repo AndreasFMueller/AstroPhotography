@@ -38,7 +38,7 @@ ProcessingStep::~ProcessingStep() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "destroying %s @ %p, (id=%d, name=%s)",
 		type_name().c_str(),  this, id(), name().c_str());
 	// ensure we are neither precursor nor successor of any other step
-	remove_me();
+	//remove_me();
 }
 
 static std::string	get_typename(const ProcessingStep *step) {

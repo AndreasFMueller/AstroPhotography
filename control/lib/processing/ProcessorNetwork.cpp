@@ -200,8 +200,11 @@ void	ProcessorNetwork::process() {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "working on %d '%s'", id,
 			step->name().c_str());
 		ProcessingThreadPtr	t(new ProcessingThread(step));
-		t->join();
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "wait for thread to complete");
+		if (t->joinable()) {
+			t->join();
+		}
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "thread joined");
 	} 
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "end processing");
 }
