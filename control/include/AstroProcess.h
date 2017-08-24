@@ -120,6 +120,8 @@ class ProcessorParser;
 class ProcessorNetwork;
 class ProcessingThread;
 
+class ProcessingSteps;
+
 /**
  * \brief ProcessingStep base class
  *
@@ -130,20 +132,24 @@ class ProcessingThread;
  * 
  */
 class ProcessingStep {
+	static ProcessingSteps	*processing_steps;
+#if 0
 	static std::recursive_mutex	_process_mutex;
 	static int	_process_id;
 	typedef std::map<int, ProcessingStepPtr>	stepmap_t;
 	static stepmap_t	allsteps;
+#endif
 public:
 	static int	newid();
 	static void	remember(ProcessingStepPtr step);
+	static void	forget(int id);
 	static bool	exists(int id);
 	static ProcessingStepPtr	byid(int id);
-	static void	forget(int id);
 	static bool	inuse(int id);
 	static void	checkstate();
 	static void	verbose(bool v);
 	static bool	verbose();
+	static void	clear();
 private:
 	// each processing step has an id, and the library ensures that the
 	// ids are unique

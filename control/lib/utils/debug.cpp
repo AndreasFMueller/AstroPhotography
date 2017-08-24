@@ -172,15 +172,34 @@ static void	rotate_logfile() {
 
 #define	MSGSIZE	8192
 
-static std::mutex	mtx;
+/**
+ * \brief auxiliary class to prevent the use of a static object
+ *
+ * static objects have the problem that the order of destruction is not fixed,
+ * and because debugging is used very late, these objects may already have
+ * been destroyed, leading to a crash at the end of the program.
+ */
+class thread_helper {
+	int	nextthreadid;
+	typedef std::map<std::thread::id, int>	thread_map_t;
+	thread_map_t	thread_map;
+public:
+	std::recursive_mutex	mtx;
+	thread_helper() {
+		nextthreadid = 1;
+	}
+	int	lookupthreadid(std::thread::id);
+};
+static thread_helper	*th = NULL;
 
-typedef std::map<std::thread::id, int>	thread_map_t;
+struct std::once_flag	thread_helper_once;
 
-static	thread_map_t	thread_map;
-static	int	nextthreadid = 1;
+void	thread_helper_initialize() {
+	th = new thread_helper();
+}
 
-static int	lookupthreadid(std::thread::id id) {
-	std::unique_lock<std::mutex>	lock(mtx);
+int	thread_helper::lookupthreadid(std::thread::id id) {
+	std::unique_lock<std::recursive_mutex>	lock(mtx);
 	thread_map_t::const_iterator	i = thread_map.find(id);
 	if (i != thread_map.end()) {
 		return i->second;
@@ -204,7 +223,7 @@ static void	writeout(char *prefix, char *msgbuffer) {
 	snprintf(msgbuffer2, sizeof(msgbuffer2), "%s %s",
 		prefix, msgbuffer);
 	{
-		std::unique_lock<std::mutex>	lock(mtx);
+		std::unique_lock<std::recursive_mutex>	lock(th->mtx);
 		linecounter++;
 		lseek(debug_filedescriptor, 0, SEEK_END);
 		write(debug_filedescriptor, msgbuffer2, strlen(msgbuffer2));
@@ -226,6 +245,9 @@ extern "C" void vdebug(int loglevel, const char *file, int line,
 	int	localerrno;
 
 	if (loglevel > debuglevel) { return; }
+
+	// make sure thread helper is initialized
+	std::call_once(thread_helper_once, thread_helper_initialize);
 
 	// message content
 	localerrno = errno;
@@ -258,7 +280,7 @@ extern "C" void vdebug(int loglevel, const char *file, int line,
 	// find the current thread id if necessary
 	if (debugthreads) {
 		snprintf(threadid, sizeof(threadid), "/%d",
-			lookupthreadid(std::this_thread::get_id()));
+			th->lookupthreadid(std::this_thread::get_id()));
 	} else {
 		threadid[0] = '\0';
 	}

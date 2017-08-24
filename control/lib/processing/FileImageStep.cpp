@@ -22,7 +22,7 @@ FileImageStep::FileImageStep(const std::string& filename)
  * \brief Destroy a file images step
  */
 FileImageStep::~FileImageStep() {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "destroying %s", _filename.c_str());
+//	debug(LOG_DEBUG, DEBUG_LOG, 0, "destroying %s", _filename.c_str());
 }
 
 /**
