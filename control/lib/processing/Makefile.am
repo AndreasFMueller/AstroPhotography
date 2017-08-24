@@ -31,6 +31,7 @@ libastroprocessing_la_SOURCES =						\
 	ProcessorParser.cpp						\
 	ParserSteps.cpp							\
 	RawImageFileStep.cpp						\
+	StackingStep.cpp						\
 	WriteImageStep.cpp						\
 	WriteableFileImageStep.cpp
 

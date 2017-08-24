@@ -55,6 +55,10 @@ void	ProcessorParser::startElement(const std::string& name,
 		startCalibrate(attrs);
 		return;
 	}
+	if (name == std::string("stack")) {
+		startStack(attrs);
+		return;
+	}
 	std::string	msg = stringprintf("don't know how to handle <%s>",
 		name.c_str());
 	throw std::runtime_error(msg);
@@ -87,6 +91,10 @@ void	ProcessorParser::endElement(const std::string& name) {
 	}
 	if (name == std::string("calibrate")) {
 		endCalibrate();
+		return;
+	}
+	if (name == std::string("stack")) {
+		endStack();
 		return;
 	}
 	std::string	msg = stringprintf("don't know how to handle </%s>",

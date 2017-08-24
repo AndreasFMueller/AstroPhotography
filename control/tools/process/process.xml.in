@@ -37,20 +37,37 @@
 			<fileimage file="20161230-201.fits" name="flat-src-11"/>
 		</flatimage>
 	</writefileimage>
+
 	<writefileimage file="calibrated/20161230-100.fits"
-			name="calibrated 100">
+		name="baseimage">
 		<calibrate dark="dark" flat="flat" interpolate="yes"
-				demosaic="yes" flip="yes" name="calibrate 100">
+				demosaic="yes" flip="yes"
+				name="calibrate 100">
 			<fileimage base="raw" file="20161230-100.fits"
 				name="raw 100"/>
 		</calibrate>
 	</writefileimage>
-	<writefileimage file="calibrated/20161230-101.fits"
-			name="calibrated 101">
-		<calibrate dark="dark" flat="flat" interpolate="yes"
-				demosaic="yes" flip="yes" name="calibrate 101">
-			<fileimage base="raw" file="20161230-101.fits"
-				name="raw 101"/>
-		</calibrate>
+
+	<writefileimage file="stacked.fits">
+		<stack baseimage="baseimage" patchsize="512">
+			<writefileimage file="calibrated/20161230-100.fits"
+				name="calibrated 100">
+				<calibrate dark="dark" flat="flat" interpolate="yes"
+						demosaic="yes" flip="yes"
+						name="calibrate 100">
+					<fileimage base="raw" file="20161230-100.fits"
+						name="raw 100"/>
+				</calibrate>
+			</writefileimage>
+			<writefileimage file="calibrated/20161230-101.fits"
+					name="calibrated 101">
+				<calibrate dark="dark" flat="flat" interpolate="yes"
+						demosaic="yes" flip="yes"
+						name="calibrate 101">
+					<fileimage base="raw" file="20161230-101.fits"
+						name="raw 101"/>
+				</calibrate>
+			</writefileimage>
+		</stack>
 	</writefileimage>
 </process>

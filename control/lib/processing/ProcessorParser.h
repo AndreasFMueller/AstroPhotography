@@ -39,6 +39,8 @@ class ProcessorParser {
 	void	endCalibrate();
 	void	startWritefileimage(const attr_t& attrs);
 	void	endWritefileimage();
+	void	startStack(const attr_t& attrs);
+	void	endStack();
 public:
 	ProcessorParser();
 	void	startElement(const std::string& name, const attr_t& attrs);

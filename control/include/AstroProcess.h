@@ -437,6 +437,32 @@ public:
 	virtual std::string	what() const;
 };
 
+/**
+ * \brief Step that performs the stacking operation
+ */
+class StackingStep : public ImageStep {
+	ProcessingStepPtr	_baseimage;
+	int	_numberofstars;
+	int	_patchsize;
+	int	_searchradius;
+	bool	_notransform;
+public:
+	StackingStep();
+	ProcessingStepPtr	baseimage() const { return _baseimage; }
+	void	baseimage(ProcessingStepPtr b) { _baseimage = b; }
+	int	numberofstars() const { return _numberofstars; }
+	void	numberofstars(int n) { _numberofstars = n; }
+	int	patchsize() const { return _patchsize; }
+	void	patchsize(int p) { _patchsize = p; }
+	int	searchradius() const { return _searchradius; }
+	void	searchradius(int s) { _searchradius = s; }
+	bool	notransform() const { return _notransform; }
+	void	notransform(bool n) { _notransform = n; }
+private:
+	virtual ProcessingStep::state	do_work();
+	virtual std::string	what() const;
+};
+
 #if 0
 /**
  * \brief Image Steps also have image output and preview
