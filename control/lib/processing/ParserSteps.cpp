@@ -347,8 +347,14 @@ void	ProcessorParser::startStack(const attr_t& attrs) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "baseimage attribute missing");
 		throw std::runtime_error("missing base image");
 	}
-	int	baseid = std::stoi(i->second);
-	ss->baseimage(ProcessingStep::byid(baseid));
+	ProcessingStepPtr	bi = _network->bynameid(i->second);
+	if (!bi) {
+		std::string	msg = stringprintf("referenced base image "
+			"'%s' not found", i->second.c_str());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw std::runtime_error(msg);
+	}
+	ss->baseimage(bi);
 
 	// get the attributes for the stacking step
 	if (attrs.end() != (i = attrs.find("searchradius"))) {

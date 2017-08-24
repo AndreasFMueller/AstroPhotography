@@ -24,6 +24,7 @@ StackingStep::StackingStep() {
  * \brief perform the stacking operation
  */
 ProcessingStep::state	StackingStep::do_work() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "stack %d images", precursors().size());
 	// get the base image
 	if (!_baseimage) {
 		std::string	msg = stringprintf("no base image");
@@ -37,6 +38,8 @@ ProcessingStep::state	StackingStep::do_work() {
 		throw std::runtime_error(msg);
 	}
 	ImagePtr	baseimageptr = bi->image();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "found %s base image",
+		baseimageptr->size().toString().c_str());
 
 	// create a stacker based on the base image
 	astro::image::stacking::StackerPtr	stacker
@@ -47,6 +50,7 @@ ProcessingStep::state	StackingStep::do_work() {
 	stacker->searchradius(_searchradius);
 	stacker->numberofstars(_numberofstars);
 	stacker->notransform(_notransform);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "stacker created and parametrized");
 	
 	// add the precursor images (except the base image)
 	int	counter =0;
@@ -66,11 +70,13 @@ ProcessingStep::state	StackingStep::do_work() {
 			counter++;
 		}
 	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "%d images added to the stacker",
+		counter);
 
 	// extract the result image
 	_image = stacker->image();
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "%d images added to the stacker",
-		counter);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "%s stacked extracted",
+		_image->size().toString().c_str());
 
 	return ProcessingStep::complete;
 }
