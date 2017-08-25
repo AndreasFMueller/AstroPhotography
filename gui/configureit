@@ -70,9 +70,11 @@ Linux)
 	./configure ${commonflags}
 	;;
 Debian)
-	CXXFLAGS="${CXXFLAGS} --std=c++0x"
+	CXXFLAGS="${CXXFLAGS} --std=c++11 -fopenmp"
 	LDFLAGS="${LDFLAGS} -Wl,-rpath -Wl,/usr/local/lib"
-	export CXXFLAGS LDFLAGS
+	EXTRA_CXXFLAGS="-fopenmp"
+	EXTRA_LIBS="-lgomp"
+	export CXXFLAGS LDFLAGS EXTRA_CXXFLAGS EXTRA_LDFLAGS EXTRA_LIBS
 	./configure ${commonflags}
 	;;
 SuSE)

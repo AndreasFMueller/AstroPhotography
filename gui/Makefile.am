@@ -6,3 +6,6 @@
 
 all:
 	cd snowgui; qmake; $(MAKE)
+
+clean:
+	cd snowgui; make clean

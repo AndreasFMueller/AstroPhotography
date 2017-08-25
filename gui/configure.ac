@@ -116,7 +116,7 @@ AC_ARG_WITH([ice],
 	fi
 
 	# get the slice directory. However, there are cases where the slice
-	# files are in a completely different location (like in Ubunt),
+	# files are in a completely different location (like in Ubuntu),
 	# so we will probably need additional configure options to point
 	if test -d ${ICEDIR}/slice
 	then
@@ -146,6 +146,7 @@ AC_SUBST(ASTROLIBDIR)
 
 AC_SUBST(EXTRA_CXXFLAGS)
 AC_SUBST(EXTRA_LDFLAGS)
+AC_SUBST(EXTRA_LIBS)
 
 AC_CONFIG_FILES([Makefile snowgui/snowgui.pro
 	snowgui/astrogui/astrogui.pro

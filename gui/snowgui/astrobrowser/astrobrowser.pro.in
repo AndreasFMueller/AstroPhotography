@@ -8,6 +8,8 @@ QT       += core gui widgets
 
 TARGET = astrobrowser
 TEMPLATE = app
+QMAKE_CXXFLAGS += @EXTRA_CXXFLAGS@
+QMAKE_LFLAGS += @EXTRA_LDFLAGS@
 
 # Directories for the astrophotography library
 ASTROPATH = @ASTROPATH@
@@ -16,6 +18,8 @@ ASTROLIBDIR = @ASTROLIBDIR@
 LIBS += -L../browser -lbrowser 
 LIBS += -L../astrogui -lastrogui 
 LIBS += -L$${ASTROLIBDIR} -lastro
+LIBS += @EXTRA_LIBS@
+LIBS += @EXTRA_LIBS@
 
 INCLUDEPATH += /usr/local/include
 INCLUDEPATH += $${ASTROPATH}/include
