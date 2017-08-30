@@ -223,7 +223,6 @@ void	start_work(ProcessingThread *t) {
 
 ProcessingThread::ProcessingThread(ProcessingStepPtr step)
 	: std::thread(start_work, this), _step(step) {
-	detach();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "barrier comming up");
 	sleep(1);
 	_step->_barrier.await();
@@ -236,7 +235,7 @@ void	ProcessingThread::work() {
 }
 
 ProcessingThread::~ProcessingThread() {
-	//join();
+	join();
 }
 
 } // namespace process
