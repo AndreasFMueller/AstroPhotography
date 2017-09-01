@@ -16,6 +16,18 @@ namespace snowstar {
  */
 ImageLocator::ImageLocator() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "image locator created");
+	_stop = false;
+}
+
+/**
+ * \brief Destructor for the ImageLocator
+ */
+ImageLocator::~ImageLocator() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "wait for the thread to terminate");
+	if (_thread.joinable()) {
+		_thread.join();
+	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "destroy the image locator");
 }
 
 /**
@@ -25,14 +37,14 @@ ImageLocator::ImageLocator() {
  */
 Ice::ObjectPtr	ImageLocator::locate(const Ice::Current& current,
 					Ice::LocalObjectPtr& /* cookie */) {
-	std::unique_lock<std::mutex>	lock(imagemutex);
+	std::unique_lock<std::mutex>	lock(_imagemutex);
 
 	std::string	name = current.id.name;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "get image %s", name.c_str());
 
 	// see whether we can satisfy the request from the cache
-	imagemap::iterator	i = images.find(name);
-	if (i != images.end()) {
+	imagemap::iterator	i = _images.find(name);
+	if (i != _images.end()) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "%s found in cache",
 			name.c_str());
 		return i->second;
@@ -90,7 +102,7 @@ Ice::ObjectPtr	ImageLocator::locate(const Ice::Current& current,
 	}
 
 	// add the servant to the cache
-	images.insert(std::make_pair(name, ptr));
+	_images.insert(std::make_pair(name, ptr));
 	return ptr;
 }
 
@@ -106,7 +118,7 @@ void	ImageLocator::deactivate(const std::string& category) {
 
 void	ImageLocator::expire() {
 	imagemap::iterator	i;
-	for (i = images.begin(); i != images.end(); i++) {
+	for (i = _images.begin(); i != _images.end(); i++) {
 		ImageI	*im = dynamic_cast<ImageI*>(&*i->second);
 		if (im) {
 			debug(LOG_DEBUG, DEBUG_LOG, 0,
