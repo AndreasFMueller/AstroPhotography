@@ -367,6 +367,12 @@ public:
 	virtual std::string	what() const;
 };
 
+/**
+ * \brief Writeable File image step
+ *
+ * The writeable file image step writes an image to a file when its
+ * dependencies have changed
+ */
 class WriteableFileImageStep : public FileImageStep {
 public:
 	WriteableFileImageStep(const std::string& filename);
@@ -377,6 +383,11 @@ private:
 	virtual ImagePtr	image();
 };
 
+/**
+ * \brief Dark image step
+ *
+ * The dark image step constructs a dark image from a set of dark images
+ */
 class DarkImageStep : public ImageStep {
 public:
 	DarkImageStep();
@@ -391,6 +402,12 @@ public:
 	virtual std::string	what() const;
 };
 
+/** 
+ * \brief Flat Image step
+ *
+ * The flat image step constructs a flat image from a set of precursor
+ * images.
+ */
 class FlatImageStep : public ImageStep {
 	ProcessingStepPtr	_dark;
 public:
@@ -403,6 +420,12 @@ public:
 	virtual std::string	what() const;
 };
 
+/**
+ * \brief image calibration step
+ *
+ * The image calibration step applies dark and flat images to a an input
+ * image.
+ */
 class ImageCalibrationStep : public ImageStep {
 	ProcessingStepPtr	_dark;
 	ProcessingStepPtr	_flat;

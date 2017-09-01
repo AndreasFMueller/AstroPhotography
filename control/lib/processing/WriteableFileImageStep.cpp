@@ -171,8 +171,24 @@ ProcessingStep::state	WriteableFileImageStep::do_work() {
 	return ProcessingStep::complete;
 }
 
+/**
+ * \brief Show what this step is going to do
+ */
 std::string	WriteableFileImageStep::what() const {
 	return stringprintf("writing FITS file %s", _filename.c_str());
+}
+
+/**
+ * \brief get the image from this step
+ * 
+ * If the image has already been computed, we return the image, but if it
+ * has not been computed, then we read it from the file.
+ */
+ImagePtr	WriteableFileImageStep::image() {
+	if (_image) {
+		return _image;
+	}
+	return FileImageStep::image();
 }
 
 } // namespace process
