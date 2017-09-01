@@ -79,7 +79,6 @@ esac
 ICEDIR=
 ICELIBS=
 ICEINCLUDE=
-SLICEDIR=
 AC_ARG_WITH([ice],
 [AS_HELP_STRING([--with-ice=dir], [build the ICE components from path])],
 [
@@ -113,14 +112,6 @@ AC_ARG_WITH([ice],
 	if test -d ${ICEDIR}/include
 	then
 		ICEINCLUDE=-I${ICEDIR}/include
-	fi
-
-	# get the slice directory. However, there are cases where the slice
-	# files are in a completely different location (like in Ubuntu),
-	# so we will probably need additional configure options to point
-	if test -d ${ICEDIR}/slice
-	then
-		SLICEDIR=${ICEDIR}/slice
 	fi
 ],[
 ])

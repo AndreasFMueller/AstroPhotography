@@ -45,7 +45,6 @@ Linux)	if [ -r /etc/debian_version ]
 	then
 		echo "configuring for Debian"
 		systemtype=Debian
-		commonflags="${commonflags} --with-slice=/opt/Ice-3.5.1/slice"
 	else
 		if [ -r /etc/SuSE-release ]
 		then
@@ -60,29 +59,27 @@ esac
 
 set -x
 
+EXTRA_CSSFLAGS=
+EXTRA_LDFLAGS=
+EXTRA_LIBS=
+
 # now that we have all the information, run the configure script
 case ${systemtype} in
 Linux)
 	CXXFLAGS="${CFLAGS} --std=c++11 -fopenmp"
 	EXTRA_CXXFLAGS="-fopenmp"
 	EXTRA_LDFLAGS="-fopenmp"
-	export CXXFLAGS EXTRA_CXXFLAGS EXTRA_LDFLAGS
-	./configure ${commonflags}
 	;;
 Debian)
 	CXXFLAGS="${CXXFLAGS} --std=c++11 -fopenmp"
 	LDFLAGS="${LDFLAGS} -Wl,-rpath -Wl,/usr/local/lib"
 	EXTRA_CXXFLAGS="-fopenmp"
 	EXTRA_LIBS="-lgomp"
-	export CXXFLAGS LDFLAGS EXTRA_CXXFLAGS EXTRA_LDFLAGS EXTRA_LIBS
-	./configure ${commonflags}
 	;;
 SuSE)
 	LDFLAGS="-L/usr/local/lib64 -lusb-1.0"
 	CXXFLAGS="${CFLAGS} --std=c++11"
 	EXTRA_CXXFLAGS="-fopenmp"
-	export LDFLAGS CFLAGS CXXFLAGS EXTRA_CXXFLAGS
-	./configure ${commonflags}
 	;;
 Darwin)
 	if [ -d /Applications/Qt5/Qt5.7/5.7/clang_64/bin ]
@@ -99,8 +96,12 @@ Darwin)
 	CXXFLAGS="${CFLAGS} --std=c++11"
 	export CFLAGS CXXFLAGS LDFLAGS
 	CXXFLAGS="${CXXFLAGS} -stdlib=libc++"
-	./configure ${commonflags}
 	;;
 esac
+
+export EXTRA_CXXFLAGS EXTRA_LDFLAGS EXTRA_LIBS
+export CXXFLAGS LDFLAGS
+
+./configure ${commonflags}
 
 
