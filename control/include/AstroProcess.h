@@ -133,12 +133,6 @@ class ProcessingSteps;
  */
 class ProcessingStep {
 	static ProcessingSteps	*processing_steps;
-#if 0
-	static std::recursive_mutex	_process_mutex;
-	static int	_process_id;
-	typedef std::map<int, ProcessingStepPtr>	stepmap_t;
-	static stepmap_t	allsteps;
-#endif
 public:
 	static int	newid();
 	static void	remember(ProcessingStepPtr step);
@@ -255,10 +249,6 @@ private:	// prevent copying
 	ProcessingStep&	operator=(const ProcessingStep& other);
 public:
 	std::string	type_name() const;
-#if 0
-	virtual bool	hasMetadata(const std::string& name) const;
-	virtual Metavalue	getMetadata(const std::string& name) const;
-#endif
 	// dependency tracking
 protected:
 	time_t	_when;
@@ -384,6 +374,7 @@ private:
 	virtual ProcessingStep::state	do_work();
 	virtual ProcessingStep::state	status() const;
 	virtual std::string	what() const;
+	virtual ImagePtr	image();
 };
 
 class DarkImageStep : public ImageStep {
