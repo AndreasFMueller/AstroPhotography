@@ -125,19 +125,6 @@ void	ProcessingSteps::forget(int id) {
 }
 
 /**
- * \brief check the state of all the steps remembered by the system
- */
-void	ProcessingSteps::checkstate() {
-	std::unique_lock<std::recursive_mutex>	lock(_process_mutex);
-	std::for_each(_allsteps.begin(), _allsteps.end(),
-		[](const std::pair<int, ProcessingStepPtr>& p) mutable {
-			ProcessingStepPtr	step = p.second;
-			//step->checkyourstate();
-		}
-	);
-}
-
-/**
  * \brief check the verbose flat
  */
 bool	ProcessingSteps::verbose() {
@@ -209,13 +196,6 @@ bool	ProcessingStep::exists(int id) {
 		return ps->exists(id);
 	}
 	return false;
-}
-
-void	ProcessingStep::checkstate() {
-	std::call_once(ps_flag, ps_init);
-	if (ps) {
-		ps->checkstate();
-	}
 }
 
 bool	ProcessingStep::verbose() {

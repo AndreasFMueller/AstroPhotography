@@ -123,15 +123,6 @@ ProcessingStep::steps	ProcessorNetwork::initials() const {
 	return result;
 }
 
-void	ProcessorNetwork::checkstate() {
-	std::for_each(_steps.begin(), _steps.end(),
-		[](const std::pair<int, ProcessingStepPtr>& p) mutable {
-			ProcessingStepPtr       step = p.second;
-			step->checkyourstate();
-		}
-	);
-}
-
 bool	ProcessorNetwork::hasneedswork() {
 	stepmap_t::const_iterator	i;
 	i = std::find_if(_steps.begin(), _steps.end(),
@@ -191,7 +182,6 @@ int	ProcessorNetwork::process(const ProcessingStep::steps& steps) {
  */
 void	ProcessorNetwork::process() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "start processing");
-	checkstate();
 	ProcessingStep::steps	t = terminals();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "found %d terminals", t.size());
 	int	id;

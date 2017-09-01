@@ -19,7 +19,7 @@ namespace adapter {
 class PreviewAdapter;
 typedef std::shared_ptr<PreviewAdapter>	PreviewAdapterPtr;
 /**
- * \brief Adapter fro Previewing 
+ * \brief Adapter for Previewing 
  *
  * All processing steps allow preview of the product of this step. If the
  * steps are just simple pixel operations, then this class is essentially
@@ -146,7 +146,6 @@ public:
 	static bool	exists(int id);
 	static ProcessingStepPtr	byid(int id);
 	static bool	inuse(int id);
-	static void	checkstate();
 	static void	verbose(bool v);
 	static bool	verbose();
 	static void	clear();
@@ -365,7 +364,6 @@ public:
  * A processing step that is based on a file
  */
 class FileImageStep : public ImageStep {
-	time_t	_lastread;
 protected:
 	std::string	_filename;
 	bool	exists() const;
@@ -845,7 +843,6 @@ public:
 private:
 	std::vector<ProcessingThreadPtr>	_threads;
 public:
-	void	checkstate();
 	bool	hasneedswork();
 	void	process();
 	int	process(int id);

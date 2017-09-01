@@ -167,13 +167,6 @@ ProcessingStep::state	WriteableFileImageStep::do_work() {
 	out.setPrecious(false);
 	out.write(_image);
 
-#if 0
-	// set the timestamp to the current time
-	time_t	now;
-	time(&now);
-	ProcessingStep::when(now);
-#endif
-
 	// return complete status
 	return ProcessingStep::complete;
 }

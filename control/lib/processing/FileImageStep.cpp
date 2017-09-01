@@ -15,7 +15,6 @@ namespace process {
  */
 FileImageStep::FileImageStep(const std::string& filename)
 	: _filename(filename) {
-	_lastread = std::numeric_limits<time_t>::max();
 }
 
 /**
@@ -55,54 +54,26 @@ ProcessingStep::state	FileImageStep::status() const {
 	}
 
 	// check the file
-	struct stat	sb;
-	int	rc = stat(_filename.c_str(), &sb);
-	if (rc < 0) {
-		// if there is no file, we have failed
+	if (!exists()) {
 		return ProcessingStep::failed;
 	}
-
-	// if the file we have in memory is stale, we need work
-	if (_image) {
-		if (sb.st_ctime > _lastread) {
-			return ProcessingStep::needswork;
-		} else {
-			return ProcessingStep::complete;
-		}
-	} else {
-		// we have no image yet, so reading it is required
-		return ProcessingStep::needswork;
-	}
-
-	// we should never get to this point, so we return the failed state
-	return ProcessingStep::failed;
+	return ProcessingStep::complete;
 }
 
 /**
  * \brief Get the image by reading it form disk
  */
 ImagePtr	FileImageStep::image() {
-	if (_image) {
-		return _image;
-	}
 	astro::io::FITSin	in(_filename);
-	_image = in.read();
-	time(&_lastread);
-	return _image;
+	ImagePtr	image = in.read();
+	return image;
 }
 
 /**
  * \brief Do the work, i.e. read the image from disk
  */
 ProcessingStep::state	FileImageStep::do_work() {
-	if (_image) {
-		if (when() < _lastread) {
-			return ProcessingStep::complete;
-		}
-	}
-	astro::io::FITSin	in(_filename);
-	_image = in.read();
-	return ProcessingStep::complete;
+	return status();
 }
 
 /**
