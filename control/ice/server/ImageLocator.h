@@ -9,12 +9,14 @@
 #include <Ice/Ice.h>
 #include <map>
 #include <ImageI.h>
+#include <mutex>
 
 namespace snowstar {
 
 class ImageLocator : public Ice::ServantLocator {
 	typedef std::map<std::string, Ice::ObjectPtr>	imagemap;
 	imagemap	images;
+	std::mutex	imagemutex;
 public:
 	ImageLocator();
 
@@ -26,6 +28,8 @@ public:
 				const Ice::LocalObjectPtr& cookie);
 
 	virtual void	deactivate(const std::string& category);
+
+	void	expire();
 };
 
 } // namespace snowstar

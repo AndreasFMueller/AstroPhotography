@@ -49,6 +49,9 @@ ImageI::ImageI(astro::image::ImagePtr image, const std::string& filename)
 	_planes = _image->planes();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "image servant created for %s",
 		_filename.c_str());
+
+	// start the timer
+	time(&_lastused);
 }
 
 ImageI::~ImageI() {
@@ -89,12 +92,12 @@ int     ImageI::bytesPerValue(const Ice::Current& /* current */) {
 
 bool	ImageI::hasMeta(const std::string& keyword,
 			const Ice::Current& /* current */) {
-	return _image->hasMetadata(keyword);
+	return image()->hasMetadata(keyword);
 }
 
 Metavalue	ImageI::getMeta(const std::string& keyword,
 			const Ice::Current& /* current */) {
-	if (!_image->hasMetadata(keyword)) {
+	if (!image()->hasMetadata(keyword)) {
 		throw NotFound("keyword not found");
 	}
 	return convert(_image->getMetadata(keyword));
@@ -106,7 +109,7 @@ void	ImageI::setMetavalue(const Metavalue& metavalue,
 	metadata.setMetadata(convert(metavalue));
 	astro::image::ImageDirectory	_imagedirectory;
 	_imagedirectory.setMetadata(_filename, metadata);
-	_image = _imagedirectory.getImagePtr(_filename);
+	_image.reset();
 }
 
 void	ImageI::setMetadata(const Metadata& metadata,
@@ -119,7 +122,16 @@ void	ImageI::setMetadata(const Metadata& metadata,
 	}
 	astro::image::ImageDirectory	_imagedirectory;
 	_imagedirectory.setMetadata(_filename, m);
-	_image = _imagedirectory.getImagePtr(_filename);
+	_image.reset();
+}
+
+astro::image::ImagePtr	ImageI::image() {
+	if (!_image) {
+		astro::image::ImageDirectory	_imagedirectory;
+		_image = _imagedirectory.getImagePtr(_filename);
+		time(&_lastused);
+	}
+	return _image;
 }
 
 ImageFile       ImageI::file(const Ice::Current& /* current */) {
@@ -186,7 +198,7 @@ void	ImageI::toRepository(const std::string& reponame,
 	astro::project::ImageRepoPtr	repo = repoconf->repo(reponame);
 
 	// add the image to the repository;
-	repo->save(_image);
+	repo->save(image());
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "image saved");
 }
 
@@ -253,7 +265,7 @@ ByteImageI::~ByteImageI() {
 
 ByteSequence	ByteImageI::getBytes(const Ice::Current& /* current */) {
 	ByteSequence	result;
-	unsigned int	size = _image->size().getPixels();
+	unsigned int	size = image()->size().getPixels();
 	sequence_mono(unsigned char, size);
 	sequence_yuyv(unsigned char, size);
 	sequence_rgb(unsigned char, size);
@@ -282,7 +294,7 @@ ShortImageI::~ShortImageI() {
 
 ShortSequence	ShortImageI::getShorts(const Ice::Current& /* current */) {
 	ShortSequence	result;
-	unsigned int	size = _image->size().getPixels();
+	unsigned int	size = image()->size().getPixels();
         sequence_mono(unsigned short, size);
         sequence_yuyv(unsigned short, size);
         sequence_rgb(unsigned short, size);
@@ -311,7 +323,7 @@ IntImageI::~IntImageI() {
 
 IntSequence	IntImageI::getInts(const Ice::Current& /* current */) {
 	IntSequence	result;
-	unsigned int	size = _image->size().getPixels();
+	unsigned int	size = image()->size().getPixels();
         sequence_mono(unsigned int, size);
         sequence_yuyv(unsigned int, size);
         sequence_rgb(unsigned int, size);
@@ -340,7 +352,7 @@ FloatImageI::~FloatImageI() {
 
 FloatSequence	FloatImageI::getFloats(const Ice::Current& /* current */) {
 	FloatSequence	result;
-	unsigned int	size = _image->size().getPixels();
+	unsigned int	size = image()->size().getPixels();
         sequence_mono(float, size);
         sequence_yuyv(float, size);
         sequence_rgb(float, size);
@@ -369,7 +381,7 @@ DoubleImageI::~DoubleImageI() {
 
 DoubleSequence	DoubleImageI::getDoubles(const Ice::Current& /* current */) {
 	DoubleSequence	result;
-	unsigned int	size = _image->size().getPixels();
+	unsigned int	size = image()->size().getPixels();
         sequence_mono(double, size);
         sequence_yuyv(double, size);
         sequence_rgb(double, size);
@@ -384,6 +396,24 @@ ImagePrx	ImageI::createProxy(const std::string& filename,
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "create proxy for %s pixels",
 		astro::demangle(_type.name()).c_str());
 	return getImage(filename, _type, current);
+}
+
+#define	EXPIRATION_INTERVAL	30
+
+/**
+ * \brief expire images to conserver memory
+ *
+ * The expire method lets the servant forget the image if it has not been
+ * use for some time. This releases the pixel data. If clients forget to
+ * release images, large memory consumption can build up in the server
+ * which may break it on the small SoC systems that we use on the telescope
+ */
+void	ImageI::expire() {
+	time_t	now;
+	time(&now);
+	if ((now - _lastused) > EXPIRATION_INTERVAL) {
+		_image.reset();
+	}
 }
 
 } // namespace snowstar

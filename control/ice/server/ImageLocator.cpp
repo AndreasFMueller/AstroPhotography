@@ -11,11 +11,22 @@
 
 namespace snowstar {
 
+/**
+ * \brief Constructor for an ImageLocator
+ */
 ImageLocator::ImageLocator() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "image locator created");
 }
 
+/**
+ * \brief locate an image
+ *
+ * This method creates an image servant of the correct pixel type
+ */
 Ice::ObjectPtr	ImageLocator::locate(const Ice::Current& current,
 					Ice::LocalObjectPtr& /* cookie */) {
+	std::unique_lock<std::mutex>	lock(imagemutex);
+
 	std::string	name = current.id.name;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "get image %s", name.c_str());
 
@@ -91,6 +102,19 @@ void	ImageLocator::finished(const Ice::Current& /* current */,
 
 void	ImageLocator::deactivate(const std::string& category) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "deactivate: %s", category.c_str());
+}
+
+void	ImageLocator::expire() {
+	imagemap::iterator	i;
+	for (i = images.begin(); i != images.end(); i++) {
+		ImageI	*im = dynamic_cast<ImageI*>(&*i->second);
+		if (im) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0,
+				"found image '%s' to expire",
+				im->filename().c_str());
+			im->expire();
+		}
+	}
 }
 
 } // namespace snowstar

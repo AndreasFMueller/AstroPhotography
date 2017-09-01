@@ -12,13 +12,21 @@
 
 namespace snowstar {
 
+/**
+ * \brief Base class for Image implementations
+ *
+ * derived classes of this class will implement returning pixel arrays for
+ * different pixel types
+ */
 class ImageI : virtual public Image {
 protected:
 	astro::image::ImagePtr	_image;
+	astro::image::ImagePtr	image();
 private:
 	std::string	_filename;
 	ImagePoint	_origin;
 	ImageSize	_size;
+	time_t	_lastused;
 protected:
 	std::type_index	_type;
 	int	_bytesperpixel;
@@ -49,8 +57,13 @@ public:
 	virtual void	remove(const Ice::Current& current);
 	ImagePrx	createProxy(const std::string& filename,
 				const Ice::Current& current);
+	std::string	filename() const { return _filename; }
+	void	expire();
 };
 
+/**
+ * \brief Implementation of an image with unsigned char pixels
+ */
 class ByteImageI : virtual public ByteImage, virtual public ImageI {
 public:
 	ByteImageI(astro::image::ImagePtr image, const std::string& filename);
@@ -58,6 +71,9 @@ public:
 	virtual ByteSequence	getBytes(const Ice::Current& current);
 };
 
+/**
+ * \brief Implementation of an image with unsigned short pixels
+ */
 class ShortImageI : virtual public ShortImage, virtual public ImageI {
 public:
 	ShortImageI(astro::image::ImagePtr image, const std::string& filename);
@@ -65,6 +81,9 @@ public:
 	virtual ShortSequence	getShorts(const Ice::Current& current);
 };
 
+/**
+ * \brief Implementation of an image with unsigned int pixels
+ */
 class IntImageI : virtual public IntImage, virtual public ImageI {
 public:
 	IntImageI(astro::image::ImagePtr image, const std::string& filename);
@@ -72,6 +91,9 @@ public:
 	virtual IntSequence	getInts(const Ice::Current& current);
 };
 
+/**
+ * \brief Implementation of an image with floa pixels
+ */
 class FloatImageI : virtual public FloatImage, virtual public ImageI {
 public:
 	FloatImageI(astro::image::ImagePtr image, const std::string& filename);
@@ -79,6 +101,9 @@ public:
 	virtual FloatSequence	getFloats(const Ice::Current& current);
 };
 
+/**
+ * \brief Implementation of an image with doulbe pixels
+ */
 class DoubleImageI : virtual public DoubleImage, virtual public ImageI {
 public:
 	DoubleImageI(astro::image::ImagePtr image, const std::string& filename);
