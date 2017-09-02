@@ -58,7 +58,7 @@ public:
 	ImagePrx	createProxy(const std::string& filename,
 				const Ice::Current& current);
 	std::string	filename() const { return _filename; }
-	void	expire();
+	bool	expire();
 };
 
 /**

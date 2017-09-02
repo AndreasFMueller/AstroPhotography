@@ -11,12 +11,18 @@
 
 namespace snowstar {
 
+// method to launch the image expiration thread
+static void	launch_expiration(ImageLocator *imagelocator) {
+	imagelocator->run();
+}
+
 /**
  * \brief Constructor for an ImageLocator
  */
 ImageLocator::ImageLocator() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "image locator created");
 	_stop = false;
+	_thread = std::thread(launch_expiration, this);
 }
 
 /**
@@ -24,6 +30,7 @@ ImageLocator::ImageLocator() {
  */
 ImageLocator::~ImageLocator() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "wait for the thread to terminate");
+	stop();
 	if (_thread.joinable()) {
 		_thread.join();
 	}
@@ -37,7 +44,7 @@ ImageLocator::~ImageLocator() {
  */
 Ice::ObjectPtr	ImageLocator::locate(const Ice::Current& current,
 					Ice::LocalObjectPtr& /* cookie */) {
-	std::unique_lock<std::mutex>	lock(_imagemutex);
+	std::unique_lock<std::mutex>	lock(_mutex);
 
 	std::string	name = current.id.name;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "get image %s", name.c_str());
@@ -106,27 +113,71 @@ Ice::ObjectPtr	ImageLocator::locate(const Ice::Current& current,
 	return ptr;
 }
 
+/**
+ * \brief finished locator interface method
+ */
 void	ImageLocator::finished(const Ice::Current& /* current */,
 				const Ice::ObjectPtr& /* servant */,
 				const Ice::LocalObjectPtr& /* cookie */) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "finished");
 }
 
+/**
+ * \brief deactivate locator interface method
+ */
 void	ImageLocator::deactivate(const std::string& category) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "deactivate: %s", category.c_str());
 }
 
+/**
+ * \brief Expire all images
+ *
+ * This method calls the expire method on all images and counts how many
+ * times it actually did expire an image. This allows to get some information
+ * about how reliably clients clean up the images.
+ */
 void	ImageLocator::expire() {
 	imagemap::iterator	i;
+	int	counter = 0;
 	for (i = _images.begin(); i != _images.end(); i++) {
 		ImageI	*im = dynamic_cast<ImageI*>(&*i->second);
 		if (im) {
 			debug(LOG_DEBUG, DEBUG_LOG, 0,
 				"found image '%s' to expire",
 				im->filename().c_str());
-			im->expire();
+			if (im->expire()) {
+				counter++;
+			}
 		}
 	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "%d images expired", counter);
+}
+
+/**
+ * \brief Work method for the expiration thread
+ *
+ * The trampoline function launch_expiration just calls this method
+ */
+void	ImageLocator::run() {
+	std::unique_lock<std::mutex>	lock(_mutex);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "start image expiration thread");
+	do {
+		expire();
+		_condition.wait_for(lock, std::chrono::seconds(10));
+	} while (!_stop);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "image expiration thread completes");
+}
+
+/**
+ * \brief stop the expiration thread
+ *
+ * This method sets the _stop signal to true and signals the thread that
+ * it should stop expiring.
+ */
+void	ImageLocator::stop() {
+	std::unique_lock<std::mutex>	lock(_mutex);
+	_stop = false;
+	_condition.notify_all();
 }
 
 } // namespace snowstar

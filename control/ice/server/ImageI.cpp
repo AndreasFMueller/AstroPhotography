@@ -408,12 +408,17 @@ ImagePrx	ImageI::createProxy(const std::string& filename,
  * release images, large memory consumption can build up in the server
  * which may break it on the small SoC systems that we use on the telescope
  */
-void	ImageI::expire() {
+bool	ImageI::expire() {
+	if (!_image) {
+		return false;
+	}
 	time_t	now;
 	time(&now);
 	if ((now - _lastused) > EXPIRATION_INTERVAL) {
 		_image.reset();
+		return true;
 	}
+	return false;
 }
 
 } // namespace snowstar
