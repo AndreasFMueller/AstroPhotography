@@ -85,6 +85,8 @@ static void	usage(const char *progname) {
  * \brief Main function for the Snowstar server
  */
 int	snowstar_main(int argc, char *argv[]) {
+	debuglevel = LOG_DEBUG;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "main start");
 	// copy arguments so that we can restart
 	Restart	restart(argc, argv);
 
@@ -120,14 +122,18 @@ int	snowstar_main(int argc, char *argv[]) {
 
 	// default configuration
 	std::string	databasefile("testdb.db");
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "database: %s", databasefile.c_str());
 	std::string	servicename("server");
 	std::string	pidfilename(PIDDIR "/snowstar.pid");
 
 	// parse the command line
 	int	c;
 	int	longindex;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "start parsing the command line");
 	while (EOF != (c = getopt_long(argc, argv, "b:c:dD:fghl:Ln:p:P:s:uN:F:",
-		longopts, &longindex)))
+		longopts, &longindex))) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "found option '%c': %s",
+			c, optarg);
 		switch (c) {
 		case 'b':
 			astro::image::ImageDirectory::basedir(optarg);
@@ -250,6 +256,8 @@ int	snowstar_main(int argc, char *argv[]) {
 				"option %c (0x%02x)", c, c);
 			throw std::runtime_error(msg);
 		}
+	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "command line parsed");
 
 	// go inter the background
 	if (!foreground) {
@@ -299,6 +307,7 @@ int	snowstar_main(int argc, char *argv[]) {
 	astro::event(EVENT_GLOBAL, astro::events::INFO,
 		astro::events::Event::SERVER, "snowstar server shutdown");
 
+	// executing the new server
 	restart.exec();
 
 	return status;
