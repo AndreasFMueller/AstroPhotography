@@ -10,6 +10,7 @@
 #include <cerrno>
 #include <cstring>
 #include <AstroEvent.h>
+#include <unistd.h>
 
 namespace snowstar {
 
