@@ -1,0 +1,63 @@
+#! /bin/sh
+#
+# startastro -- start/stop the astro service
+#
+# (c) 2017 Prof Dr Andreas Müller, Hochschule Rapperswil
+#
+
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+bindir=@bindir@
+sbindir=@sbindir@
+datadir=@datadir@
+
+localstatedir=@localstatedir@
+runstatedir=@runstatedir@
+sharedstatedir=@sharedstatedir@
+sysconfdir=@sysconfdir@
+datarootdir=@datarootdir@
+datadir=@datadir@
+
+logdir=${localstatedir}/log
+configdb=${sysconfdir}/config.db
+imagedir=${datadir}/images
+
+# make sure that all images are present
+if [ ! -d ${imagedir} ]
+then
+	mkdir -p ${imagedir}
+	chown astro:astro ${imagedir}
+fi
+if [ ! -d ${logdir} ]
+then
+	mkdir -p ${logdir}
+	chown astro:astro ${logdir}
+fi
+
+# read the additional variables
+servername=server
+if [ -r ${sysconfdir}/snowstar.conf ]
+then
+	. ${sysconfdir}/snowstar.conf
+fi
+
+# start/stop the service
+case $1 in
+	start)
+		${sbindir}/snowstar					\
+			--group=astro --user=astro			\
+			--config=${configdb} 				\
+			--database=${configdb} --base=${imagedir}	\
+			--name=${servername}				\
+			--files=10 --lines=100000 			\
+			--logfile=${logdir}/snowstar			\
+			--debug
+		;;
+	stop)
+		if [ -r ${runstatedir} ]
+		then
+			kill `cat ${runstatedir}/snowstar.pid`
+		fi
+		;;
+esac
+

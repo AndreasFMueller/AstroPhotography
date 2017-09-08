@@ -541,6 +541,7 @@ AC_CONFIG_FILES([Makefile include/Makefile
 	drivers/celestron/Makefile drivers/gpio/Makefile drivers/nice/Makefile
 	drivers/asi/Makefile drivers/atik/Makefile
 	man/Makefile doc/Makefile doc/manual/Makefile
+	scripts/Makefile scripts/startastro
 	test/Makefile])
 AC_OUTPUT
 
