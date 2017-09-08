@@ -59,6 +59,7 @@ public:
 				const Ice::Current& current);
 	std::string	filename() const { return _filename; }
 	bool	expire();
+	time_t	lastused() const { return _lastused; }
 };
 
 /**

@@ -11,6 +11,9 @@
 
 namespace snowstar {
 
+// never maintain more than maxservants
+static const int	maxservants = 120;
+
 // method to launch the image expiration thread
 static void	launch_expiration(ImageLocator *imagelocator) {
 	imagelocator->run();
@@ -107,6 +110,11 @@ Ice::ObjectPtr	ImageLocator::locate(const Ice::Current& current,
 		throw exception;
 	}
 
+	// look for the oldest image and remove it from the map until 
+	while (_images.size() > maxservants) {
+		removeoldest();
+	}
+
 	// add the servant to the cache
 	_images.insert(std::make_pair(name, ptr));
 	return ptr;
@@ -118,7 +126,6 @@ Ice::ObjectPtr	ImageLocator::locate(const Ice::Current& current,
 void	ImageLocator::finished(const Ice::Current& /* current */,
 				const Ice::ObjectPtr& /* servant */,
 				const Ice::LocalObjectPtr& /* cookie */) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "finished");
 }
 
 /**
@@ -141,15 +148,17 @@ void	ImageLocator::expire() {
 	for (i = _images.begin(); i != _images.end(); i++) {
 		ImageI	*im = dynamic_cast<ImageI*>(&*i->second);
 		if (im) {
-			debug(LOG_DEBUG, DEBUG_LOG, 0,
-				"found image '%s' to expire",
-				im->filename().c_str());
 			if (im->expire()) {
+				debug(LOG_DEBUG, DEBUG_LOG, 0,
+					"image '%s' expired",
+					im->filename().c_str());
 				counter++;
 			}
 		}
 	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "%d images expired", counter);
+	if (counter > 0) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "%d images expired", counter);
+	}
 }
 
 /**
@@ -177,6 +186,46 @@ void	ImageLocator::stop() {
 	std::unique_lock<std::mutex>	lock(_mutex);
 	_stop = true;
 	_condition.notify_all();
+}
+
+/**
+ * \brief remove the oldest image from the map
+ */
+void	ImageLocator::removeoldest() {
+	// don't do anything 
+	if (_images.size() == 0) {
+		return;
+	}
+	imagemap::const_iterator	oldest = _images.begin();
+	ImageI	*oldestim = dynamic_cast<ImageI*>(&*oldest->second);
+	if (NULL == oldestim) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "not an image (internal error)");
+		return;
+	}
+	time_t	oldesttime = oldestim->lastused();
+
+	// now go through all the images and found an older one
+	imagemap::const_iterator	i;
+	for (i = _images.begin(); i != _images.end(); i++) {
+		ImageI	*im = dynamic_cast<ImageI*>(&*i->second);
+		if (im) {
+			time_t	t = im->lastused();
+			if (t < oldesttime) {
+				oldest = i;
+				oldesttime = t;
+			}
+		}
+	}
+
+	// we have an image
+	if (oldest != _images.end()) {
+		time_t	now;
+		time(&now);
+		debug(LOG_DEBUG, DEBUG_LOG, 0,
+			"remove servant for '%s', age %d",
+			oldest->first.c_str(), now - oldesttime);
+		_images.erase(oldest);
+	}
 }
 
 } // namespace snowstar

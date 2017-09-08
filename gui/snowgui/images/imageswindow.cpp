@@ -1,5 +1,5 @@
 /*
- * \brief imageswindow.cpp -- implementation of images preview
+ * imageswindow.cpp -- implementation of images preview
  *
  * (c) 2016 Prof Dr Andreas Müller, Hochschule Rapperswil
  */ 
@@ -47,17 +47,28 @@ imageswindow::imageswindow(QWidget *parent,
 	setWindowTitle(QString(title.c_str()));
 
 	// add connections
-	connect(ui->imageTree, SIGNAL(currentItemChanged(QTreeWidgetItem*,QTreeWidgetItem*)),
-		this, SLOT(currentImageChanged(QTreeWidgetItem*,QTreeWidgetItem*)));
-	connect(ui->imageTree, SIGNAL(itemDoubleClicked(QTreeWidgetItem*,int)),
-		this, SLOT(itemDoubleClicked(QTreeWidgetItem*,int)));
-	connect(ui->imagedetailWidget, SIGNAL(imageReceived(astro::image::ImagePtr)),
-		this, SLOT(setImage(astro::image::ImagePtr)));
-	connect(ui->imagedetailWidget, SIGNAL(deleteCurrentImage()),
-		this, SLOT(deleteCurrentImage()));
+	connect(ui->imageTree,
+		SIGNAL(currentItemChanged(QTreeWidgetItem*,QTreeWidgetItem*)),
+		this,
+		SLOT(currentImageChanged(QTreeWidgetItem*,QTreeWidgetItem*)));
+	connect(ui->imageTree,
+		SIGNAL(itemDoubleClicked(QTreeWidgetItem*,int)),
+		this,
+		SLOT(itemDoubleClicked(QTreeWidgetItem*,int)));
+	connect(ui->imagedetailWidget,
+		SIGNAL(imageReceived(astro::image::ImagePtr)),
+		this,
+		SLOT(setImage(astro::image::ImagePtr)));
+	connect(ui->imagedetailWidget,
+		SIGNAL(deleteCurrentImage()),
+		this,
+		SLOT(deleteCurrentImage()));
 
-	connect(ui->imageWidget, SIGNAL(rectangleSelected(astro::image::ImageRectangle)),
-                ui->imageWidget, SLOT(selectRectangle(QRect)));
+	connect(ui->imageWidget,
+		SIGNAL(rectangleSelected(astro::image::ImageRectangle)),
+                ui->imageWidget,
+		SLOT(selectRectangle(QRect)));
+
 	ui->imageWidget->setRectangleSelectionEnabled(true);
 }
 
@@ -111,7 +122,8 @@ void	imageswindow::setImages(snowstar::ImagesPrx images) {
 /**
  * \brief handle when the selected widget changes
  */
-void	imageswindow::currentImageChanged(QTreeWidgetItem *current, QTreeWidgetItem * /* previous */) {
+void	imageswindow::currentImageChanged(QTreeWidgetItem *current,
+		QTreeWidgetItem * /* previous */) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "currentImageChanged");
 	std::string	name(current->text(3).toLatin1());
 	if (!_images) {
@@ -122,17 +134,24 @@ void	imageswindow::currentImageChanged(QTreeWidgetItem *current, QTreeWidgetItem
 	try {
 		image = _images->getImage(name);
 	} catch (const std::exception& x) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "cannot get image: %s", x.what());
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "cannot get image: %s",
+			x.what());
 		return;
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "got a new image");
 	ui->imagedetailWidget->setImage(image);
 }
 
+/**
+ * \brief set the new image in the image widget
+ */
 void	imageswindow::setImage(astro::image::ImagePtr image) {
 	ui->imageWidget->setImage(image);
 }
 
+/**
+ * \brief Delete the current image
+ */
 void	imageswindow::deleteCurrentImage() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "delete image");
 
@@ -156,10 +175,17 @@ void	imageswindow::deleteCurrentImage() {
 	//ui->imageWidget->setImage(imageptr);
 }
 
-void	imageswindow::itemDoubleClicked(QTreeWidgetItem * /* item */, int /* column */) {
+/**
+ * \brief handle a double click in a tree widet
+ */
+void	imageswindow::itemDoubleClicked(QTreeWidgetItem * /* item */,
+		int /* column */) {
 	ui->imagedetailWidget->loadImage();
 }
 
+/**
+ * \brief Handle the close event for the window
+ */
 void	imageswindow::closeEvent(QCloseEvent * /* event */) {
 	deleteLater();
 }

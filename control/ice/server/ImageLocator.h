@@ -56,6 +56,8 @@ public:
 	void	stop();
 	void	expire();
 	void	run();
+private:
+	void	removeoldest();
 };
 
 } // namespace snowstar
