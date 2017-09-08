@@ -215,7 +215,7 @@ void    GuiderI::unregisterCalibrationImageMonitor(const Ice::Identity& imagecal
 	calibrationimagecallbacks.unregisterCallback(imagecallback, current);
 }
 
-
+#if 0
 /**
  * \brief start imaging with a given exposure
  */
@@ -248,6 +248,7 @@ ImagePrx	GuiderI::getImage(const Ice::Current& current) {
 	// return a proxy for the image
 	return snowstar::getImage(filename, image->pixel_type(), current);
 }
+#endif
 
 /**
  * \brief Update information about the image

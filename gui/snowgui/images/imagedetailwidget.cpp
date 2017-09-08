@@ -15,6 +15,9 @@
 
 namespace snowgui {
 
+/**
+ * \brief Construct a new widget
+ */
 imagedetailwidget::imagedetailwidget(QWidget *parent)
 	: QWidget(parent), ui(new Ui::imagedetailwidget) {
 	ui->setupUi(this);
@@ -32,15 +35,23 @@ imagedetailwidget::imagedetailwidget(QWidget *parent)
 		SLOT(sendImage(astro::image::ImagePtr, std::string)));
 }
 
+/**
+ * \brief Destroy the image widget
+ */
 imagedetailwidget::~imagedetailwidget() {
 	delete ui;
 }
 
+/**
+ * \brief Accept a new image proxy
+ */
 void	imagedetailwidget::setImage(snowstar::ImagePrx image) {
 	_image = image;
 	if (!_image) {
 		return;
 	}
+
+	// process the new image proxy
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "got an new image");
 	std::string	s;
 	try {
@@ -80,6 +91,9 @@ void	imagedetailwidget::setImage(snowstar::ImagePrx image) {
 	ui->deleteButton->setEnabled(true);
 }
 
+/**
+ * \brief Load the image from the remote server
+ */
 void	imagedetailwidget::loadImage() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "load image %s", _image->name().c_str());
 	snowstar::ImageFile	file = _image->file();
@@ -91,6 +105,9 @@ void	imagedetailwidget::loadImage() {
 	emit imageReceived(_imageptr);
 }
 
+/**
+ * \brief Delete the image on the server side
+ */
 void	imagedetailwidget::deleteImage() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "delete image %s", _image->name().c_str());
 	ui->nameField->setText(QString(""));
@@ -107,6 +124,9 @@ void	imagedetailwidget::deleteImage() {
 	emit deleteCurrentImage();
 }
 
+/**
+ * \brief Save an image in the file system
+ */
 void	imagedetailwidget::saveImage() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "saving file");
 	QFileDialog	filedialog(this);
@@ -137,6 +157,9 @@ void	imagedetailwidget::saveImage() {
 	}
 }
 
+/**
+ * \brief handle the window close event
+ */
 void	imagedetailwidget::closeEvent(QCloseEvent * /* event */) {
         emit offerImage(ImagePtr(NULL), std::string());
 }

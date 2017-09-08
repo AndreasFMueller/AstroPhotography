@@ -21,6 +21,9 @@
 
 namespace snowstar {
 
+/**
+ * \brief Construct a new Image servant
+ */
 ImageI::ImageI(astro::image::ImagePtr image, const std::string& filename)
 	: _image(image), _filename(filename), _type(typeid(unsigned short)) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0,
@@ -54,47 +57,77 @@ ImageI::ImageI(astro::image::ImagePtr image, const std::string& filename)
 	time(&_lastused);
 }
 
+/**
+ * \brief Destroy an image servant
+ */
 ImageI::~ImageI() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "destroy servant for image %s", 
 		_filename.c_str());
 }
 
+/**
+ * \brief Get the name of an image
+ */
 std::string	ImageI::name(const Ice::Current& /* current */) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "request for image %s",
 		_filename.c_str());
 	return _filename;
 }
 
+/**
+ * \brief Get the age of an image in the directory
+ */
 int	ImageI::age(const Ice::Current& /* current */) {
 	astro::image::ImageDirectory	_imagedirectory;
 	return _imagedirectory.fileAge(_filename);
 }
 
+/**
+ * \brief Get the size of the image
+ */
 ImageSize       ImageI::size(const Ice::Current& /* current */) {
 	return _size;
 }
 
+/**
+ * \brief Get the origin of the image inside the ccd frame
+ */
 ImagePoint      ImageI::origin(const Ice::Current& /* current */) {
 	return _origin;
 }
 
+/**
+ * \brief Get the size of a pixel
+ */
 int     ImageI::bytesPerPixel(const Ice::Current& /* current */) {
 	return _bytesperpixel;
 }
 
+/**
+ * \brief Get the number of image planes
+ */
 int     ImageI::planes(const Ice::Current& /* current */) {
 	return _planes;
 }
 
+/**
+ * \brief Get the size of a single value in a plane
+ */
 int     ImageI::bytesPerValue(const Ice::Current& /* current */) {
 	return _bytespervalue;
 }
 
+/**
+ * \brief Find out whether there is a keyword in the metadata
+ */
 bool	ImageI::hasMeta(const std::string& keyword,
 			const Ice::Current& /* current */) {
 	return image()->hasMetadata(keyword);
 }
 
+/**
+ * \brief Get the metadata for a keyword
+ */
 Metavalue	ImageI::getMeta(const std::string& keyword,
 			const Ice::Current& /* current */) {
 	if (!image()->hasMetadata(keyword)) {
@@ -103,6 +136,9 @@ Metavalue	ImageI::getMeta(const std::string& keyword,
 	return convert(_image->getMetadata(keyword));
 }
 
+/**
+ * \brief Set a metadata value for an image
+ */
 void	ImageI::setMetavalue(const Metavalue& metavalue,
 			const Ice::Current& /* current */) {
 	ImageMetadata	metadata;
@@ -112,6 +148,9 @@ void	ImageI::setMetavalue(const Metavalue& metavalue,
 	_image.reset();
 }
 
+/**
+ * \brief Set metadata for an image
+ */
 void	ImageI::setMetadata(const Metadata& metadata,
 			const Ice::Current& /* current */) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "setting metadata on file %s, %d items",
@@ -125,6 +164,9 @@ void	ImageI::setMetadata(const Metadata& metadata,
 	_image.reset();
 }
 
+/**
+ * \brief Get a image in memorey
+ */
 astro::image::ImagePtr	ImageI::image() {
 	if (!_image) {
 		astro::image::ImageDirectory	_imagedirectory;
@@ -134,6 +176,9 @@ astro::image::ImagePtr	ImageI::image() {
 	return _image;
 }
 
+/**
+ * \brief Retrieve the content of the FITS file
+ */
 ImageFile       ImageI::file(const Ice::Current& /* current */) {
 	std::vector<Ice::Byte>	result;
 	astro::image::ImageDirectory	_imagedirectory;
@@ -180,11 +225,17 @@ ImageFile       ImageI::file(const Ice::Current& /* current */) {
 	return result;
 }
 
+/**
+ * \brief Get the size of an image file
+ */
 int     ImageI::filesize(const Ice::Current& /* current */) {
 	astro::image::ImageDirectory	_imagedirectory;
 	return _imagedirectory.fileSize(_filename);
 }
 
+/**
+ * \brief Save an image in a repository
+ */
 void	ImageI::toRepository(const std::string& reponame,
 		const Ice::Current& /* current */) {
 	// get the repository
@@ -202,7 +253,12 @@ void	ImageI::toRepository(const std::string& reponame,
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "image saved");
 }
 
+/**
+ * \brief Remove the image from the 
+ */
 void    ImageI::remove(const Ice::Current& /* current */) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "destroy the image file '%s'",
+		_filename.c_str());
 	astro::image::ImageDirectory	_imagedirectory;
 	_imagedirectory.remove(_filename);
 }

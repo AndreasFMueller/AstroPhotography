@@ -79,6 +79,7 @@ snowstar_SOURCES = snowstar.cpp 					\
 	GuiderICalibrationImage.cpp					\
 	GuiderICalibration.cpp						\
 	GuiderIGuiding.cpp						\
+	GuiderIImage.cpp						\
 	GuiderI.cpp							\
 	GuiderLocator.cpp						\
 	ImageI.cpp							\

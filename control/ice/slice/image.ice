@@ -113,7 +113,7 @@ module snowstar {
 		void	toRepository(string reponame) throws NotFound;
 
 		/**
-		 * \brief Destroy a servant
+		 * \brief remove the image from the respository
 		 */
 		void	remove();
 	};
