@@ -399,6 +399,7 @@ module snowstar {
 		void	startBacklash(double interval, BacklashDirection dir)
 				throws BadState;
 		void	stopBacklash() throws BadState;
+		BacklashDirection	getBacklashDirection() throws BadState;
 		BacklashData	getBacklashData() throws BadState, NotFound;
 		void	setLastPoints(int n) throws BadState;
 

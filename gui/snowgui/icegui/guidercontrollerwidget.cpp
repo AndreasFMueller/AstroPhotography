@@ -362,29 +362,52 @@ void	guidercontrollerwidget::statusUpdate() {
 	case snowstar::GuiderIDLE:
 		ui->guideButton->setText(QString("Guiding"));
 		ui->guideButton->setEnabled(false);
+		ui->monitorButton->setEnabled(false);
+		ui->decBacklashButton->setEnabled(true);
+		ui->raBacklashButton->setEnabled(true);
 		break;
 	case snowstar::GuiderUNCONFIGURED:
 		ui->guideButton->setText(QString("Guide"));
 		ui->guideButton->setEnabled(false);
+		ui->monitorButton->setEnabled(false);
+		ui->decBacklashButton->setEnabled(true);
+		ui->raBacklashButton->setEnabled(true);
 		break;
 	case snowstar::GuiderCALIBRATING:
 		ui->guideButton->setText(QString("Guide"));
 		ui->guideButton->setEnabled(false);
+		ui->monitorButton->setEnabled(true);
+		ui->decBacklashButton->setEnabled(false);
+		ui->raBacklashButton->setEnabled(false);
 		break;
 	case snowstar::GuiderCALIBRATED:
 		ui->guideButton->setText(QString("Guide"));
 		ui->guideButton->setEnabled(true);
+		ui->decBacklashButton->setEnabled(true);
+		ui->raBacklashButton->setEnabled(true);
 		break;
 	case snowstar::GuiderGUIDING:
 		ui->guideButton->setText(QString("Stop Guiding"));
 		ui->guideButton->setEnabled(true);
+		ui->monitorButton->setEnabled(true);
+		ui->decBacklashButton->setEnabled(false);
+		ui->raBacklashButton->setEnabled(false);
 		break;
+	case snowstar::GuiderBACKLASH:
+		if (_guider->getBacklashDirection() == snowstar::BacklashDEC) {
+			ui->decBacklashButton->setEnabled(true);
+			ui->raBacklashButton->setEnabled(false);
+		} else {
+			ui->decBacklashButton->setEnabled(false);
+			ui->raBacklashButton->setEnabled(true);
+		}
 	case snowstar::GuiderIMAGING:
 	case snowstar::GuiderDARKACQUIRE:
 	case snowstar::GuiderFLATACQUIRE:
-	case snowstar::GuiderBACKLASH:
 		ui->guideButton->setText(QString("Guide"));
 		ui->guideButton->setEnabled(false);
+		ui->monitorButton->setEnabled(false);
+		break;
 	}
 	_previousstate = state;
 }

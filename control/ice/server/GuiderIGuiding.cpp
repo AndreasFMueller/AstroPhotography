@@ -23,7 +23,8 @@ namespace snowstar {
 void GuiderI::startGuiding(Ice::Float gpinterval, Ice::Float aointerval,
 		bool stepping,
 		const Ice::Current& /* current */) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "start guiding with interval gp=%.1f, ao=%.1f",
+	debug(LOG_DEBUG, DEBUG_LOG, 0,
+		"start guiding with interval gp=%.1f, ao=%.1f",
 		gpinterval, aointerval);
 	// construct a tracker
 	astro::guiding::TrackerPtr	tracker = getTracker();
@@ -37,10 +38,16 @@ void GuiderI::startGuiding(Ice::Float gpinterval, Ice::Float aointerval,
 		guider->name().c_str()));
 }
 
+/**
+ * \brief Retrieve the guiding interval from the guider
+ */
 Ice::Float GuiderI::getGuidingInterval(const Ice::Current& /* current */) {
 	return guider->getInterval();
 }
 
+/**
+ * \brief Stop guiding
+ */
 void GuiderI::stopGuiding(const Ice::Current& /* current */) {
 	guider->stopGuiding();
 
@@ -56,6 +63,9 @@ void GuiderI::stopGuiding(const Ice::Current& /* current */) {
 		guider->name().c_str()));
 }
 
+/**
+ * \brief Get the most recent image
+ */
 ImagePrx GuiderI::mostRecentImage(const Ice::Current& current) {
 	// retrieve image
 	astro::image::ImagePtr	image = guider->mostRecentImage();
@@ -71,6 +81,9 @@ ImagePrx GuiderI::mostRecentImage(const Ice::Current& current) {
 	return snowstar::getImage(filename, image->pixel_type(), current);
 }
 
+/**
+ * \brief Get the most recent tracking point
+ */
 TrackingPoint GuiderI::mostRecentTrackingPoint(const Ice::Current& /* current */) {
 	if (astro::guiding::Guide::guiding != guider->state()) {
 		throw BadState("not currently guiding");
@@ -90,6 +103,9 @@ TrackingPoint GuiderI::mostRecentTrackingPoint(const Ice::Current& /* current */
 	return result;
 }
 
+/**
+ * \brief Get the complete tracking history
+ */
 TrackingHistory GuiderI::getTrackingHistory(Ice::Int id,
 	const Ice::Current& /* current */) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "get tracking history %d", id);
@@ -97,6 +113,9 @@ TrackingHistory GuiderI::getTrackingHistory(Ice::Int id,
 	return convert(store.get(id));
 }
 
+/**
+ * \brief Get a tracking history for a given control type
+ */
 TrackingHistory GuiderI::getTrackingHistoryType(Ice::Int id,
 	ControlType type, const Ice::Current& /* current */) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "get tracking history %d", id);
@@ -123,7 +142,8 @@ void    GuiderI::registerTrackingMonitor(const Ice::Identity& trackingcallback,
 	try {
 		trackingcallbacks.registerCallback(trackingcallback, current);
 	} catch (const std::exception& x) {
-		debug(LOG_ERR, DEBUG_LOG, 0, "cannot register tracking callback: %s %s",
+		debug(LOG_ERR, DEBUG_LOG, 0,
+			"cannot register tracking callback: %s %s",
 			astro::demangle(typeid(x).name()).c_str(), x.what());
 	} catch (...) {
 		debug(LOG_ERR, DEBUG_LOG, 0,

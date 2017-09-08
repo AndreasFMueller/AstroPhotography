@@ -120,5 +120,14 @@ void	callback_adapter<BacklashMonitorPrx>(BacklashMonitorPrx& p,
 		typeid(*data).name());
 }
 
+BacklashDirection	GuiderI::getBacklashDirection(const Ice::Current& /* current */) {
+	switch (guider->getBacklashDirection()) {
+	case astro::guiding::backlash_dec:
+		return BacklashDEC;
+	case astro::guiding::backlash_ra:
+		return BacklashRA;
+	}
+}
+
 
 } // namespace snowstar

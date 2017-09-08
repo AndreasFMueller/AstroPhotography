@@ -219,6 +219,9 @@ void	BacklashDialog::addPoint(const snowstar::BacklashPoint& point) {
 	ui->dataWidget->add(point.time, values);
 }
 
+/**
+ * \brief Method to set the window title
+ */
 void	BacklashDialog::windowTitle() {
 	std::string	title = std::string(
 		(_direction = snowstar::BacklashDEC) ? "DEC" : "RA");
@@ -274,8 +277,9 @@ void	BacklashDialog::showResult() {
 	if (hypot(_data.result.x, _data.result.y) < 0.5) {
 		ui->directionField->setText("");
 		ui->directionField2->setText("");
+		ui->directionFieldAngle->setText("");
 		ui->scatterField->setText("");
-		ui->scatterField2->setText("");
+		ui->scatterFieldLength->setText("");
 		ui->movementField->setText("");
 		ui->movementField2->setText("");
 		ui->backlashField->setText("");
@@ -289,11 +293,15 @@ void	BacklashDialog::showResult() {
 		astro::stringprintf("%.1f,", _data.result.x).c_str());
 	ui->directionField2->setText(
 		astro::stringprintf("%.1f", _data.result.y).c_str());
+	ui->directionFieldAngle->setText(astro::stringprintf("%.1f°",
+		(180 / M_PI) * atan2(_data.result.y, _data.result.x)).c_str());
 
 	ui->scatterField->setText(
 		astro::stringprintf("%.1f,", _data.result.longitudinal).c_str());
 	ui->scatterField2->setText(
 		astro::stringprintf("%.1f", _data.result.lateral).c_str());
+	ui->scatterFieldLength->setText(astro::stringprintf("%.1f",
+		hypot(_data.result.longitudinal, _data.result.lateral)).c_str());
 
 	ui->movementField->setText(
 		astro::stringprintf("%.1f,", _data.result.forward).c_str());
@@ -321,6 +329,9 @@ void	BacklashDialog::showResult() {
 	ui->lastpointsSpinBox->blockSignals(false);
 }
 
+/**
+ * \brief slot called when the number of points to consider changes
+ */
 void	BacklashDialog::lastpointsChanged(int lastpoints) {
 	if (!_guider) {
 		return;

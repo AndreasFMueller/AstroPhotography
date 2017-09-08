@@ -1171,6 +1171,7 @@ public:
 			backlash_t dir);
 	void	setLastPoints(int n);
 	void	stopBacklash();
+	backlash_t	getBacklashDirection();
 };
 typedef std::shared_ptr<Guider>	GuiderPtr;
 

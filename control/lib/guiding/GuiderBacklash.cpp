@@ -100,5 +100,15 @@ void	Guider::setLastPoints(int n) {
 	_backlashwork->lastPoints(n);
 }
 
+/**
+ * \brief Get the direction of the backlash characterization
+ */
+backlash_t	Guider::getBacklashDirection() {
+	if (!_backlashwork) {
+		throw BadState("not in backlash state");
+	}
+	return _backlashwork->direction();
+}
+
 } // namespace guiding
 } // namespace astro
