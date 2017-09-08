@@ -29,7 +29,6 @@ ImageLocator::ImageLocator() {
  * \brief Destructor for the ImageLocator
  */
 ImageLocator::~ImageLocator() {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "wait for the thread to terminate");
 	stop();
 	if (_thread.joinable()) {
 		_thread.join();
@@ -176,7 +175,7 @@ void	ImageLocator::run() {
  */
 void	ImageLocator::stop() {
 	std::unique_lock<std::mutex>	lock(_mutex);
-	_stop = false;
+	_stop = true;
 	_condition.notify_all();
 }
 

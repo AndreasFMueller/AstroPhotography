@@ -107,8 +107,9 @@ snowstar_LDADD = -L$(top_builddir)/lib -lastro \
 snowstar_CPPFLAGS = -I$(top_builddir)/ice/include -I$(top_builddir)/ice/slice \
 	@ICEINCLUDE@ -DPIDDIR=\"@PIDDIR@\"
 
-COMMONFLAGS = --debug --foreground --name=$${servername} --base=`pwd`/images \
-	--database=`pwd`/testdb.db --config=`pwd`/testdb.db
+COMMONFLAGS = --debug --foreground --base=`pwd`/images \
+	--database=`pwd`/testdb.db --config=`pwd`/testdb.db \
+	--name=$${servername} 
 EFENCE = EF_PROTECT_FREE=1 EF_FILL=255
 
 test:	snowstar
