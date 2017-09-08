@@ -215,41 +215,6 @@ void    GuiderI::unregisterCalibrationImageMonitor(const Ice::Identity& imagecal
 	calibrationimagecallbacks.unregisterCallback(imagecallback, current);
 }
 
-#if 0
-/**
- * \brief start imaging with a given exposure
- */
-void	GuiderI::startImaging(const Exposure& exposure,
-                                const Ice::Current& /* current */) {
-	try {
-		astro::camera::Exposure	e = convert(exposure);
-		guider->startImaging(e);
-	} catch (const std::exception& x) {
-		BadState	exception;
-		exception.cause = std::string(x.what());
-		throw exception;
-	}
-}
-
-/**
- * \brief retrieve the image
- */
-ImagePrx	GuiderI::getImage(const Ice::Current& current) {
-	// retrieve image
-	astro::image::ImagePtr	image = guider->getImaging();
-	if (!image) {
-		throw NotFound("no image available");
-	}
-
-	// store image in image directory
-	astro::image::ImageDirectory	imagedirectory;
-	std::string	filename = imagedirectory.save(image);
-
-	// return a proxy for the image
-	return snowstar::getImage(filename, image->pixel_type(), current);
-}
-#endif
-
 /**
  * \brief Update information about the image
  */
