@@ -12,6 +12,7 @@
 #include <AstroEvent.h>
 #include <unistd.h>
 #include <sstream>
+#include <includes.h>
 
 namespace snowstar {
 
@@ -47,7 +48,12 @@ void	Restart::shutdown_instead(bool s) {
  */
 void	Restart::exec() {
 	char	path[PATH_MAX];
-	getcwd(path, sizeof(path));
+	if (NULL == getcwd(path, sizeof(path))) {
+		std::string	msg = astro::stringprintf("cannot determine "
+			"current working directory: %s", strerror(errno));
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw std::runtime_error(msg);
+	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "Restart::exec(), path: %s", path);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "%s", toString().c_str());
 
