@@ -11,6 +11,7 @@
 #include <time.h>
 #include <EventMonitor.h>
 #include <AstroUtils.h>
+#include "eventdetailwidget.h"
 
 namespace snowgui {
 
@@ -31,10 +32,13 @@ EventDisplayWidget::EventDisplayWidget(QWidget *parent,
 		this, SLOT(filterClicked()));
 	connect(ui->timeSelectButton, SIGNAL(clicked()),
 		this, SLOT(timeSelectClicked()));
+	connect(ui->eventTable, SIGNAL(itemDoubleClicked(QTableWidgetItem*)),
+		this, SLOT(eventDoubleClicked(QTableWidgetItem*)));
 
 	// configure the table
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "configure table");
 	QStringList	headers;
+	headers << "ID";
 	headers << "Level";
 	headers << "PID";
 	headers << "service";
@@ -60,6 +64,9 @@ EventDisplayWidget::EventDisplayWidget(QWidget *parent,
 	QDateTime	todatetime;
 	todatetime.setTime_t(now + 3600);
 	ui->toTime->setDateTime(todatetime);
+
+	// make sure we  have no detail widget
+	_detailwidget = NULL;
 
 	// connect to the event handler
 	Ice::CommunicatorPtr	ic = snowstar::CommunicatorSingleton::get();
@@ -141,40 +148,44 @@ void	EventDisplayWidget::insertEvent(int row, const snowstar::Event& event) {
 
 	QTableWidgetItem	*item;
 
-	std::string	levelstring = astro::events::level2string(snowstar::convert(event.level));
-	item = new QTableWidgetItem(levelstring.c_str());
+	std::string	idstring = astro::stringprintf("%d", event.id);
+	item = new QTableWidgetItem(idstring.c_str());
 	ui->eventTable->setItem(row, 0, item);
 
-	item = new QTableWidgetItem(astro::stringprintf("%d", event.pid).c_str());
+	std::string	levelstring = astro::events::level2string(snowstar::convert(event.level));
+	item = new QTableWidgetItem(levelstring.c_str());
 	ui->eventTable->setItem(row, 1, item);
 
-	item = new QTableWidgetItem(event.service.c_str());
+	item = new QTableWidgetItem(astro::stringprintf("%d", event.pid).c_str());
 	ui->eventTable->setItem(row, 2, item);
+
+	item = new QTableWidgetItem(event.service.c_str());
+	ui->eventTable->setItem(row, 3, item);
 
 
 	struct timeval	when = snowstar::converttimeval(event.timeago);
 	std::string	timestamp = astro::Timer::timestamp(when, 3);
 	item = new QTableWidgetItem(timestamp.c_str());
-	QFont   f("Microsoft Sans Serif");;
+	QFont   f("Microsoft Sans Serif");
         f.setStyleHint(QFont::Monospace);
         item->setFont(f);
-	ui->eventTable->setItem(row, 3, item);
-
-	item = new QTableWidgetItem(event.subsystem.c_str());
 	ui->eventTable->setItem(row, 4, item);
 
-	item = new QTableWidgetItem(event.message.c_str());
+	item = new QTableWidgetItem(event.subsystem.c_str());
 	ui->eventTable->setItem(row, 5, item);
 
-	item = new QTableWidgetItem(event.classname.c_str());
+	item = new QTableWidgetItem(event.message.c_str());
 	ui->eventTable->setItem(row, 6, item);
 
-	item = new QTableWidgetItem(event.file.c_str());
+	item = new QTableWidgetItem(event.classname.c_str());
 	ui->eventTable->setItem(row, 7, item);
+
+	item = new QTableWidgetItem(event.file.c_str());
+	ui->eventTable->setItem(row, 8, item);
 
 	item = new QTableWidgetItem(astro::stringprintf("%d", event.line).c_str());
 	item->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter);
-	ui->eventTable->setItem(row, 8, item);
+	ui->eventTable->setItem(row, 9, item);
 }
 
 /**
@@ -252,6 +263,25 @@ void	EventDisplayWidget::timeSelectClicked() {
  */
 void	EventDisplayWidget::filterClicked() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "filterClicked");
+}
+
+/**
+ * \brief Slot to handle double clicks on event rows
+ */
+void	EventDisplayWidget::eventDoubleClicked(QTableWidgetItem *item) {
+	int	row = ui->eventTable->row(item);
+	item = ui->eventTable->item(row, 0);
+	int	id = std::stoi(item->text().toLatin1().data());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "item double clicked: id %d", id);
+	snowstar::Event	e = _events->eventId(id);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "level: %d", e.level);
+	
+	if (_detailwidget == NULL) {
+		_detailwidget = new EventDetailWidget(NULL);
+	}
+	_detailwidget->setEvent(e);
+	_detailwidget->raise();
+	_detailwidget->show();
 }
 
 } // namespace snowgui

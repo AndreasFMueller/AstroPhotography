@@ -270,6 +270,9 @@ astro::events::eventlevel_t	convert(snowstar::EventLevel);
 snowstar::Event	convert(const astro::events::Event& e);
 astro::events::Event	convert(const snowstar::Event& e);
 
+snowstar::Event	convert(const astro::events::EventRecord& e);
+astro::events::EventRecord	convertRecord(const snowstar::Event& e);
+
 } // namespace snowstar
 
 #endif /* _IceConversions_h */

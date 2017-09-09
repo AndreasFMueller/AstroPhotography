@@ -40,6 +40,7 @@ astro::events::eventlevel_t	convert(EventLevel l) {
 
 Event	convert(const astro::events::Event& e) {
 	Event	result;
+	result.id = -1;
 	result.level = convert(e.level);
 	result.pid = e.pid;
 	result.service = e.service;
@@ -54,6 +55,35 @@ Event	convert(const astro::events::Event& e) {
 
 astro::events::Event	convert(const Event& e) {
 	astro::events::Event	result;
+	result.level = convert(e.level);
+	result.pid = e.pid;
+	result.service = e.service;
+	result.eventtime = converttimeval(e.timeago);
+	result.subsystem = e.subsystem;
+	result.message = e.message;
+	result.classname = e.classname;
+	result.file = e.file;
+	result.line = e.line;
+	return result;
+}
+
+Event	convert(const astro::events::EventRecord& e) {
+	Event	result;
+	result.id = e.id();
+	result.level = convert(e.level);
+	result.pid = e.pid;
+	result.service = e.service;
+	result.timeago = converttimeval(e.eventtime);
+	result.subsystem = e.subsystem;
+	result.message = e.message;
+	result.classname = e.classname;
+	result.file = e.file;
+	result.line = e.line;
+	return result;
+}
+
+astro::events::EventRecord	convertRecord(const Event& e) {
+	astro::events::EventRecord	result(e.id);
 	result.level = convert(e.level);
 	result.pid = e.pid;
 	result.service = e.service;

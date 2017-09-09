@@ -174,6 +174,7 @@ module snowstar {
  	 * \brief An event record
 	 */
 	struct Event {
+		int		id;
 		EventLevel	level;
 		int		pid;
 		string		service;
@@ -191,6 +192,7 @@ module snowstar {
 	};
 
 	interface EventHandler {
+		Event		eventId(int id);
 		eventlist	eventsBetween(double fromago, double toago);
 		eventlist	eventsCondition(string condition);
 		void	registerMonitor(Ice::Identity eventmonitor);

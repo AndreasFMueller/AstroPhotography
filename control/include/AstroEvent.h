@@ -52,14 +52,14 @@ public:
 };
 
 /**
- * \brief Interface to callbacks
- */
-typedef callback::CallbackDataEnvelope<Event>	EventCallbackData;
-
-/**
  * \brief Persistence of Events
  */
 typedef astro::persistence::Persistent<Event>	EventRecord;
+
+/**
+ * \brief Interface to callbacks
+ */
+typedef callback::CallbackDataEnvelope<EventRecord>	EventCallbackData;
 
 /**
  * \brief Adapter for event able

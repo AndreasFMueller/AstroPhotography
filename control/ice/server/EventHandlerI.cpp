@@ -12,7 +12,7 @@
 namespace snowstar {
 
 /**
- * \brief calback adapter for Tracking monitor
+ * \brief calback adapter for Event monitor
  */
 template<>
 void    callback_adapter<EventMonitorPrx>(EventMonitorPrx& p,
@@ -23,6 +23,8 @@ void    callback_adapter<EventMonitorPrx>(EventMonitorPrx& p,
 	if (NULL == cbd) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "not event callback data");
 	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "found callback data of type %s",
+		astro::demangle(typeid(cbd).name()).c_str());
 
 	// now send the payload to the registerd clients
 	Event	event = convert(cbd->data());
@@ -62,6 +64,29 @@ EventHandlerI::EventHandlerI() {
  */
 EventHandlerI::~EventHandlerI() {
 	astro::events::EventHandler::callback(astro::callback::CallbackPtr());
+}
+
+/**
+ * \brief Get an event identified by its id
+ */
+Event	EventHandlerI::eventId(int id, const Ice::Current& /* current */) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "event id %d requested", id);
+	astro::config::ConfigurationPtr	configuration
+                = astro::config::Configuration::get();
+	astro::persistence::Database	database = configuration->database();
+	astro::events::EventTable	table(database);
+	try {
+		astro::events::EventRecord	record = table.byid(id);
+		debug(LOG_DEBUG, DEBUG_LOG, 0,
+			"got event record '%s', level %d",
+			record.message.c_str(), record.level);
+		return convert(record);
+	} catch (const std::exception& x) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "row not found: %s", x.what());
+		NotFound	notfound;
+		notfound.cause = x.what();
+		throw notfound;
+	}
 }
 
 /**

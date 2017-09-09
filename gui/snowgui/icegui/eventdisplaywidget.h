@@ -9,6 +9,8 @@
 #include <QWidget>
 #include <AstroDiscovery.h>
 #include <types.h>
+#include <QTableWidgetItem>
+#include "eventdetailwidget.h"
 
 namespace snowgui {
 
@@ -23,6 +25,7 @@ class EventDisplayWidget : public QWidget {
 	snowstar::EventHandlerPrx	_events;
 	astro::discover::ServiceObject	_serviceobject;
 	Ice::Identity	_monitoridentity;
+	EventDetailWidget	*_detailwidget;
 public:
 	explicit EventDisplayWidget(QWidget *parent,
 		astro::discover::ServiceObject serviceobject);
@@ -39,6 +42,7 @@ public slots:
 	void	filterClicked();
 	void	stopSignaled();
 	void	updateSignaled(const snowstar::Event& event);
+	void	eventDoubleClicked(QTableWidgetItem*);
 };
 
 } // namespace snowgui

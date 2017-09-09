@@ -36,6 +36,7 @@ FORMS    +=								\
 	ccdcontrollerwidget.ui						\
 	coolercontrollerwidget.ui					\
 	darkwidget.ui							\
+	eventdetailwidget.ui						\
 	eventdisplaywidget.ui						\
 	filterwheelcontrollerwidget.ui					\
 	flatwidget.ui							\
@@ -58,6 +59,7 @@ WIDGETSOURCES =								\
 	ccdcontrollerwidget.cpp						\
 	coolercontrollerwidget.cpp					\
 	darkwidget.cpp							\
+	eventdetailwidget.cpp						\
 	eventdisplaywidget.cpp						\
 	filterwheelcontrollerwidget.cpp					\
 	flatwidget.cpp							\
@@ -80,6 +82,7 @@ WIDGETHEADERS =								\
 	ccdcontrollerwidget.h						\
 	coolercontrollerwidget.h					\
 	darkwidget.h							\
+	eventdetailwidget.h						\
 	eventdisplaywidget.h						\
 	filterwheelcontrollerwidget.h					\
 	flatwidget.h							\

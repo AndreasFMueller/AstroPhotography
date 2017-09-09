@@ -21,6 +21,7 @@ class EventHandlerI : virtual public EventHandler {
 public:
 	EventHandlerI();
 	virtual ~EventHandlerI();
+	virtual Event	eventId(int id, const Ice::Current& current);
 	virtual eventlist	eventsBetween(double fromago, double toago,
 					const Ice::Current& current);
 	virtual eventlist	eventsCondition(const std::string& condition,
