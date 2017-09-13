@@ -88,6 +88,9 @@ instrumentswindow::~instrumentswindow() {
 	delete ui;
 }
 
+/**
+ * \brief enable/disable the buttons in the dialog
+ */
 void	instrumentswindow::instrumentEnabled(bool enabled) {
 	ui->addButton->setEnabled(enabled);
 	ui->addguiderccdButton->setEnabled(enabled);
@@ -150,8 +153,10 @@ void	instrumentswindow::checkdiscovery() {
 
 	// if the number of entries has not changed, we stay where we are
 	if (ssb->count() == keys.size()) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "no change in discovery");
 		return;
 	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "rebuilding the menu list");
 
 	// discovery has changed, so we have to rebuild the serverselection
 	// combobox
@@ -188,7 +193,11 @@ void	instrumentswindow::checkdiscovery() {
 	if (previouscount == 0) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "selecting item 0: %s",
 			ssb->itemText(0).toLatin1().data());
-		ssb->setCurrentIndex(0);
+		if (ssb->currentIndex() != 0) {
+			ssb->setCurrentIndex(0);
+		} else {
+			serviceSelected(ssb->currentText());
+		}
 		return;
 	}
 
@@ -196,11 +205,16 @@ void	instrumentswindow::checkdiscovery() {
 		if (ssb->itemText(i) == current) {
 			debug(LOG_DEBUG, DEBUG_LOG, 0, "selecting item %d: %s",
 				i, ssb->itemText(i).toLatin1().data());
-			ssb->setCurrentIndex(i);
+			if (i != ssb->currentIndex()) {
+				ssb->setCurrentIndex(i);
+			} else {
+				serviceSelected(ssb->currentText());
+			}
 			return;
 		}
 	}
 	ssb->setCurrentIndex(0);
+	serviceSelected(ssb->currentText());
 }
 
 /**
@@ -231,6 +245,9 @@ void	instrumentswindow::deleteClicked() {
         ui->instrumentdisplayWidget->deleteSelected();
 }
 
+/**
+ * \brief Slot used to delete an instrument
+ */
 void	instrumentswindow::deleteInstrument() {
 	if (!_instrument) {
 		return;

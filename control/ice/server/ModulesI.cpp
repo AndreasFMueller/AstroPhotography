@@ -29,6 +29,8 @@ ModuleNameList	ModulesI::getModuleNames(const Ice::Current& /* current */) {
 	if (i != result.end()) result.erase(i);
 	i = find(result.begin(), result.end(), std::string("nice"));
 	if (i != result.end()) result.erase(i);
+	// make sure the module list is sorted
+	std::stable_sort(result.begin(), result.end());
 	return result;
 }
 
