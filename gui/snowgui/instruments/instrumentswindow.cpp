@@ -130,6 +130,7 @@ void	instrumentswindow::serviceSelected(QString name) {
 
 	// tell the module display to work with this modules interface
 	ui->moduledisplayWidget->setModules(_modules);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "service connection successful");
 }
 
 /**
@@ -146,6 +147,14 @@ void	instrumentswindow::checkdiscovery() {
 		keys.size());
 
 	QComboBox	*ssb = ui->serverselectionBox;
+
+	// if the number of entries has not changed, we stay where we are
+	if (ssb->count() == keys.size()) {
+		return;
+	}
+
+	// discovery has changed, so we have to rebuild the serverselection
+	// combobox
 	QString	current;
 	int	previouscount = ssb->count();
 	if (previouscount > 0) {
@@ -154,9 +163,7 @@ void	instrumentswindow::checkdiscovery() {
 
 	// we rebuild the list, but we have to block signals while we do
 	// that, so that we don't trigger modules queries
-	if (previouscount > 0) {
-		ssb->blockSignals(true);
-	}
+	ssb->blockSignals(true);
 
 	while (ssb->count()) {
 		ssb->removeItem(0);
@@ -169,9 +176,7 @@ void	instrumentswindow::checkdiscovery() {
 		}
 	);
 
-	if (previouscount > 0) {
-		ssb->blockSignals(false);
-	}
+	ssb->blockSignals(false);
 
 	if (ssb->count() == 0) {
 		if (previouscount > 0) {

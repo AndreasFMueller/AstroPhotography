@@ -33,6 +33,7 @@ modulesdisplay::~modulesdisplay() {
  * \brief Rebuild the modules menu from a new proxy
  */
 void	modulesdisplay::setModules(snowstar::ModulesPrx modules) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "install a different modules proxy");
 	_modules = modules;
 	snowstar::ModuleNameList	names = _modules->getModuleNames();
 	QComboBox	*msb = ui->moduleselectionBox;
@@ -53,6 +54,7 @@ void	modulesdisplay::setModules(snowstar::ModulesPrx modules) {
 
 	msb->blockSignals(false);
 	msb->setCurrentIndex(0);
+	moduleChanged(msb->currentText());
 }
 
 /**
