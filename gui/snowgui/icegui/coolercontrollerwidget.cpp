@@ -37,8 +37,10 @@ void	coolercontrollerwidget::instrumentSetup(
 	while (_instrument.has(snowstar::InstrumentCooler, index)) {
 		try {
 			snowstar::CoolerPrx	cooler = _instrument.cooler(index);
-			ui->coolerSelectionBox->addItem(
-				QString(cooler->getName().c_str()));
+			std::string	sn = _instrument.displayname(
+					snowstar::InstrumentCooler, index,
+					serviceobject.name());
+			ui->coolerSelectionBox->addItem(QString(sn.c_str()));
 			if (!_cooler) {
 				_cooler = cooler;
 				emit coolerSelected(index);

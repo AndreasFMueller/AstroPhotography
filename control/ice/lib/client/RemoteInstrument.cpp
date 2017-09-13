@@ -282,4 +282,21 @@ GuiderPrx	RemoteInstrument::guider(unsigned int ccdindex,
 	return guider;
 }
 
+/**
+ * \brief Get the display name for the device
+ */
+std::string	RemoteInstrument::displayname(InstrumentComponentType type,
+			unsigned int index,
+			const std::string& defaultservicename) {
+	InstrumentComponent	component
+		= _instrument->getComponent(type, index);
+	std::string	dn = component.deviceurl;
+	if (defaultservicename != component.servicename) {
+		dn = dn.append(" @ ").append(component.servicename);
+	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "constructed display name '%s'",
+		dn.c_str());
+	return dn;
+}
+
 } // namespace snowstar

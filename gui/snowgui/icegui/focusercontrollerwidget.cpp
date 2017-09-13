@@ -52,8 +52,10 @@ void	focusercontrollerwidget::instrumentSetup(
 		if (!_focuser) {
 			_focuser = focuser;
 		}
-		ui->focuserSelectionBox->addItem(
-			QString(focuser->getName().c_str()));
+		std::string	sn = instrument.displayname(
+					snowstar::InstrumentFocuser,
+					index, serviceobject.name());
+		ui->focuserSelectionBox->addItem(QString(sn.c_str()));
 		index++;
 	}
 

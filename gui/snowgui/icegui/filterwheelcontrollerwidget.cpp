@@ -53,8 +53,10 @@ void	filterwheelcontrollerwidget::instrumentSetup(
 	while(_instrument.has(snowstar::InstrumentFilterWheel, index)) {
 		snowstar::FilterWheelPrx	filterwheel
 			= _instrument.filterwheel(index);
-		ui->filterwheelSelectionBox->addItem(
-			QString(filterwheel->getName().c_str()));
+		std::string	sn = instrument.displayname(
+					snowstar::InstrumentFilterWheel,
+					index, serviceobject.name());
+		ui->filterwheelSelectionBox->addItem(QString(sn.c_str()));
 		if (!_filterwheel) {
 			_filterwheel = filterwheel;
 		}

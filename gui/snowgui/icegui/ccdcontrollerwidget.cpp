@@ -89,7 +89,10 @@ void	ccdcontrollerwidget::instrumentSetup(
 				if (!_ccd) {
 					_ccd = ccd;
 				}
-				ui->ccdSelectionBox->addItem(QString(ccd->getName().c_str()));
+				std::string	sn = instrument.displayname(
+					snowstar::InstrumentCCD, index,
+					serviceobject.name());
+				ui->ccdSelectionBox->addItem(QString(sn.c_str()));
 			} catch (const std::exception& x) {
 				debug(LOG_DEBUG, DEBUG_LOG, 0, "ignoring ccd %d", index);
 			}
@@ -103,7 +106,10 @@ void	ccdcontrollerwidget::instrumentSetup(
 			if (!_ccd) {
 				_ccd = ccd;
 			}
-			ui->ccdSelectionBox->addItem(QString(ccd->getName().c_str()));
+			std::string	sn = instrument.displayname(
+				snowstar::InstrumentGuiderCCD, index,
+				serviceobject.name());
+			ui->ccdSelectionBox->addItem(QString(sn.c_str()));
 		} catch (const std::exception& x) {
 			debug(LOG_DEBUG, DEBUG_LOG, 0, "ignoring ccd %d", index);
 		}

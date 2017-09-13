@@ -54,8 +54,12 @@ void	guideportcontrollerwidget::instrumentSetup(
 		if (!_guideport) {
 			_guideport = guideport;
 		}
-		ui->guideportSelectionBox->addItem(
-			QString(guideport->getName().c_str()));
+		std::string	dn = instrument.displayname(
+			snowstar::InstrumentGuidePort,
+			index, serviceobject.name());
+		ui->guideportSelectionBox->addItem(QString(dn.c_str()));
+		//ui->guideportSelectionBox->addItem(
+		//	QString(guideport->getName().c_str()));
 		index++;
 	}
 

@@ -34,6 +34,7 @@ public:
 	std::string	instrumentname();
 	void	sendImage(astro::image::ImagePtr image, std::string title);
 	void	changeEvent(QEvent *);
+
 signals:
 	void	offerImage(astro::image::ImagePtr, std::string);
 };

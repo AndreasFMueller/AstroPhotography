@@ -35,8 +35,11 @@ public:
 	bool	has(InstrumentComponentType type, unsigned int index = 0);
 	InstrumentComponent	getComponent(InstrumentComponentType type,
 					unsigned int index);
+	std::string	displayname(InstrumentComponentType type,
+				unsigned int index,
+				const std::string& defaultservicename);
 	astro::ServerName	servername(InstrumentComponentType type,
-				unsigned int index = 0);
+					unsigned int index = 0);
 	AdaptiveOpticsPrx	adaptiveoptics(unsigned int index = 0);
 	CameraPrx		camera(unsigned int index = 0);
 	CcdPrx			ccd(unsigned int index = 0);

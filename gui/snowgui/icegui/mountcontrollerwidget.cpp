@@ -52,8 +52,10 @@ void	mountcontrollerwidget::instrumentSetup(
 		if (!_mount) {
 			_mount = mount;
 		}
-		ui->mountSelectionBox->addItem(
-			QString(mount->getName().c_str()));
+		std::string	sn = _instrument.displayname(
+					snowstar::InstrumentMount, index,
+					serviceobject.name());
+		ui->mountSelectionBox->addItem(QString(sn.c_str()));
 		index++;
 	}
 

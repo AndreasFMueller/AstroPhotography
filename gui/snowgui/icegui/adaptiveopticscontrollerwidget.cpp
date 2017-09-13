@@ -56,8 +56,10 @@ void	adaptiveopticscontrollerwidget::instrumentSetup(
 		if (!_adaptiveoptics) {
 			_adaptiveoptics = adaptiveoptics;
 		}
-		ui->adaptiveopticsSelectionBox->addItem(
-			QString(adaptiveoptics->getName().c_str()));
+		std::string	sn = instrument.displayname(
+					snowstar::InstrumentAdaptiveOptics,
+					index, serviceobject.name());
+		ui->adaptiveopticsSelectionBox->addItem(QString(sn.c_str()));
 		index++;
 	}
 
