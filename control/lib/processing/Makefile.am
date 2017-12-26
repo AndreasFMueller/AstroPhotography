@@ -13,7 +13,10 @@ noinst_LTLIBRARIES = libastroprocessing.la
 libastroprocessing_la_SOURCES =						\
 	CalibrationImageStep.cpp					\
 	CalibrationProcessorStep.cpp					\
+	ColorclampStep.cpp						\
+	ColorStep.cpp							\
 	DarkImageStep.cpp						\
+	DestarStep.cpp							\
 	FileImageStep.cpp						\
 	FlatImageStep.cpp						\
 	ImageBufferStep.cpp						\
@@ -31,6 +34,7 @@ libastroprocessing_la_SOURCES =						\
 	ProcessorParser.cpp						\
 	ParserSteps.cpp							\
 	RawImageFileStep.cpp						\
+	RescaleStep.cpp							\
 	StackingStep.cpp						\
 	WriteImageStep.cpp						\
 	WriteableFileImageStep.cpp

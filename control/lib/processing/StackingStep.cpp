@@ -18,6 +18,7 @@ StackingStep::StackingStep() {
 	_searchradius = 10;
 	_numberofstars = 20;
 	_notransform = false;
+	_usetriangles = false;
 }
 
 /**
@@ -50,6 +51,7 @@ ProcessingStep::state	StackingStep::do_work() {
 	stacker->searchradius(_searchradius);
 	stacker->numberofstars(_numberofstars);
 	stacker->notransform(_notransform);
+	stacker->usetriangles(_usetriangles);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "stacker created and parametrized");
 	
 	// add the precursor images (except the base image)

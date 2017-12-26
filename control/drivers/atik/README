@@ -1,1 +1,8 @@
 Driver for ATIK cameras, using the CloudMakers driver
+
+TODO:
+
+provide locking for temperature queries (crashes the library)
+
+library probably needs an update
+

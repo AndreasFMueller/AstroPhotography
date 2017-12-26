@@ -140,8 +140,8 @@ int	ProcessorNetwork::process(int id) {
 	// check the current node
 	ProcessingStepPtr	current = ProcessingStep::byid(id);
 	ProcessingStep::state	s = current->status();
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "process(%d, %s, %d) %s", id,
-		current->name().c_str(), s,
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "process(%d, %s, %s) %s", id,
+		current->name().c_str(), ProcessingStep::statename(s).c_str(),
 		demangle(typeid(*current).name()).c_str());
 	switch (s) {
 		case ProcessingStep::needswork:
@@ -149,11 +149,14 @@ int	ProcessorNetwork::process(int id) {
 			return id;
 		case ProcessingStep::idle:
 			// check all precursors
+			debug(LOG_DEBUG, DEBUG_LOG, 0,
+				"process all the precursors");
 			return process(current->precursors());
 		// never check below working, complete or failed nodes
 		case ProcessingStep::working:
 		case ProcessingStep::complete:
 		case ProcessingStep::failed:
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "return no work");
 			return -1;
 	}
 	throw std::runtime_error("should not happen");

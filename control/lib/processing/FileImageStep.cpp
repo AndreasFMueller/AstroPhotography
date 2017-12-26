@@ -47,11 +47,13 @@ time_t	FileImageStep::when() const {
 /**
  * \brief determine the status of the step
  */
-ProcessingStep::state	FileImageStep::status() const {
+ProcessingStep::state	FileImageStep::status() {
+#if 0
 	// if we are presently working, return the working state
 	if (_status == ProcessingStep::working) {
 		return _status;
 	}
+#endif
 
 	// check the file
 	if (!exists()) {
@@ -80,6 +82,8 @@ ProcessingStep::state	FileImageStep::do_work() {
  * \brief find out whether the file exists
  */
 bool	FileImageStep::exists() const {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "check existence of '%s'",
+		_filename.c_str());
 	struct stat	sb;
 	int	rc = stat(_filename.c_str(), &sb);
 	if (rc < 0) {

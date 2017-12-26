@@ -39,6 +39,7 @@ include_HEADERS =							\
 	AstroOperations.h						\
 	AstroPersistence.h						\
 	AstroPixel.h							\
+	AstroPostprocessing.h						\
 	AstroProcess.h							\
 	AstroProject.h							\
 	AstroProjection.h						\

@@ -53,29 +53,42 @@ typedef std::shared_ptr<Stacker>	StackerPtr;
 class Stacker {
 protected:
 	ImagePtr	_baseimage;
+	// size of the patch to use when doing phase correlator analysis 
 	int	_patchsize;
 public:
 	int	patchsize() const { return _patchsize; }
 	void	patchsize(int p) { _patchsize = p; }
 protected:
+	// number of stars th collect to build the triangle set
 	int	_numberofstars;
 public:
 	int	numberofstars() const { return _numberofstars; }
 	void	numberofstars(int n) { _numberofstars = n; }
 protected:
+	// radius in pixels to use when searching for triangles
 	int	_searchradius;
 public:
 	int	searchradius() const { return _searchradius; }
 	void	searchradius(int s) { _searchradius = s; }
 private:
+	// do not transform the images, just stack tham as they are
 	bool	_notransform;
 public:
 	bool	notransform() const { return _notransform; }
 	void	notransform(bool n) { _notransform = n; }
+private:
+	// whether to use the triangle analysis step to find the transforms
+	bool	_usetriangles;
+public:
+	bool	usetriangles() const { return _usetriangles; }
+	void	usetriangles(bool u) { _usetriangles = u; }
 
 	static StackerPtr	get(ImagePtr baseimage);
 protected:
-	Stacker(ImagePtr baseimage) : _baseimage(baseimage), _patchsize(256) { }
+	Stacker(ImagePtr baseimage)
+		: _baseimage(baseimage), _patchsize(256), _numberofstars(0),
+		  _searchradius(16), _notransform(true), _usetriangles(false) {
+	}
 public:
 	virtual void	add(ImagePtr) = 0;
 	virtual ImagePtr	image() = 0;

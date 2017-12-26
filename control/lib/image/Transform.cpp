@@ -360,6 +360,19 @@ bool	Transform::isAnglePreserving() const {
 	return true;
 }
 
+double	Transform::skew() const {
+	double	d[3];
+	d[0] = a[0] * a[0] + a[3] * a[3];
+	d[1] = a[0] * a[1] + a[3] * a[4];
+	d[2] = a[1] * a[1] + a[4] * a[4];
+	return hypot(d[1], d[0]/d[2] - 1);
+}
+
+bool	Transform::isAspectPreserving() const {
+	if (skew() > epsilon) { return false; }
+	return true;
+}
+
 bool	Transform::operator==(const Transform& other) const {
 	for (size_t i = 0; i < 6; i++) {
 		if (fabs(a[i] - other.a[i]) > epsilon) { return false; }

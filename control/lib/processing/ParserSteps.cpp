@@ -383,6 +383,14 @@ void	ProcessorParser::startStack(const attr_t& attrs) {
 			ss->notransform("false");
 		}
 	}
+	if (attrs.end() != (i = attrs.find("usetriangles"))) {
+		std::string	value = i->second;
+		if ((value == "no") || (value == "false")) {
+			ss->usetriangles(true);
+		} else {
+			ss->usetriangles(false);
+		}
+	}
 
 	// done
 }
@@ -393,6 +401,87 @@ void	ProcessorParser::startStack(const attr_t& attrs) {
 void	ProcessorParser::endStack() {
 	endCommon();
 }
+
+void	ProcessorParser::startColor(const attr_t& attrs) {
+	startCommon(attrs);
+
+	// create the stacking step
+	ColorStep	*s = new ColorStep();
+	ProcessingStepPtr	step(s);
+
+	// remember everyhwere
+	_stepstack.push(step);
+	ProcessingStep::remember(step);
+}
+
+void	ProcessorParser::endColor() {
+	endCommon();
+}
+
+void	ProcessorParser::startColorclamp(const attr_t& attrs) {
+	startCommon(attrs);
+
+	// create the stacking step
+	ColorclampStep	*s = new ColorclampStep();
+	ProcessingStepPtr	step(s);
+
+	// remember everyhwere
+	_stepstack.push(step);
+	ProcessingStep::remember(step);
+}
+
+void	ProcessorParser::endColorclamp() {
+	endCommon();
+}
+
+void	ProcessorParser::startHDR(const attr_t& attrs) {
+	startCommon(attrs);
+
+	// create the stacking step
+	HDRStep	*s = new HDRStep();
+	ProcessingStepPtr	step(s);
+
+	// remember everyhwere
+	_stepstack.push(step);
+	ProcessingStep::remember(step);
+}
+
+void	ProcessorParser::endHDR() {
+	endCommon();
+}
+
+void	ProcessorParser::startRescale(const attr_t& attrs) {
+	startCommon(attrs);
+
+	// create the stacking step
+	RescaleStep	*s = new RescaleStep();
+	ProcessingStepPtr	step(s);
+
+	// remember everyhwere
+	_stepstack.push(step);
+	ProcessingStep::remember(step);
+}
+
+void	ProcessorParser::endRescale() {
+	endCommon();
+}
+
+void	ProcessorParser::startDestar(const attr_t& attrs) {
+	startCommon(attrs);
+
+	// create the stacking step
+	DestarStep	*s = new DestarStep();
+	ProcessingStepPtr	step(s);
+
+	// remember everyhwere
+	_stepstack.push(step);
+	ProcessingStep::remember(step);
+}
+
+void	ProcessorParser::endDestar() {
+	endCommon();
+}
+
 
 } // namespace process
 } // namespace astro

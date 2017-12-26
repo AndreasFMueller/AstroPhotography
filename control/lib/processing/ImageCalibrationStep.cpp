@@ -262,6 +262,7 @@ ImageCalibrationStep::ImageCalibrationStep() {
  * \brief Perform the step
  */
 ProcessingStep::state	ImageCalibrationStep::do_work() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "start work in calibration");
 	int	darkid = -1;
 	int	flatid = -1;
 
@@ -270,6 +271,8 @@ ProcessingStep::state	ImageCalibrationStep::do_work() {
 	// check for the dark image
 	if (_dark) {
 		darkid = _dark->id();
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "looking for dark image %d",
+			darkid);
 		ImageStep	*imagestep = dynamic_cast<ImageStep*>(&*_dark);
 		if (imagestep) {
 			ImagePtr	darkimage = imagestep->image();
@@ -285,6 +288,8 @@ ProcessingStep::state	ImageCalibrationStep::do_work() {
 	// check for the flat image
 	if (_flat) {
 		flatid = _flat->id();
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "looking for flat image %d",
+			flatid);
 		ImageStep	*imagestep = dynamic_cast<ImageStep*>(&*_flat);
 		if (imagestep) {
 			ImagePtr	flatimage = imagestep->image();
@@ -297,7 +302,7 @@ ProcessingStep::state	ImageCalibrationStep::do_work() {
 		}
 	}
 
-	// get the unique precursor that is not 
+	// get the unique precursor that is not dark/flat
 	steps::const_iterator	i;
 	i = std::find_if(precursors().begin(), precursors().end(),
 		[darkid,flatid](int id) -> bool {
@@ -309,6 +314,8 @@ ProcessingStep::state	ImageCalibrationStep::do_work() {
 		return ProcessingStep::failed;
 	}
 	ProcessingStepPtr	precursor = byid(*i);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "precursor is %s",
+		precursor->name().c_str());
 	ImageStep	*imagestep = dynamic_cast<ImageStep*>(&*precursor);
 	if (NULL == imagestep) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "no precursor image");
@@ -341,19 +348,30 @@ ProcessingStep::state	ImageCalibrationStep::do_work() {
 	return ProcessingStep::complete;
 }
 
-ProcessingStep::state	ImageCalibrationStep::status() const {
+ProcessingStep::state	ImageCalibrationStep::status() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "check processing status of '%s'",
+		name().c_str());
 	if (_image) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0,
+			"processing of '%s' already complete", name().c_str());
 		return ProcessingStep::complete;
 	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "checking precursors");
 	// if all precursors are complete, we can perform the calibration
 	if (std::all_of(precursors().begin(), precursors().end(),
 			[](int precursorid) -> bool {
 				ProcessingStepPtr	step = byid(precursorid);
+				debug(LOG_DEBUG, DEBUG_LOG, 0,
+					"precursor '%s' %s",
+					step->name().c_str(),
+					statename(step->status()).c_str());
 				return (step->status() == ProcessingStep::complete);
 			}
 		)) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "all precursors complete");
 		return ProcessingStep::needswork;
 	} else {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "some precursors incomplete");
 		return ProcessingStep::idle;
 	}
 }

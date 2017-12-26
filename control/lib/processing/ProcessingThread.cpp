@@ -33,7 +33,6 @@ void	ProcessingThread::work() {
 }
 
 ProcessingThread::~ProcessingThread() {
-	join();
 }
 
 } // namespace process

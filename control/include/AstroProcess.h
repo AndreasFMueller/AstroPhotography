@@ -12,6 +12,7 @@
 #include <AstroAdapter.h>
 #include <AstroUtils.h>
 #include <thread>
+#include <mutex>
 
 namespace astro {
 namespace adapter {
@@ -223,10 +224,10 @@ static std::string	statename(state s);
 private:
 	state	precursorstate() const;
 	void	checkyourstate();
-protected:
+private:
 	state	_status;
 public:
-	virtual state	status() const;
+	virtual state	status();
 	state	status(state newsstate);
 protected:
 	volatile float	_completion;
@@ -361,7 +362,7 @@ public:
 	FileImageStep(const std::string& filename);
 	~FileImageStep();
 	virtual time_t	when() const;
-	virtual ProcessingStep::state	status() const;
+	virtual ProcessingStep::state	status();
 	virtual ImagePtr image();
 	virtual ProcessingStep::state	do_work();
 	virtual std::string	what() const;
@@ -374,11 +375,12 @@ public:
  * dependencies have changed
  */
 class WriteableFileImageStep : public FileImageStep {
+	std::recursive_mutex	_mutex;
 public:
 	WriteableFileImageStep(const std::string& filename);
 private:
 	virtual ProcessingStep::state	do_work();
-	virtual ProcessingStep::state	status() const;
+	virtual ProcessingStep::state	status();
 	virtual std::string	what() const;
 	virtual ImagePtr	image();
 };
@@ -445,7 +447,7 @@ public:
 	void	flip(bool f) { _flip = f; }
 	ImageCalibrationStep();
 	virtual ProcessingStep::state	do_work();
-	virtual ProcessingStep::state	status() const;
+	virtual ProcessingStep::state	status();
 	virtual std::string	what() const;
 };
 
@@ -458,6 +460,7 @@ class StackingStep : public ImageStep {
 	int	_patchsize;
 	int	_searchradius;
 	bool	_notransform;
+	bool	_usetriangles;
 public:
 	StackingStep();
 	ProcessingStepPtr	baseimage() const { return _baseimage; }
@@ -470,6 +473,8 @@ public:
 	void	searchradius(int s) { _searchradius = s; }
 	bool	notransform() const { return _notransform; }
 	void	notransform(bool n) { _notransform = n; }
+	bool	usetriangles() const { return _usetriangles; }
+	void	usetriangles(bool u) { _usetriangles = u; }
 private:
 	virtual ProcessingStep::state	do_work();
 	virtual std::string	what() const;
@@ -831,48 +836,98 @@ public:
 #endif
 
 /**
- * \brief Network Class to manage a complete network of interdependen steps
+ * \brief Image Step to change the color balance (see tools/image/color)
  */
-class ProcessorNetwork {
-	typedef std::map<int, ProcessingStepPtr>	stepmap_t;
-	typedef std::map<int, std::string>		id2namemap_t;
-	typedef std::multimap<std::string, int>		name2idmap_t;
+class ColorStep : public ImageStep {
+public:
+	ColorStep();
+	virtual ProcessingStep::state	do_work();
+	virtual std::string	what() const;
+};
 
-	stepmap_t	_steps;
-	id2namemap_t	_id2names;
-	name2idmap_t	_name2ids;
+/**
+ * \brief HDR transformation step (see tools/image/hdr)
+ */
+class HDRStep : public ImageStep {
 public:
-	ProcessorNetwork();
-	void	add(ProcessingStepPtr step);
-	ProcessingStepPtr	byid(int id) const;
-	ProcessingStepPtr	byname(const std::string& name) const;
-	ProcessingStepPtr	bynameid(const std::string& name) const;
-	ProcessingStep::steps	terminals() const;
-	ProcessingStep::steps	initials() const;
+	HDRStep();
+	virtual ProcessingStep::state	do_work();
+	virtual std::string	what() const;
+};
+
+/**
+ * \brief Rescaling transformation step (see tools/image/rescale)
+ */
+class RescaleStep : public ImageStep {
+public:
+	RescaleStep();
+	virtual ProcessingStep::state	do_work();
+	virtual std::string	what() const;
+};
+
+/**
+ * \brief Color clampoing step
+ */
+class ColorclampStep : public ImageStep {
+public:
+	ColorclampStep();
+	virtual ProcessingStep::state	do_work();
+	virtual std::string	what() const;
+};
+
+/**
+ * \brief Destarring step
+ */
+class DestarStep : public ImageStep {
+public:
+	DestarStep();
+	virtual ProcessingStep::state	do_work();
+	virtual std::string	what() const;
+};
+
+/**
+* \brief Network Class to manage a complete network of interdependen steps
+*/
+class ProcessorNetwork {
+typedef std::map<int, ProcessingStepPtr>	stepmap_t;
+typedef std::map<int, std::string>		id2namemap_t;
+typedef std::multimap<std::string, int>		name2idmap_t;
+
+stepmap_t	_steps;
+id2namemap_t	_id2names;
+name2idmap_t	_name2ids;
+public:
+ProcessorNetwork();
+void	add(ProcessingStepPtr step);
+ProcessingStepPtr	byid(int id) const;
+ProcessingStepPtr	byname(const std::string& name) const;
+ProcessingStepPtr	bynameid(const std::string& name) const;
+ProcessingStep::steps	terminals() const;
+ProcessingStep::steps	initials() const;
 private:
-	int	_maxthreads;
+int	_maxthreads;
 public:
-	int	maxthreads() const { return _maxthreads; }
-	void	maxthreads(int m) { _maxthreads = m; }
+int	maxthreads() const { return _maxthreads; }
+void	maxthreads(int m) { _maxthreads = m; }
 private:
-	std::vector<ProcessingThreadPtr>	_threads;
+std::vector<ProcessingThreadPtr>	_threads;
 public:
-	bool	hasneedswork();
-	void	process();
-	int	process(int id);
-	int	process(const ProcessingStep::steps& steps);
+bool	hasneedswork();
+void	process();
+int	process(int id);
+int	process(const ProcessingStep::steps& steps);
 };
 typedef std::shared_ptr<ProcessorNetwork>	ProcessorNetworkPtr;
 
 /**
- * \brief Factory class to build processing networks from files or strings
- */
+* \brief Factory class to build processing networks from files or strings
+*/
 class ProcessorFactory {
 public:
-	ProcessorFactory();
-	ProcessorNetworkPtr	operator()(void);
-	ProcessorNetworkPtr	operator()(const std::string& filename);
-	ProcessorNetworkPtr	operator()(const char *data, int size);
+ProcessorFactory();
+ProcessorNetworkPtr	operator()(void);
+ProcessorNetworkPtr	operator()(const std::string& filename);
+ProcessorNetworkPtr	operator()(const char *data, int size);
 };
 
 } // namespace process

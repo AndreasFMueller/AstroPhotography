@@ -97,6 +97,7 @@ libastroimage_la_SOURCES = 						\
 	Projection.cpp							\
 	ProjectionCorrector.cpp						\
 	Radon.cpp							\
+	Rescale.cpp							\
 	Residual.cpp							\
 	RingImage.cpp							\
 	SphereProjection.cpp						\

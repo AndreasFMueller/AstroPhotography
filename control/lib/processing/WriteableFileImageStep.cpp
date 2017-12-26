@@ -5,6 +5,7 @@
  */
 #include <AstroProcess.h>
 #include <AstroIO.h>
+#include <mutex>
 
 namespace astro {
 namespace process {
@@ -23,14 +24,17 @@ WriteableFileImageStep::WriteableFileImageStep(const std::string& filename)
  * If the file exists and the precursor and the precusor is older, then
  * we don't need to look at the precursor
  */
-ProcessingStep::state	WriteableFileImageStep::status() const {
+ProcessingStep::state	WriteableFileImageStep::status() {
+	std::unique_lock<std::recursive_mutex>	lock(_mutex);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "checking status %s", _filename.c_str());
 	if (precursors().size() != 1) {
 		return ProcessingStep::failed;
 	}
+#if 0
 	if (_status == ProcessingStep::working) {
 		return ProcessingStep::working;
 	}
+#endif
 
 	// now we know that there is exactly one precursor image
 	ProcessingStepPtr	precursor
@@ -42,10 +46,12 @@ ProcessingStep::state	WriteableFileImageStep::status() const {
 			_filename.c_str());
 		if (precursor->when() < when()) {
 			debug(LOG_DEBUG, DEBUG_LOG, 0,
-				"precursor of '%s' is older %d < %d",
-				_filename.c_str(), precursor->when(), when());
+				"precursor of '%s' is older than precursor %s: %d < %d",
+				_filename.c_str(), precursor->name().c_str(),
+				precursor->when(), when());
 			// the precursors are older than the file, so we
 			// don't need to evaluate the precursor
+#if 0
 			if (_image) {
 				debug(LOG_DEBUG, DEBUG_LOG, 0,
 					"%d %s complete",
@@ -53,10 +59,13 @@ ProcessingStep::state	WriteableFileImageStep::status() const {
 				return ProcessingStep::complete;
 			} else {
 				debug(LOG_DEBUG, DEBUG_LOG, 0,
-					"%d %s needs work",
+					"%d %s needs work (read file)",
 					id(), _filename.c_str());
 				return ProcessingStep::needswork;
 			}
+#else
+			return ProcessingStep::complete;
+#endif
 		} else {
 			debug(LOG_DEBUG, DEBUG_LOG, 0,
 				"precursor of %s is younger",
@@ -117,6 +126,7 @@ ProcessingStep::state	WriteableFileImageStep::status() const {
  * \brief Do the work of writing a file to disk if necessary
  */
 ProcessingStep::state	WriteableFileImageStep::do_work() {
+	std::unique_lock<std::recursive_mutex>	lock(_mutex);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "%d start processing %s", id(),
 		_filename.c_str());
 	// get the predecessor image (there may only be one)
@@ -185,6 +195,7 @@ std::string	WriteableFileImageStep::what() const {
  * has not been computed, then we read it from the file.
  */
 ImagePtr	WriteableFileImageStep::image() {
+	std::unique_lock<std::recursive_mutex>	lock(_mutex);
 	if (_image) {
 		return _image;
 	}

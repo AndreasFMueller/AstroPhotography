@@ -270,6 +270,10 @@ public:
 		const std::vector<Point>& to,
 		const std::vector<double>& weights);
 
+	// return some quality measure for how far away from an aspect
+	// preserving 
+	double	skew() const;
+
 	// check whether this is a certain type of transform
 	bool	isIdentity() const;
 	bool	isTranslation() const;
@@ -279,6 +283,7 @@ public:
 	bool	isAreaPreserving() const;
 	bool	isAnglePreserving() const;
 	bool	fixesOrigin() const;
+	bool	isAspectPreserving() const;
 	bool	operator==(const Transform& other) const;
 	bool	operator!=(const Transform& other) const;
 

@@ -27,20 +27,42 @@ class ProcessorParser {
 	// private methods for handling different types of processing steps
 	void	startCommon(const attr_t& attrs);
 	void	endCommon();
+
 	void	startProcess(const attr_t& attrs);
 	void	endProcess();
+
 	void	startFileimage(const attr_t& attrs);
 	void	endFileimage();
+
 	void	startDarkimage(const attr_t& attrs);
 	void	endDarkimage();
+
 	void	startFlatimage(const attr_t& attrs);
 	void	endFlatimage();
+
 	void	startCalibrate(const attr_t& attrs);
 	void	endCalibrate();
+
 	void	startWritefileimage(const attr_t& attrs);
 	void	endWritefileimage();
+
 	void	startStack(const attr_t& attrs);
 	void	endStack();
+
+	void	startColor(const attr_t& attrs);
+	void	endColor();
+
+	void	startColorclamp(const attr_t& attrs);
+	void	endColorclamp();
+
+	void	startHDR(const attr_t& attrs);
+	void	endHDR();
+
+	void	startRescale(const attr_t& attrs);
+	void	endRescale();
+
+	void	startDestar(const attr_t& attrs);
+	void	endDestar();
 public:
 	ProcessorParser();
 	void	startElement(const std::string& name, const attr_t& attrs);

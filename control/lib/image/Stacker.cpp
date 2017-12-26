@@ -81,17 +81,23 @@ void	Accumulator<AccumulatorPixel, Pixel>::accumulate(
 
 Transform	Stacker::findtransform(const ConstImageAdapter<double>& base,
 			const ConstImageAdapter<double>& image) const {
-	// create an transform analyzer with respect to the base image
-	TriangleAnalyzer	transformanalyzer(base, _numberofstars,
-					_searchradius);
-
 	// find the mean levels, this is used for the reduction later on
 	double	mb = filter::Mean<double, double>().filter(base);
 	double	mi = filter::Mean<double, double>().filter(image);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "mb = %f, mi = %f", mb, mi);
 
-	// find the transform between the base image and the new image
-	Transform	transform = transformanalyzer.transform(image);
+	// we will need a transformation
+	Transform	transform;
+
+	// find out whether we should use triangles to find an initial transform
+	if (usetriangles()) {
+		// create an transform analyzer with respect to the base image
+		TriangleAnalyzer	transformanalyzer(base, numberofstars(),
+						searchradius());
+
+		// find the transform between the base image and the new image
+		transform = transformanalyzer.transform(image);
+	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "initial transform: %s",
 		transform.toString().c_str());
 
@@ -102,8 +108,8 @@ Transform	Stacker::findtransform(const ConstImageAdapter<double>& base,
 		ReductionAdapter	reducedbase(transformedbase,
 						mb, 2 * mb);
 		Analyzer	analyzer(reducedbase);
-		analyzer.patchsize(_patchsize);
-		analyzer.spacing(_patchsize);
+		analyzer.patchsize(patchsize());
+		analyzer.spacing(patchsize());
 		analyzer.hanning(false);
 
 		// now find the residuals to the target image
@@ -156,8 +162,8 @@ Transform	Stacker::findtransform(const ConstImageAdapter<double>& base,
 		}
 	}
 
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "final transform: %s",
-		transform.toString().c_str());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "final transform: %s, skew = %f",
+		transform.toString().c_str(), transform.skew());
 	return transform;
 }
 

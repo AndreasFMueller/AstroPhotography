@@ -298,9 +298,9 @@ void	ProcessingStep::work() {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "%d calling %s::do_work()",
 			id(), demangle(typeid(*this).name()).c_str());
 		_resultstate = do_work();
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "%d %s::do_work() completed: %d",
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "%d %s::do_work() completed: %s",
 			id(), demangle(typeid(*this).name()).c_str(),
-			_resultstate);
+			ProcessingStep::statename(_resultstate).c_str());
 	} catch (const std::exception& x) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "processing step failed: %s",
 			x.what());
@@ -429,7 +429,7 @@ time_t	ProcessingStep::when() const {
 /**
  * \brief default status query implementation
  */
-ProcessingStep::state	ProcessingStep::status() const {
+ProcessingStep::state	ProcessingStep::status() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "find status of '%s' (%d) %s",
 		_name.c_str(), _id,
 		demangle(typeid(*this).name()).c_str());

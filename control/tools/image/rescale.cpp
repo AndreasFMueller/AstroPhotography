@@ -8,20 +8,14 @@
 #include <AstroFormat.h>
 #include <iostream>
 #include <AstroImage.h>
-#include <AstroCalibration.h>
+#include <AstroPostprocessing.h>
 #include <AstroIO.h>
-#include <AstroDemosaic.h>
-#include <AstroImager.h>
-#include <AstroAdapter.h>
-#include <AstroFilter.h>
 #include <cmath>
 #include <typeinfo>
 
 using namespace astro;
 using namespace astro::io;
-using namespace astro::calibration;
-using namespace astro::adapter;
-using namespace astro::image::filter;
+using namespace astro::image::post;
 
 namespace astro {
 namespace app {
@@ -61,56 +55,6 @@ static void	usage(const char *progname) {
 	std::cout << "simultanously with the -M option" << std::endl;
 }
 
-double	minimum = -1;
-double	maximum = -1;
-double	scale = -1;
-
-template<typename Pixel>
-ImagePtr	rescale(const ConstImageAdapter<Pixel>& image) {
-	LuminanceAdapter<Pixel, double>	luminance(image);
-	if (minimum < 0) {
-		minimum = Min<double, double>()(luminance);
-	}
-	if (scale < 0) {
-		if (maximum < 0) {
-			maximum = Max<double, double>()(luminance);
-		}
-		scale = 255. / (maximum - minimum);
-	}
-
-	// create image from rescaling adapter
-	Pixel	zero(minimum);
-	RescalingAdapter<Pixel>	ra(image, zero, scale);
-	Image<Pixel>	*rescaledimage = new Image<Pixel>(ra);
-	ImagePtr	outimage(rescaledimage);
-	return outimage;
-}
-
-#define	do_rescale(image, Pixel)			\
-{							\
-	Image<Pixel >	*imagep				\
-		= dynamic_cast<Image<Pixel >*>(&*image);\
-	if (NULL != imagep) {				\
-		return rescale(*imagep);		\
-	}						\
-}
-
-ImagePtr	rescale(ImagePtr image) {
-	do_rescale(image, unsigned char)
-	do_rescale(image, unsigned short)
-	do_rescale(image, unsigned int)
-	do_rescale(image, unsigned long)
-	do_rescale(image, float)
-	do_rescale(image, double)
-	do_rescale(image, RGB<unsigned char>)
-	do_rescale(image, RGB<unsigned short>)
-	do_rescale(image, RGB<unsigned int>)
-	do_rescale(image, RGB<unsigned long>)
-	do_rescale(image, RGB<float>)
-	do_rescale(image, RGB<double>)
-	throw std::runtime_error("cannot rescale this pixel type");
-}
-
 /**
  * \brief Main function in astro namespace
  */
@@ -119,6 +63,7 @@ int	main(int argc, char *argv[]) {
 	int	c;
 
 	// parse the command line
+	Rescale	rescale;
 	int	longindex;
 	while (EOF != (c = getopt_long(argc, argv, "d?hm:M:s:",
 		longopts, &longindex)))
@@ -127,13 +72,13 @@ int	main(int argc, char *argv[]) {
 			debuglevel = LOG_DEBUG;
 			break;
 		case 'm':
-			minimum = std::stod(optarg);
+			rescale.minimum(std::stod(optarg));
 			break;
 		case 'M':
-			maximum = std::stod(optarg);
+			rescale.maximum(std::stod(optarg));
 			break;
 		case 's':
-			scale = std::stod(optarg);
+			rescale.scale(std::stod(optarg));
 			break;
 		case '?':
 		case 'h':
