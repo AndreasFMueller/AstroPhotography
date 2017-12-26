@@ -11,15 +11,12 @@ namespace astro {
 namespace process {
 
 void	ProcessorParser::startRescale(const attr_t& attrs) {
-	startCommon(attrs);
-
 	// create the stacking step
 	RescaleStep	*s = new RescaleStep();
 	ProcessingStepPtr	step(s);
 
 	// remember everyhwere
 	_stepstack.push(step);
-	ProcessingStep::remember(step);
 
 	// parse the Rescale attributes
 	attr_t::const_iterator	i;
@@ -38,10 +35,8 @@ void	ProcessorParser::startRescale(const attr_t& attrs) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "set scale to %f",
 			s->scale());
 	}
-}
 
-void	ProcessorParser::endRescale() {
-	endCommon();
+	startCommon(attrs);
 }
 
 } // namespace process

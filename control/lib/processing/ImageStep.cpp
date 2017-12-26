@@ -10,6 +10,7 @@
 #include <algorithm>
 #include <includes.h>
 #include <AstroDebug.h>
+#include <algorithm>
 
 using namespace astro::adapter;
 
@@ -17,14 +18,47 @@ namespace astro {
 namespace process {
 
 /**
+ * \brief Get a vector of precursor images
+ */
+ImageSequence	ImageStep::precursorimages(std::vector<int> exclude) {
+	ImageSequence   images;
+	std::for_each(precursors().begin(), precursors().end(),
+		[&images,&exclude](int precursorid) mutable {
+			ProcessingStepPtr p = ProcessingStep::byid(precursorid);
+			if (!p) {
+				debug(LOG_DEBUG, DEBUG_LOG, 0,
+					"%d not remembered", precursorid);
+			}
+			ImageStep       *j = dynamic_cast<ImageStep*>(&*p);
+			if (NULL == j) {
+				debug(LOG_DEBUG, DEBUG_LOG, 0,
+					"%d not an image step", j->id());
+				return;
+			}
+			// if the image is not excluded add it
+			if (exclude.end() == std::find(exclude.begin(),
+				exclude.end(), j->id())) {
+				debug(LOG_DEBUG, DEBUG_LOG, 0,
+					"precursor %d excluded", j->id());
+				return;
+			}
+			images.push_back(j->image());
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "add image %d",
+				j->id());
+		}
+	);
+	return images;
+}
+
+/**
  * \brief Retrieve the unique precursor image
  *
  * If there is not exactly one precursor image, throw an exception,
  * otherwise return the unique precursor image
  */
-ImagePtr	ImageStep::precursorimage() {
+ImagePtr	ImageStep::precursorimage(std::vector<int> exclude) {
 	// get the image from the precursor
-	ImageSequence	p = precursorimages();
+	ImageSequence	p = precursorimages(exclude);
 	if (p.size() != 1) {
 		std::string	msg = stringprintf("wrong number of precursor "
 			"images: %d != 1", p.size());

@@ -346,9 +346,9 @@ protected:
 public:
 	virtual ImagePtr	image() { return _image; }
 	ImageStep() : ProcessingStep() { }
-	ImageSequence	precursorimages();
+	ImageSequence	precursorimages(std::vector<int> exlude = std::vector<int>());
 	virtual ProcessingStep::state	do_work() = 0;
-	ImagePtr	precursorimage();
+	ImagePtr	precursorimage(std::vector<int> exlude = std::vector<int>());
 };
 
 /**
@@ -851,7 +851,11 @@ public:
 /**
  * \brief HDR transformation step (see tools/image/hdr)
  */
-class HDRStep : public ImageStep {
+class HDRStep : public ImageStep, public astro::image::post::HDR {
+	int	_maskid;
+public:
+	int	maskid() const { return _maskid; }
+	void	maskid(int m) { _maskid = m; }
 public:
 	HDRStep();
 	virtual ProcessingStep::state	do_work();
@@ -883,6 +887,10 @@ public:
  * \brief Destarring step
  */
 class DestarStep : public ImageStep {
+	double	_radius;
+public:
+	double	radius() const { return _radius; }
+	void	radius(double r) { _radius = r; }
 public:
 	DestarStep();
 	virtual ProcessingStep::state	do_work();
@@ -893,33 +901,33 @@ public:
 * \brief Network Class to manage a complete network of interdependen steps
 */
 class ProcessorNetwork {
-typedef std::map<int, ProcessingStepPtr>	stepmap_t;
-typedef std::map<int, std::string>		id2namemap_t;
-typedef std::multimap<std::string, int>		name2idmap_t;
+	typedef std::map<int, ProcessingStepPtr>	stepmap_t;
+	typedef std::map<int, std::string>		id2namemap_t;
+	typedef std::multimap<std::string, int>		name2idmap_t;
 
-stepmap_t	_steps;
-id2namemap_t	_id2names;
-name2idmap_t	_name2ids;
+	stepmap_t	_steps;
+	id2namemap_t	_id2names;
+	name2idmap_t	_name2ids;
 public:
-ProcessorNetwork();
-void	add(ProcessingStepPtr step);
-ProcessingStepPtr	byid(int id) const;
-ProcessingStepPtr	byname(const std::string& name) const;
-ProcessingStepPtr	bynameid(const std::string& name) const;
-ProcessingStep::steps	terminals() const;
-ProcessingStep::steps	initials() const;
+	ProcessorNetwork();
+	void	add(ProcessingStepPtr step);
+	ProcessingStepPtr	byid(int id) const;
+	ProcessingStepPtr	byname(const std::string& name) const;
+	ProcessingStepPtr	bynameid(const std::string& name) const;
+	ProcessingStep::steps	terminals() const;
+	ProcessingStep::steps	initials() const;
 private:
-int	_maxthreads;
+	int	_maxthreads;
 public:
-int	maxthreads() const { return _maxthreads; }
-void	maxthreads(int m) { _maxthreads = m; }
+	int	maxthreads() const { return _maxthreads; }
+	void	maxthreads(int m) { _maxthreads = m; }
 private:
-std::vector<ProcessingThreadPtr>	_threads;
+	std::vector<ProcessingThreadPtr>	_threads;
 public:
-bool	hasneedswork();
-void	process();
-int	process(int id);
-int	process(const ProcessingStep::steps& steps);
+	bool	hasneedswork();
+	void	process();
+	int	process(int id);
+	int	process(const ProcessingStep::steps& steps);
 };
 typedef std::shared_ptr<ProcessorNetwork>	ProcessorNetworkPtr;
 
@@ -928,10 +936,10 @@ typedef std::shared_ptr<ProcessorNetwork>	ProcessorNetworkPtr;
 */
 class ProcessorFactory {
 public:
-ProcessorFactory();
-ProcessorNetworkPtr	operator()(void);
-ProcessorNetworkPtr	operator()(const std::string& filename);
-ProcessorNetworkPtr	operator()(const char *data, int size);
+	ProcessorFactory();
+	ProcessorNetworkPtr	operator()(void);
+	ProcessorNetworkPtr	operator()(const std::string& filename);
+	ProcessorNetworkPtr	operator()(const char *data, int size);
 };
 
 } // namespace process

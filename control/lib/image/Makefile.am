@@ -63,6 +63,7 @@ libastroimage_la_SOURCES = 						\
 	FWHM.cpp							\
 	GaussImage.cpp							\
 	GaussNoiseAdapter.cpp						\
+	HDR.cpp								\
 	Histogram.cpp							\
 	HSLBase.cpp							\
 	Image.cpp							\

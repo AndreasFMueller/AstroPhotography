@@ -22,25 +22,7 @@ DarkImageStep::DarkImageStep() {
  */
 ProcessingStep::state	DarkImageStep::do_work() {
 	// construct the sequence of images
-	ImageSequence	images;
-	std::for_each(precursors().begin(), precursors().end(),
-		[&images](int precursorid) mutable {
-			ProcessingStepPtr p = ProcessingStep::byid(precursorid);
-			if (!p) {
-				debug(LOG_DEBUG, DEBUG_LOG, 0,
-					"%d not remembered", precursorid);
-			}
-			ImageStep	*j = dynamic_cast<ImageStep*>(&*p);
-			if (NULL == j) {
-				debug(LOG_DEBUG, DEBUG_LOG, 0,
-					"%d not an image step", j->id());
-				return;
-			}
-			images.push_back(j->image());
-			debug(LOG_DEBUG, DEBUG_LOG, 0, "add image %d",
-				j->id());
-		}
-	);
+	ImageSequence	images = precursorimages();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "found %d images", images.size());
 	if (images.size() == 0) {
 		return ProcessingStep::failed;

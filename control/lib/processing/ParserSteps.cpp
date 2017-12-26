@@ -10,6 +10,12 @@
 namespace astro {
 namespace process {
 
+static int	namenumber = 0;
+
+static std::string	generate_name() {
+	return stringprintf("step%d", namenumber++);
+}
+
 /**
  * \brief common method call when a an element begins
  *
@@ -18,6 +24,9 @@ namespace process {
  * \param attrs		XML attributes specified in the start element
  */
 void	ProcessorParser::startCommon(const attr_t& attrs) {
+	ProcessingStepPtr	step = _stepstack.top();
+
+	// check the base attribute
 	attr_t::const_iterator	i = attrs.find(std::string("base"));
 	if (i != attrs.end()) {
 		std::string	newbase = _basestack.top() + "/" + i->second;
@@ -27,6 +36,20 @@ void	ProcessorParser::startCommon(const attr_t& attrs) {
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "current top base: '%s'",
 		_basestack.top().c_str());
+
+	// check the name attribute
+	i = attrs.find(std::string("name"));
+	if (i != attrs.end()) {
+		_namestack.push(i->second);
+	} else {
+		_namestack.push(generate_name());
+	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "name of this node: %s",
+		step->name().c_str());
+
+	// remember the step in the network
+	ProcessingStep::remember(step);
+	_network->add(step);
 }
 
 /**
@@ -37,7 +60,9 @@ void	ProcessorParser::endCommon() {
 
 	// get the step that was pushed on the stack with the start element
 	ProcessingStepPtr	step = _stepstack.top();
+	step->name(_namestack.top());
 	_stepstack.pop();
+	_namestack.pop();
 
 	// if there is a current top element, then add the present element
 	// as a precursor to the top of stack
@@ -53,192 +78,6 @@ void	ProcessorParser::endCommon() {
 	if (_basestack.size() > 0) {
 		_basestack.pop();
 	}
-}
-
-/**
- * \brief Create a new File image node
- *
- * \param attrs		XML attributes specified in the start element
- */
-void	ProcessorParser::startFileimage(const attr_t& attrs) {
-	startCommon(attrs);
-	// get the file name
-	attr_t::const_iterator	i = attrs.find(std::string("file"));
-	if (i == attrs.end()) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "no file name");
-		throw std::runtime_error("no file name");
-	}
-	std::string	filename = fullname(i->second);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "filename: %s", filename.c_str());
-	FileImageStep	*filestep = new FileImageStep(filename);
-	ProcessingStepPtr	step(filestep);
-	ProcessingStep::remember(step);
-
-	// check whether there is a name attribute
-	i = attrs.find(std::string("name"));
-	if (i != attrs.end()) {
-		step->name(i->second);
-	}
-
-	// add to the network
-	_network->add(step);
-
-	// push the process on the stack
-	_stepstack.push(step);
-}
-
-/**
- * \brief method called when a file image element ends
- */
-void	ProcessorParser::endFileimage() {
-	endCommon();
-}
-
-/**
- * \brief method called to start a dark image processor
- *
- * \param attrs		XML attributes specified in the start element
- */
-void	ProcessorParser::startDarkimage(const attr_t& attrs) {
-	startCommon(attrs);
-
-	// create a new dark process
-	DarkImageStep	*dark = new DarkImageStep();
-	ProcessingStepPtr	step(dark);
-
-	// remember the step everywhere
-	_stepstack.push(step);
-	ProcessingStep::remember(step);
-
-	// check whether there is a name attribute
-	attr_t::const_iterator	i = attrs.find(std::string("name"));
-	if (i != attrs.end()) {
-		step->name(i->second);
-	}
-	_network->add(step);
-}
-
-/**
- * \brief method called to end a dar image processor
- */
-void	ProcessorParser::endDarkimage() {
-	endCommon();
-}
-
-/**
- * \brief Start a flat image processor
- *
- * \param attrs		XML attributes of the flat image element
- */
-void	ProcessorParser::startFlatimage(const attr_t& attrs) {
-	startCommon(attrs);
-
-	// create a new flat process
-	FlatImageStep	*flat = new FlatImageStep();
-	ProcessingStepPtr	step(flat);
-
-	// remember the step everywhere
-	_stepstack.push(step);
-	ProcessingStep::remember(step);
-
-	// add a dark image if the dark attribute is present
-	attr_t::const_iterator	i = attrs.find(std::string("dark"));
-	if (attrs.end() != i) {
-		std::string	darkname = i->second;
-		ProcessingStepPtr	darkstep = _network->byname(darkname);
-		debug(LOG_DEBUG, DEBUG_LOG, 0,
-			"dark attribute found: %s, step %d",
-			darkname.c_str(), darkstep->id());
-		step->add_precursor(darkstep);
-	}
-	
-	// check whether there is a name attribute
-	i = attrs.find(std::string("name"));
-	if (i != attrs.end()) {
-		step->name(i->second);
-	}
-	_network->add(step);
-}
-
-/**
- * \brief end a flat image processor
- */
-void	ProcessorParser::endFlatimage() {
-	endCommon();
-}
-
-/**
- * \brief start an image calibration process
- *
- * \param attrs		XML attributes of the flat image element
- */
-void	ProcessorParser::startCalibrate(const attr_t& attrs) {
-	startCommon(attrs);
-
-	// create a new image calibration step
-	ImageCalibrationStep	*cal = new ImageCalibrationStep();
-	ProcessingStepPtr	step(cal);
-
-	// remember the step everywhere
-	_stepstack.push(step);
-	ProcessingStep::remember(step);
-
-	// get the dark image
-	attr_t::const_iterator	i = attrs.find(std::string("dark"));
-	if (attrs.end() != i) {
-		std::string	name = i->second;
-		ProcessingStepPtr	dark = _network->bynameid(name);
-		cal->add_precursor(dark);
-		cal->dark(dark);
-	}
-
-	// get the flat image
-	i = attrs.find(std::string("flat"));
-	if (attrs.end() != i) {
-		std::string	name = i->second;
-		ProcessingStepPtr	flat = _network->bynameid(name);
-		cal->add_precursor(flat);
-		cal->flat(flat);
-	}
-
-	// check whether there is a name attribute
-	i = attrs.find(std::string("name"));
-	if (i != attrs.end()) {
-		step->name(i->second);
-	}
-	_network->add(step);
-
-	// check other attributes
-	i = attrs.find(std::string("demosaic"));
-	if (i != attrs.end()) {
-		if ((i->second == std::string("yes"))
-			|| (i->second == std::string("true"))) {
-			cal->demosaic(true);
-		}
-	}
-
-	i = attrs.find(std::string("interpolate"));
-	if (i != attrs.end()) {
-		if ((i->second == std::string("yes"))
-			|| (i->second == std::string("true"))) {
-			cal->interpolate(true);
-		}
-	}
-
-	i = attrs.find(std::string("flip"));
-	if (i != attrs.end()) {
-		if ((i->second == std::string("yes"))
-			|| (i->second == std::string("true"))) {
-			cal->flip(true);
-		}
-	}
-}
-
-/**
- * \brief end an image calibration process
- */
-void	ProcessorParser::endCalibrate() {
-	endCommon();
 }
 
 /**
@@ -287,223 +126,6 @@ void	ProcessorParser::startProcess(const attr_t& attrs) {
 void	ProcessorParser::endProcess() {
 	_basestack.pop();
 }
-
-/**
- * \brief start the writefileimage element
- */
-void	ProcessorParser::startWritefileimage(const attr_t& attrs) {
-	startCommon(attrs);
-
-	// we need a file attribute
-	attr_t::const_iterator	i = attrs.find(std::string("file"));
-	if (i == attrs.end()) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "missing file attribute");
-		throw std::runtime_error("missing file attribute");
-	}
-	std::string	filename = fullname(i->second);
-
-	// create a new dark process
-	WriteableFileImageStep	*writeable
-		= new WriteableFileImageStep(filename);
-	ProcessingStepPtr	step(writeable);
-
-	// remember the step everywhere
-	_stepstack.push(step);
-	ProcessingStep::remember(step);
-
-	// check whether there is a name attribute
-	i = attrs.find(std::string("name"));
-	if (i != attrs.end()) {
-		step->name(i->second);
-	}
-	_network->add(step);
-}
-
-/**
- * \brief end the writefileimage element
- */
-void	ProcessorParser::endWritefileimage() {
-	endCommon();
-}
-
-/**
- * \brief start the stacking step
- */
-void	ProcessorParser::startStack(const attr_t& attrs) {
-	startCommon(attrs);
-
-	// create the stacking step
-	StackingStep	*ss = new StackingStep();
-	ProcessingStepPtr	sstep(ss);
-
-	// remember everyhwere
-	_stepstack.push(sstep);
-	ProcessingStep::remember(sstep);
-
-	// we need the baseimage attribute (don't confuse with the base
-	// attribute, which relates to the base directory)
-	attr_t::const_iterator	i = attrs.find(std::string("baseimage"));
-	if (i == attrs.end()) {
-		debug(LOG_ERR, DEBUG_LOG, 0, "baseimage attribute missing");
-		throw std::runtime_error("missing base image");
-	}
-	ProcessingStepPtr	bi = _network->bynameid(i->second);
-	if (!bi) {
-		std::string	msg = stringprintf("referenced base image "
-			"'%s' not found", i->second.c_str());
-		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
-		throw std::runtime_error(msg);
-	}
-	ss->baseimage(bi);
-
-	// get the attributes for the stacking step
-	if (attrs.end() != (i = attrs.find("searchradius"))) {
-		int	sradius= std::stoi(i->second);
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "set search radius to %d",
-			sradius);
-		ss->searchradius(sradius);
-	}
-	if (attrs.end() != (i = attrs.find("patchsize"))) {
-		int	patchsize= std::stoi(i->second);
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "set patch size to %d",
-			patchsize);
-		ss->patchsize(patchsize);
-	}
-	if (attrs.end() != (i = attrs.find("numberofstars"))) {
-		int	numberofstars= std::stoi(i->second);
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "set number of stars to %d",
-			numberofstars);
-		ss->numberofstars(numberofstars);
-	}
-	if (attrs.end() != (i = attrs.find("transform"))) {
-		std::string	value = i->second;
-		if ((value == "no") || (value == "false")) {
-			ss->notransform("true");
-		} else {
-			ss->notransform("false");
-		}
-	}
-	if (attrs.end() != (i = attrs.find("usetriangles"))) {
-		std::string	value = i->second;
-		if ((value == "no") || (value == "false")) {
-			ss->usetriangles(true);
-		} else {
-			ss->usetriangles(false);
-		}
-	}
-
-	// done
-}
-
-/**
- * \brief End of the stacking step
- */
-void	ProcessorParser::endStack() {
-	endCommon();
-}
-
-#if 0
-void	ProcessorParser::startColor(const attr_t& attrs) {
-	startCommon(attrs);
-
-	// create the stacking step
-	ColorStep	*s = new ColorStep();
-	ProcessingStepPtr	step(s);
-
-	// remember everyhwere
-	_stepstack.push(step);
-	ProcessingStep::remember(step);
-}
-
-void	ProcessorParser::endColor() {
-	endCommon();
-}
-#endif
-
-void	ProcessorParser::startColorclamp(const attr_t& attrs) {
-	startCommon(attrs);
-
-	// create the stacking step
-	ColorclampStep	*s = new ColorclampStep();
-	ProcessingStepPtr	step(s);
-
-	// remember everyhwere
-	_stepstack.push(step);
-	ProcessingStep::remember(step);
-}
-
-void	ProcessorParser::endColorclamp() {
-	endCommon();
-}
-
-void	ProcessorParser::startHDR(const attr_t& attrs) {
-	startCommon(attrs);
-
-	// create the stacking step
-	HDRStep	*s = new HDRStep();
-	ProcessingStepPtr	step(s);
-
-	// remember everyhwere
-	_stepstack.push(step);
-	ProcessingStep::remember(step);
-}
-
-void	ProcessorParser::endHDR() {
-	endCommon();
-}
-
-#if 0
-void	ProcessorParser::startRescale(const attr_t& attrs) {
-	startCommon(attrs);
-
-	// create the stacking step
-	RescaleStep	*s = new RescaleStep();
-	ProcessingStepPtr	step(s);
-
-	// remember everyhwere
-	_stepstack.push(step);
-	ProcessingStep::remember(step);
-
-	// parse the Rescale attributes
-	attr_t::const_iterator	i;
-	if (attrs.end() != (i = attrs.find("minimum"))) {
-		s->minimum(std::stod(i->second));
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "set minimum to %f",
-			s->minimum());
-	}
-	if (attrs.end() != (i = attrs.find("maximum"))) {
-		s->maximum(std::stod(i->second));
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "set maximum to %f",
-			s->maximum());
-	}
-	if (attrs.end() != (i = attrs.find("scale"))) {
-		s->scale(std::stod(i->second));
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "set scale to %f",
-			s->scale());
-	}
-}
-
-void	ProcessorParser::endRescale() {
-	endCommon();
-}
-#endif
-
-void	ProcessorParser::startDestar(const attr_t& attrs) {
-	startCommon(attrs);
-
-	// create the stacking step
-	DestarStep	*s = new DestarStep();
-	ProcessingStepPtr	step(s);
-
-	// remember everyhwere
-	_stepstack.push(step);
-	ProcessingStep::remember(step);
-}
-
-void	ProcessorParser::endDestar() {
-	endCommon();
-}
-
 
 } // namespace process
 } // namespace astro

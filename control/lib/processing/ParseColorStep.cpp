@@ -11,15 +11,12 @@ namespace astro {
 namespace process {
 
 void	ProcessorParser::startColor(const attr_t& attrs) {
-	startCommon(attrs);
-
 	// create the stacking step
 	ColorStep	*s = new ColorStep();
 	ProcessingStepPtr	step(s);
 
 	// remember everyhwere
 	_stepstack.push(step);
-	ProcessingStep::remember(step);
 
 	// parse attributes
 	attr_t::const_iterator	i;
@@ -50,10 +47,16 @@ void	ProcessorParser::startColor(const attr_t& attrs) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "set offsets to %.2f,%.2f,%.2f", 
 			sc.R, sc.G, sc.B);
 	}
-}
+	if (attrs.end() != (i = attrs.find("image"))) {
+		std::string     imagename = i->second;
+		ProcessingStepPtr       imagestep = _network->byname(imagename);
+		debug(LOG_DEBUG, DEBUG_LOG, 0,
+			"dark attribute found: %s, step %d",
+			imagename.c_str(), imagestep->id());
+		step->add_precursor(imagestep);
+        }
 
-void	ProcessorParser::endColor() {
-	endCommon();
+	startCommon(attrs);
 }
 
 } // namespace process
