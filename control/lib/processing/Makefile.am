@@ -24,6 +24,9 @@ libastroprocessing_la_SOURCES =						\
 	ImageProcessing.cpp						\
 	ImageStep.cpp							\
 	InterpolationStep.cpp						\
+	ParseColorStep.cpp						\
+	ParseRescaleStep.cpp						\
+	ParserSteps.cpp							\
 	PreviewAdapter.cpp						\
 	ProcessingController.cpp					\
 	ProcessingStatic.cpp						\
@@ -32,7 +35,6 @@ libastroprocessing_la_SOURCES =						\
 	ProcessorFactory.cpp						\
 	ProcessorNetwork.cpp						\
 	ProcessorParser.cpp						\
-	ParserSteps.cpp							\
 	RawImageFileStep.cpp						\
 	RescaleStep.cpp							\
 	StackingStep.cpp						\

@@ -402,6 +402,7 @@ void	ProcessorParser::endStack() {
 	endCommon();
 }
 
+#if 0
 void	ProcessorParser::startColor(const attr_t& attrs) {
 	startCommon(attrs);
 
@@ -417,6 +418,7 @@ void	ProcessorParser::startColor(const attr_t& attrs) {
 void	ProcessorParser::endColor() {
 	endCommon();
 }
+#endif
 
 void	ProcessorParser::startColorclamp(const attr_t& attrs) {
 	startCommon(attrs);
@@ -450,6 +452,7 @@ void	ProcessorParser::endHDR() {
 	endCommon();
 }
 
+#if 0
 void	ProcessorParser::startRescale(const attr_t& attrs) {
 	startCommon(attrs);
 
@@ -460,11 +463,30 @@ void	ProcessorParser::startRescale(const attr_t& attrs) {
 	// remember everyhwere
 	_stepstack.push(step);
 	ProcessingStep::remember(step);
+
+	// parse the Rescale attributes
+	attr_t::const_iterator	i;
+	if (attrs.end() != (i = attrs.find("minimum"))) {
+		s->minimum(std::stod(i->second));
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "set minimum to %f",
+			s->minimum());
+	}
+	if (attrs.end() != (i = attrs.find("maximum"))) {
+		s->maximum(std::stod(i->second));
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "set maximum to %f",
+			s->maximum());
+	}
+	if (attrs.end() != (i = attrs.find("scale"))) {
+		s->scale(std::stod(i->second));
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "set scale to %f",
+			s->scale());
+	}
 }
 
 void	ProcessorParser::endRescale() {
 	endCommon();
 }
+#endif
 
 void	ProcessorParser::startDestar(const attr_t& attrs) {
 	startCommon(attrs);

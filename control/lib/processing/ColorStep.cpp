@@ -15,11 +15,22 @@ ColorStep::ColorStep() {
 }
 
 ProcessingStep::state	ColorStep::do_work() {
-	return ProcessingStep::complete;
+	switch (status()) {
+	case ProcessingStep::needswork:
+	case ProcessingStep::complete:
+		return ProcessingStep::complete;
+	default:
+		return ProcessingStep::idle;
+	}
 }
 
 std::string	ColorStep::what() const {
 	return std::string("Color correction");
+}
+
+ImagePtr	ColorStep::image() {
+	ImagePtr	precursor = precursorimage();
+	return adapter::colortransform(precursor, *this);
 }
 
 } // namespace process

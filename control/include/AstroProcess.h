@@ -11,6 +11,7 @@
 #include <AstroImage.h>
 #include <AstroAdapter.h>
 #include <AstroUtils.h>
+#include <AstroPostprocessing.h>
 #include <thread>
 #include <mutex>
 
@@ -347,6 +348,7 @@ public:
 	ImageStep() : ProcessingStep() { }
 	ImageSequence	precursorimages();
 	virtual ProcessingStep::state	do_work() = 0;
+	ImagePtr	precursorimage();
 };
 
 /**
@@ -838,11 +840,12 @@ public:
 /**
  * \brief Image Step to change the color balance (see tools/image/color)
  */
-class ColorStep : public ImageStep {
+class ColorStep : public ImageStep, public astro::adapter::ColorTransformBase {
 public:
 	ColorStep();
 	virtual ProcessingStep::state	do_work();
 	virtual std::string	what() const;
+	virtual ImagePtr	image();
 };
 
 /**
@@ -858,11 +861,12 @@ public:
 /**
  * \brief Rescaling transformation step (see tools/image/rescale)
  */
-class RescaleStep : public ImageStep {
+class RescaleStep : public ImageStep, public astro::image::post::Rescale {
 public:
 	RescaleStep();
 	virtual ProcessingStep::state	do_work();
 	virtual std::string	what() const;
+	virtual ImagePtr	image();
 };
 
 /**

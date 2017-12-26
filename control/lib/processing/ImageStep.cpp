@@ -16,104 +16,24 @@ using namespace astro::adapter;
 namespace astro {
 namespace process {
 
-#if 0
-//////////////////////////////////////////////////////////////////////
-// Construction and Destruction
-//////////////////////////////////////////////////////////////////////
 /**
- * \brief Create a new processing step
+ * \brief Retrieve the unique precursor image
+ *
+ * If there is not exactly one precursor image, throw an exception,
+ * otherwise return the unique precursor image
  */
-ImageStep::ImageStep() : _preview(NULL), _out(NULL) {
-	_status = idle;
-}
-
-/**
- * \brief Destroy the processing step
- */
-ImageStep::~ImageStep() {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "destroying an %s", type_name().c_str());
-}
-
-//////////////////////////////////////////////////////////////////////
-// Preview access
-//////////////////////////////////////////////////////////////////////
-PreviewMonochromeAdapter	ImageStep::monochrome_preview() {
-	return PreviewMonochromeAdapter(preview());
-}
-
-PreviewColorAdapter	ImageStep::color_preview() {
-	return PreviewColorAdapter(preview());
-}
-
-//////////////////////////////////////////////////////////////////////
-// Access to output images
-//////////////////////////////////////////////////////////////////////
-const ConstImageAdapter<double>&	ImageStep::out() const {
-	if (NULL == _out) {
-		throw std::runtime_error("no output available");
+ImagePtr	ImageStep::precursorimage() {
+	// get the image from the precursor
+	ImageSequence	p = precursorimages();
+	if (p.size() != 1) {
+		std::string	msg = stringprintf("wrong number of precursor "
+			"images: %d != 1", p.size());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw std::runtime_error(msg);
 	}
-	return *_out;
+	ImagePtr	precursorimage = *p.begin();
+	return precursorimage;
 }
-
-bool	ImageStep::hasColor() const {
-	return false;
-}
-
-const ConstImageAdapter<RGB<double> >&	ImageStep::out_color() const {
-	throw std::runtime_error("not implemented");
-}
-
-//////////////////////////////////////////////////////////////////////
-// Access to the first image precursor
-//////////////////////////////////////////////////////////////////////
-/**
- * \brief Get an ImageStep precursors
- */
-ImageStep	*ImageStep::input() const {
-	// get the precursor
-	steps::const_iterator	pp =
-		find_if(precursors().begin(), precursors().end(),
-			[](int stepid) {
-				ProcessingStepPtr	step
-					= ProcessingStep::byid(stepid);
-				return (dynamic_cast<ImageStep *>(&*step)
-					!= NULL);
-			}
-		);
-	if (pp == precursors().end()) {
-		throw std::runtime_error("no precursor image");
-	}
-	ProcessingStepPtr	step = ProcessingStep::byid(*pp);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "precursor: %p", &*step);
-	ImageStep	*precursor = dynamic_cast<ImageStep *>(&*step);
-	return precursor;
-}
-
-//////////////////////////////////////////////////////////////////////
-// meta data access
-//////////////////////////////////////////////////////////////////////
-/**
- * \brief Test precursor image for metadata
- */
-bool	ImageStep::hasMetadata(const std::string& name) const {
-	return input()->hasMetadata(name);
-}
-
-/**
- * \brief Get metadata from the precursor image
- */
-astro::image::Metavalue	ImageStep::getMetadata(const std::string& name) const {
-	return input()->getMetadata(name);
-}
-
-ImageMetadata::const_iterator	ImageStep::begin() const {
-	return input()->begin();
-}
-
-ImageMetadata::const_iterator	ImageStep::end() const {
-	return input()->end();
-}
-#endif
 
 } // namespace process
 } // namespace astro
