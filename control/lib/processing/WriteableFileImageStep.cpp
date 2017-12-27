@@ -67,10 +67,13 @@ ProcessingStep::state	WriteableFileImageStep::status() {
 			case needswork:
 			case working:
 				_previousstate = idle;
+				break;
 			case complete:
 				_previousstate = needswork;
+				break;
 			case failed:
 				_previousstate = failed;
+				break;
 			}
 		}
 	} else {
@@ -80,7 +83,8 @@ ProcessingStep::state	WriteableFileImageStep::status() {
 		switch (precursor->status()) {
 		case ProcessingStep::idle:
 		case ProcessingStep::working:
-			return ProcessingStep::idle;
+			_previousstate = ProcessingStep::idle;
+			break;
 		case ProcessingStep::needswork:	
 			debug(LOG_DEBUG, DEBUG_LOG, 0, "precursor needs work");
 			// in this case we have to check the age of the
@@ -101,12 +105,15 @@ ProcessingStep::state	WriteableFileImageStep::status() {
 		case ProcessingStep::complete:
 			debug(LOG_DEBUG, DEBUG_LOG, 0, "precursor is complete");
 			_previousstate = ProcessingStep::needswork;
+			break;
 		case ProcessingStep::failed:
 			debug(LOG_DEBUG, DEBUG_LOG, 0, "precursor is failed");
 			_previousstate = ProcessingStep::failed;
+			break;
 		}
 	}
-
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "step '%s' is %s", name().c_str(),
+		statename(_previousstate).c_str());
 	return _previousstate;
 }
 

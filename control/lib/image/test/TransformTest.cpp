@@ -72,7 +72,8 @@ void	TransformTest::testPoints() {
 	residuals.push_back(Residual(P2, Q2));
 	residuals.push_back(Residual(P3, Q3));
 	
-	Transform	t1(residuals);
+	TransformFactory	tf;
+	Transform	t1 = tf(residuals);
 	Transform	t2(M_PI/2, Point(2, 3));
 	CPPUNIT_ASSERT(t1 == t2);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "point test complete");
@@ -125,7 +126,8 @@ void	TransformTest::testAreaPreserving() {
 	residuals.push_back(Residual(P2, Q2));
 	residuals.push_back(Residual(P3, Q3));
 	
-	Transform	t1(residuals);
+	TransformFactory	tf;
+	Transform	t1 = tf(residuals);
 	CPPUNIT_ASSERT(t1.isAreaPreserving());
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "area preserving test complete");
 }

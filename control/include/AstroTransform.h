@@ -253,22 +253,26 @@ public:
 class Transform {
 	double	a[6];
 	void	identity();
+#if 0
 	void	translation(const std::vector<Residual>& residuals);
 	void	build(const std::vector<Point>& from,
 			const std::vector<Point>& to,
 			const std::vector<double>& weight);
+#endif
 public:
 	// constructors
 	Transform();
 	Transform(const Transform& other);
 	Transform(double angle, const Point& translation,
 		double scalefactor = 1);
+#if 0
 	Transform(const std::vector<Residual>& residuals);
 	Transform(const std::vector<Point>& from,
 		const std::vector<Point>& to);
 	Transform(const std::vector<Point>& from,
 		const std::vector<Point>& to,
 		const std::vector<double>& weights);
+#endif
 
 	// return some quality measure for how far away from an aspect
 	// preserving 
@@ -313,6 +317,27 @@ public:
 	virtual std::string	toString() const;
 	friend std::ostream&	operator<<(std::ostream& out,
 		const Transform& transform);
+};
+
+/**
+ * \brief Factory class to build a transform from a set of points
+ */
+class TransformFactory {
+	Transform	build(const std::vector<Point>& from,
+		const std::vector<Point>& to,
+		const std::vector<double>& weights);
+	bool	_rigid;
+public:
+	bool	rigid() const { return _rigid; }
+	void	rigid(bool r) { _rigid = r; }
+public:
+	TransformFactory(bool r = false);
+	Transform	operator()(const std::vector<Residual>& residuals);
+	Transform	operator()(const std::vector<Point>& from,
+		const std::vector<Point>& to);
+	Transform	operator()(const std::vector<Point>& from,
+		const std::vector<Point>& to,
+		const std::vector<double>& weights);
 };
 
 /**
@@ -441,10 +466,14 @@ public:
  */
 class TransformAnalyzer : public Analyzer {
 	Transform	basetransform;
+	bool	_rigid;
+public:
+	bool	rigid() const { return _rigid; }
+	void	rigid(bool r) { _rigid = r; }
 public:
 	TransformAnalyzer(const ConstImageAdapter<double>& _baseimage,
 		int _spacing = 128, int _patchsize = 128)
-		: Analyzer(_baseimage, _spacing, _patchsize) { }
+		: Analyzer(_baseimage, _spacing, _patchsize), _rigid(false) { }
 	Transform	transform(const ConstImageAdapter<double>& image) const;
 };
 

@@ -44,6 +44,8 @@ void	ProcessorParser::startCalibrate(const attr_t& attrs) {
 		if ((i->second == std::string("yes"))
 			|| (i->second == std::string("true"))) {
 			cal->demosaic(true);
+		} else {
+			cal->demosaic(false);
 		}
 	}
 
@@ -52,6 +54,8 @@ void	ProcessorParser::startCalibrate(const attr_t& attrs) {
 		if ((i->second == std::string("yes"))
 			|| (i->second == std::string("true"))) {
 			cal->interpolate(true);
+		} else {
+			cal->interpolate(false);
 		}
 	}
 
@@ -60,6 +64,8 @@ void	ProcessorParser::startCalibrate(const attr_t& attrs) {
 		if ((i->second == std::string("yes"))
 			|| (i->second == std::string("true"))) {
 			cal->flip(true);
+		} else {
+			cal->flip(false);
 		}
 	}
 

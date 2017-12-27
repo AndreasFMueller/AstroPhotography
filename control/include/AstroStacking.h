@@ -87,6 +87,11 @@ private:
 public:
 	bool	usetriangles() const { return _usetriangles; }
 	void	usetriangles(bool u) { _usetriangles = u; }
+private:
+	bool	_rigid;
+public:
+	bool	rigid() const { return _rigid; }
+	void	rigid(bool r) { _rigid = r; }
 
 	static StackerPtr	get(ImagePtr baseimage);
 protected:
@@ -94,7 +99,7 @@ protected:
 		: _baseimage(baseimage),
 		  _patchsize(256), _residual(30),
 		  _numberofstars(0), _searchradius(16),
-		  _notransform(true), _usetriangles(false) {
+		  _notransform(true), _usetriangles(false), _rigid(false) {
 	}
 public:
 	virtual void	add(ImagePtr) = 0;

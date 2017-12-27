@@ -40,7 +40,8 @@ void	Stack::add(ImagePtr image) {
 	// use a transform analyzer to find the transform, add the transform
 	// to the layer
 	transform::TransformAnalyzer	ta(*baseadapter, 2048, 2048);
-	newlayer->transform(ta(*imageadapter));
+	transform::Transform	t = ta.transform(*imageadapter);
+	newlayer->transform(t);
 
 	// add the layer to the stack
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "adding layer %d: %s", size(),

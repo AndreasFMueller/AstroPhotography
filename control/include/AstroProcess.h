@@ -470,6 +470,7 @@ class StackingStep : public ImageStep {
 	int	_searchradius;
 	bool	_notransform;
 	bool	_usetriangles;
+	bool	_rigid;
 public:
 	StackingStep();
 	ProcessingStepPtr	baseimage() const { return _baseimage; }
@@ -486,6 +487,8 @@ public:
 	void	notransform(bool n) { _notransform = n; }
 	bool	usetriangles() const { return _usetriangles; }
 	void	usetriangles(bool u) { _usetriangles = u; }
+	bool	rigid() const { return _rigid; }
+	void	rigid(bool r) { _rigid = r; }
 private:
 	virtual ProcessingStep::state	do_work();
 	virtual std::string	what() const;

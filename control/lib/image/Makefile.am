@@ -6,13 +6,15 @@
 SUBDIRS = . test
 
 noinst_HEADERS =							\
+	LevelExtractor.h						\
 	Miniball.hpp							\
-	LevelExtractor.h
+	TransformBuilder.h
 
 noinst_LTLIBRARIES = libastroimage.la
 
 libastroimage_la_SOURCES = 						\
 	Adapters.cpp							\
+	AffineTransformBuilder.cpp					\
 	AiryImage.cpp							\
 	AmplifierGlowImage.cpp						\
 	Analyzer.cpp							\
@@ -101,6 +103,7 @@ libastroimage_la_SOURCES = 						\
 	Rescale.cpp							\
 	Residual.cpp							\
 	RingImage.cpp							\
+	RigidTransformBuilder.cpp					\
 	SphereProjection.cpp						\
 	Stack.cpp							\
 	StackingAdapter.cpp						\
@@ -113,6 +116,7 @@ libastroimage_la_SOURCES = 						\
 	ThresholdExtractor.cpp						\
 	Transform.cpp							\
 	TransformAnalyzer.cpp						\
+	TransformFactory.cpp						\
 	TriangleAnalyzer.cpp						\
 	Triangle.cpp							\
 	TriangleSet.cpp							\

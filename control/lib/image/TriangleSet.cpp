@@ -311,7 +311,8 @@ Transform	TriangleSet::closest(const TriangleSet& other) const {
 			to.push_back(tp->second[i]);
 		}
 	}
-	return Transform(from, to);
+	TransformFactory	tf;
+	return tf(from, to);
 }
 
 } // namespace transform

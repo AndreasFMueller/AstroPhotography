@@ -19,7 +19,8 @@ Transform	TransformAnalyzer::transform(
 			const ConstImageAdapter<double>& image) const {
 	std::vector<Residual>	residuals = (*this)(image);
 
-	return Transform(residuals);
+	TransformFactory	tf(_rigid);
+	return tf(residuals);
 }
 
 } // namespace transform

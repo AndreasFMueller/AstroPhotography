@@ -64,17 +64,25 @@ void	ProcessorParser::startStack(const attr_t& attrs) {
 	if (attrs.end() != (i = attrs.find("transform"))) {
 		std::string	value = i->second;
 		if ((value == "no") || (value == "false")) {
-			ss->notransform("true");
+			ss->notransform(false);
 		} else {
-			ss->notransform("false");
+			ss->notransform(true);
 		}
 	}
 	if (attrs.end() != (i = attrs.find("usetriangles"))) {
 		std::string	value = i->second;
 		if ((value == "no") || (value == "false")) {
-			ss->usetriangles(true);
-		} else {
 			ss->usetriangles(false);
+		} else {
+			ss->usetriangles(true);
+		}
+	}
+	if (attrs.end() != (i = attrs.find("rigid"))) {
+		std::string	value = i->second;
+		if ((value == "no") || (value == "false")) {
+			ss->rigid(false);
+		} else {
+			ss->rigid(true);
 		}
 	}
 

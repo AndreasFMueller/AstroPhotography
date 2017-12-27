@@ -10,6 +10,7 @@
 #include <cstdlib>
 #include <AstroTransform.h>
 #include <AstroFormat.h>
+#include "TransformBuilder.h"
 
 #ifdef HAVE_ACCELERATE_ACCELERATE_H
 #include <Accelerate/Accelerate.h>
@@ -88,6 +89,7 @@ Transform::Transform(double angle, const Point& translation, double scale) {
 	a[5] = translation.y();
 }
 
+#if 0
 /**
  * \brief Extract the average translation from a number of residuals
  */
@@ -111,7 +113,9 @@ void	Transform::translation(const std::vector<Residual>& residuals) {
 	a[2] = sum.x();
 	a[5] = sum.y();
 }
+#endif
 
+#if 0
 /**
  * \brief common method to solve least squares equations
  */
@@ -233,7 +237,18 @@ void	Transform::build(const std::vector<Point>& from,
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "average residual %f",
 		residual / from.size());
 } 
+/**
+ * \brief common method to solve least squares equations
+ */
+void	Transform::build(const std::vector<Point>& from,
+		const std::vector<Point>& to,
+		const std::vector<double>& weights) {
+	AffineTransformBuilder	atb;
+	*this = atb.build(from, to, weights);
+}
+#endif
 
+#if 0
 Transform::Transform(const std::vector<Residual>& residuals) {
 	// make sure we have enough points
 	if (residuals.size() < 3) {
@@ -268,6 +283,7 @@ Transform::Transform(const std::vector<Point>& from,
 	const std::vector<Point>& to, const std::vector<double>& weights) {
 	build(from, to, weights);
 }
+#endif
 
 /**
  * \brief Compute the inverse transformation

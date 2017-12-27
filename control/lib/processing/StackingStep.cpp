@@ -20,6 +20,7 @@ StackingStep::StackingStep() {
 	_numberofstars = 20;
 	_notransform = false;
 	_usetriangles = false;
+	_rigid = false;
 }
 
 /**
@@ -54,6 +55,7 @@ ProcessingStep::state	StackingStep::do_work() {
 	stacker->numberofstars(_numberofstars);
 	stacker->notransform(_notransform);
 	stacker->usetriangles(_usetriangles);
+	stacker->rigid(_rigid);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "stacker created and parametrized");
 	
 	// add the precursor images (except the base image)

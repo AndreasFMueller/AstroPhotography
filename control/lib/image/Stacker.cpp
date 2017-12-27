@@ -142,7 +142,8 @@ Transform	Stacker::findtransform(const ConstImageAdapter<double>& base,
 		}
 
 		// create the improvement transform
-		Transform	deltatransform(residuals);
+		TransformFactory	tf(_rigid);
+		Transform	deltatransform = tf(residuals);
 		double	disc = deltatransform.discrepancy(image.getSize());
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "delta transform: %s, disc = %f",
 			deltatransform.toString().c_str(), disc);
@@ -278,82 +279,10 @@ void	RGBStacker<AccumulatorPixel, Pixel>::add(
 	// create a luminance adapter on the base image, because we only want
 	// ot use the luminance when determining the transformation
 	LuminanceAdapter<RGB<Pixel>, double>	luminancebase(*baseimage());
-#if 0
-	double	mb = filter::Mean<double, double>().filter(luminancebase);
-
-	// create an transform analyzer with respect to the base image
-	TriangleAnalyzer	transformanalyzer(luminancebase, _numberofstars,
-					_searchradius);
-#endif
 
 	// find the transform to the new image
 	LuminanceAdapter<RGB<Pixel>, double>	luminanceimage(image);
-#if 0
-	double	mi = filter::Mean<double, double>().filter(luminanceimage);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "mb = %f, mi = %f", mb, mi);
-	Transform	transform = transformanalyzer.transform(luminanceimage);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "transform: %s",
-		transform.toString().c_str());
-
-	// we now use this preliminary transform to improve using the Analyzer
-	int	repeats = 3;
-	while (repeats--) {
-		TransformAdapter<double>	transformedbase(luminancebase,
-			transform);
-		ReductionAdapter	base(transformedbase, mb, 2 * mb);
-		Analyzer	analyzer(base);
-		analyzer.patchsize(_patchsize);
-		analyzer.spacing(_patchsize);
-		analyzer.hanning(false);
-
-		ReductionAdapter	target(luminanceimage, mi, 2 * mi);
-		std::vector<Residual>	residuals = analyzer(target);
-
-		// we only want to use residuals that are close
-		int	counter = 0;
-		auto ptr = residuals.begin();
-		while (ptr != residuals.end()) {
-			if (ptr->offset().abs() > 30) {
-				ptr = residuals.erase(ptr);
-				counter++;
-			} else {
-				ptr++;
-			}
-		}
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "excluded %d residuals too large",
-			counter);
-
-		// display the residuals that we still want to process
-		int	i = 0;
-		for (ptr = residuals.begin(); ptr != residuals.end();
-			ptr++, i++) {
-			debug(LOG_DEBUG, DEBUG_LOG, 0, "Residual[%d]: %s",
-				i, std::string(*ptr).c_str());
-		}
-
-		// create the improvement transform
-		Transform	deltatransform(residuals);
-		double	disc = deltatransform.discrepancy(image.getSize());
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "delta transform: %s, disc = %f",
-			deltatransform.toString().c_str(), disc);
-
-		// the final transform is the composition of the previous 
-		// transform with the deltatransform;
-		transform = deltatransform.inverse() * transform;
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "improved transform: %s",
-		transform.toString().c_str());
-
-		// check whether the difference is small enought so we can
-		// give up
-		if (disc < 2) {
-			debug(LOG_DEBUG, DEBUG_LOG, 0, "accept transform, "
-				"last discrepancy %f", disc);
-			continue;
-		}
-	}
-#else
 	Transform	transform = findtransform(luminancebase, luminanceimage);
-#endif
 
 	// create an adapter that converts the pixels of the original image
 	// into pixels that are compatible with the accumulator
