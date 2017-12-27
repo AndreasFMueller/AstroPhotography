@@ -10,8 +10,16 @@ namespace astro {
 namespace camera {
 namespace atik {
 
-AtikGuideport::AtikGuideport(::AtikCamera *camera)
+AtikGuideport::AtikGuideport(AtikCamera& camera)
 	: GuidePort(guideportname(camera)), _camera(camera) {
+}
+
+uint8_t	AtikGuideport::active() {
+	return 0;
+}
+
+void	AtikGuideport::activate(float raplus, float raminus,
+		float decplus, float decminus) {
 }
 
 } // namespace atik

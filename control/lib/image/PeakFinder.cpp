@@ -201,8 +201,8 @@ std::pair<Point, double>	PeakFinder::peak(const ConstImageAdapter<double>& image
 
 	// done
 	Point	result = Point(_approximate) + c.first;
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "found peak: %s",
-		result.toString().c_str());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "found peak: %s, weight = %f",
+		result.toString().c_str(), c.second);
 	return std::make_pair(result, c.second);
 }
 

@@ -13,6 +13,10 @@ namespace image {
 namespace transform {
 
 class TransformBuilder {
+protected:
+	void	showResiduals(const Transform& t,
+			const std::vector<Point>& from,
+			const std::vector<Point>& to) const;
 public:
 	TransformBuilder() { }
 	virtual Transform	build(const std::vector<Point>& from,

@@ -9,7 +9,6 @@ noinst_HEADERS =							\
 	LevelExtractor.h						\
 	Miniball.hpp							\
 	TransformBuilder.h
-
 noinst_LTLIBRARIES = libastroimage.la
 
 libastroimage_la_SOURCES = 						\
@@ -116,6 +115,7 @@ libastroimage_la_SOURCES = 						\
 	ThresholdExtractor.cpp						\
 	Transform.cpp							\
 	TransformAnalyzer.cpp						\
+	TransformBuilder.cpp						\
 	TransformFactory.cpp						\
 	TriangleAnalyzer.cpp						\
 	Triangle.cpp							\

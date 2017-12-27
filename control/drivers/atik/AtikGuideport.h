@@ -7,16 +7,19 @@
 #define _AtikGuideport_h
 
 #include <atikccdusb.h>
-#include <AstroCamera.h>
+#include <AtikCamera.h>
 
 namespace astro {
 namespace camera {
 namespace atik {
 
 class AtikGuideport : public GuidePort {
-	::AtikCamera	*_camera;
+	AtikCamera&	_camera;
 public:
-	AtikGuideport(::AtikCamera*);
+	AtikGuideport(AtikCamera&);
+	virtual uint8_t	active();
+	virtual void	activate(float raplus, float raminus,
+		float decplus, float decminus);
 };
 
 } // namespace atik

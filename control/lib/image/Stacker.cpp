@@ -196,6 +196,7 @@ void	MonochromeStacker<AccumulatorPixel, Pixel>::add(
 		const ConstImageAdapter<Pixel>& image) {
 	// first handle the case where there is no transform
 	if (notransform()) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "accumulate with no transform");
 		ConvertingAdapter<AccumulatorPixel, Pixel>	accumulatorimage(image);
 		_accumulator.accumulate(accumulatorimage);
 		return;
@@ -209,6 +210,8 @@ void	MonochromeStacker<AccumulatorPixel, Pixel>::add(
 
 	Transform	transform = findtransform(baseimageadapter,
 					targetimageadapter);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "add transform: %s",
+		transform.toString().c_str());
 
 	// create an adapter that converts the pixels of the original image
 	// into pixels that are compatible with the accumulator

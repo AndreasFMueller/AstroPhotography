@@ -13,10 +13,19 @@ namespace astro {
 namespace camera {
 namespace atik {
 
+DeviceName	cameraname(AtikCamera& camera);
 DeviceName	cameraname(::AtikCamera *camera);
+
+DeviceName	ccdname(AtikCamera& camera, const std::string& name);
 DeviceName	ccdname(::AtikCamera *camera, const std::string& name);
+
+DeviceName	filterwheelname(AtikCamera& camera);
 DeviceName	filterwheelname(::AtikCamera *camera);
+
+DeviceName	guideportname(AtikCamera& camera);
 DeviceName	guideportname(::AtikCamera *camera);
+
+DeviceName	coolername(AtikCamera& camera);
 DeviceName	coolername(::AtikCamera *camera);
 
 } // namespace atik

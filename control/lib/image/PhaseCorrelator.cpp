@@ -107,7 +107,8 @@ void	PhaseCorrelator::write(const Image<double>& image) {
 	}
 	struct stat	sb;
 	if (stat(_imagedir.c_str(), &sb) < 0) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "image directory not found");
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "image directory '%s' not found",
+			_imagedir.c_str());
 		return;
 	}
 	std::string	filename = stringprintf("%s/%s-%05d.fits",

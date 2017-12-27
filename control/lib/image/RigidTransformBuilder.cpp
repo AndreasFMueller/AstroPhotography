@@ -108,36 +108,14 @@ Transform	RigidTransformBuilder::build(const std::vector<Point>& from,
 	Transform	t;
 
 	// copy result data
-	t[0] = b[0];
-	t[1] = -b[1];
-	t[2] = b[2];
-	t[3] = b[1];
-	t[4] = b[0];
-	t[5] = b[3];
+	t[0] = b[0]; t[1] = -b[1]; t[2] = b[2];
+	t[3] = b[1]; t[4] =  b[0]; t[5] = b[3];
 
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "transformation found: %s",
 		t.toString().c_str());
 
 	// compute the residual
-	double	residual = 0.;
-	fromptr = from.begin();
-	toptr = to.begin();
-	i = 0;
-	while (fromptr != from.end()) {
-		double	X, Y;
-		X = t[0] * fromptr->x() + t[1] * fromptr->y() + t[2];
-		Y = t[3] * fromptr->x() + t[4] * fromptr->y() + t[5];
-		double	delta = hypot(X - toptr->x(), Y - toptr->y());
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "residual[%d] = %f",
-			i++, delta);
-		residual += delta;
-		fromptr++;
-		toptr++;
-	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "residual = %f", residual);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "average residual %f",
-		residual / from.size());
-
+	showResiduals(t, from, to);
 	return t;
 } 
 

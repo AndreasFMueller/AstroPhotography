@@ -6,7 +6,7 @@
 #ifndef _AtikCcd_h
 #define _AtikCcd_h
 
-#include <AstroCamera.h>
+#include <AtikCamera.h>
 #include <atikccdusb.h>
 #include <thread>
 
@@ -14,13 +14,17 @@ namespace astro {
 namespace camera {
 namespace atik {
 
+class AtikCcd;
+
 class AtikCcd : public Ccd {
-	::AtikCamera	*_camera;
-	struct AtikCapabilities	capa;
+	astro::camera::atik::AtikCamera&	_camera;
 	ImagePtr	_image;
+public:
+	void	image(ImagePtr);
+private:
 	std::shared_ptr<std::thread>	_thread;
 public:
-	AtikCcd(CcdInfo&, ::AtikCamera *);
+	AtikCcd(CcdInfo&, astro::camera::atik::AtikCamera&);
 	~AtikCcd();
 	virtual void	startExposure(const Exposure& exposure);
 	virtual void	cancelExposure();
@@ -36,6 +40,8 @@ public:
 
 public:
 	void	run();
+
+	void	updatestate(CcdState::State s) { state(s); }
 };
 
 } // namespace atik

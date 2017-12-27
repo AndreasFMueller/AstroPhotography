@@ -253,26 +253,12 @@ public:
 class Transform {
 	double	a[6];
 	void	identity();
-#if 0
-	void	translation(const std::vector<Residual>& residuals);
-	void	build(const std::vector<Point>& from,
-			const std::vector<Point>& to,
-			const std::vector<double>& weight);
-#endif
 public:
 	// constructors
 	Transform();
 	Transform(const Transform& other);
 	Transform(double angle, const Point& translation,
 		double scalefactor = 1);
-#if 0
-	Transform(const std::vector<Residual>& residuals);
-	Transform(const std::vector<Point>& from,
-		const std::vector<Point>& to);
-	Transform(const std::vector<Point>& from,
-		const std::vector<Point>& to,
-		const std::vector<double>& weights);
-#endif
 
 	// return some quality measure for how far away from an aspect
 	// preserving 

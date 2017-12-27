@@ -7,17 +7,19 @@
 #define _AtikCooler_h
 
 #include <atikccdusb.h>
-#include <AstroCamera.h>
+#include <AtikCamera.h>
 
 namespace astro {
 namespace camera {
 namespace atik {
 
 class AtikCooler : public Cooler {
-	::AtikCamera	*_camera;
-	int	_tempSensorCount;
+	AtikCamera&	_camera;
+	bool	_lastIsOn;
+	float	_lastTemperature;
+	float	_lastSetTemperature;
 public:
-	AtikCooler(::AtikCamera*);
+	AtikCooler(AtikCamera&);
 	virtual ~AtikCooler();
 	virtual float	getSetTemperature();
 	virtual float	getActualTemperature();

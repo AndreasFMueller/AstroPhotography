@@ -11,91 +11,51 @@ namespace astro {
 namespace camera {
 namespace atik {
 
-AtikCooler::AtikCooler(::AtikCamera *camera)
+AtikCooler::AtikCooler(AtikCamera& camera)
 	: Cooler(coolername(camera)), _camera(camera) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "creating ATIK cooler");
-	struct AtikCapabilities	capa;
-	char	name[1024];
-	CAMERA_TYPE	type;
-	_camera->getCapabilities((const char **)&name, &type, &capa);
-	_tempSensorCount = capa.tempSensorCount;
 }
 
 AtikCooler::~AtikCooler() {
 	try {
-		_camera->initiateWarmUp();
+		_camera.initiateWarmUp();
 	} catch (...) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "cannot initiate WarmUp");
 	}
 }
 
 float	AtikCooler::getSetTemperature() {
-	COOLING_STATE	state;
-	float	targetTemp = 0;
-	float	power = 0;
-	_camera->getCoolingStatus(&state, &targetTemp, &power);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieve cooler temperature: %.1f, "
-		"power %.2f, state %d", targetTemp, power, state);
-	if ((state == COOLING_ON) || (state == COOLING_SETPOINT)) {
-		Cooler::setTemperature(targetTemp + 273.15);
+	try {
+		return _lastSetTemperature = _camera.getSetTemperature(*this);
+	} catch (...) {
+		return _lastSetTemperature;
 	}
-	return Cooler::getSetTemperature();
 }
 
 float	AtikCooler::getActualTemperature() {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieve current Temp (%d)",
-		_tempSensorCount);
-	if (_tempSensorCount != 0) {
-		float	currentTemp;
-		_camera->getTemperatureSensorStatus(1, &currentTemp);
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "current Temp: %.1f",
-			currentTemp);
-		return currentTemp + 273.15;
-	};
-	COOLING_STATE	state;
-	float	targetTemp = 0;
-	float	power = 0;
-	_camera->getCoolingStatus(&state, &targetTemp, &power);
-	switch (state) {
-	case COOLING_ON:
-	case COOLING_INACTIVE:
-	case WARMING_UP:
-		return 273.15 + 20;
-	case COOLING_SETPOINT:
-		return Cooler::getSetTemperature();
+	try {
+		return _lastTemperature = _camera.getActualTemperature(*this);
+	} catch (...) {
+		return _lastTemperature;
 	}
-	std::string	msg = stringprintf("unknown cooling state: %d",
-		state);
-	debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
-	throw std::runtime_error(msg);
 }
 
 void	AtikCooler::setTemperature(const float temperature) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "set temperature: %f", temperature);
-	Cooler::setTemperature(temperature);
-	if (isOn()) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "setCooling(%f)",
-			temperature - 273.15);
-		_camera->setCooling(temperature - 273.15);
-	}
+	_camera.setTemperature(temperature, *this);
+	_lastSetTemperature = temperature;
 }
 
 bool	AtikCooler::isOn() {
-	COOLING_STATE	state;
-	float	targetTemp = 0;
-	float	power = 0;
-	_camera->getCoolingStatus(&state, &targetTemp, &power);
-	return ((state == COOLING_ON) || (state == COOLING_SETPOINT));
+	try {
+		return _lastIsOn = _camera.isOn(*this);
+	} catch (...) {
+		return _lastIsOn;
+	}
 }
 
 void	AtikCooler::setOn(bool onoff) {
-	if (onoff) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "turn cooling on");
-		_camera->setCooling(Cooler::getSetTemperature() - 273.15);
-	} else {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "turn cooling off");
-		_camera->initiateWarmUp();
-	}
+	_camera.setOn(onoff, *this);
+	_lastIsOn = onoff;
 }
 
 } // namespace atik
