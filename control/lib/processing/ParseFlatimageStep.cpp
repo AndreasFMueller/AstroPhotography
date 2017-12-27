@@ -30,10 +30,13 @@ void	ProcessorParser::startFlatimage(const attr_t& attrs) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0,
 			"dark attribute found: %s, step %d",
 			darkname.c_str(), darkstep->id());
-		step->add_precursor(darkstep);
+		flat->dark(darkstep);
 	}
 	
 	startCommon(attrs);
+	if (flat->dark()) {
+		step->add_precursor(flat->dark());
+	}
 }
 
 } // namespace process

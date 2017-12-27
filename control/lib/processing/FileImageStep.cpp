@@ -15,6 +15,7 @@ namespace process {
  */
 FileImageStep::FileImageStep(const std::string& filename)
 	: _filename(filename) {
+	_exists = false;
 }
 
 /**
@@ -81,14 +82,18 @@ ProcessingStep::state	FileImageStep::do_work() {
 /**
  * \brief find out whether the file exists
  */
-bool	FileImageStep::exists() const {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "check existence of '%s'",
-		_filename.c_str());
+bool	FileImageStep::exists() {
+	if (_exists) {
+		return true;
+	}
+	//debug(LOG_DEBUG, DEBUG_LOG, 0, "check existence of '%s'",
+	//	_filename.c_str());
 	struct stat	sb;
 	int	rc = stat(_filename.c_str(), &sb);
 	if (rc < 0) {
 		return false;
 	}
+	_exists = true;
 	return true;
 }
 

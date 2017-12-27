@@ -15,6 +15,7 @@ namespace process {
  */
 StackingStep::StackingStep() {
 	_patchsize = 256;
+	_residual = 30;
 	_searchradius = 10;
 	_numberofstars = 20;
 	_notransform = false;
@@ -48,6 +49,7 @@ ProcessingStep::state	StackingStep::do_work() {
 
 	// set the parameters
 	stacker->patchsize(_patchsize);
+	stacker->residual(_residual);
 	stacker->searchradius(_searchradius);
 	stacker->numberofstars(_numberofstars);
 	stacker->notransform(_notransform);

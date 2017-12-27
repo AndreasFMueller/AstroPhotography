@@ -30,8 +30,11 @@ void	ProcessorParser::startHDR(const attr_t& attrs) {
                 debug(LOG_DEBUG, DEBUG_LOG, 0, "set radius to %f",
                         s->radius());
         }
+
+	startCommon(attrs);
+
         if (attrs.end() != (i = attrs.find("mask"))) {
-	std::string     maskname = i->second;
+		std::string     maskname = i->second;
 		ProcessingStepPtr       maskstep = _network->byname(maskname);
 		debug(LOG_DEBUG, DEBUG_LOG, 0,
 			"mask attribute found: %s, step %d",
@@ -39,8 +42,6 @@ void	ProcessorParser::startHDR(const attr_t& attrs) {
 		s->maskid(maskstep->id());
 		step->add_precursor(maskstep);
 	}
-
-	startCommon(attrs);
 }
 
 } // namespace process

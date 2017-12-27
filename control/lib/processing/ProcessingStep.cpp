@@ -351,6 +351,9 @@ std::string	ProcessingStep::statename(state s) {
 	throw std::runtime_error("internal error: unknown state");
 }
 
+/**
+ * \brief Find the state of the precursors
+ */
 ProcessingStep::state	ProcessingStep::precursorstate() const {
 	// if there is no precursor, then we can consider them all complete
 	if (_precursors.size() == 0) {
@@ -364,6 +367,9 @@ ProcessingStep::state	ProcessingStep::precursorstate() const {
 		state	newstatus = byid(*i)->status();
 		if (newstatus < minstate) {
 			minstate = newstatus;
+			if (minstate == ProcessingStep::idle) {
+				return minstate;
+			}
 		}
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0,
@@ -436,6 +442,8 @@ ProcessingStep::state	ProcessingStep::status() {
 		
 	// if we have no precursors, then our own style decides
 	if (0 == _precursors.size()) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "no precursors: status %s",
+			statename(_status).c_str());
 		return _status;
 	}
 
@@ -446,6 +454,7 @@ ProcessingStep::state	ProcessingStep::status() {
 				== byid(precursorid)->status();
 		}
 	)) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "some precursors failed: failed");
 		return ProcessingStep::failed;
 	}
 
@@ -458,17 +467,26 @@ ProcessingStep::state	ProcessingStep::status() {
 			"not all precursors of '%s' (%d) %s are complete",
 			_name.c_str(), _id,
 			demangle(typeid(*this).name()).c_str());
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "%s is idle",
+				_name.c_str());
 		return ProcessingStep::idle;
 	case complete:
 		debug(LOG_DEBUG, DEBUG_LOG, 0,
 			"precursors of '%s' (%d) %s are all complete",
 			_name.c_str(), _id,
 			demangle(typeid(*this).name()).c_str());
-		if (_status != complete)
+		if (_status != complete) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "%s needs work",
+				_name.c_str());
 			return ProcessingStep::needswork;
-		else
+		} else {
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "%s complete",
+				_name.c_str());
 			return ProcessingStep::complete;
+		}
 	case failed:
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "%s failed",
+			_name.c_str());
 		return ProcessingStep::failed;
 	}
 	throw std::runtime_error("cannot determine my status");

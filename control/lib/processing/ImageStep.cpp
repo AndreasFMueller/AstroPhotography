@@ -36,7 +36,7 @@ ImageSequence	ImageStep::precursorimages(std::vector<int> exclude) {
 				return;
 			}
 			// if the image is not excluded add it
-			if (exclude.end() == std::find(exclude.begin(),
+			if (exclude.end() != std::find(exclude.begin(),
 				exclude.end(), j->id())) {
 				debug(LOG_DEBUG, DEBUG_LOG, 0,
 					"precursor %d excluded", j->id());

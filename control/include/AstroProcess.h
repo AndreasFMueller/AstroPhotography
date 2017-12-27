@@ -359,7 +359,12 @@ public:
 class FileImageStep : public ImageStep {
 protected:
 	std::string	_filename;
-	bool	exists() const;
+public:
+	const std::string&	filename() const { return _filename; }
+	void	filename(const std::string& f) { _filename = f; }
+protected:
+	bool	_exists;
+	bool	exists();
 public:
 	FileImageStep(const std::string& filename);
 	~FileImageStep();
@@ -382,6 +387,7 @@ public:
 	WriteableFileImageStep(const std::string& filename);
 private:
 	virtual ProcessingStep::state	do_work();
+	ProcessingStep::state	_previousstate;
 	virtual ProcessingStep::state	status();
 	virtual std::string	what() const;
 	virtual ImagePtr	image();
@@ -460,6 +466,7 @@ class StackingStep : public ImageStep {
 	ProcessingStepPtr	_baseimage;
 	int	_numberofstars;
 	int	_patchsize;
+	double	_residual;
 	int	_searchradius;
 	bool	_notransform;
 	bool	_usetriangles;
@@ -471,6 +478,8 @@ public:
 	void	numberofstars(int n) { _numberofstars = n; }
 	int	patchsize() const { return _patchsize; }
 	void	patchsize(int p) { _patchsize = p; }
+	double	residual() const { return _residual; }
+	void	residual(double r) { _residual = r; }
 	int	searchradius() const { return _searchradius; }
 	void	searchradius(int s) { _searchradius = s; }
 	bool	notransform() const { return _notransform; }

@@ -120,7 +120,7 @@ Transform	Stacker::findtransform(const ConstImageAdapter<double>& base,
 		int	counter = 0;
 		auto ptr = residuals.begin();
 		while (ptr != residuals.end()) {
-			if (ptr->offset().abs() > 30) {
+			if (ptr->offset().abs() > residual()) {
 				ptr = residuals.erase(ptr);
 				counter++;
 			} else {

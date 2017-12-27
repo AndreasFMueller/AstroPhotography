@@ -47,14 +47,6 @@ void	ProcessorParser::startColor(const attr_t& attrs) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "set offsets to %.2f,%.2f,%.2f", 
 			sc.R, sc.G, sc.B);
 	}
-	if (attrs.end() != (i = attrs.find("image"))) {
-		std::string     imagename = i->second;
-		ProcessingStepPtr       imagestep = _network->byname(imagename);
-		debug(LOG_DEBUG, DEBUG_LOG, 0,
-			"dark attribute found: %s, step %d",
-			imagename.c_str(), imagestep->id());
-		step->add_precursor(imagestep);
-        }
 
 	startCommon(attrs);
 }

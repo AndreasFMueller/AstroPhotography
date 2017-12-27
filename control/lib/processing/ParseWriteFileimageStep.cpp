@@ -19,7 +19,7 @@ void	ProcessorParser::startWritefileimage(const attr_t& attrs) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "missing file attribute");
 		throw std::runtime_error("missing file attribute");
 	}
-	std::string	filename = fullname(i->second);
+	std::string	filename = i->second;
 
 	// create a new dark process
 	WriteableFileImageStep	*writeable
@@ -30,6 +30,15 @@ void	ProcessorParser::startWritefileimage(const attr_t& attrs) {
 	_stepstack.push(step);
 
 	startCommon(attrs);
+
+	if (filename.size() > 0) {
+		if (filename[0] != '/') {
+			std::string	f = fullname(filename);
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "new filename: %s",
+				f.c_str());
+			writeable->filename(f);
+		}
+	}
 }
 
 } // namespace process

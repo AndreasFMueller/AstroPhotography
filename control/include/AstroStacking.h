@@ -58,6 +58,11 @@ protected:
 public:
 	int	patchsize() const { return _patchsize; }
 	void	patchsize(int p) { _patchsize = p; }
+private:
+	double	_residual;
+public:
+	double	residual() const { return _residual; }
+	void	residual(double r) { _residual = r; }
 protected:
 	// number of stars th collect to build the triangle set
 	int	_numberofstars;
@@ -86,8 +91,10 @@ public:
 	static StackerPtr	get(ImagePtr baseimage);
 protected:
 	Stacker(ImagePtr baseimage)
-		: _baseimage(baseimage), _patchsize(256), _numberofstars(0),
-		  _searchradius(16), _notransform(true), _usetriangles(false) {
+		: _baseimage(baseimage),
+		  _patchsize(256), _residual(30),
+		  _numberofstars(0), _searchradius(16),
+		  _notransform(true), _usetriangles(false) {
 	}
 public:
 	virtual void	add(ImagePtr) = 0;

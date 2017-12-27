@@ -15,7 +15,8 @@ namespace process {
  */
 WriteableFileImageStep::WriteableFileImageStep(const std::string& filename)
 	: FileImageStep(filename) {
-	ProcessingStep::status(needswork);
+	_previousstate = idle;
+	ProcessingStep::status(idle);
 }
 
 /**
@@ -28,13 +29,15 @@ ProcessingStep::state	WriteableFileImageStep::status() {
 	std::unique_lock<std::recursive_mutex>	lock(_mutex);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "checking status %s", _filename.c_str());
 	if (precursors().size() != 1) {
-		return ProcessingStep::failed;
+		_previousstate = ProcessingStep::failed;
+		return _previousstate;
 	}
-#if 0
-	if (_status == ProcessingStep::working) {
-		return ProcessingStep::working;
+
+	// if the previous state is complete or failed, we don't need to
+	// check the state
+	if (_previousstate >= ProcessingStep::complete) {
+		return _previousstate;
 	}
-#endif
 
 	// now we know that there is exactly one precursor image
 	ProcessingStepPtr	precursor
@@ -51,21 +54,7 @@ ProcessingStep::state	WriteableFileImageStep::status() {
 				precursor->when(), when());
 			// the precursors are older than the file, so we
 			// don't need to evaluate the precursor
-#if 0
-			if (_image) {
-				debug(LOG_DEBUG, DEBUG_LOG, 0,
-					"%d %s complete",
-					id(), _filename.c_str());
-				return ProcessingStep::complete;
-			} else {
-				debug(LOG_DEBUG, DEBUG_LOG, 0,
-					"%d %s needs work (read file)",
-					id(), _filename.c_str());
-				return ProcessingStep::needswork;
-			}
-#else
-			return ProcessingStep::complete;
-#endif
+			_previousstate = ProcessingStep::complete;
 		} else {
 			debug(LOG_DEBUG, DEBUG_LOG, 0,
 				"precursor of %s is younger",
@@ -77,11 +66,11 @@ ProcessingStep::state	WriteableFileImageStep::status() {
 			case idle:
 			case needswork:
 			case working:
-				return idle;
+				_previousstate = idle;
 			case complete:
-				return needswork;
+				_previousstate = needswork;
 			case failed:
-				return failed;
+				_previousstate = failed;
 			}
 		}
 	} else {
@@ -100,26 +89,25 @@ ProcessingStep::state	WriteableFileImageStep::status() {
 				// what the precursor has is good enough, so
 				// we can work with that
 				debug(LOG_DEBUG, DEBUG_LOG, 0, "we need work");
-				return ProcessingStep::needswork;
+				_previousstate = ProcessingStep::needswork;
 			} else {
 				// what the precursor has is not good enough
 				// we have to make sure it is processed first
 				debug(LOG_DEBUG, DEBUG_LOG, 0, "wait for precursor");
-				return ProcessingStep::idle;
+				_previousstate = ProcessingStep::idle;
 			}
 			// we should never get to this point
 			break;
 		case ProcessingStep::complete:
 			debug(LOG_DEBUG, DEBUG_LOG, 0, "precursor is complete");
-			return ProcessingStep::needswork;
+			_previousstate = ProcessingStep::needswork;
 		case ProcessingStep::failed:
 			debug(LOG_DEBUG, DEBUG_LOG, 0, "precursor is failed");
-			return ProcessingStep::failed;
+			_previousstate = ProcessingStep::failed;
 		}
 	}
 
-	// we should never get to this point, so we return failed in this case
-	return failed;
+	return _previousstate;
 }
 
 /**
@@ -132,7 +120,8 @@ ProcessingStep::state	WriteableFileImageStep::do_work() {
 	// get the predecessor image (there may only be one)
 	if (precursors().size() != 1) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "wrong number of precursors");
-		return ProcessingStep::failed;
+		_previousstate = ProcessingStep::failed;
+		return _previousstate;
 	}
 
 	// now we know that there is exactly one precursor image
@@ -150,14 +139,16 @@ ProcessingStep::state	WriteableFileImageStep::do_work() {
 		if (precursor->when() < when()) {
 			debug(LOG_DEBUG, DEBUG_LOG, 0, "reading the file %s",
 				_filename.c_str());
-			return FileImageStep::do_work();
+			_previousstate = FileImageStep::do_work();
+			return _previousstate;
 		}
 	}
 
 	// if the current state of the precursor is not complete, we
 	// cannot use it 
 	if (ProcessingStep::complete != precursor->status()) {
-		return ProcessingStep::idle;
+		_previousstate = ProcessingStep::idle;
+		return _previousstate;
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "precursor found: %d", precursor->id());
 
@@ -178,7 +169,8 @@ ProcessingStep::state	WriteableFileImageStep::do_work() {
 	out.write(_image);
 
 	// return complete status
-	return ProcessingStep::complete;
+	_previousstate = ProcessingStep::complete;
+	return _previousstate;
 }
 
 /**

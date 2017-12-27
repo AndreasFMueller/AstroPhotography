@@ -29,8 +29,18 @@ void	ProcessorParser::startCommon(const attr_t& attrs) {
 	// check the base attribute
 	attr_t::const_iterator	i = attrs.find(std::string("base"));
 	if (i != attrs.end()) {
-		std::string	newbase = _basestack.top() + "/" + i->second;
-		_basestack.push(newbase);
+		std::string	component = i->second;
+		if (component.size() > 0) {
+			std::string	newbase;
+			if (component[0] == '/') {
+				newbase = component;
+			} else {
+				newbase = _basestack.top() + "/" + i->second;
+			}
+			_basestack.push(newbase);
+		} else {
+			_basestack.push(_basestack.top());
+		}
 	} else {
 		_basestack.push(_basestack.top());
 	}
@@ -44,19 +54,31 @@ void	ProcessorParser::startCommon(const attr_t& attrs) {
 	} else {
 		_namestack.push(generate_name());
 	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "name of this node: %s",
-		step->name().c_str());
+	step->name(_namestack.top());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "name of %d node: %s",
+		step->id(), step->name().c_str());
 
 	// remember the step in the network
 	ProcessingStep::remember(step);
 	_network->add(step);
+
+	// add precursor image if present
+	if (attrs.end() != (i = attrs.find("image"))) {
+		std::string     imagename = i->second;
+		ProcessingStepPtr       imagestep = _network->byname(imagename);
+		debug(LOG_DEBUG, DEBUG_LOG, 0,
+			"image attribute found: %s, step %d",
+			imagename.c_str(), imagestep->id());
+		step->add_precursor(imagestep);
+        }
 }
 
 /**
  * \brief common method to call when an element ends
  */
 void	ProcessorParser::endCommon() {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "endCommon() called");
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "endCommon() called, %d/%d on stack, %s",
+		_stepstack.size(), _namestack.size(), _namestack.top().c_str());
 
 	// get the step that was pushed on the stack with the start element
 	ProcessingStepPtr	step = _stepstack.top();
@@ -68,8 +90,11 @@ void	ProcessorParser::endCommon() {
 	// as a precursor to the top of stack
 	if (_stepstack.size() > 0) {
 		if (_stepstack.top()) {
-			debug(LOG_DEBUG, DEBUG_LOG, 0, "add precursor %d to %d",
-				step->id(), _stepstack.top()->id());
+			debug(LOG_DEBUG, DEBUG_LOG, 0,
+				"add precursor %s(%d) to %s(%d)",
+				step->name().c_str(), step->id(),
+				_stepstack.top()->name().c_str(),
+				_stepstack.top()->id());
 			_stepstack.top()->add_precursor(step);
 		}
 	}

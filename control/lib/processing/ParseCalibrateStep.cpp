@@ -27,7 +27,6 @@ void	ProcessorParser::startCalibrate(const attr_t& attrs) {
 	if (attrs.end() != i) {
 		std::string	darkname = i->second;
 		ProcessingStepPtr	dark = _network->bynameid(darkname);
-		cal->add_precursor(dark);
 		cal->dark(dark);
 	}
 
@@ -36,7 +35,6 @@ void	ProcessorParser::startCalibrate(const attr_t& attrs) {
 	if (attrs.end() != i) {
 		std::string	flatname = i->second;
 		ProcessingStepPtr	flat = _network->bynameid(flatname);
-		cal->add_precursor(flat);
 		cal->flat(flat);
 	}
 
@@ -66,6 +64,12 @@ void	ProcessorParser::startCalibrate(const attr_t& attrs) {
 	}
 
 	startCommon(attrs);
+	if (cal->dark()) {
+		step->add_precursor(cal->dark());
+	}
+	if (cal->flat()) {
+		step->add_precursor(cal->flat());
+	}
 }
 
 } // namespace process

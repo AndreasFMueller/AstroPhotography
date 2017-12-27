@@ -19,8 +19,10 @@ ProcessingStep::state	RescaleStep::do_work() {
 	switch (status()) {
 	case ProcessingStep::needswork:
 	case ProcessingStep::complete:
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "rescale is complete");
 		return ProcessingStep::complete;
 	default:
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "rescale is idle");
 		return ProcessingStep::idle;
 	}
 }

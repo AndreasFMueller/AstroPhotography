@@ -13,15 +13,12 @@ namespace process {
  * \brief start the stacking step
  */
 void	ProcessorParser::startStack(const attr_t& attrs) {
-	startCommon(attrs);
-
 	// create the stacking step
 	StackingStep	*ss = new StackingStep();
 	ProcessingStepPtr	sstep(ss);
 
 	// remember everyhwere
 	_stepstack.push(sstep);
-	ProcessingStep::remember(sstep);
 
 	// we need the baseimage attribute (don't confuse with the base
 	// attribute, which relates to the base directory)
@@ -52,6 +49,12 @@ void	ProcessorParser::startStack(const attr_t& attrs) {
 			patchsize);
 		ss->patchsize(patchsize);
 	}
+	if (attrs.end() != (i = attrs.find("residual"))) {
+		double	residual= std::stoi(i->second);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "set residual to %f",
+			residual);
+		ss->residual(residual);
+	}
 	if (attrs.end() != (i = attrs.find("numberofstars"))) {
 		int	numberofstars= std::stoi(i->second);
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "set number of stars to %d",
@@ -75,7 +78,11 @@ void	ProcessorParser::startStack(const attr_t& attrs) {
 		}
 	}
 
-	// done
+	startCommon(attrs);
+
+	if (ss->baseimage()) {
+		sstep->add_precursor(ss->baseimage());
+	}
 }
 
 } // namespace process
