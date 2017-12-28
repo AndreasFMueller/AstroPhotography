@@ -11,6 +11,7 @@
 #include <AstroFormat.h>
 #include <AstroAdapter.h>
 #include <set>
+#include <vector>
 
 namespace astro {
 namespace image {
@@ -627,6 +628,22 @@ public:
 		int numberofstars, int searchradius);
 	Transform	transform(const ConstImageAdapter<double>& image) const;
 	Transform	transform(ImagePtr image) const;
+};
+
+/**
+ * \brief 
+ */
+class VectorField : public std::vector<std::pair<ImagePoint, Point> > {
+public:
+	typedef std::vector<std::pair<ImagePoint, Point> >	fielddata_t;
+	VectorField() { }
+	VectorField(const fielddata_t&);
+	VectorField(const std::vector<Residual>&);
+	int	verify(unsigned int i, double tolerance);
+	int	verify(double tolerance);
+	fielddata_t	badpoints(double tolerance);
+	double	eliminate(int count);
+	void	eliminate(double tolerance, std::vector<Residual>& residuals);
 };
 
 } // namespace transform

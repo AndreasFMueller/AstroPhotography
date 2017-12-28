@@ -123,6 +123,7 @@ libastroimage_la_SOURCES = 						\
 	TriangleSetFactory.cpp						\
 	UnsharpMask.cpp							\
 	VanCittertOperator.cpp						\
+	VectorField.cpp							\
 	Viewer.cpp							\
 	ViewerPipeline.cpp						\
 	WeightingAdapter.cpp

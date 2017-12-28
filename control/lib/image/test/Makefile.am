@@ -19,7 +19,7 @@ noinst_PROGRAMS = tests singletest
 
 # single test
 singletest_SOURCES = singletest.cpp \
-	MedianRadiusAdapterTest.cpp					
+	VectorFieldTest.cpp					
 #	DebayerTest.cpp
 #	FWHMTest.cpp
 #	EuclideanDisplacementTest.cpp
@@ -74,7 +74,8 @@ tests_SOURCES = tests.cpp 						\
 	RadonTest.cpp							\
 	TransformTest.cpp						\
 	TranslationTest.cpp						\
-	WindowAdapterTest.cpp
+	WindowAdapterTest.cpp						\
+	VectorFieldTest.cpp
 
 tests_LDADD = $(test_ldadd)
 tests_DEPENDENCIES = $(test_dependencies)

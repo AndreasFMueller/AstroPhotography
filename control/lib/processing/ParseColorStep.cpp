@@ -25,9 +25,9 @@ void	ProcessorParser::startColor(const attr_t& attrs) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "set gain to %f",
 			s->gain());
 	}
-	if (attrs.end() != (i = attrs.find("base"))) {
+	if (attrs.end() != (i = attrs.find("brightness"))) {
 		s->base(std::stod(i->second));
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "set base to %f",
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "set brightness to %f",
 			s->base());
 	}
 	if (attrs.end() != (i = attrs.find("limit"))) {

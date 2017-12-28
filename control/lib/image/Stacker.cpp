@@ -130,6 +130,17 @@ Transform	Stacker::findtransform(const ConstImageAdapter<double>& base,
 		debug(LOG_DEBUG, DEBUG_LOG, 0,
 			"excluded %d residuals too large", counter);
 
+		// eliminate the 10% worst points
+		VectorField	vf(residuals);
+		int	part = 0.1 * vf.size();
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "%d residuals, eliminate %d",
+			vf.size(), part);
+		double	tolerance = vf.eliminate(part);
+		debug(LOG_DEBUG, DEBUG_LOG, 0,
+			"eliminating %d from %d residuals with tol=%f",
+			part, vf.size(), tolerance);
+		vf.eliminate(tolerance, residuals);
+
 		// display the residuals that we still want to process
 		if (debuglevel >= LOG_DEBUG) {
 			int	i = 0;
