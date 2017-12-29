@@ -20,7 +20,7 @@ void	ProcessorParser::startHDR(const attr_t& attrs) {
 
 	// parse attributes
 	attr_t::const_iterator  i;
-        if (attrs.end() != (i = attrs.find("deemphasize"))) {
+        if (attrs.end() != (i = attrs.find("deemphasis"))) {
                 s->degree(std::stod(i->second));
                 debug(LOG_DEBUG, DEBUG_LOG, 0, "set deemphasize to %f",
                         s->degree());

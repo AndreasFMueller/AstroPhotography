@@ -8,6 +8,7 @@
 #include <AstroFilter.h>
 #include <AstroAdapter.h>
 #include <AstroConvolve.h>
+#include <AstroIO.h>
 
 namespace astro {
 namespace image {
@@ -64,10 +65,10 @@ ImagePtr	HDR::operator()(ImagePtr image) const {
 	Image<double>	*blurredmask
 		= dynamic_cast<Image<double>*>(&*blurredmaskptr);
 
-#if 0
+#if 1
 	io::FITSout	blurredout("blurredout.fits");
 	blurredout.setPrecious(false);
-	blurredout.write(ImagePtr(tgimage));
+	blurredout.write(blurredmaskptr);
 #endif
 
 	// process the image file
@@ -76,6 +77,7 @@ ImagePtr	HDR::operator()(ImagePtr image) const {
 		demangle(image->pixel_type().name()).c_str());
 
 	// hdr masking of image
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "deemphasize by %f", degree());
 	ImagePtr	outimage = adapter::deemphasize(image, *blurredmask,
 		degree());
 	return outimage;

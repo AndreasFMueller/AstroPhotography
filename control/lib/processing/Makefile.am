@@ -27,6 +27,7 @@ libastroprocessing_la_SOURCES =						\
 	HDRStep.cpp							\
 	ParseCalibrateStep.cpp						\
 	ParseColorStep.cpp						\
+	ParseColorclampStep.cpp						\
 	ParseDarkimageStep.cpp						\
 	ParseDestarStep.cpp						\
 	ParseFileimageStep.cpp						\

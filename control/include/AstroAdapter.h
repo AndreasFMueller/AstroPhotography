@@ -2616,7 +2616,9 @@ public:
 		  _deemph(deemph), _degree(degree) {
 	}
 	virtual T       pixel(int x, int y) const {
-		double	f = 1 / (_degree * _deemph.pixel(x, y) + 1.);
+		double	v = _deemph.pixel(x, y);
+		if (v < 0) { v = 0; }
+		double	f = 1 / (_degree * v + 1.);
 		return _image.pixel(x, y) * f;
 	}
 };

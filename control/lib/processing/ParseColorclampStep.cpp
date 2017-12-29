@@ -18,6 +18,19 @@ void	ProcessorParser::startColorclamp(const attr_t& attrs) {
 	// remember everyhwere
 	_stepstack.push(step);
 
+	// parse the Colorclamp attributes
+	attr_t::const_iterator  i;
+	if (attrs.end() != (i = attrs.find("minimum"))) {
+		s->minimum(std::stod(i->second));
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "set minimum to %f",
+			s->minimum());
+	}
+	if (attrs.end() != (i = attrs.find("maximum"))) {
+		s->maximum(std::stod(i->second));
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "set maximum to %f",
+			s->maximum());
+	}
+
 	startCommon(attrs);
 }
 

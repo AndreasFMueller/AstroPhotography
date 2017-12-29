@@ -889,10 +889,20 @@ public:
  * \brief Color clampoing step
  */
 class ColorclampStep : public ImageStep {
+	double	_minimum;
+public:
+	double	minimum() const { return _minimum; }
+	void	minimum(double m) { _minimum = m; }
+private:
+	double	_maximum;
+public:
+	double	maximum() const { return _maximum; }
+	void	maximum(double m) { _maximum = m; }
 public:
 	ColorclampStep();
 	virtual ProcessingStep::state	do_work();
 	virtual std::string	what() const;
+	virtual ImagePtr	image();
 };
 
 /**

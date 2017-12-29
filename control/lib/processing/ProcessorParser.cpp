@@ -67,6 +67,10 @@ void	ProcessorParser::startElement(const std::string& name,
 		startColor(attrs);
 		return;
 	}
+	if (name == std::string("colorclamp")) {
+		startColorclamp(attrs);
+		return;
+	}
 	if (name == std::string("destar")) {
 		startDestar(attrs);
 		return;
