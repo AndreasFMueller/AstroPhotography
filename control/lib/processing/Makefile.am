@@ -21,7 +21,6 @@ libastroprocessing_la_SOURCES =						\
 	FlatImageStep.cpp						\
 	ImageBufferStep.cpp						\
 	ImageCalibrationStep.cpp					\
-	ImageProcessing.cpp						\
 	ImageStep.cpp							\
 	InterpolationStep.cpp						\
 	HDRStep.cpp							\
@@ -38,17 +37,14 @@ libastroprocessing_la_SOURCES =						\
 	ParseWriteFileimageStep.cpp					\
 	ParserSteps.cpp							\
 	PreviewAdapter.cpp						\
-	ProcessingController.cpp					\
 	ProcessingStatic.cpp						\
 	ProcessingStep.cpp						\
 	ProcessingThread.cpp						\
 	ProcessorFactory.cpp						\
 	ProcessorNetwork.cpp						\
 	ProcessorParser.cpp						\
-	RawImageFileStep.cpp						\
 	RescaleStep.cpp							\
 	StackingStep.cpp						\
-	WriteImageStep.cpp						\
 	WriteableFileImageStep.cpp
 
 libastroprocessing_la_CPPFLAGS = -DPKGLIBDIR=\"$(pkglibdir)\" \

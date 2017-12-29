@@ -49,13 +49,6 @@ time_t	FileImageStep::when() const {
  * \brief determine the status of the step
  */
 ProcessingStep::state	FileImageStep::status() {
-#if 0
-	// if we are presently working, return the working state
-	if (_status == ProcessingStep::working) {
-		return _status;
-	}
-#endif
-
 	// check the file
 	if (!exists()) {
 		return ProcessingStep::failed;
