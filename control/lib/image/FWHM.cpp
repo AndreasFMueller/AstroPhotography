@@ -107,28 +107,6 @@ size_t	growComponent(Image<unsigned char>& component, unsigned char label) {
 				counter++;
 				continue;
 			}
-#if 0
-			if ((x > 0) && (y > 0) && (component.pixel(x - 1, y - 1) == label)) {
-				component.pixel(x, y) = label;
-				counter++;
-				continue;
-			}
-			if ((x < w) && (y > 0) && (component.pixel(x + 1, y - 1) == label)) {
-				component.pixel(x, y) = label;
-				counter++;
-				continue;
-			}
-			if ((x > 0) && (y < h) && (component.pixel(x - 1, y + 1) == label)) {
-				component.pixel(x, y) = label;
-				counter++;
-				continue;
-			}
-			if ((x < w) && (y < h) && (component.pixel(x + 1, y + 1) == label)) {
-				component.pixel(x, y) = label;
-				counter++;
-				continue;
-			}
-#endif
 		}
 	}
 	//debug(LOG_DEBUG, DEBUG_LOG, 0, "component %d grown by %d pixels",
