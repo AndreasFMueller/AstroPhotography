@@ -12,6 +12,7 @@
 #include <AstroAdapter.h>
 #include <AstroUtils.h>
 #include <AstroPostprocessing.h>
+#include <AstroTonemapping.h>
 #include <thread>
 #include <mutex>
 
@@ -489,6 +490,20 @@ public:
 	void	radius(double r) { _radius = r; }
 public:
 	DestarStep();
+	virtual ProcessingStep::state	do_work();
+	virtual std::string	what() const;
+};
+
+/**
+ * \brief Step to stretch the luminance using a suitable stretching function
+ */
+class LuminanceStretchingStep : public ImageStep {
+	adapter::LuminanceFactorPtr	_factor;
+public:
+	adapter::LuminanceFactorPtr	factor() const { return _factor; }
+	void	factor(adapter::LuminanceFactorPtr f) { _factor = f; }
+public:
+	LuminanceStretchingStep();
 	virtual ProcessingStep::state	do_work();
 	virtual std::string	what() const;
 };

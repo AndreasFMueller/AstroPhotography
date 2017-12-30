@@ -323,6 +323,120 @@ std::string	QuadraticFunction::toString() const {
 } 
 
 //////////////////////////////////////////////////////////////////////
+// Degree4Functions
+//////////////////////////////////////////////////////////////////////
+/**
+ * \brief 
+ */
+Degree4Function::Degree4Function(const ImagePoint& center,
+	bool symmetric) : QuadraticFunction(center, symmetric) {
+	m = 0;
+}
+
+Degree4Function::Degree4Function(const LinearFunction& lin)
+	: QuadraticFunction(lin) {
+	m = 0;
+}
+
+Degree4Function::Degree4Function(const QuadraticFunction& q)
+	: QuadraticFunction(q) {
+	m = 0;
+}
+
+double	Degree4Function::evaluate(const Point& point) const {
+	double	value = QuadraticFunction::evaluate(point);
+	double	deltax = point.x() - center().x();
+	double	deltay = point.y() - center().y();
+	value += m * sqr(sqr(deltax) + sqr(deltay));
+	return value;
+}
+
+double	Degree4Function::operator[](int i) const {
+	if (i < 6) {
+		return QuadraticFunction::operator[](i);
+	}
+	if (i > 6) {
+		std::runtime_error("index out of range");
+	}
+	return m;
+}
+
+double	Degree4Function::norm() const {
+	double	s = sqr(QuadraticFunction::norm());
+	s += sqr(m);
+	return sqrt(s);
+}
+
+void	Degree4Function::reduce(const std::vector<FunctionBase::doublevaluepair>& /* values */) {
+	throw std::runtime_error("Degree4Function::reduce not implemented");
+}
+
+double&	Degree4Function::operator[](int i) {
+	if (i < 6) {
+		return QuadraticFunction::operator[](i);
+	}
+	if (i > 6) {
+		std::runtime_error("index out of range");
+	}
+	return m;
+}
+
+Degree4Function	Degree4Function::operator+(
+	const Degree4Function& other) {
+	Degree4Function	result(center(),
+					symmetric() || other.symmetric());
+	for (unsigned int i = 0; i < 7; i++) {
+		result[i] += (*this)[i] + other[i];
+	}
+	return result;
+}
+
+Degree4Function	Degree4Function::operator+(
+	const QuadraticFunction& other) {
+	Degree4Function	result(center(),
+					symmetric() || other.symmetric());
+	for (unsigned int i = 0; i < 6; i++) {
+		result[i] += (*this)[i] + other[i];
+	}
+	result[6] = m;
+	return result;
+}
+
+Degree4Function	Degree4Function::operator+(
+	const LinearFunction& other) {
+	Degree4Function	result(center(),
+					symmetric() || other.symmetric());
+	for (unsigned int i = 0; i < 3; i++) {
+		result[i] += (*this)[i] + other[i];
+	}
+	for (unsigned int i = 3; i < 7; i++) {
+		result[i] += (*this)[i];
+	}
+	return result;
+}
+
+Degree4Function&	Degree4Function::operator=(
+	const Degree4Function& other) {
+	QuadraticFunction::operator=(other);
+	m = other.m;
+	return *this;
+}
+
+Degree4Function&	Degree4Function::operator=(
+	const LinearFunction& other) {
+	LinearFunction::operator=(other);
+	for (unsigned int i = 3; i < 7; i++) {
+		(*this)[i] = 0;
+	}
+	return *this;
+}
+
+std::string	Degree4Function::toString() const {
+	return QuadraticFunction::toString() + stringprintf("[%.6g]", m);
+} 
+
+
+//////////////////////////////////////////////////////////////////////
 // arithmetic operators for FunctionPtr
 //////////////////////////////////////////////////////////////////////
 FunctionPtr	operator+(const FunctionPtr& a, const FunctionPtr& b) {
@@ -330,23 +444,54 @@ FunctionPtr	operator+(const FunctionPtr& a, const FunctionPtr& b) {
 	LinearFunction	*lb = dynamic_cast<LinearFunction*>(&*b);
 	QuadraticFunction	*qa = dynamic_cast<QuadraticFunction*>(&*a);
 	QuadraticFunction	*qb = dynamic_cast<QuadraticFunction*>(&*b);
-	if (qa == NULL) {
-		if (qb == NULL) {
-			debug(LOG_DEBUG, DEBUG_LOG, 0, "linear + linear");
-			return FunctionPtr(new LinearFunction(*la + *lb));
-		} else {
+	Degree4Function	*da = dynamic_cast<Degree4Function*>(&*a);
+	Degree4Function	*db = dynamic_cast<Degree4Function*>(&*b);
+	if (da != NULL) {
+		if (db != NULL) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "degree4 + degree4");
+			return FunctionPtr(new Degree4Function(*da + *db));
+		}
+		if (qb != NULL) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "degree4 + quadratic");
+			Degree4Function	d(*qb);
+			return FunctionPtr(new Degree4Function(*da + d));
+		}
+		if (lb != NULL) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "degree4 + linear");
+			Degree4Function	d(*lb);
+			return FunctionPtr(new Degree4Function(*da + d));
+		}
+	}
+	if (qa != NULL) {
+		if (db != NULL) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "quadratic + degree4");
+			Degree4Function	d(*qa);
+			return FunctionPtr(new Degree4Function(d + *db));
+		}
+		if (qb != NULL) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "quadratic + quadratic");
+			return FunctionPtr(new QuadraticFunction(*qa + *qb));
+		}
+		if (lb != NULL) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "quadratic + linear");
+			QuadraticFunction	q(*lb);
+			return FunctionPtr(new QuadraticFunction(*qa + q));
+		}
+	}
+	if (la != NULL) {
+		if (db != NULL) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "linear + degree4");
+			Degree4Function	d(*la);
+			return FunctionPtr(new Degree4Function(d + *db));
+		}
+		if (qb != NULL) {
 			debug(LOG_DEBUG, DEBUG_LOG, 0, "linear + quadratic");
 			QuadraticFunction	q(*la);
 			return FunctionPtr(new QuadraticFunction(q + *qb));
 		}
-	} else {
-		if (qb == NULL) {
-			debug(LOG_DEBUG, DEBUG_LOG, 0, "quadratic + linear");
-			QuadraticFunction	q(*lb);
-			return FunctionPtr(new QuadraticFunction(*qa + q));
-		} else {
-			debug(LOG_DEBUG, DEBUG_LOG, 0, "quadratic + quadratic");
-			return FunctionPtr(new QuadraticFunction(*qa + *qb));
+		if (lb != NULL) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "linear + linear");
+			return FunctionPtr(new LinearFunction(*la + *lb));
 		}
 	}
 }

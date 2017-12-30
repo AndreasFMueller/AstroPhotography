@@ -8,7 +8,11 @@ SUBDIRS = . test
 noinst_HEADERS =							\
 	LevelExtractor.h						\
 	Miniball.hpp							\
-	TransformBuilder.h
+	TransformBuilder.h						\
+	LowerBoundDegree4Function.h					\
+	LowerBoundLinearFunction.h					\
+	LowerBoundQuadraticFunction.h
+
 noinst_LTLIBRARIES = libastroimage.la
 
 libastroimage_la_SOURCES = 						\
@@ -84,8 +88,10 @@ libastroimage_la_SOURCES = 						\
 	Layer.cpp							\
 	LevelExtractor.cpp						\
 	LevelMaskExtractor.cpp						\
+	LinearLogLuminanceFactor.cpp					\
 	LogImage.cpp							\
 	Luminance.cpp							\
+	LuminanceStretchingAdapter.cpp					\
 	Masks.cpp							\
 	Maxima.cpp							\
 	Metavalue.cpp							\

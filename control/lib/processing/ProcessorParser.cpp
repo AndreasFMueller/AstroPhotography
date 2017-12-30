@@ -79,6 +79,10 @@ void	ProcessorParser::startElement(const std::string& name,
 		startHDR(attrs);
 		return;
 	}
+	if (name == std::string("luminancestretching")) {
+		startLuminanceStretching(attrs);
+		return;
+	}
 	std::string	msg = stringprintf("don't know how to handle <%s>",
 		name.c_str());
 	throw std::runtime_error(msg);

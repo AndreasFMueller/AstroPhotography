@@ -248,6 +248,33 @@ public:
 };
 
 /**
+ * \brief Degree4 background function
+ *
+ * A quadratic function is a linear function that also has some quadratic
+ * terms. 
+ */
+class Degree4Function : public QuadraticFunction {
+	double	m;
+protected:
+	virtual void	reduce(const std::vector<doublevaluepair>& values);
+public:
+	Degree4Function(const ImagePoint& center, bool symmetric);
+	Degree4Function(const LinearFunction& linear);
+	Degree4Function(const QuadraticFunction& linear);
+	virtual double	evaluate(const Point& point) const;
+	virtual double	operator[](int i) const;
+	virtual double&	operator[](int i);
+	virtual double	norm() const;
+	Degree4Function	operator+(const Degree4Function& other);
+	Degree4Function	operator+(const QuadraticFunction& other);
+	Degree4Function	operator+(const LinearFunction& other);
+	Degree4Function&	operator=(const Degree4Function& other);
+	Degree4Function&	operator=(const LinearFunction& other);
+	virtual std::string	toString() const;
+	typedef function_tag<Degree4Function>	function_category;
+};
+
+/**
  * \brief
  */
 template<typename Pixel, typename FunctionType>
@@ -470,7 +497,7 @@ public:
 class BackgroundExtractor {
 	unsigned int	alpha;
 public:
-	typedef enum { CONSTANT, LINEAR, QUADRATIC } functiontype;
+	typedef enum { CONSTANT, LINEAR, QUADRATIC, DEGREE4 } functiontype;
 	BackgroundExtractor(unsigned int _alpha) : alpha(_alpha) { }
 	Background<float>	operator()(const ImagePoint& center,
 				bool symmetric, functiontype f,

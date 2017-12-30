@@ -31,6 +31,8 @@ static void	usage(const char *progname) {
 		<< std::endl;
 	std::cout << "  -h,--help               display this help message"
 		 << std::endl;
+	std::cout << "  -D,--degree=<d>         degree of the polynomial, valid values " << std::endl;
+	std::cout << "                          are 0, 1, 2 or 4" << std::endl;
 	std::cout << "  -o,--outfile=<file>     write corrected image to the "
 		"FITS file named <file>" << std::endl;
 }
@@ -38,6 +40,7 @@ static void	usage(const char *progname) {
 static struct option	longopts[] = {
 { "alpha",	required_argument,	NULL,		'a' }, /* 0 */
 { "debug",	no_argument,		NULL,		'd' }, /* 1 */
+{ "degree",	required_argument,	NULL,		'D' }, /* 4 */
 { "force",	no_argument,		NULL,		'f' }, /* 2 */
 { "help",	no_argument,		NULL,		'h' }, /* 3 */
 { "outfile",	required_argument,	NULL,		'o' }, /* 4 */
@@ -50,6 +53,8 @@ int	main(int argc, char *argv[]) {
 	std::string	outfilename;
 	bool	force = false;
 	float	alpha = 0.001;
+	BackgroundExtractor::functiontype	type
+		= BackgroundExtractor::QUADRATIC;
 	while (EOF != (c = getopt_long(argc, argv, "a:dfho:", longopts,
                 &longindex)))
                 switch (c) {
@@ -58,6 +63,22 @@ int	main(int argc, char *argv[]) {
 			break;
 		case 'd':
 			debuglevel = LOG_DEBUG;
+			break;
+		case 'D':
+			switch (std::stoi(optarg)) {
+			case 0:
+				type = BackgroundExtractor::CONSTANT;
+				break;
+			case 1:
+				type = BackgroundExtractor::LINEAR;
+				break;
+			case 2:
+				type = BackgroundExtractor::QUADRATIC;
+				break;
+			case 4:
+				type = BackgroundExtractor::DEGREE4;
+				break;
+			}
 			break;
 		case 'f':
 			force = true;
@@ -97,7 +118,7 @@ int	main(int argc, char *argv[]) {
 
 		// get the background
 		Background<float>	bg = extractor(image->center(), true,
-					BackgroundExtractor::QUADRATIC, from);
+						type, from);
 
 		// subtract the background
 		BackgroundFunctionAdapter	bfa(from, bg.G());
@@ -112,7 +133,7 @@ int	main(int argc, char *argv[]) {
 
 		// get the background
 		Background<float>	bg = extractor(image->center(), true,
-					BackgroundExtractor::QUADRATIC, from);
+						type, from);
 
 		// subtract the background
 		BackgroundSubtractionAdapter	bsa(from, bg);

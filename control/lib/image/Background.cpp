@@ -178,6 +178,7 @@ public:
 	}
 };
 
+#if 0
 /**
  * \brief problem for symmetric linear functions
  *
@@ -271,7 +272,11 @@ FunctionPtr	LowerBound<LinearFunction>::asymmetricfunction(
 		lb->toString().c_str());
 	return FunctionPtr(lb);
 }
+#else
+#include <LowerBoundLinearFunction.h>
+#endif
 
+#if 0
 /**
  * \brief Optimization problem for symmetric quadratic functions
  */
@@ -423,6 +428,11 @@ FunctionPtr	LowerBound<QuadraticFunction>::asymmetricfunction(
 		q->toString().c_str());
 	return FunctionPtr(q);
 }
+#else
+#include <LowerBoundQuadraticFunction.h>
+#endif
+
+#include <LowerBoundDegree4Function.h>
 
 //////////////////////////////////////////////////////////////////////
 // MinimumEstimator implementation
@@ -540,6 +550,9 @@ Background<float> BackgroundExtractor::operator()(const ImagePoint& center,
 	case QUADRATIC:
 		return getBackground(center, symmetric, alpha, image,
 			function_tag<QuadraticFunction>());
+	case DEGREE4:
+		return getBackground(center, symmetric, alpha, image,
+			function_tag<Degree4Function>());
 	}
 	throw std::runtime_error("unknown function type");
 }
@@ -557,6 +570,9 @@ Background<float> BackgroundExtractor::operator()(const ImagePoint& center,
 	case QUADRATIC:
 		return getBackground(center, symmetric, alpha, image,
 			function_tag<QuadraticFunction>());
+	case DEGREE4:
+		return getBackground(center, symmetric, alpha, image,
+			function_tag<Degree4Function>());
 	}
 	throw std::runtime_error("unknown function type");
 }

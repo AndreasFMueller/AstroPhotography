@@ -315,6 +315,60 @@ unsigned int	RGB32Adapter<Pixel>::pixel(int x, int y) const {
 	return reduce(_image.pixel(x, y));
 }
 
+/**
+ * \brief Default Luminance Factor
+ *
+ * This factor always returns 1 so it does not change the image
+ */
+class LuminanceFactor {
+public:
+	virtual double	operator()(double /* d */) { return 1; }
+};
+typedef std::shared_ptr<LuminanceFactor>	LuminanceFactorPtr;
+
+/**
+ * \brief Class to apply an arbitrary luminance mapping
+ */
+template<typename Pixel>
+class LuminanceStretchingAdapter : public ConstImageAdapter<Pixel> {
+	const ConstImageAdapter<Pixel>&	_image;
+	LuminanceAdapter<Pixel, double>	_luminance;
+	LuminanceFactor&	_factor;
+public:
+	LuminanceStretchingAdapter(const ConstImageAdapter<Pixel>& image,
+		LuminanceFactor& factor)
+		: ConstImageAdapter<Pixel>(image.getSize()), _image(image),
+		  _luminance(image), _factor(factor) {
+	}
+	virtual Pixel	pixel(int x, int y) const {
+		Pixel	v = _image.pixel(x, y);
+		double	l = _luminance.pixel(x, y);
+		if (l < 0) {
+			return Pixel(0);
+		}
+		return v * _factor(l);
+	}
+};
+
+class LinearLogLuminanceFactor : public LuminanceFactor {
+	double	_crossover;
+	double	_top;
+	double	_maximum;
+	double	_s;
+public:
+	LinearLogLuminanceFactor(double crossover, double top, double maximum);
+	virtual double	operator()(double d);
+};
+
+template<typename Pixel>
+Image<Pixel>	*luminancestretching(const Image<Pixel>& image,
+			LuminanceFactor& factor) {
+	LuminanceStretchingAdapter<Pixel>	lsa(image, factor);
+	return new Image<Pixel>(lsa);
+}
+
+ImagePtr	luminancestretching(ImagePtr image, LuminanceFactor& factor);
+
 } // namespace adapter
 } // namespace astro
 
