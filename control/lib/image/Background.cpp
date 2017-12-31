@@ -432,7 +432,7 @@ FunctionPtr	LowerBound<QuadraticFunction>::asymmetricfunction(
 #include <LowerBoundQuadraticFunction.h>
 #endif
 
-#include <LowerBoundDegree4Function.h>
+#include <LowerBoundDegreeNFunction.h>
 
 //////////////////////////////////////////////////////////////////////
 // MinimumEstimator implementation
@@ -552,7 +552,7 @@ Background<float> BackgroundExtractor::operator()(const ImagePoint& center,
 			function_tag<QuadraticFunction>());
 	case DEGREE4:
 		return getBackground(center, symmetric, alpha, image,
-			function_tag<Degree4Function>());
+			function_tag<DegreeNFunction>());
 	}
 	throw std::runtime_error("unknown function type");
 }
@@ -572,7 +572,7 @@ Background<float> BackgroundExtractor::operator()(const ImagePoint& center,
 			function_tag<QuadraticFunction>());
 	case DEGREE4:
 		return getBackground(center, symmetric, alpha, image,
-			function_tag<Degree4Function>());
+			function_tag<DegreeNFunction>());
 	}
 	throw std::runtime_error("unknown function type");
 }

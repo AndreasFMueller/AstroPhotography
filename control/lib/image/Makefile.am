@@ -9,7 +9,7 @@ noinst_HEADERS =							\
 	LevelExtractor.h						\
 	Miniball.hpp							\
 	TransformBuilder.h						\
-	LowerBoundDegree4Function.h					\
+	LowerBoundDegreeNFunction.h					\
 	LowerBoundLinearFunction.h					\
 	LowerBoundQuadraticFunction.h
 

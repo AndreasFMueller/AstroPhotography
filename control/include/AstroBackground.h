@@ -248,30 +248,35 @@ public:
 };
 
 /**
- * \brief Degree4 background function
+ * \brief DegreeN background function
  *
  * A quadratic function is a linear function that also has some quadratic
  * terms. 
  */
-class Degree4Function : public QuadraticFunction {
-	double	m;
+class DegreeNFunction : public QuadraticFunction {
+	double	*m;
+	int	_n;
+public:
+	int	n() const { return _n; }
 protected:
 	virtual void	reduce(const std::vector<doublevaluepair>& values);
 public:
-	Degree4Function(const ImagePoint& center, bool symmetric);
-	Degree4Function(const LinearFunction& linear);
-	Degree4Function(const QuadraticFunction& linear);
+	DegreeNFunction(const DegreeNFunction& other);
+	DegreeNFunction(const ImagePoint& center, bool symmetric, int n = 1);
+	DegreeNFunction(const LinearFunction& linear, int n = 1);
+	DegreeNFunction(const QuadraticFunction& linear, int n = 1);
+	virtual ~DegreeNFunction();
 	virtual double	evaluate(const Point& point) const;
 	virtual double	operator[](int i) const;
 	virtual double&	operator[](int i);
 	virtual double	norm() const;
-	Degree4Function	operator+(const Degree4Function& other);
-	Degree4Function	operator+(const QuadraticFunction& other);
-	Degree4Function	operator+(const LinearFunction& other);
-	Degree4Function&	operator=(const Degree4Function& other);
-	Degree4Function&	operator=(const LinearFunction& other);
+	DegreeNFunction	operator+(const DegreeNFunction& other);
+	DegreeNFunction	operator+(const QuadraticFunction& other);
+	DegreeNFunction	operator+(const LinearFunction& other);
+	DegreeNFunction&	operator=(const DegreeNFunction& other);
+	DegreeNFunction&	operator=(const LinearFunction& other);
 	virtual std::string	toString() const;
-	typedef function_tag<Degree4Function>	function_category;
+	typedef function_tag<DegreeNFunction>	function_category;
 };
 
 /**
