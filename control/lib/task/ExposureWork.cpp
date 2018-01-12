@@ -309,7 +309,12 @@ ExposureWork::~ExposureWork() {
 	// XXX we should make this configurable, but for the time being
 	// XXX we disable it, the cooler can still be turned off manually
 	if (cooler) {
-		cooler->setOn(false);
+		try {
+			cooler->setOn(false);
+		} catch (const std::exception& x) {
+			debug(LOG_ERR, DEBUG_LOG, 0,
+				"cannot turn off the cooler, giving up");
+		}
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "ExposureWork destroyed");
 }
