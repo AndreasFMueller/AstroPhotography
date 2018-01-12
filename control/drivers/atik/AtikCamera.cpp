@@ -286,7 +286,8 @@ void	AtikCamera::setTemperature(const float temperature, AtikCooler& cooler) {
 	if (lock.try_lock()) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "locked");
 	} else {
-		std::string	msg("cannot lock in setTemperature()");
+		std::string	msg = stringprintf("cannot lock in "
+			"setTemperature(%f)", temperature);
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 		throw std::runtime_error(msg);
 	}
@@ -318,7 +319,8 @@ void	AtikCamera::setOn(bool onoff, AtikCooler& cooler) {
 	if (lock.try_lock()) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "locked");
 	} else {
-		std::string	msg("cannot lock in setOn()");
+		std::string	msg = stringprintf("cannot lock in setOn(%s)",
+			(onoff) ? "true" : "false");
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 		throw std::runtime_error(msg);
 	}
