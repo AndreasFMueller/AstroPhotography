@@ -231,7 +231,9 @@ void    AtikCamera::abortExposure() {
 float	AtikCamera::getSetTemperature(AtikCooler& cooler) {
 	std::unique_lock<std::recursive_mutex>	lock(_mutex, std::defer_lock);
 	if (!lock.try_lock()) {
-		throw std::runtime_error("cannot lock");
+		std::string	msg("cannot lock in getSetTemperatur()");
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw std::runtime_error(msg);
 	}
 	COOLING_STATE	state;
 	float	targetTemp = 0;
@@ -248,7 +250,9 @@ float	AtikCamera::getSetTemperature(AtikCooler& cooler) {
 float	AtikCamera::getActualTemperature(AtikCooler& cooler) {
 	std::unique_lock<std::recursive_mutex>	lock(_mutex, std::defer_lock);
 	if (!lock.try_lock()) {
-		throw std::runtime_error("cannot lock");
+		std::string	msg("cannot lock in getActualTemperature()");
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw std::runtime_error(msg);
 	}
 	//debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieve current Temp (%d)",
 	//	_tempSensorCount);
@@ -282,7 +286,9 @@ void	AtikCamera::setTemperature(const float temperature, AtikCooler& cooler) {
 	if (lock.try_lock()) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "locked");
 	} else {
-		throw std::runtime_error("cannot lock");
+		std::string	msg("cannot lock in setTemperature()");
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw std::runtime_error(msg);
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "set temperature: %f", temperature);
 	cooler.Cooler::setTemperature(temperature);
@@ -296,7 +302,9 @@ void	AtikCamera::setTemperature(const float temperature, AtikCooler& cooler) {
 bool	AtikCamera::isOn(AtikCooler& /* cooler */) {
 	std::unique_lock<std::recursive_mutex>	lock(_mutex, std::defer_lock);
 	if (!lock.try_lock()) {
-		throw std::runtime_error("cannot lock");
+		std::string	msg("cannot lock in isOn()");
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw std::runtime_error(msg);
 	}
 	COOLING_STATE	state;
 	float	targetTemp = 0;
@@ -310,7 +318,9 @@ void	AtikCamera::setOn(bool onoff, AtikCooler& cooler) {
 	if (lock.try_lock()) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "locked");
 	} else {
-		throw std::runtime_error("cannot lock");
+		std::string	msg("cannot lock in setOn()");
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw std::runtime_error(msg);
 	}
 	if (onoff) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "turn cooling on");

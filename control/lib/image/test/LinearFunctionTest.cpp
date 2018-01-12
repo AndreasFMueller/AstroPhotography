@@ -82,7 +82,7 @@ void	LinearFunctionTest::testSymmetric() {
 		}
 	}
 	ImageFunctionAdapter<LinearFunction>	lfa(size, l, ImagePoint(0, 0));
-	MinimumEstimator<LinearFunction>	me(lfa, 100);
+	MinimumEstimator<LinearFunction>	me(std::map<std::string,double>(), lfa, 100);
 	FunctionPtr	l2 = me(size.center(), true);
 	
 	for (int x = 0; x < size.width(); x++) {
@@ -112,7 +112,7 @@ void	LinearFunctionTest::testAsymmetric() {
 		}
 	}
 	ImageFunctionAdapter<LinearFunction>	lfa(size, l, ImagePoint(0, 0));
-	MinimumEstimator<LinearFunction>	me(lfa, 100);
+	MinimumEstimator<LinearFunction>	me(std::map<std::string,double>(), lfa, 100);
 	FunctionPtr	l2 = me(size.center(), false);
 	
 	for (int x = 0; x < size.width(); x++) {

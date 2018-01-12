@@ -369,14 +369,16 @@ public:
  * \brief Estimate the minimum of the image
  */
 template<typename FunctionType>
-class MinimumEstimator {
+class MinimumEstimator : public std::map<std::string, double> {
 	const ConstImageAdapter<float>&	_image;
 	unsigned int	_alpha;
 public:
 	unsigned int	alpha() const { return _alpha; }
-	MinimumEstimator(const ConstImageAdapter<float>& image,
+	MinimumEstimator(const std::map<std::string, double>& parameters,
+		const ConstImageAdapter<float>& image,
 		const unsigned int alpha)
-		: _image(image), _alpha(alpha) { }
+		: std::map<std::string, double>(parameters), _image(image),
+		  _alpha(alpha) { }
 	FunctionPtr	operator()(const ImagePoint& center, bool symmetric) const;
 };
 
@@ -499,11 +501,13 @@ public:
  * float pixels and formulating the whole argument as a template whould just
  * bee too much hassle.
  */
-class BackgroundExtractor {
-	unsigned int	alpha;
+class BackgroundExtractor : public std::map<std::string, double> {
+	unsigned int	_alpha;
+public:
+	unsigned int	alpha() const { return _alpha; }
 public:
 	typedef enum { CONSTANT, LINEAR, QUADRATIC, DEGREE4 } functiontype;
-	BackgroundExtractor(unsigned int _alpha) : alpha(_alpha) { }
+	BackgroundExtractor(unsigned int alpha) : _alpha(alpha) { }
 	Background<float>	operator()(const ImagePoint& center,
 				bool symmetric, functiontype f,
 				const ConstImageAdapter<RGB<float> >& image) const;

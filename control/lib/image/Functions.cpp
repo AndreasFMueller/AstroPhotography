@@ -408,7 +408,7 @@ DegreeNFunction	DegreeNFunction::operator+(
 	int	l = std::max(n(), other.n());
 	DegreeNFunction	result(center(),
 					symmetric() || other.symmetric(), l);
-	for (unsigned int i = 0; i < 5 + l; i++) {
+	for (int i = 0; i < 5 + l; i++) {
 		result[i] += (*this)[i] + other[i];
 	}
 	return result;
@@ -532,6 +532,7 @@ FunctionPtr	operator+(const FunctionPtr& a, const FunctionPtr& b) {
 			return FunctionPtr(new LinearFunction(*la + *lb));
 		}
 	}
+	throw std::runtime_error("no matching combination for operator+");
 }
 
 } // namespace image

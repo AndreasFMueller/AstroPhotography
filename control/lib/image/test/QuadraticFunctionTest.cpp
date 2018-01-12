@@ -56,7 +56,7 @@ void	QuadraticFunctionTest::testSymmetric() {
 		}
 	}
 	ImageFunctionAdapter<QuadraticFunction>	lfa(size, l, ImagePoint(0, 0));
-	MinimumEstimator<QuadraticFunction>	me(lfa, 100);
+	MinimumEstimator<QuadraticFunction>	me(std::map<std::string, double>(), lfa, 100);
 	FunctionPtr	l2 = me(size.center(), true);
 	
 	for (int x = 0; x < size.width(); x++) {
@@ -91,7 +91,7 @@ void	QuadraticFunctionTest::testAsymmetric() {
 		}
 	}
 	ImageFunctionAdapter<QuadraticFunction>	lfa(size, l, ImagePoint(0, 0));
-	MinimumEstimator<QuadraticFunction>	me(lfa, 100);
+	MinimumEstimator<QuadraticFunction>	me(std::map<std::string, double>(), lfa, 100);
 	FunctionPtr	l2 = me(size.center(), false);
 	
 	for (int x = 0; x < size.width(); x++) {

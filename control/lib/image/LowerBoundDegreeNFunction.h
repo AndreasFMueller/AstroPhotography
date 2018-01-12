@@ -3,7 +3,6 @@
  *
  * (c) 2017 Prof Dr Andreas Müller, Hochschule Rapperswil
  */
-static int degree = 1;
 
 /**
  * \brief Optimization problem for symmetric quadratic functions
@@ -11,10 +10,19 @@ static int degree = 1;
 template<>
 FunctionPtr	LowerBound<DegreeNFunction>::symmetricfunction(
 	const ImagePoint& center, const tilevaluevector& values) const {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "symmetric quadratic problem");
-	// we first need to know the degree to which we should go, for
-	// the time being we use a static
-	//int	degree = 1;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "symmetric degree n problem");
+	// we first need to know the degree 
+	int	degree = 1;
+	if (end() != find(std::string("degree"))) {
+		degree = at(std::string("degree"));
+		if ((degree < 1) || (degree > 10)) {
+			std::string	msg = stringprintf("invalid degree %d",
+				degree);
+			debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+			throw std::runtime_error(msg);
+		}
+	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "degree: %d", degree);
 
 	// create a problem
 	glp_prob	*lp = glp_create_prob();
@@ -22,7 +30,7 @@ FunctionPtr	LowerBound<DegreeNFunction>::symmetricfunction(
 
 	// we have three columns for the three coefficients of the linear
 	// function, and one constraint for each tile
-	glp_add_cols(lp, 3);
+	glp_add_cols(lp, 2 + degree);
 	glp_set_col_name(lp, 1, "minimum");
 	glp_set_col_bnds(lp, 1, GLP_LO, 0, 0);
 	glp_set_col_name(lp, 2, "q0");
@@ -38,13 +46,15 @@ FunctionPtr	LowerBound<DegreeNFunction>::symmetricfunction(
 	tilevaluevector::const_iterator	vp;
 	unsigned int	row = 1;
 	int	ind[3 + degree];
-	ind[0] = 0;
+	for (int i = 0; i < 3 + degree; i++) {
+		ind[i] = i;
+	}
 	double	obj[2 + degree];
 	for (int i = 0; i < 2 + degree; i++) {
-		ind[i + 1] = i;
 		obj[i] = 0.;
 	}
 	for (vp = values.begin(); vp != values.end(); vp++, row++) {
+		//debug(LOG_DEBUG, DEBUG_LOG, 0, "row %d", row);
 		// row name
 		char	rowname[10];
 		snprintf(rowname, sizeof(rowname), "s[%d]", row);
@@ -52,7 +62,7 @@ FunctionPtr	LowerBound<DegreeNFunction>::symmetricfunction(
 
 		// row coefficients and bounds
 		glp_set_row_bnds(lp, row, GLP_UP, 0, vp->second);
-		double	val[4];
+		double	val[3 + degree];
 		double	deltax = vp->first.x() - center.x();
 		double	deltay = vp->first.y() - center.y();
 		double	a = sqr(deltax) + sqr(deltay);
@@ -100,9 +110,20 @@ FunctionPtr	LowerBound<DegreeNFunction>::symmetricfunction(
 template<>
 FunctionPtr	LowerBound<DegreeNFunction>::asymmetricfunction(
 	const ImagePoint& center, const tilevaluevector& values) const {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "asymmetric quadratic problem");
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "asymmetric degree n problem");
 	// first find out the degree
-	//int	degree = ?;
+	// we first need to know the degree 
+	int	degree = 1;
+	if (end() != find(std::string("degree"))) {
+		degree = at(std::string("degree"));
+		if ((degree < 1) || (degree > 10)) {
+			std::string	msg = stringprintf("invalid degree %d",
+				degree);
+			debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+			throw std::runtime_error(msg);
+		}
+	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "degree: %d", degree);
 
 	// create a problem
 	glp_prob	*lp = glp_create_prob();

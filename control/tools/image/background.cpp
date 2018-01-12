@@ -53,6 +53,7 @@ int	main(int argc, char *argv[]) {
 	std::string	outfilename;
 	bool	force = false;
 	float	alpha = 0.001;
+	int	degree = 1;
 	BackgroundExtractor::functiontype	type
 		= BackgroundExtractor::QUADRATIC;
 	while (EOF != (c = getopt_long(argc, argv, "a:dfho:", longopts,
@@ -65,7 +66,7 @@ int	main(int argc, char *argv[]) {
 			debuglevel = LOG_DEBUG;
 			break;
 		case 'D':
-			switch (std::stoi(optarg)) {
+			switch (degree = std::stoi(optarg)) {
 			case 0:
 				type = BackgroundExtractor::CONSTANT;
 				break;
@@ -75,8 +76,14 @@ int	main(int argc, char *argv[]) {
 			case 2:
 				type = BackgroundExtractor::QUADRATIC;
 				break;
-			case 4:
+			case 3:
+				throw std::runtime_error("cubic background "
+					"not supported");
+				break;
+			default:
 				type = BackgroundExtractor::DEGREE4;
+				type = BackgroundExtractor::DEGREE4;
+				degree = (degree - 2) / 2;
 				break;
 			}
 			break;
@@ -92,6 +99,7 @@ int	main(int argc, char *argv[]) {
 		default:
 			throw std::runtime_error("unknown option");
 		}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "degree: %d", degree);
 
 	// get the file name
 	if (argc <= optind) {
@@ -108,6 +116,8 @@ int	main(int argc, char *argv[]) {
 
 	// prepare a background extractor
 	BackgroundExtractor	extractor(alpha);
+	extractor.insert(std::make_pair(std::string("degree"),
+		(double)degree));
 
 	// if this is a mono image, we just use luminance for background
 	// extraction

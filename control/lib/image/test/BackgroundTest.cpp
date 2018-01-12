@@ -58,7 +58,7 @@ void	BackgroundTest::testBase() {
 	}
 
 	// compute the lower bound
-	MinimumEstimator<LinearFunction>	me(image, 100);
+	MinimumEstimator<LinearFunction>	me(std::map<std::string, double>(), image, 100);
 	FunctionPtr	l2 = me(ImagePoint(1000, 500), false);
 	
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testBase() end");
