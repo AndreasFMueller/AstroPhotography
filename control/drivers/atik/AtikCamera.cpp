@@ -30,6 +30,14 @@ AtikCamera::AtikCamera(::AtikCamera *camera)
 		atikname);
 	_atikname = std::string(atikname);
 
+	// for an Atik 383L+ Color we have to fudge the color capability,
+	// as the library gives incorrect information
+	if (std::string(atikname) == std::string("Atik 383L+")) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "faking color camera for %s",
+			atikname);
+		_capa.colour = COLOUR_RGGB;
+	}
+
 	// serial number
 	_serial = _camera->getSerialNumber();
 
@@ -191,16 +199,19 @@ void	AtikCamera::exposureRun(Exposure& exposure, atik::AtikCcd& atikccd) {
 	}
 
 	// interpreting the data we have received
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "exposure %s complete. reading rata",
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "exposure %s complete. reading data",
 		exposure.toString().c_str());
 	ImageSize	size = exposure.frame().size() / exposure.mode();
 	Image<unsigned short>	*image = new Image<unsigned short>(size);
 	image->setOrigin(exposure.frame().origin());
 	switch (_capa.colour) {
 	case COLOUR_NONE:
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "this is a mono camera");
+		break;
 	case COLOUR_RGGB:
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "this is a RGGB color camera");
-		image->setMosaicType(MosaicType::BAYER_RGGB);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "this is a GBRG color camera");
+		// note that what ATIK thinks is RGGB is actually GBRG
+		image->setMosaicType(MosaicType::BAYER_GBRG);
 		break;
 	default:
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "unknown camera color type: %d",
@@ -232,7 +243,7 @@ float	AtikCamera::getSetTemperature(AtikCooler& cooler) {
 	std::unique_lock<std::recursive_mutex>	lock(_mutex, std::defer_lock);
 	if (!lock.try_lock()) {
 		std::string	msg("cannot lock in getSetTemperatur()");
-		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		//debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 		throw std::runtime_error(msg);
 	}
 	COOLING_STATE	state;
@@ -251,7 +262,7 @@ float	AtikCamera::getActualTemperature(AtikCooler& cooler) {
 	std::unique_lock<std::recursive_mutex>	lock(_mutex, std::defer_lock);
 	if (!lock.try_lock()) {
 		std::string	msg("cannot lock in getActualTemperature()");
-		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		//debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 		throw std::runtime_error(msg);
 	}
 	//debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieve current Temp (%d)",
@@ -288,7 +299,7 @@ void	AtikCamera::setTemperature(const float temperature, AtikCooler& cooler) {
 	} else {
 		std::string	msg = stringprintf("cannot lock in "
 			"setTemperature(%f)", temperature);
-		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		//debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 		throw std::runtime_error(msg);
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "set temperature: %f", temperature);
@@ -304,7 +315,7 @@ bool	AtikCamera::isOn(AtikCooler& /* cooler */) {
 	std::unique_lock<std::recursive_mutex>	lock(_mutex, std::defer_lock);
 	if (!lock.try_lock()) {
 		std::string	msg("cannot lock in isOn()");
-		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		//debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 		throw std::runtime_error(msg);
 	}
 	COOLING_STATE	state;
@@ -321,7 +332,7 @@ void	AtikCamera::setOn(bool onoff, AtikCooler& cooler) {
 	} else {
 		std::string	msg = stringprintf("cannot lock in setOn(%s)",
 			(onoff) ? "true" : "false");
-		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		//debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 		throw std::runtime_error(msg);
 	}
 	if (onoff) {
