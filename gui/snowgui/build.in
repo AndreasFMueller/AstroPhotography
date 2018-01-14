@@ -36,6 +36,7 @@ case `uname` in
 		./snowgui --debug --server=${servername} 2>&1 | tee build.log
 		;;
 	Darwin)
+		LC_NUMERIC=C \
 		./snowgui.app/Contents/MacOS/snowgui --debug \
 			--server=${servername} 2>&1 | tee build.log
 		;;
