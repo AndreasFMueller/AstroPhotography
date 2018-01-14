@@ -436,12 +436,16 @@ void	FITSoutfileBase::write(const ImageBase& image) {
 
 		if (type == std::type_index(typeid(bool))) {
 			int	logicalvalue = (bool)value;
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "%s: (bool)%s",
+				key, (logicalvalue) ? "true" : "false");
 			rc = fits_write_key(fptr, TLOGICAL, key, &logicalvalue,
 				comment, &status);
 			goto writedone;
 		}
 
 		if (type == std::type_index(typeid(std::string))) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "%s: (string)%s",
+				key, value.getValue().c_str());
 			rc = fits_write_key(fptr, TSTRING, key,
 				(void *)value.getValue().c_str(),
 				comment, &status);
@@ -450,6 +454,8 @@ void	FITSoutfileBase::write(const ImageBase& image) {
 
 		if (type == std::type_index(typeid(char))) {
 			char	charvalue = (char)value;
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "%s: (char)%d",
+				key, charvalue);
 			rc = fits_write_key(fptr, TBYTE, key, &charvalue,
 				comment, &status);
 			goto writedone;
@@ -457,6 +463,8 @@ void	FITSoutfileBase::write(const ImageBase& image) {
 
 		if (type == std::type_index(typeid(short))) {
 			short	shortvalue = (short)value;
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "%s: (short)%d",
+				key, shortvalue);
 			rc = fits_write_key(fptr, TSHORT, key, &shortvalue,
 				comment, &status);
 			goto writedone;
@@ -464,6 +472,8 @@ void	FITSoutfileBase::write(const ImageBase& image) {
 
 		if (type == std::type_index(typeid(unsigned short))) {
 			unsigned short	ushortvalue = (unsigned short)value;
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "%s: (ushort)%hu",
+				key, ushortvalue);
 			rc = fits_write_key(fptr, TUSHORT, key, &ushortvalue,
 				comment, &status);
 			goto writedone;
@@ -471,6 +481,8 @@ void	FITSoutfileBase::write(const ImageBase& image) {
 
 		if (type == std::type_index(typeid(int))) {
 			int	intvalue = (int)value;
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "%s: (int)%d",
+				key, intvalue);
 			rc = fits_write_key(fptr, TINT, key, &intvalue,
 				comment, &status);
 			goto writedone;
@@ -478,6 +490,8 @@ void	FITSoutfileBase::write(const ImageBase& image) {
 
 		if (type == std::type_index(typeid(unsigned int))) {
 			unsigned int	uintvalue = (unsigned int)value;
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "%s: (uint)%u",
+				key, uintvalue);
 			rc = fits_write_key(fptr, TUINT, key, &uintvalue,
 				comment, &status);
 			goto writedone;
@@ -485,6 +499,8 @@ void	FITSoutfileBase::write(const ImageBase& image) {
 
 		if (type == std::type_index(typeid(long))) {
 			long	longvalue = (long)value;
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "%s: (long)%ld",
+				key, longvalue);
 			rc = fits_write_key(fptr, TLONG, key, &longvalue,
 				comment, &status);
 			goto writedone;
@@ -492,6 +508,8 @@ void	FITSoutfileBase::write(const ImageBase& image) {
 
 		if (type == std::type_index(typeid(unsigned long))) {
 			unsigned long	ulongvalue = (unsigned long)value;
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "%s: (ulong)%lu",
+				key, ulongvalue);
 			rc = fits_write_key(fptr, TULONG, key, &ulongvalue,
 				comment, &status);
 			goto writedone;
@@ -499,6 +517,8 @@ void	FITSoutfileBase::write(const ImageBase& image) {
 
 		if (type == std::type_index(typeid(float))) {
 			float	floatvalue = (float)value;
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "%s: (float)%f",
+				key, floatvalue);
 			rc = fits_write_key(fptr, TFLOAT, key, &floatvalue,
 				comment, &status);
 			goto writedone;
@@ -506,6 +526,8 @@ void	FITSoutfileBase::write(const ImageBase& image) {
 
 		if (type == std::type_index(typeid(double))) {
 			double doublevalue = (double)value;
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "%s: (double)%f",
+				key, doublevalue);
 			rc = fits_write_key(fptr, TDOUBLE, key, &doublevalue,
 				comment, &status);
 			goto writedone;

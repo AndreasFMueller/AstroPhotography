@@ -166,6 +166,12 @@ void	CcdInfo::addMetadata(ImageBase& image) const {
 	image.setMetadata(
 		FITSKeywords::meta(std::string("PXLHIGHT"),
 			_pixelheight * 1000000.));
+	image.setMetadata(
+		FITSKeywords::meta(std::string("CCDWIDTH"),
+			round(_size.width() * _pixelwidth * 100000.)/100.));
+	image.setMetadata(
+		FITSKeywords::meta(std::string("CCDHIGHT"),
+			round(_size.height() * _pixelheight * 100000.)/100.));
 }
 
 } // namespace camera
