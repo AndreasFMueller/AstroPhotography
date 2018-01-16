@@ -9,6 +9,7 @@
 #include <AstroUtils.h>
 #include <cmath>
 #include <set>
+#include <sstream>
 
 #ifdef HAVE_CONFIG_H
 #include <config.h>
