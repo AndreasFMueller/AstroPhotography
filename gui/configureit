@@ -59,9 +59,17 @@ esac
 
 set -x
 
-EXTRA_CSSFLAGS=
+EXTRA_CXXFLAGS=
 EXTRA_LDFLAGS=
 EXTRA_LIBS=
+
+if [ -d /usr/local/astro ]
+then
+	ASTROPREFIX=/usr/local/astro
+else
+	ASTROPREFIX=`pwd`/../control/root
+fi
+EXTRA_LDFLAGS="-Wl,-rpath -Wl,${ASTROPREFIX}/lib"
 
 # now that we have all the information, run the configure script
 case ${systemtype} in
