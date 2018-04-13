@@ -17,10 +17,17 @@ GuiderButton::GuiderButton(QWidget *parent) : QWidget(parent) {
 	_southPressed = false;
 	_westPressed = false;
 	_eastPressed = false;
+
+	_northActive = false;
+	_southActive = false;
+	_eastActive = false;
+	_westActive = false;
 }
 
 GuiderButton::~GuiderButton() {
 }
+
+#define LEDDIM	6
 
 void	GuiderButton::draw() {
 	QPainter	painter(this);
@@ -32,11 +39,12 @@ void	GuiderButton::draw() {
 	QPointF	center(width() / 2., height() / 2.);
 	QColor	grey(224, 224, 224);
 	QColor	red(255, 128, 128);
+	QColor	brightred(255, 0, 0);
 	
 	// ellipse
-	double	w = width() - 10;
-	double	h = height() - 10;
-	QRect	rect(5, 5, w, h);
+	double	w = width() - 2 * LEDDIM;
+	double	h = height() - 2 * LEDDIM;
+	QRect	rect(LEDDIM, LEDDIM, w, h);
 	QPainterPath	ellipse;
 
 	ellipse.moveTo(center);
@@ -70,20 +78,46 @@ void	GuiderButton::draw() {
 	painter.fillPath(bezel, black);
 
 	QPainterPath	bar;
-	bar.moveTo(0, 5);
-	bar.lineTo(width() - 5, height());
-	bar.lineTo(width(), height() - 5);
-	bar.lineTo(5, 0);
+	bar.moveTo(0, LEDDIM);
+	bar.lineTo(width() - LEDDIM, height());
+	bar.lineTo(width(), height() - LEDDIM);
+	bar.lineTo(LEDDIM, 0);
 	bar.closeSubpath();
 	painter.fillPath(bar, black);
 
 	bar = QPainterPath();
-	bar.moveTo(width() - 5, 0);
-	bar.lineTo(0, height() - 5);
-	bar.lineTo(5, height());
-	bar.lineTo(width(), 5);
+	bar.moveTo(width() - LEDDIM, 0);
+	bar.lineTo(0, height() - LEDDIM);
+	bar.lineTo(LEDDIM, height());
+	bar.lineTo(width(), LEDDIM);
 	bar.closeSubpath();
 	painter.fillPath(bar, black);
+
+	// display the active LEDs
+	if (_northActive) {
+		QPainterPath	led;
+		QPoint	ledcenter(width() / 2, LEDDIM/2);
+		led.addEllipse(ledcenter, LEDDIM/2, LEDDIM/2);
+		painter.fillPath(led, brightred);
+	}
+	if (_southActive) {
+		QPainterPath	led;
+		QPoint	ledcenter(width() / 2, height() - LEDDIM/2);
+		led.addEllipse(ledcenter, LEDDIM/2, LEDDIM/2);
+		painter.fillPath(led, brightred);
+	}
+	if (_eastActive) {
+		QPainterPath	led;
+		QPoint	ledcenter(3, height() / 2);
+		led.addEllipse(ledcenter, LEDDIM/2, LEDDIM/2);
+		painter.fillPath(led, brightred);
+	}
+	if (_westActive) {
+		QPainterPath	led;
+		QPoint	ledcenter(width() - LEDDIM/2, height() / 2);
+		led.addEllipse(ledcenter, LEDDIM/2, LEDDIM/2);
+		painter.fillPath(led, brightred);
+	}
 }
 
 void	GuiderButton::paintEvent(QPaintEvent * /* event */) {

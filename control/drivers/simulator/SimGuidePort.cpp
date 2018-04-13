@@ -64,12 +64,12 @@ static double	sign(double x) {
 void	SimGuidePort::update() {
 	// if this is the first 
 	if ((ra == 0) && (dec == 0)) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "no update");
+		//debug(LOG_DEBUG, DEBUG_LOG, 0, "no update");
 		return;
 	}
 
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "update: current offset: %s",
-		_offset.toString().c_str());
+	//debug(LOG_DEBUG, DEBUG_LOG, 0, "update: current offset: %s",
+	//	_offset.toString().c_str());
 
 	// advance the offset according to last activation
 	double	now = simtime();
@@ -90,7 +90,7 @@ void	SimGuidePort::update() {
 		// have to compute this partial activation
 		rachange = sign(ra) * activetime;
 	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "update: advance RA by %f", rachange);
+	//debug(LOG_DEBUG, DEBUG_LOG, 0, "update: advance RA by %f", rachange);
 	ra -= rachange;
 	_offset = _offset + rachange * pixelspeed * _ravector;
 
@@ -105,12 +105,12 @@ void	SimGuidePort::update() {
 		// not enough time to execute activation
 		decchange = sign(dec) * activetime;
 	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "update: advance DEC by %f", decchange);
+	//debug(LOG_DEBUG, DEBUG_LOG, 0, "update: advance DEC by %f", decchange);
 	dec -= decchange;
 	_offset = _offset + decchange * pixelspeed * _decvector;
 
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "update: new offset: %s",
-		_offset.toString().c_str());
+	//debug(LOG_DEBUG, DEBUG_LOG, 0, "update: new offset: %s",
+	//	_offset.toString().c_str());
 
 	// we must now remember that the activation time has changed
 	lastactivation = now;
@@ -134,7 +134,7 @@ uint8_t	SimGuidePort::active() {
 	if (dec < 0) {
 		result |= DECMINUS;
 	}
-	return 0;
+	return result;
 }
 
 /**

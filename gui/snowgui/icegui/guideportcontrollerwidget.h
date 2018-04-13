@@ -7,6 +7,7 @@
 #define GUIDEPORTCONTROLLERWIDGET_H
 
 #include <InstrumentWidget.h>
+#include <QTimer>
 
 namespace snowgui {
 
@@ -19,6 +20,8 @@ class guideportcontrollerwidget : public InstrumentWidget {
 
 	snowstar::GuidePortPrx	_guideport;
 	float	_activationtime;
+	QTimer	_statusTimer;
+	unsigned char	_active;
 public:
 	explicit guideportcontrollerwidget(QWidget *parent = 0);
 	~guideportcontrollerwidget();
@@ -35,6 +38,7 @@ private:
 
 	void	setupGuideport();
 
+
 public slots:
 	void	guideportChanged(int);
 	void	activateRAplus();
@@ -43,6 +47,7 @@ public slots:
 	void	activateDECminus();
 	void	setActivationTime(double);
 	void	changeActivationTime(double);
+	void	statusUpdate();
 };
 
 } // namespace snowogui

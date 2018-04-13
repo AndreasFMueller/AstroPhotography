@@ -18,6 +18,11 @@ class GuiderButton : public QWidget {
         bool	_eastPressed;
         bool	_westPressed;
 
+	bool	_northActive;
+	bool	_southActive;
+	bool	_eastActive;
+	bool	_westActive;
+
 	double	angle(QPoint p);
 	void	checkPressed(QPoint p);
 public:
@@ -25,6 +30,10 @@ public:
 	virtual ~GuiderButton();
 
 	void	draw();
+	void	setNorthActive(bool northActive) { _northActive = northActive; }
+	void	setSouthActive(bool southActive) { _southActive = southActive; }
+	void	setEastActive(bool eastActive) { _eastActive = eastActive; }
+	void	setWestActive(bool westActive) { _westActive = westActive; }
 signals:
 	void	northClicked();
 	void	southClicked();

@@ -164,8 +164,8 @@ ImagePtr  SimCcd::getRawImage() {
 	starcamera.binning(exposure.mode());
 
 	ImagePtr	image = starcamera(starfield);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "got an %s image",
-		image->getFrame().toString().c_str());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "got an %s image: %s",
+		image->getFrame().toString().c_str(), image->info().c_str());
 	state(CcdState::idle);
 
 	// origin

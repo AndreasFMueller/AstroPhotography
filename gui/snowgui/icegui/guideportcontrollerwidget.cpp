@@ -32,11 +32,17 @@ guideportcontrollerwidget::guideportcontrollerwidget(QWidget *parent)
 	connect(ui->activationtimeSpinBox, SIGNAL(valueChanged(double)),
 		this, SLOT(changeActivationTime(double)));
 
+	// start the timer
+	_active = 0;
+	connect(&_statusTimer, SIGNAL(timeout()), this, SLOT(statusUpdate()));
+	_statusTimer.setInterval(100);
+
 	// set default activation time
 	_activationtime = 5;
 }
 
 guideportcontrollerwidget::~guideportcontrollerwidget() {
+	_statusTimer.stop();
 	delete ui;
 }
 
@@ -66,9 +72,11 @@ void	guideportcontrollerwidget::instrumentSetup(
 }
 
 void	guideportcontrollerwidget::setupGuideport() {
+	_statusTimer.stop();
 	if (_guideport) {
 		ui->guideWidget->setEnabled(true);
 		ui->activationWidget->setEnabled(true);
+		_statusTimer.start();
 	} else {
 		ui->guideWidget->setEnabled(false);
 		ui->activationWidget->setEnabled(false);
@@ -107,6 +115,28 @@ void	guideportcontrollerwidget::setActivationTime(double t) {
 
 void	guideportcontrollerwidget::changeActivationTime(double t) {
 	_activationtime = t;
+}
+
+void	guideportcontrollerwidget::statusUpdate() {
+	if (!_guideport) { return; }
+	try {
+		unsigned char	newactive = _guideport->active();
+		if (newactive != _active) {
+			_active = newactive;
+			ui->guiderButton->setNorthActive(
+				_active & snowstar::DECPLUS);
+			ui->guiderButton->setSouthActive(
+				_active & snowstar::DECMINUS);
+			ui->guiderButton->setWestActive(
+				_active & snowstar::RAPLUS);
+			ui->guiderButton->setEastActive(
+				_active & snowstar::RAMINUS);
+			repaint();
+		}
+	} catch (const std::exception& x) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "couldn't get active data: %s",
+			x.what());
+	}
 }
 
 } // namespace snowgui
