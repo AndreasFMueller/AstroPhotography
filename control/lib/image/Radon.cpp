@@ -126,6 +126,7 @@ Normal::pointpair	Normal::roundpoints(const Point& p1,
 		}
 		break;
 	}
+	throw std::logic_error("Normal::roundpoints unreachable point reached");
 }
 
 /**
