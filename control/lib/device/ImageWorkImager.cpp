@@ -33,9 +33,12 @@ void	ImageWorkImager::main(astro::thread::Thread<ImageWorkImager>& /* thread */)
 
 		// retrieve image
 		_image = _imager.getImage();
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "image retrieved");
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "image retrieved: %s",
+			_image->info().c_str());
 	} catch (std::exception& x) {
-		debug(LOG_ERR, DEBUG_LOG, 0, "image acquisition failed");
+		std::string	msg = stringprintf("image acquisition "
+			"failed: %s", x.what());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 		// XXX we should really send an reason through the callback
 		(*_endcallback)(CallbackDataPtr());
 	}

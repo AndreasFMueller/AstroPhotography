@@ -2,7 +2,6 @@
  * AstroImage.h -- abstraction for raw images received from cameras
  *
  * (c) 2012 Prof Dr Andreas Mueller, Hochschule Rapperswil
- * $Id$
  */
 #ifndef _AstroImage_h
 #define _AstroImage_h
@@ -430,6 +429,9 @@ public:
 
 	// type index of the pixel type
 	virtual std::type_index	pixel_type() const;
+
+	// info string for the image
+	virtual std::string	info() const;
 };
 
 std::ostream&	operator<<(std::ostream& out, const ImageBase& image);
@@ -565,6 +567,13 @@ public:
 	virtual Pixel	pixel(int x, int y) const = 0;
 	Pixel	pixel(ImagePoint p) const {
 		return pixel(p.x(), p.y());
+	}
+
+	/**
+	 * \brief Give some information about the image (including pixel type)
+	 */
+	virtual std::string	info() const {
+		return demangle(typeid(*this).name());
 	}
 };
 

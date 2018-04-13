@@ -2,7 +2,6 @@
  * simulatortests.cpp
  *
  * (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
- * $Id$
  */
 #include <includes.h>
 #include <cppunit/extensions/TestFactoryRegistry.h>

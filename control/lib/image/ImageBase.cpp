@@ -188,5 +188,10 @@ void	ImageBase::dump_metadata() const {
 	_metadata.dump();
 }
 
+
+std::string	ImageBase::info() const {
+	return stringprintf("%s image", size().toString().c_str());
+}
+
 } // namespace image
 } // namespace astro

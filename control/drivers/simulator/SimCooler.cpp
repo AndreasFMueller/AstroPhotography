@@ -16,6 +16,9 @@ namespace simulator {
 
 #define AMBIENT_TEMPERATURE     (273 + 13.2)
 
+/**
+ *  \brief Construct a new cooler object
+ */
 SimCooler::SimCooler(SimLocator& locator)
 	: Cooler(DeviceName("cooler:simulator/cooler")), _locator(locator) {
 	temperature = AMBIENT_TEMPERATURE;
@@ -24,6 +27,9 @@ SimCooler::SimCooler(SimLocator& locator)
 	on = false;
 }
 
+/**
+ * \brief Get the actual temperature
+ */
 float	SimCooler::getActualTemperature() {
 	double	timepast = simtime() - laststatechange;
 	float	targettemperature = (on) ? temperature : AMBIENT_TEMPERATURE;
@@ -40,12 +46,20 @@ float	SimCooler::getActualTemperature() {
 	return actemp;
 }
 
+/**
+ * \brief Set the set temperature
+ *
+ * \param _temperature	absolute temperature for the cooler
+ */
 void	SimCooler::setTemperature(float _temperature) {
 	lasttemperature = getActualTemperature();
 	laststatechange = simtime();
 	temperature = _temperature;
 }
 
+/**
+ * \brief Turn on or off the cooler
+ */
 void	SimCooler::setOn(bool onoff) {
 	if (onoff == on) {
 		return;
@@ -55,6 +69,9 @@ void	SimCooler::setOn(bool onoff) {
 	on = onoff;
 }
 
+/**
+ * \brief Find out whether the cooler is currently below ambient temperature
+ */
 int	SimCooler::belowambient() {
 	int	result = (AMBIENT_TEMPERATURE - getActualTemperature()) / 7.;
 	return result;
