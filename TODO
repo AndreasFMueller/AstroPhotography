@@ -1,0 +1,68 @@
+7. 4.
+
+- no atik driver
+- table structure
+- when starting backlash measurement
+
+	 04/08/18 06:40:59.177 warning: dispatch exception: /opt/Ice-3.5.1/include/Ice/StreamHelpers.h:333: Ice::MarshalException:
+	   protocol error: error during marshaling or unmarshaling:
+	   enumerator out of range
+	   identity: guider/GUIDETEST%7c0%7c0%7c0
+	   facet: 
+	   operation: getBacklashDirection
+	   remote host: ::ffff:192.168.42.2 remote port: 50409
+	-! 04/08/18 06:41:17.515 warning: dispatch exception: /opt/Ice-3.5.1/include/Ice/StreamHelpers.h:333: Ice::MarshalException:
+	   protocol error: error during marshaling or unmarshaling:
+	   enumerator out of range
+	   identity: guider/GUIDETEST%7c0%7c0%7c0
+	   facet: 
+	   operation: getBacklashDirection
+	   remote host: ::ffff:192.168.42.2 remote port: 50410k
+
+- when increasing "last points" in backlash measurement
+
+	stacktrace caused by signal 11
+	[0] /usr/local/astro/lib/libastro.so.0(stderr_stacktrace+0x3b) [0xb6eee7c4]
+	[1] /lib/arm-linux-gnueabihf/libc.so.6(+0x25260) [0xb610e260]
+	[2] /usr/local/astro/lib/libastro.so.0(_ZN5astro7guiding12BacklashWork10lastPointsEi+0xb) [0xb6dbb128]
+	[3] /usr/local/astro/lib/libiceastro.so.0(_ZN8snowstar6Guider16___setLastPointsERN11IceInternal8IncomingERKN3Ice7CurrentE+0x8b) [0xb6a9d520]
+	[4] /opt/Ice-3.5.1/lib/libIce.so.35(_ZN11IceInternal8Incoming6invokeERKNS_6HandleINS_14ServantManagerEEEPNS_11BasicStreamE+0x3df) [0xb67611d0]
+	[5] /opt/Ice-3.5.1/lib/libIce.so.35(_ZN3Ice11ConnectionI9invokeAllERN11IceInternal11BasicStreamEiihRKNS1_6HandleINS1_14ServantManagerEEERKNS4_INS_13ObjectAdapterEEE+0xf5) [0xb67398ea]
+	[6] /opt/Ice-3.5.1/lib/libIce.so.35(_ZN3Ice11ConnectionI8dispatchERKN7IceUtil6HandleINS0_13StartCallbackEEERKSt6vectorINS0_12SentCallbackESaIS8_EEhiiRKN11IceInternal6HandleINSD_14ServantManagerEEERKNSE_INS_13ObjectAdapterEEERKNSE_INSD_13OutgoingAsyncEEERNSD_11BasicStreamE+0xf5) [0xb6733bca]
+	[7] /opt/Ice-3.5.1/lib/libIce.so.35(_ZN3Ice11ConnectionI7messageERN11IceInternal17ThreadPoolCurrentE+0xb9f) [0xb67333c0]
+	[8] /opt/Ice-3.5.1/lib/libIce.so.35(_ZN11IceInternal10ThreadPool3runERKN7IceUtil6HandleINS0_18EventHandlerThreadEEE+0x8f) [0xb688cb34]
+	[9] /opt/Ice-3.5.1/lib/libIce.so.35(_ZN11IceInternal10ThreadPool18EventHandlerThread3runEv+0x9b) [0xb688e1b4]
+	[10] /opt/Ice-3.5.1/lib/libIceUtil.so.35(+0x56e78) [0xb63aee78]
+
+
+- during guiding
+
+	$ stacktrace caused by signal 11
+	[0] /usr/local/astro/lib/libastro.so.0(stderr_stacktrace+0x3b) [0xb6f447c4]
+	[1] /lib/arm-linux-gnueabihf/libc.so.6(+0x25260) [0xb6164260]
+
+- should be handled more elegantly
+
+	-! 04/08/18 07:18:42.206 warning: dispatch exception: std::exception: cannot start guiding in this state
+	   identity: guider/GUIDETEST%7c0%7c0%7c0
+	   facet: 
+	   operation: startGuiding
+	   remote host: ::ffff:192.168.42.2 remote port: 51584
+
+- when opening the backlash dialog for the first time:
+
+	Apr 13 13:58:43 snowgui[8515/1] backlashdialog.cpp:094: identity: 922BBA9F-E15B-484B-AF57-C382EFFEA143
+	Apr 13 13:58:43 snowgui[8515/1] ChannelDisplayWidget.cpp:091: plotting between inf and -inf (-inf seconds)
+	Apr 13 13:58:43 snowgui[8515/1] ChannelDisplayWidget.cpp:096: duration must be positive
+
+- the graph of the backlash analysis needs a legend
+
+- calibration thread termination not correctly signaled to application
+
+- accept reason strings the payload data in endCallback
+
+- track display needs a legend (ra = blue, dec = green)
+
+
+
+
