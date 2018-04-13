@@ -59,9 +59,9 @@
 
 - calibration thread termination not correctly signaled to application
 
+- accept reason strings the payload data in endCallback
 
-
-
+- track display needs a legend (ra = blue, dec = green)
 
 
 
