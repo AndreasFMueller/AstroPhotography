@@ -11,6 +11,8 @@ TEMPLATE = app
 QMAKE_CXXFLAGS += @EXTRA_CXXFLAGS@
 QMAKE_LFLAGS += @EXTRA_LDFLAGS@
 
+QMAKE_MAC_SDK = @MACSDK@
+
 # Directories for ICE and the astrophotography library
 ICEDIR = @ICEDIR@
 ICELIBS = @ICELIBS@

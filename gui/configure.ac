@@ -139,6 +139,9 @@ AC_SUBST(EXTRA_CXXFLAGS)
 AC_SUBST(EXTRA_LDFLAGS)
 AC_SUBST(EXTRA_LIBS)
 
+MACSDK=macosx10.13
+AC_SUBST(MACSDK)
+
 AC_CONFIG_FILES([Makefile snowgui/snowgui.pro
 	snowgui/astrogui/astrogui.pro
 	snowgui/icegui/icegui.pro

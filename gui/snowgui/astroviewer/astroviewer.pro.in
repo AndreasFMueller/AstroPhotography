@@ -9,6 +9,8 @@ QT       += core gui widgets
 TARGET = astroviewer
 TEMPLATE = app
 
+QMAKE_MAC_SDK = @MACSDK@
+
 QMAKE_CXXFLAGS += @EXTRA_CXXFLAGS@
 QMAKE_LFLAGS += @EXTRA_LDFLAGS@
 
