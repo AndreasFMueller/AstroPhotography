@@ -97,6 +97,10 @@ void	Guider::stopBacklash() {
  * \brief Tell the guider how many points to evaluate
  */
 void	Guider::setLastPoints(int n) {
+	if (!_backlashwork) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "no backlash thread");
+		return;
+	}
 	_backlashwork->lastPoints(n);
 }
 

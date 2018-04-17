@@ -75,6 +75,10 @@ BacklashData	GuiderI::getBacklashData(const Ice::Current& /* current */) {
 }
 
 void	GuiderI::setLastPoints(int n, const Ice::Current& /* current */) {
+	if (!guider) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "no guider present!");
+		return;
+	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "set last points to %d", n);
 	guider->setLastPoints(n);
 }
@@ -127,6 +131,10 @@ BacklashDirection	GuiderI::getBacklashDirection(const Ice::Current& /* current *
 	case astro::guiding::backlash_ra:
 		return BacklashRA;
 	}
+	// the following exception should never happen
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "backlash direction: %d",
+		guider->getBacklashDirection());
+	throw std::runtime_error("unknown backlash direction");
 }
 
 

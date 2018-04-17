@@ -643,6 +643,9 @@ public:
 	std::string	toString() const;
 	void	clear();
 	double	operator()(const int k[4], const BacklashPoint& p);
+	BacklashResult() : direction(backlash_dec), interval(0), x(0), y(0),
+			   longitudinal(0), lateral(0), forward(0), backward(0),
+			   f(0), b(0), offset(0), drift(0) { }
 };
 typedef callback::CallbackDataEnvelope<BacklashResult>	CallbackBacklashResult;
 typedef std::shared_ptr<CallbackBacklashResult>	CallbackBacklashResultPtr;
