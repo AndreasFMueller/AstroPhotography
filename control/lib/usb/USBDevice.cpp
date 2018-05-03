@@ -97,18 +97,28 @@ Device::~Device() {
 	libusb_unref_device(dev);
 }
 
+// try at most three times to get the string descriptor. This is used
+// as a workaround for a problem with the at90usb162 microcontroller
+// used in the othello devices which cases the string transfer to fail
+static const int	max_retries = 3;
+
 std::string	Device::getStringDescriptor(uint8_t index) const {
 	if (NULL == dev_handle) {
 		return std::string("(device not open)");
 	}
 	// read the string descriptor
 	unsigned char	buffer[128];
-	int	rc = libusb_get_string_descriptor_ascii(dev_handle, index,
-			buffer, sizeof(buffer));
-	if (rc > 0) {
-		return std::string((const char *)buffer, rc);
-	}
-	return std::string();
+	int	retries = 0;
+	int	rc;
+	do {
+		rc = libusb_get_string_descriptor_ascii(dev_handle,
+				index, buffer, sizeof(buffer));
+		if (rc > 0) {
+			return std::string((const char *)buffer, rc);
+		}
+	} while (max_retries > ++retries);
+	return stringprintf("cannot get string %d: %s (%d)", index,
+		libusb_error_name(rc), rc);
 }
 
 DeviceDescriptorPtr	Device::descriptor() {

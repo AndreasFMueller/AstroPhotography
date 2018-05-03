@@ -1,5 +1,9 @@
 ChangeLog for the Astro project.
 
+20180503:
+	* add retries to USB descriptor string retrieval to work around
+	  problem with at90usb162 issue
+
 20150718:
 	* convert astro::camera::Exposure class to the more common conventions
 	  in this project, in particular, make all members private
