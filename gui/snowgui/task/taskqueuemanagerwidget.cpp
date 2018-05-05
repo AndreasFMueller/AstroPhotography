@@ -33,7 +33,8 @@ taskqueuemanagerwidget::taskqueuemanagerwidget(QWidget *parent)
 	headers << "Binning";		//  8
 	headers << "Temperature";	//  9
 	headers << "Repository";	// 10
-	headers << "Filename/Cause";	// 11
+	headers << "Database";		// 11
+	headers << "Filename/Cause";	// 12
 	ui->taskTree->setHeaderLabels(headers);
 	ui->taskTree->header()->resizeSection(0, 80);	// ID
 	ui->taskTree->header()->resizeSection(1, 110);	// Instrument
@@ -46,6 +47,7 @@ taskqueuemanagerwidget::taskqueuemanagerwidget(QWidget *parent)
 	ui->taskTree->header()->resizeSection(8, 50);	// Binning
 	ui->taskTree->header()->resizeSection(9, 80);	// Temperature
 	ui->taskTree->header()->resizeSection(10, 80);	// Repository
+	ui->taskTree->header()->resizeSection(11, 80);	// Database
 
 	// create the top level entries in the tree
 	{
@@ -183,7 +185,10 @@ void	taskqueuemanagerwidget::addTask(QTreeWidgetItem *parent,
 	// 10 repository
 	list << QString(parameters.repository.c_str());
 
-	// 11 filename
+	// 11 repository database name
+	list << QString(parameters.repodb.c_str());
+
+	// 12 filename
 	list << QString(info.filename.c_str());
 
 	QTreeWidgetItem	*item = new QTreeWidgetItem(list,
@@ -200,6 +205,7 @@ void	taskqueuemanagerwidget::addTask(QTreeWidgetItem *parent,
 	item->setTextAlignment(9, Qt::AlignRight);
 	item->setTextAlignment(10, Qt::AlignLeft);
 	item->setTextAlignment(11, Qt::AlignLeft);
+	item->setTextAlignment(12, Qt::AlignLeft);
 
 	// now add the new entry to the parent
 	parent->addChild(item);
@@ -246,6 +252,9 @@ void	taskqueuemanagerwidget::addTasks(QTreeWidgetItem *parent,
 			snowstar::TaskInfo	info = _tasks->info(*i);
 			snowstar::TaskParameters	parameters
 				= _tasks->parameters(*i);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "task %d: repodb: %s",
+			info.taskid,
+			parameters.repodb.c_str());
 			addTask(parent, info, parameters);
 		} catch (const std::exception& x) {
 			debug(LOG_ERR, DEBUG_LOG, 0,
@@ -482,14 +491,14 @@ void	taskqueuemanagerwidget::updateInfo(QTreeWidgetItem *item,
 	switch (info.state) {
 	case snowstar::TskPENDING:
 	case snowstar::TskEXECUTING:
-		item->setText(11, QString(""));
+		item->setText(12, QString(""));
 		break;
 	case snowstar::TskFAILED:
 	case snowstar::TskCANCELLED:
-		item->setText(11, QString(info.cause.c_str()));
+		item->setText(12, QString(info.cause.c_str()));
 		break;
 	case snowstar::TskCOMPLETE:
-		item->setText(11, QString(info.filename.c_str()));
+		item->setText(12, QString(info.filename.c_str()));
 		break;
 	}
 	if ((info.frame.size.width != 0) && (info.frame.size.height != 0)) {

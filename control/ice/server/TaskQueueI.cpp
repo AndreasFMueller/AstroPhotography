@@ -12,6 +12,7 @@
 #include <AstroDebug.h>
 #include <typeinfo>
 #include <AstroEvent.h>
+#include <ImageRepo.h>
 
 namespace snowstar {
 
@@ -94,21 +95,27 @@ void TaskQueueI::stop(const Ice::Current& /* current */) {
 	}
 }
 
+/**
+ * \brief Submit a task to the task queue
+ */
 int TaskQueueI::submit(const TaskParameters& parameters,
 		const Ice::Current& /* current */) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "submit a new task on '%s', purpose = %d",
 		parameters.instrument.c_str(), parameters.exp.purpose);
+	TaskParameters	tp = parameters;
+	// add the repository path information
+	tp.repodb = ImageRepo::configdb();
+
 	// get information about the parameters
 	astro::discover::InstrumentPtr  instrument
-                = astro::discover::InstrumentBackend::get(
-			parameters.instrument);
+                = astro::discover::InstrumentBackend::get(tp.instrument);
 	astro::task::TaskInfo	info(-1);
 	if ((instrument->nComponentsOfType(
 		astro::discover::InstrumentComponentKey::Camera) > 0)
-		&& (parameters.cameraIndex >= 0)) {
+		&& (tp.cameraIndex >= 0)) {
 		astro::discover::InstrumentComponent	camera = instrument->get(
 			astro::discover::InstrumentComponentKey::Camera,
-				parameters.cameraIndex);
+				tp.cameraIndex);
 		info.camera(camera.deviceurl());
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "found camera %s",
 			info.camera().c_str());
@@ -118,10 +125,10 @@ int TaskQueueI::submit(const TaskParameters& parameters,
 
 	if ((instrument->nComponentsOfType(
 		astro::discover::InstrumentComponentKey::CCD) > 0)
-		&& (parameters.ccdIndex >= 0)) {
+		&& (tp.ccdIndex >= 0)) {
 		astro::discover::InstrumentComponent	ccd = instrument->get(
 			astro::discover::InstrumentComponentKey::CCD,
-				parameters.ccdIndex);
+				tp.ccdIndex);
 		info.ccd(ccd.deviceurl());
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "found ccd %s",
 			info.ccd().c_str());
@@ -131,10 +138,10 @@ int TaskQueueI::submit(const TaskParameters& parameters,
 
 	if ((instrument->nComponentsOfType(
 		astro::discover::InstrumentComponentKey::Cooler) > 0)
-		&& (parameters.coolerIndex >= 0)) {
+		&& (tp.coolerIndex >= 0)) {
 		astro::discover::InstrumentComponent	cooler = instrument->get(
 			astro::discover::InstrumentComponentKey::Cooler,
-				parameters.coolerIndex);
+				tp.coolerIndex);
 		info.cooler(cooler.deviceurl());
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "found cooler %s",
 			info.cooler().c_str());
@@ -144,10 +151,10 @@ int TaskQueueI::submit(const TaskParameters& parameters,
 
 	if ((instrument->nComponentsOfType(
 		astro::discover::InstrumentComponentKey::FilterWheel) > 0)
-		&& (parameters.filterwheelIndex >= 0)) {
+		&& (tp.filterwheelIndex >= 0)) {
 		astro::discover::InstrumentComponent	filterwheel = instrument->get(
 			astro::discover::InstrumentComponentKey::FilterWheel,
-				parameters.filterwheelIndex);
+				tp.filterwheelIndex);
 		info.filterwheel(filterwheel.deviceurl());
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "found filterwheel %s",
 			info.filterwheel().c_str());
@@ -157,10 +164,10 @@ int TaskQueueI::submit(const TaskParameters& parameters,
 
 	if ((instrument->nComponentsOfType(
 		astro::discover::InstrumentComponentKey::Mount) > 0)
-		&& (parameters.mountIndex >= 0)) {
+		&& (tp.mountIndex >= 0)) {
 		astro::discover::InstrumentComponent	mount = instrument->get(
 			astro::discover::InstrumentComponentKey::Mount,
-				parameters.mountIndex);
+				tp.mountIndex);
 		info.mount(mount.deviceurl());
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "found mount %s",
 			info.mount().c_str());
@@ -170,7 +177,7 @@ int TaskQueueI::submit(const TaskParameters& parameters,
 
 	try {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "submitting new task");
-		int	id = taskqueue.submit(snowstar::convert(parameters), info);
+		int	id = taskqueue.submit(snowstar::convert(tp), info);
 		astro::event(EVENT_CLASS, astro::events::INFO,
 			astro::events::Event::TASK,
 			astro::stringprintf("task %d submitted", id));
@@ -193,6 +200,9 @@ TaskParameters TaskQueueI::parameters(int taskid, const Ice::Current& /* current
 		throw NotFound(cause);
 	}
 	try {
+		astro::task::TaskParameters p = taskqueue.parameters(taskid);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "found repodb: %s",
+			p.repodb().c_str());
 		return snowstar::convert(taskqueue.parameters(taskid));
 	} catch (const std::exception& x) {
 		std::string	 cause = astro::stringprintf(

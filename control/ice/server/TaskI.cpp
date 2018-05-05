@@ -81,21 +81,6 @@ int	TaskI::imageToRepo(const std::string& reponame,
 	astro::image::ImagePtr	image = imagedir.getImagePtr(filename);
 
 	// now get the named image repository configuration
-#if 0
-	astro::config::ConfigurationPtr	configuration
-		= astro::config::Configuration::get();
-	astro::config::ImageRepoConfigurationPtr	imagerepos
-		= astro::config::ImageRepoConfiguration::get(configuration);
-	if (!imagerepos->exists(reponame)) {
-		NotFound	exception;
-		exception.cause
-			= astro::stringprintf("image repo '%s' not found",
-				reponame.c_str());
-		debug(LOG_ERR, DEBUG_LOG, 0, "%s", exception.cause.c_str());
-		throw exception;
-	}
-	astro::project::ImageRepoPtr	repo = imagerepos->repo(reponame);
-#endif
 	astro::project::ImageRepoPtr	repo;
 	try {
 		repo = ImageRepo::repo(reponame);
