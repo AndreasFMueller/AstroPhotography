@@ -21,9 +21,13 @@ public:
 	void	restartServer(Ice::Float delay, const Ice::Current& current);
 	FileInfo	statFile(const std::string& filename,
 					const Ice::Current& current);
+	FileInfo	statDevice(const std::string& devicename,
+					const Ice::Current& current);
 	DirectoryInfo	statDirectory(const std::string& dirname,
 					const Ice::Current& current);
 	void	mount(const std::string& device, const std::string& mountpoint,
+			const Ice::Current& current);
+	void	unmount(const std::string& mountpoint,
 			const Ice::Current& current);
 };
 

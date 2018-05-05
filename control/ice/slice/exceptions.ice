@@ -62,4 +62,11 @@ module snowstar {
 	exception Exists {
 		string cause;
 	};
+
+	/**
+ 	 * \brief Exception to signal that some operation did not work
+ 	 */
+	exception OperationFailed {
+		string cause;
+	};
 };

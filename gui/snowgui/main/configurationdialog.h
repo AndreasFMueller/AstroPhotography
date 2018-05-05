@@ -23,6 +23,7 @@ class configurationdialog : public QDialog {
 	void    changevalue(const std::string& name, bool defaultvalue,
 			bool newvalue);
 	bool	_servicechangewarning;
+	bool	_mounting;
 
 public:
 	configurationdialog(QWidget *parent,
@@ -31,6 +32,7 @@ public:
 
 	void	setConfiguration(snowstar::ConfigurationPrx);
 	void	setDaemon(snowstar::DaemonPrx);
+
 
 public slots:
 	void	devicesToggled(bool);
@@ -43,11 +45,17 @@ public slots:
 	void	restartClicked();
 	void	repodbChanged(QString);
 	void	repodbClicked();
+
+	void	deviceChanged(QString);
+	void	mountpointChanged(QString);
+	void	mountClicked();
 private:
 	Ui::configurationdialog *ui;
 	astro::discover::ServiceObject	_serviceobject;
 	snowstar::ConfigurationPrx	_configuration;
 	snowstar::DaemonPrx	_daemon;
+
+	void	operationFailed(const std::string& s);
 };
 
 

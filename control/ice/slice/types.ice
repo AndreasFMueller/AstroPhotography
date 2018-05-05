@@ -136,8 +136,12 @@ module snowstar {
 					throws NotFound, IOException;
 		DirectoryInfo	statDirectory(string dirname)
 					throws NotFound, IOException;
+		FileInfo	statDevice(string filename)
+					throws NotFound, IOException;
 		void	mount(string device, string mountpoint)
-				throws NotFound, IOException;
+				throws NotFound, IOException, OperationFailed;
+		void	unmount(string mountpoint)
+				throws NotFound, IOException, OperationFailed;
 	};
 
 	/**

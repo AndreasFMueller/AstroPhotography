@@ -20,6 +20,10 @@ AC_PROG_CC
 AC_PROG_LIBTOOL
 AC_CHECK_TOOL(FLEX, flex)
 AC_CHECK_TOOL(BISON, bison)
+AC_PATH_TOOL(MOUNT, mount)
+AC_PATH_TOOL(UMOUNT, umount)
+AC_SUBST(MOUNT)
+AC_SUBST(UMOUNT)
 AC_CHECK_PROG(PDFLATEX, pdflatex, pdflatex)
 if test -z "$PDFLATEX"; then
 	AC_MSG_WARN([Unabel to create PDF version of the user manual.])

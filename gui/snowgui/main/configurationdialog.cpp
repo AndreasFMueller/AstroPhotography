@@ -24,6 +24,7 @@ configurationdialog::configurationdialog(QWidget *parent,
 
 	_serviceobject = serviceobject;
 	_servicechangewarning = false;
+	_mounting = true;
 
 	// connect to the server
 	Ice::CommunicatorPtr    ic = snowstar::CommunicatorSingleton::get();
@@ -76,6 +77,13 @@ configurationdialog::configurationdialog(QWidget *parent,
 		this, SLOT(repodbChanged(QString)));
 	connect(ui->repodbButton, SIGNAL(clicked()),
 		this, SLOT(repodbClicked()));
+
+	connect(ui->deviceField, SIGNAL(textChanged(QString)),
+		this, SLOT(deviceChanged(QString)));
+	connect(ui->mountpointField, SIGNAL(textChanged(QString)),
+		this, SLOT(mountpointChanged(QString)));
+	connect(ui->mountButton, SIGNAL(clicked()),
+		this, SLOT(mountClicked()));
 
 	// title
 	setWindowTitle(QString("Configuration"));
@@ -318,6 +326,68 @@ void	configurationdialog::repodbClicked() {
 		ui->repositoryconfiguration->readRepositories();
 	} catch (const std::exception& x) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "cannot set directory");
+	}
+}
+
+void	configurationdialog::deviceChanged(QString device) {
+	std::string	devicename(device.toLatin1().data());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "deviceChanged(%s)", devicename.c_str());
+	try {
+		_daemon->statDevice(devicename);
+		std::string	mountpoint(
+				ui->mountpointField->text().toLatin1().data());
+		_daemon->statDirectory(mountpoint);
+		ui->mountButton->setEnabled(true);
+	} catch (const std::exception& x) {
+		ui->mountButton->setEnabled(false);
+	}
+}
+
+void	configurationdialog::mountpointChanged(QString m) {
+	std::string	mountpoint(m.toLatin1().data());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "mountpointChanged(%s)",
+		mountpoint.c_str());
+	try {
+		_daemon->statDirectory(mountpoint);
+		std::string	devicename(
+				ui->deviceField->text().toLatin1().data());
+		_daemon->statDevice(devicename);
+		ui->mountButton->setEnabled(true);
+	} catch (const std::exception& x) {
+		ui->mountButton->setEnabled(false);
+	}
+}
+
+void	configurationdialog::operationFailed(const std::string& s) {
+        QMessageBox     message;
+        message.setText(QString("Operation failed"));
+        std::ostringstream      out;
+        out << "The requested operation failed: ";
+	out << s;
+        message.setInformativeText(QString(out.str().c_str()));
+        message.exec();
+}
+
+void	configurationdialog::mountClicked() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "mountClicked()");
+	std::string devicename(ui->deviceField->text().toLatin1().data());
+	std::string	mountpoint(ui->mountpointField->text().toLatin1().data());
+	try {
+		if (_mounting) {
+			_daemon->mount(devicename, mountpoint);
+			ui->mountButton->setText(QString("Unmount"));
+			ui->mountpointField->setEnabled(false);
+			ui->deviceField->setEnabled(false);
+			_mounting = false;
+		} else {
+			_daemon->unmount(mountpoint);
+			ui->mountButton->setText(QString("Mount"));
+			ui->mountpointField->setEnabled(true);
+			ui->deviceField->setEnabled(true);
+			_mounting = true;
+		}
+	} catch (const std::exception& x) {
+		operationFailed(x.what());
 	}
 }
 

@@ -110,7 +110,8 @@ snowstar_DEPENDENCIES = $(top_builddir)/lib/libastro.la \
 snowstar_LDADD = -L$(top_builddir)/lib -lastro \
 	-L$(top_builddir)/ice/lib -liceastro @ICELIBS@
 snowstar_CPPFLAGS = -I$(top_builddir)/ice/include -I$(top_builddir)/ice/slice \
-	@ICEINCLUDE@ -DPIDDIR=\"@PIDDIR@\"
+	@ICEINCLUDE@ -DPIDDIR=\"@PIDDIR@\" -DMOUNT_COMMAND=\"@MOUNT@\" \
+	-DUMOUNT_COMMAND=\"@UMOUNT@\"
 
 COMMONFLAGS = --debug --foreground --base=`pwd`/images \
 	--database=`pwd`/testdb.db --config=`pwd`/testdb.db \

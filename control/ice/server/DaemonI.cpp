@@ -57,7 +57,7 @@ void    DaemonI::restartServer(Ice::Float delay,
  * \brief Get information about the directory
  */
 DirectoryInfo	DaemonI::statDirectory(const std::string& dirname,
-			const Ice::Current& current) {
+			const Ice::Current& /* current */) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "statDirectory(%s)", dirname.c_str());
 	struct stat	sb;
 	if (stat(dirname.c_str(), &sb) < 0) {
@@ -143,13 +143,114 @@ FileInfo	DaemonI::statFile(const std::string& filename,
 }
 
 /**
+ * \brief Get information about a block device
+ */
+FileInfo	DaemonI::statDevice(const std::string& devicename,
+			const Ice::Current& /* current */) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "statDevice(%s)", devicename.c_str());
+	struct stat	sb;
+	if (stat(devicename.c_str(), &sb) < 0) {
+		NotFound	notfound;
+		notfound.cause = astro::stringprintf("cannot stat %s: %s",
+			devicename.c_str(), strerror(errno));
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "%s", notfound.cause.c_str());
+		throw notfound;
+	}
+	if (!S_ISBLK(sb.st_mode)) {
+		IOException	notfile;
+		notfile.cause = astro::stringprintf("%s not a device",
+			devicename.c_str());
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "%s", notfile.cause.c_str());
+		throw notfile;
+	}
+	FileInfo	fi;
+	fi.name = devicename;
+	fi.writeable = (0 == access(devicename.c_str(), W_OK)) ? true : false;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "device %s is %swritable", 
+		devicename.c_str(), (fi.writeable) ? "" : "not ");
+	return fi;
+}
+
+/**
  * \brief Mount a device
  */
 void	DaemonI::mount(const std::string& device, const std::string& mountpoint,
-		const Ice::Current& current) {
-	// XXX implementation needed
+		const Ice::Current& /* current */) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "mounting %s on %s", device.c_str(),
 		mountpoint.c_str());
+
+	// first check that the device exists
+	struct stat	sb;
+	if (stat(device.c_str(), &sb) < 0) {
+		NotFound	error;
+		error.cause = astro::stringprintf("cannot stat '%s': %s",
+			device.c_str(), strerror(errno));
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "%s", error.cause.c_str());
+		throw error;
+	}
+	if (!S_ISBLK(sb.st_mode)) {
+		IOException	error;
+		error.cause = astro::stringprintf("%s is not a block device",
+				device.c_str());
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "%s", error.cause.c_str());
+		throw error;
+	}
+
+	// check that the mount point exists
+	if (stat(mountpoint.c_str(), &sb) < 0) {
+		NotFound	error;
+		error.cause = astro::stringprintf("cannot stat '%s': %s",
+			mountpoint.c_str(), strerror(errno));
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "%s", error.cause.c_str());
+		throw error;
+	}
+	if (!S_ISDIR(sb.st_mode)) {
+		IOException	error;
+		error.cause = astro::stringprintf("%s is not a directory",
+				mountpoint.c_str());
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "%s", error.cause.c_str());
+		throw error;
+	}
+
+	// perform the mount command
+	// XXX we should do this via popen, to be able to read the error stream
+	std::string	command = astro::stringprintf("%s -t vfat %s %s",
+		MOUNT_COMMAND, device.c_str(), mountpoint.c_str());
+	int	rc = system(command.c_str());
+	if (rc) {
+		OperationFailed	error;
+		error.cause = astro::stringprintf("cannot mount %s on %s: %s",
+			device.c_str(), mountpoint.c_str(), strerror(errno));
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "%s", error.cause.c_str());
+		throw error;
+	}
+}
+
+/**
+ * \brief
+ */
+void	DaemonI::unmount(const std::string& mountpoint,
+		const Ice::Current& /* current */) {
+	struct stat	sb;
+	if (stat(mountpoint.c_str(), &sb) < 0) {
+		NotFound	error;
+		error.cause = astro::stringprintf("cannot stat %s: %s",
+			mountpoint.c_str(), strerror(errno));
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "%s", error.cause.c_str());
+		throw error;
+	}
+	if (!S_ISDIR(sb.st_mode)) {
+	}
+	std::string	cmd = astro::stringprintf("%s %s", UMOUNT_COMMAND,
+				mountpoint.c_str());
+	int	rc = system(cmd.c_str());
+	if (rc) {
+		IOException	error;
+		error.cause = astro::stringprintf("cannot unmount %s: %s",
+			mountpoint.c_str(), strerror(errno));
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "%s", error.cause.c_str());
+		throw error;
+	}
 }
 
 } // namespace snowstar
