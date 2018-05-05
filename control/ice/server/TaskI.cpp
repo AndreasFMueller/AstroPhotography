@@ -14,6 +14,7 @@
 #include <AstroUtils.h>
 #include <AstroConfig.h>
 #include <ImageDirectory.h>
+#include <ImageRepo.h>
 
 namespace snowstar {
 
@@ -80,6 +81,7 @@ int	TaskI::imageToRepo(const std::string& reponame,
 	astro::image::ImagePtr	image = imagedir.getImagePtr(filename);
 
 	// now get the named image repository configuration
+#if 0
 	astro::config::ConfigurationPtr	configuration
 		= astro::config::Configuration::get();
 	astro::config::ImageRepoConfigurationPtr	imagerepos
@@ -93,6 +95,18 @@ int	TaskI::imageToRepo(const std::string& reponame,
 		throw exception;
 	}
 	astro::project::ImageRepoPtr	repo = imagerepos->repo(reponame);
+#endif
+	astro::project::ImageRepoPtr	repo;
+	try {
+		repo = ImageRepo::repo(reponame);
+	} catch (const std::exception& x) {
+		NotFound	exception;
+		exception.cause
+			= astro::stringprintf("image repo '%s' not found: %s",
+				reponame.c_str(), x.what());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", exception.cause.c_str());
+		throw exception;
+	}
 
 	// save the image
 	return repo->save(image);

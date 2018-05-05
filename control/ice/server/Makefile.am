@@ -36,6 +36,7 @@ noinst_HEADERS =							\
 	GuiderLocator.h							\
 	ImageI.h							\
 	ImageLocator.h							\
+	ImageRepo.h							\
 	ImagesI.h							\
 	InstrumentI.h							\
 	InstrumentLocator.h						\
@@ -86,6 +87,7 @@ snowstar_SOURCES = snowstar.cpp 					\
 	GuiderLocator.cpp						\
 	ImageI.cpp							\
 	ImageLocator.cpp						\
+	ImageRepo.cpp							\
 	ImagesI.cpp							\
 	InstrumentI.cpp							\
 	InstrumentLocator.cpp						\

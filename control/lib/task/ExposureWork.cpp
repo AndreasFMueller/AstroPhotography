@@ -263,10 +263,17 @@ void	ExposureWork::run() {
 		// add the image to the repository
 		std::string	repodb = _task.repodb();
 		std::string	repository = _task.repository();
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "saving image to imagerepo %s",
-			repository.c_str());
-		project::ImageRepoPtr	 imagerepo
-			= config::ImageRepoConfiguration::get()->repo(repository);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "saving image to repo %s@%s",
+			repository.c_str(), repodb.c_str());
+
+		// build the image repo from the repo db name
+		config::ConfigurationPtr	config;
+		if (repodb.size() > 0) {
+			config = config::Configuration::get(repodb);
+		} else {
+			config = config::Configuration::get();
+		}
+		project::ImageRepoPtr	imagerepo = config::ImageRepoConfiguration::get(config)->repo(repository);
 		if (imagerepo) {
 			long	id = imagerepo->save(image);
 			_task.filename(stringprintf("%ld", id));

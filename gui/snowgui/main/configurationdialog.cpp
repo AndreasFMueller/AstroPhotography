@@ -132,6 +132,7 @@ void	configurationdialog::setConfiguration(snowstar::ConfigurationPrx configurat
 		return;
 	}
 	_configuration = configuration;
+
 	// read the configuration information and update the widgets
 	whileBlocking(ui->devicesCheckBox)->setChecked(getService("devices"));
 	whileBlocking(ui->imagesCheckBox)->setChecked(getService("images"));
@@ -140,6 +141,17 @@ void	configurationdialog::setConfiguration(snowstar::ConfigurationPrx configurat
 	whileBlocking(ui->focusingCheckBox)->setChecked(getService("focusing"));
 	whileBlocking(ui->repositoriesCheckBox)->setChecked(getService("repository"));
 	whileBlocking(ui->tasksCheckBox)->setChecked(getService("tasks"));
+
+	// read the directory path
+	snowstar::ConfigurationKey	key;
+	key.domain = "snowstar";
+	key.section = "repositories";
+	key.name = "directory";
+	if (_configuration->has(key)) {
+		snowstar::ConfigurationItem	item = _configuration->get(key);
+		ui->repodbField->setText(QString(item.value.c_str()));
+	}
+	
 }
 
 void	configurationdialog::setDaemon(snowstar::DaemonPrx daemon) {

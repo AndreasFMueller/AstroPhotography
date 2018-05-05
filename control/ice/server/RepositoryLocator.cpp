@@ -7,6 +7,7 @@
 #include <RepositoryLocator.h>
 #include <AstroDebug.h>
 #include <AstroConfig.h>
+#include <ImageRepo.h>
 
 namespace snowstar {
 
@@ -41,14 +42,9 @@ Ice::ObjectPtr	RepositoryLocator::locate(const Ice::Current& current,
 		return i->second;
 	}
 
-	// create the repository servant
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "create a new repo servant");
-	astro::config::ConfigurationPtr	config
-		= astro::config::Configuration::get();
-	astro::config::ImageRepoConfigurationPtr	imagerepos
-		= astro::config::ImageRepoConfiguration::get(config);
-	Ice::ObjectPtr	repositoryptr = new RepositoryI(
-		*imagerepos->repo(repositoryname));
+	// no servant present, so we have to create one
+	astro::project::ImageRepoPtr	repo = ImageRepo::repo(repositoryname);
+	Ice::ObjectPtr	repositoryptr = new RepositoryI(*repo);
 	add(repositoryname, repositoryptr);
 	return repositoryptr;
 }

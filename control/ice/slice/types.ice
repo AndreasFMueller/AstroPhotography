@@ -124,6 +124,9 @@ module snowstar {
 
 	/**
 	 * \brief Interface to the server functions
+	 *
+	 * These relate to process control and more generally operating
+	 * system functions.
 	 */
 	interface Daemon {
 		void	reloadRepositories();
@@ -133,6 +136,8 @@ module snowstar {
 					throws NotFound, IOException;
 		DirectoryInfo	statDirectory(string dirname)
 					throws NotFound, IOException;
+		void	mount(string device, string mountpoint)
+				throws NotFound, IOException;
 	};
 
 	/**

@@ -18,6 +18,7 @@
 #include <ProxyCreator.h>
 #include <ImagesI.h>
 #include <ImageDirectory.h>
+#include <ImageRepo.h>
 
 namespace snowstar {
 
@@ -239,14 +240,15 @@ int     ImageI::filesize(const Ice::Current& /* current */) {
 void	ImageI::toRepository(const std::string& reponame,
 		const Ice::Current& /* current */) {
 	// get the repository
-	astro::config::ImageRepoConfigurationPtr	repoconf
-		= astro::config::ImageRepoConfiguration::get();
-	if (!repoconf->exists(reponame)) {
-		std::string	msg = astro::stringprintf("repo %s not found",
-			reponame.c_str());
+	astro::project::ImageRepoPtr	repo;
+	try {
+		repo = ImageRepo::repo(reponame);
+	} catch (const std::exception& x) {
+		std::string	msg = astro::stringprintf("repo %s not found: %s",
+			reponame.c_str(), x.what());
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "%s", msg.c_str());
 		throw NotFound(msg);
 	}
-	astro::project::ImageRepoPtr	repo = repoconf->repo(reponame);
 
 	// add the image to the repository;
 	repo->save(image());

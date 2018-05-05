@@ -29,8 +29,8 @@ static void     do_shutdown(float delay, const Ice::Current& current) {
  * \brief Reload the repository database
  */
 void	DaemonI::reloadRepositories(const Ice::Current& /* current */) {
-	// XXX implementation needed
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "repositories reloaded");
+	_server.reloadRepositories();
 }
 
 /**
@@ -140,6 +140,16 @@ FileInfo	DaemonI::statFile(const std::string& filename,
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "file %s is %swritable", 
 		filename.c_str(), (fi.writeable) ? "" : "not ");
 	return fi;
+}
+
+/**
+ * \brief Mount a device
+ */
+void	DaemonI::mount(const std::string& device, const std::string& mountpoint,
+		const Ice::Current& current) {
+	// XXX implementation needed
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "mounting %s on %s", device.c_str(),
+		mountpoint.c_str());
 }
 
 } // namespace snowstar

@@ -23,6 +23,8 @@ public:
 					const Ice::Current& current);
 	DirectoryInfo	statDirectory(const std::string& dirname,
 					const Ice::Current& current);
+	void	mount(const std::string& device, const std::string& mountpoint,
+			const Ice::Current& current);
 };
 
 } // namespace snowstar
