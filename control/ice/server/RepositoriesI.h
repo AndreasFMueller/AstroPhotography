@@ -7,11 +7,17 @@
 #define _Repositories_h
 
 #include <repository.h>
+#include <AstroConfig.h>
 
 namespace snowstar {
 
 class RepositoriesI : virtual public Repositories {
+	std::string	_repositoriesDB;
+	astro::config::ConfigurationPtr	_configuration;
 public:
+	void	setRepositoriesDB(const std::string& dbfilename);
+	const std::string&	repositoriesDB();
+	void	reloadDB();
 	RepositoriesI();
 	virtual ~RepositoriesI();
 	virtual reponamelist	list(const Ice::Current& current);

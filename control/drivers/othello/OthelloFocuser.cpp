@@ -68,6 +68,14 @@ long	OthelloFocuser::current() {
  * \brief Set the position to move to
  */
 void	OthelloFocuser::set(long value) {
+	// bring the value into the interval
+	if (value < min()) {
+		value = min();
+	}
+	if (value > max()) {
+		value = max();
+	}
+	// prepare the structure to send
 	othello_set_t	setdata;
 	setdata.set = value;
 	Request<othello_set_t>	request(

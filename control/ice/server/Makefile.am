@@ -14,6 +14,7 @@ noinst_HEADERS =							\
 	CcdI.h								\
 	ConfigurationI.h						\
 	CoolerI.h							\
+	DaemonI.h							\
 	DeviceI.h							\
 	DeviceLocatorI.h						\
 	DeviceLocatorLocator.h						\
@@ -60,6 +61,7 @@ snowstar_SOURCES = snowstar.cpp 					\
 	CcdSink.cpp							\
 	ConfigurationI.cpp						\
 	CoolerI.cpp							\
+	DaemonI.cpp							\
 	DeviceI.cpp							\
 	DeviceLocatorI.cpp						\
 	DeviceLocatorLocator.cpp					\

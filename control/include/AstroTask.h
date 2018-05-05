@@ -85,6 +85,12 @@ public:
 	void	project(const std::string& p) { _project = p; }
 
 private:
+	std::string	_repodb;
+public:
+	const std::string&	repodb() const { return _repodb; }
+	void	repodb(const std::string& r) { _repodb = r; }
+
+private:
 	std::string	_repository;
 public:
 	const std::string&	repository() const { return _repository; }

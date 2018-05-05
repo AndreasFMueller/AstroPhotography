@@ -150,7 +150,7 @@ static int	list_command(ConfigurationPrx configuration,
 	return EXIT_SUCCESS;
 }
 
-int	restart_command(ConfigurationPrx configuration,
+int	restart_command(DaemonPrx daemon,
 			const std::list<std::string>& arguments) {
 	float	delay = 0;
 	if (arguments.size() > 0) {
@@ -158,11 +158,11 @@ int	restart_command(ConfigurationPrx configuration,
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "requesting restart after delay %f",
 		delay);
-	configuration->restartServer(delay);
+	daemon->restartServer(delay);
 	return EXIT_SUCCESS;
 }
 
-int	shutdown_command(ConfigurationPrx configuration,
+int	shutdown_command(DaemonPrx daemon,
 			const std::list<std::string>& arguments) {
 	float	delay = 0;
 	if (arguments.size() > 0) {
@@ -170,7 +170,7 @@ int	shutdown_command(ConfigurationPrx configuration,
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "requesting shutdown after delay %f",
 		delay);
-	configuration->shutdownServer(delay);
+	daemon->shutdownServer(delay);
 	return EXIT_SUCCESS;
 }
 
@@ -237,6 +237,7 @@ int	main(int argc, char *argv[]) {
 
 	// create a sever connection
 	astro::ServerName	servername(serverargument);
+
 	Ice::ObjectPrx	base = ic->stringToProxy(
 				servername.connect("Configuration"));
 	ConfigurationPrx	configuration
@@ -245,6 +246,12 @@ int	main(int argc, char *argv[]) {
 		throw std::runtime_error("cannot connect to remote server");
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "connected to configuration service");
+
+	base = ic->stringToProxy(servername.connect("Daemon"));
+	DaemonPrx	daemon = DaemonPrx::checkedCast(base);
+	if (!daemon) {
+		throw std::runtime_error("cannot connect to remote server");
+	}
 	
 	// now process the various commands
 	if ("get" == command) {
@@ -260,10 +267,10 @@ int	main(int argc, char *argv[]) {
 		return list_command(configuration, arguments);
 	}
 	if ("shutdown" == command) {
-		return shutdown_command(configuration, arguments);
+		return shutdown_command(daemon, arguments);
 	}
 	if ("restart" == command) {
-		return restart_command(configuration, arguments);
+		return restart_command(daemon, arguments);
 	}
 	std::cerr << "command " << command << " unknown" << std::endl;
 

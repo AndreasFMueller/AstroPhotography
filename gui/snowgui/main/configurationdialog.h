@@ -20,7 +20,8 @@ class configurationdialog : public QDialog {
 	Q_OBJECT
 
 	bool	getService(const std::string& name);
-	void    changevalue(const std::string& name, bool defaultvalue, bool newvalue);
+	void    changevalue(const std::string& name, bool defaultvalue,
+			bool newvalue);
 	bool	_servicechangewarning;
 
 public:
@@ -29,6 +30,7 @@ public:
 	~configurationdialog();
 
 	void	setConfiguration(snowstar::ConfigurationPrx);
+	void	setDaemon(snowstar::DaemonPrx);
 
 public slots:
 	void	devicesToggled(bool);
@@ -39,11 +41,13 @@ public slots:
 	void	repositoriesToggled(bool);
 	void	tasksToggled(bool);
 	void	restartClicked();
-
+	void	repodbChanged(QString);
+	void	repodbClicked();
 private:
 	Ui::configurationdialog *ui;
 	astro::discover::ServiceObject	_serviceobject;
 	snowstar::ConfigurationPrx	_configuration;
+	snowstar::DaemonPrx	_daemon;
 };
 
 

@@ -107,8 +107,32 @@ module snowstar {
 		ConfigurationList	listDomain(string domain);
 		ConfigurationList	listSection(string domain,
 						string section);
+	};
+
+	struct FileInfo {
+		string	name;
+		bool	writeable;
+	};
+
+	sequence<string>	FilenameList;
+	struct DirectoryInfo {
+		string	name;
+		bool	writeable;
+		FilenameList	files;
+		FilenameList	directories;
+	};
+
+	/**
+	 * \brief Interface to the server functions
+	 */
+	interface Daemon {
+		void	reloadRepositories();
 		void	shutdownServer(float delay);
 		void	restartServer(float delay);
+		FileInfo	statFile(string filename)
+					throws NotFound, IOException;
+		DirectoryInfo	statDirectory(string dirname)
+					throws NotFound, IOException;
 	};
 
 	/**

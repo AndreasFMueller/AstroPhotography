@@ -35,6 +35,14 @@ configurationdialog::configurationdialog(QWidget *parent,
 	}
 	setConfiguration(configuration);
 
+	// daemon connection
+	base = ic->stringToProxy(_serviceobject.connect("Daemon"));
+	snowstar::DaemonPrx	daemon = snowstar::DaemonPrx::checkedCast(base);
+	if (!base) {
+		throw std::runtime_error("cannot create daemon app");
+	}
+	setDaemon(daemon);
+
 	// find out whether the remote supports 
 	try {
 		Ice::ObjectPrx	base = ic->stringToProxy(
@@ -63,6 +71,11 @@ configurationdialog::configurationdialog(QWidget *parent,
 
 	connect(ui->restartButton, SIGNAL(clicked()),
 		this, SLOT(restartClicked()));
+
+	connect(ui->repodbField, SIGNAL(textChanged(QString)),
+		this, SLOT(repodbChanged(QString)));
+	connect(ui->repodbButton, SIGNAL(clicked()),
+		this, SLOT(repodbClicked()));
 
 	// title
 	setWindowTitle(QString("Configuration"));
@@ -129,7 +142,16 @@ void	configurationdialog::setConfiguration(snowstar::ConfigurationPrx configurat
 	whileBlocking(ui->tasksCheckBox)->setChecked(getService("tasks"));
 }
 
-void	configurationdialog::changevalue(const std::string& name, bool defaultvalue, bool newvalue) {
+void	configurationdialog::setDaemon(snowstar::DaemonPrx daemon) {
+	if (!daemon) {
+		return;
+	}
+	_daemon = daemon;
+	ui->repositoryconfiguration->setDaemon(daemon);
+}
+
+void	configurationdialog::changevalue(const std::string& name,
+		bool defaultvalue, bool newvalue) {
 	std::string	targetvalue = (newvalue) ? "yes" : "no";
 	snowstar::ConfigurationKey	key;
 	key.domain = "snowstar";
@@ -195,8 +217,96 @@ void	configurationdialog::tasksToggled(bool newvalue) {
 
 void	configurationdialog::restartClicked() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "restart initiated");
-	_configuration->restartServer(1.0f);
+	_daemon->restartServer(1.0f);
 }
 
+void	configurationdialog::repodbChanged(QString s) {
+	std::string	filename = std::string(s.toLatin1().data());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "repo db changed to %s",
+		filename.c_str());
+
+	// enable the button if the filename string points to a writable file
+	try {
+		snowstar::FileInfo	fileinfo = _daemon->statFile(filename);
+		if (fileinfo.writeable) {
+			ui->repodbButton->setText("Open");
+			ui->repodbButton->setEnabled(true);
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "found a writable file");
+			return;
+		}
+	} catch (const std::exception& x) {
+		// this is not a file
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "%s is not a file",
+			filename.c_str());
+	}
+
+	// check whether the parent directory is actually a writable directory
+	try {
+		snowstar::DirectoryInfo	dirinfo
+			= _daemon->statDirectory(filename);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "found a directory");
+		ui->repodbButton->setEnabled(false);
+		return;
+	} catch (const std::exception& x) {
+		// this is not a directory
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "%s is not a directory",
+			filename.c_str());
+	}
+
+	// strip the last component from the name
+	size_t	l = filename.rfind('/');
+	if (std::string::npos != l) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "l = %d", l);
+		std::string	dirname = filename.substr(0, l);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "dirname = '%s'",
+			dirname.c_str());
+		std::string	fname = filename.substr(l + 1);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "filename = '%s'",
+			fname.c_str());
+		if (fname.size() == 0) {
+			ui->repodbButton->setEnabled(false);
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "just a directory name");
+			return;
+		}
+		filename = dirname;
+	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "check directory '%s'",
+		filename.c_str());
+
+	// check whether the directory is writable
+	try {
+		snowstar::DirectoryInfo dirinfo
+			= _daemon->statDirectory(filename);
+		if (dirinfo.writeable) {
+			ui->repodbButton->setText("Create");
+			ui->repodbButton->setEnabled(true);
+			debug(LOG_DEBUG, DEBUG_LOG, 0,
+				"found a creatable file %s", filename.c_str());
+			return;
+		}
+	} catch (const std::exception& x) {
+		// this file is not writable
+	}
+
+	// make sure 
+	ui->repodbButton->setEnabled(false);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "nothing found");
+}
+
+void	configurationdialog::repodbClicked() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "repodb button clicked");
+	try {
+		snowstar::ConfigurationItem	item;
+		item.domain = "snowstar";
+		item.section = "repositories";
+		item.name = "directory";
+		item.value = std::string(ui->repodbField->text().toLatin1().data());
+		_configuration->set(item);
+		_daemon->reloadRepositories();
+		ui->repositoryconfiguration->readRepositories();
+	} catch (const std::exception& x) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "cannot set directory");
+	}
+}
 
 } // namespace snowgui

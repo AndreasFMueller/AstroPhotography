@@ -17,6 +17,8 @@
 
 namespace snowstar {
 
+class RepositoriesI;
+
 class Server {
 	Ice::CommunicatorPtr	ic;
 
@@ -32,11 +34,14 @@ class Server {
 
 	Ice::ObjectAdapterPtr	adapter;
 
+	RepositoriesI	*_repositories;
+
 	void	get_configured_services(astro::discover::ServicePublisherPtr sp);
 
 	void	add_devices_servant();
 	void	add_event_servant();
 	void	add_configuration_servant();
+	void	add_daemon_servant();
 	void	add_images_servant();
 	void	add_tasks_servant();
 	void	add_instruments_servant();
@@ -45,7 +50,11 @@ class Server {
 	void	add_focusing_servant();
 public:
 	Server(Ice::CommunicatorPtr ic, const std::string& dbfilename);
+
 	void	waitForShutdown();
+
+	// cross servant methods
+	void	reloadRepositories();
 };
 
 } // namespace snowstar

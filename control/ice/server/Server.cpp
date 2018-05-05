@@ -37,6 +37,7 @@
 #include <EventHandlerI.h>
 #include <EventServantLocator.h>
 #include <ConfigurationI.h>
+#include <DaemonI.h>
 
 namespace snowstar {
 
@@ -123,6 +124,14 @@ void	Server::add_configuration_servant() {
 		"Configuration server added");
 }
 
+void	Server::add_daemon_servant() {
+	Ice::ObjectPtr	object = new DaemonI(*this);
+	adapter->add(object, ic->stringToIdentity("Daemon"));
+	astro::event(EVENT_GLOBAL, astro::events::INFO,
+		astro::events::Event::DEBUG,
+		"Daemon server added");
+}
+
 void	Server::add_images_servant() {
 	Ice::ObjectPtr	object = new ImagesI();
 	adapter->add(object, ic->stringToIdentity("Images"));
@@ -158,7 +167,8 @@ void	Server::add_instruments_servant() {
 }
 
 void	Server::add_repository_servant() {
-	Ice::ObjectPtr	object = new RepositoriesI();
+	_repositories = new RepositoriesI();
+	Ice::ObjectPtr	object = _repositories;
 	adapter->add(object, ic->stringToIdentity("Repositories"));
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "Repositories servant added");
 	RepositoryLocator	*repolocator = new RepositoryLocator();
@@ -245,6 +255,7 @@ Server::Server(Ice::CommunicatorPtr _ic, const std::string& dbfilename)
 
 	// add a servant for configuration data
 	add_configuration_servant();
+	add_daemon_servant();
 
 	// add a servant for devices to the device adapter
 	if (sp->has(astro::discover::ServiceSubset::DEVICES)) {
@@ -292,6 +303,14 @@ void	Server::waitForShutdown() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "wait for shutdown");
 	ic->waitForShutdown();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "shutdown complete");
+}
+
+void	Server::reloadRepositories() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "reload repositories called");
+	if (!_repositories) {
+		return;
+	}
+	_repositories->reloadDB();
 }
 
 } // namespace snowstar

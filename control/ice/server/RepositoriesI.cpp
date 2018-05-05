@@ -10,10 +10,45 @@
 
 namespace snowstar {
 
+/**
+ * \brief Create a repositories server
+ */
 RepositoriesI::RepositoriesI() {
+	reloadDB();
 }
 
+/**
+ * \brief Destroy the repositories servant
+ */
 RepositoriesI::~RepositoriesI() {
+}
+
+/**
+ * \brief Switch to a new repositories database
+ */
+void	RepositoriesI::setRepositoriesDB(const std::string& dbfilename) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "switch to new dbfile: %s",
+		dbfilename.c_str());
+	_configuration = astro::config::Configuration::get(dbfilename);
+	_repositoriesDB = dbfilename;
+}
+
+void	RepositoriesI::reloadDB() {
+	astro::config::ConfigurationPtr	config
+		= astro::config::Configuration::get();
+	try {
+		if (config->has("snowstar", "repositories", "directory")) {
+			std::string	dbfilename = config->get("snowstar",
+						"repositories", "directory");
+			setRepositoriesDB(dbfilename);
+			return;
+		}
+	} catch (std::exception& x) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "cannot create repository: %s",
+			x.what());
+	}
+	_repositoriesDB = "";
+	_configuration = config;
 }
 
 /**
@@ -22,10 +57,8 @@ RepositoriesI::~RepositoriesI() {
 reponamelist	RepositoriesI::list(const Ice::Current& /* current */) {
 	reponamelist	result;
 	// retrieve a list of repository names from the configuration
-	astro::config::ConfigurationPtr	config
-		= astro::config::Configuration::get();
 	astro::config::ImageRepoConfigurationPtr	imagerepos
-		= astro::config::ImageRepoConfiguration::get(config);
+		= astro::config::ImageRepoConfiguration::get(_configuration);
 	std::list<astro::project::ImageRepoInfo>	repolist
 		= imagerepos->listrepo(true);
 	for (auto ptr = repolist.begin(); ptr != repolist.end(); ptr++) {
@@ -40,10 +73,8 @@ reponamelist	RepositoriesI::list(const Ice::Current& /* current */) {
 reposummarylist	RepositoriesI::summarylist(const Ice::Current& /* current */) {
 	reposummarylist	result;
 	// retrieve a list of repository names from the configuration
-	astro::config::ConfigurationPtr	config
-		= astro::config::Configuration::get();
 	astro::config::ImageRepoConfigurationPtr	imagerepos
-		= astro::config::ImageRepoConfiguration::get(config);
+		= astro::config::ImageRepoConfiguration::get(_configuration);
 	std::list<astro::project::ImageRepoInfo>	repolist
 		= imagerepos->listrepo(false);
 	for (auto ptr = repolist.begin(); ptr != repolist.end(); ptr++) {
@@ -74,10 +105,8 @@ reposummarylist	RepositoriesI::summarylist(const Ice::Current& /* current */) {
 bool	RepositoriesI::has(const std::string& reponame,
 			const Ice::Current& /* current */) {
 	// retrieve a list of repository names from the configuration
-	astro::config::ConfigurationPtr	config
-		= astro::config::Configuration::get();
 	astro::config::ImageRepoConfigurationPtr	imagerepos
-		= astro::config::ImageRepoConfiguration::get(config);
+		= astro::config::ImageRepoConfiguration::get(_configuration);
 	return imagerepos->exists(reponame);
 }
 
@@ -100,10 +129,8 @@ RepositoryPrx	RepositoriesI::get(const std::string& reponame,
 void	RepositoriesI::remove(const std::string& reponame, bool removecontents,
 		const Ice::Current& /* current */) {
 	// get configuration
-	astro::config::ConfigurationPtr	config
-		= astro::config::Configuration::get();
 	astro::config::ImageRepoConfigurationPtr	imagerepos
-		= astro::config::ImageRepoConfiguration::get(config);
+		= astro::config::ImageRepoConfiguration::get(_configuration);
 
 	// check repo exists
 	if (!imagerepos->exists(reponame)) {
@@ -135,10 +162,8 @@ void	RepositoriesI::add(const std::string& reponame,
 		const std::string& directory,
 		const Ice::Current& /* current */) {
 	// get configuration
-	astro::config::ConfigurationPtr	config
-		= astro::config::Configuration::get();
 	astro::config::ImageRepoConfigurationPtr	imagerepos
-		= astro::config::ImageRepoConfiguration::get(config);
+		= astro::config::ImageRepoConfiguration::get(_configuration);
 
 	// check whether repository already exists
 	if (imagerepos->exists(reponame)) {
@@ -166,10 +191,8 @@ void	RepositoriesI::add(const std::string& reponame,
 bool	RepositoriesI::hidden(const std::string& reponame,
 		const Ice::Current& /* current */) {
 	// get configuration
-	astro::config::ConfigurationPtr	config
-		= astro::config::Configuration::get();
 	astro::config::ImageRepoConfigurationPtr	imagerepos
-		= astro::config::ImageRepoConfiguration::get(config);
+		= astro::config::ImageRepoConfiguration::get(_configuration);
 
 	// check whether repository already exists
 	if (imagerepos->exists(reponame)) {
@@ -187,10 +210,8 @@ bool	RepositoriesI::hidden(const std::string& reponame,
 void	RepositoriesI::setHidden(const std::string& reponame,
 		bool hidden, const Ice::Current& /* current */) {
 	// get configuration
-	astro::config::ConfigurationPtr	config
-		= astro::config::Configuration::get();
 	astro::config::ImageRepoConfigurationPtr	imagerepos
-		= astro::config::ImageRepoConfiguration::get(config);
+		= astro::config::ImageRepoConfiguration::get(_configuration);
 
 	// check whether repository already exists
 	if (!imagerepos->exists(reponame)) {

@@ -261,6 +261,7 @@ void	ExposureWork::run() {
 
 	if (_task.repository().size() > 0) {
 		// add the image to the repository
+		std::string	repodb = _task.repodb();
 		std::string	repository = _task.repository();
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "saving image to imagerepo %s",
 			repository.c_str());
