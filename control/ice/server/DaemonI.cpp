@@ -100,7 +100,7 @@ DirectoryInfo	DaemonI::statDirectory(const std::string& dirname,
 			closedir(dirp);
 			throw error;
 		}
-		std::string	entryname(direntry.d_name, direntry.d_namlen);
+		std::string	entryname(direntry.d_name);
 		if (direntry.d_type == DT_REG) {
 			info.files.push_back(entryname);
 		}
