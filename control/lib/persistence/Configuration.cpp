@@ -89,5 +89,12 @@ void	Configuration::set_default(const std::string& filename) {
 	default_config = filename;
 }
 
+/**
+ * \brief Get the system database
+ */
+persistence::Database	Configuration::systemdatabase() {
+	return database();
+}
+
 } // namespace config
 } // namespace astro

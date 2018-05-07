@@ -245,8 +245,15 @@ static void	set_default(const std::string& filename);
 	virtual std::list<ConfigurationEntry>	list(const std::string& domain,
 		const std::string& section) = 0;
 
+	// simplified accessors
+	virtual void	setMediaPath(const std::string& path) = 0;
+	virtual std::string	getMediaPath() = 0;
+
 	// access to the raw database
 	virtual persistence::Database	database() = 0;
+
+	virtual persistence::Database	systemdatabase();
+	virtual persistence::Database	mediadatabase() = 0;
 };
 
 class ImageRepoConfiguration;

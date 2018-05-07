@@ -1,5 +1,8 @@
 ChangeLog for the Astro project.
 
+20180507:
+	* add media path to configuration backend
+
 20180503:
 	* add retries to USB descriptor string retrieval to work around
 	  problem with at90usb162 issue

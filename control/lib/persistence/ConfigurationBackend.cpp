@@ -7,6 +7,10 @@
 #include <AstroDebug.h>
 #include <AstroFormat.h>
 #include <cstdlib>
+#include <sys/stat.h>
+#include <errno.h>
+#include <string.h>
+#include <unistd.h>
 
 using namespace astro::persistence;
 using namespace astro::project;
@@ -110,6 +114,64 @@ std::list<ConfigurationEntry>   ConfigurationBackend::list(
  */
 Database	ConfigurationBackend::database() {
 	return _database;
+}
+
+/**
+ * \brief Set the path for the media database
+ */
+void	ConfigurationBackend::setMediaPath(const std::string& path) {
+	// make sure the path actually is a directory
+	struct stat	sb;
+	if (stat(path.c_str(), &sb) < 0) {
+		std::string	msg = stringprintf("cannot stat %s: %s",
+			path.c_str(), strerror(errno));
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw std::runtime_error(msg);
+	}
+	if (!S_ISDIR(sb.st_mode)) {
+		std::string	msg = stringprintf("%s is not a directory",
+			path.c_str());
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw std::runtime_error(msg);
+	}
+	if (!access(path.c_str(), W_OK)) {
+		std::string	msg = stringprintf("cannot write %s",
+			path.c_str());
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw std::runtime_error(msg);
+	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "'%s' is suitable as media path");
+
+	set("system", "configuration", "media", path);
+}
+
+/**
+ * \brief Get the media path
+ */
+std::string	ConfigurationBackend::getMediaPath() {
+	if (!has("system", "configuration", "media")) {
+		return std::string("");
+	}
+	return get("system", "configuration", "media");
+}
+
+/**
+ * \brief Get the media database
+ */
+Database	ConfigurationBackend::mediadatabase() {
+	// ask the configuration database for the key named
+	if (has("system", "configuration", "media")) {
+		return _database;
+	}
+
+	// try alternative Media database path
+	std::string	_mediadbfilename = get("system", "configuration",
+				"media", "") + "/media.db";
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "opening media database '%s'",
+		_mediadbfilename.c_str());
+	
+	// get the database based on this filename
+	return DatabaseFactory::get(_mediadbfilename);
 }
 
 } // namespace config

@@ -51,6 +51,8 @@ public:
 				const std::string& value);
 	virtual void	set(const ConfigurationKey& key,
 				const std::string& value);
+	virtual void	setMediaPath(const std::string& path);
+	virtual std::string	getMediaPath();
 	virtual void	remove(const ConfigurationKey& key);
 	virtual void    remove(const std::string& domain,
 				const std::string& section,
@@ -70,6 +72,7 @@ public:
 
 	// get the configuration database
 	virtual Database	database();
+	virtual Database	mediadatabase();
 };
 
 } // namespace config
