@@ -1,21 +1,5 @@
 7. 4.
 
-- table structure
-
-- during guiding
-
-	$ stacktrace caused by signal 11
-	[0] /usr/local/astro/lib/libastro.so.0(stderr_stacktrace+0x3b) [0xb6f447c4]
-	[1] /lib/arm-linux-gnueabihf/libc.so.6(+0x25260) [0xb6164260]
-
-- should be handled more elegantly
-
-	-! 04/08/18 07:18:42.206 warning: dispatch exception: std::exception: cannot start guiding in this state
-	   identity: guider/GUIDETEST%7c0%7c0%7c0
-	   facet: 
-	   operation: startGuiding
-	   remote host: ::ffff:192.168.42.2 remote port: 51584
-
 - when opening the backlash dialog for the first time:
 
 	Apr 13 13:58:43 snowgui[8515/1] backlashdialog.cpp:094: identity: 922BBA9F-E15B-484B-AF57-C382EFFEA143
@@ -32,5 +16,9 @@
 
 - Ubuntu GUI: where is the file menu?
 
+- repositories should be relative to a path stored in the repository database
+
+- tasks should be stored in a database that is in the same place as the
+  repository stuff, i.e. on the USB stick
 
 
