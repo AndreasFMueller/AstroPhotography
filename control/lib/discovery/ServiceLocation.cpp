@@ -12,6 +12,14 @@
 namespace astro {
 namespace discover {
 
+static config::ConfigurationRegister	_name_key("global", "service", "name",
+	"name of the service");
+static config::ConfigurationRegister	_port_key("global", "service", "port",
+	"port for the service");
+static config::ConfigurationRegister	_sslport_key("global", "service",
+						"sslport",
+	"port for the SSL encrypted  service");
+
 /**
  * \brief locate a service
  */
@@ -19,8 +27,8 @@ void	ServiceLocation::locate() {
 	astro::config::ConfigurationPtr	config
 		= astro::config::Configuration::get();
 	if (_servicename.size() == 0) {
-		if (config->has("global", "service", "name")) {
-			_servicename = config->get("global", "service", "name");
+		if (config->has(_name_key)) {
+			_servicename = config->get(_name_key);
 		} else {
 			char	h[1024];
 			if (gethostname(h, sizeof(h)) < 0) {
@@ -34,16 +42,16 @@ void	ServiceLocation::locate() {
 		}
 	}
 	if (_port == 0) {
-		if (config->has("global", "service", "port")) {
-			std::string	s = config->get("global", "service", "port");
+		if (config->has(_port_key)) {
+			std::string	s = config->get(_port_key);
 			_port = std::stoi(s);
 		} else {
 			_port = 10000;
 		}
 	}
 	if (_sslport == 0) {
-		if (config->has("global", "service", "sslport")) {
-			std::string s = config->get("global", "service", "sslport");
+		if (config->has(_sslport_key)) {
+			std::string s = config->get(_sslport_key);
 			_sslport = std::stoi(s);
 		}
 	}

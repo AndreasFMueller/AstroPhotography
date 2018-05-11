@@ -25,6 +25,7 @@ namespace snowstar {
 static struct option	longopts[] = {
 { "base",		required_argument,	NULL,	'b' }, /*  0 */
 { "config",		required_argument,	NULL,	'c' }, /*  1 */
+{ "confkeys",		required_argument,	NULL,	'C' }, /*  1 */
 { "debug",		no_argument,		NULL,	'd' }, /*  2 */
 { "database",		required_argument,	NULL,	'D' }, /*  3 */
 { "foreground",		no_argument,		NULL,	'f' }, /*  4 */
@@ -130,13 +131,17 @@ int	snowstar_main(int argc, char *argv[]) {
 	int	c;
 	int	longindex;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "start parsing the command line");
-	while (EOF != (c = getopt_long(argc, argv, "b:c:dD:fghl:Ln:p:P:s:uN:F:",
+	while (EOF != (c = getopt_long(argc, argv, "b:Cc:dD:fghl:Ln:p:P:s:uN:F:",
 		longopts, &longindex))) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "found option '%c': %s",
 			c, optarg);
 		switch (c) {
 		case 'b':
 			astro::image::ImageDirectory::basedir(optarg);
+			break;
+		case 'C':
+			astro::config::Configuration::showkeys(std::cout, true);
+			exit(EXIT_SUCCESS);
 			break;
 		case 'c':
 			debug(LOG_DEBUG, DEBUG_LOG, 0, "configuration: %s",

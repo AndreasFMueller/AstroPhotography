@@ -116,6 +116,9 @@ Database	ConfigurationBackend::database() {
 	return _database;
 }
 
+ConfigurationRegister	_media_key("system", "configuration", "media",
+				"path to the media directory/mount point");
+
 /**
  * \brief Set the path for the media database
  */
@@ -142,17 +145,17 @@ void	ConfigurationBackend::setMediaPath(const std::string& path) {
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "'%s' is suitable as media path");
 
-	set("system", "configuration", "media", path);
+	set(_media_key, path);
 }
 
 /**
  * \brief Get the media path
  */
 std::string	ConfigurationBackend::getMediaPath() {
-	if (!has("system", "configuration", "media")) {
+	if (!has(_media_key)) {
 		return std::string("");
 	}
-	return get("system", "configuration", "media");
+	return get(_media_key);
 }
 
 /**
@@ -160,13 +163,12 @@ std::string	ConfigurationBackend::getMediaPath() {
  */
 Database	ConfigurationBackend::mediadatabase() {
 	// ask the configuration database for the key named
-	if (has("system", "configuration", "media")) {
+	if (has(_media_key)) {
 		return _database;
 	}
 
 	// try alternative Media database path
-	std::string	_mediadbfilename = get("system", "configuration",
-				"media", "") + "/media.db";
+	std::string	_mediadbfilename = get(_media_key, ".") + "/media.db";
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "opening media database '%s'",
 		_mediadbfilename.c_str());
 	

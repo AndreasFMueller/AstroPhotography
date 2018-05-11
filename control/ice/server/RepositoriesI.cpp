@@ -7,6 +7,7 @@
 #include <ProxyCreator.h>
 #include <AstroConfig.h>
 #include <AstroFormat.h>
+#include "ImageRepo.h"
 
 namespace snowstar {
 
@@ -37,9 +38,9 @@ void	RepositoriesI::reloadDB() {
 	astro::config::ConfigurationPtr	config
 		= astro::config::Configuration::get();
 	try {
-		if (config->has("snowstar", "repositories", "directory")) {
-			std::string	dbfilename = config->get("snowstar",
-						"repositories", "directory");
+		if (config->has(_snowstar_repositories_directory_key)) {
+			std::string	dbfilename = config->get(
+					_snowstar_repositories_directory_key);
 			setRepositoriesDB(dbfilename);
 			return;
 		}

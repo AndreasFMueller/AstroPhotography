@@ -75,6 +75,9 @@ ImageRepoPtr	ImageRepoConfigurationBackend::repo(const std::string& name) {
 	return ImageRepoPtr(new ImageRepo(repos.get(name)));
 }
 
+static ConfigurationRegister	_topdir_key("global", "repository", "topdir",
+	"top directory for an image repository database");
+
 /**
  * \brief add a repository
  */
@@ -94,13 +97,12 @@ void	ImageRepoConfigurationBackend::addrepo(const std::string& name,
 	// find out whether the name contains any slashes
 	std::string	_directory = directory;
 	if (directory.find('/') == std::string::npos) {
-		if (!_config->has("global", "repository", "topdir")) {
+		if (!_config->has(_topdir_key)) {
 			debug(LOG_ERR, DEBUG_LOG, 0,
 				"repository.topdir not set");
 			throw BadParameter("repository.topdir not set");
 		}
-		_directory = _config->get("global", "repository", "topdir")
-			+ "/" + directory;
+		_directory = _config->get(_topdir_key) + "/" + directory;
 	}
 
 	// find out whether the directory already exists

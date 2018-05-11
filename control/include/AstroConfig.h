@@ -254,6 +254,28 @@ static void	set_default(const std::string& filename);
 
 	virtual persistence::Database	systemdatabase();
 	virtual persistence::Database	mediadatabase() = 0;
+
+	// registration of keys
+	static void	registerkey(const ConfigurationKey& key,
+				const std::string& description);
+	static void	registerkey(const std::string& domain,
+				const std::string& section,
+				const std::string& name,
+				const std::string& description) {
+		registerkey(ConfigurationKey(domain, section, name),
+			description);
+	}
+	static std::string	describe(const ConfigurationKey& key);
+	static std::list<ConfigurationKey>	listRegistered();
+	static void	showkeys(std::ostream& out,
+				bool showdescriptions = false);
+};
+
+class ConfigurationRegister : public ConfigurationKey {
+public:
+	ConfigurationRegister(const std::string& domain,
+		const std::string& section, const std::string& name,
+		const std::string& description);
 };
 
 class ImageRepoConfiguration;

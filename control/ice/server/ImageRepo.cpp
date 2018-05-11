@@ -7,14 +7,17 @@
 
 namespace snowstar {
 
+astro::config::ConfigurationKey	_snowstar_repositories_directory_key("snowstar",
+					"repositories", "directory");
+
 /**
  * \brief Get the database file name
  */
 std::string	ImageRepo::configdb() {
 	astro::config::ConfigurationPtr config
 		= astro::config::Configuration::get();
-	if (config->has("snowstar", "repositories", "directory")) {
-		return config->get("snowstar", "repositories", "directory");
+	if (config->has(_snowstar_repositories_directory_key)) {
+		return config->get(_snowstar_repositories_directory_key);
 	}
 	return std::string("");
 }
@@ -26,9 +29,9 @@ astro::config::ConfigurationPtr	ImageRepo::repoconfig() {
 	// get the repository database name
 	astro::config::ConfigurationPtr config
 		= astro::config::Configuration::get();
-	if (config->has("snowstar", "repositories", "directory")) {
+	if (config->has(_snowstar_repositories_directory_key)) {
 		std::string	repodbname
-			= config->get("snowstar", "repositories", "directory");
+			= config->get(_snowstar_repositories_directory_key);
 		config = astro::config::Configuration::get(repodbname);
 	}
 	return config;

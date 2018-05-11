@@ -9,6 +9,8 @@
 #include <AstroFormat.h>
 #include <cstdlib>
 #include "ConfigurationBackend.h"
+#include "ConfigurationRegistry.h"
+#include <mutex>
 
 using namespace astro::persistence;
 using namespace astro::project;
@@ -94,6 +96,46 @@ void	Configuration::set_default(const std::string& filename) {
  */
 persistence::Database	Configuration::systemdatabase() {
 	return database();
+}
+
+
+static std::once_flag	_registry_flag;
+static ConfigurationRegistry	*_registry = NULL;
+static void	_create_registry() {
+	_registry = new ConfigurationRegistry();
+}
+
+/**
+ * \brief Register a configuration key
+ */
+void	Configuration::registerkey(const ConfigurationKey& key,
+		const std::string& description) {
+	std::call_once(_registry_flag, _create_registry);
+	_registry->add(key, description);
+}
+
+/**
+ * \brief Retrieve the description for a configuration key
+ */
+std::string	Configuration::describe(const ConfigurationKey& key) {
+	std::call_once(_registry_flag, _create_registry);
+	return _registry->describe(key);
+}
+
+/**
+ * \brief Retrieve a list of registered configuration keys
+ */
+std::list<ConfigurationKey>	Configuration::listRegistered() {
+	std::call_once(_registry_flag, _create_registry);
+	return _registry->list();
+}
+
+/**
+ * \brief Show all keys and descriptions
+ */
+void	Configuration::showkeys(std::ostream& out, bool showdescriptions) {
+	std::call_once(_registry_flag, _create_registry);
+	return _registry->show(out, showdescriptions);
 }
 
 } // namespace config

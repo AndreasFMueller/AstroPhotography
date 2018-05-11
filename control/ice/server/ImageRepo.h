@@ -10,6 +10,8 @@
 
 namespace snowstar {
 
+extern astro::config::ConfigurationKey	_snowstar_repositories_directory_key;
+
 class ImageRepo {
 public:
 	ImageRepo() { }

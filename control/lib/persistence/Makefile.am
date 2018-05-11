@@ -19,6 +19,8 @@ libastropersistence_la_SOURCES = 					\
 	ConfigurationBackend.cpp					\
 	ConfigurationEntry.cpp						\
 	ConfigurationKey.cpp						\
+	ConfigurationRegister.cpp					\
+	ConfigurationRegistry.cpp					\
 	ConfigurationTable.cpp						\
 	NoSuchEntry.cpp							\
 	Persistence.cpp							\
