@@ -59,3 +59,6 @@ copytimestamp:  $(SLICEHEADERS) $(SLICESOURCE)
 		cp $${h}.cpp ../lib/common; \
 	done
 	touch copytimestamp     
+
+clean-local:
+	rm -f $(SLICEHEADERS) $(SLICESOURCES)

@@ -23,7 +23,7 @@ LIBS += -L../icegui -licegui
 LIBS += -L../astrogui -lastrogui 
 LIBS += -L$${ASTROLIBDIR} -lastro
 LIBS += -liceastro
-LIBS +=	$${ICELIBS} -lIce -lIceUtil
+LIBS +=	$${ICELIBS}
 LIBS += @EXTRA_LIBS@
 
 INCLUDEPATH += /usr/local/include

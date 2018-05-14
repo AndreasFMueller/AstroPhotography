@@ -160,10 +160,24 @@ AC_ARG_WITH([ice],
 	fi
 ],[
 ])
-ICELIBS="${ICELIBS} -lIce -lIceUtil"
+
+OLDLIBS="${LIBS}"
+OLDCXXFLAGS="${CXXFLAGS} ${ICEINCLUDE}"
+OLDCFLAGS="${CFLAGS} ${ICEINCLUDE}"
+
+AC_CHECK_LIB([IceUtil], [childAtFork],[
+	ICELIBS="${ICELIBS} -lIce -lIceUtil"
+],[
+	ICELIBS="${ICELIBS} -lIce"
+])
+
 AC_SUBST(ICEDIR)
 AC_SUBST(ICELIBS)
 AC_SUBST(ICEINCLUDE)
+
+LIBS="${OLDLIBS}"
+CXXFLAGS="${OLDCXXFLAGS}"
+CFLAGS="${OLDCFLAGS}"
 
 # set the slice directory, and throwing an error if don't find it
 AC_ARG_WITH([slice],

@@ -150,7 +150,10 @@ Debian)
 	CXXFLAGS="${CXXFLAGS} --std=c++11 -fopenmp"
 	LDFLAGS="${LDFLAGS} -Wl,-rpath -Wl,/usr/local/lib"
 	export CXXFLAGS LDFLAGS
-	if [ -d /usr/share/slice ]
+	if [ -d /usr/share/ice/slice ]
+	then
+		sliceoption=--with-slice=/usr/share/ice/slice
+	elif [ -d /usr/share/slice ]
 	then
 		sliceoption=--with-slice=/usr/share/slice
 	else

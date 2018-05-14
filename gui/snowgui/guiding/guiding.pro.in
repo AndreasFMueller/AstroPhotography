@@ -21,7 +21,7 @@ ASTROLIBDIR = @ASTROLIBDIR@
 
 LIBS += -L$${ASTROLIBDIR} -lastro
 LIBS += -liceastro
-LIBS +=	$${ICELIBS} -lIce -lIceUtil
+LIBS +=	$${ICELIBS}
 
 INCLUDEPATH += $${ASTROPATH}/include
 INCLUDEPATH += $${ICEDIR}/include
