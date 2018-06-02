@@ -119,6 +119,15 @@ void	SxCcd::startExposure0(const Exposure& exposure) {
 		throw SxError("binning mode not supported");
 	}
 
+	// if the shutter is to be opened, we should do that now
+	EmptyRequest    shutteropenrequest(
+		RequestBase::vendor_specific_type,
+		RequestBase::device_recipient, (uint16_t)0,
+		(uint8_t)SX_CMD_SHUTTER,
+		(exposure.shutter() == Shutter::OPEN)
+			? (uint16_t)64 : (uint16_t)128);
+        camera.controlRequest(&shutteropenrequest);
+
 	// if this is an interline CCD, we should send a clear before we start
 	// an exposure, maybe allways
 	if ((camera.hasInterlineCcd()) && (getInfo().getId() == 0)) {
@@ -162,6 +171,13 @@ void	SxCcd::startExposure0(const Exposure& exposure) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 		throw DeviceTimeout(msg);
 	}
+
+	// close the shutter again
+	EmptyRequest    shuttercloserequest(
+		RequestBase::vendor_specific_type,
+		RequestBase::device_recipient, (uint16_t)0,
+		(uint8_t)SX_CMD_SHUTTER, (uint16_t)128);
+        camera.controlRequest(&shuttercloserequest);
 
 	// we are now in exposing state
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "camera now exposing");

@@ -33,7 +33,12 @@ namespace sx {
 #define SX_CMD_GET_SERIAL		13
 #define SX_CMD_CAMERA_MODEL		14
 #define SX_CMD_LOAD_EEPROM		15
+#define SX_CMD_READ_PIXELS_GATED	18
+#define SX_CMD_BUILD_NUMBER		19
 #define SX_CMD_COOLER			30
+#define SX_CMD_COOLER_TEMPERATURE	31
+#define SX_CMD_SHUTTER			32
+#define SX_CMD_READ_I2CPORT		33
 
 typedef struct sx_firmware_version_s {
 	uint16_t	minor_version;	// least significant byte first
