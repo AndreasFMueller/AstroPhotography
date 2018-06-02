@@ -13,6 +13,7 @@
 #include "SxCamera.h"
 #include "SxUtils.h"
 #include "SxAO.h"
+#include "SxFilterWheel.h"
 
 using namespace astro::usb;
 
@@ -171,6 +172,15 @@ std::vector<std::string>	SxCameraLocator::getDevicelist(DeviceName::device_type 
 		return names;
 	}
 
+	// special treatment for FilterWheel. The FilterWheels are not 
+	// associated with cameras, so we have to scan for them separately
+	if (device == DeviceName::Filterwheel) {
+		// XXX scan for filter wheels
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "%d filterwheels found",
+			names.size());
+		return names;
+	}
+
 	// list all devices from the context
 	std::vector<DevicePtr>	d = context.devices();
 	std::vector<DevicePtr>::const_iterator	i;
@@ -261,6 +271,11 @@ CoolerPtr	SxCameraLocator::getCooler0(const DeviceName& name) {
 	return ccd->getCooler();
 }
 
+/**
+ * \brief Get a CCD based on the CCD name
+ *
+ * \param name	name of the CCD
+ */
 CcdPtr	SxCameraLocator::getCcd0(const DeviceName& name) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieveing CCD '%s'",
 		name.toString().c_str());
@@ -281,13 +296,17 @@ CcdPtr	SxCameraLocator::getCcd0(const DeviceName& name) {
 
 /**
  * \brief Get an AO object
+ *
+ * \param name	name of the adaptive optics device
  */
 AdaptiveOpticsPtr	SxCameraLocator::getAdaptiveOptics0(const DeviceName& name) {
 	return AdaptiveOpticsPtr(new SxAO(name));
 }
 
 /**
- * \brief Get a guider port by name
+ * \brief Get a guide port by name
+ *
+ * \param name	name of the guide port
  */
 GuidePortPtr	SxCameraLocator::getGuidePort0(const DeviceName& name) {
 	SxName	sxname(name);
@@ -307,6 +326,16 @@ GuidePortPtr	SxCameraLocator::getGuidePort0(const DeviceName& name) {
 		throw NotFound("camera does not have guider port");
 	}
 	return camera->getGuidePort();
+}
+
+/**
+ * \brief Get the FilterWheel
+ *
+ * \param name	device name identifying the filter wheel
+ */
+FilterWheelPtr	SxCameraLocator::getFilterWheel0(const DeviceName& name) {
+	FilterWheelPtr	filterwheel(new SxFilterWheel(name));
+	return filterwheel;
 }
 
 } // namespace sx

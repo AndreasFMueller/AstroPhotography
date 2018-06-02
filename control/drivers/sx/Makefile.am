@@ -8,14 +8,15 @@ if ENABLE_SX
 pkglib_LTLIBRARIES = sx.la 
 
 noinst_HEADERS = sx.h SxUtils.h SxLocator.h SxCamera.h SxCcd.h SxDemux.h \
-	SxGuidePort.h SxAO.h SxCooler.h
+	SxGuidePort.h SxAO.h SxCooler.h SxFilterWheel.h
 
 if ENABLE_UNITTESTS
 
 noinst_LTLIBRARIES = libsx.la
 
 libsx_la_SOURCES = SxUtils.cpp SxLocator.cpp SxCamera.cpp SxCcd.cpp \
-	SxCooler.cpp SxCcdM26C.cpp SxDemux.cpp SxGuidePort.cpp SxAO.cpp
+	SxCooler.cpp SxCcdM26C.cpp SxDemux.cpp SxGuidePort.cpp SxAO.cpp \
+	SxFilterWheel.cpp
 libsx_la_DEPENDENCIES = ../../lib/libastro.la
 libsx_la_LIBADD = ../../lib/libastro.la
 

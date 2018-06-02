@@ -38,6 +38,7 @@ protected:
 	virtual GuidePortPtr	getGuidePort0(const DeviceName& name);
 	virtual CoolerPtr	getCooler0(const DeviceName& name);
 	virtual AdaptiveOpticsPtr	getAdaptiveOptics0(const DeviceName& name);
+	virtual FilterWheelPtr	getFilterWheel0(const DeviceName& name);
 };
 
 } // namespace sx
