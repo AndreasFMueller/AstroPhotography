@@ -90,6 +90,8 @@ std::string	command_name(sx_command_t command) {
 
 /**
  * \brief Convert a wide string to a 8bit string
+ *
+ * \param w	wide character string to convert
  */
 std::string     wchar2string(const wchar_t *w) {
 	int	l = wcslen(w) + 1;

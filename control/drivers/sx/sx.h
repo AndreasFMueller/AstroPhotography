@@ -21,6 +21,9 @@ namespace astro {
 namespace camera {
 namespace sx {
 
+/**
+ * \brief Enumeration of all the documented USB commands
+ */
 typedef enum sx_command_e {
 	SX_CMD_GET_FIRMWARE_VERSION	= 255,
 	SX_CMD_ECHO			= 0,
@@ -47,16 +50,25 @@ typedef enum sx_command_e {
 	SX_CMD_READ_I2CPORT		= 33
 } sx_command_t;
 
+/**
+ * \brief Data structure for the firmware version command
+ */
 typedef struct sx_firmware_version_s {
 	uint16_t	minor_version;	// least significant byte first
 	uint16_t	major_version;	// least significant byte first
 } __attribute__((packed)) sx_firmware_version_t;
 
+/**
+ * \brief Data structure for the build number command
+ */
 typedef struct sx_build_number_s {
 	uint16_t	build_number;
 	uint16_t	padding;
 } __attribute__((packed)) sx_build_number_t;
 
+/**
+ * \brief Data structure for the read pixels command
+ */
 typedef struct sx_read_pixels_s {
 	uint16_t	x_offset;
 	uint16_t	y_offset;
@@ -66,14 +78,23 @@ typedef struct sx_read_pixels_s {
 	uint8_t		y_bin;
 } __attribute__((packed)) sx_read_pixels_t;
 
+/**
+ * \brief Data structure for the timed read pixels command 
+ */
 typedef struct sx_read_pixels_delayed_s : public sx_read_pixels_t {
 	uint32_t	delay;
 } __attribute__((packed)) sx_read_pixels_delayed_t;
 
+/**
+ * \brief Data structure for the timer command
+ */
 typedef struct sx_timer_s {
 	uint32_t	timer;
 } __attribute__((packed)) sx_timer_t;
 
+/**
+ * \brief Data structure for the CCD parameters command
+ */
 typedef struct sx_ccd_params_s {
 	uint8_t		hfront_porch;
 	uint8_t		hback_porch;
@@ -89,10 +110,16 @@ typedef struct sx_ccd_params_s {
 	uint8_t		extra_capabilities;
 } __attribute__((packed)) sx_ccd_params_t;
 
+/**
+ * \brief Data structure for the camera model command
+ */
 typedef struct sx_camera_model_s {
 	uint16_t	model;
 } __attribute__((packed)) sx_camera_model_t;
 
+/**
+ * \brief Data structure for the cooler temperature command
+ */
 typedef struct sx_cooler_temperature_s {
 	uint16_t	temperature;
 	uint8_t		status;

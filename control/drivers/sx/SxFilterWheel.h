@@ -21,6 +21,27 @@ class SxFilterWheel : public FilterWheel {
 	unsigned int	nfilters;
 	std::vector<std::string>	filternames;
 	hid_device	*_hid;
+
+	typedef enum filterwheel_cmd_e {
+		no_command = 0,
+		select_filter = 1,
+		current_filter = 2,
+		get_total = 3
+	} filterwheel_cmd_t;
+	filterwheel_cmd_t	pending_cmd;
+
+	void	send_command(filterwheel_cmd_t cmd, int arg = 0);
+	int	read_response();
+	int	try_complete();
+
+	typedef enum filterwheel_state_e { 
+		unknown = 0,
+		moving = 1,
+		idle = 2
+	} filterwheel_state_t;
+	filterwheel_state_t	state;
+
+	int	currentposition;
 public:
 	SxFilterWheel(const DeviceName& name);
 	~SxFilterWheel();
