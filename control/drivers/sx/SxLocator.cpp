@@ -63,8 +63,6 @@ namespace sx {
 // Implementation of the Camera Locator for Starlight Express
 //////////////////////////////////////////////////////////////////////
 
-#define	SX_VENDOR_ID	0x1278
-
 SxCameraLocator::SxCameraLocator() {
 	context.setDebugLevel(3);
 }
@@ -175,7 +173,17 @@ std::vector<std::string>	SxCameraLocator::getDevicelist(DeviceName::device_type 
 	// special treatment for FilterWheel. The FilterWheels are not 
 	// associated with cameras, so we have to scan for them separately
 	if (device == DeviceName::Filterwheel) {
-		// XXX scan for filter wheels
+		// scan for filter wheels
+		struct hid_device_info	*hinfo = hid_enumerate(SX_VENDOR_ID,
+			SX_FILTERWHEEL_PRODUCT_ID);
+		struct hid_device_info	*p = hinfo;
+		while (p) {
+			std::string	serial = wchar2string(p->serial_number);
+			DeviceName	name(DeviceName::Filterwheel,
+						std::string("sx"), serial);
+			names.push_back(name);
+			p = p->next;
+		}
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "%d filterwheels found",
 			names.size());
 		return names;

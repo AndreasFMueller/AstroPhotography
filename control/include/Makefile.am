@@ -65,6 +65,7 @@ noinst_HEADERS =							\
 	FocusCompute.h							\
 	FocusWork.h							\
 	GuiderProcess.h							\
+	hidapi.h							\
 	ImageDirectory.h						\
 	ImagePersistence.h						\
 	Nice.h								\

@@ -9,12 +9,13 @@
 #include <stdexcept>
 #include <AstroUSB.h>
 #include <DeviceNameUSB.h>
+#include "sx.h"
 
 namespace astro {
 namespace camera {
 namespace sx {
 
-extern std::string	command_name(int command);
+extern std::string	command_name(sx_command_t command);
 
 class SxError : public std::runtime_error {
 public:
@@ -26,6 +27,8 @@ public:
 	SxName(usb::DevicePtr deviceptr);
 	SxName(const DeviceName& devicename);
 };
+
+extern std::string     wchar2string(const wchar_t *w);
 
 } // namespace sx
 } // namespace camera

@@ -2,11 +2,12 @@
 # Makefile.am -- build the USB/UVC parts of the library
 #
 # (c) 2015 Prof Dr Andreas Mueller, Hochschule Rapperswil
-# $Id$
 #
 SUBDIRS = 
 
 noinst_LTLIBRARIES = libastrousb.la
+
+EXTRA_DIST = hid-macos.c hid-libusb.c
 
 if ENABLE_UVC
 uvc_files = 								\
@@ -27,6 +28,7 @@ endif
 
 libastrousb_la_SOURCES = 						\
 	DeviceNameUSB.cpp						\
+	hidapi.c							\
 	USBConfiguration.cpp						\
 	USBContext.cpp							\
 	USBContextHolder.cpp						\

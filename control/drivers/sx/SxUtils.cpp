@@ -19,7 +19,6 @@ SxError::SxError(const char *cause) : std::runtime_error(cause) {
 }
 
 #define SX_MODULE_NAME	"sx"
-#define SX_VENDOR_ID	0x1278
 
 /**
  * \brief Construct an SxName from a USB device ptr
@@ -38,7 +37,7 @@ SxName::SxName(const DeviceName& devicename)
 /**
  * \brief convert the command code into a printable name
  */
-std::string	command_name(int command) {
+std::string	command_name(sx_command_t command) {
 	switch (command) {
 	case SX_CMD_GET_FIRMWARE_VERSION:
 		return std::string("get firmware");
@@ -74,11 +73,36 @@ std::string	command_name(int command) {
 		return std::string("camera model");
 	case SX_CMD_LOAD_EEPROM:
 		return std::string("load eeprom");
+	case SX_CMD_READ_PIXELS_GATED:
+		return std::string("read pixels gated");
+	case SX_CMD_GET_BUILD_NUMBER:
+		return std::string("get build number");
 	case SX_CMD_COOLER:
 		return std::string("cooler");
+	case SX_CMD_COOLER_TEMPERATURE:
+		return std::string("cooler temperature");
+	case SX_CMD_SHUTTER:
+		return std::string("shutter");
+	case SX_CMD_READ_I2CPORT:
+		return std::string("read i2cport");
 	}
 	std::string	cmd = stringprintf("UNKNOWN CMD %d");
 	return cmd;
+}
+
+std::string     wchar2string(const wchar_t *w) {
+	int	l = wcslen(w) + 1;
+	char	buffer[l];
+	int	i = 0;
+	memset(buffer, 0, l);
+	const wchar_t	*p = w;
+	while (p) {
+		int	r = wctob(*p);
+		if (r != WEOF) {
+			buffer[i++] = r;
+		}
+	}
+        return std::string(buffer);
 }
 
 } // namespace sx

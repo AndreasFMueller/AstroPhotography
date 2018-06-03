@@ -159,6 +159,15 @@ SxCamera::SxCamera(DevicePtr& _deviceptr)
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "firmware version: %d.%d",
 		firmware_version.major_version, firmware_version.minor_version);
 
+	// get the build number
+	Request<sx_build_number_t>	buildnumberrequest(
+		RequestBase::vendor_specific_type,
+		RequestBase::device_recipient, (uint16_t)0,
+		(uint8_t)SX_CMD_GET_BUILD_NUMBER, (uint16_t)0);
+	controlRequest(&buildnumberrequest);
+	build_number = buildnumberrequest.data()->build_number;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "build_number: %d", build_number);
+
 	// learn the model number
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "get model number");
 	Request<sx_camera_model_t>      modelrequest(
@@ -357,11 +366,12 @@ void	SxCamera::controlRequest(RequestBase *request,
 	}
 
 	// Performing request over the data OUTPOINT
+	sx_command_t	command = (sx_command_t)request->bRequest();
 	debug(LOG_DEBUG, DEBUG_LOG, 0,
 		"control request for command '%s' on data interface, "
 		"request = %02x, requesttype = %02x,  wValue = %04x, "
 		"wIndex = %04x, wLength = %04x",
-		command_name(request->bRequest()).c_str(),
+		command_name(command).c_str(),
 		request->bRequest(), request->bmRequestType(),
 		request->wValue(), request->wIndex(), request->wLength());
 	request->setTimeout(10000);

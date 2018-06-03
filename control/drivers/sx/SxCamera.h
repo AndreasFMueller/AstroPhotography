@@ -32,6 +32,7 @@ class SxCamera : public Camera {
 	EndpointDescriptorPtr	inendpoint;
 	bool	useControlRequests;
 	sx_firmware_version_t	firmware_version;
+	int	build_number;
 	bool	_hasCooler;
 	bool	_hasGuidePort;
 	bool	_has_interline_ccd;

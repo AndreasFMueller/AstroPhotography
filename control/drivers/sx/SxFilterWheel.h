@@ -8,6 +8,7 @@
 
 #include <AstroCamera.h>
 #include <AstroUSB.h>
+#include <hidapi.h>
 
 namespace astro {
 namespace camera {
@@ -19,7 +20,7 @@ namespace sx {
 class SxFilterWheel : public FilterWheel {
 	unsigned int	nfilters;
 	std::vector<std::string>	filternames;
-	astro::usb::DevicePtr	deviceptr;
+	hid_device	*_hid;
 public:
 	SxFilterWheel(const DeviceName& name);
 	~SxFilterWheel();
