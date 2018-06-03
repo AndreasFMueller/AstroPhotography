@@ -14,6 +14,7 @@
 #include "SxUtils.h"
 #include "SxAO.h"
 #include "SxFilterWheel.h"
+#include "sx.h"
 
 using namespace astro::usb;
 
@@ -25,7 +26,7 @@ namespace sx {
 // Implementation of the Starlight Express Module Descriptor
 //////////////////////////////////////////////////////////////////////
 
-static std::string      sx_name("sx");
+static std::string      sx_name(SX_MODULE_NAME);
 static std::string      sx_version(VERSION);
 
 /**
@@ -111,7 +112,7 @@ static bool	has_cooler(unsigned short product) {
  * \brief Get module name.
  */
 std::string	SxCameraLocator::getName() const {
-	return std::string("sx");
+	return std::string(SX_MODULE_NAME);
 }
 
 /**
@@ -180,7 +181,7 @@ std::vector<std::string>	SxCameraLocator::getDevicelist(DeviceName::device_type 
 		while (p) {
 			std::string	serial = wchar2string(p->serial_number);
 			DeviceName	name(DeviceName::Filterwheel,
-						std::string("sx"), serial);
+					std::string(SX_MODULE_NAME), serial);
 			names.push_back(name);
 			p = p->next;
 		}

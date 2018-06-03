@@ -18,8 +18,6 @@ namespace sx {
 SxError::SxError(const char *cause) : std::runtime_error(cause) {
 }
 
-#define SX_MODULE_NAME	"sx"
-
 /**
  * \brief Construct an SxName from a USB device ptr
  */
@@ -90,6 +88,9 @@ std::string	command_name(sx_command_t command) {
 	return cmd;
 }
 
+/**
+ * \brief Convert a wide string to a 8bit string
+ */
 std::string     wchar2string(const wchar_t *w) {
 	int	l = wcslen(w) + 1;
 	char	buffer[l];

@@ -10,6 +10,8 @@
 
 using namespace astro::usb;
 
+#define SX_MODULE_NAME  "sx"
+
 #define	DEFAULT_AS_USB_CONTROL_REQUEST	true
 
 #define	SX_VENDOR_ID	0x1278
