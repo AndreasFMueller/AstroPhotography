@@ -10,5 +10,5 @@
 #elif __linux__
 #include "hid-libusb.c"
 #else
-#error "Compiler not supported for hidapi
+#error "Compiler not supported for hidapi"
 #endif

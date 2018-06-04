@@ -26,7 +26,7 @@ class taskqueuemanagerwidget : public QWidget {
 	snowstar::TaskQueuePrx		_tasks;
 	snowstar::RepositoriesPrx	_repositories;
 	snowstar::ImagesPrx		_images;
-	TaskMonitorController*	_taskmonitor;
+	TaskMonitorController	*_taskmonitor;
 	Ice::ObjectPtr	_taskmonitorptr;
 	taskinfowidget	*_taskinfowidget;
 

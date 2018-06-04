@@ -20,6 +20,9 @@ taskqueuemanagerwidget::taskqueuemanagerwidget(QWidget *parent)
 	ui->cancelButton->setEnabled(false);
 	ui->downloadButton->setEnabled(false);
 
+	_taskinfowidget = NULL;
+	_taskmonitor = NULL;
+
 	// configure the task list
 	QStringList	headers;
 	headers << "ID";		//  0

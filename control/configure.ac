@@ -32,7 +32,7 @@ AM_CONDITIONAL([HAVE_PDFLATEX], test -n "$PDFLATEX")
 
 # Checks for header files
 AC_HEADER_STDC
-AC_CHECK_HEADERS([stdlib.h stdio.h unistd.h math.h errno.h string.h stdarg.h libintl.h locale.h syslog.h sys/types.h sys/stat.h sys/time.h dirent.h fcntl.h sys/file.h dlfcn.h libusb-1.0/libusb.h fftw3.h Accelerate/Accelerate.h termios.h sys/mman.h execinfo.h sys/select.h poll.h signal.h sys/param.h getopt.h uuid/uuid.h netdb.h assert.h])
+AC_CHECK_HEADERS([stdlib.h stdio.h unistd.h math.h errno.h string.h stdarg.h libintl.h locale.h syslog.h sys/types.h sys/stat.h sys/time.h dirent.h fcntl.h sys/file.h dlfcn.h fftw3.h Accelerate/Accelerate.h termios.h sys/mman.h execinfo.h sys/select.h poll.h signal.h sys/param.h getopt.h uuid/uuid.h netdb.h assert.h])
 
 # We want to use backtrace API for stack dumps, this requires the use of
 # the -rdynamic option during compile
@@ -41,13 +41,23 @@ LDFLAGS="${LDFLAGS} -rdynamic"
 # Check for libraries that we cannot do without
 AC_CHECK_LIB([m], [sqrt])
 AC_CHECK_LIB([dl], [dlopen])
-AC_CHECK_LIB([usb-1.0], [libusb_bulk_transfer])
 AC_CHECK_LIB([lapack], [dgels_], [LIBS="-llapack $LIBS"],
 	AC_MSG_ERROR([required library LAPACK not found]))
 AC_CHECK_LIB([fftw3], [fftw_malloc])
 AC_CHECK_LIB([pthread], [pthread_create])
 AC_CHECK_LIB([glpk], [glp_create_prob])
 AC_CHECK_LIB([sqlite3], [sqlite3_initialize])
+
+## LIBUSB ############################################################
+if pkg-config --exists libusb-1.0
+then
+	LIBS="${LIBS} `pkg-config --libs libusb-1.0`"
+	CFLAGS="${CFLAGS} `pkg-config --cflags libusb-1.0`"
+	CXXFLAGS="${CXXFLAGS} `pkg-config --cflags libusb-1.0`"
+else
+	AC_CHECK_HEADERS([libusb-1.0/libusb.h])
+	AC_CHECK_LIB([usb-1.0], [libusb_bulk_transfer])
+fi
 
 ## CFITS #############################################################
 # if cfits is installed with pkginfo, we use that

@@ -6,7 +6,16 @@
 #ifndef _AstroUSB_h
 #define _AstroUSB_h
 
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif /* HAVE_CONFIG_H */
+
+#ifdef HAVE_LIBUSB_1_0_LIBUSB_H 
 #include <libusb-1.0/libusb.h>
+#else
+#include <libusb.h>
+#endif
+
 #include <stdexcept>
 #include <list>
 #include <vector>
