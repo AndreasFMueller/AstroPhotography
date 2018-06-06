@@ -57,12 +57,23 @@ fi
 if [ -d /Library/Developer/Ice-3.5.1 ]
 then
 	ICEDIR=/Library/Developer/Ice-3.5.1
+	SLICEDIR=/Library/Developer/Ice-3.5.1/slice
 fi
 
 # add ICE PATH for an ICE that we compiled ourselves
 if [ -d /opt/Ice-3.5.1 ]
 then
 	ICEDIR=/opt/Ice-3.5.1
+	SLICEDIR=/opt/Ice-3.7.1/slice
+fi
+if [ -d /usr/local/Ice-3.7.1 ]
+then
+	ICEDIR=/usr/local/Ice-3.7.1
+	SLICEDIR=/usr/local/Ice-3.7.1/share/ice/slice
+fi
+if [ -n "${SLICEDIR}" ]
+then
+	commonflags="${commonflags} --with-slice=${SLICEDIR}"
 fi
 
 if [ -n "${ICEDIR}" ]
@@ -71,6 +82,8 @@ then
 	if [ -d ${ICEDIR}/bin/c++11 ]
 	then
 		PATH="${ICEDIR}/bin/c++11:${PATH}"
+	else
+		PATH="${ICEDIR}/bin:${PATH}"
 	fi
 	commonflags="${commonflags} --with-ice=${ICEDIR}"
 fi
@@ -104,7 +117,7 @@ Linux)	if [ -r /etc/debian_version ]
 			commonflags="${commonflags} --with-slice=/usr/share/Ice/slice"
 		else if [ -d /opt/Ice-3.5.1/slice ]
 			then
-				commonflags="${commonflags} --with-slice=/opt/Ice-3.5.1/slice"
+				commonflags="${commonflags} --with-slice=${SLICEDIR}"
 			fi
 		fi
 	else
