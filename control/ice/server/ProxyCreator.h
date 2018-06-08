@@ -9,6 +9,7 @@
 #include <string>
 #include <Ice/ObjectAdapter.h>
 #include <Ice/Communicator.h>
+#include <Ice/Initialize.h>
 #include <NameConverter.h>
 #include <AstroDebug.h>
 
@@ -25,7 +26,7 @@ prx createProxy(const std::string& name, const Ice::Current& current,
 		ename = NameConverter::urlencode(name);
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "encoded name: %s", ename.c_str());
-	return prx::uncheckedCast(a->createProxy(ic->stringToIdentity(ename)));
+	return prx::uncheckedCast(a->createProxy(Ice::stringToIdentity(ename)));
 }
 
 } // namespace snowstar

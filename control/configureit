@@ -70,6 +70,10 @@ if [ -d /usr/local/Ice-3.7.1 ]
 then
 	ICEDIR=/usr/local/Ice-3.7.1
 	SLICEDIR=/usr/local/Ice-3.7.1/share/ice/slice
+	if [ -d ${ICEDIR}/lib/arm-linux-gnueabihf ]
+	then
+		ICELIBDIR="${ICEDIR}/lib/arm-linux-gnueabihf"
+	fi
 fi
 if [ -n "${SLICEDIR}" ]
 then
@@ -172,8 +176,12 @@ Debian)
 	else
 		sliceoption=
 	fi
+	if [ -n "${ICELIBDIR}" ]
+	then
+		icelibdiroption="--with-icelibdir=${ICELIBDIR}"
+	fi
 	./configure --prefix=${prefix} ${commonflags} \
-		${sbigoption} ${sliceoption}
+		${sbigoption} ${sliceoption} ${icelibdiroption}
 	;;
 SuSE)
 	LDFLAGS="-L/usr/local/lib64 -lusb-1.0 -lefence"

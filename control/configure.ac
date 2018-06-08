@@ -126,6 +126,7 @@ ICEDIR=
 ICELIBS=
 ICEINCLUDE=
 SLICEDIR=
+ICLIBDIR=
 AC_ARG_WITH([ice],
 [AS_HELP_STRING([--with-ice=dir], [build the ICE components from path])],
 [
@@ -168,6 +169,12 @@ AC_ARG_WITH([ice],
 	then
 		SLICEDIR=${ICEDIR}/slice
 	fi
+],[
+])
+AC_ARG_WITH([icelibdir],
+[AS_HELP_STRING([--with-icelibdir=dir], [where to find the ICE libraries])],
+[
+	ICELIBS="-L${with_icelibdir} -Wl,-rpath,${with_icelibdir}"
 ],[
 ])
 
@@ -219,7 +226,8 @@ esac
 ## UNITTESTS #########################################################
 # decide whether or not to build the test programs
 AC_ARG_ENABLE(unittests,
-[AS_HELP_STRING([--enable-unittests], [also build the unit tests if CPPUNIT is present])],
+[AS_HELP_STRING([--enable-unittests],
+[also build the unit tests if CPPUNIT is present])],
 [
 ],[
 ])
