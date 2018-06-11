@@ -125,7 +125,7 @@ test:	snowstar
 	else								\
 		servername=server;					\
 	fi;								\
-	$(EFENCE) ./snowstar $(COMMONFLAGS) 2>&1 | tee test.log
+	$(EFENCE) strace -f -o /var/tmp/snowstar.strace ./snowstar $(COMMONFLAGS) 2>&1 | tee test.log
 
 #		--lines=100 --files=10 --logfile=test.log
 

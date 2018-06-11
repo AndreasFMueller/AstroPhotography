@@ -18,8 +18,11 @@ namespace sx {
  * \param name	name of the filterwheel
  */
 SxFilterWheel::SxFilterWheel(const DeviceName& name) : FilterWheel(name) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "opening filter wheel with name %s",
+		name.toString().c_str());
 	// extract the serial number from the name
 	std::string	serial = name.unitname();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "serial number: %s", serial.c_str());
 
 	// initialize connection to the filter wheel
 	struct hid_device_info	*hinfo = hid_enumerate(SX_VENDOR_ID,
@@ -31,15 +34,21 @@ SxFilterWheel::SxFilterWheel(const DeviceName& name) : FilterWheel(name) {
 	}
 	struct hid_device_info	*p = hinfo;
 	while (p) {
-		std::string	serial_number = wchar2string(p->serial_number);
+		std::string	serial_number("080");
+		if (p->serial_number) {
+			serial_number = wchar2string(p->serial_number);
+		}
 		if (serial == serial_number) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "opening HID device");
 			_hid = hid_open(p->vendor_id, p->product_id,
 				p->serial_number);
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "hid = %p", _hid);
 			break;
 		}
 		p = p->next;
 	}
 	hid_free_enumeration(hinfo);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "enumeration of HID devices complete");
 
 	// initialize the state variables
 	pending_cmd = no_command;
@@ -78,6 +87,8 @@ SxFilterWheel::~SxFilterWheel() {
  * \param arg	argument to command
  */
 void	SxFilterWheel::send_command(filterwheel_cmd_t cmd, int arg) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "got command %d/%d for filterwheel",
+		cmd, arg);
 	if (cmd == no_command) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "no command");
 		return;
@@ -92,25 +103,29 @@ void	SxFilterWheel::send_command(filterwheel_cmd_t cmd, int arg) {
 	}
 
 	// send a new command
-	uint8_t	buffer[2];
+	uint8_t	buffer[3];
 	buffer[0] = 0;
 	buffer[1] = 0;
+	buffer[2] = 0;
 	switch (cmd) {
 	case select_filter:
-		buffer[0] = arg;
+		buffer[1] = arg;
 		break;
 	case current_filter:
 		break;
 	case get_total:
-		buffer[1] = 1;
+		buffer[2] = 1;
 		break;
 	case no_command:
 		// should not happen
 		throw std::logic_error("cannot happen");
 	}
-	int	rc = hid_write(_hid, buffer, 2);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "sending %02x,%02x report",
+		buffer[1], buffer[2]);
+	int	rc = hid_write(_hid, buffer, 3);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "%d bytes written", rc);
 	if (rc != 2) {
-		std::string	msg = stringprintf("cannot write command: %s",
+		std::string	msg = stringprintf("cannot write command: %s ",
 			hid_error(_hid));
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 		throw std::runtime_error(msg);
@@ -139,10 +154,11 @@ int	SxFilterWheel::read_response() {
 	if (pending_cmd == no_command) {
 		return result;
 	}
-	uint8_t	buffer[2];
+	uint8_t	buffer[3];
 	buffer[0] = 0;
 	buffer[1] = 0;
-	int	rc = hid_read(_hid, buffer, 2);
+	buffer[2] = 0;
+	int	rc = hid_read(_hid, buffer, 3);
 	if (rc < 0) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "cannot read: %s",
 			hid_error(_hid));
@@ -154,7 +170,7 @@ int	SxFilterWheel::read_response() {
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 		throw std::runtime_error(msg);
 	}
-	return buffer[0];
+	return buffer[1];
 }
 
 /**

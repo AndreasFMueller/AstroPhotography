@@ -352,6 +352,14 @@ enum Device::usb_speed	Device::getDeviceSpeed() const {
 	return (Device::usb_speed)libusb_get_device_speed(dev);
 }
 
+uint16_t	Device::getVendorId() {
+	return descriptor()->idVendor();
+}
+
+uint16_t	Device::getProductId() {
+	return descriptor()->idProduct();
+}
+
 std::ostream&	operator<<(std::ostream& out, const Device& device) {
 	out	<< "bus " << (int)device.getBusNumber()
 		<< " address " << (int)device.getDeviceAddress()

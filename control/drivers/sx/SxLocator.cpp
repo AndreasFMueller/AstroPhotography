@@ -174,12 +174,19 @@ std::vector<std::string>	SxCameraLocator::getDevicelist(DeviceName::device_type 
 	// special treatment for FilterWheel. The FilterWheels are not 
 	// associated with cameras, so we have to scan for them separately
 	if (device == DeviceName::Filterwheel) {
+		// enumerate filterwheels
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "scan for hid devices");
+
 		// scan for filter wheels
 		struct hid_device_info	*hinfo = hid_enumerate(SX_VENDOR_ID,
 			SX_FILTERWHEEL_PRODUCT_ID);
 		struct hid_device_info	*p = hinfo;
 		while (p) {
-			std::string	serial = wchar2string(p->serial_number);
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "got HID at %p", hinfo);
+			std::string	serial("080");
+			if (p->serial_number) {
+				serial = wchar2string(p->serial_number);
+			}
 			DeviceName	name(DeviceName::Filterwheel,
 					std::string(SX_MODULE_NAME), serial);
 			names.push_back(name);
@@ -199,6 +206,8 @@ std::vector<std::string>	SxCameraLocator::getDevicelist(DeviceName::device_type 
 		// all devices. We ignore devices that we cannot open
 		try {
 			DevicePtr	devptr = *i;
+			if (devptr->getProductId() == SX_FILTERWHEEL_PRODUCT_ID)
+				continue;
 			devptr->open();
 			try {
 				addname(names, devptr, device);

@@ -167,6 +167,8 @@ public:
 	enum usb_speed { SPEED_UNKNOWN = 0, SPEED_LOW = 1, SPEED_FULL = 2,
 		SPEED_HIGH = 3, SPEED_SUPER = 4 };
 	enum usb_speed	getDeviceSpeed() const;
+	uint16_t	getVendorId();
+	uint16_t	getProductId();
 
 	// descriptor access
 	DeviceDescriptorPtr	descriptor();

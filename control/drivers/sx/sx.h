@@ -15,7 +15,7 @@ using namespace astro::usb;
 #define	DEFAULT_AS_USB_CONTROL_REQUEST	true
 
 #define	SX_VENDOR_ID	0x1278
-#define SX_FILTERWHEEL_PRODUCT_ID	0x0000
+#define SX_FILTERWHEEL_PRODUCT_ID	0x0920
 
 namespace astro {
 namespace camera {
