@@ -94,7 +94,12 @@ std::string	command_name(sx_command_t command) {
  * \param w	wide character string to convert
  */
 std::string     wchar2string(const wchar_t *w) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "converting string at %p", w);
 	int	l = wcslen(w) + 1;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "string length is %d", l);
+	if (l <= 1) {
+		return std::string("");
+	}
 	char	buffer[l];
 	int	i = 0;
 	memset(buffer, 0, l);

@@ -9,6 +9,8 @@
 #include <AstroCamera.h>
 #include <AstroUSB.h>
 #include <hidapi.h>
+#include <thread>
+#include <AstroUtils.h>
 
 namespace astro {
 namespace camera {
@@ -21,6 +23,14 @@ class SxFilterWheel : public FilterWheel {
 	unsigned int	nfilters;
 	std::vector<std::string>	filternames;
 	hid_device	*_hid;
+	astro::thread::Barrier		_barrier;
+	std::thread	*_thread;
+	bool	_terminate;
+	std::recursive_mutex	_mutex;
+	std::condition_variable_any	_condition;
+public:
+	void	run();
+private:
 
 	typedef enum filterwheel_cmd_e {
 		no_command = 0,

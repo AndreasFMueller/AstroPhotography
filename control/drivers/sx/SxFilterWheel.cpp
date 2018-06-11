@@ -6,6 +6,7 @@
 #include <SxFilterWheel.h>
 #include <AstroExceptions.h>
 #include <SxUtils.h>
+#include <includes.h>
 #include "sx.h"
 
 namespace astro {
@@ -13,11 +14,124 @@ namespace camera {
 namespace sx {
 
 /**
+ * \brief tranmpoline function to jump into the thread run function
+ */
+static void	filterwheel_main(SxFilterWheel *filterwheel) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "starting filterwheel_main(%s)",
+		filterwheel->name().toString().c_str());
+	try {
+		filterwheel->run();
+	} catch (std::exception& x) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "error in filterwheel_main: %s",
+			x.what());
+	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "filterwheel_main terminated");
+}
+
+/**
+ * \brief Thread main method
+ */
+void	SxFilterWheel::run() {
+	_barrier.await();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "SxFilterWheel:run() start");
+	uint8_t	command[3];
+	uint8_t	response[3];
+	int	rc = 0;
+	while (!_terminate) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "try again");
+		if (pending_cmd == no_command) {
+			goto waitnext;
+		}
+
+		// send the command
+		memset(command, 0, sizeof(command));
+		switch (pending_cmd) {
+		case select_filter:
+			command[1] = currentposition;
+			break;
+		case current_filter:
+			break;
+		case get_total:
+			command[2] = 1;
+			pending_cmd = current_filter;
+			break;
+		case no_command:
+			break;
+		}
+
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "sending %02x,%02x report",
+			command[1], command[2]);
+		rc = hid_write(_hid, command, 3);
+		if (rc != 3) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "failed to send: %d",
+				rc);
+			continue;
+		}
+
+		// wait for response
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "got a response: %d", rc);
+		memset(response, 0, sizeof(response));
+		rc = hid_read(_hid, response, 2);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "response (%d): %02x,%02x,%02x",
+			rc, response[0], response[1], response[2]);
+		if (rc < 0) {
+			continue;
+		}
+		
+		// what to do depening in the pending command
+		if (response[0] == 0) {
+			sleep(1);
+			continue;
+		}
+		switch (pending_cmd) {
+		case select_filter:
+			pending_cmd = current_filter;
+			continue;
+			break;
+		case get_total:
+		case current_filter:
+			currentposition = response[0];
+			nfilters = response[1];
+			debug(LOG_DEBUG, DEBUG_LOG, 0,
+				"current = %d, total = %d",
+				currentposition, nfilters);
+			break;
+		case no_command:
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "should not happen");
+			break;
+		}
+
+		// add the filter names if there aren't any names
+		if ((filternames.size() == 0) && (nfilters > 0)) {
+			for (size_t i = 1; i <= nfilters; i++) {
+				std::string n = stringprintf("filter-%lu", i);
+				filternames.push_back(n);
+			}
+		}
+
+	waitnext:
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "command complete");
+		// reset the command
+		{
+			std::unique_lock<std::recursive_mutex>	lock(_mutex);
+			
+			pending_cmd = no_command;
+			state = idle;
+
+			// wait for the new command
+			_condition.wait(lock);
+		}
+	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "SxFilterWheel:run() end");
+}
+
+/**
  * \brief Construct a filterwheel object
  *
  * \param name	name of the filterwheel
  */
-SxFilterWheel::SxFilterWheel(const DeviceName& name) : FilterWheel(name) {
+SxFilterWheel::SxFilterWheel(const DeviceName& name)
+	: FilterWheel(name), _barrier(2) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "opening filter wheel with name %s",
 		name.toString().c_str());
 	// extract the serial number from the name
@@ -32,12 +146,20 @@ SxFilterWheel::SxFilterWheel(const DeviceName& name) : FilterWheel(name) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 		throw NotFound(msg);
 	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "found HID device %p", hinfo);
 	struct hid_device_info	*p = hinfo;
 	while (p) {
 		std::string	serial_number("080");
 		if (p->serial_number) {
-			serial_number = wchar2string(p->serial_number);
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "converting serial number");
+			std::string	s = wchar2string(p->serial_number);
+			if (s.size() > 0) {
+				serial_number = s;
+			}
+		} else {
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "no serial");
 		}
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "going to open the HID device");
 		if (serial == serial_number) {
 			debug(LOG_DEBUG, DEBUG_LOG, 0, "opening HID device");
 			_hid = hid_open(p->vendor_id, p->product_id,
@@ -51,171 +173,39 @@ SxFilterWheel::SxFilterWheel(const DeviceName& name) : FilterWheel(name) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "enumeration of HID devices complete");
 
 	// initialize the state variables
-	pending_cmd = no_command;
+	pending_cmd = get_total;
 	state = unknown;
 	currentposition = 0;
 
 	// number of filters
 	nfilters = 0;
 
-	// make the hid device nonblocking
-	hid_set_nonblocking(_hid, 1);
+	// start the thread
+	_terminate = false;
+	_thread = new std::thread(filterwheel_main, this);
 
-	// send the get total command
-	send_command(get_total);
+	// release the thread
+	_barrier.await(); // release the thread
 }
-
-//	// initialize the filter names
-//	for (size_t i = 0; i < nfilters; i++) {
-//		filternames.push_back(stringprintf("filter-%d", i));
-//	}
-//}
 
 /**
  * \brief Destroy the FilterWheel object
  */
 SxFilterWheel::~SxFilterWheel() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "destroy FilterWheel");
+	// wait for the thread to terminate
+	_terminate = true;
+	_condition.notify_all();
+	_thread->join();
+	delete _thread;
+
 	// close connection to the filter wheel
 	hid_close(_hid);
 	_hid = NULL;
 }
 
-/**
- * \brief Auxiliary function to send a new command
- *
- * \param cmd	command to send
- * \param arg	argument to command
- */
-void	SxFilterWheel::send_command(filterwheel_cmd_t cmd, int arg) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "got command %d/%d for filterwheel",
-		cmd, arg);
-	if (cmd == no_command) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "no command");
-		return;
-	}
-
-	// make sure the previous command did complete
-	if (pending_cmd != no_command) {
-		std::string	msg = stringprintf("pending command: %d",
-			pending_cmd);
-		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
-		throw BadState(msg);
-	}
-
-	// send a new command
-	uint8_t	buffer[3];
-	buffer[0] = 0;
-	buffer[1] = 0;
-	buffer[2] = 0;
-	switch (cmd) {
-	case select_filter:
-		buffer[1] = arg;
-		break;
-	case current_filter:
-		break;
-	case get_total:
-		buffer[2] = 1;
-		break;
-	case no_command:
-		// should not happen
-		throw std::logic_error("cannot happen");
-	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "sending %02x,%02x report",
-		buffer[1], buffer[2]);
-	int	rc = hid_write(_hid, buffer, 3);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "%d bytes written", rc);
-	if (rc != 2) {
-		std::string	msg = stringprintf("cannot write command: %s ",
-			hid_error(_hid));
-		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
-		throw std::runtime_error(msg);
-	}
-	pending_cmd = cmd;
-	switch (pending_cmd) {
-	case select_filter:
-	case get_total:
-		state = moving;
-		break;
-	case current_filter:
-		break;
-	case no_command:
-		// should not happen
-		throw std::logic_error("cannot happen");
-	}
-}
-
-/**
- * \brief Read the response
- *
- * \return -1 if there is no response, 0 if filterhweel is moving and > 0
- */
-int	SxFilterWheel::read_response() {
-	int	result = -1;
-	if (pending_cmd == no_command) {
-		return result;
-	}
-	uint8_t	buffer[3];
-	buffer[0] = 0;
-	buffer[1] = 0;
-	buffer[2] = 0;
-	int	rc = hid_read(_hid, buffer, 3);
-	if (rc < 0) {
-		debug(LOG_ERR, DEBUG_LOG, 0, "cannot read: %s",
-			hid_error(_hid));
-		return -1;
-	}
-	if (2 != rc) {
-		std::string	msg = stringprintf("wrong number of "
-			"bytes: %d != 2", rc);
-		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
-		throw std::runtime_error(msg);
-	}
-	return buffer[1];
-}
-
-/**
- * \brief Try to complete an open command
- */
-int	SxFilterWheel::try_complete() {
-	// if there is no pending command, return
-	if (pending_cmd == no_command) {
-		return 0;
-	}
-	// if there is a pending command, try to get a response
-	int	a = read_response();
-	if (a < 0) {
-		// no response
-		return 0;
-	}
-	if (a == 0) {
-		// still pending
-		return 0;
-	}
-	switch (pending_cmd) {
-	case select_filter:
-	case current_filter:
-		currentposition = a;
-		break;
-	case get_total:
-		nfilters = a;
-		currentposition = 1;
-		// initialize the filter names
-		for (size_t i = 0; i < nfilters; i++) {
-			filternames.push_back(stringprintf("filter-%d", i));
-		}
-		break;
-	case no_command:
-		// should not happen
-		throw std::logic_error("cannot happen");
-	}
-	state = idle;
-	return 1;
-}
-
 unsigned int	SxFilterWheel::nFilters() {
-	if (nfilters <= 0) {
-		try_complete();
-	}
+	std::unique_lock<std::recursive_mutex>	lock(_mutex);
 	if (nfilters > 0) {
 		return nfilters;
 	}
@@ -226,10 +216,10 @@ unsigned int	SxFilterWheel::nFilters() {
  * \brief Get the 
  */
 unsigned int	SxFilterWheel::currentPosition() {
+	std::unique_lock<std::recursive_mutex>	lock(_mutex);
 	if (state == idle) {
 		return currentposition;
 	}
-	try_complete();
 	if (state != idle) {
 		throw BadState("filter wheel busy");
 	}
@@ -242,17 +232,22 @@ unsigned int	SxFilterWheel::currentPosition() {
  * \param filterindex	number of the filter to select
  */
 void	SxFilterWheel::select(size_t filterindex) {
+	std::unique_lock<std::recursive_mutex>	lock(_mutex);
 	// make sure we can send a command
 	if (pending_cmd != no_command) {
-		std::string	msg = stringprintf("filterwheel busy");
+		std::string	msg = stringprintf("filterwheel busy: %d",
+			pending_cmd);
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 		throw BadState(msg);
 	}
 
 	// send a new command
-	send_command(select_filter, filterindex + 1);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "send select filter %d sent",
+	pending_cmd = select_filter;
+	state = moving;
+	currentposition = filterindex;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "send select filter %d",
 		filterindex + 1);
+	_condition.notify_all();
 }
 
 /**
@@ -296,7 +291,6 @@ FilterWheel::State	SxFilterWheel::getState() {
 	if (pending_cmd == no_command) {
 		return FilterWheel::idle;
 	}
-	try_complete();
 	switch (state) {
 	case unknown:
 		return FilterWheel::unknown;
