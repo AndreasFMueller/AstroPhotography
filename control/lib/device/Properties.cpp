@@ -109,6 +109,11 @@ void	Properties::setup(const std::string& name, const std::string& filename) {
 	while (!in.eof()) {
 		in.getline(b, buffer_size);
 		std::string	buffer = standardize(std::string(b));
+		if (buffer.size() == 0) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0,
+				"skip empty line: %s", b);
+			continue;
+		}
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "got buffer: '%s'",
 			buffer.c_str());
 		try {
