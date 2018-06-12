@@ -80,7 +80,7 @@ void	SxFilterWheel::run() {
 		
 		// what to do depening in the pending command
 		if (response[0] == 0) {
-			sleep(1);
+			usleep(100000);
 			continue;
 		}
 		switch (pending_cmd) {
@@ -304,6 +304,7 @@ FilterWheel::State	SxFilterWheel::getState() {
 	case idle:
 		return FilterWheel::idle;
 	}
+	throw std::logic_error("should not happen");
 }
 
 } // namespace sx

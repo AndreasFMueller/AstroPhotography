@@ -40,3 +40,5 @@ sx_la_DEPENDENCIES = ../../lib/libastro.la
 sx_la_LIBADD = ../../lib/libastro.la
 
 endif
+
+EXTRA_DIST = device.properties
