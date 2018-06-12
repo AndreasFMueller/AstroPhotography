@@ -91,9 +91,6 @@ int	snowstar_main(int argc, char *argv[]) {
 	// copy arguments so that we can restart
 	Restart	restart(argc, argv);
 
-	// set up the CtrlHandler
-	Ice::CtrlCHandler	ctrlCHandler;
-
 	// set up communicator
 	CommunicatorSingleton	communicator(argc, argv);
 
@@ -123,15 +120,6 @@ int	snowstar_main(int argc, char *argv[]) {
 	}
 
 	debuglevel = LOG_DEBUG;
-
-#if 0
-	// install the shutdown callback for ctrl-C
-	ctrlCHandler.setCallback(
-		[ic](int) {
-			ic->shutdown();
-		}
-	);
-#endif
 
 	// default configuration
 	std::string	databasefile("testdb.db");
