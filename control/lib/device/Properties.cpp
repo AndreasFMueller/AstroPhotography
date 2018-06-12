@@ -108,7 +108,7 @@ void	Properties::setup(const std::string& name, const std::string& filename) {
 		sizeof(b));
 	while (!in.eof()) {
 		in.getline(b, buffer_size);
-		std::string	buffer(b);
+		std::string	buffer = standardize(std::string(b));
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "got buffer: '%s'",
 			buffer.c_str());
 		try {

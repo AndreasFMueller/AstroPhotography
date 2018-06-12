@@ -65,6 +65,7 @@ void	SxFilterWheel::run() {
 		if (rc != 3) {
 			debug(LOG_DEBUG, DEBUG_LOG, 0, "failed to send: %d",
 				rc);
+			usleep(100000);
 			continue;
 		}
 
@@ -75,6 +76,9 @@ void	SxFilterWheel::run() {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "response (%d): %02x,%02x,%02x",
 			rc, response[0], response[1], response[2]);
 		if (rc < 0) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0,
+				"bad response, skipping");
+			usleep(100000);
 			continue;
 		}
 		
@@ -103,7 +107,10 @@ void	SxFilterWheel::run() {
 
 		// add the filter names if there aren't any names
 		if ((filternames.size() == 0) && (nfilters > 0)) {
-			Properties	properties(name().toString());
+			std::string	devname = name().toString();
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "get properties for '%s'",
+				devname.c_str());
+			Properties	properties(devname);
 
 			for (size_t i = 1; i <= nfilters; i++) {
 				std::string n = stringprintf("filter-%lu", i);
