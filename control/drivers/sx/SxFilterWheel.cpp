@@ -103,10 +103,18 @@ void	SxFilterWheel::run() {
 
 		// add the filter names if there aren't any names
 		if ((filternames.size() == 0) && (nfilters > 0)) {
+			Properties	properties(name().toString());
+
 			for (size_t i = 1; i <= nfilters; i++) {
 				std::string n = stringprintf("filter-%lu", i);
+				if (properties.hasProperty(n)) {
+					n = properties.getProperty(n);
+				}
+				debug(LOG_DEBUG, DEBUG_LOG, 0,
+					"set filter %lu name %s", i, n.c_str());
 				filternames.push_back(n);
 			}
+
 		}
 
 	waitnext:
@@ -213,17 +221,14 @@ unsigned int	SxFilterWheel::nFilters() {
 }
 
 /**
- * \brief Get the 
+ * \brief Get the current position of the filterwheel
  */
 unsigned int	SxFilterWheel::currentPosition() {
 	std::unique_lock<std::recursive_mutex>	lock(_mutex);
 	if (state == idle) {
-		return currentposition;
+		return currentposition - 1;
 	}
-	if (state != idle) {
-		throw BadState("filter wheel busy");
-	}
-	return currentposition;
+	throw BadState("filter wheel busy");
 } 
 
 /**
@@ -244,7 +249,7 @@ void	SxFilterWheel::select(size_t filterindex) {
 	// send a new command
 	pending_cmd = select_filter;
 	state = moving;
-	currentposition = filterindex;
+	currentposition = filterindex + 1;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "send select filter %d",
 		filterindex + 1);
 	_condition.notify_all();

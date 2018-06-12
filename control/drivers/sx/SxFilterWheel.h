@@ -51,6 +51,9 @@ private:
 	} filterwheel_state_t;
 	filterwheel_state_t	state;
 
+	// the current position is the number of the filter as
+	// defined by the SX filterwheel (i.e. 1-nFilters), not
+	// the filterindex used by the FilterWheel class
 	int	currentposition;
 public:
 	SxFilterWheel(const DeviceName& name);
