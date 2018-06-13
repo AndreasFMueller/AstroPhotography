@@ -44,6 +44,13 @@ void    SimCcd::startExposure(const Exposure& exposure) {
 	// ensure that the guideport ist updated before we start exposing
 	_locator.simguideport()->update();
 
+	// update the mount position
+	RaDec	rd = _locator.mount()->getRaDec();
+	double	s = log2(fabs(rd.ra().radians() + rd.dec().radians()));
+	s = s - trunc(s) + 30;
+	unsigned long	seed = trunc(pow(2, s));
+	starfield.rebuild(seed);
+
 	// start the exposure
 	Ccd::startExposure(exposure);
 	starttime = simtime();
@@ -163,6 +170,7 @@ ImagePtr  SimCcd::getRawImage() {
 	// binning mode
 	starcamera.binning(exposure.mode());
 
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "build a new image");
 	ImagePtr	image = starcamera(starfield);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "got an %s image: %s",
 		image->getFrame().toString().c_str(), image->info().c_str());

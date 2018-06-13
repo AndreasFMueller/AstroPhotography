@@ -4,6 +4,7 @@
  * (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
 #include <Stars.h>
+#include <unistd.h>
 
 using namespace astro::image;
 
@@ -17,10 +18,41 @@ namespace astro {
  * \param nobjects	number of stars to generate
  */
 StarField::StarField(const ImageSize& size, int overshoot,
-	unsigned int nobjects) {
-	for (unsigned int i = 0; i < nobjects; i++) {
-		createStar(size, overshoot);
+	unsigned int nobjects)
+	: _size(size), _overshoot(overshoot), _nobjects(nobjects) {
+	_seed = 0;
+	rebuild(0);
+}
+
+/**
+ * \brief Create stars for star field
+ *
+ * \param seed	random seed to use in this field
+ */
+void	StarField::rebuild(unsigned long seed) {
+	std::unique_lock<std::mutex>	lock(_mutex);
+	if (seed == _seed) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "seed has not changed");
+		return;
 	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "rebuilding stars with seed %lu", seed);
+	_seed = seed;
+	srandom(_seed);
+	sleep(3);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "destroying %d objects", objects.size());
+	for (unsigned int i = 0; i < objects.size(); i++) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "object %d %p", i, &*objects[i]);
+		objects[i].reset();
+	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "removing objects");
+	//objects.clear();
+	sleep(2);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "objects cleared: %d stars",
+		objects.size());
+	for (unsigned int i = 0; i < _nobjects; i++) {
+		createStar(_size, _overshoot);
+	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "%d stars created", objects.size());
 }
 
 /**
@@ -41,16 +73,17 @@ void	StarField::createStar(const ImageSize& size, int overshoot) {
 
 	// create color
 	int	colorcode = random() % 8;
-	double	red = (colorcode & 4) ? 1.0 : 0.8;
-	double	green = (colorcode & 2) ? 1.0 : 0.8;
-	double	blue = (colorcode & 1) ? 1.0 : 0.8;
+	double	red = (colorcode & 4) ? 1.0 : 0.6;
+	double	green = (colorcode & 2) ? 1.0 : 0.6;
+	double	blue = (colorcode & 1) ? 1.0 : 0.6;
 	RGB<double>	color(red, green, blue);
 	newstar->color(color);
 	//debug(LOG_DEBUG, DEBUG_LOG, 0, "color: %.2f/%.2f/%.2f",
 	//	red, green, blue);
 	
 	// the new star
-	addObject(StellarObjectPtr(newstar));
+	StellarObjectPtr	ptr(newstar);
+	addObject(ptr);
 }
 
 /**
@@ -59,13 +92,16 @@ void	StarField::createStar(const ImageSize& size, int overshoot) {
  * This method accepts stars or nebulae
  */
 void	StarField::addObject(StellarObjectPtr object) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "add new object %d %p", objects.size(),
+		&*object);
 	objects.push_back(object);
 }
 
 /**
  * \brief Compute cumulated intensity for all objects in the star field
  */
-double	StarField::intensity(const Point& where) const {
+double	StarField::intensity(const Point& where) {
+	std::unique_lock<std::mutex>	lock(_mutex);
 	std::vector<StellarObjectPtr>::const_iterator	i;
 	double	result = 0;
 	for (i = objects.begin(); i != objects.end(); i++) {
@@ -77,7 +113,8 @@ double	StarField::intensity(const Point& where) const {
 /**
  * \brief Compute cumulated intensity for all objects in the star field
  */
-double	StarField::intensityR(const Point& where) const {
+double	StarField::intensityR(const Point& where) {
+	std::unique_lock<std::mutex>	lock(_mutex);
 	std::vector<StellarObjectPtr>::const_iterator	i;
 	double	result = 0;
 	for (i = objects.begin(); i != objects.end(); i++) {
@@ -89,7 +126,8 @@ double	StarField::intensityR(const Point& where) const {
 /**
  * \brief Compute cumulated intensity for all objects in the star field
  */
-double	StarField::intensityG(const Point& where) const {
+double	StarField::intensityG(const Point& where) {
+	std::unique_lock<std::mutex>	lock(_mutex);
 	std::vector<StellarObjectPtr>::const_iterator	i;
 	double	result = 0;
 	for (i = objects.begin(); i != objects.end(); i++) {
@@ -101,7 +139,8 @@ double	StarField::intensityG(const Point& where) const {
 /**
  * \brief Compute cumulated intensity for all objects in the star field
  */
-double	StarField::intensityB(const Point& where) const {
+double	StarField::intensityB(const Point& where) {
+	std::unique_lock<std::mutex>	lock(_mutex);
 	std::vector<StellarObjectPtr>::const_iterator	i;
 	double	result = 0;
 	for (i = objects.begin(); i != objects.end(); i++) {

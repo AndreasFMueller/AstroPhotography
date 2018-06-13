@@ -21,6 +21,10 @@ then
 fi
 
 # add ICE PATH for an ICE that we compiled ourselves
+if [ -d /usr/local/Ice-3.7.1 ]
+then
+	ICEDIR=/usr/local/Ice-3.7.1
+fi
 if [ -d /opt/Ice-3.5.1 ]
 then
 	ICEDIR=/opt/Ice-3.5.1

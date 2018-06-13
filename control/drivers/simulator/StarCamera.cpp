@@ -94,7 +94,7 @@ double	StarCameraBase::noisevalue() const {
 }
 
 
-void    StarCameraBase::noise(const double& n) {
+void    StarCameraBase::noise(double n) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "set noise value to %f", n);
 	_noise = n;
 }
@@ -105,7 +105,7 @@ void    StarCameraBase::noise(const double& n) {
  * This method computes the distribution of the stars, with appropriate
  * transformations, and the effect of the focuser.
  */
-Image<double>	*StarCameraBase::operator()(const StarField& field) const {
+Image<double>	*StarCameraBase::operator()(StarField& field) {
 	// find out how large we should make the field which we will later
 	// transform. This must be large enough so that we catch starts that 
 	// are just ouside the image area, because the will show up when

@@ -26,17 +26,20 @@ protected:
 	double	distance(const Point& point) const { return point - _position; }
 public:
 	StellarObject(const Point& position);
+	virtual ~StellarObject();
 	const Point&	position() const { return _position; }
 	void	position(const Point& position) { _position = position; }
 	const astro::image::RGB<double>&	color() const { return _color; }
 	void	color(const astro::image::RGB<double>& color) {
 		_color = color;
 	}
-	virtual double	intensity(const Point& where) const = 0;
-	double	intensityR(const Point& where) const;
-	double	intensityG(const Point& where) const;
-	double	intensityB(const Point& where) const;
-	virtual std::string	toString() const { return _position.toString(); }
+	virtual double	intensity(const Point& where) = 0;
+	double	intensityR(const Point& where);
+	double	intensityG(const Point& where);
+	double	intensityB(const Point& where);
+	virtual std::string	toString() const {
+		return _position.toString();
+	}
 };
 
 /**
@@ -50,9 +53,10 @@ class Star : public StellarObject {
 	double	_peak;
 public:
 	Star(const Point& position, double magnitude = 0);
+	virtual ~Star();
 	const double&	magnitude() const { return _magnitude; }
 	void	magnitude(const double& magnitude);
-	virtual double intensity(const Point& where) const;
+	virtual double intensity(const Point& where);
 	virtual std::string	toString() const;
 };
 
@@ -67,11 +71,11 @@ class Nebula : public StellarObject {
 public:
 	Nebula(const Point& center, double radius)
 		: StellarObject(center), _radius(radius), _density(1) { }
-	const double&	radius() const { return _radius; }
+	double	radius() const { return _radius; }
 	void	radius(const double& radius) { _radius = radius; }
-	const double&	density() const { return _density; }
+	double	density() const { return _density; }
 	void	density(const double& density) { _density = density; }
-	virtual double intensity(const Point& where) const;
+	virtual double intensity(const Point& where);
 	virtual std::string	toString() const;
 };
 
@@ -86,15 +90,27 @@ typedef std::shared_ptr<StellarObject>	StellarObjectPtr;
 class StarField {
 	std::vector<StellarObjectPtr>	objects;
 	void	createStar(const ImageSize& size, int overshoot);
+	ImageSize	_size;
+	int	_overshoot;
+	unsigned long	_seed;
+	unsigned int	_nobjects;
+	std::mutex	_mutex;
+public:
+	int	overshoot() const { return _overshoot; }
+	const ImageSize&	size() const { return _size; }
 public:
 	StarField(const ImageSize& size, int overshoot = 100,
 		unsigned int nobjects = 100);
+	void	rebuild(unsigned long seed);
+private:
 	void	addObject(StellarObjectPtr object);
-	virtual double	intensity(const Point& where) const;
-	virtual double	intensityR(const Point& where) const;
-	virtual double	intensityG(const Point& where) const;
-	virtual double	intensityB(const Point& where) const;
-	const StellarObjectPtr&	operator[](size_t index) const {
+public:
+	virtual double	intensity(const Point& where);
+	virtual double	intensityR(const Point& where);
+	virtual double	intensityG(const Point& where);
+	virtual double	intensityB(const Point& where);
+	StellarObjectPtr	operator[](size_t index) {
+		std::unique_lock<std::mutex>	lock(_mutex);
 		return objects[index];
 	}
 };
@@ -189,46 +205,47 @@ public:
 	}
 
 	// accessors for the rotation angle
-	const double&	alpha() const { return _alpha; }
-	void	alpha(const double& alpha) { _alpha = alpha; }
+	double	alpha() const { return _alpha; }
+	void	alpha(double alpha) { _alpha = alpha; }
 
 	// accessor for the stretch factor
-	const double&	stretch() const { return _stretch; }
-	void	stretch(const double& stretch) { _stretch = stretch; }
+	double	stretch() const { return _stretch; }
+	void	stretch(double stretch) { _stretch = stretch; }
 
 	// accessor for the dark value
-	const double&	dark() const { return _dark; }
-	void	dark(const double& dark) { _dark = dark; }
+	double	dark() const { return _dark; }
+	void	dark(double dark) { _dark = dark; }
 
 	// accessor for the noise standard deviation
-	const double&	noise() const { return _noise; }
-	//void	noise(const double& noise) { _noise = noise; }
-	void	noise(const double& noise);
+	double	noise() const { return _noise; }
+	void	noise(double noise);
 
 	// accessor for the shutter flag
-	const bool&	light() const { return _light; }
-	void	light(const bool& light) { _light = light; }
+	bool	light() const { return _light; }
+	void	light(bool light) { _light = light; }
 
 	// accessor for the color parameter
-	const int&	color() const { return _color; }
-	void	colorfactor(const int& color) { _color = color; }
+	int	color() const { return _color; }
+	void	colorfactor(int color) { _color = color; }
 
 	// accessor for the out of focus radius
-	const double&	radius() const { return _radius; }
-	void	radius(const double& radius) { _radius = radius; }
+	double	radius() const { return _radius; }
+	void	radius(double radius) { _radius = radius; }
 
 	// accessor for the inner radius for donuts
-	const double&	innerradius() const { return _innerradius; }
-	void	innerradius(const double& innerradius) {
+	double	innerradius() const { return _innerradius; }
+	void	innerradius(double innerradius) {
 		_innerradius = innerradius;
 	}
 
 	// accessor for the binning mode
 	const astro::image::Binning&	binning() const { return _binning; }
-	void	binning(const astro::image::Binning& binning) { _binning = binning; }
+	void	binning(const astro::image::Binning& binning) {
+			_binning = binning;
+	}
 
 	// imaging operator
-	Image<double>	*operator()(const StarField& field) const;
+	Image<double>	*operator()(StarField& field);
 };
 
 /**
@@ -244,7 +261,7 @@ public:
 	StarCamera(const ImageRectangle& rectangle)
 		: StarCameraBase(rectangle) { }
 
-	ImagePtr	operator()(const StarField& field) const {
+	ImagePtr	operator()(StarField& field) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "imaging star field %s",
 			field[0]->toString().c_str());
 			

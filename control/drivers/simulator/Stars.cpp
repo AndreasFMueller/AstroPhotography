@@ -24,23 +24,29 @@ StellarObject::StellarObject(const Point& position) : _position(position) {
 }
 
 /**
+ * \brief Destroy the StellarObject
+ */
+StellarObject::~StellarObject() {
+}
+
+/**
  * \brief Extract red color value
  */
-double	StellarObject::intensityR(const Point& where) const {
+double	StellarObject::intensityR(const Point& where) {
 	return _color.R * this->intensity(where);
 }
 
 /**
  * \brief Extract blue color value
  */
-double	StellarObject::intensityB(const Point& where) const {
+double	StellarObject::intensityB(const Point& where) {
 	return _color.B * this->intensity(where);
 }
 
 /**
  * \brief Extract green color value
  */
-double	StellarObject::intensityG(const Point& where) const {
+double	StellarObject::intensityG(const Point& where) {
 	return _color.G * this->intensity(where);
 }
 
@@ -54,12 +60,15 @@ Star::Star(const Point& position, double magnitude)
 	//	position.toString().c_str());
 }
 
+Star::~Star() {
+}
+
 /**
  * \brief Intensity distribution for a star
  */
 #define	AIRY_RADIUS	1.5
 static const double	vpeak = (0.5 / AIRY_RADIUS);
-double	Star::intensity(const Point& where) const {
+double	Star::intensity(const Point& where) {
 	double	d = distance(where);
 	// short circuit far away points to improve speed
 	if (d > 10) {
@@ -98,7 +107,7 @@ std::string	Star::toString() const {
 /**
  * \brief Nebula intensity distribution: circular disk
  */
-double	Nebula::intensity(const Point& where) const {
+double	Nebula::intensity(const Point& where) {
 	return (distance(where) > _radius) ? 0 : _density;
 }
 

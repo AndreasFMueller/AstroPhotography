@@ -27,6 +27,7 @@ public:
 	void	cancel();
 	virtual void    parameter(const std::string& name, float value);
 	virtual float	parameterValueFloat(const std::string& name) const;
+	const RaDec&	direction() const { return _direction; }
 };
 
 } // namespace simulator

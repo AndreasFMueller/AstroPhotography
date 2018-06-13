@@ -49,7 +49,12 @@ void	mountcontrollerwidget::instrumentSetup(
 	int	index = 0;
 	while (_instrument.has(snowstar::InstrumentMount, index)) {
 		snowstar::MountPrx	mount = _instrument.mount(index);
+		if (!mount) {
+			debug(LOG_ERR, DEBUG_LOG, 0, "no mount at index %d",
+				index);
+		}
 		if (!_mount) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "found a mount");
 			_mount = mount;
 		}
 		std::string	sn = _instrument.displayname(
@@ -67,12 +72,14 @@ void	mountcontrollerwidget::instrumentSetup(
  * \brief setup the mount
  */
 void	mountcontrollerwidget::setupMount() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "setup the mount");
 	_statusTimer.stop();
 	_previousstate = snowstar::MountIDLE;
 	if (_mount) {
 		ui->raField->setEnabled(true);
 		ui->decField->setEnabled(true);
 		ui->gotoButton->setEnabled(true);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "start the mount timer");
 		_statusTimer.start();
 	} else {
 		ui->raField->setEnabled(true);
@@ -124,9 +131,11 @@ void	mountcontrollerwidget::gotoClicked() {
  * \brief Slot called when the timer expires
  */
 void	mountcontrollerwidget::statusUpdate() {
-	if (_mount) {
+	if (!_mount) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "no active mount");
 		return;
 	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "Mount status udpate");
 	snowstar::mountstate state = _mount->state();
 	if (state != _previousstate) {
 		_previousstate = state;
@@ -161,6 +170,7 @@ void	mountcontrollerwidget::statusUpdate() {
  * \brief Slot called when the selection of the mount changes
  */
 void	mountcontrollerwidget::mountChanged(int index) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "mount changed to %d", index);
 	_mount = _instrument.mount(index);
 	setupMount();
 	emit mountSelected(index);
