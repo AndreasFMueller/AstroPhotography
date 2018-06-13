@@ -80,7 +80,7 @@ void	Server::get_configured_services(astro::discover::ServicePublisherPtr sp) {
  */
 void	Server::add_devices_servant() {
 	Ice::ObjectPtr	object = new DevicesI(devices);
-	adapter->add(object, ic->stringToIdentity("Devices"));
+	adapter->add(object, Ice::stringToIdentity("Devices"));
 	DeviceServantLocator	*deviceservantlocator
 		= new DeviceServantLocator(repository);
 	adapter->addServantLocator(deviceservantlocator, "");
@@ -91,7 +91,7 @@ void	Server::add_devices_servant() {
 
 	// add a servant for the modules
 	object = new ModulesI();
-	adapter->add(object, ic->stringToIdentity("Modules"));
+	adapter->add(object, Ice::stringToIdentity("Modules"));
 	DriverModuleLocator	*drivermodulelocator
 		= new DriverModuleLocator(repository);
 	adapter->addServantLocator(drivermodulelocator, "drivermodule");
@@ -108,7 +108,7 @@ void	Server::add_devices_servant() {
 
 void	Server::add_event_servant() {
 	Ice::ObjectPtr	object = new EventHandlerI();
-	adapter->add(object, ic->stringToIdentity("Events"));
+	adapter->add(object, Ice::stringToIdentity("Events"));
 	astro::event(EVENT_GLOBAL, astro::events::INFO,
 		astro::events::Event::DEBUG,
 		"Event server added");
@@ -118,7 +118,7 @@ void	Server::add_configuration_servant() {
 	astro::config::ConfigurationPtr	configuration
 		= astro::config::Configuration::get();
 	Ice::ObjectPtr	object = new ConfigurationI(configuration);
-	adapter->add(object, ic->stringToIdentity("Configuration"));
+	adapter->add(object, Ice::stringToIdentity("Configuration"));
 	astro::event(EVENT_GLOBAL, astro::events::INFO,
 		astro::events::Event::DEBUG,
 		"Configuration server added");
@@ -126,7 +126,7 @@ void	Server::add_configuration_servant() {
 
 void	Server::add_daemon_servant() {
 	Ice::ObjectPtr	object = new DaemonI(*this);
-	adapter->add(object, ic->stringToIdentity("Daemon"));
+	adapter->add(object, Ice::stringToIdentity("Daemon"));
 	astro::event(EVENT_GLOBAL, astro::events::INFO,
 		astro::events::Event::DEBUG,
 		"Daemon server added");
@@ -134,7 +134,7 @@ void	Server::add_daemon_servant() {
 
 void	Server::add_images_servant() {
 	Ice::ObjectPtr	object = new ImagesI();
-	adapter->add(object, ic->stringToIdentity("Images"));
+	adapter->add(object, Ice::stringToIdentity("Images"));
 	ImageLocator	*imagelocator = new ImageLocator();
 	adapter->addServantLocator(imagelocator, "image");
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "images servant locator added");
@@ -145,7 +145,7 @@ void	Server::add_images_servant() {
 
 void	Server::add_tasks_servant() {
 	Ice::ObjectPtr	object = new TaskQueueI(taskqueue);
-	adapter->add(object, ic->stringToIdentity("Tasks"));
+	adapter->add(object, Ice::stringToIdentity("Tasks"));
 	TaskLocator	*tasklocator = new TaskLocator(database);
 	adapter->addServantLocator(tasklocator, "task");
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "task locator added");
@@ -156,7 +156,7 @@ void	Server::add_tasks_servant() {
 
 void	Server::add_instruments_servant() {
 	Ice::ObjectPtr	object = new InstrumentsI();
-	adapter->add(object, ic->stringToIdentity("Instruments"));
+	adapter->add(object, Ice::stringToIdentity("Instruments"));
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "Instruments servant added");
 	InstrumentLocator	*instrumentlocator = new InstrumentLocator();
 	adapter->addServantLocator(instrumentlocator, "instrument");
@@ -169,7 +169,7 @@ void	Server::add_instruments_servant() {
 void	Server::add_repository_servant() {
 	_repositories = new RepositoriesI();
 	Ice::ObjectPtr	object = _repositories;
-	adapter->add(object, ic->stringToIdentity("Repositories"));
+	adapter->add(object, Ice::stringToIdentity("Repositories"));
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "Repositories servant added");
 	RepositoryLocator	*repolocator = new RepositoryLocator();
 	adapter->addServantLocator(repolocator, "repository");
@@ -183,7 +183,7 @@ void	Server::add_guiding_servant() {
 	GuiderLocator	*guiderlocator = new GuiderLocator();
 	Ice::ObjectPtr	object = new GuiderFactoryI(database, guiderfactory,
 		guiderlocator);
-	adapter->add(object, ic->stringToIdentity("Guiders"));
+	adapter->add(object, Ice::stringToIdentity("Guiders"));
 	adapter->addServantLocator(guiderlocator, "guider");
 	astro::event(EVENT_GLOBAL, astro::events::INFO,
 		astro::events::Event::GUIDE,
@@ -192,7 +192,7 @@ void	Server::add_guiding_servant() {
 
 void	Server::add_focusing_servant() {
 	Ice::ObjectPtr	object = new FocusingFactoryI();
-	adapter->add(object, ic->stringToIdentity("FocusingFactory"));
+	adapter->add(object, Ice::stringToIdentity("FocusingFactory"));
 	FocusingLocator	*focusinglocator = new FocusingLocator();
 	adapter->addServantLocator(focusinglocator, "focusing");
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "Focusing servant added");

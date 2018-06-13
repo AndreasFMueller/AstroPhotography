@@ -106,6 +106,7 @@ void    StarCameraBase::noise(double n) {
  * transformations, and the effect of the focuser.
  */
 Image<double>	*StarCameraBase::operator()(StarField& field) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "start building base image");
 	// find out how large we should make the field which we will later
 	// transform. This must be large enough so that we catch starts that 
 	// are just ouside the image area, because the will show up when
@@ -206,25 +207,25 @@ Image<double>	*StarCameraBase::operator()(StarField& field) {
 				}
 				break;
 			case SUN: {
-				double	r = (p - body).abs();
-				if (r < 100) {
-					value = 1.;
-				} else if (r > 102) {
-					value = 0;
-				} else {
-					value = (102 - r) / 2;
-				}
+					double	r = (p - body).abs();
+					if (r < 100) {
+						value = 1.;
+					} else if (r > 102) {
+						value = 0;
+					} else {
+						value = (102 - r) / 2;
+					}
 				}
 				break;
 			case PLANET: {
-				double	r = (p - body).abs();
-				if (r < 10) {
-					value = 1.;
-				} else if (r > 12) {
-					value = 0;
-				} else {
-					value = (12 - r) / 2;
-				}
+					double	r = (p - body).abs();
+					if (r < 10) {
+						value = 1.;
+					} else if (r > 12) {
+						value = 0;
+					} else {
+						value = (12 - r) / 2;
+					}
 				}
 				break;
 			}
@@ -232,6 +233,7 @@ Image<double>	*StarCameraBase::operator()(StarField& field) {
 			image.pixel(x, y) = value;
 		}
 	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "object values applied");
 
 	// compute the blurr if necessary
 	if (radius() > 1) {
@@ -239,17 +241,22 @@ Image<double>	*StarCameraBase::operator()(StarField& field) {
 		Image<double>	blurredimage = blurr(image);
 		image = blurredimage;
 	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "blurring completed");
 
 	// extract the rectangle 
 	ImageRectangle	r(offset, rectangle().size());
 	WindowAdapter<double>	wa(image, r);
 	Image<double>	*result = new Image<double>(wa);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "rectangle %s extracted",
+		r.toString().c_str());
 
 	// add noise to the image rectangle
 	if (noise()) {
 		addnoise(*result);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "noise added");
 	}
 
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "base image complete");
 	return result;
 }
 

@@ -149,4 +149,15 @@ double	StarField::intensityB(const Point& where) {
 	return result;
 }
 
+StellarObjectPtr	StarField::operator[](size_t index) {
+	std::unique_lock<std::mutex>	lock(_mutex);
+	if (index >= objects.size()) {
+		std::string	msg = stringprintf("index %d exceeds size %d",
+			index, objects.size());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw std::range_error(msg);
+	}
+	return objects[index];
+}
+
 } // namespace astro

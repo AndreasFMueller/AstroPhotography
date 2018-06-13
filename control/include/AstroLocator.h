@@ -123,6 +123,8 @@ public:
 public:
 	DeviceLocator();
 	virtual ~DeviceLocator();
+	DeviceLocator(const DeviceLocator&) = delete;
+	DeviceLocator&	operator=(const DeviceLocator&) = delete;
 	virtual std::string	getName() const;
 	virtual std::string	getVersion() const;
 	virtual std::vector<std::string>	getDevicelist(

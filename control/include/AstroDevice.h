@@ -214,13 +214,11 @@ public:
 class Device : public Properties {
 protected:
 	DeviceName	_name;
-private:
-	// make sure devices cannot be copied
-	Device(const Device& other);
-	Device&	operator=(const Device& other);
 public:
 	Device(const std::string& name, DeviceName::device_type type);
 	Device(const DeviceName& name, DeviceName::device_type type);
+	Device(const Device& other) = delete;
+	Device&	operator=(const Device& other) = delete;
 	virtual ~Device();
 	const DeviceName&	name() const { return _name; }
 

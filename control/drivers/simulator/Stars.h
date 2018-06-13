@@ -27,6 +27,8 @@ protected:
 public:
 	StellarObject(const Point& position);
 	virtual ~StellarObject();
+	StellarObject(const StellarObject&) = delete;
+	StellarObject&	operator=(const StellarObject&) = delete;
 	const Point&	position() const { return _position; }
 	void	position(const Point& position) { _position = position; }
 	const astro::image::RGB<double>&	color() const { return _color; }
@@ -101,6 +103,8 @@ public:
 public:
 	StarField(const ImageSize& size, int overshoot = 100,
 		unsigned int nobjects = 100);
+	StarField(const StarField&) = delete;
+	StarField&	operator=(const StarField&) = delete;
 	void	rebuild(unsigned long seed);
 private:
 	void	addObject(StellarObjectPtr object);
@@ -109,10 +113,7 @@ public:
 	virtual double	intensityR(const Point& where);
 	virtual double	intensityG(const Point& where);
 	virtual double	intensityB(const Point& where);
-	StellarObjectPtr	operator[](size_t index) {
-		std::unique_lock<std::mutex>	lock(_mutex);
-		return objects[index];
-	}
+	StellarObjectPtr	operator[](size_t index);
 };
 
 /**
@@ -190,6 +191,8 @@ protected:
 	std::set<ImagePoint>	hotpixels;
 public:
 	StarCameraBase(const ImageRectangle& rectangle);
+	StarCameraBase(const StarCameraBase&) = delete;
+	StarCameraBase&	operator=(const StarCameraBase&) = delete;
 
 	void	addHotPixels(unsigned int npixels);
 
@@ -260,51 +263,59 @@ class StarCamera : public StarCameraBase {
 public:
 	StarCamera(const ImageRectangle& rectangle)
 		: StarCameraBase(rectangle) { }
-
-	ImagePtr	operator()(StarField& field) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "imaging star field %s",
-			field[0]->toString().c_str());
-			
-		// compute the image
-		Image<double>	*rawimage = StarCameraBase::operator()(field);
-
-		// bin the image,
-		if (binning() != astro::image::Binning()) {
-			bin(*rawimage);
-		}
-
-		// now add all the local stuff, which depends on the camera,
-		// not the star field
-		double	scale = std::numeric_limits<P>::max();
-		rescale(*rawimage, scale);
-
-		// turn pixels hot, this must respsect the binning
-		addhot(*rawimage, scale);
-
-		// now convert the image into an image of the right pixel type
-		// create the image
-		ImageSize	size = rectangle().size() / binning();
-		Image<P>	*image = new Image<P>(size);
-
-		// fill in the data
-		int	width = size.width();
-		int	height = size.height();
-		int	deltax = binning().x();
-		int	deltay = binning().y();
-		for (int x = 0; x < width; x++) {
-			for (int y = 0; y < height; y++) {
-				image->pixel(x, y)
-					= rawimage->pixel(x * deltax, y * deltay);
-			}
-		}
-
-		// remove the raw image, we no longer need it
-		delete rawimage;
-
-		// that's the image
-		return ImagePtr(image);
-	}
+	ImagePtr	operator()(StarField& field);
 };
+
+template<typename P>
+ImagePtr	StarCamera<P>::operator()(StarField& field) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "apply camera to field");
+//	try {
+//		debug(LOG_DEBUG, DEBUG_LOG, 0, "imaging star field %s",
+//			field[0]->toString().c_str());
+//	} catch (const std::exception& x) {
+//		debug(LOG_ERR, DEBUG_LOG, 0, "exception: %s", x.what());
+//	}
+		
+	// compute the image
+	Image<double>	*rawimage = StarCameraBase::operator()(field);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "new image created");
+
+	// bin the image,
+	if (binning() != astro::image::Binning()) {
+		bin(*rawimage);
+	}
+
+	// now add all the local stuff, which depends on the camera,
+	// not the star field
+	double	scale = std::numeric_limits<P>::max();
+	rescale(*rawimage, scale);
+
+	// turn pixels hot, this must respsect the binning
+	addhot(*rawimage, scale);
+
+	// now convert the image into an image of the right pixel type
+	// create the image
+	ImageSize	size = rectangle().size() / binning();
+	Image<P>	*image = new Image<P>(size);
+
+	// fill in the data
+	int	width = size.width();
+	int	height = size.height();
+	int	deltax = binning().x();
+	int	deltay = binning().y();
+	for (int x = 0; x < width; x++) {
+		for (int y = 0; y < height; y++) {
+			image->pixel(x, y)
+				= rawimage->pixel(x * deltax, y * deltay);
+		}
+	}
+
+	// remove the raw image, we no longer need it
+	delete rawimage;
+
+	// that's the image
+	return ImagePtr(image);
+}
 
 } // namespace astro
 
