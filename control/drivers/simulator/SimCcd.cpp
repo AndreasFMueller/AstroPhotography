@@ -46,8 +46,9 @@ void    SimCcd::startExposure(const Exposure& exposure) {
 
 	// update the mount position
 	RaDec	rd = _locator.mount()->getRaDec();
-	double	s = log2(fabs(rd.ra().radians() + rd.dec().radians()));
+	double	s = log2(1 + fabs(rd.ra().radians() + rd.dec().radians()));
 	s = s - trunc(s) + 30;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "log of seed: %f", s);
 	unsigned long	seed = trunc(pow(2, s));
 	starfield.rebuild(seed);
 

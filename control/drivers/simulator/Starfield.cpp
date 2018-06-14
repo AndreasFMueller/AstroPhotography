@@ -20,8 +20,8 @@ namespace astro {
 StarField::StarField(const ImageSize& size, int overshoot,
 	unsigned int nobjects)
 	: _size(size), _overshoot(overshoot), _nobjects(nobjects) {
-	_seed = 0;
-	rebuild(0);
+	_seed = 3141592654; // some phantastic value
+	rebuild(RaDec(0, 0));
 }
 
 /**
@@ -34,6 +34,9 @@ void	StarField::rebuild(unsigned long seed) {
 	if (seed == _seed) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "seed has not changed");
 		return;
+	} else {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "rebuilding with seed %lu",
+			seed);
 	}
 	_seed = seed;
 	srandom(_seed);
@@ -42,6 +45,19 @@ void	StarField::rebuild(unsigned long seed) {
 		createStar(_size, _overshoot);
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "%d stars created", objects.size());
+}
+
+/**
+ * \brief Create the starfield from the direction
+ *
+ * \param radec	direction the simulated telescope is pointing to
+ */
+void	StarField::rebuild(const RaDec& radec) {
+	double	s = log2(1 + fabs(radec.ra().radians() + radec.dec().radians()));
+	s = s - trunc(s) + 30;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "log of seed: %f", s);
+	unsigned long   seed = trunc(pow(2, s));
+	rebuild(seed);
 }
 
 /**

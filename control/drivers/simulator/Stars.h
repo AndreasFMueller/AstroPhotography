@@ -106,6 +106,7 @@ public:
 	StarField(const StarField&) = delete;
 	StarField&	operator=(const StarField&) = delete;
 	void	rebuild(unsigned long seed);
+	void	rebuild(const RaDec& radec);
 private:
 	void	addObject(StellarObjectPtr object);
 public:
