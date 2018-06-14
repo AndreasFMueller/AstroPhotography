@@ -26,7 +26,11 @@ prx createProxy(const std::string& name, const Ice::Current& current,
 		ename = NameConverter::urlencode(name);
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "encoded name: %s", ename.c_str());
+#if ICE_INT_VERSION > 30501
 	return prx::uncheckedCast(a->createProxy(Ice::stringToIdentity(ename)));
+#else
+	return prx::uncheckedCast(a->createProxy(ic->stringToIdentity(ename)));
+#endif
 }
 
 } // namespace snowstar
