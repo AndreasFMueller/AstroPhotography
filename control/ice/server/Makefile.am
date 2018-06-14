@@ -116,7 +116,7 @@ snowstar_CPPFLAGS = -I$(top_builddir)/ice/include -I$(top_builddir)/ice/slice \
 COMMONFLAGS = --debug --foreground --base=`pwd`/images \
 	--database=`pwd`/testdb.db --config=`pwd`/testdb.db \
 	--name=$${servername} 
-EFENCE = EF_PROTECT_FREE=1 EF_FILL=255
+EFENCE = LD_PRELOAD=libefence.so.0.0 EF_PROTECT_FREE=1 EF_FILL=255 EF_ALLOW_MALLOC_0=1
 
 test:	snowstar
 	if [ -r servername ];						\
@@ -125,7 +125,7 @@ test:	snowstar
 	else								\
 		servername=server;					\
 	fi;								\
-	./snowstar $(COMMONFLAGS) 2>&1 | tee test.log
+	$(EFENCE) ./snowstar $(COMMONFLAGS) 2>&1 | tee test.log
 
 #		--lines=100 --files=10 --logfile=test.log
 

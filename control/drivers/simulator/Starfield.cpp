@@ -35,20 +35,9 @@ void	StarField::rebuild(unsigned long seed) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "seed has not changed");
 		return;
 	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "rebuilding stars with seed %lu", seed);
 	_seed = seed;
 	srandom(_seed);
-	sleep(3);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "destroying %d objects", objects.size());
-	for (unsigned int i = 0; i < objects.size(); i++) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "object %d %p", i, &*objects[i]);
-		objects[i].reset();
-	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "removing objects");
-	//objects.clear();
-	sleep(2);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "objects cleared: %d stars",
-		objects.size());
+	objects.clear();
 	for (unsigned int i = 0; i < _nobjects; i++) {
 		createStar(_size, _overshoot);
 	}
