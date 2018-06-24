@@ -54,18 +54,14 @@ fi
 
 # the next few sections are about whether or not to build the ICE components
 # add ICE PATH for Mac OS X
-if [ -d /Library/Developer/Ice-3.5.1 ]
-then
-	ICEDIR=/Library/Developer/Ice-3.5.1
-	SLICEDIR=/Library/Developer/Ice-3.5.1/slice
-elif [ -d /opt/Ice-3.5.1 ]
-then
-	ICEDIR=/opt/Ice-3.5.1
-	SLICEDIR=/opt/Ice-3.5.1/slice
-elif [ -d /usr/local/Ice ]
+if [ -d /usr/local/Ice ]
 then
 	ICEDIR=/usr/local/Ice
 	SLICEDIR=/usr/local/Ice/share/ice/slice
+elif [ -d /Library/Developer/Ice-3.5.1 ]
+then
+	ICEDIR=/Library/Developer/Ice-3.5.1
+	SLICEDIR=/Library/Developer/Ice-3.5.1/slice
 elif [ -x /usr/bin/slice2cpp ]
 then
 	ICEDIR=/usr
@@ -100,6 +96,7 @@ then
 	fi
 	commonflags="${commonflags} --with-ice=${ICEDIR}"
 	# architecture specific ICE libdirs (used on Debian)
+	ICELIBDIR="${ICEDIR}/lib"
 	for architecture in arm-linux-gnueabihf x86_64-linux-gnu
 	do
 		if [ -d ${ICEDIR}/lib/${architecture} ]
@@ -112,7 +109,7 @@ fi
 # make sure the Ice libdir option is set
 if [ -n "${ICELIBDIR}" ]
 then
-	icelibdiroption="--with-icelibdir=${ICELIBDIR}"
+	commonflags="${commonflags} --with-icelibdir=${ICELIBDIR}"
 fi
 
 # make sure pdflatex is found even on Mac OS X where pdflatex is not on
