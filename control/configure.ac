@@ -126,7 +126,7 @@ ICEDIR=
 ICELIBS=
 ICEINCLUDE=
 SLICEDIR=
-ICLIBDIR=
+ICELIBDIR=
 AC_ARG_WITH([ice],
 [AS_HELP_STRING([--with-ice=dir], [build the ICE components from path])],
 [
@@ -154,6 +154,7 @@ AC_ARG_WITH([ice],
 			fi
 		fi
 	fi
+	ICELIBS="${ICELIBS} -lIce -lIceUtil"
 
 	# get the include directory, if we cannot find it below the ICE
 	# directory, we will assume that it is already on the include path
@@ -174,8 +175,16 @@ AC_ARG_WITH([ice],
 AC_ARG_WITH([icelibdir],
 [AS_HELP_STRING([--with-icelibdir=dir], [where to find the ICE libraries])],
 [
+	ICELIBDIR="${with_icelibdir}"
 	ICELIBS="-L${with_icelibdir} -Wl,-rpath,${with_icelibdir}"
+	if test -r "${ICELIBDIR}/libIceUtil.so"
+	then
+		ICELIBS="${ICELIBS} -lIce -lIceUtil"
+	else
+		ICELIBS="${ICELIBS} -lIce"
+	fi
 ],[
+	ICELIBS="-lIce -lIceUtil"
 ])
 
 OLDLIBS="${LIBS}"
@@ -184,13 +193,7 @@ OLDCFLAGS="${CFLAGS}"
 
 CXXFLAGS="${CXXFLAGS} ${ICEINCLUDE}"
 CFLAGS="${CFLAGS} ${ICEINCLUDE}"
-LIBS="${LIBS} ${ICELIBS} -lIce"
-
-AC_CHECK_LIB([IceUtil], [childAtFork],[
-	ICELIBS="${ICELIBS} -lIce -lIceUtil"
-],[
-	ICELIBS="${ICELIBS} -lIce"
-])
+LIBS="${LIBS} ${ICELIBS}"
 
 AC_SUBST(ICEDIR)
 AC_SUBST(ICELIBS)
