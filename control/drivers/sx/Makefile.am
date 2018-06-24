@@ -41,4 +41,4 @@ sx_la_LIBADD = ../../lib/libastro.la
 
 endif
 
-EXTRA_DIST = device.properties
+EXTRA_DIST = device.properties 80-sx.rules

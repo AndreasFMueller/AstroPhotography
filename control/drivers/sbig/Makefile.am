@@ -3,6 +3,7 @@
 #
 # (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
 #
+EXTRA_DIST = 80-sbig.rules
 
 if ENABLE_SBIG
 
@@ -48,4 +49,5 @@ sbig_la_LIBADD = ../../lib/libastro.la @SBIGLIBRARY@
 sbig_la_CPPFLAGS = -DTARGET=@SBIGTARGET@ @SBIGINCLUDE@
 
 endif
+
 

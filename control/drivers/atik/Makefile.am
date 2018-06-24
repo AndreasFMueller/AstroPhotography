@@ -3,6 +3,7 @@
 #
 # (c) 2016 Prof Dr Andreas Mueller, Hochschule Rapperswil
 #
+EXTRA_DIST = 80-atik.rules
 
 if ENABLE_ATIK
 

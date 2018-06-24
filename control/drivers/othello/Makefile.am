@@ -3,6 +3,8 @@
 #
 # (c) 2015 Prof Dr Andreas Mueller, Hochschule Rapperswil
 #
+EXTRA_DIST = 80-othello.rules
+
 if ENABLE_OTHELLO
 
 pkglib_LTLIBRARIES = othello.la

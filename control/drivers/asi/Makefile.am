@@ -3,6 +3,7 @@
 #
 # (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
 #
+EXTRA_DIST = 80-asi.rules
 
 if ENABLE_ASI
 
