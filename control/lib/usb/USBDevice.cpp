@@ -104,7 +104,9 @@ static const int	max_retries = 3;
 
 std::string	Device::getStringDescriptor(uint8_t index) const {
 	if (NULL == dev_handle) {
-		return std::string("(device not open)");
+		std::string	msg = stringprintf("device not open");
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw USBError(msg);
 	}
 	// read the string descriptor
 	unsigned char	buffer[128];
@@ -114,11 +116,16 @@ std::string	Device::getStringDescriptor(uint8_t index) const {
 		rc = libusb_get_string_descriptor_ascii(dev_handle,
 				index, buffer, sizeof(buffer));
 		if (rc > 0) {
-			return std::string((const char *)buffer, rc);
+			std::string	result((const char *)buffer, rc);
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "got string %d: '%s'",
+				result.c_str());
+			return result;
 		}
 	} while (max_retries > ++retries);
-	return stringprintf("cannot get string %d: %s (%d)", index,
-		libusb_error_name(rc), rc);
+	std::string	msg = stringprintf("cannot get string %d: %s (%d)",
+		index, libusb_error_name(rc), rc);
+	debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+	throw USBError(msg);
 }
 
 DeviceDescriptorPtr	Device::descriptor() {
@@ -138,7 +145,10 @@ ConfigurationPtr	Device::config(uint8_t index) {
 	struct libusb_config_descriptor	*config = NULL;
 	int	rc = libusb_get_config_descriptor(dev, index, &config);
 	if (rc != LIBUSB_SUCCESS) {
-		throw USBError(libusb_error_name(rc));
+		std::string	msg = stringprintf("cannot get config %d: %s",
+			index, libusb_error_name(rc));
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw USBError(msg);
 	}
 	Configuration	*result = new Configuration(*this, config);
 	libusb_free_config_descriptor(config);
@@ -176,7 +186,10 @@ ConfigurationPtr	Device::activeConfig() {
 	struct libusb_config_descriptor	*config = NULL;
 	int	rc = libusb_get_active_config_descriptor(dev, &config);
 	if (rc != LIBUSB_SUCCESS) {
-		throw USBError(libusb_error_name(rc));
+		std::string	msg = stringprintf("cannot active config: %s",
+			libusb_error_name(rc));
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw USBError(msg);
 	}
 	Configuration	*result = new Configuration(*this, config);
 	libusb_free_config_descriptor(config);
@@ -192,7 +205,10 @@ ConfigurationPtr	Device::configValue(uint8_t value) {
 	struct libusb_config_descriptor	*config;
 	int	rc = libusb_get_config_descriptor_by_value(dev, value, &config);
 	if (rc != LIBUSB_SUCCESS) {
-		throw USBError(libusb_error_name(rc));
+		std::string	msg = stringprintf("cannot get config value "
+			"%d: %s", value, libusb_error_name(rc));
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw USBError(msg);
 	}
 	Configuration	*result = new Configuration(*this, config);
 	libusb_free_config_descriptor(config);

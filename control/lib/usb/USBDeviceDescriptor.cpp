@@ -4,6 +4,7 @@
  * (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
 #include <AstroUSB.h>
+#include <AstroDebug.h>
 #include <ios>
 #include <iomanip>
 #include <cstring>
@@ -19,7 +20,12 @@ DeviceDescriptor::DeviceDescriptor(Device& device,
 	// manufacturer
 	manufacturer = device.getStringDescriptor(d.iManufacturer);
 	product = device.getStringDescriptor(d.iProduct);
-	serialnumber = device.getStringDescriptor(d.iSerialNumber);
+	try {
+		serialnumber = device.getStringDescriptor(d.iSerialNumber);
+	} catch (const USBError& e) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "no serial number found: %s",
+			e.what());
+	}
 }
 
 DeviceDescriptor::~DeviceDescriptor() {

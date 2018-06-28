@@ -55,6 +55,7 @@ namespace usb {
 class	USBError : public std::runtime_error {
 public:
 	USBError(const char *error) : std::runtime_error(error) { }
+	USBError(const std::string& s);
 	USBError(enum libusb_error error);
 };
 

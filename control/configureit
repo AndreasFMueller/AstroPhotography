@@ -65,6 +65,7 @@ then
 elif [ -x /usr/bin/slice2cpp ]
 then
 	ICEDIR=/usr
+	SLICEDIR="${ICEDIR}/share/ice/slice"
 fi
 if [ -n "${ICEDIR}" ]
 then
