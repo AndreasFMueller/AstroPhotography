@@ -17,6 +17,25 @@ using namespace astro::usb;
 #define	SX_VENDOR_ID	0x1278
 #define SX_FILTERWHEEL_PRODUCT_ID	0x0920
 
+#define CCD_EXP_FLAGS_FIELD_ODD		0x0001
+#define CCD_EXP_FLAGS_FIELD_EVEN	0x0002
+#define CCD_EXP_FLAGS_FIELD_BOTH	(CCD_EXP_FLAGS_FIELD_EVEN|CCD_EXP_FLAGS_FIELD_ODD)
+#define CCD_EXP_FLAGS_FIELD_MASK	CCD_EXP_FLAGS_FIELD_BOTH
+#define CCD_EXP_FLAGS_SPARE2		0x0004
+#define CCD_EXP_FLAGS_NOWIPE_FRAME	0x0008
+#define CCD_EXP_FLAGS_SPARE4		0x0010
+#define CCD_EXP_FLAGS_TDI		0x0020
+#define CCD_EXP_FLAGS_NOCLEAR_FRAME	0x0040
+#define CCD_EXP_FLAGS_NOCLEAR_REGISTER	0x0080
+#define CCD_EXP_FLAGS_SPARE8		0x0100
+#define CCD_EXP_FLAGS_SPARE9		0x0200
+#define CCD_EXP_FLAGS_SPARE10		0x0400
+#define CCD_EXP_FLAGS_SPARE11		0x0800
+#define CCD_EXP_FLAGS_SPARE12		0x1000
+#define CCD_EXP_FLAGS_SHUTTER_MANUAL	0x2000
+#define CCD_EXP_FLAGS_SHUTTER_OPEN	0x4000
+#define CCD_EXP_FLAGS_SHUTTER_CLOSE	0x8000
+
 namespace astro {
 namespace camera {
 namespace sx {
@@ -65,6 +84,10 @@ typedef struct sx_build_number_s {
 	uint16_t	build_number;
 	uint16_t	padding;
 } __attribute__((packed)) sx_build_number_t;
+
+typedef struct sx_short_build_number_s {
+	uint16_t	build_number;
+} __attribute__((packed)) sx_short_build_number_t;
 
 /**
  * \brief Data structure for the read pixels command

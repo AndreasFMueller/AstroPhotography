@@ -76,7 +76,7 @@ typedef struct sx_hascooler_s {
 	bool	has_cooler;
 } sx_hascooler_t;
 
-#define sx_hascooler_size	20
+#define sx_hascooler_size	21
 static sx_hascooler_t	models[sx_hascooler_size] {
 	{ 0x0000, false },
 	{ 0x0100, true },
@@ -98,6 +98,7 @@ static sx_hascooler_t	models[sx_hascooler_size] {
 	{ 0x0507, false }, // Lodestar
 	{ 0x0509, false }, // Oculus
 	{ 0x0517, false }, // Costar
+	{ 0x0601, true }, // SX-56
 };
 static bool	has_cooler(unsigned short product) {
 	for (int i = 0; i < sx_hascooler_size; i++) {
@@ -158,6 +159,7 @@ std::vector<std::string>	SxCameraLocator::getDevicelist(DeviceName::device_type 
 	// are not discoverable, so their names must be retrieved from
 	// the properties file
 	if (device == DeviceName::AdaptiveOptics) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "listing SX AOs");
 		for (int unit = 0; unit < 4; unit++) {
 			std::string	devicename
 				= stringprintf("adaptiveoptics:sx/%d", unit);
@@ -174,6 +176,7 @@ std::vector<std::string>	SxCameraLocator::getDevicelist(DeviceName::device_type 
 	// special treatment for FilterWheel. The FilterWheels are not 
 	// associated with cameras, so we have to scan for them separately
 	if (device == DeviceName::Filterwheel) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "listing SX Filterwheels");
 		// enumerate filterwheels
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "scan for hid devices");
 
@@ -198,9 +201,10 @@ std::vector<std::string>	SxCameraLocator::getDevicelist(DeviceName::device_type 
 	}
 
 	// list all devices from the context
-	std::vector<DevicePtr>	d = context.devices();
+	std::vector<DevicePtr>	d = context.devices((uint16_t)SX_VENDOR_ID);
 	std::vector<DevicePtr>::const_iterator	i;
 	for (i = d.begin(); i != d.end(); i++) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "iterating through devices");
 		// try to open the device. On Mac OS X, opening doesn't fail
 		// ever, but on Linux, we may not have permission to open
 		// all devices. We ignore devices that we cannot open
@@ -243,7 +247,7 @@ CameraPtr	SxCameraLocator::getCamera0(const DeviceName& name) {
 	}
 
 	// find the device with this bus number and address
-	std::vector<DevicePtr>	d = context.devices();
+	std::vector<DevicePtr>	d = context.devices(SX_VENDOR_ID);
 	std::vector<DevicePtr>::const_iterator	i;
 	for (i = d.begin(); i != d.end(); i++) {
 		DevicePtr	dptr = (*i);

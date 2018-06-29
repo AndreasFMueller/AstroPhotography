@@ -149,8 +149,7 @@ class 	Device {
 	libusb_device_handle	*dev_handle;
 
 	// Device objects can only be created from a Context
-	Device(ContextHolderPtr context, libusb_device *dev,
-		libusb_device_handle *dev_handle = NULL);
+	Device(ContextHolderPtr context, libusb_device *dev);
 
 	// Device objects cannot be copied
 	Device(const Device& other);
@@ -162,6 +161,7 @@ public:
 
 	// information about the device
 	uint8_t	getBusNumber() const;
+	uint8_t	getPortNumber() const;
 	uint8_t	getDeviceAddress() const;
 	std::string	getDeviceName() const;
 	int	getBroken() const;
@@ -213,6 +213,7 @@ public:
 
 	// Context is a friend class, it acts as a factory for Devices
 	friend class Context;
+	friend class DeviceDescriptor;
 	friend std::ostream&	operator<<(std::ostream& out, const Device& device);
 };
 
@@ -236,6 +237,7 @@ public:
 
 	// factory functions to create Devices
 	std::vector<DevicePtr>	devices();
+	std::vector<DevicePtr>	devices(uint16_t vendor_id);
 	DevicePtr	find(uint16_t vendor_id, uint16_t product_id);
 	libusb_context	*getLibusbContext() const;
 };
@@ -591,8 +593,7 @@ class	DeviceDescriptor {
 	std::string	manufacturer;
 	std::string	product;
 	std::string	serialnumber;
-	DeviceDescriptor(Device& device,
-		libusb_device_descriptor *dev_descriptor);
+	DeviceDescriptor(Device& device);
 	DeviceDescriptor(const DeviceDescriptor& other);
 public:
 	// constructors

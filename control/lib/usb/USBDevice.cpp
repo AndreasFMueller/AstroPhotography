@@ -41,7 +41,10 @@ void	Device::open() {
 	// the device is not open yet, so open it
 	int	rc = libusb_open(dev, &dev_handle);
 	if (rc != LIBUSB_SUCCESS) {
-		throw USBError(libusb_error_name(rc));
+		std::string	msg = stringprintf("cannot open device: %s",
+			libusb_error_name(rc));
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw USBError(msg);
 	}
 }
 
@@ -70,13 +73,18 @@ void	Device::close() {
  * \param _dev_handle	The libusb_device_handle structure to use if
  *			the device is already open.
  */
-Device::Device(ContextHolderPtr _context, libusb_device *_dev,
-	libusb_device_handle *_dev_handle)
-	: context(_context), dev(_dev), dev_handle(_dev_handle) {
+Device::Device(ContextHolderPtr _context, libusb_device *_dev)
+	: context(_context), dev(_dev), dev_handle(NULL) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0,
-		"create a device from the libusb structure");
+		"create a device bus=%d, port=%d",
+		getBusNumber(), getPortNumber());
+
 	// increment the reference counter
 	libusb_ref_device(dev);
+
+	// we need to open the device, otherwise we cannot read the
+	// descriptors
+	open();
 
 	// find out whether this is a broken device
 	DeviceDescriptorPtr	d = descriptor();
@@ -102,9 +110,23 @@ Device::~Device() {
 // used in the othello devices which cases the string transfer to fail
 static const int	max_retries = 3;
 
+/**
+ * \brief Get a string descriptor
+ *
+ * \param index	Index of the string descriptor to retrieve
+ */
 std::string	Device::getStringDescriptor(uint8_t index) const {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieve string descriptor %d from %p",
+		index, dev_handle);
+	if (0 == index) {
+		std::string	msg = stringprintf("0 not a valid string index",
+			index);
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw USBError(msg);
+	}
 	if (NULL == dev_handle) {
-		std::string	msg = stringprintf("device not open");
+		std::string	msg = stringprintf("cannot get String %d: "
+			"device not open", index);
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 		throw USBError(msg);
 	}
@@ -118,7 +140,7 @@ std::string	Device::getStringDescriptor(uint8_t index) const {
 		if (rc > 0) {
 			std::string	result((const char *)buffer, rc);
 			debug(LOG_DEBUG, DEBUG_LOG, 0, "got string %d: '%s'",
-				result.c_str());
+				index, result.c_str());
 			return result;
 		}
 	} while (max_retries > ++retries);
@@ -128,19 +150,30 @@ std::string	Device::getStringDescriptor(uint8_t index) const {
 	throw USBError(msg);
 }
 
+/**
+ * \brief Get the descriptor of the device
+ */
 DeviceDescriptorPtr	Device::descriptor() {
 	// get the device descriptor
 	libusb_device_descriptor	d;
 	int	rc = libusb_get_device_descriptor(dev, &d);
 	if (rc != LIBUSB_SUCCESS) {
-		throw USBError(libusb_error_name(rc));
+		std::string	msg = stringprintf("cannot get device "
+			"descriptor: %s", libusb_error_name(rc));
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw USBError(msg);
 	}
 
 	// create a DeviceDescriptor object
-	DeviceDescriptor	*devdesc = new DeviceDescriptor(*this, &d);
+	DeviceDescriptor	*devdesc = new DeviceDescriptor(*this);
 	return DeviceDescriptorPtr(devdesc);
 }
 
+/**
+ * \brief Get a configuration for a given index
+ *
+ * \param index	index of the configuration to retrieve
+ */
 ConfigurationPtr	Device::config(uint8_t index) {
 	struct libusb_config_descriptor	*config = NULL;
 	int	rc = libusb_get_config_descriptor(dev, index, &config);
@@ -217,6 +250,10 @@ ConfigurationPtr	Device::configValue(uint8_t value) {
 
 uint8_t	Device::getBusNumber() const {
 	return libusb_get_bus_number(dev);
+}
+
+uint8_t	Device::getPortNumber() const {
+	return libusb_get_port_number(dev);
 }
 
 uint8_t	Device::getDeviceAddress() const {

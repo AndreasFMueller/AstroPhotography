@@ -7,6 +7,7 @@
 #include <ios>
 #include <iomanip>
 #include <AstroDebug.h>
+#include <AstroFormat.h>
 
 namespace astro {
 namespace usb {
@@ -45,14 +46,20 @@ void	Context::setDebugLevel(int level) {
  * \brief Retrieve a list of devices available within this context
  */
 std::vector<DevicePtr>	Context::devices() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "getting a list of all USB devices");
 	std::vector<DevicePtr>	result;
 	libusb_device	**devlist;
 	ssize_t	length = libusb_get_device_list(context->context(), &devlist);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "found %d devices", length);
 	if (length < 0) {
-		throw USBError(libusb_error_name(length));
+		std::string	msg = stringprintf("no devices found: %s",
+			libusb_error_name(length));
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw USBError(msg);
 	}
 	if (length > 0) {
 		for (int i = 0; i < length; i++) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "add device %d", i);
 			DevicePtr	dev(new Device(context, devlist[i]));
 			result.push_back(dev);
 		}
@@ -65,20 +72,69 @@ std::vector<DevicePtr>	Context::devices() {
 }
 
 /**
- * \brief Open device based on vendor_id and product_id
+ * \brief Retrieve a list of devices available within this context
+ *
+ * \param vendor_id	list devices from this vendor
  */
-DevicePtr	Context::find(uint16_t vendor_id, uint16_t product_id) {
-	// open the device handle
-	libusb_device_handle	*dev_handle = libusb_open_device_with_vid_pid(
-		context->context(), vendor_id, product_id);
-	if (NULL == dev_handle) {
-		throw USBError("cannot open device");
+std::vector<DevicePtr>	Context::devices(uint16_t vendor_id) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "getting devices for vendor %04x",
+		vendor_id);
+	std::vector<DevicePtr>	result;
+	libusb_device	**devlist;
+	ssize_t	length = libusb_get_device_list(context->context(), &devlist);
+	if (length < 0) {
+		std::string	msg = stringprintf("cannot get device list: %s",
+			libusb_error_name(length));
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw USBError(msg);
+	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "scan %d devices", length);
+	for (int i = 0; i < length; i++) {
+		int	rc;
+		libusb_device_descriptor	desc;
+		rc = libusb_get_device_descriptor(devlist[i], &desc);
+		if ((rc == LIBUSB_SUCCESS) && (desc.idVendor == vendor_id)) {
+			DevicePtr	dev(new Device(context, devlist[i]));
+			result.push_back(dev);
+		}
 	}
 
+	// creating Device objects increases the reference count, 
+	// so it is save to unref all devices, we don't need them
+	// any more
+	libusb_free_device_list(devlist, 1);
+	return result;
+}
+
+/**
+ * \brief Open device based on vendor_id and product_id
+ *
+ * \param vendor_id	vendor id to search for
+ * \param product_id	product id to search for
+ */
+DevicePtr	Context::find(uint16_t vendor_id, uint16_t product_id) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "find device VID=%04x/PID=%04x",
+		vendor_id, product_id);
+	libusb_device	**devlist;
+	ssize_t	length = libusb_get_device_list(context->context(), &devlist);
+	if (length < 0) {
+		throw USBError(libusb_error_name(length));
+	}
+	DevicePtr	result;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "scan %d devices", length);
+	for (int i = 0; (!result) && (i < length); i++) {
+		int	rc;
+		libusb_device_descriptor	desc;
+		rc = libusb_get_device_descriptor(devlist[i], &desc);
+		if ((rc == LIBUSB_SUCCESS) && (desc.idVendor == vendor_id)
+			&& (desc.idProduct == product_id)) {
+			result = DevicePtr(new Device(context, devlist[i]));
+		}
+	}
+	libusb_free_device_list(devlist, 1);
+
 	// get the device structure for thie device handle
-	Device	*devptr = new Device(context, libusb_get_device(dev_handle),
-		dev_handle);
-	return DevicePtr(devptr);
+	return result;
 }
 
 /**

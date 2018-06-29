@@ -11,6 +11,7 @@
 #include <AstroExceptions.h>
 #include "sx.h"
 #include <AstroDebug.h>
+#include <AstroUtils.h>
 #include "SxUtils.h"
 #include "SxCooler.h"
 
@@ -108,6 +109,8 @@ CoolerPtr	SxCcd::getCooler0() {
  * \param exposure	specification of the exposure to take
  */
 void	SxCcd::startExposure0(const Exposure& exposure) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "start exposure %s",
+		exposure.toString().c_str());
 	// remember the exposure
 	this->exposure = exposure;
 
@@ -118,15 +121,6 @@ void	SxCcd::startExposure0(const Exposure& exposure) {
 			exposure.mode().toString().c_str());
 		throw SxError("binning mode not supported");
 	}
-
-	// if the shutter is to be opened, we should do that now
-	EmptyRequest    shutteropenrequest(
-		RequestBase::vendor_specific_type,
-		RequestBase::device_recipient, (uint16_t)0,
-		(uint8_t)SX_CMD_SHUTTER,
-		(exposure.shutter() == Shutter::OPEN)
-			? (uint16_t)64 : (uint16_t)128);
-        camera.controlRequest(&shutteropenrequest);
 
 	// if this is an interline CCD, we should send a clear before we start
 	// an exposure, maybe allways
@@ -157,11 +151,27 @@ void	SxCcd::startExposure0(const Exposure& exposure) {
 	rpd.y_bin = exposure.mode().y();
 	rpd.delay = 1000 * exposure.exposuretime();
 
+	// prepare the flags
+	uint16_t	flags = 0;
+	if (info.shutter()) {
+		if (exposure.shutter() == Shutter::OPEN) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "setting shutter open");
+			flags = CCD_EXP_FLAGS_SHUTTER_OPEN
+				| CCD_EXP_FLAGS_SHUTTER_MANUAL;
+		} else {
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "setting shutter closed");
+			flags = CCD_EXP_FLAGS_SHUTTER_CLOSE
+				| CCD_EXP_FLAGS_SHUTTER_MANUAL;
+		}
+	} else {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "no shutter");
+	}
+
 	// build a control request
 	Request<sx_read_pixels_delayed_t>	request(
 		RequestBase::vendor_specific_type,
 		RequestBase::device_recipient, ccdindex,
-		(uint8_t)SX_CMD_READ_PIXELS_DELAYED, (uint16_t)0, &rpd);
+		(uint8_t)SX_CMD_READ_PIXELS_DELAYED, flags, &rpd);
 	try {
 		camera.controlRequest(&request);
 	} catch (USBError& x) {
@@ -171,13 +181,6 @@ void	SxCcd::startExposure0(const Exposure& exposure) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 		throw DeviceTimeout(msg);
 	}
-
-	// close the shutter again
-	EmptyRequest    shuttercloserequest(
-		RequestBase::vendor_specific_type,
-		RequestBase::device_recipient, (uint16_t)0,
-		(uint8_t)SX_CMD_SHUTTER, (uint16_t)128);
-        camera.controlRequest(&shuttercloserequest);
 
 	// we are now in exposing state
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "camera now exposing");

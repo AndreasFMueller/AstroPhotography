@@ -5,6 +5,7 @@
  */
 #include <AstroUSB.h>
 #include <AstroDebug.h>
+#include <AstroFormat.h>
 #include <ios>
 #include <iomanip>
 #include <cstring>
@@ -12,19 +13,42 @@
 namespace astro {
 namespace usb {
 
-DeviceDescriptor::DeviceDescriptor(Device& device,
-	libusb_device_descriptor *device_descriptor) : dev(device) {
+/**
+ * \brief Construct a DeviceDescriptor object
+ *
+ * \param device
+ * \param device_descriptor	
+ */
+DeviceDescriptor::DeviceDescriptor(Device& device) : dev(device) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0,
+		"Construct DeviceDescriptor for bus=%d, port=%d",
+		device.getBusNumber(), device.getPortNumber());
 	// copy the descriptor data
-	memcpy(&d, device_descriptor, sizeof(libusb_device_descriptor));
+	int	rc = libusb_get_device_descriptor(device.dev, &d);
+	if (rc != LIBUSB_SUCCESS) {
+		std::string     msg = stringprintf("cannot get device "
+			"descriptor: %s", libusb_error_name(rc));
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw USBError(msg);
+	}
 
 	// manufacturer
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "iManufacturer = %d", d.iManufacturer);
 	manufacturer = device.getStringDescriptor(d.iManufacturer);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "iProduct = %d", d.iProduct);
 	product = device.getStringDescriptor(d.iProduct);
-	try {
-		serialnumber = device.getStringDescriptor(d.iSerialNumber);
-	} catch (const USBError& e) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "no serial number found: %s",
-			e.what());
+	if (d.iSerialNumber > 0) {
+		try {
+			serialnumber = device.getStringDescriptor(
+				d.iSerialNumber);
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "found serial: %s",
+				serialnumber.c_str());
+		} catch (const USBError& e) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "no serial number: %s",
+				e.what());
+		}
+	} else {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "device has no serial");
 	}
 }
 
@@ -57,7 +81,11 @@ std::ostream&	operator<<(std::ostream& out, const DeviceDescriptor& devdesc) {
 	out << indent << "iProduct:                      ";
 	out << devdesc.iProduct() << std::endl;
 	out << indent << "iSerialNumber:                 ";
-	out << devdesc.iSerialNumber() << std::endl;
+	if (devdesc.iSerialNumber().size() > 0) {
+		out << devdesc.iSerialNumber() << std::endl;
+	} else {
+		out << "(none)" << std::endl;
+	}
 	out << indent << "bNumConfigurations:            ";
 	out << std::dec << (int)devdesc.bNumConfigurations() << std::endl;
 	return out;

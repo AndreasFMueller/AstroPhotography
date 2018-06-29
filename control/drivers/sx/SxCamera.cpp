@@ -29,6 +29,7 @@ namespace sx {
 #define EEPROM			(1 << 2)
 #define	INTEGRATED_GUIDER	(1 << 3)
 #define REGULATED_COOLER	(1 << 4)
+#define HAS_SHUTTER		(1 << 5)
 /*
  * the last constant is not contained in the official documentation,
  * it is a meaning of that by conjectured in an email from Terry Platt, 
@@ -40,7 +41,7 @@ typedef struct sx_model_s {
 	std::string	name;
 } sx_model_t;
 
-#define	NUMBER_SX_MODELS	38
+#define	NUMBER_SX_MODELS	40
 sx_model_t	models[NUMBER_SX_MODELS] = {
 	{ 0x0105, 0x0045, std::string("SXVF-M5")       },
 	{ 0x0305, 0x00c5, std::string("SXVF-M5C")      },
@@ -80,6 +81,8 @@ sx_model_t	models[NUMBER_SX_MODELS] = {
 	{ 0x0000, 0x0028, std::string("SXVR-H814")     },
 	{ 0x0000, 0x00a8, std::string("SXVR-H814C")    },
 	{ 0x0000, 0x0058, std::string("SXVR-H290")     },
+	{ 0x0000, 0x0021, std::string("SX-56")         },
+	{ 0x0000, 0x0022, std::string("SX-46")         },
 };
 
 /**
@@ -160,13 +163,36 @@ SxCamera::SxCamera(DevicePtr& _deviceptr)
 		firmware_version.major_version, firmware_version.minor_version);
 
 	// get the build number
-	Request<sx_build_number_t>	buildnumberrequest(
-		RequestBase::vendor_specific_type,
-		RequestBase::device_recipient, (uint16_t)0,
-		(uint8_t)SX_CMD_GET_BUILD_NUMBER, (uint16_t)0);
-	controlRequest(&buildnumberrequest);
-	build_number = buildnumberrequest.data()->build_number;
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "build_number: %d", build_number);
+	build_number = 0xffff;
+	try {
+		Request<sx_build_number_t>	buildnumberrequest(
+			RequestBase::vendor_specific_type,
+			RequestBase::device_recipient, (uint16_t)0,
+			(uint8_t)SX_CMD_GET_BUILD_NUMBER, (uint16_t)0);
+		controlRequest(&buildnumberrequest);
+		build_number = buildnumberrequest.data()->build_number;
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "build_number: %d",
+			build_number);
+		goto gotbuildnumber;
+	} catch (const std::exception& x) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "long build number worked");
+	}
+	try {
+		Request<sx_short_build_number_t>	buildnumberrequest(
+			RequestBase::vendor_specific_type,
+			RequestBase::device_recipient, (uint16_t)0,
+			(uint8_t)SX_CMD_GET_BUILD_NUMBER, (uint16_t)0);
+		controlRequest(&buildnumberrequest);
+		build_number = buildnumberrequest.data()->build_number;
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "build_number: %d",
+			build_number);
+		goto gotbuildnumber;
+	} catch (const std::exception& x) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "short build number worked");
+	}
+	build_number = 0;
+gotbuildnumber:
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "got build number: %04x", build_number);
 
 	// learn the model number
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "get model number");
@@ -216,11 +242,6 @@ SxCamera::SxCamera(DevicePtr& _deviceptr)
 	ccd0.minexposuretime(0.001);
 	ccd0.maxexposuretime(3600);
 
-	// add the CCDinfo to the ccdinfo array
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "Imaging CCD: %s",
-		ccd0.toString().c_str());
-	ccdinfo.push_back(ccd0);
-
 	// find out whether this camera has a cooler
 	if (ccd0request.data()->extra_capabilities & REGULATED_COOLER) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "has cooler");
@@ -261,6 +282,22 @@ SxCamera::SxCamera(DevicePtr& _deviceptr)
 	} else {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "no tracking ccd");
 	}
+
+	// find out whether there is a shutter
+	if (ccd0request.data()->extra_capabilities & REGULATED_COOLER) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "has shutter");
+		ccd0.shutter(true);
+	} else {
+		ccd0.shutter(false);
+	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "camera has shutter: %s",
+		(ccd0.shutter()) ? "yes" : "no");
+
+	// add the CCDinfo to the ccdinfo array
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "Imaging CCD: %s",
+		ccd0.toString().c_str());
+	ccdinfo.push_back(ccd0);
+
 }
 
 /**
