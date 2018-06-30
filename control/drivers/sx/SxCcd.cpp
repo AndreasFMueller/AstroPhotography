@@ -104,6 +104,22 @@ CoolerPtr	SxCcd::getCooler0() {
 }
 
 /**
+ * \brief Clear all the pixels
+ */
+void	SxCcd::clearPixels() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "clear pixels");
+	EmptyRequest    clearrequest(
+		RequestBase::vendor_specific_type,
+		RequestBase::device_recipient, (uint16_t)0,
+		(uint8_t)SX_CMD_CLEAR_PIXELS,
+		(uint16_t)CCD_EXP_FLAGS_NOWIPE_FRAME);
+	camera.reserve("exposure", 1000);
+	camera.controlRequest(&clearrequest);
+	camera.release("exposure");
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "pixels cleared");
+}
+
+/**
  * \brief Start an Exposure on a "normal" Starlight Express camera
  *
  * \param exposure	specification of the exposure to take
@@ -111,6 +127,7 @@ CoolerPtr	SxCcd::getCooler0() {
 void	SxCcd::startExposure0(const Exposure& exposure) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "start exposure %s",
 		exposure.toString().c_str());
+
 	// remember the exposure
 	this->exposure = exposure;
 
@@ -127,13 +144,7 @@ void	SxCcd::startExposure0(const Exposure& exposure) {
 	if ((camera.hasInterlineCcd()) && (getInfo().getId() == 0)) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "extra clear for interline "
 			"cameras");
-		EmptyRequest    resetrequest(
-			RequestBase::vendor_specific_type,
-			RequestBase::device_recipient, (uint16_t)0,
-			(uint8_t)SX_CMD_CLEAR_PIXELS, (uint16_t)0);
-		camera.reserve("exposure", 1000);
-		camera.controlRequest(&resetrequest);
-		camera.release("exposure");
+		clearPixels();
 	}
 
 	// create the exposure request
@@ -195,6 +206,14 @@ void	SxCcd::startExposure0(const Exposure& exposure) {
  */
 void	SxCcd::getImage0() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "start getImage0");
+
+	// if this exposure has flood purpose, let some other function handle
+	// this request
+	if (camera.hasRBIFlood() && (exposure.purpose() == Exposure::flood)) {
+		doFlood(exposure);
+		return;
+	}
+
 	// start the exposure
 	state(CcdState::exposing);
 	this->startExposure0(exposure);
@@ -282,6 +301,35 @@ void	SxCcd::flood(bool onoff) {
 		RequestBase::device_recipient, (uint16_t)0,
 		(uint8_t)SX_CMD_FLOOD_CCD, (uint16_t)((onoff) ? 1 : 0));
 	camera.controlRequest(&floodrequest);
+}
+
+/**
+ * \brief Perform the RBI flood procedure
+ */
+void	SxCcd::doFlood(const Exposure& exposure) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "doFlood started");
+	state(CcdState::exposing);
+	this->exposure = exposure;
+
+	// turn on the flood iluminator
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "turning RBI flood on");
+	flood(true);
+
+	// wait for exposure time
+	Timer::sleep(exposure.exposuretime());
+
+	// turn the flood illuminator off
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "turning RBI flood off");
+	flood(false);
+
+	// now clear the pixels
+	clearPixels();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "pixels cleared");
+
+	// create an empty image
+	image = ImagePtr(new Image<unsigned short>(ImageSize(1, 1)));
+	state(CcdState::exposed);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "doFlood complete");
 }
 
 } // namespace sx

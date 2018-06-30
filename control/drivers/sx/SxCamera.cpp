@@ -22,6 +22,8 @@ namespace camera {
 namespace sx {
 
 #define	SX_MODEL_M26C	0x005a
+#define SX_MODEL_56	0x0021
+#define SX_MODEL_46	0x0022
 #define SX_PRODUCT_M26C	0x0326
 
 #define	STAR2000_PORT		(1 << 0)
@@ -54,7 +56,7 @@ sx_model_t	models[NUMBER_SX_MODELS] = {
 	{ 0x0309, 0x00c9, std::string("MX9C")          },
 	{ 0x0509, 0x0009, std::string("Oculus")        },
 	{ 0x0325, 0x0059, std::string("SXVR-M25C")     },
-	{ 0x0326, 0x005a, std::string("SXVR-M26C")     },
+	{ 0x0326, SX_MODEL_M26C, std::string("SXVR-M26C")     },
 	{ 0x0128, 0x0000, std::string("SXVR-H18")      },
 	{ 0x0126, 0x0000, std::string("SXVR-H16")      },
 	{ 0x0135, 0x0023, std::string("SXVR-H35")      },
@@ -81,8 +83,8 @@ sx_model_t	models[NUMBER_SX_MODELS] = {
 	{ 0x0000, 0x0028, std::string("SXVR-H814")     },
 	{ 0x0000, 0x00a8, std::string("SXVR-H814C")    },
 	{ 0x0000, 0x0058, std::string("SXVR-H290")     },
-	{ 0x0000, 0x0021, std::string("SX-56")         },
-	{ 0x0000, 0x0022, std::string("SX-46")         },
+	{ 0x0000, SX_MODEL_56, std::string("SX-56")         },
+	{ 0x0000, SX_MODEL_46, std::string("SX-46")         },
 };
 
 /**
@@ -581,6 +583,10 @@ void	SxCamera::release(const std::string& purpose) {
 	_busy = false;
 	_purpose = "";
 	condition.notify_all();
+}
+
+bool	SxCamera::hasRBIFlood() const {
+	return ((model == SX_MODEL_56) && (model == SX_MODEL_56));
 }
 
 } // namespace sx

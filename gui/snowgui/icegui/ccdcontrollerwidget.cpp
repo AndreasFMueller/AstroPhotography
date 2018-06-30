@@ -372,6 +372,7 @@ Exposure::purpose_t	ccdcontrollerwidget::getPurpose(int index) {
 	case 4:	return Exposure::test;
 	case 5:	return Exposure::guide;
 	case 6:	return Exposure::focus;
+	case 7:	return Exposure::flood;
 	default:
 		break;
 	}

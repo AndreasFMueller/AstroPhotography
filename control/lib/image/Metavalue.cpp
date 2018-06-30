@@ -26,7 +26,7 @@ void	Metavalue::standardize() {
 		if ((value != "dark") && (value != "flat")
 			&& (value != "light") && (value != "bias")
 			&& (value != "test") && (value != "guide")
-			&& (value != "focus")) {
+			&& (value != "focus") && (value != "flood")) {
 			debug(LOG_DEBUG, DEBUG_LOG, 0, "illegal purpose: [%s]",
 				value.c_str());
 			throw std::runtime_error("illegal value for PURPOSE");

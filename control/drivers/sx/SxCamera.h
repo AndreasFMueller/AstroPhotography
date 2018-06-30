@@ -38,6 +38,7 @@ class SxCamera : public Camera {
 	bool	_has_interline_ccd;
 public:
 	bool	hasInterlineCcd() const { return _has_interline_ccd; }
+	bool	hasRBIFlood() const;
 
 private:
 	// a lock to ensure that only one USB operation at a time goes to

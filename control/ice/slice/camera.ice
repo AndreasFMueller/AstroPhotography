@@ -12,7 +12,7 @@ module snowstar {
 	sequence<BinningMode>	BinningSet;
 
 	enum ShutterState { ShCLOSED, ShOPEN };
-	enum ExposurePurpose { ExLIGHT, ExDARK, ExFLAT, ExBIAS, ExTEST, ExGUIDE, ExFOCUS };
+	enum ExposurePurpose { ExLIGHT, ExDARK, ExFLAT, ExBIAS, ExTEST, ExGUIDE, ExFOCUS, ExFLOOD };
 
 	/**
 	 * \brief Exposure request structure

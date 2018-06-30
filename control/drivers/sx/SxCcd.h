@@ -39,19 +39,17 @@ private:
 public:
 	SxCcd(const CcdInfo& info, SxCamera& camera, int ccdindex);
 	virtual ~SxCcd();
+private:
+	void	clearPixels();
 protected:
 	virtual void	startExposure0(const Exposure& exposure);
+	virtual void	doFlood(const Exposure& exposure);
 public:
 	virtual void	startExposure(const Exposure& exposure);
 	virtual void	getImage0();
 public:
 	virtual ImagePtr	getRawImage();
 
-private:
-	bool	_hasflood;
-public:
-	bool	hasflood() const { return _hasflood; }
-	void	hasflood(bool h) { _hasflood = h; }
 	void	flood(bool onoff);
 
 	// cooler stuff
