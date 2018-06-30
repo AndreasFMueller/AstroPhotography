@@ -83,6 +83,8 @@ std::string	command_name(sx_command_t command) {
 		return std::string("shutter");
 	case SX_CMD_READ_I2CPORT:
 		return std::string("read i2cport");
+	case SX_CMD_FLOOD_CCD:
+		return std::string("flood ccd");
 	}
 	std::string	cmd = stringprintf("UNKNOWN CMD %d");
 	return cmd;

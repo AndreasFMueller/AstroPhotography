@@ -66,7 +66,8 @@ typedef enum sx_command_e {
 	SX_CMD_COOLER			= 30,
 	SX_CMD_COOLER_TEMPERATURE	= 31,
 	SX_CMD_SHUTTER			= 32,
-	SX_CMD_READ_I2CPORT		= 33
+	SX_CMD_READ_I2CPORT		= 33,
+	SX_CMD_FLOOD_CCD		= 43
 } sx_command_t;
 
 /**

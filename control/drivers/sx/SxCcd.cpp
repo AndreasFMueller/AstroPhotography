@@ -273,6 +273,17 @@ void	SxCcd::getImage0() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "status set to exposed");
 }
 
+/**
+ * \brief Start/stop the flooding command
+ */
+void	SxCcd::flood(bool onoff) {
+	EmptyRequest    floodrequest(
+		RequestBase::vendor_specific_type,
+		RequestBase::device_recipient, (uint16_t)0,
+		(uint8_t)SX_CMD_FLOOD_CCD, (uint16_t)((onoff) ? 1 : 0));
+	camera.controlRequest(&floodrequest);
+}
+
 } // namespace sx
 } // namespace camera
 } // namespace astro

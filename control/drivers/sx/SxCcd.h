@@ -47,6 +47,13 @@ public:
 public:
 	virtual ImagePtr	getRawImage();
 
+private:
+	bool	_hasflood;
+public:
+	bool	hasflood() const { return _hasflood; }
+	void	hasflood(bool h) { _hasflood = h; }
+	void	flood(bool onoff);
+
 	// cooler stuff
 	virtual bool	hasCooler() const;
 protected:
