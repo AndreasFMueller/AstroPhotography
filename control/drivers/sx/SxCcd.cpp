@@ -300,7 +300,9 @@ void	SxCcd::flood(bool onoff) {
 		RequestBase::vendor_specific_type,
 		RequestBase::device_recipient, (uint16_t)0,
 		(uint8_t)SX_CMD_FLOOD_CCD, (uint16_t)((onoff) ? 1 : 0));
+	camera.reserve("exposure", 1000);
 	camera.controlRequest(&floodrequest);
+	camera.release("exposure");
 }
 
 /**
