@@ -69,3 +69,10 @@ exposewidget:
 imagecontrollerwidget
       -	controls to turn on/off use of dark, interpolation
       - ability to retrieve dark image and to view it
+
+taskswindow:
+      - make sure tasks are not submitted without a project name
+      - add button to reload tasks (in case they have changed while
+	the client was not able to process changes)
+
+
