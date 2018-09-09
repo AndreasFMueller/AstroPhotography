@@ -127,7 +127,8 @@ std::vector<std::string>	OthelloLocator::getDevicelist(DeviceName::device_type d
 			devptr->close();
 		} catch (std::exception& x) {
 			// log the error, but don't do anything about it
-			debug(LOG_ERR, DEBUG_LOG, 0, "cannot work with device");
+			debug(LOG_ERR, DEBUG_LOG, 0, "cannot work with device, "
+				"skipping");
 		}
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "found %d othello devices", names.size());
