@@ -325,8 +325,13 @@ double	GPCalibrationProcess::gridconstant(double focallength,
 		throw std::runtime_error("no pixel size specified");
 	}
 
-	// compute the conversion factor from pixels to arc secons
+	// compute the conversion factor from pixels to arc seconds
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "find grid constant [s] for "
+		"pixelsize=%.1fμm focallength=%.1fmm", pixelsize * 1e6,
+		focallength * 1e3);
 	double arcsecperpixel = (180 * 3600 / M_PI) * (pixelsize / focallength);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "arcsec/px = %.2f[arcsec/px]",
+		arcsecperpixel);
 
 	// the default guide rate is just half the rate of rotation of
 	// the earth this is the default guide rate of 15" per second
@@ -337,11 +342,12 @@ double	GPCalibrationProcess::gridconstant(double focallength,
 		guiderate = 0.5;
 	}
 	guiderate *= siderial_rate;				// [pixel/s]
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "guiderate: %.2f[px/s]", guiderate);
  
 	// what we compute the grid constant for
 	debug(LOG_DEBUG, DEBUG_LOG, 0,
 		"grid constant for focallength = %.0fmm, pixelsize = %.1fum, "
-		"guiderate %.1f, %.1f pixel/sec",
+		"guiderate %.1f*siderial rate, %.1f pixel/sec",
 		1000 * focallength, 1000000 * pixelsize,
 		guiderate / siderial_rate, guiderate);
 
@@ -350,6 +356,9 @@ double	GPCalibrationProcess::gridconstant(double focallength,
 	// is short)
 	static double	pixelgridsize = 30;			// [pixel]
 	double	pixelgridconstant = pixelgridsize / guiderate;	// [s]
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "pixelgridsize = %.1f[px], "
+		"pixelgridconstant = %.1f[s]", pixelgridsize,
+		pixelgridconstant);
 
 	// computing the grid constant (seconds displacement of calibration
 	// points). Default grid constant is 5 seconds, which should be
@@ -359,7 +368,7 @@ double	GPCalibrationProcess::gridconstant(double focallength,
 
 	// now get the larger of the two
 	debug(LOG_DEBUG, DEBUG_LOG, 0,
-		"time for displacement of 30\": %.1f[s], 15 pixel: %.1f[s]",
+		"time for displacement of 30arcsec: %.1f[s], 15 pixel: %.1f[s]",
 		pixelgridconstant, anglegridconstant);
 	double	gridconstant = (pixelgridconstant > anglegridconstant)
 			? pixelgridconstant : anglegridconstant;

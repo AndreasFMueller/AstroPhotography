@@ -86,6 +86,7 @@ std::string	OthelloLocator::getVersion() const {
 /**
  * \brief Get a list of Starlight Express cameras.
  *
+ * \param device	type of devices to list
  * \return a vector of strings that uniquely descript devices
  */
 std::vector<std::string>	OthelloLocator::getDevicelist(DeviceName::device_type device) {
@@ -127,11 +128,15 @@ std::vector<std::string>	OthelloLocator::getDevicelist(DeviceName::device_type d
 			devptr->close();
 		} catch (std::exception& x) {
 			// log the error, but don't do anything about it
+			debug(LOG_ERR, DEBUG_LOG, 0, "cannot work with device: "
+				"'%s', skipping", x.what());
+		} catch (...) {
 			debug(LOG_ERR, DEBUG_LOG, 0, "cannot work with device, "
 				"skipping");
 		}
 	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "found %d othello devices", names.size());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "found %d othello devices",
+		names.size());
 	return names;
 }
 
@@ -150,30 +155,40 @@ GuidePortPtr	OthelloLocator::getGuidePort0(const DeviceName& name) {
 	std::vector<astro::usb::DevicePtr>	d = context.devices();
 	std::vector<astro::usb::DevicePtr>::const_iterator	i;
 	for (i = d.begin(); i != d.end(); i++) {
-		astro::usb::DevicePtr	dptr = (*i);
-		DeviceDescriptorPtr	descriptor = dptr->descriptor();
-		uint16_t	vendor = descriptor->idVendor();
-		if (vendor != OTHELLO_VENDOR_ID) {
-			continue;
-		}
-		if (descriptor->idProduct() != OTHELLO_GUIDEPORT_ID) {
-			continue;
-		}
-		bool	needsclosing = true;
-		if (dptr->isOpen()) {
-			needsclosing = false;
-		} else {
-			dptr->open();
-		}
-		std::string	devserial = dptr->descriptor()->iSerialNumber();
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "device serial: %s",
-			devserial.c_str());
-		if (devserial == serial) {
-			debug(LOG_DEBUG, DEBUG_LOG, 0, "matching guider port");
-			return GuidePortPtr(new OthelloGuidePort(dptr));
-		}
-		if (needsclosing) {
-			dptr->close();
+		try {
+			astro::usb::DevicePtr	dptr = (*i);
+			DeviceDescriptorPtr	descriptor = dptr->descriptor();
+			uint16_t	vendor = descriptor->idVendor();
+			if (vendor != OTHELLO_VENDOR_ID) {
+				continue;
+			}
+			if (descriptor->idProduct() != OTHELLO_GUIDEPORT_ID) {
+				continue;
+			}
+			bool	needsclosing = true;
+			if (dptr->isOpen()) {
+				needsclosing = false;
+			} else {
+				dptr->open();
+			}
+			std::string	devserial
+				= dptr->descriptor()->iSerialNumber();
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "device serial: %s",
+				devserial.c_str());
+			if (devserial == serial) {
+				debug(LOG_DEBUG, DEBUG_LOG, 0,
+					"matching guider port");
+				return GuidePortPtr(new OthelloGuidePort(dptr));
+			}
+			if (needsclosing) {
+				dptr->close();
+			}
+		} catch (const std::runtime_error& x) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "cannot work with "
+				"device: '%s', skipping", x.what());
+		} catch (...) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "cannot work with "
+				"device, skipping");
 		}
 	}
 	debug(LOG_ERR, DEBUG_LOG, 0, "coult no find device %s",
@@ -183,6 +198,8 @@ GuidePortPtr	OthelloLocator::getGuidePort0(const DeviceName& name) {
 
 /**
  * \brief Create a focuser from the name
+ *
+ * \param name	name of the focuser
  */
 FocuserPtr	OthelloLocator::getFocuser0(const DeviceName& name) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "looking for device %s",
@@ -196,43 +213,55 @@ FocuserPtr	OthelloLocator::getFocuser0(const DeviceName& name) {
 	std::vector<astro::usb::DevicePtr>	d = context.devices();
 	std::vector<astro::usb::DevicePtr>::const_iterator	i;
 	for (i = d.begin(); i != d.end(); i++) {
-		astro::usb::DevicePtr	dptr = (*i);
-		DeviceDescriptorPtr	descriptor = dptr->descriptor();
-		uint16_t	vendor = descriptor->idVendor();
-		uint16_t	product = descriptor->idProduct();
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "checking %hx:%hx",
-			vendor, product);
-		if (vendor != OTHELLO_VENDOR_ID) {
-			debug(LOG_DEBUG, DEBUG_LOG, 0, "wrong vendor %hx",
-				vendor);
-			continue;
-		}
-		if (product != OTHELLO_FOCUSER_ID) {
-			debug(LOG_DEBUG, DEBUG_LOG, 0, "wrong product %hx",
-				product);
-			continue;
-		}
-		bool	needsclosing = true;
-		if (dptr->isOpen()) {
-			needsclosing = false;
-		} else {
-			debug(LOG_DEBUG, DEBUG_LOG, 0, "opening device");
-			dptr->open();
-			// reread the descriptor, as the serial number was not
-			// accessible during when the device was not open
-			descriptor = dptr->descriptor();
-		}
-		std::string	devserial = descriptor->iSerialNumber();
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "device serial: %s",
-			devserial.c_str());
-		if (devserial == serial) {
-			debug(LOG_DEBUG, DEBUG_LOG, 0, "matching focuser");
-			return FocuserPtr(new OthelloFocuser(dptr));
-		}
-		debug(LOG_DEBUG, DEBUG_LOG, 0,
-			"device serial %s does not match", serial.c_str());
-		if (needsclosing) {
-			dptr->close();
+		try {
+			astro::usb::DevicePtr	dptr = (*i);
+			DeviceDescriptorPtr	descriptor = dptr->descriptor();
+			uint16_t	vendor = descriptor->idVendor();
+			uint16_t	product = descriptor->idProduct();
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "checking %hx:%hx",
+				vendor, product);
+			if (vendor != OTHELLO_VENDOR_ID) {
+				debug(LOG_DEBUG, DEBUG_LOG, 0,
+					"wrong vendor %hx", vendor);
+				continue;
+			}
+			if (product != OTHELLO_FOCUSER_ID) {
+				debug(LOG_DEBUG, DEBUG_LOG, 0,
+					"wrong product %hx", product);
+				continue;
+			}
+			bool	needsclosing = true;
+			if (dptr->isOpen()) {
+				needsclosing = false;
+			} else {
+				debug(LOG_DEBUG, DEBUG_LOG, 0,
+					"opening device");
+				dptr->open();
+				// reread the descriptor, as the serial number
+				// was not accessible during when the device
+				// was not open
+				descriptor = dptr->descriptor();
+			}
+			std::string	devserial = descriptor->iSerialNumber();
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "device serial: %s",
+				devserial.c_str());
+			if (devserial == serial) {
+				debug(LOG_DEBUG, DEBUG_LOG, 0,
+					"matching focuser");
+				return FocuserPtr(new OthelloFocuser(dptr));
+			}
+			debug(LOG_DEBUG, DEBUG_LOG, 0,
+				"device serial %s does not match",
+				serial.c_str());
+			if (needsclosing) {
+				dptr->close();
+			}
+		} catch (const std::exception& x) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "cannot work with "
+				"device: '%s', skipping", x.what());
+		} catch (...) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "cannot work with "
+				"device, skipping");
 		}
 	}
 	debug(LOG_ERR, DEBUG_LOG, 0, "coult no find device %s",
