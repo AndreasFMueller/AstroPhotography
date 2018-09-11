@@ -41,8 +41,8 @@ static struct option	longopts[] = {
 { "sslport",		required_argument,	NULL,	's' }, /* 13 */
 { "name",		required_argument,	NULL,	'n' }, /* 14 */
 { "user",		required_argument,	NULL,	'u' }, /* 15 */
-{ "USB",		required_argument,	NULL,	'U' }, /* 15 */
-{ NULL,			0,			NULL,	 0  }, /* 16 */
+{ "USB",		no_argument,		NULL,	'U' }, /* 16 */
+{ NULL,			0,			NULL,	 0  }, /* 17 */
 };
 
 static void	usage(const char *progname) {
