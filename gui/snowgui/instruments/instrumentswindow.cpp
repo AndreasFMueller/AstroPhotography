@@ -24,6 +24,7 @@ instrumentswindow::instrumentswindow(QWidget *parent,
 	ui->setupUi(this);
 
 	// get service discover
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "start discovery");
 	_discovery = astro::discover::ServiceDiscovery::get();
 	_discovery->start();
 	_discoveryTimer = new QTimer();
@@ -71,7 +72,9 @@ instrumentswindow::instrumentswindow(QWidget *parent,
 	);
 
 	// read the service keys and add them to the the service selection
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "start discover");
 	checkdiscovery();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "discover complete");
 
 	// start the timer
 	_discoveryTimer->start();
