@@ -270,7 +270,12 @@ void	instrumentswindow::deleteInstrument() {
 			_instruments->remove(_instrument->name());
 			int	index = ui->instrumentselectionBox->currentIndex();
 			ui->instrumentselectionBox->removeItem(index);
-			instrumentEnabled(false);
+			// make sure selection is consistent
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "current index: %d",
+				ui->instrumentselectionBox->currentIndex());
+			if (ui->instrumentselectionBox->currentIndex() < 0) {
+				instrumentEnabled(false);
+			}
 		} catch (const std::exception& x) {
 		}
 	}
