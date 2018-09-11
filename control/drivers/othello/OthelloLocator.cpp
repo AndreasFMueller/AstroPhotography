@@ -63,7 +63,7 @@ namespace othello {
 //////////////////////////////////////////////////////////////////////
 
 OthelloLocator::OthelloLocator() {
-	context.setDebugLevel(0);
+	// context.setDebugLevel(0);
 }
 
 OthelloLocator::~OthelloLocator() {

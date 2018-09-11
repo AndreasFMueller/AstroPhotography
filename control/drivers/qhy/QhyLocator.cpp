@@ -61,7 +61,7 @@ namespace qhy {
 //////////////////////////////////////////////////////////////////////
 
 QhyCameraLocator::QhyCameraLocator() {
-	context.setDebugLevel(3);
+	// context.setDebugLevel(0);
 }
 
 QhyCameraLocator::~QhyCameraLocator() {

@@ -40,6 +40,8 @@ void	Context::setDebugLevel(int level) {
 	if ((level < 0) || (level > 4)) {
 		throw std::range_error("invalid USB debug level");
 	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "setting USB debug level to %d",
+		level);
 	context->debug(level);
 }
 

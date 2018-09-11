@@ -8,7 +8,7 @@
 namespace astro {
 namespace usb {
 
-static bool	usbdebug_enabled = true;
+static bool	usbdebug_enabled = false;
 
 /**
  * \brief Enable USB debugging
