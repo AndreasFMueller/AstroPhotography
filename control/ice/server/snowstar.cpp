@@ -13,6 +13,7 @@
 #include <DeviceServantLocator.h>
 #include <ImageLocator.h>
 #include <AstroConfig.h>
+#include <AstroUSB.h>
 #include <CommunicatorSingleton.h>
 #include <AstroEvent.h>
 #include <grp.h>
@@ -40,6 +41,7 @@ static struct option	longopts[] = {
 { "sslport",		required_argument,	NULL,	's' }, /* 13 */
 { "name",		required_argument,	NULL,	'n' }, /* 14 */
 { "user",		required_argument,	NULL,	'u' }, /* 15 */
+{ "USB",		required_argument,	NULL,	'U' }, /* 15 */
 { NULL,			0,			NULL,	 0  }, /* 16 */
 };
 
@@ -80,6 +82,7 @@ static void	usage(const char *progname) {
 	std::cout << " -s,--sslport=<port>       use SSL enable port <port>"
 		<< std::endl;
 	std::cout << " -u,--user=<user>          user to run as" << std::endl;
+	std::cout << " -U,--USB                  enable USB debugging" << std::endl;
 }
 
 /**
@@ -131,7 +134,7 @@ int	snowstar_main(int argc, char *argv[]) {
 	int	c;
 	int	longindex;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "start parsing the command line");
-	while (EOF != (c = getopt_long(argc, argv, "b:Cc:dD:fghl:Ln:p:P:s:uN:F:",
+	while (EOF != (c = getopt_long(argc, argv, "b:Cc:dD:fghl:Ln:p:P:s:u:UN:F:",
 		longopts, &longindex))) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "found option '%c': %s",
 			c, optarg);
@@ -255,6 +258,9 @@ int	snowstar_main(int argc, char *argv[]) {
 					pwp->pw_name);
 			}
 			}
+			break;
+		case 'U':
+			astro::usb::USBdebugEnable();
 			break;
 		default:
 			std::string	msg = astro::stringprintf("unknown "
