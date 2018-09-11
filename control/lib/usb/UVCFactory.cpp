@@ -6,6 +6,7 @@
 #include <AstroUVC.h>
 #include <sstream>
 #include <AstroDebug.h>
+#include <USBDebug.h>
 
 using namespace astro::usb;
 
@@ -210,7 +211,7 @@ VideoStreamingDescriptorFactory::VideoStreamingDescriptorFactory(
 USBDescriptorPtr	VideoStreamingDescriptorFactory::header(
 				const void *data, int length,
 				HeaderDescriptor *hd) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "completing a header descriptor");
+	USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "completing a header descriptor");
 	// add the formats
 	int	offset = hd->bLength();
 	int	nformats = hd->bNumFormats(); // for TIS, we should not rely on
@@ -220,7 +221,7 @@ USBDescriptorPtr	VideoStreamingDescriptorFactory::header(
 	for (; formatindex < nformats; formatindex++) {
 		// use the descriptor method of the factory to get the
 		// next desriptor. This also parses the format headers
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "FO parse format %d", formatindex);
+		USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "FO parse format %d", formatindex);
 		USBDescriptorPtr	newformat
 			= descriptor(offset + (uint8_t *)data, length - offset);
 
@@ -228,12 +229,12 @@ USBDescriptorPtr	VideoStreamingDescriptorFactory::header(
 		FormatDescriptor	*fd
 			= getPtr<FormatDescriptor>(newformat);
 		hd->formats.push_back(newformat);
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "FO new format found");
+		USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "FO new format found");
 
 		// find out how long that format is and go to the next
 		// descriptor
 		offset += fd->wTotalLength();
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "total length: %d, new offset %d",
+		USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "total length: %d, new offset %d",
 			fd->wTotalLength(), offset);
 
 		// it is possible that there are still image frame descriptors
@@ -258,7 +259,7 @@ USBDescriptorPtr	VideoStreamingDescriptorFactory::header(
 					offset += newformat->bLength();
 				}
 			} while ((fd == NULL) && (length > offset));
-			debug(LOG_DEBUG, DEBUG_LOG, 0,
+			USBdebug(LOG_DEBUG, DEBUG_LOG, 0,
 				"unknown descriptors skipped");
 		}
 
@@ -267,31 +268,31 @@ USBDescriptorPtr	VideoStreamingDescriptorFactory::header(
 		// descriptors. But we use this logic only if this is a TIS
 		// camera
 		if (device.getBroken() == BROKEN_THE_IMAGING_SOURCE) {
-			debug(LOG_DEBUG, DEBUG_LOG, 0, "fixing nformats: %d",
+			USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "fixing nformats: %d",
 				nformats);
 			// there must be more room, formatindex is the last
 			// index
-			debug(LOG_DEBUG, DEBUG_LOG, 0,
+			USBdebug(LOG_DEBUG, DEBUG_LOG, 0,
 				"length = %d > offset = %d", length, offset);
 			if (length > offset) {
 				if (formatindex == (nformats - 1)) {
-					debug(LOG_DEBUG, DEBUG_LOG, 0,
+					USBdebug(LOG_DEBUG, DEBUG_LOG, 0,
 						"FO expect another format");
 					nformats++;
 				}
 			}
 		}
 	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "FO found %d formats", nformats);
+	USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "FO found %d formats", nformats);
 
 	// for a broken camera, we overwrite the number of formats
 	if (device.getBroken() == BROKEN_THE_IMAGING_SOURCE) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "FO overwriting nformats");
+		USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "FO overwriting nformats");
 		hd->setBNumFormats(nformats);
 	}
 
 	// return the header with all the formats attached
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "header descriptor complete");
+	USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "header descriptor complete");
 	return USBDescriptorPtr(hd);
 }
 
@@ -305,7 +306,7 @@ USBDescriptorPtr	VideoStreamingDescriptorFactory::header(
 USBDescriptorPtr	VideoStreamingDescriptorFactory::format(
 				const void *data, int length,
 				FormatDescriptor *fd) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "FO completing a format descriptor, "
+	USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "FO completing a format descriptor, "
 		"length = %d", length);
 
 	// get offset to the first frame descriptor
@@ -315,7 +316,7 @@ USBDescriptorPtr	VideoStreamingDescriptorFactory::format(
 	// until what remains is not a frame descriptor
 	int	nframes = 0;
 	do {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "FR try at offset %d", offset);
+		USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "FR try at offset %d", offset);
 		// parse the next header
 		USBDescriptorPtr	newframe
 			= descriptor(offset + (uint8_t *)data, length - offset);
@@ -324,7 +325,7 @@ USBDescriptorPtr	VideoStreamingDescriptorFactory::format(
 		if (!isPtr<FrameDescriptor>(newframe)) {
 			// it is not a frame descriptor, so we go to the
 			// cleanup portion
-			debug(LOG_DEBUG, DEBUG_LOG, 0, "FR not a frame descriptor");
+			USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "FR not a frame descriptor");
 			goto cleanup;
 		} else {
 			// this is a frame descriptor, add it th the format
@@ -332,22 +333,22 @@ USBDescriptorPtr	VideoStreamingDescriptorFactory::format(
 			fd->frames.push_back(newframe);
 			offset += newframe->bLength();
 			nframes++;
-			debug(LOG_DEBUG, DEBUG_LOG, 0, "FR found a new frame");
+			USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "FR found a new frame");
 		}
 
 		// is there more space?
 	} while (offset < length);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "FR total format length: %d", offset);
+	USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "FR total format length: %d", offset);
 
 cleanup:
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "FR %d frames found", nframes);
+	USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "FR %d frames found", nframes);
 	// fix broken TIS cameras
 	if (device.getBroken() == BROKEN_THE_IMAGING_SOURCE) {
 		fd->setBNumFrameDescriptors(nframes);
 	}
 
 	// return the format with all the frames attached
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "FO format descriptor complete");
+	USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "FO format descriptor complete");
 	return USBDescriptorPtr(fd);
 }
 
@@ -382,7 +383,7 @@ USBDescriptorPtr	VideoStreamingDescriptorFactory::descriptor(
 
 	// check the subtype
 	uint8_t	subtype = bdescriptorsubtype(data);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "descriptor subtype: %02x", subtype);
+	USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "descriptor subtype: %02x", subtype);
 
 	USBDescriptorPtr	result;
 	switch (subtype) {

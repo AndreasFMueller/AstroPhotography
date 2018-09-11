@@ -7,6 +7,7 @@
 #include <sstream>
 #include <ostream>
 #include <AstroDebug.h>
+#include <USBDebug.h>
 
 using namespace astro::usb::uvc;
 
@@ -38,7 +39,7 @@ bool	isUVCDevice(Device& device) {
  *			get the default settings
  */
 void	UVCCamera::getCur(uint8_t interface) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "get current settings of interface %d",
+	USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "get current settings of interface %d",
 		interface);
 
 	// get the interface descriptor
@@ -61,19 +62,19 @@ void	UVCCamera::getCur(uint8_t interface) {
 	maxpayloadtransfersize = rcur.data()->dwMaxPayloadTransferSize;
 
 	if (debuglevel >= LOG_DEBUG) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "Format:                   %d",
+		USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "Format:                   %d",
 			(int)rcur.data()->bFormatIndex);
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "Frame:                    %d",
+		USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "Frame:                    %d",
 			(int)rcur.data()->bFrameIndex);
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "wWidth:                   %d",
+		USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "wWidth:                   %d",
 			(int)framedescriptor->wWidth());
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "wHeight:                  %d",
+		USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "wHeight:                  %d",
 			(int)framedescriptor->wHeight());
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "dwFrameInterval:          %d",
+		USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "dwFrameInterval:          %d",
 			(int)frameinterval);
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "dwMaxVideoFrameSize:      %d",
+		USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "dwMaxVideoFrameSize:      %d",
 			(int)maxvideoframesize);
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "dwMaxPayloadTransferSize: %d",
+		USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "dwMaxPayloadTransferSize: %d",
 			maxpayloadtransfersize);
 	}
 }
@@ -95,7 +96,7 @@ void	UVCCamera::getCur(uint8_t interface) {
  *     asked whether we can remove it.
  */
 UVCCamera::UVCCamera(Device& _device, bool /* force */) : device(_device) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "create a UVC camera object");
+	USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "create a UVC camera object");
 
 	// make sure the camera is open, this most probably will not have
 	// any effect
@@ -105,7 +106,7 @@ UVCCamera::UVCCamera(Device& _device, bool /* force */) : device(_device) {
 	// association descriptor
 	ConfigurationPtr config = device.activeConfig();
 	if (config->extra().size() == 0) {
-		debug(LOG_ERR, DEBUG_LOG, 0, "no extra descriptors");
+		USBdebug(LOG_ERR, DEBUG_LOG, 0, "no extra descriptors");
 		throw USBError("no InterfaceAssociationDescriptor");
 	}
 
@@ -116,19 +117,19 @@ UVCCamera::UVCCamera(Device& _device, bool /* force */) : device(_device) {
 		throw USBError("no Video Interface Association found");
 	}
 	iadptr = *iadlist.begin();
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "Video Interface Association found");
+	USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "Video Interface Association found");
 
 	// get the control interface, and the list of interface descriptors
 	// for the control interface, and claim it
 	uint8_t	ci = controlInterfaceNumber();
 	videocontrol = (*config)[ci];
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "Control interface number: %d", ci);
+	USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "Control interface number: %d", ci);
 	videocontrol->detachKernelDriver();
 
 	// we also need to know all the video control descriptors appended
 	// to this InterfaceDescriptor. The VideoControlDescriptorFactory
 	// does that.
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "parse the video control descriptors");
+	USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "parse the video control descriptors");
 	InterfaceDescriptorPtr	controlinterface = (*videocontrol)[0];
 	VideoControlDescriptorFactory	vcdf(device);
 	videocontroldescriptors = vcdf.descriptors(controlinterface->extra());
@@ -137,28 +138,28 @@ UVCCamera::UVCCamera(Device& _device, bool /* force */) : device(_device) {
 	// now claim get the various interface descriptors, i.e. the
 	// alternate settings for an interface
 	int	interfacecount = iad().bInterfaceCount();
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "interfaces in association: %d",
+	USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "interfaces in association: %d",
 		interfacecount);
 
 	// now parse the video streaming interfaces
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "parse streaming interface descriptors");
+	USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "parse streaming interface descriptors");
 	VideoStreamingDescriptorFactory	vsf(device);
 	for (int vsif = controlInterfaceNumber() + 1;
 		vsif < controlInterfaceNumber() + iad().bInterfaceCount();
 		vsif++) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0,
+		USBdebug(LOG_DEBUG, DEBUG_LOG, 0,
 			"analyzing video streaming interface %d", vsif);
 		InterfacePtr	interface = (*config)[vsif];
 		// only alternate setting 0 contains the formats
 		InterfaceDescriptorPtr	id = (*interface)[0];
 		std::string	extra = id->extra();
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "extra descriptors: %d bytes",
+		USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "extra descriptors: %d bytes",
 			extra.size());
 		USBDescriptorPtr	vsd = vsf.descriptor(extra);
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "parse complete");
+		USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "parse complete");
 		videostreaming.push_back(vsd);
 	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "UVCCamera constructed");
+	USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "UVCCamera constructed");
 }
 
 /**
@@ -168,15 +169,15 @@ UVCCamera::UVCCamera(Device& _device, bool /* force */) : device(_device) {
  * reinstall a kernel driver if one was attached.
  */
 UVCCamera::~UVCCamera() {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "camera cleanup");
+	USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "camera cleanup");
 	try {
 		device.close();
 	} catch (std::exception& x) {
-		debug(LOG_ERR, DEBUG_LOG, 0, "error during cleanup: %s",
+		USBdebug(LOG_ERR, DEBUG_LOG, 0, "error during cleanup: %s",
 			x.what());
 		throw x;
 	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "camera cleanup complete");
+	USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "camera cleanup complete");
 }
 
 /**
@@ -189,10 +190,10 @@ UVCCamera::~UVCCamera() {
 USBDescriptorPtr	UVCCamera::getHeaderDescriptor(uint8_t interface) {
 	USBDescriptorPtr	headerptr = (*this)[interface];
 	if (!isPtr<HeaderDescriptor>(headerptr)) {
-		debug(LOG_ERR, DEBUG_LOG, 0, "not a header descriptor");
+		USBdebug(LOG_ERR, DEBUG_LOG, 0, "not a header descriptor");
 		throw std::runtime_error("not a header descriptor");
 	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "found a header descriptor");
+	USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "found a header descriptor");
 	return headerptr;
 }
 
@@ -205,24 +206,24 @@ USBDescriptorPtr	UVCCamera::getHeaderDescriptor(uint8_t interface) {
 USBDescriptorPtr	UVCCamera::getFormatDescriptor(uint8_t interface,
 	uint8_t formatindex) {
 	// logging
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "get format for interface = %d, "
+	USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "get format for interface = %d, "
 		"format = %d", interface, formatindex);
 
 	// get the header descriptor
 	USBDescriptorPtr	header = getHeaderDescriptor(interface);
 	HeaderDescriptor	*headerptr = getPtr<HeaderDescriptor>(header);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "headerptr = %p", headerptr);
+	USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "headerptr = %p", headerptr);
 
 	// we don't need to do any range checking on the formatindex
 	// because the operator[] of the header descriptor class will do it
 	USBDescriptorPtr	formatptr = (*headerptr)[formatindex - 1];
 	if (!isPtr<FormatDescriptor>(formatptr)) {
-		debug(LOG_ERR, DEBUG_LOG, 0, "not a format descriptor");
+		USBdebug(LOG_ERR, DEBUG_LOG, 0, "not a format descriptor");
 		throw std::runtime_error("not a format descriptor");
 	}
 
 	// if we get to this point, then we have found the format
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "found format");
+	USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "found format");
 	return formatptr;
 }
 
@@ -236,7 +237,7 @@ USBDescriptorPtr	UVCCamera::getFormatDescriptor(uint8_t interface,
 USBDescriptorPtr	UVCCamera::getFrameDescriptor(uint8_t interface,
 	uint8_t formatindex, uint8_t frameindex) {
 	// logging
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "get frame descriptor interface = %d, "
+	USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "get frame descriptor interface = %d, "
 		"format = %d, frame = %d", interface, formatindex, frameindex);
 
 	// get a format pointer
@@ -247,12 +248,12 @@ USBDescriptorPtr	UVCCamera::getFrameDescriptor(uint8_t interface,
 	// get the frame pointer from the format
 	USBDescriptorPtr	frameptr = (*formatptr)[frameindex - 1];
 	if (!isPtr<FrameDescriptor>(frameptr)) {
-		debug(LOG_ERR, DEBUG_LOG, 0, "not a frame descriptor");
+		USBdebug(LOG_ERR, DEBUG_LOG, 0, "not a frame descriptor");
 		throw std::runtime_error("not a frame descriptor");
 	}
 
 	// if we get here, we have found the frame
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "found frame");
+	USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "found frame");
 	return frameptr;
 }
 
@@ -325,7 +326,7 @@ uint32_t	UVCCamera::controlProcessingUnitControls() const {
  * This sets the exposure priority as well
  */
 void	UVCCamera::setExposureTime(double exposuretime) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "setting auto exposure priority");
+	USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "setting auto exposure priority");
 
 	// we have to find out whether the auto_exposure_priority_control
 	// is available on this camera
@@ -335,18 +336,18 @@ void	UVCCamera::setExposureTime(double exposuretime) {
 	// altered dynamically
 	aeprio.bAutoExposurePriority = 1;
 	if (controlSupported(aeprio)) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0,
+		USBdebug(LOG_DEBUG, DEBUG_LOG, 0,
 			"auto exposure priority control supported");
 		setCurrent(aeprio);
 	}
 
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "setting auto exposure mode");
+	USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "setting auto exposure mode");
 	// set the auto exposure mode
 	astro::usb::uvc::auto_exposure_mode_control_t   aemode;
 	// bAutoExposureMode == 1 means manual mode, manual iris
 	aemode.bAutoExposureMode = 1;
 	if (controlSupported(aemode)) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0,
+		USBdebug(LOG_DEBUG, DEBUG_LOG, 0,
 			"auto exposure mode control supported");
 		setCurrent(aemode);
 	}
@@ -354,30 +355,30 @@ void	UVCCamera::setExposureTime(double exposuretime) {
 	// check allowed min/max values of the exposure time
 	astro::usb::uvc::exposure_time_absolute_control_t       exptime;
 	if (controlSupported(exptime)) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0,
+		USBdebug(LOG_DEBUG, DEBUG_LOG, 0,
 			"exposure time absolute control supported");
 		// get min and max time
 		exptime = get(GET_MIN, exptime);
 		uint32_t	minexp = exptime.dwExposureTimeAbsolute;
 		exptime = get(GET_MAX, exptime);
 		uint32_t	maxexp = exptime.dwExposureTimeAbsolute;
-		debug(LOG_DEBUG, DEBUG_LOG, 0,
+		USBdebug(LOG_DEBUG, DEBUG_LOG, 0,
 			"exposure time min = %u, max = %u", minexp, maxexp);
 
 		// set exposure time
 		exptime.dwExposureTimeAbsolute = 10000 * exposuretime;
 		if ((exptime.dwExposureTimeAbsolute < minexp) ||
 			(maxexp < exptime.dwExposureTimeAbsolute)) {
-			debug(LOG_ERR, DEBUG_LOG, 0, "time %u out of range",
+			USBdebug(LOG_ERR, DEBUG_LOG, 0, "time %u out of range",
 				exptime.dwExposureTimeAbsolute);
 			throw std::range_error("exposure time not supported");
 		} else {
-			debug(LOG_DEBUG, DEBUG_LOG, 0, "setting time %u",
+			USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "setting time %u",
 				exptime.dwExposureTimeAbsolute);
 			setCurrent(exptime);
 		}
 	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "exposure time set to %fs",
+	USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "exposure time set to %fs",
 		exposuretime);
 }
 
@@ -389,11 +390,11 @@ void	UVCCamera::disableAutoWhiteBalance() {
 	white_balance_temperature_auto_control_t	wbtempauto;
 	wbtempauto.bWhiteBalanceTemperatureAuto = 0;
 	if (controlSupported(wbtempauto)) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0,
+		USBdebug(LOG_DEBUG, DEBUG_LOG, 0,
 			"turn off auto white balance temperature");
 		setCurrent(wbtempauto);
 	} else {
-		debug(LOG_DEBUG, DEBUG_LOG, 0,
+		USBdebug(LOG_DEBUG, DEBUG_LOG, 0,
 			"white balance temperature auto control not supported");
 	}
 
@@ -401,11 +402,11 @@ void	UVCCamera::disableAutoWhiteBalance() {
 	white_balance_component_auto_control_t	wbcompauto;
 	wbcompauto.bWhiteBalanceComponentAuto = 0;
 	if (controlSupported(wbcompauto)) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0,
+		USBdebug(LOG_DEBUG, DEBUG_LOG, 0,
 			"turn off auto white balance components");
 		setCurrent(wbcompauto);
 	} else {
-		debug(LOG_DEBUG, DEBUG_LOG, 0,
+		USBdebug(LOG_DEBUG, DEBUG_LOG, 0,
 			"white balance component auto control not supported");
 	}
 
@@ -414,12 +415,12 @@ void	UVCCamera::disableAutoWhiteBalance() {
 	if (controlSupported(wbtemp)) {
 		wbtemp = get(GET_DEF, wbtemp);
 		setCurrent(wbtemp);
-		debug(LOG_DEBUG, DEBUG_LOG, 0,
+		USBdebug(LOG_DEBUG, DEBUG_LOG, 0,
 			"white balance temperature set to %hu", 
 			wbtemp.wWhiteBalanceTemperature);
 		return;
 	} else {
-		debug(LOG_DEBUG, DEBUG_LOG, 0,
+		USBdebug(LOG_DEBUG, DEBUG_LOG, 0,
 			"white balance temperature control not supported");
 	}
 
@@ -428,19 +429,19 @@ void	UVCCamera::disableAutoWhiteBalance() {
 	white_balance_component_control_t	wbcomp;
 	if (controlSupported(wbcomp)) {
 		wbcomp = get(GET_CUR, wbcomp);
-		debug(LOG_DEBUG, DEBUG_LOG, 0,
+		USBdebug(LOG_DEBUG, DEBUG_LOG, 0,
 			"current White Balance components B = %hu, R = %hu", 
 			wbcomp.wWhiteBalanceBlue,
 			wbcomp.wWhiteBalanceRed);
 		wbcomp = get(GET_DEF, wbcomp);
 		wbcomp.wWhiteBalanceBlue += 10;
 		setCurrent(wbcomp);
-		debug(LOG_DEBUG, DEBUG_LOG, 0,
+		USBdebug(LOG_DEBUG, DEBUG_LOG, 0,
 			"white balance components set to B = %hu, R = %hu", 
 			wbcomp.wWhiteBalanceBlue,
 			wbcomp.wWhiteBalanceRed);
 	} else {
-		debug(LOG_DEBUG, DEBUG_LOG, 0,
+		USBdebug(LOG_DEBUG, DEBUG_LOG, 0,
 			"white balance component control not supported");
 	}
 }
@@ -462,7 +463,7 @@ void	UVCCamera::setGain(double gain) {
 	astro::usb::uvc::gain_control_t	def, min, max, gaincontrol;
 
 	if (controlSupported(gaincontrol)) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "gain control is supported");
+		USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "gain control is supported");
 		// get the default, min and max value of the gain
 		def = get(GET_DEF, astro::usb::uvc::gain_control_t());
 		min = get(GET_MIN, astro::usb::uvc::gain_control_t());
@@ -475,7 +476,7 @@ void	UVCCamera::setGain(double gain) {
 			throw std::range_error("gain outside range");
 		}
 		setCurrent(gaincontrol);
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "gain set to %f", gain);
+		USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "gain set to %f", gain);
 	}
 }
 
@@ -488,7 +489,7 @@ std::pair<float, float>	UVCCamera::getGainInterval() {
 	if (!controlSupported(gaincontrol)) {
 		throw std::runtime_error("gain control not supported");
 	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "gain control is supported");
+	USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "gain control is supported");
 		// get the default, min and max value of the gain
 	def = get(GET_DEF, astro::usb::uvc::gain_control_t());
 	min = get(GET_MIN, astro::usb::uvc::gain_control_t());
@@ -548,7 +549,7 @@ std::ostream&	operator<<(std::ostream& out, const UVCCamera& camera) {
  */
 uint32_t	UVCCamera::minFrameInterval(uint8_t interface, uint8_t format,
 	uint8_t frame) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieve minFrameInterval for "
+	USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "retrieve minFrameInterval for "
 		"interface = %d, format = %d, frame = %d",
 		interface, format, frame);
 
@@ -560,7 +561,7 @@ uint32_t	UVCCamera::minFrameInterval(uint8_t interface, uint8_t format,
 	FrameDescriptor	*framedesc = getPtr<FrameDescriptor>(frameptr);
 
 	// we have found the minimum frame interval
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "minimum frame interval: %d",
+	USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "minimum frame interval: %d",
 		framedesc->minFrameInterval());
 	return framedesc->minFrameInterval();
 }
@@ -583,7 +584,7 @@ uint32_t	UVCCamera::minFrameInterval(uint8_t interface, uint8_t format,
  */
 void	UVCCamera::selectFormatAndFrame(uint8_t interface,
 		uint8_t format, uint8_t frame) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0,
+	USBdebug(LOG_DEBUG, DEBUG_LOG, 0,
 		"select interface %d, format %d, frame %d",
 		interface, format, frame);
 	// We want to negotiate use of the a given format and frame.
@@ -597,7 +598,7 @@ void	UVCCamera::selectFormatAndFrame(uint8_t interface,
 
 	// do we have to claim the interface?
 	InterfacePtr	interfaceptr = (*device.activeConfig())[interface];
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "interface %d with %d alt settings",
+	USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "interface %d with %d alt settings",
 		interfaceptr->interfaceNumber(),
 		interfaceptr->numAltsettings());
 #if 1
@@ -631,11 +632,11 @@ void	UVCCamera::selectFormatAndFrame(uint8_t interface,
 	FormatFrameBasedDescriptor	*fd
 		= dynamic_cast<FormatFrameBasedDescriptor *>(&*formatptr);
 	if (NULL == fd) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "unknown pixel size");
+		USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "unknown pixel size");
 		bitsPerPixel = 1;
 	} else {
 		bitsPerPixel = fd->bBitsPerPixel();
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "bits per pixel: %d",
+		USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "bits per pixel: %d",
 			bitsPerPixel);
 	}
 
@@ -669,14 +670,14 @@ int	UVCCamera::preferredAltSetting(uint8_t interface) {
 	// if the frame interval is 0, we have to ask the format for
 	// the default frame interval
 	if (0 == frameinterval) {
-		debug(LOG_WARNING, DEBUG_LOG, 0,
+		USBdebug(LOG_WARNING, DEBUG_LOG, 0,
 			"warning: no negotiated frame interval");
 		frameinterval = 333333;
 	}
 
 	// compute the data rate
 	double	datarate = maxvideoframesize * (10000000. / frameinterval);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "required data rate: %.1fMBps",
+	USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "required data rate: %.1fMBps",
 		datarate / 1000000.);
 
 	// for this software, bulk transfers are preferable, if the
@@ -703,7 +704,7 @@ int	UVCCamera::preferredAltSetting(uint8_t interface) {
 		EndpointDescriptorPtr	endpointptr = (*ifdescptr)[0];
 		size_t	maxbandwidth = endpointptr->maxBandwidth();
 		if (maxbandwidth > datarate) {
-			debug(LOG_DEBUG, DEBUG_LOG, 0, "first alt setting "
+			USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "first alt setting "
 				"matching data rate %.1fMBps: %d (%.1fMBps)",
 				datarate / 1000000., alt,
 				maxbandwidth / 1000000.);
@@ -725,7 +726,7 @@ int	UVCCamera::preferredAltSetting(uint8_t interface) {
  */
 std::vector<FramePtr>	UVCCamera::getBulkFrames(uint8_t interface,
 	unsigned int nframes) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "get %d frames using bulk transfer",
+	USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "get %d frames using bulk transfer",
 		nframes);
 	// find the interface on which we want to do the transfer
 	InterfacePtr	interfaceptr = (*device.activeConfig())[interface];
@@ -735,7 +736,7 @@ std::vector<FramePtr>	UVCCamera::getBulkFrames(uint8_t interface,
 	// bulk endpoint resides
 	InterfaceDescriptorPtr	ifdescptr = (*interfaceptr)[0];
 	ifdescptr->altSetting();
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "using alt setting 0");
+	USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "using alt setting 0");
 
 	// get the Endpoint for this alternate setting
 	EndpointDescriptorPtr	endpoint = (*ifdescptr)[0];
@@ -750,7 +751,7 @@ std::vector<FramePtr>	UVCCamera::getBulkFrames(uint8_t interface,
 	try {
 		interfaceptr->release();
 	} catch (std::exception& x) {
-		debug(LOG_ERR, DEBUG_LOG, 0, "interface release failed: %s",
+		USBdebug(LOG_ERR, DEBUG_LOG, 0, "interface release failed: %s",
 			x.what());
 	}
 
@@ -767,7 +768,7 @@ std::vector<FramePtr>	UVCCamera::getBulkFrames(uint8_t interface,
  */
 std::vector<FramePtr>	UVCCamera::getIsoFrames(uint8_t interface,
 	unsigned int nframes) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieve a frame from if %d",
+	USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "retrieve a frame from if %d",
 		interface);
 
 	// We have to claim the interface bevor we can actually use an
@@ -780,7 +781,7 @@ std::vector<FramePtr>	UVCCamera::getIsoFrames(uint8_t interface,
 	int	altsetting = preferredAltSetting(interface);
 	InterfaceDescriptorPtr	ifdescptr = (*interfaceptr)[altsetting];
 	ifdescptr->altSetting();
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "bandwidth negotiation complete, "
+	USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "bandwidth negotiation complete, "
 		"alt setting: %d", altsetting);
 
 	// get the Endpoint for this alternate setting
@@ -792,22 +793,22 @@ std::vector<FramePtr>	UVCCamera::getIsoFrames(uint8_t interface,
 
 	// submit this transfer to the device
 	try {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "submitting request");
+		USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "submitting request");
 		device.submit(&transfer);
 	} catch (USBError& usberror) {
-		debug(LOG_ERR, DEBUG_LOG, 0, "usb error: %s", usberror.what());
+		USBdebug(LOG_ERR, DEBUG_LOG, 0, "usb error: %s", usberror.what());
 	}
 
 	// revert to alt setting 0, i.e. no data
 	ifdescptr = (*interfaceptr)[0];
 	ifdescptr->altSetting();
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "bandwith reset to 0");
+	USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "bandwith reset to 0");
 
 	// release the interface again
 	try {
 		interfaceptr->release();
 	} catch (std::exception& x) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "release failed: %s", x.what());
+		USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "release failed: %s", x.what());
 	}
 
 	// convert the retrieved data to an image
@@ -832,11 +833,11 @@ std::vector<FramePtr>	UVCCamera::getFrames(uint8_t interface,
 	if (ifdptr->numEndpoints() > 0) {
 		EndpointDescriptorPtr	endpoint = (*ifdptr)[0];
 		if (endpoint->isBulk()) {
-			debug(LOG_DEBUG, DEBUG_LOG, 0, "using bulk endpoint");
+			USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "using bulk endpoint");
 			return getBulkFrames(interface, nframes);
 		}
 	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "using isochronous endpoint");
+	USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "using isochronous endpoint");
 	return getIsoFrames(interface, nframes);
 }
 

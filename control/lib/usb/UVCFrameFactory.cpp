@@ -6,6 +6,7 @@
  */
 #include <AstroUVC.h>
 #include <AstroDebug.h>
+#include <USBDebug.h>
 
 namespace astro {
 namespace usb {
@@ -39,7 +40,7 @@ std::vector<FramePtr>	FrameFactory::operator()(const std::list<std::string>& pac
 		try {
 			UVCPayloadPacket	uvcpayload(*i);
 			if (i->length() > 12) {
-				debug(LOG_DEBUG, DEBUG_LOG, 0, "%d: %u, %u, %u, %d",
+				USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "%d: %u, %u, %u, %d",
 					(int)uvcpayload.hle(), 
 					uvcpayload.ptsValue(), 
 					uvcpayload.fid(), 
@@ -55,7 +56,7 @@ std::vector<FramePtr>	FrameFactory::operator()(const std::list<std::string>& pac
 			} else {
 				// cast below to make compiler happy
 				if ((currentframe) && ((int)currentframe->size() >= minsize)) {
-					debug(LOG_DEBUG, DEBUG_LOG, 0,
+					USBdebug(LOG_DEBUG, DEBUG_LOG, 0,
 						"adding frame of size %d",
 						currentframe->size());
 					frames.push_back(FramePtr(currentframe));
@@ -67,7 +68,7 @@ std::vector<FramePtr>	FrameFactory::operator()(const std::list<std::string>& pac
 			}
 			processed++;
 		} catch (std::exception& x) {
-			//debug(LOG_DEBUG, DEBUG_LOG, 0, "packet %d ignored: %s",
+			//USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "packet %d ignored: %s",
 			//	packetcounter, x.what());
 		}
 		packetcounter++;
@@ -75,7 +76,7 @@ std::vector<FramePtr>	FrameFactory::operator()(const std::list<std::string>& pac
 	if (currentframe) {
 		delete currentframe;
 	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "processed packets: %d, frames: %d",
+	USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "processed packets: %d, frames: %d",
 		processed, framecounter);
 
 	// show how large the frames are:
@@ -83,7 +84,7 @@ std::vector<FramePtr>	FrameFactory::operator()(const std::list<std::string>& pac
 	framecounter = 0;
 	for (j = frames.begin(); j != frames.end(); j++, framecounter++) {
 #if 1
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "frame %d: %d bytes",
+		USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "frame %d: %d bytes",
 			framecounter, (*j)->size());
 #endif
 	}

@@ -8,6 +8,7 @@
 #include <cstring>
 #include <cstdio>
 #include <AstroDebug.h>
+#include <USBDebug.h>
 
 namespace astro {
 namespace usb {
@@ -152,14 +153,14 @@ USBDescriptorPtr	DescriptorFactory::descriptor(const void *data,
 	USBDescriptorPtr	dp;
 	switch (bdescriptortype(data)) {
 	case 11:
-		debug(LOG_DEBUG, DEBUG_LOG, 0,
+		USBdebug(LOG_DEBUG, DEBUG_LOG, 0,
 			"create an InterfaceAssociationDescriptor");
 		dp = USBDescriptorPtr(
 			new InterfaceAssociationDescriptor(device,
 				data, blength(data)));
 		break;
 	default:
-		debug(LOG_ERR, DEBUG_LOG, 0,
+		USBdebug(LOG_ERR, DEBUG_LOG, 0,
 			"trying to build unknown descriptor");
 		throw UnknownDescriptorError(blength(data),
 			bdescriptortype(data));
@@ -194,7 +195,7 @@ std::vector<USBDescriptorPtr>	DescriptorFactory::descriptors(
 				result.push_back(this->descriptor(a,
 					length - offset));
 			} catch (UnknownDescriptorError& x) {
-				debug(LOG_ERR, DEBUG_LOG, 0,
+				USBdebug(LOG_ERR, DEBUG_LOG, 0,
 					"unknown descriptor: %s",x.what());
 				throw x;
 			}
@@ -248,7 +249,7 @@ uint8_t	InterfaceAssociationDescriptor::bFunctionClass() const {
 	if (device.getBroken() == BROKEN_THE_IMAGING_SOURCE) {
 		return CC_VIDEO;
 	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "bFunctionClass = %02x", uint8At(4));
+	USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "bFunctionClass = %02x", uint8At(4));
 	return uint8At(4);
 }
 
@@ -256,7 +257,7 @@ uint8_t	InterfaceAssociationDescriptor::bFunctionSubClass() const {
 	if (device.getBroken() == BROKEN_THE_IMAGING_SOURCE) {
 		return SC_VIDEO_INTERFACE_COLLECTION;
 	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "bFunctionSubClass = %02x", uint8At(5));
+	USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "bFunctionSubClass = %02x", uint8At(5));
 	return uint8At(5);
 }
 

@@ -943,6 +943,11 @@ public:
 };
 typedef std::shared_ptr<Frame>	FramePtr;
 
+/**
+ * \brief enable/disable debugging inside the USB class
+ */
+void	USBdebugEnable();
+void	USBdebugDisable();
 
 } // namespace usb
 } // namespace astro

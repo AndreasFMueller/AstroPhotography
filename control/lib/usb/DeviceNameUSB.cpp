@@ -7,6 +7,7 @@
 #include <AstroDebug.h>
 #include <AstroFormat.h>
 #include <AstroUtils.h>
+#include <USBDebug.h>
 
 namespace astro {
 namespace device {
@@ -22,7 +23,7 @@ static std::string	remove_dashes(const std::string& s) {
 			result.append(1, c);
 		}
 	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "'%s' dashes removed: '%s'",
+	usb::USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "'%s' dashes removed: '%s'",
 		s.c_str(), result.c_str());
 	return result;
 }
@@ -36,7 +37,7 @@ static std::string	remove_dashes(const std::string& s) {
  * number.
  */
 void	DeviceNameUSB::parse(const std::string& name) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "parsing name '%s'", name.c_str());
+	usb::USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "parsing name '%s'", name.c_str());
 	// USB bus number
 	std::string	busnumberstring = name.substr(0, 3);
 	_busnumber = stoi(busnumberstring);
@@ -47,7 +48,7 @@ void	DeviceNameUSB::parse(const std::string& name) {
 	std::string	w = name.substr(8);
 	size_t	o = w.find('-');
 	_iproduct = w.substr(0, o);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "iproduct = %s", _iproduct.c_str());
+	usb::USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "iproduct = %s", _iproduct.c_str());
 	// get the rest of the name
 	w = w.substr(o + 1);
 	// idvendor
@@ -63,7 +64,7 @@ void	DeviceNameUSB::parse(const std::string& name) {
 	}
 	
 	// find the next dash to extract idvendor and idproduct
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "%s has bus=%d, addr=%d, iprod=%s, "
+	usb::USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "%s has bus=%d, addr=%d, iprod=%s, "
 		"idvendor=%04x, idproduct=%04x, serial=%s", name.c_str(),
 		_busnumber, _deviceaddress, _iproduct.c_str(),
 		_idvendor, _idproduct, _serial.c_str());
@@ -77,14 +78,14 @@ void	DeviceNameUSB::parse(const std::string& name) {
 DeviceNameUSB::DeviceNameUSB(const std::string& modulename,
 	unsigned short modulevendor, astro::usb::DevicePtr deviceptr)
 	: _modulename(modulename), _modulevendor(modulevendor) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "DeviceNameUSB constructor on USB: %s",
+	usb::USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "DeviceNameUSB constructor on USB: %s",
 		deviceptr->getDeviceName().c_str());
 	usb::DeviceDescriptorPtr	descriptor = deviceptr->descriptor();
 	if (_modulevendor != descriptor->idVendor()) {
 		std::string	msg = stringprintf("device is not a %s device, "
 			"but 0x%hx",
 			_modulename.c_str(), descriptor->idVendor());
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "%s", msg.c_str());
+		usb::USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "%s", msg.c_str());
 		throw std::runtime_error(msg);
 	}
 	_busnumber = deviceptr->getBusNumber();
@@ -103,27 +104,27 @@ DeviceNameUSB::DeviceNameUSB(const std::string& modulename,
 DeviceNameUSB::DeviceNameUSB(const std::string& modulename,
 	unsigned short modulevendor, const DeviceName& devicename)
 	: _modulename(modulename), _modulevendor(modulevendor) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0,
+	usb::USBdebug(LOG_DEBUG, DEBUG_LOG, 0,
 		"DeviceNameUSB constructor on DeviceName: %s",
 		devicename.toString().c_str());
 	if (devicename[0] != _modulename) {
 		std::string	msg = stringprintf("%s ist not a %s device",
 			devicename.toString().c_str(), _modulename.c_str());
-		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		usb::USBdebug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 		throw std::runtime_error(msg);
 	}
 	parse(devicename[1]);
 }
 
 std::string	DeviceNameUSB::unparse() const {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "_iproduct = %s", _iproduct.c_str());
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "_idvendor = %04hx", _idvendor);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "_idproduct = %04hx", _idproduct);
+	usb::USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "_iproduct = %s", _iproduct.c_str());
+	usb::USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "_idvendor = %04hx", _idvendor);
+	usb::USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "_idproduct = %04hx", _idproduct);
 	std::string	name = stringprintf(
 		"%03d-%03d-%s-%04hx-%04hx",
 		_busnumber, _deviceaddress, _iproduct.c_str(),
 		_idvendor, _idproduct);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "name = %s", name.c_str());
+	usb::USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "name = %s", name.c_str());
 	if (_serial.size() > 0) {
 		name.append("-");
 		name.append(_serial);
@@ -161,7 +162,7 @@ DeviceName	DeviceNameUSB::name(DeviceName::device_type type,
 			components.push_back(component);
 		}
 	} while (work.size() > 0);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "found %d components in %s",
+	usb::USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "found %d components in %s",
 		components.size(), path.c_str());
 	return name(type, components);
 }
@@ -228,7 +229,7 @@ bool	DeviceNameUSB::isCamera(const DeviceName& other) {
 }
 
 bool	DeviceNameUSB::isCcd(const DeviceName& other) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "%s -> isCcd(%s)",
+	usb::USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "%s -> isCcd(%s)",
 		ccdname().toString().c_str(), other.toString().c_str());
 	if (!matches(other, DeviceName::Ccd)) {
 		return false;

@@ -6,6 +6,7 @@
 #include <AstroUVC.h>
 #include <sstream>
 #include <AstroDebug.h>
+#include <USBDebug.h>
 
 using namespace astro::usb;
 
@@ -67,9 +68,9 @@ void	HeaderDescriptor::setWTotalLength(uint16_t w) {
  * \param formatindex	number of the format descriptors, starting from 0
  */
 const USBDescriptorPtr	HeaderDescriptor::operator[](size_t formatindex) const {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "request format %d", formatindex);
+	USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "request format %d", formatindex);
 	if (formatindex >= bNumFormats()) {
-		debug(LOG_ERR, DEBUG_LOG, 0, "%d outside format range %d",
+		USBdebug(LOG_ERR, DEBUG_LOG, 0, "%d outside format range %d",
 			formatindex, bNumFormats());
 		throw std::length_error("outside format range");
 	}

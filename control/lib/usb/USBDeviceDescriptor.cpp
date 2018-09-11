@@ -9,6 +9,7 @@
 #include <ios>
 #include <iomanip>
 #include <cstring>
+#include <USBDebug.h>
 
 namespace astro {
 namespace usb {
@@ -20,7 +21,7 @@ namespace usb {
  * \param device_descriptor	
  */
 DeviceDescriptor::DeviceDescriptor(Device& device) : dev(device) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0,
+	USBdebug(LOG_DEBUG, DEBUG_LOG, 0,
 		"Construct DeviceDescriptor for bus=%d, port=%d",
 		device.getBusNumber(), device.getPortNumber());
 	// copy the descriptor data
@@ -28,27 +29,27 @@ DeviceDescriptor::DeviceDescriptor(Device& device) : dev(device) {
 	if (rc != LIBUSB_SUCCESS) {
 		std::string     msg = stringprintf("cannot get device "
 			"descriptor: %s", libusb_error_name(rc));
-		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		USBdebug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 		throw USBError(msg);
 	}
 
 	// manufacturer
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "iManufacturer = %d", d.iManufacturer);
+	USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "iManufacturer = %d", d.iManufacturer);
 	manufacturer = device.getStringDescriptor(d.iManufacturer);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "iProduct = %d", d.iProduct);
+	USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "iProduct = %d", d.iProduct);
 	product = device.getStringDescriptor(d.iProduct);
 	if (d.iSerialNumber > 0) {
 		try {
 			serialnumber = device.getStringDescriptor(
 				d.iSerialNumber);
-			debug(LOG_DEBUG, DEBUG_LOG, 0, "found serial: %s",
+			USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "found serial: %s",
 				serialnumber.c_str());
 		} catch (const USBError& e) {
-			debug(LOG_DEBUG, DEBUG_LOG, 0, "no serial number: %s",
+			USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "no serial number: %s",
 				e.what());
 		}
 	} else {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "device has no serial");
+		USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "device has no serial");
 	}
 }
 

@@ -32,6 +32,7 @@ libastrousb_la_SOURCES = 						\
 	USBConfiguration.cpp						\
 	USBContext.cpp							\
 	USBContextHolder.cpp						\
+	USBDebug.cpp							\
 	USBDescriptors.cpp						\
 	USBDevice.cpp							\
 	USBDeviceDescriptor.cpp						\
@@ -44,6 +45,9 @@ libastrousb_la_SOURCES = 						\
 	USBRequests.cpp							\
 	USBTransfer.cpp							\
 	$(uvc_files)
+
+
+noinst_HEADERS = USBDebug.h
 
 libastrousb_la_CPPFLAGS = -DPKGLIBDIR=\"$(pkglibdir)\" -DDEVICEPROPERTIES=\"@DEVICEPROPERTIES@\"
 

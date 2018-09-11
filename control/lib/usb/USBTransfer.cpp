@@ -8,6 +8,7 @@
 #include <AstroUVC.h>
 #include <AstroFormat.h>
 #include <cstdlib>
+#include <USBDebug.h>
 
 namespace astro {
 namespace usb {
@@ -30,7 +31,7 @@ int	Transfer::getTimeout() const {
 
 void	Transfer::setTimeout(int _timeout) {
 	timeout = _timeout;
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "set timeout to %d", timeout);
+	USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "set timeout to %d", timeout);
 }
 
 bool	Transfer::isComplete() const {
@@ -51,7 +52,7 @@ static void bulktransfer_callback(libusb_transfer *transfer) {
 }
 
 void	BulkTransfer::init(int _length, unsigned char *_data) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "%s transfer on %02x, size %d",
+	USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "%s transfer on %02x, size %d",
 		(endpoint->bEndpointAddress() & 0x80) ? "IN" : "OUT",
 		(endpoint->bEndpointAddress()), _length);
 	transfer = NULL;
@@ -116,7 +117,7 @@ void	BulkTransfer::submit(libusb_device_handle *dev_handle) {
 		length, bulktransfer_callback, this, timeout);
 
 	// submit the transfer
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "submitting bulk transfer, timeout = %d",
+	USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "submitting bulk transfer, timeout = %d",
 		timeout);
 	int	rc = libusb_submit_transfer(transfer);
 	if (rc != LIBUSB_SUCCESS) {
@@ -133,10 +134,10 @@ void	BulkTransfer::submit(libusb_device_handle *dev_handle) {
 	// don't know yet what happened.
 	const char	*cause = usb_status_name(transfer->status);
 	if (NULL != cause) {
-		debug(LOG_ERR, DEBUG_LOG, 0, "transfer failed: %s", cause);
+		USBdebug(LOG_ERR, DEBUG_LOG, 0, "transfer failed: %s", cause);
 		throw USBError(cause);
 	} else {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "transfer complete, %d bytes",
+		USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "transfer complete, %d bytes",
 			transfer->actual_length);
 	}
 }
@@ -166,7 +167,7 @@ BulkTransfer::~BulkTransfer() {
  * method overridden.
  */
 void	BulkTransfer::callback(libusb_transfer *transfer) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0,
+	USBdebug(LOG_DEBUG, DEBUG_LOG, 0,
 		"callback: transfer status: %d, %s %d bytes",
 		transfer->status,
 		(endpoint->bEndpointAddress() & 0x80) ? "got" : "sent",

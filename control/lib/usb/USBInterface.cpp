@@ -9,6 +9,7 @@
 #include <iomanip>
 #include <cstring>
 #include <AstroDebug.h>
+#include <USBDebug.h>
 
 namespace astro {
 namespace usb {
@@ -78,7 +79,7 @@ EndpointDescriptorPtr	InterfaceDescriptor::operator[](size_t index) const {
 }
 
 void	InterfaceDescriptor::altSetting() {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "select alt setting %d on interface %d",
+	USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "select alt setting %d on interface %d",
 		bAlternateSetting(), bInterfaceNumber());
 	dev.setInterfaceAltSetting(bInterfaceNumber(), bAlternateSetting());
 }
@@ -132,7 +133,7 @@ Interface::Interface(Device& device, Configuration& _configuration,
 	const libusb_interface *li, int _interfaceindex)
 	: dev(device), interfaceindex(_interfaceindex),
 	  configuration(_configuration) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "creating interface index=%d",
+	USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "creating interface index=%d",
 		interfaceindex);
 	for (int i = 0; i < li->num_altsetting; i++) {
 		InterfaceDescriptor	*id
@@ -140,7 +141,7 @@ Interface::Interface(Device& device, Configuration& _configuration,
 				&li->altsetting[i]);
 		altsettingvector.push_back(InterfaceDescriptorPtr(id));
 	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "interface with index %d has number %d",
+	USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "interface with index %d has number %d",
 			interfaceindex, interfaceNumber());
 	reattach = false;
 }
@@ -148,12 +149,12 @@ Interface::Interface(Device& device, Configuration& _configuration,
 Interface::~Interface() {
 	try {
 		if (reattach) {
-			debug(LOG_DEBUG, DEBUG_LOG, 0,
+			USBdebug(LOG_DEBUG, DEBUG_LOG, 0,
 				"reattach kernel driver");
 			attachKernelDriver();
 		}
 	} catch (USBError& error) {
-		debug(LOG_ERR, DEBUG_LOG, 0, "error during kernel driver "
+		USBdebug(LOG_ERR, DEBUG_LOG, 0, "error during kernel driver "
 			"reattach: %s", error.what());
 	}
 }

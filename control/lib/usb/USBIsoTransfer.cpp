@@ -6,6 +6,7 @@
 #include <AstroUSB.h>
 #include <AstroDebug.h>
 #include <cstdlib>
+#include <USBDebug.h>
 
 namespace astro {
 namespace usb {
@@ -51,7 +52,7 @@ IsoSegment::IsoSegment(EndpointDescriptorPtr _endpoint, int packets,
 	// allocate the transfer
 	transfer = libusb_alloc_transfer(packets);
 	if (NULL == transfer) {
-		debug(LOG_ERR, DEBUG_LOG, 0, "cannot allocate transfer");
+		USBdebug(LOG_ERR, DEBUG_LOG, 0, "cannot allocate transfer");
 	}
 	transfer->type = LIBUSB_TRANSFER_TYPE_ISOCHRONOUS;
 	transfer->num_iso_packets = packets;
@@ -70,7 +71,7 @@ IsoSegment::IsoSegment(EndpointDescriptorPtr _endpoint, int packets,
 	libusb_set_iso_packet_lengths(transfer, packetsize);
 
 	// log completion of the segment creation
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "created IsoSegment with %d packets",
+	USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "created IsoSegment with %d packets",
 		packets);
 }
 
@@ -96,7 +97,7 @@ int	IsoSegment::extract(std::list<std::string>& packets) {
 			std::string	packet((char *)
 				libusb_get_iso_packet_buffer(transfer, i),
 				transfer->iso_packet_desc[i].actual_length);
-			debug(LOG_DEBUG, DEBUG_LOG, 0, "packet size %d",
+			USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "packet size %d",
 				transfer->iso_packet_desc[i].actual_length);
 			packets.push_back(packet);
 			packetcounter++;
@@ -125,7 +126,7 @@ void	IsoTransfer::handlevents() {
 
 	// wait for the mutex to unlock
 	lock.lock();
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "event handling thread released");
+	USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "event handling thread released");
 
 	// the mutex was locked, so we can now start handling segments
 	incoming.front()->submit();
@@ -134,7 +135,7 @@ void	IsoTransfer::handlevents() {
 	while (!complete) {
 		int	rc = libusb_handle_events(ctx);
 		if (rc != LIBUSB_SUCCESS) {
-			debug(LOG_ERR, DEBUG_LOG, 0, "request handling failed");
+			USBdebug(LOG_ERR, DEBUG_LOG, 0, "request handling failed");
 		}
 		// XXX if failed, we should cancel all pending requests.
 	}
@@ -150,18 +151,18 @@ void	IsoTransfer::handlevents() {
  * \param dev_handle	libusb_device_handle to use for the transfer
  */
 void	IsoTransfer::submit(libusb_device_handle *dev_handle) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "preparing isochronous transfer");
+	USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "preparing isochronous transfer");
 
 	// find the packet size that the endpoint can handle
 	int	packetsize = endpoint->maxPacketSize()
 			* endpoint->transactionOpportunities();
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "found packet size: %d", packetsize);
+	USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "found packet size: %d", packetsize);
 
 	// each segment should be the same number of segments
 	int	packets_per_segment = 400;
 
 	// create a bunch of IsoSegments and add them to the queue
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "total packets: %d", totalpackets);
+	USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "total packets: %d", totalpackets);
 	int	packetcount = 0;
 	while (packetcount < totalpackets) {
 		IsoSegment	*segptr
@@ -170,7 +171,7 @@ void	IsoTransfer::submit(libusb_device_handle *dev_handle) {
 		incoming.push(IsoSegmentPtr(segptr));
 		packetcount += packets_per_segment;
 	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "incoming now contains %d segments",
+	USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "incoming now contains %d segments",
 		incoming.size());
 	if (incoming.size() == 0) {
 		return;
@@ -199,19 +200,19 @@ void	IsoTransfer::submit(libusb_device_handle *dev_handle) {
 		throw USBError("cannot release event handling thread");
 	}
 
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "all callbacks completed");
+	USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "all callbacks completed");
 
 	// wait for the thread to terminate
 	eventthread.join();
 
 	// copy all the packets
 	while (outgoing.size() > 0) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0,
+		USBdebug(LOG_DEBUG, DEBUG_LOG, 0,
 			"extracting packets from segment");
 		outgoing.front()->extract(packets);
 		outgoing.pop();
 	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "have now %d packets", packets.size());
+	USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "have now %d packets", packets.size());
 }
 
 IsoTransfer::~IsoTransfer() {
@@ -231,7 +232,7 @@ void	IsoTransfer::callback(libusb_transfer * /* transfer */) {
 	if (incoming.size() > 0) {
 		incoming.front()->submit();
 	} else {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "all segments complete");
+		USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "all segments complete");
 		complete = true;
 		lock.unlock();
 		condition.notify_one();

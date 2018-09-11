@@ -8,6 +8,7 @@
 #include <iomanip>
 #include <AstroDebug.h>
 #include <AstroFormat.h>
+#include <USBDebug.h>
 
 namespace astro {
 namespace usb {
@@ -46,26 +47,26 @@ void	Context::setDebugLevel(int level) {
  * \brief Retrieve a list of devices available within this context
  */
 std::vector<DevicePtr>	Context::devices() {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "getting a list of all USB devices");
+	USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "getting a list of all USB devices");
 	std::vector<DevicePtr>	result;
 	libusb_device	**devlist;
 	ssize_t	length = libusb_get_device_list(context->context(), &devlist);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "found %d devices", length);
+	USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "found %d devices", length);
 	if (length < 0) {
 		std::string	msg = stringprintf("no devices found: %s",
 			libusb_error_name(length));
-		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		USBdebug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 		throw USBError(msg);
 	}
 	if (length > 0) {
 		for (int i = 0; i < length; i++) {
-			debug(LOG_DEBUG, DEBUG_LOG, 0, "add device %d", i);
+			USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "add device %d", i);
 			try {
 				DevicePtr	dev(new Device(context,
 							devlist[i]));
 				result.push_back(dev);
 			} catch (const std::exception& x) {
-				debug(LOG_DEBUG, DEBUG_LOG, 0,
+				USBdebug(LOG_DEBUG, DEBUG_LOG, 0,
 					"cannot add device: '%s', skipping",
 					x.what());
 			}
@@ -84,7 +85,7 @@ std::vector<DevicePtr>	Context::devices() {
  * \param vendor_id	list devices from this vendor
  */
 std::vector<DevicePtr>	Context::devices(uint16_t vendor_id) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "getting devices for vendor %04x",
+	USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "getting devices for vendor %04x",
 		vendor_id);
 	std::vector<DevicePtr>	result;
 	libusb_device	**devlist;
@@ -92,10 +93,10 @@ std::vector<DevicePtr>	Context::devices(uint16_t vendor_id) {
 	if (length < 0) {
 		std::string	msg = stringprintf("cannot get device list: %s",
 			libusb_error_name(length));
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "%s", msg.c_str());
+		USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "%s", msg.c_str());
 		throw USBError(msg);
 	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "scan %d devices", length);
+	USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "scan %d devices", length);
 	for (int i = 0; i < length; i++) {
 		int	rc;
 		libusb_device_descriptor	desc;
@@ -120,7 +121,7 @@ std::vector<DevicePtr>	Context::devices(uint16_t vendor_id) {
  * \param product_id	product id to search for
  */
 DevicePtr	Context::find(uint16_t vendor_id, uint16_t product_id) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "find device VID=%04x/PID=%04x",
+	USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "find device VID=%04x/PID=%04x",
 		vendor_id, product_id);
 	libusb_device	**devlist;
 	ssize_t	length = libusb_get_device_list(context->context(), &devlist);
@@ -128,7 +129,7 @@ DevicePtr	Context::find(uint16_t vendor_id, uint16_t product_id) {
 		throw USBError(libusb_error_name(length));
 	}
 	DevicePtr	result;
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "scan %d devices", length);
+	USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "scan %d devices", length);
 	for (int i = 0; (!result) && (i < length); i++) {
 		int	rc;
 		libusb_device_descriptor	desc;

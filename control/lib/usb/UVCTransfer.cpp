@@ -8,6 +8,7 @@
 #include <iomanip>
 #include <AstroDebug.h>
 #include <cstdlib>
+#include <USBDebug.h>
 
 namespace astro {
 namespace usb {
@@ -48,7 +49,7 @@ UVCBulkTransfer::UVCBulkTransfer(EndpointDescriptorPtr endpoint, int _nframes,
 	// we are asking for
 	int	ptspfrm = (1 + maxframesize / (payloadtransfersize - 12));
 	ntransfers = ptspfrm * (nframes + 1);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "need %d transfers to get %d frames",
+	USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "need %d transfers to get %d frames",
 		ntransfers, nframes);
 	queuesize = 2; // depends on architecture
 
@@ -60,7 +61,7 @@ UVCBulkTransfer::UVCBulkTransfer(EndpointDescriptorPtr endpoint, int _nframes,
 		transfers[i] = libusb_alloc_transfer(0);
 		buffers[i] = (unsigned char *)malloc(payloadtransfersize + 12);
 	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "%d transfers/buffers allocated",
+	USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "%d transfers/buffers allocated",
 		ntransfers);
 }
 
@@ -89,14 +90,14 @@ void	UVCBulkTransfer::submit(libusb_device_handle *devhandle) {
 			payloadtransfersize + 12, uvcbulk_callback, this,
 			timeout);
 	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "transfers filled: %d", ntransfers);
+	USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "transfers filled: %d", ntransfers);
 
 	// now submit them all
 	for (int i = 0; i < queuesize; i++) {
 		libusb_submit_transfer(transfers[i]);
 		submitted++;
 	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "transfers submitted: %d", submitted);
+	USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "transfers submitted: %d", submitted);
 
 	// now handle events until all transfers are done
 	libusb_context	*context = getContext();
@@ -104,10 +105,10 @@ void	UVCBulkTransfer::submit(libusb_device_handle *devhandle) {
 	while (outstanding) {
 		libusb_handle_events(context);
 		outstanding--;
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "transfers outstanding: %d",
+		USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "transfers outstanding: %d",
 			outstanding);
 	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "transfer complete");
+	USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "transfer complete");
 }
 
 /**
@@ -116,21 +117,21 @@ void	UVCBulkTransfer::submit(libusb_device_handle *devhandle) {
  * The callback just packs the packets into the packet list.
  */
 void	UVCBulkTransfer::callback(libusb_transfer *transfer) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0,
+	USBdebug(LOG_DEBUG, DEBUG_LOG, 0,
 		"UVCBulkTransfer callback: %d bytes", transfer->actual_length);
 	if (transfer->actual_length >= 12) {
 		// create a new payload packet from the transferred data
 		packets.push_back(std::string((char *)transfer->buffer,
 			transfer->actual_length));
 	} else {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "ignoring short packet: %d",
+		USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "ignoring short packet: %d",
 			transfer->actual_length);
 	}
 	if (submitted < ntransfers) {
 		libusb_submit_transfer(transfer);
 		submitted++;
 	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "return from callback");
+	USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "return from callback");
 }
  
 //////////////////////////////////////////////////////////////////////
@@ -175,13 +176,13 @@ void	UVCIsochronousTransfer::callback(libusb_transfer *transfer) {
 	// if some bytes where transferred, then this is a completed
 	// transfer
 	if (bytes > 0) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "got %lu bytes", bytes);
+		USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "got %lu bytes", bytes);
 		completed++;
 	}
 
 	// resubmit the transfer if necessary
 	if (completed < ntransfers) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "resubmitting %p", transfer);
+		USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "resubmitting %p", transfer);
 		libusb_submit_transfer(transfer);
 		submitted++;
 	}
@@ -209,18 +210,18 @@ UVCIsochronousTransfer::UVCIsochronousTransfer(EndpointDescriptorPtr endpoint,
 	double	microframesperframe = frameinterval / 1250.;
 	int	isoframes = microframesperframe * (1 + nframes);
 	isoframes = isochunk * (1 + (isoframes / isochunk));
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "isoframes = %d", isoframes);
+	USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "isoframes = %d", isoframes);
 
 	// compute the packet size
 	packetsize = endpoint->maxPacketSize()
 			* endpoint->transactionOpportunities();
 	int	buffersize = packetsize * isochunk;
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "iso packetsize = %d, buffersize = %d",
+	USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "iso packetsize = %d, buffersize = %d",
 		packetsize, buffersize);
 
 	// find out how many isochronous transfers we need
 	ntransfers = 2 + isoframes / isochunk;
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "need %d transfers to get %d frames",
+	USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "need %d transfers to get %d frames",
 		ntransfers, nframes);
 	queuesize = 4; // depends on architecture
 
@@ -234,7 +235,7 @@ UVCIsochronousTransfer::UVCIsochronousTransfer(EndpointDescriptorPtr endpoint,
 		transfers[i]->num_iso_packets = isochunk;
 		buffers[i] = (unsigned char *)malloc(buffersize);
 	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "%d transfers/buffers allocated",
+	USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "%d transfers/buffers allocated",
 		ntransfers);
 }
 
@@ -264,25 +265,25 @@ void	UVCIsochronousTransfer::submit(libusb_device_handle *dev_handle) {
 			isochunk, uvcisochronous_callback, this, timeout);
 		libusb_set_iso_packet_lengths(transfers[i], packetsize);
 	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "transfers filled: %d", queuesize);
+	USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "transfers filled: %d", queuesize);
 
 	// now submit them all
 	for (int i = 0; i < queuesize; i++) {
 		libusb_submit_transfer(transfers[i]);
 		submitted++;
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "submitted: %p", transfers[i]);
+		USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "submitted: %p", transfers[i]);
 	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "transfers submitted: %d", submitted);
+	USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "transfers submitted: %d", submitted);
 
 	// now handle events until all transfers are done
 	libusb_context	*context = getContext();
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "completed = %d, ntransfers = %d",
+	USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "completed = %d, ntransfers = %d",
 		completed, ntransfers);
 	while (completed < ntransfers) {
 		libusb_handle_events(context);
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "completed: %d", completed);
+		USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "completed: %d", completed);
 	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "transfer complete");
+	USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "transfer complete");
 }
 
  

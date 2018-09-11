@@ -8,6 +8,7 @@
 #include <iomanip>
 #include <AstroFormat.h>
 #include <AstroDebug.h>
+#include <USBDebug.h>
 
 using namespace astro;
 
@@ -31,10 +32,10 @@ bool	Device::isOpen() const {
  * the device.
  */
 void	Device::open() {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "open the device");
+	USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "open the device");
 	// handle the case where the device has already been opened
 	if (isOpen()) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "device already open");
+		USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "device already open");
 		return;
 	}
 
@@ -43,7 +44,7 @@ void	Device::open() {
 	if (rc != LIBUSB_SUCCESS) {
 		std::string	msg = stringprintf("cannot open device: %s",
 			libusb_error_name(rc));
-		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		USBdebug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 		throw USBError(msg);
 	}
 }
@@ -75,7 +76,7 @@ void	Device::close() {
  */
 Device::Device(ContextHolderPtr _context, libusb_device *_dev)
 	: context(_context), dev(_dev), dev_handle(NULL) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0,
+	USBdebug(LOG_DEBUG, DEBUG_LOG, 0,
 		"create a device bus=%d, port=%d",
 		getBusNumber(), getPortNumber());
 
@@ -89,12 +90,12 @@ Device::Device(ContextHolderPtr _context, libusb_device *_dev)
 	// find out whether this is a broken device
 	DeviceDescriptorPtr	d = descriptor();
 	if (d->idVendor() == VENDOR_THE_IMAGING_SOURCE) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0,
+		USBdebug(LOG_DEBUG, DEBUG_LOG, 0,
 			"broken camera: The Imaging Source");
 		broken = BROKEN_THE_IMAGING_SOURCE;
 	}
 	if (d->idVendor() == VENDOR_ZWO) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0,
+		USBdebug(LOG_DEBUG, DEBUG_LOG, 0,
 			"broken camera: ZWO ASI");
 		broken = BROKEN_ZWO;
 	}
@@ -116,18 +117,18 @@ static const int	max_retries = 3;
  * \param index	Index of the string descriptor to retrieve
  */
 std::string	Device::getStringDescriptor(uint8_t index) const {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieve string descriptor %d from %p",
+	USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "retrieve string descriptor %d from %p",
 		index, dev_handle);
 	if (0 == index) {
 		std::string	msg = stringprintf("0 not a valid string index",
 			index);
-		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		USBdebug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 		throw USBError(msg);
 	}
 	if (NULL == dev_handle) {
 		std::string	msg = stringprintf("cannot get String %d: "
 			"device not open", index);
-		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		USBdebug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 		throw USBError(msg);
 	}
 	// read the string descriptor
@@ -139,14 +140,14 @@ std::string	Device::getStringDescriptor(uint8_t index) const {
 				index, buffer, sizeof(buffer));
 		if (rc > 0) {
 			std::string	result((const char *)buffer, rc);
-			debug(LOG_DEBUG, DEBUG_LOG, 0, "got string %d: '%s'",
+			USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "got string %d: '%s'",
 				index, result.c_str());
 			return result;
 		}
 	} while (max_retries > ++retries);
 	std::string	msg = stringprintf("cannot get string %d: %s (%d)",
 		index, libusb_error_name(rc), rc);
-	debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+	USBdebug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 	throw USBError(msg);
 }
 
@@ -160,7 +161,7 @@ DeviceDescriptorPtr	Device::descriptor() {
 	if (rc != LIBUSB_SUCCESS) {
 		std::string	msg = stringprintf("cannot get device "
 			"descriptor: %s", libusb_error_name(rc));
-		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		USBdebug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 		throw USBError(msg);
 	}
 
@@ -180,7 +181,7 @@ ConfigurationPtr	Device::config(uint8_t index) {
 	if (rc != LIBUSB_SUCCESS) {
 		std::string	msg = stringprintf("cannot get config %d: %s",
 			index, libusb_error_name(rc));
-		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		USBdebug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 		throw USBError(msg);
 	}
 	Configuration	*result = new Configuration(*this, config);
@@ -221,7 +222,7 @@ ConfigurationPtr	Device::activeConfig() {
 	if (rc != LIBUSB_SUCCESS) {
 		std::string	msg = stringprintf("cannot active config: %s",
 			libusb_error_name(rc));
-		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		USBdebug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 		throw USBError(msg);
 	}
 	Configuration	*result = new Configuration(*this, config);
@@ -240,7 +241,7 @@ ConfigurationPtr	Device::configValue(uint8_t value) {
 	if (rc != LIBUSB_SUCCESS) {
 		std::string	msg = stringprintf("cannot get config value "
 			"%d: %s", value, libusb_error_name(rc));
-		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		USBdebug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 		throw USBError(msg);
 	}
 	Configuration	*result = new Configuration(*this, config);
@@ -278,25 +279,25 @@ int	Device::getBroken() const {
 }
 
 void	Device::claimInterface(uint8_t interface) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "claiming interface %d", interface);
+	USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "claiming interface %d", interface);
 	int	rc = libusb_claim_interface(dev_handle, interface);
 	if (rc != LIBUSB_SUCCESS) {
-		debug(LOG_ERR, DEBUG_LOG, 0, "cannot claim interface %d: %s",
+		USBdebug(LOG_ERR, DEBUG_LOG, 0, "cannot claim interface %d: %s",
 			interface, libusb_error_name(rc));
 		throw USBError(libusb_error_name(rc));
 	}
 }
 
 void	Device::releaseInterface(uint8_t interface) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "releasing interface %d", interface);
+	USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "releasing interface %d", interface);
 	int	rc = libusb_release_interface(dev_handle, interface);
 	rc = libusb_release_interface(dev_handle, interface);
 	if (rc != LIBUSB_SUCCESS) {
-		debug(LOG_ERR, DEBUG_LOG, 0, "cannot release interface %d: %s",
+		USBdebug(LOG_ERR, DEBUG_LOG, 0, "cannot release interface %d: %s",
 			interface, libusb_error_name(rc));
 		throw USBError(libusb_error_name(rc));
 	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "interface released");
+	USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "interface released");
 }
 
 /**
@@ -308,7 +309,7 @@ int	Device::getConfiguration() {
 	int	result;
 	int	rc = libusb_get_configuration(dev_handle, &result);
 	if (rc != LIBUSB_SUCCESS) {
-		debug(LOG_ERR, DEBUG_LOG, 0, "cannot get configuration: %s",
+		USBdebug(LOG_ERR, DEBUG_LOG, 0, "cannot get configuration: %s",
 			libusb_error_name(rc));
 		throw USBError(libusb_error_name(rc));
 	}
@@ -323,7 +324,7 @@ int	Device::getConfiguration() {
 void	Device::setConfiguration(uint8_t configuration) {
 	int	rc = libusb_set_configuration(dev_handle, configuration);
 	if (rc != LIBUSB_SUCCESS) {
-		debug(LOG_ERR, DEBUG_LOG, 0, "cannot set configuration %d: %s",
+		USBdebug(LOG_ERR, DEBUG_LOG, 0, "cannot set configuration %d: %s",
 			configuration, libusb_error_name(rc));
 		throw USBError(libusb_error_name(rc));
 	}
@@ -340,7 +341,7 @@ void	Device::setInterfaceAltSetting(uint8_t interface, uint8_t altsetting) {
 	int	rc = libusb_set_interface_alt_setting(dev_handle,
 			interface, altsetting);
 	if (rc != LIBUSB_SUCCESS) {
-		debug(LOG_ERR, DEBUG_LOG, 0, "cannot set altsetting %d: %s",
+		USBdebug(LOG_ERR, DEBUG_LOG, 0, "cannot set altsetting %d: %s",
 			altsetting, libusb_error_name(rc));
 		throw USBError(libusb_error_name(rc));
 	}
@@ -358,7 +359,7 @@ void	Device::setInterfaceAltSetting(uint8_t interface, uint8_t altsetting) {
  * \param request	pointer to the control request
  */
 void	Device::controlRequest(RequestBase *request) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "bmRequest = %02x, bRequest = %02x, "
+	USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "bmRequest = %02x, bRequest = %02x, "
 		"wValue = %04x, wIndex = %04x, wLength = %d",
 		request->bmRequestType(), request->bRequest(),
 		request->wValue(), request->wIndex(), request->wLength());
@@ -366,7 +367,7 @@ void	Device::controlRequest(RequestBase *request) {
 	// for debugging, display the request content if it is going to
 	// the host
 	if ((request->bmRequestType() & 0x80) == RequestBase::host_to_device) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "payload to send:\n%s",
+		USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "payload to send:\n%s",
 			request->payloadHex().c_str());
 	}
 
@@ -378,7 +379,7 @@ void	Device::controlRequest(RequestBase *request) {
 			request->payload(),
 			request->wLength(),
 			request->getTimeout());
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "control request result: %d", rc);
+	USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "control request result: %d", rc);
 	if (rc < 0) {
 		throw USBError(libusb_error_name(rc));
 	}
@@ -386,7 +387,7 @@ void	Device::controlRequest(RequestBase *request) {
 	// for debuggung: if the data phase goes from device to host, display
 	// the response
 	if ((request->bmRequestType() & 0x80) == RequestBase::device_to_host) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "payload received:\n%s",
+		USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "payload received:\n%s",
 			request->payloadHex().c_str());
 	}
 
@@ -433,7 +434,7 @@ int	Device::maxIsoPacketSize(uint8_t endpoint) const {
  * \param transfer	A Transfer instance.
  */
 void	Device::submit(Transfer *transfer) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "submit transfer");
+	USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "submit transfer");
 	transfer->submit(dev_handle);
 }
 
@@ -448,7 +449,7 @@ bool	Device::kernelDriverActive(uint8_t interface) const {
 void	Device::detachKernelDriver(uint8_t interface) const {
 	int	rc = libusb_detach_kernel_driver(dev_handle, interface);
 	if (rc < 0) {
-		debug(LOG_ERR, DEBUG_LOG, 0, "cannot detach kernel driver: %s",
+		USBdebug(LOG_ERR, DEBUG_LOG, 0, "cannot detach kernel driver: %s",
 			libusb_error_name(rc));
 		throw USBError(libusb_error_name(rc));
 	}
@@ -457,7 +458,7 @@ void	Device::detachKernelDriver(uint8_t interface) const {
 void	Device::attachKernelDriver(uint8_t interface) const {
 	int	rc = libusb_attach_kernel_driver(dev_handle, interface);
 	if (rc < 0) {
-		debug(LOG_ERR, DEBUG_LOG, 0, "cannot attach kernel driver: %s",
+		USBdebug(LOG_ERR, DEBUG_LOG, 0, "cannot attach kernel driver: %s",
 			libusb_error_name(rc));
 		throw USBError(libusb_error_name(rc));
 	}
@@ -474,14 +475,14 @@ std::list<USBDescriptorPtr>	Device::interfaceAssociationDescriptors(
 	// an interface association descriptor
 	ConfigurationPtr	config = activeConfig();
 	if (config->extra().size() == 0) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "no data for descriptors");
+		USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "no data for descriptors");
 		return iadescriptors;
 	}
 
 	// try to parse additional descriptors
 	DescriptorFactory	f(*this);
 	std::vector<USBDescriptorPtr>	list = f.descriptors(config->extra());
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "found %d additional descriptors",
+	USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "found %d additional descriptors",
 		list.size());
 
 	// no check whether they are InterfaceAssociationDescriptors
@@ -492,7 +493,7 @@ std::list<USBDescriptorPtr>	Device::interfaceAssociationDescriptors(
 			InterfaceAssociationDescriptor	*iad
 				= getPtr<InterfaceAssociationDescriptor>(dp);
 			bool	isvideo = iad->isVideoInterfaceCollection();
-			debug(LOG_DEBUG, DEBUG_LOG, 0, "isvideo = %s",
+			USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "isvideo = %s",
 				(isvideo) ? "YES" : "NO");
 			if ((!videoonly) || (isvideo)) {
 				iadescriptors.push_back(dp);
@@ -508,7 +509,7 @@ std::list<USBDescriptorPtr>	Device::interfaceAssociationDescriptors(
  * \brief Find out whether this is a video device
  */
 bool	Device::isVideoDevice() {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "find out whether this is video device");
+	USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "find out whether this is video device");
 	try {
 		return (interfaceAssociationDescriptors(true).size() > 0)
 			? true : false;
