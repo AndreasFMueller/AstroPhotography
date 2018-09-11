@@ -60,8 +60,15 @@ std::vector<DevicePtr>	Context::devices() {
 	if (length > 0) {
 		for (int i = 0; i < length; i++) {
 			debug(LOG_DEBUG, DEBUG_LOG, 0, "add device %d", i);
-			DevicePtr	dev(new Device(context, devlist[i]));
-			result.push_back(dev);
+			try {
+				DevicePtr	dev(new Device(context,
+							devlist[i]));
+				result.push_back(dev);
+			} catch (const std::exception& x) {
+				debug(LOG_DEBUG, DEBUG_LOG, 0,
+					"cannot add device: '%s', skipping",
+					x.what());
+			}
 		}
 	}
 	// creating Device objects increases the reference count, 
