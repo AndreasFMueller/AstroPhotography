@@ -21,14 +21,14 @@ namespace module {
 namespace othello {
 
 //////////////////////////////////////////////////////////////////////
-// Implementation of the Starlight Express Module Descriptor
+// Implementation of the Othello Module Descriptor
 //////////////////////////////////////////////////////////////////////
 
 static std::string      othello_name("othello");
 static std::string      othello_version(VERSION);
 
 /**
- * \brief Module descriptor for the Starlight express module
+ * \brief Module descriptor for the Othello module
  */
 class OthelloDescriptor : public ModuleDescriptor {
 public:
@@ -59,11 +59,11 @@ namespace camera {
 namespace othello {
 
 //////////////////////////////////////////////////////////////////////
-// Implementation of the Camera Locator for Starlight Express
+// Implementation of the Camera Locator for Othello Devices
 //////////////////////////////////////////////////////////////////////
 
 OthelloLocator::OthelloLocator() {
-	context.setDebugLevel(3);
+	context.setDebugLevel(0);
 }
 
 OthelloLocator::~OthelloLocator() {
@@ -84,7 +84,7 @@ std::string	OthelloLocator::getVersion() const {
 }
 
 /**
- * \brief Get a list of Starlight Express cameras.
+ * \brief Get a list of Othello devices
  *
  * \param device	type of devices to list
  * \return a vector of strings that uniquely descript devices

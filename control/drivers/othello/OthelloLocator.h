@@ -18,11 +18,11 @@ namespace camera {
 namespace othello {
 
 /**
- * \brief The Locator class for Starlight Express devices
+ * \brief The Locator class for Othello devices
  *
- * All Starlight Express devices are USB devices, so this locator is 
+ * All Othello devices are USB devices, so this locator is 
  * essentially a wrapper around a USB context which serves as a factory
- * for the Starlight Express USB devices.
+ * for the Othello USB devices.
  */
 class OthelloLocator : public DeviceLocator {
 	Context	context;

@@ -1,5 +1,5 @@
 /*
- * OthelloGuidePort.h -- Starlight Express guider port
+ * OthelloGuidePort.h -- Othello guider port
  *
  * (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
@@ -15,7 +15,7 @@ namespace camera {
 namespace othello {
 
 /**
- * \brief Starlight Express Guider Port interface
+ * \brief Othello Guider Port interface
  *
  * This class encapsulates a thread that handles the timing of the guider
  * port output signals.
