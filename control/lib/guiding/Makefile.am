@@ -13,6 +13,7 @@ noinst_HEADERS = 							\
 	CalibrationPersistence.h					\
 	CalibrationProcess.h						\
 	CalibrationRedirector.h						\
+	Control.h							\
 	ControlDeviceCallback.h						\
 	GPCalibrationProcess.h						\
 	GridConstant.h							\
@@ -37,11 +38,13 @@ libastroguiding_la_SOURCES = 						\
 	CalibrationProcess.cpp						\
 	CalibrationRedirector.cpp					\
 	CalibrationStore.cpp						\
+	ControlBase.cpp							\
 	ControlDevice.cpp						\
 	ControlDeviceBase.cpp						\
 	ControlDeviceCallback.cpp					\
 	ControlDeviceName.cpp						\
 	ControlDeviceType.cpp						\
+	GainControl.cpp							\
 	GPCalibrationProcess.cpp					\
 	GridConstant.cpp						\
 	Guide.cpp							\
@@ -60,6 +63,7 @@ libastroguiding_la_SOURCES = 						\
 	LargeTracker.cpp						\
 	LinearRegression.cpp						\
 	NullTracker.cpp							\
+	OptimalControl.cpp						\
 	RefreshingTracker.cpp						\
 	SaveImageCallback.cpp						\
 	StarDetectorBase.cpp						\
