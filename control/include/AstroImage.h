@@ -335,6 +335,8 @@ public:
 	MosaicType	shifted(const ImageRectangle& rectangle) const;
 	MosaicType	operator()(const ImagePoint& offset) const;
 	MosaicType	operator()(const ImageRectangle& rectangle) const;
+	// methods used for vertical flipping of the mosaic
+	MosaicType	vflip() const;
 };
 
 /**
@@ -986,6 +988,7 @@ public:
 		std::fill(pixels, pixels + frame.size().getPixels(), value);
 	}
 
+public:
 	/**
 	 * \brief Fill a rectangle of an image with a certain value
 	 */
@@ -1003,6 +1006,47 @@ public:
  	 */
 	void	clear() {
 		fill(0);
+	}
+
+private:
+	/**
+	 * \brief Get pointer into the pixel array
+	 *
+	 * \param x	x-coordinate of pixel
+	 * \param y	y-coordinate of pixel
+	 */
+	Pixel	*pixel_pointer(int x, int y) {
+		return &pixels[y * frame.size().width() + x];
+	}
+
+	/**
+	 * \brief Get pointer into the pixel array
+	 *
+	 * \param p	Point in the image
+	 */
+	Pixel	*pixel_pointer(ImagePoint p) {
+		return pixel_pointer(p.x(), p.y());
+	}
+
+public:
+	/**
+	 * \brief Flip an image vertically
+	 *
+	 * Flip an image vertically
+	 */
+	void	flip() {
+		int	h = frame.size().height();
+		int	w = frame.size().width();
+		int	l = h / 2;
+		for (int y = 0; y < l; y++) {
+			Pixel	*first1 = pixel_pointer(0, y);
+			Pixel	*last1 = pixel_pointer(w, y);
+			Pixel	*first2 = pixel_pointer(0, h - 1 - y);
+			std::swap_ranges(first1, last1, first2);
+		}
+		if (0 == (h % 2)) {
+			mosaic = mosaic.vflip();
+		}
 	}
 
 	/**
@@ -1291,6 +1335,7 @@ public:
 	bool	operator!=(const Binning& other) const;
 	bool	operator<(const Binning& other) const;
 	virtual std::string	toString() const;
+	bool	binned() const { return ((_x > 1) || (_y > 1)); }
 };
 std::ostream&	operator<<(std::ostream& out, const Binning& binning);
 std::istream&	operator>>(std::istream& out, Binning& binning);

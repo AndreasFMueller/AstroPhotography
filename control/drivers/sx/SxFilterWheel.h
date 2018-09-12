@@ -64,6 +64,7 @@ public:
 	virtual void	select(const std::string& filtername);
 	virtual std::string	filterName(size_t filterindex);
 	virtual FilterWheel::State	getState();
+	virtual std::string	userFriendlyName() const;
 };
 
 } // namespace sx

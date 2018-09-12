@@ -372,5 +372,58 @@ void	Guider::callback(const std::exception& /* ex */) {
 	}
 }
 
+/**
+ * \brief get the gain from the guider
+ *
+ * This method reads the gain from the TrackingProcess, if available,
+ * this allows the TrackingProcess to dynamically change the gain if it
+ * notices increasing amplitude e.g.
+ */
+float	Guider::gain(gain_direction dir) {
+	TrackingProcess	*tp = NULL;
+	if (trackingprocess) {
+		tp = dynamic_cast<TrackingProcess*>(&*trackingprocess);
+	}
+	switch (dir) {
+	case GAIN_X:
+		if (tp) {
+			_gain_x = tp->gain(0);
+		}
+		return _gain_x;
+	case GAIN_Y:
+		if (tp) {
+			_gain_y = tp->gain(1);
+		}
+		return _gain_y;
+	}
+}
+
+/**
+ * \brief Set the gain for a particular direction
+ *
+ * If a TrackingProcess is running in the background, we also set the
+ * gain in that process.
+ */
+void	Guider::gain(gain_direction dir, float g) {
+	TrackingProcess	*tp = NULL;
+	if (trackingprocess) {
+		tp = dynamic_cast<TrackingProcess*>(&*trackingprocess);
+	}
+	switch (dir) {
+	case GAIN_X:
+		if (tp) {
+			tp->gain(0, g);
+		}
+		_gain_x = g;
+		break;
+	case GAIN_Y:
+		if (tp) {
+			tp->gain(1, g);
+		}
+		_gain_y = g;
+		break;
+	}
+}
+
 } // namespace guiding
 } // namespace astro

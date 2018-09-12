@@ -652,9 +652,9 @@ public:
 	AdaptiveOptics(const DeviceName& name);
 	AdaptiveOptics(const std::string& name);
 	virtual ~AdaptiveOptics();
+protected:
 	// change the position of the adaptive optics device
 	Point	currentposition;
-protected:
 	virtual void	set0(const Point& position);
 public:
 	void	set(const Point& position);

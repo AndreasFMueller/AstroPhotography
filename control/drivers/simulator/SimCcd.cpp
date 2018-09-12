@@ -182,6 +182,10 @@ ImagePtr  SimCcd::getRawImage() {
 	return image;
 }
 
+std::string	SimCcd::userFriendlyName() const {
+	return std::string("SimCam 1.0");
+}
+
 } // namespace simulator
 } // namespace camera
 } // namespace astro

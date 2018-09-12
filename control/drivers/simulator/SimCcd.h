@@ -35,6 +35,7 @@ public:
 
 	virtual bool	hasCooler() const { return true; }
 	virtual CoolerPtr	getCooler0() { return _locator.cooler(); }
+	virtual std::string	userFriendlyName() const;
 };
 
 } // namespace simulator

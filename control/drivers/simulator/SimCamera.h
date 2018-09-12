@@ -21,6 +21,7 @@ public:
 	virtual FilterWheelPtr	getFilterWheel0();
 	virtual bool	hasGuidePort() const { return true; }
 	virtual GuidePortPtr	getGuidePort0();
+	virtual std::string	userFriendlyName() const;
 };
 
 } // namespace simulator

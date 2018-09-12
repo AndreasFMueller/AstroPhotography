@@ -14,6 +14,7 @@
 #else
 #include <lapack.h>
 #endif /* HAVE_ACCELERATE_ACCELERATE_H */
+#include "GridConstant.h"
 
 namespace astro {
 namespace guiding {
@@ -49,6 +50,7 @@ BasicCalibration::BasicCalibration(const ControlDeviceName& name)
 	_flipped = false;
 	_masPerPixel = 0;
 	_focallength = 0;
+	_guiderate = 0;
 	_interval = 0;
 	time(&_when);
 }
@@ -82,6 +84,7 @@ BasicCalibration::BasicCalibration(const ControlDeviceName& name,
 	_flipped = false;
 	_masPerPixel = 0;
 	_focallength = 0;
+	_guiderate = 0;
 	_interval = 0;
 	time(&_when);
 }
@@ -347,6 +350,32 @@ void	BasicCalibration::calibrate() {
 
 	// the calibration is now complete
 	_complete = true;
+}
+
+/**
+ * \brief Get the number of pixels corresponding to this calibration
+ *
+ * Grid constant for this calibration expressed in pixels rather than
+ * seconds.
+ */
+double	BasicCalibration::pixel_interval() const {
+	double	pixelsize = GridConstant::pixelsize_from_arcsec(focallength(),
+				masPerPixel() / 1000);
+	GridConstant	gridconstant(focallength(), pixelsize);
+	return gridconstant.pixels_per_second() * interval();
+}
+
+/**
+ * \brief Get the angular displacement corresponding to this calibration
+ *
+ * Grid constant for this calibration expressed in arc seconds rather than
+ * seconds.
+ */
+double	BasicCalibration::mas_interval() const {
+	double	pixelsize = GridConstant::pixelsize_from_arcsec(focallength(),
+				masPerPixel() / 1000);
+	GridConstant	gridconstant(focallength(), pixelsize);
+	return gridconstant.arcsec_per_second() * interval();
 }
 
 } // namespace guiding

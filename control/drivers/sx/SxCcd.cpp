@@ -334,6 +334,13 @@ void	SxCcd::doFlood(const Exposure& exposure) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "doFlood complete");
 }
 
+/**
+ * \brief get the user friendly name of the camera
+ */
+std::string	SxCcd::userFriendlyName() const {
+	return camera.userFriendlyName();
+}
+
 } // namespace sx
 } // namespace camera
 } // namespace astro

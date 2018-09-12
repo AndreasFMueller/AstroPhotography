@@ -236,6 +236,7 @@ public:
 	virtual void	parameter(const std::string& name, const std::string& value);
 	virtual float	parameterValueFloat(const std::string& name) const;
 	virtual std::string	parameterValueString(const std::string& name) const;
+	virtual std::string	userFriendlyName() const;
 };
 
 class Mount;

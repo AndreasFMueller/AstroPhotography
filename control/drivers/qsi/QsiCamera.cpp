@@ -28,6 +28,10 @@ QsiCamera::QsiCamera(const std::string& _name) : Camera(_name) {
 	// connect to the camera
 	_camera.put_Connected(true);
 
+	// get the name
+	_camera.get_Name(_userFriendlyName);
+
+
 	// get the filterwheel and guideport information
 	camera().get_HasFilterWheel(&_hasfilterwheel);
 	camera().get_CanPulseGuide(&_hasguideport);

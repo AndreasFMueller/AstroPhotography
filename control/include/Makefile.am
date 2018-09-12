@@ -64,7 +64,6 @@ noinst_HEADERS =							\
 	FieldPersistence.h						\
 	FocusCompute.h							\
 	FocusWork.h							\
-	GuiderProcess.h							\
 	hidapi.h							\
 	ImageDirectory.h						\
 	ImagePersistence.h						\
@@ -74,6 +73,5 @@ noinst_HEADERS =							\
 	Serial.h							\
 	Sun.h								\
 	TaskTable.h							\
-	TrackingWork.h							\
 	ViewerPipeline.h
 

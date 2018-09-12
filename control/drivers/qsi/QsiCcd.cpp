@@ -208,7 +208,6 @@ CoolerPtr	QsiCcd::getCooler0() {
 	return CoolerPtr(cooler);
 }
 
-
 } // namespace qsi
 } // namespace camera
 } // namespace astro

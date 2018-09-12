@@ -9,6 +9,7 @@
 #include "GPCalibrationProcess.h"
 #include <AstroCallback.h>
 #include <AstroUtils.h>
+#include "GridConstant.h"
 
 using namespace astro::image;
 using namespace astro::camera;
@@ -195,7 +196,6 @@ void	GPCalibrationProcess::main(astro::thread::Thread<GPCalibrationProcess>& _th
 		debug(LOG_ERR, DEBUG_LOG, 0, "calibration thread terminated "
 			"by %s: %s", demangle(typeid(x).name()).c_str(),
 			x.what());
-		return;
 	} catch (...) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "calibration thread terminated "
 			"by unknown exception");
@@ -230,12 +230,12 @@ void	GPCalibrationProcess::main2(astro::thread::Thread<GPCalibrationProcess>& _t
 	range = 1;
 
 	// the grid constant normally depends on the focallength and the
-	// pixels size. Smaller pixels are larger focallength allow to
-	// use a smaller grid constant. The default value of 10 is a good
-	// choice for a 100mm guide scope and 7u pixels as for the SBIG
-	// ST-i guider kit
+	// pixels size. We expect to move about 20 pixels, which is 
+	// well measurable
 	calibration()->guiderate(guiderate());
-	grid = gridconstant(_focallength, guider()->pixelsize(), guiderate());
+	GridConstant	gridconstant(_focallength, guider()->pixelsize());
+	gridconstant.guiderate(guiderate());
+	grid = gridconstant(20); // suggested displacement in pixels
 	calibration()->interval(grid);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "grid constant: %f", grid);
 
@@ -300,6 +300,7 @@ void	GPCalibrationProcess::main2(astro::thread::Thread<GPCalibrationProcess>& _t
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "calibration complete");
 }
 
+#if 0
 /**
  * \brief compute the grid constant
  *
@@ -395,6 +396,7 @@ double	GPCalibrationProcess::gridconstant(double focallength,
 
 	return gridconstant;
 }
+#endif
 
 /**
  * \brief Construct a guider from guider, guideport, tracker and a database

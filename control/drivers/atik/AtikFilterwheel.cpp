@@ -10,10 +10,20 @@ namespace astro {
 namespace camera {
 namespace atik {
 
+/**
+ * \brief Create a filter wheel
+ *
+ * \param camera	camera to which this filterwheel is attached
+ */
 AtikFilterwheel::AtikFilterwheel(::AtikCamera *camera)
 	: FilterWheel(filterwheelname(camera)), _camera(camera) {
 }
 
+/**
+ * \brief Find the number of filters
+ *
+ * \return the number filters this camera has
+ */
 unsigned int	AtikFilterwheel::nFilters() {
 	unsigned int	filtercount;
 	bool	moving;
@@ -23,6 +33,11 @@ unsigned int	AtikFilterwheel::nFilters() {
 	return filtercount;
 }
 
+/**
+ * \brief Get the current position
+ *
+ * \return filter position (integer between 0 - (nFilters()-1) )
+ */
 unsigned int	AtikFilterwheel::currentPosition() {
 	unsigned int	filtercount;
 	bool	moving;
@@ -32,6 +47,11 @@ unsigned int	AtikFilterwheel::currentPosition() {
 	return current;
 }
 
+/**
+ * \brief Get the current state of the filterwheel
+ *
+ * \return current filter wheel state
+ */
 FilterWheel::State	AtikFilterwheel::getState() {
 	unsigned int	filtercount;
 	bool	moving;
@@ -44,8 +64,23 @@ FilterWheel::State	AtikFilterwheel::getState() {
 	return FilterWheel::idle;
 }
 
+/**
+ * \brief Select a new filter
+ *
+ * \param filterindex	filter to select (0 - (nFilters()-1) )
+ */
 void	AtikFilterwheel::select(size_t filterindex) {
 	_camera->setFilter(filterindex);
+}
+
+/**
+ * \brief Get the user friendly name of the filter wheel
+ */
+std::string	AtikFilterwheel::userFriendlyName() const {
+	if (_camera) {
+		return std::string(_camera->getName());
+	}
+	return Device::userFriendlyName();
 }
 
 } // namespace atik

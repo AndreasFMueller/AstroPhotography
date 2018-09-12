@@ -41,6 +41,10 @@ void	SxGuidePort::do_activate(uint8_t active) {
 		camera.controlRequest(&request);
 }
 
+std::string	SxGuidePort::userFriendlyName() const {
+	return camera.userFriendlyName();
+}
+
 } // namespace sx
 } // namespace camera
 } // namespace astro

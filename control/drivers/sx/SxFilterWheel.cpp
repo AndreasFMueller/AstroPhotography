@@ -314,6 +314,13 @@ FilterWheel::State	SxFilterWheel::getState() {
 	throw std::logic_error("should not happen");
 }
 
+/**
+ * \brief User friendly name of the filter wheel
+ */
+std::string	SxFilterWheel::userFriendlyName() const {
+	return std::string("Starlight Express USB FilterWheel");
+}
+
 } // namespace sx
 } // namespace camera
 } // namespace astro

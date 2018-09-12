@@ -51,6 +51,10 @@ public:
 	virtual void	startStream(const Exposure& exposure);
 	virtual void	stopStream();
 	virtual bool	streaming();
+
+	virtual std::string	userFriendlyName() const {
+		return _camera.userFriendlyName();
+	}
 };
 
 } // namespace asi

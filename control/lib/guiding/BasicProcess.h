@@ -65,6 +65,16 @@ public:
 	bool	wait(double timeout);
 	bool	isrunning() { return _thread->isrunning(); }
 
+private:
+	double	_gain1;
+	double	_gain2;
+public:
+	// get/set the gain
+	double	gain1() const { return _gain1; }
+	void	gain1(double g) { _gain1 = g; }
+	double	gain2() const { return _gain2; }
+	void	gain2(double g) { _gain2 = g; }
+
 	// constructors for the basic process
 public:
 	BasicProcess(GuiderBase *guider, TrackerPtr tracker,

@@ -51,6 +51,7 @@ public:
 	Point	operator-(const Point& other) const;
 	Point	operator-() const;
 	Point	operator*(double l) const;
+	Point	operator*(const Point& other) const;
 	friend Point	operator*(double l, const Point& other);
 	std::string	toString() const;
 	operator	std::string() const;

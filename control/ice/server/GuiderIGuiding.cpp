@@ -39,6 +39,34 @@ void GuiderI::startGuiding(Ice::Float gpinterval, Ice::Float aointerval,
 }
 
 /**
+ * \brief Get the gain from the guider
+ */
+float	GuiderI::getGain(GainDirection dir,
+			const Ice::Current& /* current */) {
+	switch (dir) {
+	case GainX:
+		return guider->gain(astro::guiding::Guider::GAIN_X);
+	case GainY:
+		return guider->gain(astro::guiding::Guider::GAIN_Y);
+	}
+}
+
+/**
+ * /brief Set the gain for a particular direction
+ */
+void	GuiderI::setGain(GainDirection dir, float gain,
+		const Ice::Current& /* current */) {
+	switch (dir) {
+	case GainX:
+		guider->gain(astro::guiding::Guider::GAIN_X, gain);
+		break;
+	case GainY:
+		guider->gain(astro::guiding::Guider::GAIN_Y, gain);
+		break;
+	}
+}
+
+/**
  * \brief Retrieve the guiding interval from the guider
  */
 Ice::Float GuiderI::getGuidingInterval(const Ice::Current& /* current */) {

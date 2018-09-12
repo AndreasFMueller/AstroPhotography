@@ -2,7 +2,6 @@
  * atiktests.cpp
  *
  * (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
- * $Id$
  */
 #include <cppunit/extensions/TestFactoryRegistry.h>
 #include <cppunit/ui/text/TestRunner.h>

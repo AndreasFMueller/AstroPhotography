@@ -419,11 +419,13 @@ private:
 public:
 	double	focallength() const { return _focallength; }
 	void	focallength(double f) { _focallength = f; }
+
 private:
 	double	_guiderate;
 public:
 	double	guiderate() const { return _guiderate; }
 	void	guiderate(double g) { _guiderate = g; }
+
 private:
 	double	_masPerPixel;
 public:
@@ -435,6 +437,9 @@ private:
 public:
 	double	interval() const { return _interval; }
 	void	interval(double i) { _interval = i; }
+
+	double	pixel_interval() const;
+	double	mas_interval() const;
 
 	// string representation of the baseic 
 	std::string	toString() const;
@@ -1124,6 +1129,15 @@ public:
 	bool	waitGuiding(double timeout);
 	double	getInterval();
 	const TrackingSummary&	summary();
+
+	// gain control
+	typedef enum { GAIN_X, GAIN_Y } gain_direction;
+private:
+	float	_gain_x;
+	float	_gain_y;
+public:
+	float	gain(gain_direction dir);
+	void	gain(gain_direction dir, float g);
 	
 public:
 	/**

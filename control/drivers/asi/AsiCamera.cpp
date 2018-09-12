@@ -80,6 +80,7 @@ AsiCamera::AsiCamera(int index) : Camera(asiCameraName(index)), _index(index) {
 	_isColor = (camerainfo.IsColorCam) ? true : false;
 	_hasCooler = (camerainfo.IsCoolerCam) ? true : false;
 	_id = camerainfo.CameraID;
+	_userFriendlyName = std::string(camerainfo.Name);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "camera idx = %d has id = %d",
 		_index, _id);
 	ImageSize	size(camerainfo.MaxWidth, camerainfo.MaxHeight);
@@ -136,7 +137,7 @@ AsiCamera::~AsiCamera() {
 		std::string	msg = stringprintf("%s cannot close camera: %s",
 			name().toString().c_str(), error(rc).c_str());
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
-		throw std::runtime_error(msg);
+		return;
 	}
 	AsiCameraLocator::setopen(_index, false);
 }

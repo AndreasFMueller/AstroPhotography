@@ -31,6 +31,7 @@ public:
 	const struct AtikCapabilities&	capa() const { return _capa; }
 	CAMERA_TYPE	type() { return _type; }
 	unsigned int	getSerialNumber() const { return _serial; }
+	virtual std::string	userFriendlyName() const;
 private:
 	void	exposureRun(Exposure& exposure, AtikCcd& atikccd);
 	void	abortExposure();

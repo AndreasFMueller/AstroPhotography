@@ -42,6 +42,9 @@ public:
 	void	run();
 
 	void	updatestate(CcdState::State s) { state(s); }
+	virtual std::string	userFriendlyName() const {
+		return _camera.userFriendlyName();
+	}
 };
 
 } // namespace atik

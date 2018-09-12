@@ -93,6 +93,9 @@ public slots:
 
 	void	backlashRAClicked();
 	void	backlashDECClicked();
+
+	void	xGainChanged(int);
+	void	yGainChanged(int);
 };
 
 } // namespace snowgui

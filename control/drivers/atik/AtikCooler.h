@@ -26,6 +26,9 @@ public:
 	virtual void	setTemperature(const float temperature);
 	virtual bool	isOn();
 	virtual void	setOn(bool onoff);
+	virtual std::string	userFriendlyName() const {
+		return _camera.userFriendlyName();
+	}
 };
 
 } // namespace atik

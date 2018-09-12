@@ -316,6 +316,39 @@ SxCamera::~SxCamera() {
 }
 
 /**
+ * \brief get the user friendly name
+ */
+std::string	SxCamera::userFriendlyName() const {
+	// try to match model and product
+	for (int i = 0; i < NUMBER_SX_MODELS; i++) {
+		if ((product == models[i].product)
+			&& (model == models[i].model)) {
+			return models[i].name;
+		}
+	}
+
+	// try to match model alone, at least if model != 0
+	if (model != 0) {
+		for (int i = 0; i < NUMBER_SX_MODELS; i++) {
+			if (model == models[i].model) {
+				return models[i].name;
+			}
+		}
+	}
+
+	// try to match product alone
+	if (product != 0) {
+		for (int i = 0; i < NUMBER_SX_MODELS; i++) {
+			if (product == models[i].product) {
+				return models[i].name;
+			}
+		}
+	}
+
+	return Device::userFriendlyName();
+}
+
+/**
  * \brief Reset the SxCamera
  */
 void	SxCamera::reset() {

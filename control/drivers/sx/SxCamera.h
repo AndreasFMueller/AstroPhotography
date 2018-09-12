@@ -67,6 +67,8 @@ public:
 	SxCamera(DevicePtr& devptr);
 	virtual ~SxCamera();
 
+	virtual std::string	userFriendlyName() const;
+
 	// reset
 	virtual void	reset();
 

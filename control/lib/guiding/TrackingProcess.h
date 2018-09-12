@@ -17,10 +17,11 @@ class TrackingProcess : public BasicProcess {
 	ControlDevicePtr	_adaptiveOpticsDevice;
 	TrackerPtr	_tracker;
 	int	_id;
-	double	_gain;
+	float	_gain[2];
 public:
-	double	gain() const { return _gain; }
-	void	gain(double g) { _gain = g; }
+	float	gain(int index) const { return _gain[index]; }
+	void	gain(int index, float g) { _gain[index] = g; }
+	Point	gain() const { return Point(_gain[0], _gain[1]); }
 private:
 	double	_guideportInterval;
 public:

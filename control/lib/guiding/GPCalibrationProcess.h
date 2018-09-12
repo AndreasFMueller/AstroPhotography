@@ -38,8 +38,6 @@ class GPCalibrationProcess : public GuidePortProcess {
 	 */
 	double	starttime;
 private:
-	double	gridconstant(double focallength, double pixelsize,
-			double guiderate = 0) const;
 	Point	starAt(double ra, double dec);
 	void	moveto(double ra, double dec);
 	void	measure(int deltara, int deltadec);

@@ -386,6 +386,8 @@ void	Ccd::addMetadata(ImageBase& image) {
 		FITSKeywords::meta(std::string("DATE-OBS"),
 			FITSdate()));
 	image.setMetadata(FITSKeywords::meta(std::string("UUID"), UUID()));
+	image.setMetadata(FITSKeywords::meta(std::string("CAMERA"),
+		this->userFriendlyName()));
 }
 
 } // namespace camera

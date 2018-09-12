@@ -161,5 +161,16 @@ MosaicType	MosaicType::operator()(const ImageRectangle& rectangle) const {
 	return shifted(rectangle);
 }
 
+MosaicType	MosaicType::vflip() const {
+	switch (mosaic) {
+	case NONE:		return NONE;
+	case BAYER_RGGB:	return BAYER_GBRG;
+	case BAYER_GRBG:	return BAYER_BGGR;
+	case BAYER_GBRG:	return BAYER_RGGB;
+	case BAYER_BGGR:	return BAYER_GRBG;
+	}
+	throw std::logic_error("internal error, bad mosaic type");
+}
+
 } // namespace image
 } // namespace astro

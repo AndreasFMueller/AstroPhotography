@@ -28,6 +28,7 @@ public:
 	SxGuidePort(SxCamera& camera);
 	virtual ~SxGuidePort();
 	virtual void	do_activate(uint8_t active);
+	virtual std::string	userFriendlyName() const;
 };
 
 } // namespace sx

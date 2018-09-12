@@ -5,6 +5,8 @@
  */
 #include <AstroCamera.h>
 #include <AstroExceptions.h>
+#include <AstroDebug.h>
+#include <AstroFormat.h>
 
 namespace astro {
 namespace camera {
@@ -12,11 +14,11 @@ namespace camera {
 DeviceName::device_type	AdaptiveOptics::devicetype = DeviceName::AdaptiveOptics;
 
 AdaptiveOptics::AdaptiveOptics(const DeviceName& name)
-	: Device(name, DeviceName::AdaptiveOptics) {
+	: Device(name, DeviceName::AdaptiveOptics), _hasguideport(false) {
 }
 
 AdaptiveOptics::AdaptiveOptics(const std::string& name)
-	: Device(name, DeviceName::AdaptiveOptics) {
+	: Device(name, DeviceName::AdaptiveOptics), _hasguideport(false) {
 }
 
 AdaptiveOptics::~AdaptiveOptics() {
@@ -49,13 +51,18 @@ void	AdaptiveOptics::center() {
 
 GuidePortPtr	AdaptiveOptics::getGuidePort() {
 	if (!hasGuidePort()) {
-		throw std::runtime_error("AO unit has no guide port");
+		std::string	msg("AO unit has no guide port");
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw std::runtime_error(msg);
 	}
 	return this->getGuidePort0();
 }
 
 GuidePortPtr	AdaptiveOptics::getGuidePort0() {
-	throw NotImplemented("guide port not implemented");
+	std::string	msg("guide port not implemented, have you called "
+		"hasGuiderPort()?");
+	debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+	throw NotImplemented(msg);
 }
 
 } // namespace camera

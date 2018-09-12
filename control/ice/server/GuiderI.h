@@ -99,6 +99,10 @@ public:
 	virtual void startGuiding(Ice::Float, Ice::Float, bool stepping,
 			const Ice::Current& current);
 	virtual Ice::Float getGuidingInterval(const Ice::Current& current);
+	virtual Ice::Float getGain(GainDirection dir,
+				const Ice::Current& current);
+	virtual void setGain(GainDirection dir, Ice::Float gain,
+			const Ice::Current& current);
 	virtual void stopGuiding(const Ice::Current& current);
 
 	// recent tracking data

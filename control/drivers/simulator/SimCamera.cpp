@@ -59,6 +59,13 @@ GuidePortPtr	SimCamera::getGuidePort0() {
 	return _locator.guideport();
 }
 
+/**
+ * \brief Get the camera
+ */
+std::string	SimCamera::userFriendlyName() const {
+	return std::string("SimCam 1.0");
+}
+
 } // namespace simulator
 } // namespace camera
 } // namespace astro

@@ -47,7 +47,8 @@ TrackingProcess::TrackingProcess(GuiderBase *guider, TrackerPtr tracker,
 	  _guidePortDevice(guidePortDevice),
 	  _adaptiveOpticsDevice(adaptiveOpticsDevice),
 	  _summary(guider->name(), guider->instrument(), guider->ccdname()) {
-	_gain = 1;
+	_gain[0] = 1;
+	_gain[1] = 1;
 	_guideportInterval = 10;
 	_adaptiveopticsInterval = 0;
 	_id = -1;
@@ -257,6 +258,8 @@ void	TrackingProcess::step(thread::Thread<TrackingProcess>& thread,
 	// we modify the correction, which allows us to make
 	// the correction more stable
 	offset = offset * gain();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "TRACK %d: gain-corrected offset: %s",
+		_id, offset.toString().c_str());
 	Point	remainder  = offset;
 	if (adaptiveOpticsUsable()) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0,

@@ -134,5 +134,15 @@ void	Device::add(ParameterDescription parameter) {
 	_parameters.insert(std::make_pair(parameter.name(), parameter));
 }
 
+/**
+ * \brief get the user friendly name of a device
+ */
+std::string	Device::userFriendlyName() const {
+	debug(LOG_DEBUG, DEBUG_LOG, 0,
+		"%s does not override userFriendlyName()",
+		astro::demangle(typeid(*this).name()).c_str());
+	return name().toString();
+}
+
 } // namespace device
 } // namespace astro

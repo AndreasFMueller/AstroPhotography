@@ -21,6 +21,7 @@ public:
 	virtual unsigned int	currentPosition();
 	virtual void	select(size_t filterindex);
 	virtual State	getState();
+	virtual std::string	userFriendlyName() const;
 };
 
 } // namespace atik

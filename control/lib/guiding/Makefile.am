@@ -15,6 +15,7 @@ noinst_HEADERS = 							\
 	CalibrationRedirector.h						\
 	ControlDeviceCallback.h						\
 	GPCalibrationProcess.h						\
+	GridConstant.h							\
 	GuidePortAction.h						\
 	LinearRegression.h						\
 	TrackingPersistence.h						\
@@ -42,6 +43,7 @@ libastroguiding_la_SOURCES = 						\
 	ControlDeviceName.cpp						\
 	ControlDeviceType.cpp						\
 	GPCalibrationProcess.cpp					\
+	GridConstant.cpp						\
 	Guide.cpp							\
 	Guider.cpp							\
 	GuiderBacklash.cpp						\

@@ -50,6 +50,13 @@ protected:
 
 public:
 	bool	isColor() const;
+
+private:
+	std::string	_userFriendlyName;
+public:
+	virtual std::string	userFriendlyName() const {
+		return _userFriendlyName;
+	}
 };
 
 } // namespace qsi

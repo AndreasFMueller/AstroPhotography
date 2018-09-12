@@ -20,6 +20,23 @@ using namespace astro::image;
 
 namespace snowgui {
 
+class gainconversion {
+public:
+static float	dial2gain(int dial);
+static int	gain2dial(float gain);
+};
+
+float	gainconversion::dial2gain(int dial) {
+	return 0.2 + 0.01 * dial;
+}
+
+int	gainconversion::gain2dial(float gain) {
+	int	dial = 100 * (gain - 0.2);
+	if (dial < 0) { dial = 0; }
+	if (dial > 160) { dial = 160; }
+	return dial;
+}
+
 /**
  * \brief Constructor for the guidercontrollerwidget
  */
@@ -53,6 +70,11 @@ guidercontrollerwidget::guidercontrollerwidget(QWidget *parent)
 		this, SLOT(startGuiding()));
 	connect(ui->databaseButton, SIGNAL(clicked()),
 		this, SLOT(selectTrack()));
+
+	connect(ui->xGainDial, SIGNAL(valueChanged(int)),
+		this, SLOT(xGainChanged(int)));
+	connect(ui->yGainDial, SIGNAL(valueChanged(int)),
+		this, SLOT(yGainChanged(int)));
 
 	// create the tracking monitor
 	_trackingmonitordialog = NULL;
@@ -184,6 +206,16 @@ void	guidercontrollerwidget::setupGuider() {
 	ui->starxField->setText(QString::number(_star.x()));
 	ui->staryField->setText(QString::number(_star.y()));
 
+	// XXX update rates
+	// XXX this needs an extension of the ICE interface to the guider,
+	// XXX cannot currently provide this information
+
+	// gain
+	int gx = gainconversion::gain2dial(_guider->getGain(snowstar::GainX));
+	ui->xGainDial->setValue(gx);
+	int gy = gainconversion::gain2dial(_guider->getGain(snowstar::GainY));
+	ui->yGainDial->setValue(gy);
+	
 	// do all the registration stuff
 	_trackingmonitorimage->setGuider(_guider, _trackingmonitorimageptr);
 
@@ -616,6 +648,32 @@ void	guidercontrollerwidget::backlashDECClicked() {
 	}
 	_backlashDialog->direction(snowstar::BacklashDEC);
 	_backlashDialog->setWindowTitle("DEC Backlash");
+}
+
+/**
+ * \brief Change the x gain
+ */
+void	guidercontrollerwidget::xGainChanged(int value) {
+	float	fvalue = gainconversion::dial2gain(value);
+	char	b[20];
+	snprintf(b, sizeof(b), "%.2f", fvalue);
+	ui->xGainValue->setText(QString(b));
+	if (_guider) {
+		_guider->setGain(snowstar::GainX, fvalue);
+	}
+}
+
+/**
+ * \brief Change the y gain
+ */
+void	guidercontrollerwidget::yGainChanged(int value) {
+	float	fvalue = gainconversion::dial2gain(value);
+	char	b[20];
+	snprintf(b, sizeof(b), "%.2f", fvalue);
+	ui->yGainValue->setText(QString(b));
+	if (_guider) {
+		_guider->setGain(snowstar::GainY, fvalue);
+	}
 }
 
 } // namespade snowgui

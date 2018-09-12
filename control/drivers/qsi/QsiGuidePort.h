@@ -21,6 +21,9 @@ public:
 	virtual uint8_t	active();
 	virtual void	activate(float raplus, float raminus,
 				float decplus, float decminus);
+	virtual std::string	userFriendlyName() const {
+		return _camera.userFriendlyName();
+	}
 };
 
 } // namespace qsi

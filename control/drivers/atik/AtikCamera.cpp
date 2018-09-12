@@ -80,9 +80,15 @@ AtikCamera::AtikCamera(::AtikCamera *camera)
 	_tempSensorCount = _capa.tempSensorCount;
 }
 
+/**
+ * \brief Destroy the Atik camera object
+ */
 AtikCamera::~AtikCamera() {
 }
 
+/**
+ * \brief retrieve the last error from the camera
+ */
 std::string	AtikCamera::getLastError() {
 	const char	*l = _camera->getLastError();
 	if (l) {
@@ -91,6 +97,9 @@ std::string	AtikCamera::getLastError() {
 	return std::string("(unknown error)");
 }
 
+/**
+ * \brief get a AtikCcd object from the camera
+ */
 CcdPtr	AtikCamera::getCcd0(size_t ccdid) {
 	if (ccdid >= ccdinfo.size()) {
 		std::string	msg = stringprintf("ccd id %d out of range",
@@ -101,32 +110,57 @@ CcdPtr	AtikCamera::getCcd0(size_t ccdid) {
 	return CcdPtr(new AtikCcd(ccdinfo[ccdid], *this));
 }
 
+/**
+ * \brief Find out how many ccds the camera has
+ *
+ * Note that 8bit mode is handled as a separate camera
+ */
 unsigned int	AtikCamera::nCcds() const {
 	return (_capa.has8BitMode) ? 2 : 1;
 }
 
+/**
+ * \brief Find out whether the camera has a filter wheel
+ */
 bool	AtikCamera::hasFilterWheel() const {
 	return _capa.hasFilterWheel;
 }
 
+/**
+ * \brief Get a filterwheel
+ */
 FilterWheelPtr	AtikCamera::getFilterWheel0() {
+	debug(LOG_WARNING, DEBUG_LOG, 0, "the filter wheel is not implemented");
 	return FilterWheelPtr(NULL);
 }
 
+/**
+ * \brief Find out whether the camera has a guide port
+ */
 bool	AtikCamera::hasGuidePort() const {
 	return _capa.hasGuidePort;
 }
 
+/**
+ * \brief Get the AtikGuideport object from the camera
+ */
 GuidePortPtr	AtikCamera::getGuidePort0() {
 	return GuidePortPtr(new AtikGuideport(*this));
 }
 
+/**
+ * \brief Implement taking an image
+ */
 void	AtikCamera::exposureRun(Exposure& exposure, atik::AtikCcd& atikccd) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "run method of AtikCcd starting: %p",
 		_camera);
 	std::unique_lock<std::recursive_mutex>	lock(_mutex);
 	ImagePtr	_image = ImagePtr(NULL);
 	bool	rc;
+
+	// flip the vertical offset
+	int	xoffset = exposure.x();
+	int	yoffset = atikccd.getInfo().size().height() - exposure.y() - exposure.height();
 
 	// set the shutter if we have
 	bool	shortexposure = true;
@@ -161,7 +195,7 @@ void	AtikCamera::exposureRun(Exposure& exposure, atik::AtikCcd& atikccd) {
 		&& (shortexposure)) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "start a short exposure");
 		// do a short exposure
-		rc = _camera->readCCD(exposure.x(), exposure.y(),
+		rc = _camera->readCCD(xoffset, yoffset,
 			exposure.width(), exposure.height(),
 			exposure.mode().x(), exposure.mode().y(),
 			exposure.exposuretime());
@@ -185,8 +219,11 @@ void	AtikCamera::exposureRun(Exposure& exposure, atik::AtikCcd& atikccd) {
 			throw std::runtime_error(msg);
 		}
 		// wait for the exposure time to expire
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "wating for %.1fs for exposure",
+			exposure.exposuretime());
 		usleep(_camera->delay(exposure.exposuretime()));
-		rc = _camera->readCCD(exposure.x(), exposure.y(),
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "exposure time over, read CCD");
+		rc = _camera->readCCD(xoffset, yoffset,
 			exposure.width(), exposure.height(),
 			exposure.mode().x(), exposure.mode().y());
 		if (!rc) {
@@ -203,24 +240,41 @@ void	AtikCamera::exposureRun(Exposure& exposure, atik::AtikCcd& atikccd) {
 		exposure.toString().c_str());
 	ImageSize	size = exposure.frame().size() / exposure.mode();
 	Image<unsigned short>	*image = new Image<unsigned short>(size);
+	ImagePtr	resultimage(image);	// to make sure image is dealloc
 	image->setOrigin(exposure.frame().origin());
+
+	// set the mosaic type
 	switch (_capa.colour) {
 	case COLOUR_NONE:
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "this is a mono camera");
 		break;
 	case COLOUR_RGGB:
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "this is a GBRG color camera");
-		// note that what ATIK thinks is RGGB is actually GBRG
-		image->setMosaicType(MosaicType::BAYER_GBRG);
+		// note that that when we flip the image later, we will get
+		// an RGGB image for offset 0/0
+		switch ((exposure.x() % 2) + 2 * (exposure.y() % 2)) {
+		case 0:	image->setMosaicType(MosaicType::BAYER_GBRG);
+			break;
+		case 1:	image->setMosaicType(MosaicType::BAYER_BGGR);
+			break;
+		case 2:	image->setMosaicType(MosaicType::BAYER_RGGB);
+			break;
+		case 3:	image->setMosaicType(MosaicType::BAYER_GRBG);
+			break;
+		}
 		break;
 	default:
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "unknown camera color type: %d",
 			_capa.colour);
 		break;
 	}
+
+	// now read the image data into the pixel array
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "reading image data: %d pixels",
 		image->getSize().getPixels());
 	rc = _camera->getImage(image->pixels, image->getSize().getPixels());
+
+	// if unsuccessful, update the state to exposed and throw an exception
 	if (!rc) {
 		atikccd.updatestate(CcdState::exposed);
 		std::string	msg = stringprintf("cannot read data: %s",
@@ -229,16 +283,29 @@ void	AtikCamera::exposureRun(Exposure& exposure, atik::AtikCcd& atikccd) {
 		throw std::runtime_error(msg);
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "reading image data complete");
-	_image = ImagePtr(image);
+
+	// we have to flip the image upside down, because our image class
+	// has the origin in the lower left corner, while ATIK has it
+	// in the upper left corner
+	image->flip();
+
+	// save the resulting image
+	_image = resultimage;
 	atikccd.image(_image);
 	atikccd.updatestate(CcdState::exposed);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "run method of AtikCcd complete");
 }
 
+/**
+ * \brief Abort the exposure
+ */
 void    AtikCamera::abortExposure() {
 	_camera->abortExposure();
 }
 
+/**
+ * \brief Ask the camera for the set temperature
+ */
 float	AtikCamera::getSetTemperature(AtikCooler& cooler) {
 	std::unique_lock<std::recursive_mutex>	lock(_mutex, std::defer_lock);
 	if (!lock.try_lock()) {
@@ -258,6 +325,9 @@ float	AtikCamera::getSetTemperature(AtikCooler& cooler) {
 	return cooler.Cooler::getSetTemperature();
 }
 
+/**
+ * \brief Get the actual temperature of the CCD
+ */
 float	AtikCamera::getActualTemperature(AtikCooler& cooler) {
 	std::unique_lock<std::recursive_mutex>	lock(_mutex, std::defer_lock);
 	if (!lock.try_lock()) {
@@ -292,6 +362,9 @@ float	AtikCamera::getActualTemperature(AtikCooler& cooler) {
 	throw std::runtime_error(msg);
 }
 
+/**
+ * \brief Set the temperature of the CCD
+ */
 void	AtikCamera::setTemperature(const float temperature, AtikCooler& cooler) {
 	std::unique_lock<std::recursive_mutex>	lock(_mutex, std::defer_lock);
 	if (lock.try_lock()) {
@@ -311,6 +384,9 @@ void	AtikCamera::setTemperature(const float temperature, AtikCooler& cooler) {
 	}
 }
 
+/**
+ * \brief find out whether the cooler is on
+ */
 bool	AtikCamera::isOn(AtikCooler& /* cooler */) {
 	std::unique_lock<std::recursive_mutex>	lock(_mutex, std::defer_lock);
 	if (!lock.try_lock()) {
@@ -325,6 +401,9 @@ bool	AtikCamera::isOn(AtikCooler& /* cooler */) {
 	return ((state == COOLING_ON) || (state == COOLING_SETPOINT));
 }
 
+/**
+ * \brief turn the cooler on
+ */
 void	AtikCamera::setOn(bool onoff, AtikCooler& cooler) {
 	std::unique_lock<std::recursive_mutex>	lock(_mutex, std::defer_lock);
 	if (lock.try_lock()) {
@@ -344,9 +423,22 @@ void	AtikCamera::setOn(bool onoff, AtikCooler& cooler) {
 	}
 }
 
+/**
+ * \brief Start warming up the camera
+ */
 void	AtikCamera::initiateWarmUp() {
 	std::unique_lock<std::recursive_mutex>	lock(_mutex);
 	_camera->initiateWarmUp();
+}
+
+/**
+ * \brief Get a user friendly name of the camera
+ */
+std::string	AtikCamera::userFriendlyName() const {
+	if (_camera) {
+		return std::string(_camera->getName());
+	}
+	return Device::userFriendlyName();
 }
 
 } // namespace atik

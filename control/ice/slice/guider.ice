@@ -202,6 +202,11 @@ module snowstar {
 		BacklashRA
 	};
 
+	enum GainDirection {
+		GainX,
+		GainY
+	};
+
 	struct BacklashPoint {
 		int	seqno;
 		float	time;
@@ -317,6 +322,8 @@ module snowstar {
 		void	startGuiding(float gpinterval, float aointerval,
 				bool stepping) throws BadState;
 		float	getGuidingInterval() throws BadState;
+		float	getGain(GainDirection dir) throws BadState;
+		void	setGain(GainDirection dir, float gain) throws BadState;
 		void	stopGuiding() throws BadState;
 
 		// The following methods are used to monitor the calibration

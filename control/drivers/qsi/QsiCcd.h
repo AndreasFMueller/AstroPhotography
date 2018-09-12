@@ -33,6 +33,10 @@ protected:
 	virtual CoolerPtr	getCooler0();
 public:
 	virtual bool	hasCooler() const { return true; }
+
+	virtual std::string	userFriendlyName() const {
+		return _camera.userFriendlyName();
+	}
 };
 
 } // namespace qsi

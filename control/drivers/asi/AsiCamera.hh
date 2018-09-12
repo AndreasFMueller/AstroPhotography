@@ -61,6 +61,7 @@ class AsiCamera : public Camera {
 	std::recursive_mutex	_api_mutex;
 	int	_id;
 	int	_index;
+	std::string	_userFriendlyName;
 public:
 	int	id() const { return _id; }
 	int	index() const { return _index; }
@@ -155,6 +156,10 @@ public:
 	} direction_t;
 	void	pulseGuideOn(direction_t dir);
 	void	pulseGuideOff(direction_t dir);
+
+	virtual std::string	userFriendlyName() const {
+		return _userFriendlyName;
+	}
 };
 
 } // namespace asi
