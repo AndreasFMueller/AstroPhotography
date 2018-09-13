@@ -44,13 +44,27 @@ public:
 	virtual Point	correct(const Point& offset);
 };
 
+// forward declaration of the KalmanFilter class
+class KalmanFilter;
+
 /*
  * \brief Optimal control solution for the tracking problem
+ *
+ * Optimal control works by correcting not the currently measured offset
+ * but the Kalman filtered offset. This is the gist of the separation 
+ * principle (see Donald E. Caitlin, Estimation, Control, and the discrete
+ * Kalman Filter, Theorem 8.3.3, p. 186)
  */
 class OptimalControl : public ControlBase {
+	KalmanFilter	*_kalmanfilter;
+	OptimalControl(const OptimalControl& other) = delete;
+	OptimalControl&	operator=(const OptimalControl& other) = delete;
+	void	update(const Point& z);
 public:
 	OptimalControl(CalibrationPtr cal, double deltat);
+	virtual ~OptimalControl();
 	virtual Point	correct(const Point& offset);
+	Point	offset() const;
 };
 
 } // namespace guiding

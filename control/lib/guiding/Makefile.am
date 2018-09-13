@@ -18,6 +18,7 @@ noinst_HEADERS = 							\
 	GPCalibrationProcess.h						\
 	GridConstant.h							\
 	GuidePortAction.h						\
+	KalmanFilter.h							\
 	LinearRegression.h						\
 	TrackingPersistence.h						\
 	TrackingProcess.h
@@ -60,6 +61,7 @@ libastroguiding_la_SOURCES = 						\
 	GuidePortAction.cpp						\
 	GuidePortProcess.cpp						\
 	GuiderStateMachine.cpp						\
+	KalmanFilter.cpp						\
 	LargeTracker.cpp						\
 	LinearRegression.cpp						\
 	NullTracker.cpp							\
