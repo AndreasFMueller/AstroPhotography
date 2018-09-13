@@ -29,7 +29,17 @@ class KalmanFilter {
 	Matrix<double,4,4>	phi;
 	Matrix<double,4,2>	K;
 public:
+	void	setup(double deltat);
 	KalmanFilter(double deltat);
+
+	void	systemerror(double);
+	double	systemerror() const;
+
+	void	measurementerror(double);
+	double	measurementerror() const;
+
+	const Vector<double,4>&	state() const { return x; }
+
 	Point	offset() const;
 	void	update(const Point& o);
 };

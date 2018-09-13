@@ -28,8 +28,9 @@ noinst_PROGRAMS = tests singletest
 
 # single test
 singletest_SOURCES = singletest.cpp					\
-	BacklashAnalysisTest.cpp
+	KalmanFilterTest.cpp
 singletest_LDADD = $(guiding_ldadd)
+singletest_CPPFLAGS = -I..
 singletest_DEPENDENCIES = $(guiding_dependencies)
 
 single:	singletest
@@ -37,10 +38,12 @@ single:	singletest
 
 ## general tests
 tests_SOURCES = tests.cpp						\
+	KalmanFilterTest.cpp						\
 	BacklashAnalysisTest.cpp					\
 	GuiderFactoryTest.cpp						\
 	StarDetectorTest.cpp
 tests_LDADD = $(guiding_ldadd)
+tests_CPPFLAGS = -I..
 tests_DEPENDENCIES = $(guiding_dependencies)
 
 test:	tests
