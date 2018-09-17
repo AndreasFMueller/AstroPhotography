@@ -68,6 +68,8 @@ TrackingProcess::TrackingProcess(GuiderBase *guider, TrackerPtr tracker,
 			_control = new OptimalControl(_guideportInterval);
 			break;
 		}
+		_control->parameter(0, parameter(0));
+		_control->parameter(1, parameter(1));
 	}
 
 	// additional fields in the summary
@@ -333,6 +335,23 @@ void	TrackingProcess::step(thread::Thread<TrackingProcess>& thread,
 		Timer::sleep(dt);
 	}
 }
+
+float	TrackingProcess::parameter(int index) const {
+	return _parameters[index];
+}
+
+void	TrackingProcess::parameter(int index, float p) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "new parameter[%d] = %f", index, p);
+	_parameters[index] = p;
+	if (_control) {
+		_control->parameter(index, p);
+	}
+}
+
+Point	TrackingProcess::parameter() const {
+	return Point(_parameters[0], _parameters[1]);
+}
+
 
 } // namespace guiding
 } // namespace astro

@@ -21,9 +21,9 @@ class TrackingProcess : public BasicProcess {
 	int	_id;
 	float	_parameters[2];
 public:
-	float	parameter(int index) const { return _parameters[index]; }
-	void	parameter(int index, float g) { _parameters[index] = g; }
-	Point	parameter() const { return Point(_parameters[0], _parameters[1]); }
+	float	parameter(int index) const;
+	void	parameter(int index, float g);
+	Point	parameter() const;
 private:
 	double	_guideportInterval;
 public:

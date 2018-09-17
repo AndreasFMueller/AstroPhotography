@@ -21,13 +21,13 @@ public:
 	void	deltat(double d) { _deltat = d; }
 protected:
 	double	_parameters[2];
+public:
 	virtual void	parameter(int index, double v) {
 		_parameters[index] = v;
 	}
 	virtual double	parameter(int index) const {
 		return _parameters[index];
 	}
-public:
 	ControlBase(double deltat);
 	virtual ~ControlBase();
 
