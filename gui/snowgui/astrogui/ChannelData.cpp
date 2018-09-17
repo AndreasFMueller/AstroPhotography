@@ -202,6 +202,11 @@ double	ChannelData::last() const {
 //////////////////////////////////////////////////////////////////////
 // ChannelDataVector implementation
 //////////////////////////////////////////////////////////////////////
+/**
+ * \brief Get a vector mean values for all data channels
+ *
+ * \return
+ */
 std::vector<double>	ChannelDataVector::mean() const {
 	std::vector<double>	result;
 	std::for_each(begin(), end(),
@@ -212,6 +217,11 @@ std::vector<double>	ChannelDataVector::mean() const {
 	return result;
 }
 
+/**
+ * \brief Get a vector of of the means of the last n samples
+ *
+ * \param lastn	number of samples to consider when computing the mean
+ */
 std::vector<double>	ChannelDataVector::mean(int lastn) const {
 	std::vector<double>	result;
 	std::for_each(begin(), end(),
@@ -222,6 +232,12 @@ std::vector<double>	ChannelDataVector::mean(int lastn) const {
 	return result;
 }
 
+/**
+ * \brief Get a vector of mean values between to points in time
+ *
+ * \param notbefore	start time
+ * \param notafter	end time
+ */
 std::vector<double>	ChannelDataVector::mean(double notbefore, double notafter) const {
 	std::vector<double>	result;
 	std::for_each(begin(), end(),
@@ -232,6 +248,11 @@ std::vector<double>	ChannelDataVector::mean(double notbefore, double notafter) c
 	return result;
 }
 
+/**
+ * \brief Get a vector of variances
+ *
+ * \param variance for each channel
+ */
 std::vector<double>	ChannelDataVector::var() const {
 	std::vector<double>	result;
 	std::for_each(begin(), end(),
@@ -242,6 +263,11 @@ std::vector<double>	ChannelDataVector::var() const {
 	return result;
 }
 
+/**
+ * \brief Get a vector of variances considering only the last n samples
+ *
+ * \param lastn	number of samples to consider
+ */
 std::vector<double>	ChannelDataVector::var(int lastn) const {
 	std::vector<double>	result;
 	std::for_each(begin(), end(),
@@ -252,6 +278,12 @@ std::vector<double>	ChannelDataVector::var(int lastn) const {
 	return result;
 }
 
+/**
+ * \brief Get a vector of variances for an interval in time
+ *
+ * \param notbefore	start time
+ * \param notafter	end time
+ */
 std::vector<double>	ChannelDataVector::var(double notbefore, double notafter) const {
 	std::vector<double>	result;
 	std::for_each(begin(), end(),
@@ -292,6 +324,9 @@ std::vector<double>	ChannelDataVector::stddev(double notbefore, double notafter)
 	return result;
 }
 
+/**
+ * \brief Get a vector of minima 
+ */
 std::vector<double>	ChannelDataVector::min() const {
 	std::vector<double>	result;
 	std::for_each(begin(), end(),
@@ -302,6 +337,11 @@ std::vector<double>	ChannelDataVector::min() const {
 	return result;
 }
 
+/**
+ * \brief Get a vector of minima of the last n samples
+ *
+ * \param lastn	number of samples to consider
+ */
 std::vector<double>	ChannelDataVector::min(int lastn) const {
 	std::vector<double>	result;
 	std::for_each(begin(), end(),
@@ -312,6 +352,12 @@ std::vector<double>	ChannelDataVector::min(int lastn) const {
 	return result;
 }
 
+/**
+ * \brief Get a vector of minima of values between two points in time
+ *
+ * \param notbefore	start time
+ * \param notafter	end time
+ */
 std::vector<double>	ChannelDataVector::min(double notbefore, double notafter) const {
 	std::vector<double>	result;
 	std::for_each(begin(), end(),
@@ -322,6 +368,9 @@ std::vector<double>	ChannelDataVector::min(double notbefore, double notafter) co
 	return result;
 }
 
+/**
+ * \brief Get a vector of maximum values
+ */
 std::vector<double>	ChannelDataVector::max() const {
 	std::vector<double>	result;
 	std::for_each(begin(), end(),
@@ -332,6 +381,11 @@ std::vector<double>	ChannelDataVector::max() const {
 	return result;
 }
 
+/**
+ * \brief Get a vector of maximum values of the last n samples
+ *
+ * \param lastn	number of samples to consider
+ */
 std::vector<double>	ChannelDataVector::max(int lastn) const {
 	std::vector<double>	result;
 	std::for_each(begin(), end(),
@@ -342,6 +396,12 @@ std::vector<double>	ChannelDataVector::max(int lastn) const {
 	return result;
 }
 
+/**
+ * \brief Get a vector of maximum values between to points in time
+ *
+ * \param notbefore	start time
+ * \param notafter	end time
+ */
 std::vector<double>	ChannelDataVector::max(double notbefore, double notafter) const {
 	std::vector<double>	result;
 	std::for_each(begin(), end(),
@@ -400,7 +460,7 @@ double	ChannelDataVector::allMin(double notbefore, double notafter) const {
 }
 
 double	ChannelDataVector::allMax() const {
-	std::vector<double>	maxima = min();
+	std::vector<double>	maxima = max();
 	if (size() == 0) {
 		return -std::numeric_limits<double>::infinity();
 	}
@@ -409,7 +469,7 @@ double	ChannelDataVector::allMax() const {
 }
 
 double	ChannelDataVector::allMax(int lastn) const {
-	std::vector<double>	maxima = min(lastn);
+	std::vector<double>	maxima = max(lastn);
 	if (size() == 0) {
 		return -std::numeric_limits<double>::infinity();
 	}
