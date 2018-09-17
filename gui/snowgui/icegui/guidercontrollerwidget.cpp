@@ -49,13 +49,20 @@ guidercontrollerwidget::guidercontrollerwidget(QWidget *parent)
 	_guiderdescriptor.adaptiveopticsIndex = 0;
 
 	// adding items to the tracking method combo box
-	ui->methodBox->addItem(QString("Star"));
-	ui->methodBox->addItem(QString("Phase"));
-	ui->methodBox->addItem(QString("Gradient"));
-	ui->methodBox->addItem(QString("Laplace"));
-	ui->methodBox->addItem(QString("Large"));
-	connect(ui->methodBox, SIGNAL(currentIndexChanged(int)),
-		this, SLOT(methodChanged(int)));
+	ui->trackingMethodBox->addItem(QString("Star"));
+	ui->trackingMethodBox->addItem(QString("Phase"));
+	ui->trackingMethodBox->addItem(QString("Gradient"));
+	ui->trackingMethodBox->addItem(QString("Laplace"));
+	ui->trackingMethodBox->addItem(QString("Large"));
+	connect(ui->trackingMethodBox, SIGNAL(currentIndexChanged(int)),
+		this, SLOT(trackingMethodChanged(int)));
+
+	// add the items to the filter method combo box
+	ui->filterMethodBox->addItem(QString("None"));
+	ui->filterMethodBox->addItem(QString("Gain"));
+	ui->filterMethodBox->addItem(QString("Kalman"));
+	connect(ui->filterMethodBox, SIGNAL(currentIndexChanged(int)),
+		this, SLOT(filterMethodChanged(int)));
 
 	// connections for other GUI elements
 	connect(ui->gpupdateintervalSpinBox, SIGNAL(valueChanged(double)),
@@ -178,27 +185,27 @@ void	guidercontrollerwidget::setupGuider() {
 		_guiderdescriptor, _guider, _guiderfactory, this);
 
 	// get the information from the guider
-	ui->methodBox->blockSignals(true);
+	ui->trackingMethodBox->blockSignals(true);
 	switch (_guider->getTrackerMethod()) {
 	case snowstar::TrackerUNDEFINED:
 	case snowstar::TrackerNULL:
 	case snowstar::TrackerSTAR:
-		ui->methodBox->setCurrentIndex(0);
+		ui->trackingMethodBox->setCurrentIndex(0);
 		break;
 	case snowstar::TrackerPHASE:
-		ui->methodBox->setCurrentIndex(1);
+		ui->trackingMethodBox->setCurrentIndex(1);
 		break;
 	case snowstar::TrackerDIFFPHASE:
-		ui->methodBox->setCurrentIndex(2);
+		ui->trackingMethodBox->setCurrentIndex(2);
 		break;
 	case snowstar::TrackerLAPLACE:
-		ui->methodBox->setCurrentIndex(3);
+		ui->trackingMethodBox->setCurrentIndex(3);
 		break;
 	case snowstar::TrackerLARGE:
-		ui->methodBox->setCurrentIndex(4);
+		ui->trackingMethodBox->setCurrentIndex(4);
 		break;
 	}
-	ui->methodBox->blockSignals(false);
+	ui->trackingMethodBox->blockSignals(false);
 	_exposure = snowstar::convert(_guider->getExposure());
 	astro::Point	ps = snowstar::convert(_guider->getStar());
 	_star = ImagePoint((int)ps.x(), (int)ps.y());
@@ -206,14 +213,26 @@ void	guidercontrollerwidget::setupGuider() {
 	ui->starxField->setText(QString::number(_star.x()));
 	ui->staryField->setText(QString::number(_star.y()));
 
-	// XXX update rates
-	// XXX this needs an extension of the ICE interface to the guider,
-	// XXX cannot currently provide this information
+	// get the filter method
+	ui->filterMethodBox->blockSignals(true);
+	switch (_guider->getFilterMethod()) {
+	case snowstar::FilterNONE:
+		ui->filterMethodBox->setCurrentIndex(0);
+		break;
+	case snowstar::FilterGAIN:
+		ui->filterMethodBox->setCurrentIndex(1);
+		break;
+	case snowstar::FilterKALMAN:
+		ui->filterMethodBox->setCurrentIndex(2);
+		break;
+	}
+	setupFilter();
+	ui->filterMethodBox->blockSignals(false);
 
 	// gain
-	int gx = gainconversion::gain2dial(_guider->getGain(snowstar::GainX));
+	int gx = gainconversion::gain2dial(_guider->getFilterParameter(0));
 	ui->xGainDial->setValue(gx);
-	int gy = gainconversion::gain2dial(_guider->getGain(snowstar::GainY));
+	int gy = gainconversion::gain2dial(_guider->getFilterParameter(1));
 	ui->yGainDial->setValue(gy);
 	
 	// do all the registration stuff
@@ -447,7 +466,7 @@ void	guidercontrollerwidget::statusUpdate() {
 /**
  * \brief Change the tracker method
  */
-void	guidercontrollerwidget::methodChanged(int index) {
+void	guidercontrollerwidget::trackingMethodChanged(int index) {
 	switch (index) {
 	case 0:	_guider->setTrackerMethod(snowstar::TrackerSTAR);
 		break;
@@ -460,6 +479,53 @@ void	guidercontrollerwidget::methodChanged(int index) {
 	case 4:	_guider->setTrackerMethod(snowstar::TrackerLARGE);
 		break;
 	}
+}
+
+/**
+ * \brief modify user interface matching the filter method
+ */
+void	guidercontrollerwidget::setupFilter() {
+	switch (ui->filterMethodBox->currentIndex()) {
+	case 0:	
+		ui->gainLabel->setText(QString("None"));
+		ui->xGainLabel->setText(QString(""));
+		ui->yGainLabel->setText(QString(""));
+		ui->xGainDial->setEnabled(false);
+		ui->yGainDial->setEnabled(false);
+		ui->xGainValue->setText(QString(""));
+		ui->yGainValue->setText(QString(""));
+		break;
+	case 1:	
+		ui->gainLabel->setText(QString("Gain:"));
+		ui->xGainLabel->setText(QString("X:"));
+		ui->yGainLabel->setText(QString("Y:"));
+		ui->xGainDial->setEnabled(true);
+		ui->yGainDial->setEnabled(true);
+		break;
+	case 2:	
+		ui->gainLabel->setText(QString("Errors:"));
+		ui->xGainLabel->setText(QString("Sys:"));
+		ui->yGainLabel->setText(QString("Meas:"));
+		ui->xGainDial->setEnabled(true);
+		ui->yGainDial->setEnabled(true);
+		break;
+	}
+}
+
+/**
+ * \brief Change the filter method
+ */
+void	guidercontrollerwidget::filterMethodChanged(int index) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "filter method changed to %d", index);
+	switch (index) {
+	case 0:	_guider->setFilterMethod(snowstar::FilterNONE);
+		break;
+	case 1:	_guider->setFilterMethod(snowstar::FilterGAIN);
+		break;
+	case 2:	_guider->setFilterMethod(snowstar::FilterKALMAN);
+		break;
+	}
+	setupFilter();
 }
 
 /**
@@ -659,7 +725,7 @@ void	guidercontrollerwidget::xGainChanged(int value) {
 	snprintf(b, sizeof(b), "%.2f", fvalue);
 	ui->xGainValue->setText(QString(b));
 	if (_guider) {
-		_guider->setGain(snowstar::GainX, fvalue);
+		_guider->setFilterParameter(0, fvalue);
 	}
 }
 
@@ -672,7 +738,7 @@ void	guidercontrollerwidget::yGainChanged(int value) {
 	snprintf(b, sizeof(b), "%.2f", fvalue);
 	ui->yGainValue->setText(QString(b));
 	if (_guider) {
-		_guider->setGain(snowstar::GainY, fvalue);
+		_guider->setFilterParameter(1, fvalue);
 	}
 }
 

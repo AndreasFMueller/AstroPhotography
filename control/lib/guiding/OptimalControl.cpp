@@ -68,8 +68,8 @@ double	OptimalControl::systemerror() const {
 /**
  * \brief override the parameter method to set the error in the kalman filter
  */
-void	OptimalControl::parameter(int index, double value) {
-	ControlBase::parameter(index, value);
+void	OptimalControl::filter_parameter(int index, double value) {
+	ControlBase::filter_parameter(index, value);
 	switch (index) {
 	case 0: systemerror(value); break;
 	case 1: measurementerror(value); break;

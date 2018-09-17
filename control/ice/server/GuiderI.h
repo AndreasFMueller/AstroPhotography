@@ -47,7 +47,8 @@ class GuiderI : virtual public Guider, virtual public RepositoryUser {
 	astro::persistence::Database	database;
 	// some infrastructure members we need 
 	Point	_point;
-	TrackerMethod	_method;
+	TrackerMethod	_tracker_method;
+	astro::guiding::FilterMethod	_filter_method;
 	astro::guiding::TrackerPtr	getTracker();
 
 	// callbacks that we need to remove when this object is destroyed
@@ -95,13 +96,18 @@ public:
 	virtual void cancelCalibration(const Ice::Current& current);
 	virtual bool waitCalibration(Ice::Double, const Ice::Current& current);
 
+	// control the filtering method
+	virtual void setFilterMethod(const FilterMethod,
+			const Ice::Current& current);
+	virtual FilterMethod	getFilterMethod(const Ice::Current& current);
+
 	// control guiding process
 	virtual void startGuiding(Ice::Float, Ice::Float, bool stepping,
 			const Ice::Current& current);
 	virtual Ice::Float getGuidingInterval(const Ice::Current& current);
-	virtual Ice::Float getGain(GainDirection dir,
-				const Ice::Current& current);
-	virtual void setGain(GainDirection dir, Ice::Float gain,
+	virtual Ice::Float getFilterParameter(int dir,
+			const Ice::Current& current);
+	virtual void setFilterParameter(int dir, Ice::Float value,
 			const Ice::Current& current);
 	virtual void stopGuiding(const Ice::Current& current);
 

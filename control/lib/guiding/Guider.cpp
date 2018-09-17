@@ -196,7 +196,7 @@ TrackerPtr	Guider::getLargeTracker() {
  * \param aointerval	the interval for actions by the adaptive optics unit
  */
 void	Guider::startGuiding(TrackerPtr tracker, double gpinterval,
-		double aointerval, bool stepping) {
+		double aointerval, bool stepping, FilterMethod filtermethod) {
 	// create a TrackingProcess instance
 	_state.startGuiding();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "creating new tracking process");
@@ -373,56 +373,38 @@ void	Guider::callback(const std::exception& /* ex */) {
 }
 
 /**
- * \brief get the gain from the guider
+ * \brief get the filter_parameters from the guider
  *
  * This method reads the gain from the TrackingProcess, if available,
  * this allows the TrackingProcess to dynamically change the gain if it
  * notices increasing amplitude e.g.
  */
-float	Guider::gain(gain_direction dir) {
+float	Guider::filter_parameter(int dir) {
 	TrackingProcess	*tp = NULL;
 	if (trackingprocess) {
 		tp = dynamic_cast<TrackingProcess*>(&*trackingprocess);
 	}
-	switch (dir) {
-	case GAIN_X:
-		if (tp) {
-			_gain_x = tp->parameter(0);
-		}
-		return _gain_x;
-	case GAIN_Y:
-		if (tp) {
-			_gain_y = tp->parameter(1);
-		}
-		return _gain_y;
+	if (tp) {
+		_filter_parameters[dir] = tp->filter_parameter(dir);
 	}
+	return _filter_parameters[dir];
 }
 
 /**
- * \brief Set the gain for a particular direction
+ * \brief Set the filter_parameters for a particular direction
  *
  * If a TrackingProcess is running in the background, we also set the
  * gain in that process.
  */
-void	Guider::gain(gain_direction dir, float g) {
+void	Guider::filter_parameter(int dir, float g) {
 	TrackingProcess	*tp = NULL;
 	if (trackingprocess) {
 		tp = dynamic_cast<TrackingProcess*>(&*trackingprocess);
 	}
-	switch (dir) {
-	case GAIN_X:
-		if (tp) {
-			tp->parameter(0, g);
-		}
-		_gain_x = g;
-		break;
-	case GAIN_Y:
-		if (tp) {
-			tp->parameter(1, g);
-		}
-		_gain_y = g;
-		break;
+	if (tp) {
+		tp->filter_parameter(dir, g);
 	}
+	_filter_parameters[dir] = g;
 }
 
 } // namespace guiding

@@ -65,14 +65,10 @@
       <property name="bottomMargin">
        <number>0</number>
       </property>
-      <item row="2" column="0">
-       <widget class="QLabel" name="windowRadiusLabel">
-        <property name="text">
-         <string>Window radius:</string>
-        </property>
-       </widget>
+      <item row="0" column="2" colspan="2">
+       <widget class="QComboBox" name="trackingMethodBox"/>
       </item>
-      <item row="1" column="0">
+      <item row="1" column="0" colspan="2">
        <widget class="QLabel" name="starLabel">
         <property name="minimumSize">
          <size>
@@ -85,42 +81,8 @@
         </property>
        </widget>
       </item>
-      <item row="3" column="1" colspan="2">
-       <widget class="QDoubleSpinBox" name="gpupdateintervalSpinBox">
-        <property name="alignment">
-         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-        </property>
-        <property name="decimals">
-         <number>0</number>
-        </property>
-        <property name="value">
-         <double>10.000000000000000</double>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="2">
-       <widget class="QLineEdit" name="staryField">
-        <property name="alignment">
-         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="0">
-       <widget class="QLabel" name="gpupdateintervalLabel">
-        <property name="text">
-         <string>GP update rate:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="1">
-       <widget class="QLineEdit" name="starxField">
-        <property name="alignment">
-         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="0">
-       <widget class="QLabel" name="methodLabel">
+      <item row="0" column="0" colspan="2">
+       <widget class="QLabel" name="trackingMethodLabel">
         <property name="minimumSize">
          <size>
           <width>110</width>
@@ -132,17 +94,35 @@
         </property>
        </widget>
       </item>
-      <item row="4" column="0">
-       <widget class="QLabel" name="aoupdateintervalLabel">
+      <item row="5" column="0" colspan="2">
+       <widget class="QLabel" name="filterMethodLabel">
         <property name="text">
-         <string>AO update rate:</string>
+         <string>Filter Method:</string>
         </property>
        </widget>
       </item>
-      <item row="0" column="1" colspan="2">
-       <widget class="QComboBox" name="methodBox"/>
+      <item row="1" column="3">
+       <widget class="QLineEdit" name="staryField">
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
       </item>
-      <item row="2" column="1" colspan="2">
+      <item row="3" column="0">
+       <widget class="QLabel" name="gpupdateintervalLabel">
+        <property name="text">
+         <string>GP rate:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0" colspan="2">
+       <widget class="QLabel" name="windowRadiusLabel">
+        <property name="text">
+         <string>Window radius:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="2" colspan="2">
        <widget class="snowgui::LogSpinBox" name="windowradiusSpinBox">
         <property name="alignment">
          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -161,7 +141,34 @@
         </property>
        </widget>
       </item>
-      <item row="4" column="1" colspan="2">
+      <item row="3" column="1">
+       <widget class="QDoubleSpinBox" name="gpupdateintervalSpinBox">
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+        <property name="decimals">
+         <number>0</number>
+        </property>
+        <property name="value">
+         <double>10.000000000000000</double>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="2">
+       <widget class="QLabel" name="aoupdateintervalLabel">
+        <property name="text">
+         <string>AO rate:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="2">
+       <widget class="QLineEdit" name="starxField">
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="3">
        <widget class="QDoubleSpinBox" name="aoupdateintervalSpinBox">
         <property name="alignment">
          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -174,7 +181,10 @@
         </property>
        </widget>
       </item>
-      <item row="9" column="0" colspan="3">
+      <item row="5" column="2" colspan="2">
+       <widget class="QComboBox" name="filterMethodBox"/>
+      </item>
+      <item row="11" column="0" colspan="4">
        <widget class="QWidget" name="buttonWidget" native="true">
         <property name="minimumSize">
          <size>
@@ -238,7 +248,7 @@
         </layout>
        </widget>
       </item>
-      <item row="5" column="0" colspan="3">
+      <item row="7" column="0" colspan="4">
        <widget class="QWidget" name="gainWidget" native="true">
         <property name="minimumSize">
          <size>
@@ -247,13 +257,6 @@
          </size>
         </property>
         <layout class="QGridLayout" name="gridLayout_3">
-         <item row="2" column="0">
-          <widget class="QLabel" name="yGainLabel">
-           <property name="text">
-            <string>Y:</string>
-           </property>
-          </widget>
-         </item>
          <item row="1" column="0">
           <widget class="QLabel" name="xGainLabel">
            <property name="text">
@@ -274,22 +277,6 @@
            </property>
            <property name="alignment">
             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="2" rowspan="3">
-          <widget class="QDial" name="xGainDial">
-           <property name="toolTip">
-            <string extracomment="X Gain"/>
-           </property>
-           <property name="maximum">
-            <number>160</number>
-           </property>
-           <property name="sliderPosition">
-            <number>80</number>
-           </property>
-           <property name="notchesVisible">
-            <bool>true</bool>
            </property>
           </widget>
          </item>
@@ -332,6 +319,29 @@
           <widget class="QLabel" name="gainLabel">
            <property name="text">
             <string>Gain:</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="2" rowspan="3">
+          <widget class="QDial" name="xGainDial">
+           <property name="toolTip">
+            <string extracomment="X Gain"/>
+           </property>
+           <property name="maximum">
+            <number>160</number>
+           </property>
+           <property name="sliderPosition">
+            <number>80</number>
+           </property>
+           <property name="notchesVisible">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="0">
+          <widget class="QLabel" name="yGainLabel">
+           <property name="text">
+            <string>Y:</string>
            </property>
           </widget>
          </item>
@@ -402,6 +412,7 @@
          <attribute name="title">
           <string>Guide Port</string>
          </attribute>
+         <zorder>guidingWidget</zorder>
         </widget>
         <widget class="snowgui::calibrationwidget" name="aocalibrationWidget">
          <attribute name="title">

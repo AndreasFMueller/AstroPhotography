@@ -31,7 +31,8 @@ void GuiderI::startGuiding(Ice::Float gpinterval, Ice::Float aointerval,
 
 	// start guiding
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "start guiding");
-	guider->startGuiding(tracker, gpinterval, aointerval, stepping);
+	guider->startGuiding(tracker, gpinterval, aointerval, stepping,
+		_filter_method);
 	astro::event(EVENT_CLASS, astro::events::INFO,
 		astro::events::Event::GUIDE,
 		astro::stringprintf("start guiding %s",
@@ -41,29 +42,18 @@ void GuiderI::startGuiding(Ice::Float gpinterval, Ice::Float aointerval,
 /**
  * \brief Get the gain from the guider
  */
-float	GuiderI::getGain(GainDirection dir,
-			const Ice::Current& /* current */) {
-	switch (dir) {
-	case GainX:
-		return guider->gain(astro::guiding::Guider::GAIN_X);
-	case GainY:
-		return guider->gain(astro::guiding::Guider::GAIN_Y);
-	}
+float	GuiderI::getFilterParameter(int dir, const Ice::Current& /* current */) {
+	return guider->filter_parameter(dir);
 }
 
 /**
  * /brief Set the gain for a particular direction
  */
-void	GuiderI::setGain(GainDirection dir, float gain,
+void	GuiderI::setFilterParameter(int dir, float value,
 		const Ice::Current& /* current */) {
-	switch (dir) {
-	case GainX:
-		guider->gain(astro::guiding::Guider::GAIN_X, gain);
-		break;
-	case GainY:
-		guider->gain(astro::guiding::Guider::GAIN_Y, gain);
-		break;
-	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "got new filter parameter %d: %f",
+		dir, value);
+	guider->filter_parameter(dir, value);
 }
 
 /**
@@ -321,6 +311,35 @@ void	callback_adapter<ImageMonitorPrx>(ImageMonitorPrx& p,
 
 	// now that the image has been created, send it to the callback
 	p->update(target);
+}
+
+/**
+ * \brief Set the filtering method
+ */
+void	GuiderI::setFilterMethod(FilterMethod filtermethod,
+		const Ice::Current& /* current */) {
+	switch (filtermethod) {
+	case FilterNONE:
+		_filter_method = astro::guiding::FilterNONE;
+		break;
+	case FilterGAIN:
+		_filter_method = astro::guiding::FilterGAIN;
+		break;
+	case FilterKALMAN:
+		_filter_method = astro::guiding::FilterKALMAN;
+		break;
+	}
+}
+
+/**
+ * \brief Get the filtering method
+ */
+FilterMethod	GuiderI::getFilterMethod(const Ice::Current& /* current */) {
+	switch (_filter_method) {
+	case astro::guiding::FilterNONE:	return FilterNONE;
+	case astro::guiding::FilterGAIN:	return FilterGAIN;
+	case astro::guiding::FilterKALMAN:	return FilterKALMAN;
+	}
 }
 
 } // namespace snowstar

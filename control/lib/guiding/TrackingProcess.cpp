@@ -43,13 +43,13 @@ TrackingProcess::TrackingProcess(GuiderBase *guider, TrackerPtr tracker,
 	ControlDevicePtr guidePortDevice,
 	ControlDevicePtr adaptiveOpticsDevice,
 	persistence::Database database,
-	filter_method _filtermethod)
+	FilterMethod _filter_method)
 	: BasicProcess(guider, tracker, database),
 	  _guidePortDevice(guidePortDevice),
 	  _adaptiveOpticsDevice(adaptiveOpticsDevice),
 	  _summary(guider->name(), guider->instrument(), guider->ccdname()) {
-	_parameters[0] = 1;
-	_parameters[1] = 1;
+	_filter_parameters[0] = 1;
+	_filter_parameters[1] = 1;
 	_guideportInterval = 10;
 	_adaptiveopticsInterval = 0;
 	_id = -1;
@@ -57,19 +57,19 @@ TrackingProcess::TrackingProcess(GuiderBase *guider, TrackerPtr tracker,
 
 	// construct the filter method thingy
 	if (_guidePortDevice) {
-		switch (_filtermethod) {
-		case BASIC:
+		switch (_filter_method) {
+		case FilterNONE:
 			_control = new ControlBase(_guideportInterval);
 			break;
-		case GAIN:
+		case FilterGAIN:
 			_control = new GainControl(_guideportInterval);
 			break;
-		case KALMAN:
+		case FilterKALMAN:
 			_control = new OptimalControl(_guideportInterval);
 			break;
 		}
-		_control->parameter(0, parameter(0));
-		_control->parameter(1, parameter(1));
+		_control->filter_parameter(0, filter_parameter(0));
+		_control->filter_parameter(1, filter_parameter(1));
 	}
 
 	// additional fields in the summary
@@ -336,20 +336,20 @@ void	TrackingProcess::step(thread::Thread<TrackingProcess>& thread,
 	}
 }
 
-float	TrackingProcess::parameter(int index) const {
-	return _parameters[index];
+float	TrackingProcess::filter_parameter(int index) const {
+	return _filter_parameters[index];
 }
 
-void	TrackingProcess::parameter(int index, float p) {
+void	TrackingProcess::filter_parameter(int index, float p) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "new parameter[%d] = %f", index, p);
-	_parameters[index] = p;
+	_filter_parameters[index] = p;
 	if (_control) {
-		_control->parameter(index, p);
+		_control->filter_parameter(index, p);
 	}
 }
 
-Point	TrackingProcess::parameter() const {
-	return Point(_parameters[0], _parameters[1]);
+Point	TrackingProcess::filter_parameter() const {
+	return Point(_filter_parameters[0], _filter_parameters[1]);
 }
 
 

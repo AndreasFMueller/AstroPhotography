@@ -19,11 +19,11 @@ class TrackingProcess : public BasicProcess {
 	ControlDevicePtr	_adaptiveOpticsDevice;
 	TrackerPtr	_tracker;
 	int	_id;
-	float	_parameters[2];
+	float	_filter_parameters[2];
 public:
-	float	parameter(int index) const;
-	void	parameter(int index, float g);
-	Point	parameter() const;
+	float	filter_parameter(int index) const;
+	void	filter_parameter(int index, float g);
+	Point	filter_parameter() const;
 private:
 	double	_guideportInterval;
 public:
@@ -55,7 +55,6 @@ public:
 	bool	stepping() const { return _stepping; }
 	void	stepping(bool s) { _stepping = s; }
 
-	typedef enum { BASIC, GAIN, KALMAN } filter_method;
 private:
 	ControlBase	*_control;
 
@@ -71,7 +70,7 @@ public:
 		ControlDevicePtr guidePortDevice,
 		ControlDevicePtr adaptiveOpticsDevice,
 		persistence::Database database,
-		filter_method _filter_method = KALMAN);
+		FilterMethod _filter_method = FilterKALMAN);
 	~TrackingProcess();
 
 	void    main(astro::thread::Thread<TrackingProcess>& thread);

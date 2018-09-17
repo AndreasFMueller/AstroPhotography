@@ -688,6 +688,7 @@ static std::string	state2string(state s);
 static state	string2state(const std::string& s);
 };
 
+typedef enum { FilterNONE, FilterGAIN, FilterKALMAN } FilterMethod;
 
 /**
  * \brief State machine class for the Guider
@@ -1124,20 +1125,18 @@ private:
 public:
 	// tracking
 	void	startGuiding(TrackerPtr tracker, double interval,
-			double aointerval = 0, bool stepping = false);
+			double aointerval = 0, bool stepping = false,
+			FilterMethod filtermethod = FilterNONE);
 	void	stopGuiding();
 	bool	waitGuiding(double timeout);
 	double	getInterval();
 	const TrackingSummary&	summary();
 
-	// gain control
-	typedef enum { GAIN_X, GAIN_Y } gain_direction;
 private:
-	float	_gain_x;
-	float	_gain_y;
+	float	_filter_parameters[2];
 public:
-	float	gain(gain_direction dir);
-	void	gain(gain_direction dir, float g);
+	float	filter_parameter(int i);
+	void	filter_parameter(int i, float g);
 	
 public:
 	/**

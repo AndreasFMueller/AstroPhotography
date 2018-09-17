@@ -30,7 +30,10 @@ GuiderI::GuiderI(astro::guiding::GuiderPtr _guider,
 	_point.x = p.x();
 	_point.y = p.y();
 	// default tracking method is star
-	_method = TrackerSTAR;
+	_tracker_method = TrackerSTAR;
+
+	// default filtering method is KALMAN
+	_filter_method = astro::guiding::FilterKALMAN;
 
 	// callback stuff
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "installing  callbacks");
@@ -131,7 +134,7 @@ Point GuiderI::getStar(const Ice::Current& /* current */) {
 }
 
 TrackerMethod	GuiderI::getTrackerMethod(const Ice::Current& /* current */) {
-	return _method;
+	return _tracker_method;
 }
 
 void	GuiderI::setTrackerMethod(TrackerMethod method,
@@ -140,7 +143,7 @@ void	GuiderI::setTrackerMethod(TrackerMethod method,
 		(method == TrackerUNDEFINED) ? "undefined" : (
 			(method == TrackerSTAR) ? "star" : (
 				(method == TrackerPHASE) ? "phase" : "diff")));
-	_method = method;
+	_tracker_method = method;
 }
 
 /**
@@ -166,7 +169,7 @@ astro::guiding::TrackerPtr	 GuiderI::getTracker() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "current point is (%.1f, %.1f)",
 		_point.x, _point.y);
 
-	switch (_method) {
+	switch (_tracker_method) {
 	case TrackerUNDEFINED:
 	case TrackerNULL:
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "construct a NULL tracker");

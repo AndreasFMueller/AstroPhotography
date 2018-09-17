@@ -20,13 +20,13 @@ public:
 	double	deltat() const { return _deltat; }
 	void	deltat(double d) { _deltat = d; }
 protected:
-	double	_parameters[2];
+	double	_filter_parameters[2];
 public:
-	virtual void	parameter(int index, double v) {
-		_parameters[index] = v;
+	virtual void	filter_parameter(int index, double v) {
+		_filter_parameters[index] = v;
 	}
-	virtual double	parameter(int index) const {
-		return _parameters[index];
+	virtual double	filter_parameter(int index) const {
+		return _filter_parameters[index];
 	}
 	ControlBase(double deltat);
 	virtual ~ControlBase();
@@ -39,8 +39,8 @@ public:
  */
 class GainControl : public ControlBase {
 public:
-	void	gain(int index, float value) { parameter(index, value); }
-	float	gain(int index) const { return parameter(index); }
+	void	gain(int index, float value) { filter_parameter(index, value); }
+	float	gain(int index) const { return filter_parameter(index); }
 
 	GainControl(double deltat);
 	virtual ~GainControl();
@@ -65,7 +65,7 @@ class OptimalControl : public ControlBase {
 	OptimalControl&	operator=(const OptimalControl& other) = delete;
 	void	update(const Point& z);
 public:
-	virtual void	parameter(int index, double v);
+	virtual void	filter_parameter(int index, double v);
 	void	measurementerror(double m);
 	double	measurementerror() const;
 	void	systemerror(double s);

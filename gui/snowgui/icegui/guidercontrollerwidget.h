@@ -58,6 +58,7 @@ public:
 		snowstar::RemoteInstrument instrument);
 	~guidercontrollerwidget();
 	void	setupTracker();
+	void	setupFilter();
 
 signals:
 	void	exposureChanged(astro::camera::Exposure);
@@ -78,7 +79,8 @@ public slots:
 	void	trackSelected(snowstar::TrackingHistory track);
 
 	void	selectPoint(astro::image::ImagePoint);
-	void	methodChanged(int);
+	void	trackingMethodChanged(int);
+	void	filterMethodChanged(int);
 
 	void	gpupdateintervalChanged(double);
 	void	aoupdateintervalChanged(double);

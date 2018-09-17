@@ -197,14 +197,15 @@ module snowstar {
 		TrackerLARGE
 	};
 
+	enum FilterMethod {
+		FilterNONE,
+		FilterGAIN,
+		FilterKALMAN
+	};
+
 	enum BacklashDirection {
 		BacklashDEC,
 		BacklashRA
-	};
-
-	enum GainDirection {
-		GainX,
-		GainY
 	};
 
 	struct BacklashPoint {
@@ -278,7 +279,7 @@ module snowstar {
 		Exposure	getExposure();
 
 		// set/get the tracker method
-		void	setTrackerMethod(TrackerMethod method);
+		void	setTrackerMethod(TrackerMethod trackermethod);
 		TrackerMethod	getTrackerMethod();
 
 		// This is the position of the star we want to track.
@@ -315,6 +316,10 @@ module snowstar {
 		void	registerCalibrationMonitor(Ice::Identity calibrationmonitor);
 		void	unregisterCalibrationMonitor(Ice::Identity calibrationmonitor);
 
+		// set/get the tracker method
+		void	setFilterMethod(FilterMethod filtermethod);
+		FilterMethod	getFilterMethod();
+
 		// Start and stop the guding process.
 		// Before this can be done, the exposure parameters must be
 		// specified, as the determine which are of the CCD to read
@@ -322,8 +327,9 @@ module snowstar {
 		void	startGuiding(float gpinterval, float aointerval,
 				bool stepping) throws BadState;
 		float	getGuidingInterval() throws BadState;
-		float	getGain(GainDirection dir) throws BadState;
-		void	setGain(GainDirection dir, float gain) throws BadState;
+		float	getFilterParameter(int index) throws BadState;
+		void	setFilterParameter(int index, float value)
+				throws BadState;
 		void	stopGuiding() throws BadState;
 
 		// The following methods are used to monitor the calibration
