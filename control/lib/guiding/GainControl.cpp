@@ -8,8 +8,10 @@
 namespace astro {
 namespace guiding {
 
-GainControl::GainControl(CalibrationPtr cal, double deltat)
-	: ControlBase(cal, deltat) {
+GainControl::GainControl(double deltat) : ControlBase(deltat) {
+}
+
+GainControl::~GainControl() {
 }
 
 Point	GainControl::correct(const Point& offset) {

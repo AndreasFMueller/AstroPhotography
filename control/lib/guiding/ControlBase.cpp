@@ -8,12 +8,14 @@
 namespace astro {
 namespace guiding {
 
-ControlBase::ControlBase(CalibrationPtr cal, double deltat)
-	: _calibration(cal), _deltat(deltat) {
+ControlBase::ControlBase(double deltat) : _deltat(deltat) {
+}
+
+ControlBase::~ControlBase() {
 }
 
 Point	ControlBase::correct(const Point& offset) {
-	return _calibration->correction(offset, deltat());
+	return offset;
 }
 
 } // namespace guiding

@@ -15,17 +15,21 @@ namespace guiding {
  * \brief Base class for control implementation
  */
 class ControlBase {
-	CalibrationPtr	_calibration;
-public:
-	CalibrationPtr	calibration() const { return _calibration; }
-	void	calibration(CalibrationPtr c) { _calibration = c; }
-private:
 	double	_deltat;
 public:
 	double	deltat() const { return _deltat; }
 	void	deltat(double d) { _deltat = d; }
-	
-	ControlBase(CalibrationPtr cal, double deltat);
+protected:
+	double	_parameters[2];
+	virtual void	parameter(int index, double v) {
+		_parameters[index] = v;
+	}
+	virtual double	parameter(int index) const {
+		return _parameters[index];
+	}
+public:
+	ControlBase(double deltat);
+	virtual ~ControlBase();
 
 	virtual Point	correct(const Point& offset);
 };
@@ -34,12 +38,12 @@ public:
  * \brief simple control mechanism to change the gain of the control
  */
 class GainControl : public ControlBase {
-	float	_gain[2];
 public:
-	void	gain(int index, float value) { _gain[index] = value; }
-	float	gain(int index) const { return _gain[index]; }
+	void	gain(int index, float value) { parameter(index, value); }
+	float	gain(int index) const { return parameter(index); }
 
-	GainControl(CalibrationPtr cal, double deltat);
+	GainControl(double deltat);
+	virtual ~GainControl();
 
 	virtual Point	correct(const Point& offset);
 };
@@ -61,7 +65,12 @@ class OptimalControl : public ControlBase {
 	OptimalControl&	operator=(const OptimalControl& other) = delete;
 	void	update(const Point& z);
 public:
-	OptimalControl(CalibrationPtr cal, double deltat);
+	virtual void	parameter(int index, double v);
+	void	measurementerror(double m);
+	double	measurementerror() const;
+	void	systemerror(double s);
+	double	systemerror() const;
+	OptimalControl(double deltat);
 	virtual ~OptimalControl();
 	virtual Point	correct(const Point& offset);
 	Point	offset() const;

@@ -12,8 +12,7 @@ namespace guiding {
 /**
  * \brief Create an optimal controller object
  */
-OptimalControl::OptimalControl(CalibrationPtr cal, double deltat)
-	: ControlBase(cal, deltat)  {
+OptimalControl::OptimalControl(double deltat) : ControlBase(deltat)  {
 	_kalmanfilter = new KalmanFilter(deltat);
 }
 
@@ -28,7 +27,6 @@ OptimalControl::~OptimalControl() {
  * \brief Correct with the current offset
  */
 Point	OptimalControl::correct(const Point& offset) {
-	throw std::runtime_error("optimal control filter not implemented yet");
 	// update the filter with the current offset
 	_kalmanfilter->update(offset);
 
@@ -37,6 +35,45 @@ Point	OptimalControl::correct(const Point& offset) {
 
 	// correct the filtered offset
 	return ControlBase::correct(filtered_offset);
+}
+
+/**
+ * \brief set measurement error
+ */
+void	OptimalControl::measurementerror(double m) {
+	_kalmanfilter->measurementerror(m);
+}
+
+/**
+ * \brief set system error
+ */
+void	OptimalControl::systemerror(double s) {
+	_kalmanfilter->systemerror(s);
+}
+
+/**
+ * \brief get measurement error
+ */
+double	OptimalControl::measurementerror() const {
+	return _kalmanfilter->measurementerror();
+}
+
+/**
+ * \brief get system error
+ */
+double	OptimalControl::systemerror() const {
+	return _kalmanfilter->systemerror();
+}
+
+/**
+ * \brief override the parameter method to set the error in the kalman filter
+ */
+void	OptimalControl::parameter(int index, double value) {
+	ControlBase::parameter(index, value);
+	switch (index) {
+	case 0: systemerror(value); break;
+	case 1: measurementerror(value); break;
+	}
 }
 
 } // namespace guiding

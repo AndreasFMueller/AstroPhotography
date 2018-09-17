@@ -4,6 +4,7 @@
  * (c) 2018 Prof Dr Andreas Müller, Hochschule Rapperswil
  */
 #include <KalmanFilter.h>
+#include <AstroDebug.h>
 
 namespace astro {
 namespace guiding {
@@ -58,6 +59,7 @@ double	KalmanFilter::measurementerror() const {
  * \param s	variance of the measurement error
  */
 void	KalmanFilter::measurementerror(double m) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "new measurement error: %.3f", m);
 	R(0,0) = m;
 	R(1,1) = m;
 }
@@ -75,6 +77,7 @@ double	KalmanFilter::systemerror() const {
  * \param s	variance of the system error
  */
 void	KalmanFilter::systemerror(double s) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "new system error: %.3f", s);
 	Q(0,0) = s;
 	Q(0,1) = s /  _deltat;
 	Q(1,0) = s /  _deltat;

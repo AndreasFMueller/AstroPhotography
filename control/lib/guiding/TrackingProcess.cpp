@@ -42,16 +42,33 @@ CallbackDataPtr	TrackingProcessCallback::operator()(CallbackDataPtr data) {
 TrackingProcess::TrackingProcess(GuiderBase *guider, TrackerPtr tracker,
 	ControlDevicePtr guidePortDevice,
 	ControlDevicePtr adaptiveOpticsDevice,
-	persistence::Database database)
+	persistence::Database database,
+	filter_method _filtermethod)
 	: BasicProcess(guider, tracker, database),
 	  _guidePortDevice(guidePortDevice),
 	  _adaptiveOpticsDevice(adaptiveOpticsDevice),
 	  _summary(guider->name(), guider->instrument(), guider->ccdname()) {
-	_gain[0] = 1;
-	_gain[1] = 1;
+	_parameters[0] = 1;
+	_parameters[1] = 1;
 	_guideportInterval = 10;
 	_adaptiveopticsInterval = 0;
 	_id = -1;
+	_control = NULL;
+
+	// construct the filter method thingy
+	if (_guidePortDevice) {
+		switch (_filtermethod) {
+		case BASIC:
+			_control = new ControlBase(_guideportInterval);
+			break;
+		case GAIN:
+			_control = new GainControl(_guideportInterval);
+			break;
+		case KALMAN:
+			_control = new OptimalControl(_guideportInterval);
+			break;
+		}
+	}
 
 	// additional fields in the summary
 	if (guidePortDevice) {
@@ -77,6 +94,10 @@ TrackingProcess::TrackingProcess(GuiderBase *guider, TrackerPtr tracker,
 TrackingProcess::~TrackingProcess() {
 	if (_callback) {
 		guider()->removeTrackingCallback(_callback);
+	}
+	if (_control) {
+		delete _control;
+		_control = NULL;
 	}
 }
 
@@ -255,11 +276,15 @@ void	TrackingProcess::step(thread::Thread<TrackingProcess>& thread,
 		throw std::runtime_error(cause);
 	}
 
-	// we modify the correction, which allows us to make
-	// the correction more stable
-	offset = offset * gain();
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "TRACK %d: gain-corrected offset: %s",
-		_id, offset.toString().c_str());
+	// get the filtered offset
+	if (_control) {
+		offset = _control->correct(offset);
+		debug(LOG_DEBUG, DEBUG_LOG, 0,
+			"TRACK %d: filtered offset: %s", _id,
+			offset.toString().c_str());
+	}
+
+	// now distribute the corrections to the different control devices
 	Point	remainder  = offset;
 	if (adaptiveOpticsUsable()) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0,

@@ -6,6 +6,8 @@
 #include <AstroGuiding.h>
 #include <BasicProcess.h>
 
+#include <Control.h>
+
 namespace astro {
 namespace guiding {
 
@@ -17,11 +19,11 @@ class TrackingProcess : public BasicProcess {
 	ControlDevicePtr	_adaptiveOpticsDevice;
 	TrackerPtr	_tracker;
 	int	_id;
-	float	_gain[2];
+	float	_parameters[2];
 public:
-	float	gain(int index) const { return _gain[index]; }
-	void	gain(int index, float g) { _gain[index] = g; }
-	Point	gain() const { return Point(_gain[0], _gain[1]); }
+	float	parameter(int index) const { return _parameters[index]; }
+	void	parameter(int index, float g) { _parameters[index] = g; }
+	Point	parameter() const { return Point(_parameters[0], _parameters[1]); }
 private:
 	double	_guideportInterval;
 public:
@@ -30,6 +32,9 @@ public:
 	}
 	void	guideportInterval(double g) {
 		_guideportInterval = g;
+		if (_control) {
+			_control->deltat(g);
+		}
 	}
 private:
 	double	_adaptiveopticsInterval;
@@ -50,6 +55,10 @@ public:
 	bool	stepping() const { return _stepping; }
 	void	stepping(bool s) { _stepping = s; }
 
+	typedef enum { BASIC, GAIN, KALMAN } filter_method;
+private:
+	ControlBase	*_control;
+
 private:
 	callback::CallbackPtr	_callback;
 	TrackingPoint	_last;
@@ -61,7 +70,8 @@ public:
 	TrackingProcess(GuiderBase *base, TrackerPtr tracker,
 		ControlDevicePtr guidePortDevice,
 		ControlDevicePtr adaptiveOpticsDevice,
-		persistence::Database database);
+		persistence::Database database,
+		filter_method _filter_method = KALMAN);
 	~TrackingProcess();
 
 	void    main(astro::thread::Thread<TrackingProcess>& thread);

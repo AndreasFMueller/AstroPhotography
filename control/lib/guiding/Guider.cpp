@@ -387,12 +387,12 @@ float	Guider::gain(gain_direction dir) {
 	switch (dir) {
 	case GAIN_X:
 		if (tp) {
-			_gain_x = tp->gain(0);
+			_gain_x = tp->parameter(0);
 		}
 		return _gain_x;
 	case GAIN_Y:
 		if (tp) {
-			_gain_y = tp->gain(1);
+			_gain_y = tp->parameter(1);
 		}
 		return _gain_y;
 	}
@@ -412,13 +412,13 @@ void	Guider::gain(gain_direction dir, float g) {
 	switch (dir) {
 	case GAIN_X:
 		if (tp) {
-			tp->gain(0, g);
+			tp->parameter(0, g);
 		}
 		_gain_x = g;
 		break;
 	case GAIN_Y:
 		if (tp) {
-			tp->gain(1, g);
+			tp->parameter(1, g);
 		}
 		_gain_y = g;
 		break;
