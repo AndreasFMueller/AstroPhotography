@@ -20,21 +20,46 @@ using namespace astro::image;
 
 namespace snowgui {
 
-class gainconversion {
+class GuiderParameterConverter {
+	snowstar::FilterMethod  _method;
 public:
-static float	dial2gain(int dial);
-static int	gain2dial(float gain);
+	GuiderParameterConverter(snowstar::FilterMethod method)
+		: _method(method) { }
+	int     parameter2dial(float value) const;
+	float  dial2parameter(int dial) const;
 };
 
-float	gainconversion::dial2gain(int dial) {
-	return 0.2 + 0.01 * dial;
+
+float	GuiderParameterConverter::dial2parameter(int dial) const {
+	switch (_method) {
+	case snowstar::FilterNONE:
+		return 1.0;
+	case snowstar::FilterGAIN:
+		return 0.2 + 0.01 * dial;
+	case snowstar::FilterKALMAN:
+		return 0.2 + dial / 8.;
+	}
 }
 
-int	gainconversion::gain2dial(float gain) {
-	int	dial = 100 * (gain - 0.2);
-	if (dial < 0) { dial = 0; }
-	if (dial > 160) { dial = 160; }
-	return dial;
+int	GuiderParameterConverter::parameter2dial(float value) const {
+	switch (_method) {
+	case snowstar::FilterNONE:
+		return 80;
+	case snowstar::FilterGAIN:
+		{
+			int	dial = 100 * (value - 0.2);
+			if (dial < 0) { dial = 0; }
+			if (dial > 160) { dial = 160; }
+			return dial;
+		}
+	case snowstar::FilterKALMAN:
+		{
+			int	dial = 8 * (value - 0.2);
+			if (dial < 0) { dial = 0; }
+			if (dial > 160) { dial = 160; }
+			return dial;
+		}
+	}
 }
 
 /**
@@ -230,9 +255,10 @@ void	guidercontrollerwidget::setupGuider() {
 	ui->filterMethodBox->blockSignals(false);
 
 	// gain
-	int gx = gainconversion::gain2dial(_guider->getFilterParameter(0));
+	GuiderParameterConverter	gpc(_guider->getFilterMethod());
+	int gx = gpc.parameter2dial(_guider->getFilterParameter(0));
 	ui->xGainDial->setValue(gx);
-	int gy = gainconversion::gain2dial(_guider->getFilterParameter(1));
+	int gy = gpc.parameter2dial(_guider->getFilterParameter(1));
 	ui->yGainDial->setValue(gy);
 	
 	// do all the registration stuff
@@ -513,6 +539,14 @@ void	guidercontrollerwidget::setupFilter() {
 }
 
 /**
+ * \brief call this method after a filter method change to update the parameters
+ */
+void	guidercontrollerwidget::updateParameters() {
+	xGainChanged(ui->xGainDial->value());
+	yGainChanged(ui->yGainDial->value());
+}
+
+/**
  * \brief Change the filter method
  */
 void	guidercontrollerwidget::filterMethodChanged(int index) {
@@ -526,6 +560,7 @@ void	guidercontrollerwidget::filterMethodChanged(int index) {
 		break;
 	}
 	setupFilter();
+	updateParameters();
 }
 
 /**
@@ -720,7 +755,8 @@ void	guidercontrollerwidget::backlashDECClicked() {
  * \brief Change the x gain
  */
 void	guidercontrollerwidget::xGainChanged(int value) {
-	float	fvalue = gainconversion::dial2gain(value);
+	GuiderParameterConverter	gpc(_guider->getFilterMethod());
+	float	fvalue = gpc.dial2parameter(value);
 	char	b[20];
 	snprintf(b, sizeof(b), "%.2f", fvalue);
 	ui->xGainValue->setText(QString(b));
@@ -733,7 +769,8 @@ void	guidercontrollerwidget::xGainChanged(int value) {
  * \brief Change the y gain
  */
 void	guidercontrollerwidget::yGainChanged(int value) {
-	float	fvalue = gainconversion::dial2gain(value);
+	GuiderParameterConverter	gpc(_guider->getFilterMethod());
+	float	fvalue = gpc.dial2parameter(value);
 	char	b[20];
 	snprintf(b, sizeof(b), "%.2f", fvalue);
 	ui->yGainValue->setText(QString(b));

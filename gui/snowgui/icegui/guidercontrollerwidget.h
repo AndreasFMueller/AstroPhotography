@@ -59,6 +59,7 @@ public:
 	~guidercontrollerwidget();
 	void	setupTracker();
 	void	setupFilter();
+	void	updateParameters();
 
 signals:
 	void	exposureChanged(astro::camera::Exposure);
