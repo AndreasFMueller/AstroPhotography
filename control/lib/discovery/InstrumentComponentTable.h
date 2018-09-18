@@ -86,6 +86,7 @@ public:
                 : Table<InstrumentComponentRecord,
                         InstrumentComponentTableAdapter>(database) {
         }
+	virtual ~InstrumentComponentTable() { }
 };
 typedef std::shared_ptr<InstrumentComponentTable> InstrumentComponentTablePtr;
 

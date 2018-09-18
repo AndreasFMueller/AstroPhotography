@@ -373,6 +373,7 @@ public:
  */
 class Action {
 public:
+	virtual ~Action() { }
 	virtual void	execute() = 0;
 };
 typedef std::shared_ptr<Action>	ActionPtr;

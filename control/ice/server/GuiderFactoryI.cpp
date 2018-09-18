@@ -192,6 +192,20 @@ void	GuiderFactoryI::deleteCalibration(int id,
 }
 
 /**
+ * \brief Add a calibration
+ */
+int	GuiderFactoryI::addCalibration(const Calibration& calibration,
+			const Ice::Current& /* current */) {
+	astro::guiding::CalibrationStore	store(database);
+	// convert the calibration to a persistent calibration
+	astro::guiding::CalibrationPtr	cal = convert(calibration);
+	astro::guiding::PersistentCalibration	pcal(*cal);
+	long	id = store.addCalibration(pcal);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "calibration stored as %ld", id);
+	return id;
+}
+
+/**
  * \brief Get all guide run ids available in the database
  */
 idlist	GuiderFactoryI::getAllTracks(const Ice::Current& /* current */) {

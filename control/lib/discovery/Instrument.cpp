@@ -567,6 +567,7 @@ class InstrumentImpl : public Instrument {
 	InstrumentBackendImpl	backend;
 public:
 	InstrumentImpl(const std::string& name) : Instrument(name) { }
+	virtual ~InstrumentImpl() { }
 public:
 	virtual int	nComponentsOfType(InstrumentComponent::Type type) {
 		return backend.nComponentsOfType(name(), type);

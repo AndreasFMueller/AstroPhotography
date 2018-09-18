@@ -35,7 +35,7 @@ class Sqlite3Statement : public Statement {
 	sqlite3_stmt	*stmt;
 public:
 	Sqlite3Statement(Sqlite3Backend& backend, const std::string& query);
-	~Sqlite3Statement();
+	virtual ~Sqlite3Statement();
 	// bind parameters
         virtual void	bindInteger(int colno, int value);
         virtual void	bindDouble(int colno, double value);
@@ -64,7 +64,7 @@ public:
 
 public:
 	Sqlite3Backend(const std::string& filename);
-	~Sqlite3Backend();
+	virtual ~Sqlite3Backend();
 	virtual std::string	escape(const std::string& value);
 	virtual Result	query(const std::string& query);
 	virtual std::vector<std::string>

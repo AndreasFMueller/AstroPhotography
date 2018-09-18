@@ -10,6 +10,7 @@
 #include <AstroFormat.h>
 #include <guidercontrollerwidget.h>
 #include <calibrationdetaildialog.h>
+#include <calibrationcalculatordialog.h>
 #include <QTimer>
 
 namespace snowgui {
@@ -24,6 +25,8 @@ calibrationwidget::calibrationwidget(QWidget *parent) :
 		this, SLOT(databaseClicked()));
 	connect(ui->calibrateButton, SIGNAL(clicked()),
 		this, SLOT(calibrateClicked()));
+	connect(ui->calculateButton, SIGNAL(clicked()),
+		this, SLOT(calculateClicked()));
 	connect(ui->detailButton, SIGNAL(clicked()),
 		this, SLOT(detailClicked()));
 
@@ -231,6 +234,17 @@ void	calibrationwidget::setupState() {
 		ui->databaseButton->setEnabled(false);
 		break;
 	}
+}
+
+/**
+ * \brief Display the calculator dialog
+ */
+void	calibrationwidget::calculateClicked() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "calculate clicked");
+	calibrationcalculatordialog	*ccd
+		= new calibrationcalculatordialog(_guider, _guiderfactory,
+			_controltype, this);
+	ccd->show();
 }
 
 } // namespace snowgui

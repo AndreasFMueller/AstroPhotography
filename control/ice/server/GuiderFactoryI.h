@@ -40,6 +40,8 @@ public:
 	Calibration	getCalibration(int id,
 				const Ice::Current& current);
 	void	deleteCalibration(int id, const Ice::Current& current);
+	int	addCalibration(const Calibration& calibration,
+			const Ice::Current& current);
 	idlist	getAllTracks(const Ice::Current& current);
 	idlist	getTracks(const GuiderDescriptor& guider,
 				const Ice::Current& current);

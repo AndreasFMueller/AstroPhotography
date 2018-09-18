@@ -20,6 +20,13 @@ using namespace astro::image;
 
 namespace snowgui {
 
+/**
+ * \brief Auxiliary class to convert dial positions to filter values and back
+ *
+ * The dial indicators to modify the parameters have the same range of integer
+ * values, but the filters themselves should be using different ranges
+ * of the parameters depending of the 
+ */
 class GuiderParameterConverter {
 	snowstar::FilterMethod  _method;
 public:
@@ -27,9 +34,15 @@ public:
 		: _method(method) { }
 	int     parameter2dial(float value) const;
 	float  dial2parameter(int dial) const;
+	int	operator()(float v) const { return parameter2dial(v); }
+	float	operator()(int d) const { return dial2parameter(d); }
 };
 
-
+/**
+ * \brief Convert a dial position into a filter parameter value
+ *
+ * \param dial	dial position to convert
+ */
 float	GuiderParameterConverter::dial2parameter(int dial) const {
 	switch (_method) {
 	case snowstar::FilterNONE:
@@ -41,6 +54,11 @@ float	GuiderParameterConverter::dial2parameter(int dial) const {
 	}
 }
 
+/**
+ * \brief Convert a filter parameter value into a dial position
+ *
+ * \param value		value to convert to a dial position
+ */
 int	GuiderParameterConverter::parameter2dial(float value) const {
 	switch (_method) {
 	case snowstar::FilterNONE:
@@ -753,6 +771,8 @@ void	guidercontrollerwidget::backlashDECClicked() {
 
 /**
  * \brief Change the x gain
+ *
+ * \param value		new value of the Parameter
  */
 void	guidercontrollerwidget::xGainChanged(int value) {
 	GuiderParameterConverter	gpc(_guider->getFilterMethod());
@@ -767,6 +787,8 @@ void	guidercontrollerwidget::xGainChanged(int value) {
 
 /**
  * \brief Change the y gain
+ *
+ * \param value		new value of the Parameter
  */
 void	guidercontrollerwidget::yGainChanged(int value) {
 	GuiderParameterConverter	gpc(_guider->getFilterMethod());

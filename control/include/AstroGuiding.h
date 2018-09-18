@@ -150,6 +150,7 @@ typedef std::shared_ptr<Tracker>	TrackerPtr;
 class NullTracker : public Tracker {
 public:
 	NullTracker() { }
+	virtual ~NullTracker() { }
 	virtual Point	operator()(image::ImagePtr newimage);
 };
 
@@ -167,6 +168,7 @@ public:
 	StarTracker(const Point& point,
 		const image::ImageRectangle& rectangle,
 		int k);
+	virtual ~StarTracker() { }
 
 	// find the displacement
 	virtual Point	operator()(image::ImagePtr newimage);
@@ -238,6 +240,7 @@ template<typename Adapter>
 class PhaseTracker : public RefreshingTracker {
 public:
 	PhaseTracker() { }
+	virtual ~PhaseTracker() { }
 	virtual Point	operator()(image::ImagePtr newimage) {
 		ConstImageAdapter<double>	*a = adapter(newimage);
 		if (!_imageptr) {
@@ -262,6 +265,7 @@ public:
 class LargeTracker : public Tracker {
 public:
 	LargeTracker() { }
+	virtual ~LargeTracker() { }
 	virtual Point	operator()(image::ImagePtr newimage);
 };
 
@@ -941,7 +945,7 @@ public:
 		_calibration = CalibrationPtr(new devicecalibration(
 			ControlDeviceName(guider->name(), type)));
 	}
-	~ControlDevice() {
+	virtual ~ControlDevice() {
 	}
 	virtual std::string	devicename() const { return _device->name(); }
 	virtual int	startCalibration(TrackerPtr /* tracker */) {

@@ -48,6 +48,7 @@ public:
 		: Table<InstrumentPropertyRecord,
 			InstrumentPropertyTableAdapter>(database) {
 	}
+	virtual ~InstrumentPropertyTable() { }
 };
 
 typedef std::shared_ptr<InstrumentPropertyTable>	InstrumentPropertyTablePtr;

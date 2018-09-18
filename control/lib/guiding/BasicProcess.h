@@ -81,6 +81,7 @@ public:
 		persistence::Database database = NULL);
 	BasicProcess(const camera::Exposure& exposure, camera::Imager& imager,
 		TrackerPtr tracker, persistence::Database database = NULL);
+	virtual ~BasicProcess() { }
 };
 
 } // namespace guiding

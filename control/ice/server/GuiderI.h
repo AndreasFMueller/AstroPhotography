@@ -73,6 +73,10 @@ public:
 	virtual GuidePortPrx getGuidePort(const Ice::Current& current);
 	virtual GuiderDescriptor getDescriptor(const Ice::Current& current);
 
+	// get parameters
+	virtual Ice::Float	getFocallength(const Ice::Current& current);
+	virtual	Ice::Float	getGuiderate(const Ice::Current& current);
+
 	// parametrization of the guiding process
 	virtual void setExposure(const Exposure&, const Ice::Current& current);
 	virtual Exposure getExposure(const Ice::Current& current);

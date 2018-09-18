@@ -18,6 +18,12 @@ namespace Ui {
 class BacklashDialog;
 }
 
+/**
+ * \brief Dialog about backlash assessment
+ *
+ * This dialog can be used to assess the amount of backlash of a mount.
+ * It can then be used to tune the backlash compensation.
+ */
 class BacklashDialog : public QDialog {
 	Q_OBJECT
 
@@ -34,10 +40,8 @@ public:
 	~BacklashDialog();
 
 	void	guider(snowstar::GuiderPrx guider);
-	snowstar::BacklashDirection	direction() const { return _direction; }
-	void	direction(snowstar::BacklashDirection d) {
-		_direction = d;
-	}
+	snowstar::BacklashDirection	direction() const;
+	void	direction(snowstar::BacklashDirection d);
 
 
 private:

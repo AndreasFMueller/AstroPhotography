@@ -48,6 +48,7 @@ class FocusEvaluator {
 protected:
 	ImagePtr	_evaluated_image;
 public:
+	virtual ~FocusEvaluator() { }
 	virtual double	operator()(const ImagePtr image) = 0;
 	ImagePtr	evaluated_image() const { return _evaluated_image; }
 };
@@ -104,6 +105,7 @@ typedef std::set<FocusItem>	FocusItems;
  */
 class FocusSolver {
 public:
+	virtual ~FocusSolver() { }
 	virtual int	position(const FocusItems& focusitems) = 0;
 };
 
@@ -112,18 +114,21 @@ typedef std::shared_ptr<FocusSolver>	FocusSolverPtr;
 class CentroidSolver : public FocusSolver {
 public:
 	CentroidSolver();
+	virtual ~CentroidSolver() { }
 	virtual int	position(const FocusItems& focusitems);
 };
 
 class ParabolicSolver : public FocusSolver {
 public:
 	ParabolicSolver();
+	virtual ~ParabolicSolver() { }
 	virtual int	position(const FocusItems& focusitems);
 };
 
 class AbsoluteValueSolver : public ParabolicSolver {
 public:
 	AbsoluteValueSolver();
+	virtual ~AbsoluteValueSolver() { }
 	virtual int	position(const FocusItems& focusitems);
 };
 
@@ -134,12 +139,14 @@ protected:
 	int	maximumposition;
 public:
 	MaximumSolver();
+	virtual ~MaximumSolver() { }
 	virtual int	position(const FocusItems& focusitems);
 };
 
 class BrennerSolver : public MaximumSolver {
 public:
 	BrennerSolver();
+	virtual ~BrennerSolver() { }
 	virtual int	position(const FocusItems& focusitems);
 };
 
@@ -230,7 +237,7 @@ private:
 public:
 	Focusing(astro::camera::CcdPtr ccd,
 		astro::camera::FocuserPtr focuser);
-	~Focusing();
+	virtual ~Focusing();
 	void	start(int min, int max);
 	void	cancel();
 public:

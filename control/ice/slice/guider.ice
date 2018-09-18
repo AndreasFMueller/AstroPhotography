@@ -272,6 +272,10 @@ module snowstar {
 		 */
 		GuiderDescriptor	getDescriptor();
 
+		// information about the guider
+		float	getFocallength();
+		float	getGuiderate();
+
 		// The guider needs to know how to expose an image, where
 		// to look for the guide star and where to lock it.
 		void	setExposure(Exposure expo)
@@ -464,6 +468,11 @@ module snowstar {
 		 * \brief Remove a calibration by id
 		 */
 		void	deleteCalibration(int id) throws NotFound;
+
+		/**
+		 * \brief add a calibration to the database
+		 */
+		int	addCalibration(Calibration cal);
 
 		/**
 		 * \brief Retrieve a list of all valid guide run ids

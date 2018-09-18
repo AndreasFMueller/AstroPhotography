@@ -59,6 +59,7 @@ public:
  */
 class FieldValue {
 public:
+	virtual ~FieldValue() { }
 	virtual int	intValue() const = 0;
 	virtual double	doubleValue() const = 0;
 	virtual std::string	stringValue() const = 0;

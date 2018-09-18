@@ -240,6 +240,7 @@ public:
 	CcdInfo(const std::string& name, const astro::image::ImageSize& size,
 		int ccdid = 0);
 	CcdInfo(const CcdInfo& other);
+	virtual	~CcdInfo() { }
 	CcdInfo&	operator=(const CcdInfo& other);
 
 	// text representation

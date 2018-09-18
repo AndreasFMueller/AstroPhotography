@@ -106,6 +106,14 @@ GuiderDescriptor GuiderI::getDescriptor(const Ice::Current& /* current */) {
 	return convert(guider->getDescriptor());
 }
 
+Ice::Float	GuiderI::getFocallength(const Ice::Current& /* current */) {
+	return guider->focallength();
+}
+
+Ice::Float	GuiderI::getGuiderate(const Ice::Current& /* current */) {
+	return guider->guiderate();
+}
+
 void GuiderI::setExposure(const Exposure& exposure,
 	const Ice::Current& /* current */) {
 	astro::camera::Exposure	e = convert(exposure);

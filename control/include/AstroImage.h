@@ -1331,6 +1331,7 @@ public:
 	Binning(int x = 1, int y = 1);
 	Binning(const Binning& other) : _x(other._x), _y(other._y) { }
 	Binning(const std::string& binning);
+	virtual	~Binning() { }
 	bool	operator==(const Binning& other) const;
 	bool	operator!=(const Binning& other) const;
 	bool	operator<(const Binning& other) const;

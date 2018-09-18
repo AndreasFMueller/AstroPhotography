@@ -224,7 +224,7 @@ void	BacklashDialog::addPoint(const snowstar::BacklashPoint& point) {
  */
 void	BacklashDialog::windowTitle() {
 	std::string	title = std::string(
-		(_direction = snowstar::BacklashDEC) ? "DEC" : "RA");
+		(_direction == snowstar::BacklashDEC) ? "DEC" : "RA");
 	title = title + std::string(" backlash");
 	if (_data.points.size() > 0) {
 		title = title + astro::stringprintf(": %d points",
@@ -342,6 +342,19 @@ void	BacklashDialog::lastpointsChanged(int lastpoints) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "cannot set last points: %d",
 			lastpoints);
 	}
+}
+
+/**
+ * \brief Set the backlash assessment direction
+ */
+void	BacklashDialog::direction(snowstar::BacklashDirection d) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "setting backlash direction to %s",
+		(d == snowstar::BacklashDEC) ? "DEC" : "RA");
+	_direction = d;
+}
+
+snowstar::BacklashDirection	BacklashDialog::direction() const {
+	return _direction;
 }
 
 } // namespace snowgui
