@@ -199,7 +199,13 @@ int	GuiderFactoryI::addCalibration(const Calibration& calibration,
 	astro::guiding::CalibrationStore	store(database);
 	// convert the calibration to a persistent calibration
 	astro::guiding::CalibrationPtr	cal = convert(calibration);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "new calibration: %s",
+		cal->toString().c_str());
 	astro::guiding::PersistentCalibration	pcal(*cal);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "name=%s", pcal.name.c_str());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "instrument=%s", pcal.instrument.c_str());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "ccd=%s", pcal.ccd.c_str());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "controldevice=%s", pcal.controldevice.c_str());
 	long	id = store.addCalibration(pcal);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "calibration stored as %ld", id);
 	return id;

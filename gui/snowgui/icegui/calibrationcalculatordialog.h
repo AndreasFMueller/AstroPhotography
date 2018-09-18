@@ -22,8 +22,6 @@ class calibrationcalculatordialog : public QDialog {
 	snowstar::GuiderPrx		_guider;
 	snowstar::GuiderFactoryPrx	_guiderfactory;
 
-	calibrationwidget	*_calibrationwidget;
-
 	double	_focallength;
 	double	_pixelsize;
 	int	_angle;
@@ -46,6 +44,9 @@ private:
 	Ui::calibrationcalculatordialog *ui;
 
 	void	updateCalibration();
+
+signals:
+	void	newCalibration(snowstar::Calibration);
 
 public slots:
 	void	angleChanged(int);

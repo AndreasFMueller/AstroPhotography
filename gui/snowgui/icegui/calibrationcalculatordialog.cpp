@@ -21,7 +21,6 @@ calibrationcalculatordialog::calibrationcalculatordialog(
 	calibrationwidget *calwidget,
 	QWidget *parent)
 	: QDialog(parent), _guider(guider), _guiderfactory(guiderfactory),
-	  _calibrationwidget(calwidget),
 	  ui(new Ui::calibrationcalculatordialog) {
 	ui->setupUi(this);
 
@@ -81,6 +80,9 @@ calibrationcalculatordialog::calibrationcalculatordialog(
 	connect(this, SIGNAL(rejected()),
 		this, SLOT(rejectCalibration()));
 
+	connect(this, SIGNAL(newCalibration(snowstar::Calibration)),
+		calwidget, SLOT(setCalibration(snowstar::Calibration)));
+
 	// update the calibration
 	updateCalibration();
 }
@@ -133,7 +135,7 @@ void	calibrationcalculatordialog::acceptCalibration() {
 	_cal.id = _guiderfactory->addCalibration(_cal);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "calibration stored as %d", _cal.id);
 	_guider->useCalibration(_cal.id, false);
-	_calibrationwidget->setCalibration(_cal);
+	emit newCalibration(_cal);
 	accept();
 }
 
