@@ -17,8 +17,11 @@ namespace snowgui {
 calibrationcalculatordialog::calibrationcalculatordialog(
 	snowstar::GuiderPrx guider,
 	snowstar::GuiderFactoryPrx guiderfactory,
-	snowstar::ControlType type, QWidget *parent)
+	snowstar::ControlType type,
+	calibrationwidget *calwidget,
+	QWidget *parent)
 	: QDialog(parent), _guider(guider), _guiderfactory(guiderfactory),
+	  _calibrationwidget(calwidget),
 	  ui(new Ui::calibrationcalculatordialog) {
 	ui->setupUi(this);
 
@@ -130,6 +133,7 @@ void	calibrationcalculatordialog::acceptCalibration() {
 	_cal.id = _guiderfactory->addCalibration(_cal);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "calibration stored as %d", _cal.id);
 	_guider->useCalibration(_cal.id, false);
+	_calibrationwidget->setCalibration(_cal);
 	accept();
 }
 

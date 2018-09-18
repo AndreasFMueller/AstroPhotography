@@ -243,7 +243,7 @@ void	calibrationwidget::calculateClicked() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "calculate clicked");
 	calibrationcalculatordialog	*ccd
 		= new calibrationcalculatordialog(_guider, _guiderfactory,
-			_controltype, this);
+			_controltype, this, this);
 	ccd->show();
 }
 

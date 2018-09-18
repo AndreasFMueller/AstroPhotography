@@ -8,6 +8,7 @@
 
 #include <QDialog>
 #include <guider.h>
+#include "calibrationwidget.h"
 
 namespace snowgui {
 
@@ -21,6 +22,7 @@ class calibrationcalculatordialog : public QDialog {
 	snowstar::GuiderPrx		_guider;
 	snowstar::GuiderFactoryPrx	_guiderfactory;
 
+	calibrationwidget	*_calibrationwidget;
 
 	double	_focallength;
 	double	_pixelsize;
@@ -36,6 +38,7 @@ public:
 	explicit calibrationcalculatordialog(snowstar::GuiderPrx guider,
 		snowstar::GuiderFactoryPrx guiderfactory,
 		snowstar::ControlType type,
+		calibrationwidget *calwidget,
 		QWidget *parent = 0);
 	~calibrationcalculatordialog();
 
