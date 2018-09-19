@@ -53,6 +53,9 @@ bool	GuiderDescriptor::operator<(const GuiderDescriptor& other) const {
 	return adaptiveoptics() < other.adaptiveoptics();
 }
 
+/**
+ * \brief Convert a GuiderDescriptor to a string
+ */
 std::string	GuiderDescriptor::toString() const {
 	return stringprintf("%s:%s|%s|%s", name().c_str(),
 		instrument().c_str(), ccd().c_str(),
