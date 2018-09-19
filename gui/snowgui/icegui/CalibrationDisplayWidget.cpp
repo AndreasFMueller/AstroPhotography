@@ -132,7 +132,7 @@ void	CalibrationDisplayWidget::drawCommon(QPainter& painter,
 	switch (_calibration.type) {
 	case snowstar::ControlGuidePort:
 		if (_calibration.points.size() > 0) {
-			snowstar::CalibrationPoint	p = _calibration.points[0];
+			snowstar::CalibrationPoint p = _calibration.points[0];
 			ref.x = p.star.x;
 			ref.y = p.star.y;
 		}
@@ -218,6 +218,9 @@ void	CalibrationDisplayWidget::drawCommon(QPainter& painter,
 	double	cx = width() / 2;
 	double	cy = height() / 2;
 	double	h = height() - 1;
+	h = height();
+	QPointF	center(cx, h - cy);
+
 
 	// we are going to draw a few things, we need a pen for that
 	QPen	pen(Qt::SolidLine);
@@ -293,11 +296,11 @@ void	CalibrationDisplayWidget::drawCommon(QPainter& painter,
 	}
 
 	// draw the vectors
-	QPointF	center(cx, cy);
 	pen.setWidth(2);
 	QFont	font;
 	painter.setFont(font);
 
+	// draw R vector
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "draw R vector");
 	pen.setColor((dim) ? QColor(51., 51., 102.) : QColor(0., 0., 204.));
 	painter.setPen(pen);
@@ -308,6 +311,7 @@ void	CalibrationDisplayWidget::drawCommon(QPainter& painter,
 	painter.drawText(rax * r + cx - 10, h - (ray * r + cy) - 10, 20, 20,
 		Qt::AlignCenter, QString("R"));
 
+	// draw D vector
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "draw D vector");
 	pen.setColor((dim) ? QColor(102., 204., 153.) : QColor(0., 102., 51.));
 	painter.setPen(pen);
