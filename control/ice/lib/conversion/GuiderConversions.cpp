@@ -35,6 +35,8 @@ std::string	guiderdescriptor2name(const GuiderDescriptor& descriptor) {
 }
 
 GuiderDescriptor	guiderdescriptorParse(const std::string& name) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "parsing guider name '%s'",
+		name.c_str());
 	GuiderDescriptor	descriptor;
 	descriptor.ccdIndex = -1;
 	descriptor.guideportIndex = -1;

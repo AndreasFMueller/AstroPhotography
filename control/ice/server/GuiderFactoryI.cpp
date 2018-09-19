@@ -196,12 +196,60 @@ void	GuiderFactoryI::deleteCalibration(int id,
  */
 int	GuiderFactoryI::addCalibration(const Calibration& calibration,
 			const Ice::Current& /* current */) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "storing a calibration");
 	astro::guiding::CalibrationStore	store(database);
 	// convert the calibration to a persistent calibration
 	astro::guiding::CalibrationPtr	cal = convert(calibration);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "new calibration: %s",
 		cal->toString().c_str());
 	astro::guiding::PersistentCalibration	pcal(*cal);
+
+	// get the Instrument Backend
+	std::string	instrumentname = calibration.guider.instrumentname;
+	astro::discover::InstrumentBackend	instruments(database);
+	if (!instruments.has(instrumentname)) {
+		std::string	msg = astro::stringprintf("no instrument '%s'",
+			instrumentname.c_str());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw BadState(msg);
+	}
+	astro::discover::InstrumentPtr	instrument
+		= instruments.get(instrumentname);
+	astro::discover::InstrumentComponent	ccdComponent
+		= instrument->getCcd(calibration.guider.ccdIndex);
+
+	pcal.instrument = instrumentname;
+	pcal.ccd = ccdComponent.deviceurl();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "found ccd: %s", pcal.ccd.c_str());
+	switch (calibration.type) {
+	case snowstar::ControlGuidePort:
+		{
+		astro::discover::InstrumentComponent	guideportComponent
+			= instrument->getGuidePort(
+				calibration.guider.guideportIndex);
+		pcal.controldevice = guideportComponent.deviceurl();
+		}
+		break;
+	case snowstar::ControlAdaptiveOptics:
+		{
+		astro::discover::InstrumentComponent	adaptiveopticsComponent
+			= instrument->getAdaptiveOptics(
+				calibration.guider.adaptiveopticsIndex);
+		pcal.controldevice = adaptiveopticsComponent.deviceurl();
+		}
+		break;
+	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "found control device: %s",
+		pcal.controldevice.c_str());
+
+	// parsing the name
+	astro::guiding::GuiderName	guidername(instrumentname,
+		calibration.guider.ccdIndex,
+		calibration.guider.guideportIndex,
+		calibration.guider.adaptiveopticsIndex);
+	pcal.name = guidername.name();
+
+	// convert the calibration name
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "name=%s", pcal.name.c_str());
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "instrument=%s", pcal.instrument.c_str());
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "ccd=%s", pcal.ccd.c_str());
