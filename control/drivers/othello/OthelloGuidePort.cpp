@@ -41,6 +41,12 @@ typedef struct othello_set_all_times_s {
 	uint16_t	raminus;	// port 3 on GuidePort
 } __attribute__((packed)) othello_set_all_times_t;
 
+/**
+ * \brief convert the time to an integer
+ *
+ * The activation time in the guideport device is measured in 1/100ths of
+ * a second.
+ */
 static uint16_t	othellotime(float t) {
 	if (t < 0) { return 0; }
 	if (t > 655.35) {
@@ -50,6 +56,14 @@ static uint16_t	othellotime(float t) {
 	return result;
 }
 
+/**
+ * \brief Activate the pins of the guide port
+ *
+ * \param raplus	time in seconds for which the RA+ line should be active
+ * \param raminus	time in seconds for which the RA- line should be active
+ * \param decplus	time in seconds for which the DEC+ line should be active
+ * \param decminus	time in seconds for which the DEC- line should be active
+ */
 void	OthelloGuidePort::activate(float raplus, float raminus,
 		float decplus, float decminus) {
 	othello_set_all_times_t	payload;
@@ -76,6 +90,13 @@ void	OthelloGuidePort::activate(float raplus, float raminus,
 
 typedef	uint8_t	active_t;
 
+/**
+ * \brief
+ *
+ * The order of the guide port bits seem to be different between between
+ * the conventions of the guideport device and what the active method
+ * is expected to return.
+ */
 uint8_t	OthelloGuidePort::active() {
 	Request<active_t>	request(
 		RequestBase::vendor_specific_type,
@@ -89,7 +110,12 @@ uint8_t	OthelloGuidePort::active() {
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", cause.c_str());
 		throw x;
 	}
-	return *request.data();
+	// convert the data into the conventions used by 
+	uint8_t	result = *request.data();
+	return	((result & (1 << 0)) ? RAPLUS : 0) |
+		((result & (1 << 1)) ? DECPLUS : 0) |
+		((result & (1 << 2)) ? DECMINUS : 0) |
+		((result & (1 << 3)) ? RAMINUS : 0);
 }
 
 } // namespace othello

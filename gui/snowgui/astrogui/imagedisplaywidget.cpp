@@ -656,8 +656,14 @@ void	imagedisplaywidget::processNewImage() {
 		ui->colorBox->setHidden(false);
 		ui->bayerBox->setEnabled(false);
 	} else {
-		ui->colorBox->setHidden(true);
 		ui->bayerBox->setEnabled(true);
+		// if a bayer pattern is selected, we should also display the
+		// the color box
+		if (ui->bayerBox->currentIndex()) {
+			ui->colorBox->setHidden(false);
+		} else {
+			ui->colorBox->setHidden(true);
+		}
 	}
 
 	// process rectangle information for the new image
@@ -680,6 +686,17 @@ void	imagedisplaywidget::processNewSettings() {
 	// if there is no image, we don't need to do anything
 	if (!_image) {
 		return;
+	}
+
+	// check settings for the bayer box
+	if (_image->planes() == 1) {
+		// if a bayer pattern is selected, we should also display the
+		// the color box
+		if (ui->bayerBox->currentIndex()) {
+			ui->colorBox->setHidden(false);
+		} else {
+			ui->colorBox->setHidden(true);
+		}
 	}
 
 	// display the image
