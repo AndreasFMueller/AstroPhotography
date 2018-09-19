@@ -30,7 +30,8 @@ void GuiderI::startGuiding(Ice::Float gpinterval, Ice::Float aointerval,
 	astro::guiding::TrackerPtr	tracker = getTracker();
 
 	// start guiding
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "start guiding");
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "start guiding (filter method %d)",
+		_filter_method);
 	guider->startGuiding(tracker, gpinterval, aointerval, stepping,
 		_filter_method);
 	astro::event(EVENT_CLASS, astro::events::INFO,

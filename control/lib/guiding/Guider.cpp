@@ -201,8 +201,15 @@ void	Guider::startGuiding(TrackerPtr tracker, double gpinterval,
 	_state.startGuiding();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "creating new tracking process");
 	TrackingProcess	*tp = new TrackingProcess(this, tracker,
-		guidePortDevice, adaptiveOpticsDevice, database());
+		guidePortDevice, adaptiveOpticsDevice, database(),
+		filtermethod);
 	trackingprocess = BasicProcessPtr(tp);
+
+	// setting filter parameters
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "setting filter parameters %f/%f",
+		filter_parameter(0), filter_parameter(1));
+	tp->filter_parameter(0, filter_parameter(0));
+	tp->filter_parameter(1, filter_parameter(1));
 
 	// set the guiding intervals
 	if (gpinterval < aointerval) {
@@ -380,13 +387,6 @@ void	Guider::callback(const std::exception& /* ex */) {
  * notices increasing amplitude e.g.
  */
 float	Guider::filter_parameter(int dir) {
-	TrackingProcess	*tp = NULL;
-	if (trackingprocess) {
-		tp = dynamic_cast<TrackingProcess*>(&*trackingprocess);
-	}
-	if (tp) {
-		_filter_parameters[dir] = tp->filter_parameter(dir);
-	}
 	return _filter_parameters[dir];
 }
 
@@ -400,9 +400,9 @@ void	Guider::filter_parameter(int dir, float g) {
 	TrackingProcess	*tp = NULL;
 	if (trackingprocess) {
 		tp = dynamic_cast<TrackingProcess*>(&*trackingprocess);
-	}
-	if (tp) {
-		tp->filter_parameter(dir, g);
+		if (tp) {
+			tp->filter_parameter(dir, g);
+		}
 	}
 	_filter_parameters[dir] = g;
 }
