@@ -317,10 +317,11 @@ public:
 		CCD = 2,
 		Cooler = 3,
 		GuiderCCD = 4,
-		GuidePort = 5,
-		FilterWheel = 6,
-		Focuser = 7,
-		Mount = 8
+		FinderCCD = 5,
+		GuidePort = 6,
+		FilterWheel = 7,
+		Focuser = 8,
+		Mount = 9
 	} Type;
 	std::string	_name;
 	Type	_type;
@@ -427,6 +428,7 @@ public:
 	bool	hasCcd();
 	bool	hasCooler();
 	bool	hasGuiderCcd();
+	bool	hasFinderCcd();
 	bool	hasGuidePort();
 	bool	hasFilterWheel();
 	bool	hasFocuser();
@@ -446,6 +448,7 @@ public:
 	InstrumentComponent	getCcd(int index = 0);
 	InstrumentComponent	getCooler(int index = 0);
 	InstrumentComponent	getGuiderCcd(int index = 0);
+	InstrumentComponent	getFinderCcd(int index = 0);
 	InstrumentComponent	getGuidePort(int index = 0);
 	InstrumentComponent	getFilterWheel(int index = 0);
 	InstrumentComponent	getFocuser(int index = 0);

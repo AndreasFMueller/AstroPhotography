@@ -28,6 +28,8 @@ public:
 			const std::string& servicename);
 	void	addGuiderCCD(const std::string& devicename,
 			const std::string& servicename);
+	void	addFinderCCD(const std::string& devicename,
+			const std::string& servicename);
 	void	deleteSelected();
 
 	void	redisplay();

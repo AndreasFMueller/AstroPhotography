@@ -77,6 +77,8 @@ astro::discover::InstrumentComponentKey::Type	convertInstrumentType(
 		return astro::discover::InstrumentComponentKey::Cooler;
 	case InstrumentGuiderCCD:
 		return astro::discover::InstrumentComponentKey::GuiderCCD;
+	case InstrumentFinderCCD:
+		return astro::discover::InstrumentComponentKey::FinderCCD;
 	case InstrumentGuidePort:
 		return astro::discover::InstrumentComponentKey::GuidePort;
 	case InstrumentFilterWheel:
@@ -102,6 +104,8 @@ InstrumentComponentType	convertInstrumentType(
 		return InstrumentCooler;
 	case astro::discover::InstrumentComponentKey::GuiderCCD:
 		return InstrumentGuiderCCD;
+	case astro::discover::InstrumentComponentKey::FinderCCD:
+		return InstrumentFinderCCD;
 	case astro::discover::InstrumentComponentKey::GuidePort:
 		return InstrumentGuidePort;
 	case astro::discover::InstrumentComponentKey::FilterWheel:
@@ -126,6 +130,8 @@ std::string	instrumentcomponent2name(const InstrumentComponentType type) {
                 return std::string("Cooler");
 	case InstrumentGuiderCCD:
                 return std::string("GuiderCCD");
+	case InstrumentFinderCCD:
+                return std::string("FinderCCD");
 	case InstrumentGuidePort:
                 return std::string("GuidePort");
 	case InstrumentFilterWheel:
@@ -153,6 +159,9 @@ InstrumentComponentType	name2instrumentcomponent(const std::string& name) {
 	}
 	if (std::string("GuiderCCD") == name) {
 		return InstrumentGuiderCCD;
+	}
+	if (std::string("FinderCCD") == name) {
+		return InstrumentFinderCCD;
 	}
 	if (std::string("GuidePort") == name) {
 		return InstrumentGuidePort;

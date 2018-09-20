@@ -20,10 +20,11 @@ module snowstar {
 		InstrumentCCD = 2,
 		InstrumentCooler = 3,
 		InstrumentGuiderCCD = 4,
-		InstrumentGuidePort = 5,
-		InstrumentFilterWheel = 6,
-		InstrumentFocuser = 7,
-		InstrumentMount = 8
+		InstrumentFinderCCD = 5,
+		InstrumentGuidePort = 6,
+		InstrumentFilterWheel = 7,
+		InstrumentFocuser = 8,
+		InstrumentMount = 9
 	};
 
 	/**

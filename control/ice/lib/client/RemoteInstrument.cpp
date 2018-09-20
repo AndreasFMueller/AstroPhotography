@@ -198,6 +198,18 @@ CcdPrx           RemoteInstrument::guiderccd(unsigned int index) {
 }
 
 /**
+ * \brief Retrive a finder ccd proxy
+ */
+CcdPrx           RemoteInstrument::finderccd(unsigned int index) {
+	InstrumentComponent	component
+			= getComponent(InstrumentFinderCCD, index);
+
+	// get the AO device for mapped or direct components
+	return devices(astro::ServerName(component.servicename))
+			->getCcd(component.deviceurl);
+}
+
+/**
  * \brief Retrive a guider port proxy
  *
  * guider ports can be derived from a camera

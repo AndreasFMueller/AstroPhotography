@@ -52,6 +52,7 @@ public slots:
 
 	void	addClicked();
 	void	addguiderccdClicked();
+	void	addfinderccdClicked();
 	void	deleteClicked();
 
 	void	deleteInstrument();

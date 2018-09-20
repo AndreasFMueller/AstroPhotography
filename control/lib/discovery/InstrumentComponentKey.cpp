@@ -22,6 +22,8 @@ std::string	InstrumentComponentKey::type2string(Type t) {
 		return std::string("Cooler");
 	case GuiderCCD:
 		return std::string("GuiderCCD");
+	case FinderCCD:
+		return std::string("FinderCCD");
 	case GuidePort:
 		return std::string("GuidePort");
 	case FilterWheel:
@@ -50,6 +52,9 @@ InstrumentComponentKey::Type	InstrumentComponentKey::string2type(const std::stri
 	}
 	if (std::string("GuiderCCD") == name) {
                 return GuiderCCD;
+	}
+	if (std::string("FinderCCD") == name) {
+                return FinderCCD;
 	}
 	if (std::string("GuidePort") == name) {
                 return GuidePort;

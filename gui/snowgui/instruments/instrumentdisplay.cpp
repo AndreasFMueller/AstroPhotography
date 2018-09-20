@@ -66,6 +66,7 @@ void	instrumentdisplay::alltoplevel() {
 	toplevel(snowstar::InstrumentCCD, "CCD");
 	toplevel(snowstar::InstrumentCooler, "Cooler");
 	toplevel(snowstar::InstrumentGuiderCCD, "GuiderCCD");
+	toplevel(snowstar::InstrumentGuiderCCD, "FinderCCD");
 	toplevel(snowstar::InstrumentGuidePort, "Guideport");
 	toplevel(snowstar::InstrumentFilterWheel, "Filterwheel");
 	toplevel(snowstar::InstrumentFocuser, "Focuser");
@@ -105,7 +106,7 @@ void	instrumentdisplay::children(snowstar::InstrumentComponentType type) {
 }
 
 /**
- * \brief add alld evice children
+ * \brief add all device children
  */
 void	instrumentdisplay::allchildren() {
 	children(snowstar::InstrumentAdaptiveOptics);
@@ -113,6 +114,7 @@ void	instrumentdisplay::allchildren() {
 	children(snowstar::InstrumentCCD);
 	children(snowstar::InstrumentCooler);
 	children(snowstar::InstrumentGuiderCCD);
+	children(snowstar::InstrumentFinderCCD);
 	children(snowstar::InstrumentGuidePort);
 	children(snowstar::InstrumentFilterWheel);
 	children(snowstar::InstrumentFocuser);
@@ -205,6 +207,29 @@ void	instrumentdisplay::addGuiderCCD(const std::string& devicename,
 }
 
 /**
+ * \brief Add a CCD device as a Finder CCD
+ */
+void	instrumentdisplay::addFinderCCD(const std::string& devicename,
+		const std::string& servicename) {
+	if (!_instrument) {
+		return;
+	}
+	snowstar::InstrumentComponent	component;
+	component.instrumentname = _instrument->name();
+	component.deviceurl = devicename;
+	component.servicename = servicename;
+	astro::DeviceName	d(devicename);
+	component.type = snowstar::InstrumentFinderCCD;
+	if (convert(d) != snowstar::InstrumentCCD) {
+		return;
+	}
+	component.index = _instrument->nComponentsOfType(component.type);
+	_instrument->add(component);
+
+	redisplay();
+}
+
+/**
  * \brief Delete the selected component from the instrument
  */
 void	instrumentdisplay::deleteSelected() {
@@ -262,6 +287,7 @@ void	instrumentdisplay::allproperties() {
 	property(0, "focallength", "Focal length [m] of main camera");
 	property(1, "guiderfocallength", "Focal length [m] of guide camera");
 	property(2, "guiderate", "mount rate wrt. siderial rate");
+	property(3, "finderfocallength", "Focal length [m] of finder");
 	ui->propertyTable->blockSignals(false);
 }
 
@@ -305,6 +331,7 @@ void	instrumentdisplay::propertyValueChanged(int row, int /* column */) {
 	case 0:	name = "focallength"; break;
 	case 1:	name = "guiderfocallength"; break;
 	case 2:	name = "guiderate"; break;
+	case 3: name = "finderfocallength"; break;
 	}
 	p.property = name;
 	QTableWidgetItem	*item = ui->propertyTable->item(row, 1);

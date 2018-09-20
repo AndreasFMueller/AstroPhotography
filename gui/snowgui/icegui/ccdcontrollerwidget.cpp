@@ -99,6 +99,22 @@ void	ccdcontrollerwidget::instrumentSetup(
 			index++;
 		}
 		index = 0;
+		while (_instrument.has(snowstar::InstrumentFinderCCD, index)) {
+			try {
+				snowstar::CcdPrx	ccd = _instrument.finderccd(index);
+				if (!_ccd) {
+					_ccd = ccd;
+				}
+				std::string	sn = instrument.displayname(
+					snowstar::InstrumentFinderCCD, index,
+					serviceobject.name());
+				ui->ccdSelectionBox->addItem(QString(sn.c_str()));
+			} catch (const std::exception& x) {
+				debug(LOG_DEBUG, DEBUG_LOG, 0, "ignoring ccd %d", index);
+			}
+			index++;
+		}
+		index = 0;
 	}
 	while (_instrument.has(snowstar::InstrumentGuiderCCD, index)) {
 		try {

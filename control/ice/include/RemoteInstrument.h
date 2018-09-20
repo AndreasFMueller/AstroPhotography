@@ -44,6 +44,7 @@ public:
 	CameraPrx		camera(unsigned int index = 0);
 	CcdPrx			ccd(unsigned int index = 0);
 	CcdPrx			guiderccd(unsigned int index = 0);
+	CcdPrx			finderccd(unsigned int index = 0);
 	CoolerPrx		cooler(unsigned int index = 0);
 	FilterWheelPrx		filterwheel(unsigned int index = 0);
 	FocuserPrx		focuser(unsigned int index = 0);

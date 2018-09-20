@@ -45,6 +45,10 @@ InstrumentComponent     Instrument::getGuiderCcd(int index) {
 	return this->get(InstrumentComponentKey::GuiderCCD, index);
 }
 
+InstrumentComponent     Instrument::getFinderCcd(int index) {
+	return this->get(InstrumentComponentKey::FinderCCD, index);
+}
+
 InstrumentComponent     Instrument::getGuidePort(int index) {
 	return this->get(InstrumentComponentKey::GuidePort, index);
 }
@@ -79,6 +83,10 @@ bool	Instrument::hasCooler() {
 
 bool	Instrument::hasGuiderCcd() {
 	return this->has(InstrumentComponentKey::GuiderCCD);
+}
+
+bool	Instrument::hasFinderCcd() {
+	return this->has(InstrumentComponentKey::FinderCCD);
 }
 
 bool	Instrument::hasGuidePort() {
@@ -118,6 +126,7 @@ std::list<InstrumentComponent>	Instrument::list() {
 	add(result, InstrumentComponent::CCD);
 	add(result, InstrumentComponent::Cooler);
 	add(result, InstrumentComponent::GuiderCCD);
+	add(result, InstrumentComponent::FinderCCD);
 	add(result, InstrumentComponent::GuidePort);
 	add(result, InstrumentComponent::FilterWheel);
 	add(result, InstrumentComponent::Focuser);

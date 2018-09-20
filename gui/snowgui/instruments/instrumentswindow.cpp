@@ -49,6 +49,8 @@ instrumentswindow::instrumentswindow(QWidget *parent,
 		this, SLOT(addClicked()));
 	connect(ui->addguiderccdButton, SIGNAL(clicked()),
 		this, SLOT(addguiderccdClicked()));
+	connect(ui->addfinderccdButton, SIGNAL(clicked()),
+		this, SLOT(addfinderccdClicked()));
 
 	// set the window title on
 	std::string	title = astro::stringprintf("Edit instruments in %s",
@@ -97,6 +99,7 @@ instrumentswindow::~instrumentswindow() {
 void	instrumentswindow::instrumentEnabled(bool enabled) {
 	ui->addButton->setEnabled(enabled);
 	ui->addguiderccdButton->setEnabled(enabled);
+	ui->addfinderccdButton->setEnabled(enabled);
 	ui->deleteButton->setEnabled(enabled);
 	ui->deleteinstrumentButton->setEnabled(enabled);
 	ui->instrumentdisplayWidget->setEnabled(enabled);
@@ -238,6 +241,16 @@ void	instrumentswindow::addguiderccdClicked() {
 	std::string	devicename = ui->moduledisplayWidget->selectedDevicename();
 	std::string	servicename = _serviceobject.name();
 	ui->instrumentdisplayWidget->addGuiderCCD(devicename, servicename);
+}
+
+/**
+ * \brief Slot called when the user clicks Add FinderCCD
+ */
+void	instrumentswindow::addfinderccdClicked() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "add GuiderCDD clicked");
+	std::string	devicename = ui->moduledisplayWidget->selectedDevicename();
+	std::string	servicename = _serviceobject.name();
+	ui->instrumentdisplayWidget->addFinderCCD(devicename, servicename);
 }
 
 /**

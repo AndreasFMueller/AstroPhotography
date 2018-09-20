@@ -126,6 +126,13 @@
        </widget>
       </item>
       <item>
+       <widget class="QPushButton" name="addfinderccdButton">
+        <property name="text">
+         <string>FinderCCD</string>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QPushButton" name="deleteButton">
         <property name="text">
          <string>Delete</string>
