@@ -19,6 +19,7 @@ libastroutils_la_SOURCES = 						\
 	demangle.cpp							\
 	Exceptions.cpp							\
 	Format.cpp							\
+	ImageCoordinates.cpp						\
 	Path.cpp							\
 	Pidfile.cpp							\
 	Point.cpp							\

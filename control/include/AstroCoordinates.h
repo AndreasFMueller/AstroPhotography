@@ -50,7 +50,10 @@ static Angle	dms_to_angle(const std::string& dms);
 	bool	operator>=(const Angle& other) const;
 	bool	operator==(const Angle& other) const;
 	bool	operator!=(const Angle& other) const;
+static const Angle right_angle;
 };
+
+Angle	operator*(double l, const Angle& a);
 
 double	cos(const Angle& a);
 double	sin(const Angle& a);
@@ -58,6 +61,9 @@ double	tan(const Angle& a);
 double	cot(const Angle& a);
 double	sec(const Angle& a);
 double	csc(const Angle& a);
+
+Angle	arccos(double x);
+Angle	arcsin(double x);
 
 class TwoAngles {
 	Angle	_a1;
@@ -71,6 +77,8 @@ public:
 	Angle&	a2() { return _a2; }
 	const Angle&	operator[](int i) const;
 	Angle&	operator[](int i);
+	TwoAngles	operator+(const TwoAngles& other) const;
+	TwoAngles	operator-(const TwoAngles& other) const;
 };
 
 class LongLat;
@@ -95,6 +103,7 @@ class Vector;
 class RaDec : public TwoAngles {
 public:
 	RaDec() { }
+	RaDec(const TwoAngles& ta) : TwoAngles(ta) { }
 	RaDec(const Angle& ra, const Angle& dec) : TwoAngles(ra, dec) { }
 	RaDec(const SphericalCoordinates& spherical)
 		: TwoAngles(spherical.phi(), Angle(M_PI / 2) - spherical.theta()) { }
@@ -107,6 +116,8 @@ public:
 	bool	operator>(const RaDec& other) const;
 	bool	operator<=(const RaDec& other) const;
 	bool	operator>=(const RaDec& other) const;
+	RaDec	operator+(const RaDec& other) const;
+	RaDec	operator-(const RaDec& other) const;
 	virtual std::string	toString() const;
 static const RaDec	north_pole;
 static const RaDec	south_pole;
@@ -194,6 +205,23 @@ public:
 	Point	operator()(const BarycentricPoint& barycentricpoint) const;
 	std::string	toString() const;
 	bool	inside(const Point& point) const;
+};
+
+/**
+ * \brief Coordinate Conversion for 
+ */
+class ImageCoordinates {
+	RaDec	_center;
+	Angle	_angular_resolution;
+	Angle	_azimut;
+	bool	_mirror;
+public:
+	ImageCoordinates(const RaDec& center, const Angle& angular_resolution,
+		const Angle& azimut, bool mirror = false);
+	ImageCoordinates(const RaDec& center, const Angle& angular_resolution,
+		bool mirror = false);
+	RaDec	offset(const Point& offset) const;
+	RaDec	operator()(const Point& offset) const;
 };
 
 } // namespace astro

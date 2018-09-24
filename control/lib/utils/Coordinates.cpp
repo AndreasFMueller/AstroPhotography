@@ -125,6 +125,19 @@ double	cot(const Angle& a) { return 1. / tan(a); }
 double	sec(const Angle& a) { return 1 / cos(a); }
 double	csc(const Angle& a) { return 1 / sin(a); }
 
+Angle	arccos(double x) {
+	return Angle(acos(x));
+}
+
+Angle	arcsin(double x) {
+	return Angle(asin(x));
+}
+
+Angle	operator*(double l, const Angle& a) {
+	return a * l;
+}
+
+
 class angle_parser {
 public:
 	static std::string	r;
@@ -220,6 +233,7 @@ Angle	Angle::dms_to_angle(const std::string& dms) {
 	return result;
 }
 
+const Angle Angle::right_angle(M_PI/2);
 
 //////////////////////////////////////////////////////////////////////
 // TwoAngles implementation
@@ -238,6 +252,14 @@ const Angle&	TwoAngles::operator[](int i) const {
 	case 1: return a2();
 	}
 	throw std::range_error("angle index out of range");
+}
+
+TwoAngles	TwoAngles::operator+(const TwoAngles& other) const {
+	return TwoAngles(_a1 + other._a1, _a2 + other._a2);
+}
+
+TwoAngles	TwoAngles::operator-(const TwoAngles& other) const {
+	return TwoAngles(_a1 - other._a1, _a2 - other._a2);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -282,6 +304,14 @@ std::string	RaDec::toString() const {
 
 const RaDec	RaDec::north_pole(Angle(0), Angle(M_PI / 2));
 const RaDec	RaDec::south_pole(Angle(0), Angle(-M_PI / 2));
+
+RaDec	RaDec::operator+(const RaDec& other) const {
+	return RaDec(TwoAngles::operator+(other));
+}
+
+RaDec	RaDec::operator-(const RaDec& other) const {
+	return RaDec(TwoAngles::operator-(other));
+}
 
 //////////////////////////////////////////////////////////////////////
 // SphericalCoordinates implementation
