@@ -1,0 +1,38 @@
+#
+# pointing.pro.in -- qt configuration file for the pointing subappliction
+#
+# (c) 2016 Prof Dr Andreas Mueller, Hochschule Rapperswil
+#
+
+QT       += core gui widgets
+
+TEMPLATE = lib
+CONFIG += staticlib
+QMAKE_CXXFLAGS += @EXTRA_CXXFLAGS@
+QMAKE_LFLAGS += @EXTRA_LDFLAGS@
+
+QMAKE_MAC_SDK = @MACSDK@
+
+# Directories for ICE and the astrophotography library
+ICEDIR = @ICEDIR@
+ICELIBS = @ICELIBS@
+ASTROPATH = @ASTROPATH@
+ASTROLIBDIR = @ASTROLIBDIR@
+
+LIBS += -L$${ASTROLIBDIR} -lastro
+LIBS += -liceastro
+LIBS +=	$${ICELIBS}
+
+INCLUDEPATH += $${ASTROPATH}/include
+INCLUDEPATH += $${ICEDIR}/include
+INCLUDEPATH += ../icegui ../astrogui
+
+FORMS    +=								\
+	pointingwindow.ui
+
+SOURCES += 								\
+	pointingwindow.cpp 						\
+
+HEADERS  += 								\
+	pointingwindow.h							\
+
