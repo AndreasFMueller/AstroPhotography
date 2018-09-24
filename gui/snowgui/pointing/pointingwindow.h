@@ -25,7 +25,8 @@ public:
 	~pointingwindow();
 
 public slots:
-	void newImage(astro::image::ImagePtr image);
+	void	newImage(astro::image::ImagePtr image);
+	void	pointSelected(astro::image::ImagePoint);
 
 private:
 	Ui::pointingwindow *ui;

@@ -62,7 +62,7 @@ public:
 	bool	subframeIsVisible();
 	void	setSubframeVisible(bool);
 
-	// control whether the information is visible
+	// control whether the image information at the bottom is visible
 	bool	infoIsVisible();
 	void	setInfoVisible(bool);
 

@@ -18,7 +18,7 @@ pointingwindow::pointingwindow(QWidget *parent)
 	ui->setupUi(this);
 
 	// set up the image display widget
-	ui->imageWidget->setInfoVisible(false);
+	ui->imageWidget->setInfoVisible(true);
         ui->imageWidget->setRectangleSelectionEnabled(false);
         ui->imageWidget->setPointSelectionEnabled(true);
 
@@ -30,6 +30,11 @@ pointingwindow::pointingwindow(QWidget *parent)
 		SIGNAL(imageReceived(astro::image::ImagePtr)),
 		this,
 		SLOT(newImage(astro::image::ImagePtr)));
+
+	connect(ui->imageWidget,
+		SIGNAL(pointSelected(astro::image::ImagePoint)),
+		this,
+		SLOT(pointSelected(astro::image::ImagePoint)));
 }
 
 /**
@@ -79,6 +84,14 @@ void    pointingwindow::closeEvent(QCloseEvent * /* event */) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "allow deletion");
 	sendImage(astro::image::ImagePtr(NULL), std::string());
 	deleteLater();
+}
+
+/**
+ * \brief handle new point selection
+ */
+void	pointingwindow::pointSelected(astro::image::ImagePoint p) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "point %s selected",
+		p.toString().c_str());
 }
 
 } // namespace snowgui
