@@ -35,6 +35,7 @@ public slots:
 	void	launchPreview();
 	void	launchFocusing();
 	void	launchGuiding();
+	void	launchPointing();
 	void	launchRepository();
 	void	launchInstruments();
 	void	launchTasks();

@@ -12,6 +12,7 @@
 #include <takeimagewindow.h>
 #include <focusingwindow.h>
 #include <guidingwindow.h>
+#include <pointingwindow.h>
 #include <instrumentswindow.h>
 #include "configurationdialog.h"
 #include <imageswindow.h>
@@ -48,6 +49,8 @@ MainWindow::MainWindow(QWidget *parent,
 		this, SLOT(launchFocusing()));
 	connect(ui->appGuidingButton, SIGNAL(clicked()),
 		this, SLOT(launchGuiding()));
+	connect(ui->appPointingButton, SIGNAL(clicked()),
+		this, SLOT(launchPointing()));
 	connect(ui->appInstrumentsButton, SIGNAL(clicked()),
 		this, SLOT(launchInstruments()));
 	connect(ui->appRepositoryButton, SIGNAL(clicked()),
@@ -84,6 +87,7 @@ MainWindow::MainWindow(QWidget *parent,
 			ui->appPreviewButton->setEnabled(true);
 			ui->appFocusingButton->setEnabled(true);
 			ui->appExposeButton->setEnabled(true);
+			ui->appPointingButton->setEnabled(true);
 			if (_serviceobject.has(ServiceSubset::GUIDING)) {
 				ui->appGuidingButton->setEnabled(true);
 			}
@@ -177,6 +181,27 @@ void	MainWindow::launchGuiding() {
 		message.setText(QString("Cannot launch Guiding"));
 		message.setInformativeText(QString(astro::stringprintf(
 			"The Guiding subapplication could not be started. "
+			"Cause: %s", x.what()).c_str()));
+		message.exec();
+	}
+}
+
+/**
+ * \brief Launch the Pointing subapplication
+ */
+void	MainWindow::launchPointing() {
+	try {
+		InstrumentSelectionApplication<snowgui::pointingwindow>	*is
+			= new InstrumentSelectionApplication<snowgui::pointingwindow>(this, _serviceobject);
+		is->setWindowTitle(QString("Select instrument for Pointing "
+			"application"));
+		is->exec();
+		delete is;
+	} catch (const std::exception& x) {
+		QMessageBox	message;
+		message.setText(QString("Cannot launch Pointing"));
+		message.setInformativeText(QString(astro::stringprintf(
+			"The Pointing subapplication could not be started. "
 			"Cause: %s", x.what()).c_str()));
 		message.exec();
 	}

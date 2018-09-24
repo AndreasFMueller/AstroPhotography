@@ -26,6 +26,7 @@ LIBS += -L../instruments -linstruments
 LIBS += -L../image -limage
 LIBS += -L../focusing -lfocusing
 LIBS += -L../guiding -lguiding
+LIBS += -L../pointing -lpointing
 LIBS += -L../task -ltask
 LIBS += -L../browser -lbrowser
 LIBS += -L../icegui -licegui
@@ -39,7 +40,7 @@ INCLUDEPATH += $${ASTROPATH}/include
 INCLUDEPATH += $${ICEDIR}/include
 INCLUDEPATH += /usr/local/include
 INCLUDEPATH += ../icegui ../astrogui ../image ../focusing ../guiding
-INCLUDEPATH += ../instruments ../images ../repository ../expose
+INCLUDEPATH += ../pointing ../instruments ../images ../repository ../expose
 INCLUDEPATH += ../task ../browser
 
 RC_ICONS = snowgui.ico
