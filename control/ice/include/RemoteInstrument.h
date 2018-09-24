@@ -53,6 +53,11 @@ public:
 	GuiderPrx		guider(unsigned int ccdindex = 0,
 					unsigned int guideportindex = 0,
 					unsigned int aoindex = 0);
+	bool	hasProperty(const std::string& name);
+	std::string	property(const std::string& name);
+	double	doubleProperty(const std::string& name);
+	int	integerProperty(const std::string& name);
+	bool	booleanProperty(const std::string& name);
 };
 
 } // namespace snowstar

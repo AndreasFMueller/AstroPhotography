@@ -8,6 +8,7 @@
 
 #include <InstrumentWidget.h>
 #include <AstroCamera.h>
+#include <AstroCoordinates.h>
 #include <image.h>
 #include <QTimer>
 
@@ -16,6 +17,34 @@ namespace snowgui {
 namespace Ui {
 	class ccdcontrollerwidget;
 }
+
+/**
+ * \brief Holder class to collect information about each CCD
+ */
+class ccddata {
+	snowstar::InstrumentComponentType	_type;
+	int	_index;
+	double	_focallength;
+	astro::Angle	_azimut;
+	std::string	_name;
+	snowstar::CcdInfo	_ccdinfo;
+public:
+	ccddata() : _type(snowstar::InstrumentCCD), _index(-1),
+		    _focallength(0), _azimut(0), _name("") { }
+	ccddata(snowstar::InstrumentComponentType type, int index,
+		double focallength, const astro::Angle& azimut,
+		const std::string& name)
+		: _type(type), _index(index), _focallength(focallength),
+		  _azimut(azimut), _name(name) { }
+	snowstar::InstrumentComponentType	type() const { return _type; }
+	int	index() const { return _index; }
+	double	focallength() const { return _focallength; }
+	const astro::Angle&	azimut() const { return _azimut; }
+	const std::string& 	name() const { return _name; }
+	void	ccdinfo(const snowstar::CcdInfo& i) { _ccdinfo = i; }
+	const snowstar::CcdInfo&	ccdinfo() const { return _ccdinfo; }
+	std::string	toString() const;
+};
 
 /**
  * \brief A reusable component to control a CCD
@@ -35,6 +64,9 @@ class ccdcontrollerwidget : public InstrumentWidget {
 	bool	_nosubframe;
 	bool	_nobuttons;
 	bool	_imageproxyonly;
+
+	std::vector<ccddata>	_ccddata;
+	ccddata	_current_ccddata;
 
 public:
 	explicit ccdcontrollerwidget(QWidget *parent = NULL);
@@ -58,6 +90,7 @@ signals:
 	void	imageReceived(astro::image::ImagePtr image);
 	void	imageproxyReceived(snowstar::ImagePrx image);
 	void	ccdSelected(int);
+	void	ccddataSelected(ccddata);
 
 private:
 	void	setupCcd();

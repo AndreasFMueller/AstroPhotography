@@ -6,6 +6,7 @@
 #include "pointingwindow.h"
 #include "ui_pointingwindow.h"
 #include <AstroDebug.h>
+#include <IceConversions.h>
 
 namespace snowgui {
 
@@ -30,6 +31,10 @@ pointingwindow::pointingwindow(QWidget *parent)
 		SIGNAL(imageReceived(astro::image::ImagePtr)),
 		this,
 		SLOT(newImage(astro::image::ImagePtr)));
+	connect(ui->ccdcontrollerWidget,
+		SIGNAL(ccddataSelected(ccddata)),
+		this,
+		SLOT(ccddataSelected(ccddata)));
 
 	connect(ui->imageWidget,
 		SIGNAL(pointSelected(astro::image::ImagePoint)),
@@ -90,8 +95,41 @@ void    pointingwindow::closeEvent(QCloseEvent * /* event */) {
  * \brief handle new point selection
  */
 void	pointingwindow::pointSelected(astro::image::ImagePoint p) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "point %s selected",
-		p.toString().c_str());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "point %s selected, data %s",
+		p.toString().c_str(), _ccddata.toString().c_str());
+	// get the current coordinates from the mount
+	astro::RaDec	radec = ui->mountcontrollerWidget->current();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "current position: %s",
+		radec.toString().c_str());
+
+	// compute angular resolution
+	astro::Angle	angular_resolution(_ccddata.ccdinfo().pixelwidth /
+				_ccddata.focallength());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "resolution: %.4f",
+		angular_resolution.degrees());
+	astro::ImageCoordinates	coord(radec, angular_resolution,
+					_ccddata.azimut(), false);
+
+	// calculate the new target
+	astro::image::ImagePoint	center = snowstar::convert(_ccddata.ccdinfo().size).center();
+	astro::image::ImagePoint	offset = p - center;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "offset = %s",
+		offset.toString().c_str());
+
+	// send the new target to the mount controller widget
+	astro::RaDec	target = coord(offset);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "new target: %s",
+		target.toString().c_str());
+	ui->mountcontrollerWidget->setTarget(target);
+}
+
+/**
+ * \brief handle a new data record for the ccd
+ */
+void	pointingwindow::ccddataSelected(ccddata d) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "got a new CCDdata record: %s",
+		d.toString().c_str());
+	_ccddata = d;
 }
 
 } // namespace snowgui

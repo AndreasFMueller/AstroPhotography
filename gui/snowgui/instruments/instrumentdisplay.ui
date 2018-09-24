@@ -63,11 +63,14 @@
       </size>
      </property>
      <property name="rowCount">
-      <number>4</number>
+      <number>7</number>
      </property>
      <property name="columnCount">
       <number>3</number>
      </property>
+     <row/>
+     <row/>
+     <row/>
      <row/>
      <row/>
      <row/>

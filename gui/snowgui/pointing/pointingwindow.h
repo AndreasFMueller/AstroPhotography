@@ -7,6 +7,7 @@
 #define SNOWGUI_POINTINGWINDOW_H
 
 #include <InstrumentWidget.h>
+#include <ccdcontrollerwidget.h>
 
 namespace snowgui {
 
@@ -16,6 +17,7 @@ namespace Ui {
 
 class pointingwindow : public InstrumentWidget {
 	Q_OBJECT
+	ccddata	_ccddata;
 
 public:
 	explicit pointingwindow(QWidget *parent = 0);
@@ -27,6 +29,7 @@ public:
 public slots:
 	void	newImage(astro::image::ImagePtr image);
 	void	pointSelected(astro::image::ImagePoint);
+	void	ccddataSelected(ccddata);
 
 private:
 	Ui::pointingwindow *ui;

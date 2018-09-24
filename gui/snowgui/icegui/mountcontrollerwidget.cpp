@@ -91,7 +91,7 @@ void	mountcontrollerwidget::setupMount() {
 }
 
 static QString	rangemessage("The RA value must be between 0 and 24 hours, "
-			"and the DEC value must be between -90 and -90°");
+			"and the DEC value must be between -90° and +90°");
 
 /**
  * \brief What to do when the user clicks the goto button
@@ -178,6 +178,31 @@ void	mountcontrollerwidget::mountChanged(int index) {
 	_mount = _instrument.mount(index);
 	setupMount();
 	emit mountSelected(index);
+}
+
+/**
+ * \brief get the RA and DEC from the mount
+ */
+astro::RaDec	mountcontrollerwidget::current() {
+	snowstar::RaDec	radec = _mount->getRaDec();
+	astro::Angle	ra, dec;
+	ra.hours(radec.ra);
+	dec.degrees(radec.dec);
+	return astro::RaDec(ra, dec);
+}
+
+/**
+ * \brief set the target
+ */
+void	mountcontrollerwidget::setTarget(const astro::RaDec& target) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "setting new target: %s",
+		target.toString().c_str());
+	_target.ra = target.ra().hours();
+	while (_target.ra < 0) { _target.ra += 24; }
+	while (_target.ra >= 24) { _target.ra -= 24; }
+	_target.dec = target.dec().degrees();
+	ui->raField->setText(QString(astro::stringprintf("%.4f", _target.ra).c_str()));
+	ui->decField->setText(QString(astro::stringprintf("%.4f", _target.dec).c_str()));
 }
 
 } // namespace snowgui

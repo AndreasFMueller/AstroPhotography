@@ -10,6 +10,7 @@
 #include <QTimer>
 #include <AstroIO.h>
 #include <AstroImageops.h>
+#include <AstroFormat.h>
 #include <QMessageBox>
 
 using namespace astro::image;
@@ -17,6 +18,16 @@ using namespace astro::io;
 using namespace astro::camera;
 
 namespace snowgui {
+
+/**
+ * \brief convert ccddata to a string
+ */
+std::string	ccddata::toString() const {
+	return astro::stringprintf("%s[%d] f=%.3f, azi=%.2f, %s",
+		(_type == snowstar::InstrumentCCD) ? "imaging" :
+		(_type == snowstar::InstrumentFinderCCD) ? "finder" : "guider",
+		_index, _focallength, _azimut.degrees(), _name.c_str());
+}
 
 /**
  * \brief Constructor for the CCD controller
@@ -27,6 +38,7 @@ ccdcontrollerwidget::ccdcontrollerwidget(QWidget *parent) :
 	ui->setupUi(this);
 
 	// install all internal connections
+	ui->ccdSelectionBox->blockSignals(true);
 	connect(ui->ccdSelectionBox, SIGNAL(currentIndexChanged(int)),
 		this, SLOT(ccdChanged(int)));
 
@@ -76,65 +88,145 @@ void	ccdcontrollerwidget::instrumentSetup(
 		astro::discover::ServiceObject serviceobject,
 		snowstar::RemoteInstrument instrument) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "begin ccdcontrollerwidget::instrumentSetup()");
+	ui->ccdSelectionBox->blockSignals(true);
+
 	// parent setup
 	InstrumentWidget::instrumentSetup(serviceobject, instrument);
+
+	// initialize the parameters we will need later
+	double	focallength = 1.0;
+	double	azimuth = 0;
+	double	guiderfocallength = 1.0;
+	double	guiderazimuth = 0;
+	double	finderfocallength = 1.0;
+	double	finderazimuth = 0;
+
+	// get the parameters wie are going to need later;
+	if (instrument.hasProperty("focallength")) {
+		focallength = instrument.doubleProperty("focallength");
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "focallength = %.3f",
+			focallength);
+	}
+	if (instrument.hasProperty("azimuth")) {
+		azimuth = instrument.doubleProperty("azimuth")
+			* M_PI / 180;
+	}
+	if (instrument.hasProperty("guiderfocallength")) {
+		guiderfocallength
+			= instrument.doubleProperty("guiderfocallength");
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "guiderfocallength = %.3f",
+			guiderfocallength);
+	}
+	if (instrument.hasProperty("guiderazimuth")) {
+		guiderazimuth = instrument.doubleProperty("guiderazimuth")
+			* M_PI / 180;
+	}
+	if (instrument.hasProperty("finderfocallength")) {
+		finderfocallength
+			= instrument.doubleProperty("finderfocallength");
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "finderfocallength = %.3f",
+			finderfocallength);
+	}
+	if (instrument.hasProperty("finderazimuth")) {
+		finderazimuth = instrument.doubleProperty("finderazimuth")
+			* M_PI / 180;
+	}
 
 	// read information about CCDs available on this instrument, and 
 	// remember the first ccd you can find
 	int	index = 0;
 	if (!_guiderccdonly) {
+		// add the imaging CCDs
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "adding guider ccds");
 		while (_instrument.has(snowstar::InstrumentCCD, index)) {
 			try {
-				snowstar::CcdPrx	ccd = _instrument.ccd(index);
-				if (!_ccd) {
-					_ccd = ccd;
-				}
+				snowstar::CcdPrx	ccd
+					= _instrument.ccd(index);
 				std::string	sn = instrument.displayname(
 					snowstar::InstrumentCCD, index,
 					serviceobject.name());
 				ui->ccdSelectionBox->addItem(QString(sn.c_str()));
+				ccddata	d(snowstar::InstrumentCCD, index,
+					focallength, azimuth, sn);
+				d.ccdinfo(ccd->getInfo());
+				debug(LOG_DEBUG, DEBUG_LOG, 0, "adding %s",
+					d.toString().c_str());
+				_ccddata.push_back(d);
+				if (!_ccd) {
+					_ccd = ccd;
+					_current_ccddata = d;
+				}
 			} catch (const std::exception& x) {
-				debug(LOG_DEBUG, DEBUG_LOG, 0, "ignoring ccd %d", index);
+				debug(LOG_DEBUG, DEBUG_LOG, 0,
+					"ignoring imaging ccd %d", index);
 			}
 			index++;
 		}
+		// add all finder CCDs
 		index = 0;
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "adding finder ccds");
 		while (_instrument.has(snowstar::InstrumentFinderCCD, index)) {
 			try {
-				snowstar::CcdPrx	ccd = _instrument.finderccd(index);
-				if (!_ccd) {
-					_ccd = ccd;
-				}
+				snowstar::CcdPrx	ccd
+					= _instrument.finderccd(index);
 				std::string	sn = instrument.displayname(
 					snowstar::InstrumentFinderCCD, index,
 					serviceobject.name());
+				sn = sn + " (finder)";
 				ui->ccdSelectionBox->addItem(QString(sn.c_str()));
+				ccddata	d(snowstar::InstrumentFinderCCD, index,
+					finderfocallength, finderazimuth, sn);
+				d.ccdinfo(ccd->getInfo());
+				_ccddata.push_back(d);
+				debug(LOG_DEBUG, DEBUG_LOG, 0, "adding %s",
+					d.toString().c_str());
+				if (!_ccd) {
+					_ccd = ccd;
+					_current_ccddata = d;
+				}
 			} catch (const std::exception& x) {
-				debug(LOG_DEBUG, DEBUG_LOG, 0, "ignoring ccd %d", index);
+				debug(LOG_DEBUG, DEBUG_LOG, 0,
+					"ignoring finder ccd %d", index);
 			}
 			index++;
 		}
 		index = 0;
 	}
+	// add all guider CCDs
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "adding imaging ccds");
 	while (_instrument.has(snowstar::InstrumentGuiderCCD, index)) {
 		try {
-			snowstar::CcdPrx	ccd = _instrument.guiderccd(index);
-			if (!_ccd) {
-				_ccd = ccd;
-			}
+			snowstar::CcdPrx	ccd
+				= _instrument.guiderccd(index);
 			std::string	sn = instrument.displayname(
 				snowstar::InstrumentGuiderCCD, index,
 				serviceobject.name());
+			sn = sn + " (guider)";
 			ui->ccdSelectionBox->addItem(QString(sn.c_str()));
+			ccddata	d(snowstar::InstrumentGuiderCCD, index,
+				guiderfocallength, guiderazimuth, sn);
+			d.ccdinfo(ccd->getInfo());
+			_ccddata.push_back(d);
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "adding %s",
+				d.toString().c_str());
+			if (!_ccd) {
+				_ccd = ccd;
+				_current_ccddata = d;
+			}
 		} catch (const std::exception& x) {
-			debug(LOG_DEBUG, DEBUG_LOG, 0, "ignoring ccd %d", index);
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "ignoring guider ccd %d",
+				index);
 		}
 		index++;
 	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "found total of %d ccds",
+		_ccddata.size());
 
 	// add additional information about this ccd
 	setupCcd();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "end ccdcontrollerwidget::instrumentSetup()");
+	ui->ccdSelectionBox->blockSignals(false);
+	emit ccddataSelected(_current_ccddata);
 }
 
 /**
@@ -167,9 +259,9 @@ void	ccdcontrollerwidget::setupCcd() {
 
 	// propagate the information from the ccdinfo structure
 	if (_ccd) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "get info");
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "get info of the CCD");
 		_ccdinfo = _ccd->getInfo();
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "got info");
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "got info of the CCD");
 		QComboBox	*binBox = ui->binningSelectionBox;
 		CcdInfo	ccdinfo(snowstar::convert(_ccdinfo));
 		std::for_each(ccdinfo.modes().begin(), ccdinfo.modes().end(),
@@ -203,6 +295,8 @@ void	ccdcontrollerwidget::setupCcd() {
 		// start the timer
 		statusTimer.start();
 	}
+
+	// emit the 
 
 	// now reenable signals
 	ui->binningSelectionBox->blockSignals(false);
@@ -493,26 +587,46 @@ void	ccdcontrollerwidget::setImage(ImagePtr image) {
  * \brief Slot to handle a change of the selected CCD
  */
 void	ccdcontrollerwidget::ccdChanged(int index) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "CCD changed");
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "CCD changed: %d from %d", index,
+		_ccddata.size());
 	statusTimer.stop();
 	try {
-		if (_guiderccdonly) {
-			_ccd = _instrument.guiderccd(index);
-		} else {
-			int	nccds = _instrument.componentCount(
-						snowstar::InstrumentCCD);
-			if (index >= nccds) {
-				_ccd = _instrument.guiderccd(index - nccds);
-			} else {
-				_ccd = _instrument.ccd(index);
-			}
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "checking index = %d", index);
+		_current_ccddata = _ccddata[index];
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "%s",
+			_current_ccddata.toString().c_str());
+		switch (_current_ccddata.type()) {
+		case snowstar::InstrumentCCD:
+			debug(LOG_DEBUG, DEBUG_LOG, 0,
+				"getting instrument ccd %d",
+				_current_ccddata.index());
+			_ccd = _instrument.ccd(_current_ccddata.index());
+			break;
+		case snowstar::InstrumentFinderCCD:
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "getting finder ccd %d",
+				_current_ccddata.index());
+			_ccd = _instrument.finderccd(_current_ccddata.index());
+			break;
+		case snowstar::InstrumentGuiderCCD:
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "getting guider ccd %d",
+				_current_ccddata.index());
+			_ccd = _instrument.guiderccd(_current_ccddata.index());
+			break;
+		default:
+			debug(LOG_ERR, DEBUG_LOG, 0, "bad type, ignored");
+			throw std::runtime_error("internal error: bad type");
 		}
 	} catch (const std::exception& x) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "cannot get ccd: %s", x.what());
 		ccdFailed(x);
 		return;
 	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "ccd selected, setting up");
         setupCcd();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "emitting ccdSelected(%d)", index);
 	emit ccdSelected(index);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "emitting ccddataSelected(%d)", index);
+	emit ccddataSelected(_current_ccddata);
 }
 
 /**

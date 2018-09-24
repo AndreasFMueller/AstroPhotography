@@ -285,9 +285,12 @@ void	instrumentdisplay::allproperties() {
 	}
 	ui->propertyTable->blockSignals(true);
 	property(0, "focallength", "Focal length [m] of main camera");
-	property(1, "guiderfocallength", "Focal length [m] of guide camera");
-	property(2, "guiderate", "mount rate wrt. siderial rate");
-	property(3, "finderfocallength", "Focal length [m] of finder");
+	property(1, "imagerazimuth", "Azimuth of imager ccd [degrees]");
+	property(2, "guiderfocallength", "Focal length [m] of guide camera");
+	property(3, "guiderazimuth", "Azimuth of guider ccd [degrees]");
+	property(4, "guiderate", "mount rate wrt. siderial rate");
+	property(5, "finderfocallength", "Focal length [m] of finder");
+	property(6, "finderazimuth", "Azimuth of finder ccd [degrees]");
 	ui->propertyTable->blockSignals(false);
 }
 
@@ -329,9 +332,12 @@ void	instrumentdisplay::propertyValueChanged(int row, int /* column */) {
 	std::string	name;
 	switch (row) {
 	case 0:	name = "focallength"; break;
-	case 1:	name = "guiderfocallength"; break;
-	case 2:	name = "guiderate"; break;
-	case 3: name = "finderfocallength"; break;
+	case 1:	name = "azimuth"; break;
+	case 2:	name = "guiderfocallength"; break;
+	case 3:	name = "guiderazimuth"; break;
+	case 4:	name = "guiderate"; break;
+	case 5: name = "finderfocallength"; break;
+	case 6: name = "finderazimuth"; break;
 	}
 	p.property = name;
 	QTableWidgetItem	*item = ui->propertyTable->item(row, 1);

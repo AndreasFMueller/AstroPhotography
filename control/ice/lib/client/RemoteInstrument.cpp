@@ -311,4 +311,38 @@ std::string	RemoteInstrument::displayname(InstrumentComponentType type,
 	return dn;
 }
 
+/**
+ * \brief Testen, ob das Instrument eine bestimmte Eigenschaft hat
+ */
+bool    RemoteInstrument::hasProperty(const std::string& property) {
+	try {
+		snowstar::InstrumentProperty	p = _instrument->getProperty(property);
+		return true;
+	} catch (...) {
+	}
+	return false;
+}
+
+std::string     RemoteInstrument::property(const std::string& propertyname) {
+	snowstar::InstrumentProperty	p
+		= _instrument->getProperty(propertyname);
+	return p.value;
+}
+
+double  RemoteInstrument::doubleProperty(const std::string& propertyname) {
+	return std::stod(property(propertyname));
+}
+
+int     RemoteInstrument::integerProperty(const std::string& propertyname) {
+	return std::stoi(property(propertyname));
+}
+
+bool    RemoteInstrument::booleanProperty(const std::string& propertyname) {
+	std::string	v = property(propertyname);
+	if (v == "yes") {
+		return true;
+	}
+	return false;
+}
+
 } // namespace snowstar

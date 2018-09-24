@@ -8,6 +8,7 @@
 
 #include <InstrumentWidget.h>
 #include <QTimer>
+#include <AstroCoordinates.h>
 
 namespace snowgui {
 
@@ -18,6 +19,7 @@ namespace Ui {
 class mountcontrollerwidget : public InstrumentWidget {
 	Q_OBJECT
 
+	snowstar::RaDec		_target;
 	snowstar::mountstate	_previousstate;
 	snowstar::MountPrx	_mount;
 
@@ -27,6 +29,8 @@ public:
 	virtual void	instrumentSetup(
 		astro::discover::ServiceObject serviceobject,
 		snowstar::RemoteInstrument instrument);
+	astro::RaDec	current();
+	void	setTarget(const astro::RaDec& target);
 
 signals:
 	void	mountSelected(int);
