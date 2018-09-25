@@ -22,11 +22,25 @@ namespace simulator {
 #define	NUMBER_OF_STARS		200
 
 /**
+ * \brief Auxiliary function to compute the number of stars to create
+ *
+ * This method attempts to create the same star density for every
+ * ccd size.
+ */
+static unsigned int	number_of_stars(const ImageSize& size) {
+	unsigned int	l = ImageSize(640, 480).getPixels();
+	unsigned int	s = (NUMBER_OF_STARS * size.getPixels()) / l;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "creating %u stars", s);
+	return s;
+}
+
+/**
  * \brief Create a simulated CCD
  */
 SimCcd::SimCcd(const CcdInfo& _info, SimLocator& locator)
 	: Ccd(_info), _locator(locator),
-	  starfield(_info.size(), STARFIELD_OVERSHOOT, NUMBER_OF_STARS),
+	  starfield(_info.size(), STARFIELD_OVERSHOOT,
+			number_of_stars(_info.size())),
 	  starcamera(ImageRectangle(_info.size())) {
 	starcamera.addHotPixels(6);
 
@@ -201,7 +215,6 @@ ImagePtr  SimCcd::getRawImage() {
 	// geometric distortion (guideport)
 	starcamera.translation(_locator.simguideport()->offset()
 		+ _locator.simadaptiveoptics()->offset());
-	starcamera.alpha(_locator.simguideport()->alpha());
 
 	// color (filterwheel)
 	starcamera.colorfactor(_locator.filterwheel()->currentPosition());

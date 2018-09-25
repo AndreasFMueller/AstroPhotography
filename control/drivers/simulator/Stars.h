@@ -35,10 +35,10 @@ public:
 	void	color(const astro::image::RGB<double>& color) {
 		_color = color;
 	}
-	virtual double	intensity(const Point& where) = 0;
-	double	intensityR(const Point& where);
-	double	intensityG(const Point& where);
-	double	intensityB(const Point& where);
+	virtual double	intensity(const Point& where) const = 0;
+	double	intensityR(const Point& where) const;
+	double	intensityG(const Point& where) const;
+	double	intensityB(const Point& where) const;
 	virtual std::string	toString() const {
 		return _position.toString();
 	}
@@ -58,7 +58,7 @@ public:
 	virtual ~Star();
 	const double&	magnitude() const { return _magnitude; }
 	void	magnitude(const double& magnitude);
-	virtual double intensity(const Point& where);
+	virtual double intensity(const Point& where) const;
 	virtual std::string	toString() const;
 };
 
@@ -77,7 +77,7 @@ public:
 	void	radius(const double& radius) { _radius = radius; }
 	double	density() const { return _density; }
 	void	density(const double& density) { _density = density; }
-	virtual double intensity(const Point& where);
+	virtual double intensity(const Point& where) const;
 	virtual std::string	toString() const;
 };
 
@@ -110,11 +110,12 @@ public:
 private:
 	void	addObject(StellarObjectPtr object);
 public:
-	virtual double	intensity(const Point& where);
-	virtual double	intensityR(const Point& where);
-	virtual double	intensityG(const Point& where);
-	virtual double	intensityB(const Point& where);
-	StellarObjectPtr	operator[](size_t index);
+	virtual double	intensity(const Point& where) const;
+	virtual double	intensityR(const Point& where) const;
+	virtual double	intensityG(const Point& where) const;
+	virtual double	intensityB(const Point& where) const;
+	size_t	nObjects() const { return objects.size(); }
+	StellarObjectPtr	operator[](size_t index) const;
 };
 
 /**
@@ -138,10 +139,6 @@ private:
 	 * \brief Translation to be applied to the star field
 	 */
 	Point	_translation;
-	/**
-	 * \brief Rotation angle 
- 	 */
-	double	_alpha;
 	/**
 	 * \brief Factor by which to stretch the star field
  	 */
@@ -208,10 +205,6 @@ public:
 		_translation = translation;
 	}
 
-	// accessors for the rotation angle
-	double	alpha() const { return _alpha; }
-	void	alpha(double alpha) { _alpha = alpha; }
-
 	// accessor for the stretch factor
 	double	stretch() const { return _stretch; }
 	void	stretch(double stretch) { _stretch = stretch; }
@@ -246,9 +239,24 @@ public:
 	const astro::image::Binning&	binning() const { return _binning; }
 	void	binning(const astro::image::Binning& binning) {
 			_binning = binning;
-	}
+}
 
 	// imaging operator
+private:
+	void	addStarIntensity(Image<double>& image,
+			StellarObjectPtr star,
+			const Point& shift) const;
+
+	void	addStarIntensities(Image<double>& image,
+			const StarField& field,
+			const Point& shift) const;
+
+	void	addSunIntensity(Image<double>& image,
+			const Point& shift) const;
+
+	void	addPlanetIntensity(Image<double>& image,
+			const Point& shift) const;
+public:
 	Image<double>	*operator()(StarField& field);
 };
 

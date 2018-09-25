@@ -19,7 +19,7 @@ namespace astro {
  * sets the _content variable depending on the environment variable STARCONTENT
  */
 StarCameraBase::StarCameraBase(const ImageRectangle& rectangle)
-	: _content(STARS), _rectangle(rectangle), _alpha(0), _stretch(1),
+	: _content(STARS), _rectangle(rectangle), _stretch(1),
 	  _dark(0), _noise(0), _light(true), _color(0), _radius(0),
 	  _innerradius(0) {
 	// check environement variable
@@ -161,87 +161,37 @@ Image<double>	*StarCameraBase::operator()(StarField& field) {
 	//
 
 	// compute a transform based on translation and rotation
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "translation = %s, alpha = %f",
-		translation().toString().c_str(), alpha());
-	astro::image::transform::Transform      transform(alpha(),
-							-translation());
-
-	// get the multiplier
-	float	multiplier = stretch();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "translation = %s",
+		translation().toString().c_str());
 
 	// fill in the points. 
 	ImagePoint	origin = rectangle().origin();
-
-	ImagePoint	body(340,220);
+	Point	shift = Point(origin - offset) - translation();
 
 	Image<double>	image(size);
 
-	for (int x = 0; x < size.width(); x++) {
-		for (int y = 0; y < size.height(); y++) {
-			// apply the transform to the current point
-			Point   where(origin.x() - offset.x() + x,
-					origin.y() - offset.y() + y);
-			Point   p = transform(where);
-			double  value = 0;
-
-			switch (_content) {
-			case STARS:
-				// compute the intensity
-				if (light()) {
-					switch (color()) {
-					case 0:
-						value = field.intensity(p);
-						break;
-					case 1:
-						value = field.intensityR(p);
-						break;
-					case 2:
-						value = field.intensityG(p);
-						break;
-					case 3:
-						value = field.intensityB(p);
-						break;
-					default:
-						break;
-					}
-				}
-				break;
-			case SUN: {
-					double	r = (p - body).abs();
-					if (r < 100) {
-						value = 1.;
-					} else if (r > 102) {
-						value = 0;
-					} else {
-						value = (102 - r) / 2;
-					}
-				}
-				break;
-			case PLANET: {
-					double	r = (p - body).abs();
-					if (r < 10) {
-						value = 1.;
-					} else if (r > 12) {
-						value = 0;
-					} else {
-						value = (12 - r) / 2;
-					}
-				}
-				break;
-			}
-			value *= multiplier;
-			image.pixel(x, y) = value;
+	if (light()) {
+		switch (_content) {
+		case STARS:
+			addStarIntensities(image, field, shift);
+			break;
+		case SUN:
+			addSunIntensity(image, shift);
+			break;
+		case PLANET:
+			addPlanetIntensity(image, shift);
+			break;
 		}
-	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "object values applied");
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "object values applied");
 
-	// compute the blurr if necessary
-	if (radius() > 1) {
-		Blurr	blurr(radius(), innerradius());
-		Image<double>	blurredimage = blurr(image);
-		image = blurredimage;
+		// compute the blurr if necessary
+		if (radius() > 1) {
+			Blurr	blurr(radius(), innerradius());
+			Image<double>	blurredimage = blurr(image);
+			image = blurredimage;
+		}
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "blurring completed");
 	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "blurring completed");
 
 	// extract the rectangle 
 	ImageRectangle	r(offset, rectangle().size());
@@ -249,6 +199,13 @@ Image<double>	*StarCameraBase::operator()(StarField& field) {
 	Image<double>	*result = new Image<double>(wa);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "rectangle %s extracted",
 		r.toString().c_str());
+
+	// stretch the values
+	for (int x = 0; x < size.width(); x++) {
+		for (int y = 0; y < size.height(); y++) {
+			image.pixel(x, y) = _stretch * image.pixel(x,y);
+		}
+	}
 
 	// add noise to the image rectangle
 	if (noise()) {
@@ -258,6 +215,120 @@ Image<double>	*StarCameraBase::operator()(StarField& field) {
 
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "base image complete");
 	return result;
+}
+
+/**
+ * \brief Add intensity for a simulated planet
+ */
+void	StarCameraBase::addPlanetIntensity(Image<double>& image,
+		const Point& shift) const {
+	int	w = image.size().width();
+	int	h = image.size().height();
+	ImagePoint	body = image.size().center();
+	for (int x = 0; x < w; x++) {
+		for (int y = 0; y < h; y++) {
+			// apply the transform to the current point
+			Point   p(shift.x() + x, shift.y() + y);
+			double  value = 0;
+			double	r = (p - body).abs();
+			if (r < 10) {
+				value = 1.;
+			} else if (r > 12) {
+				value = 0;
+			} else {
+				// interpolate between 100 and 102
+				value = (12 - r) / 2;
+			}
+			image.pixel(x, y) = value;
+		}
+	}
+}
+
+/**
+ * \brief Add intensity for a simulated sun
+ */
+void	StarCameraBase::addSunIntensity(Image<double>& image,
+		const Point& shift) const {
+	int	w = image.size().width();
+	int	h = image.size().height();
+	ImagePoint	body = image.size().center();
+	for (int x = 0; x < w; x++) {
+		for (int y = 0; y < h; y++) {
+			// apply the transform to the current point
+			Point   p(shift.x() + x, shift.y() + y);
+			double  value = 0;
+			double	r = (p - body).abs();
+			if (r < 100) {
+				value = 1.;
+			} else if (r > 102) {
+				value = 0;
+			} else {
+				// interpolate between 100 and 102
+				value = (102 - r) / 2;
+			}
+			image.pixel(x, y) = value;
+		}
+	}
+}
+
+/**
+ * \brief Add the intensity of one particular star
+ */
+void	StarCameraBase::addStarIntensity(Image<double>& image,
+		StellarObjectPtr star, const Point& shift) const {
+	ImagePoint	c(star->position().x(), star->position().y());
+
+	int	xmin = c.x() - 20;
+	if (xmin < 0) { xmin = 0; }
+
+	int	xmax = c.x() + 21;
+	if (xmax > image.size().width()) { xmax = image.size().width(); }
+
+	int	ymin = c.y() - 20;
+	if (ymin < 0) { ymin = 0; }
+
+	int	ymax = c.y() + 20;
+	if (ymax > image.size().height()) { ymax = image.size().height(); }
+
+	for (int x = xmin; x < xmax; x++) {
+		for (int y = ymin; y < ymax; y++) {
+			double	value = 0;
+			Point	p(shift.x() + x, shift.y() + y);
+			switch (color()) {
+			case 0:
+				value = star->intensity(p);
+				break;
+			case 1:
+				value = star->intensityR(p);
+				break;
+			case 2:
+				value = star->intensityG(p);
+				break;
+			case 3:
+				value = star->intensityB(p);
+				break;
+			default:
+				break;
+			}
+			image.pixel(x, y) = image.pixel(x,y) + value;
+		}
+	}
+}
+
+/**
+ * \brief Add intensities of all the stars
+ */
+void	StarCameraBase::addStarIntensities(Image<double>& image,
+		const StarField& field,
+		const Point& shift) const {
+	ImageSize	size = image.size();
+	for (int i = 0; i < field.nObjects(); i++) {
+		// get the object
+		StellarObjectPtr	star = field[i];
+
+		// now add the object intensity
+		addStarIntensity(image, star, shift);
+	}
 }
 
 /**

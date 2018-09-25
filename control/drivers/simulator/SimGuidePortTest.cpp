@@ -52,8 +52,6 @@ void	SimGuidePortTest::testConfig() {
 	SimGuidePort	*simguideport = locator->simguideport();
 	simguideport->drift(Point(1,2));
 	CPPUNIT_ASSERT(simguideport->drift() == Point(1,2));
-	simguideport->omega(5);
-	CPPUNIT_ASSERT(simguideport->omega() == 5);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "end GuidePort config test");
 }
 
@@ -95,7 +93,6 @@ void	SimGuidePortTest::testRotation() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "start GuidePort rotation test");
 	// get and configure the guider port
 	SimGuidePort	*simguideport = locator->simguideport();
-	simguideport->omega(0.01);
 
 	// get camera and ccd and retrieve an image
 	CameraPtr	camera = locator->getCamera("camera:simulator/camera");

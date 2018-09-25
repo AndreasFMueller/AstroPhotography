@@ -21,7 +21,6 @@ class SimGuidePort : public GuidePort {
 	double	starttime;
 	Point	_drift;
 	Point	_offset;
-	double	_omega;
 	double	lastactivation;
 	double	ra, dec;
 	double	pixelspeed;
@@ -39,9 +38,6 @@ public:
 	const Point&	drift() const { return _drift; }
 	void	drift(const Point& drift) { _drift = drift; }
 
-	double	omega() const { return _omega; }
-	void	omega(double omega) { _omega = omega; }
-
 	const Point&	ravector() const { return _ravector; }
 	void	ravector(const Point& ravector) { _ravector = ravector; }
 
@@ -50,7 +46,6 @@ public:
 
 	// retrive offset and rotation
 	Point	offset();
-	double	alpha();
 };
 
 } // namespace simulator

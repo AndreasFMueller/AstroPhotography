@@ -105,8 +105,7 @@ void	StarField::addObject(StellarObjectPtr object) {
 /**
  * \brief Compute cumulated intensity for all objects in the star field
  */
-double	StarField::intensity(const Point& where) {
-	std::unique_lock<std::mutex>	lock(_mutex);
+double	StarField::intensity(const Point& where) const {
 	std::vector<StellarObjectPtr>::const_iterator	i;
 	double	result = 0;
 	for (i = objects.begin(); i != objects.end(); i++) {
@@ -118,8 +117,7 @@ double	StarField::intensity(const Point& where) {
 /**
  * \brief Compute cumulated intensity for all objects in the star field
  */
-double	StarField::intensityR(const Point& where) {
-	std::unique_lock<std::mutex>	lock(_mutex);
+double	StarField::intensityR(const Point& where) const {
 	std::vector<StellarObjectPtr>::const_iterator	i;
 	double	result = 0;
 	for (i = objects.begin(); i != objects.end(); i++) {
@@ -131,8 +129,7 @@ double	StarField::intensityR(const Point& where) {
 /**
  * \brief Compute cumulated intensity for all objects in the star field
  */
-double	StarField::intensityG(const Point& where) {
-	std::unique_lock<std::mutex>	lock(_mutex);
+double	StarField::intensityG(const Point& where) const {
 	std::vector<StellarObjectPtr>::const_iterator	i;
 	double	result = 0;
 	for (i = objects.begin(); i != objects.end(); i++) {
@@ -144,8 +141,7 @@ double	StarField::intensityG(const Point& where) {
 /**
  * \brief Compute cumulated intensity for all objects in the star field
  */
-double	StarField::intensityB(const Point& where) {
-	std::unique_lock<std::mutex>	lock(_mutex);
+double	StarField::intensityB(const Point& where) const {
 	std::vector<StellarObjectPtr>::const_iterator	i;
 	double	result = 0;
 	for (i = objects.begin(); i != objects.end(); i++) {
@@ -154,8 +150,10 @@ double	StarField::intensityB(const Point& where) {
 	return result;
 }
 
-StellarObjectPtr	StarField::operator[](size_t index) {
-	std::unique_lock<std::mutex>	lock(_mutex);
+/**
+ * \brief Extract a stellar object from the star field
+ */
+StellarObjectPtr	StarField::operator[](size_t index) const {
 	if (index >= objects.size()) {
 		std::string	msg = stringprintf("index %d exceeds size %d",
 			index, objects.size());

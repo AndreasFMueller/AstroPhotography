@@ -25,7 +25,6 @@ SimGuidePort::SimGuidePort(SimLocator& locator)
 	starttime = simtime();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "SimGuidePort created at %f",
 		starttime);
-	_omega = 0;
 	// the initial mount axis directions are not parallel to the coordinate
 	// axes of the image
 	_ravector = sqrt(0.5) * Point(sqrt(3) / 2, 0.5);
@@ -188,10 +187,6 @@ Point	SimGuidePort::offset() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "complete offset: %s",
 		(_offset + p).toString().c_str());
 	return _offset + p;
-}
-
-double	SimGuidePort::alpha() {
-	return (simtime() - starttime) * _omega;
 }
 
 } // namespace simulator
