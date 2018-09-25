@@ -65,6 +65,12 @@ double	csc(const Angle& a);
 Angle	arccos(double x);
 Angle	arcsin(double x);
 
+/**
+ * \brief Class combining two angles
+ *
+ * This class is used as the base class for spherical coordinates on
+ * earth and on the celestial sphere
+ */
 class TwoAngles {
 	Angle	_a1;
 	Angle	_a2;
@@ -79,11 +85,16 @@ public:
 	Angle&	operator[](int i);
 	TwoAngles	operator+(const TwoAngles& other) const;
 	TwoAngles	operator-(const TwoAngles& other) const;
+	bool	operator==(const TwoAngles& other) const;
+	bool	operator!=(const TwoAngles& other) const;
 };
 
 class LongLat;
 class RaDec;
 
+/**
+ * \brief Spherical coordinates class
+ */
 class SphericalCoordinates : public TwoAngles {
 public:
 	SphericalCoordinates() { }
@@ -100,6 +111,11 @@ public:
 Angle	operator-(const SphericalCoordinates& s1, const SphericalCoordinates& s2);
 
 class Vector;
+/**
+ * \brief Class for right ascension and declination
+ *
+ * This class is used to describe points on the celestial sphere
+ */
 class RaDec : public TwoAngles {
 public:
 	RaDec() { }
@@ -124,6 +140,9 @@ static const RaDec	south_pole;
 };
 
 //class	UnitVector;
+/**
+ * \brief vector pointing from the center of the sphere to a point
+ */
 class	Vector {
 protected:
 	double	_x[3];
@@ -144,6 +163,9 @@ public:
 	Vector	normalized() const;
 };
 
+/**
+ * \brief Class describing a unit vector
+ */
 class	UnitVector : public Vector {
 public:
 	UnitVector();
@@ -156,6 +178,9 @@ public:
 	Vector	operator()(const Vector& other) const;
 };
 
+/**
+ * \brief Altazimut class based on two angles
+ */
 class	AzmAlt : public TwoAngles {
 public:
 	AzmAlt() { }
@@ -166,6 +191,9 @@ public:
 	Angle&	alt() { return a2(); }
 };
 
+/**
+ * \brief Longitude/Latitude class for points on earth
+ */
 class	LongLat : public TwoAngles {
 public:
 	LongLat() { }

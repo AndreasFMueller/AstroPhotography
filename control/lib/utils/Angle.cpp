@@ -1,5 +1,5 @@
 /*
- * Coordinates.cpp -- coordinate system implementation
+ * Angle.cpp -- Angle class implementation
  *
  * (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
@@ -234,98 +234,5 @@ Angle	Angle::dms_to_angle(const std::string& dms) {
 }
 
 const Angle Angle::right_angle(M_PI/2);
-
-//////////////////////////////////////////////////////////////////////
-// TwoAngles implementation
-//////////////////////////////////////////////////////////////////////
-Angle&	TwoAngles::operator[](int i) {
-	switch (i) {
-	case 0:	return a1();
-	case 1: return a2();
-	}
-	throw std::range_error("angle index out of range");
-}
-
-const Angle&	TwoAngles::operator[](int i) const {
-	switch (i) {
-	case 0:	return a1();
-	case 1: return a2();
-	}
-	throw std::range_error("angle index out of range");
-}
-
-TwoAngles	TwoAngles::operator+(const TwoAngles& other) const {
-	return TwoAngles(_a1 + other._a1, _a2 + other._a2);
-}
-
-TwoAngles	TwoAngles::operator-(const TwoAngles& other) const {
-	return TwoAngles(_a1 - other._a1, _a2 - other._a2);
-}
-
-//////////////////////////////////////////////////////////////////////
-// Comparison operators for RaDec
-//////////////////////////////////////////////////////////////////////
-RaDec::RaDec(const Vector& vector) {
-	ra() = Angle(atan2(vector.y(), vector.x()));
-	dec() = Angle(asin(vector.z() / vector.abs()));
-}
-
-bool	RaDec::operator<(const RaDec& other) const {
-	if (dec() < other.dec()) {
-		return true;
-	}
-	if (dec() > other.dec()) {
-		return false;
-	}
-	return ra() < other.ra();
-}
-
-bool	RaDec::operator>=(const RaDec& other) const {
-	return !(*this < other);
-}
-
-bool	RaDec::operator>(const RaDec& other) const {
-	if (dec() > other.dec()) {
-		return true;
-	}
-	if (dec() < other.dec()) {
-		return false;
-	}
-	return ra() > other.ra();
-}
-
-bool	RaDec::operator<=(const RaDec& other) const {
-	return !(*this > other);
-}
-
-std::string	RaDec::toString() const {
-	return ra().hms() + " " + dec().dms();
-}
-
-const RaDec	RaDec::north_pole(Angle(0), Angle(M_PI / 2));
-const RaDec	RaDec::south_pole(Angle(0), Angle(-M_PI / 2));
-
-RaDec	RaDec::operator+(const RaDec& other) const {
-	return RaDec(TwoAngles::operator+(other));
-}
-
-RaDec	RaDec::operator-(const RaDec& other) const {
-	return RaDec(TwoAngles::operator-(other));
-}
-
-//////////////////////////////////////////////////////////////////////
-// SphericalCoordinates implementation
-//////////////////////////////////////////////////////////////////////
-SphericalCoordinates::SphericalCoordinates(const LongLat& longlat)
-	: TwoAngles(longlat.longitude(), Angle(M_PI / 2) - longlat.latitude()) {
-}
-
-SphericalCoordinates::SphericalCoordinates(const RaDec& radec)
-	: TwoAngles(radec.ra(), Angle(M_PI / 2) - radec.dec()) {
-}
-
-Angle	operator-(const SphericalCoordinates& s1, const SphericalCoordinates& s2) {
-	return UnitVector(s1).angle(UnitVector(s2));
-}
 
 } // namespace astro

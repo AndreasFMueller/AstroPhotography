@@ -53,6 +53,7 @@ public:
 	GuiderPrx		guider(unsigned int ccdindex = 0,
 					unsigned int guideportindex = 0,
 					unsigned int aoindex = 0);
+	// property access
 	bool	hasProperty(const std::string& name);
 	std::string	property(const std::string& name);
 	double	doubleProperty(const std::string& name);

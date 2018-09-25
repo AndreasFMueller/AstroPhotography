@@ -29,6 +29,7 @@ SimCcd::SimCcd(const CcdInfo& _info, SimLocator& locator)
 	  starfield(_info.size(), STARFIELD_OVERSHOOT, NUMBER_OF_STARS),
 	  starcamera(ImageRectangle(_info.size())) {
 	starcamera.addHotPixels(6);
+	_last_direction.ra.degrees(-1);
 }
 
 /**
@@ -46,11 +47,13 @@ void    SimCcd::startExposure(const Exposure& exposure) {
 
 	// update the mount position
 	RaDec	rd = _locator.mount()->getRaDec();
-	double	s = log2(1 + fabs(rd.ra().radians() + rd.dec().radians()));
-	s = s - trunc(s) + 30;
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "log of seed: %f", s);
-	unsigned long	seed = trunc(pow(2, s));
-	starfield.rebuild(seed);
+	if (rd != _last_direction) {
+		double	s = log2(1 + fabs(rd.ra().radians() + rd.dec().radians()));
+		s = s - trunc(s) + 30;
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "log of seed: %f", s);
+		unsigned long	seed = trunc(pow(2, s));
+		starfield.rebuild(seed);
+	}
 
 	// start the exposure
 	Ccd::startExposure(exposure);

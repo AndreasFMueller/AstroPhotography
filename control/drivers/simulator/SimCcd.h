@@ -20,6 +20,7 @@ class SimCcd : public Ccd {
 	Shutter::state	shutter;
 	StarField	starfield;
 	StarCamera<unsigned short>	starcamera;
+	RaDec	_last_direction;
 public:
 	SimCcd(const CcdInfo& _info, SimLocator& locator);
 
