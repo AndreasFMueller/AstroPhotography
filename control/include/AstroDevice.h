@@ -203,6 +203,14 @@ public:
 	float	step() const;
 	std::set<float>	floatValues() const;
 	std::set<std::string>	stringValues() const;
+
+	// get/set the current value
+	bool	get_boolean() const;
+	float	get_float() const;
+	std::string	get_string() const;
+	void	set_boolean(bool v);
+	void	set_float(float v);
+	void	set_string(const std::string& v);
 };
 
 /**
@@ -228,6 +236,7 @@ protected:
 	void	add(ParameterDescription parameter);
 private:
 	parametermap_t::const_iterator	findParameter(const std::string& name) const;
+	parametermap_t::iterator	findParameter(const std::string& name);
 public:
 	std::list<std::string>	parameterNames() const;
 	bool	hasParameter(const std::string& name) const;

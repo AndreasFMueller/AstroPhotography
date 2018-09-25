@@ -18,6 +18,8 @@ class ParameterDescriptionImpl {
 public:
 	ParameterDescriptionImpl() {
 	}
+	virtual ~ParameterDescriptionImpl() {
+	}
 	virtual bool	isvalid(const std::string& value) const {
 		try {
 			return isvalid(std::stod(value));
@@ -47,19 +49,79 @@ public:
 	virtual std::set<std::string>	stringValues() const {
 		throw std::logic_error("cannot get stringValues()");
 	}
+
+	virtual bool	get_boolean() const {
+		std::string	msg = stringprintf("cannot get boolean from %s",
+			demangle(typeid(*this).name()).c_str());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw std::runtime_error(msg);
+		throw std::runtime_error("no boolean value");
+	}
+	virtual float	get_float() const {
+		std::string	msg = stringprintf("cannot get float from %s",
+			demangle(typeid(*this).name()).c_str());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw std::runtime_error(msg);
+	}
+	virtual std::string	get_string() const {
+		std::string	msg = stringprintf("cannot get string from %s",
+			demangle(typeid(*this).name()).c_str());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw std::runtime_error(msg);
+	}
+
+	virtual void	set_boolean(bool v) {
+		std::string	msg = stringprintf("cannot set boolean(%s) of %s",
+			(v) ? "true" : "false",
+			demangle(typeid(*this).name()).c_str());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw std::runtime_error(msg);
+	}
+	virtual void	set_float(float v) {
+		std::string	msg = stringprintf("cannot set float(%f) of %s",
+			v, demangle(typeid(*this).name()).c_str());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw std::runtime_error(msg);
+		throw std::runtime_error("cannot set float value");
+	}
+	virtual void	set_string(const std::string& s) {
+		std::string	msg = stringprintf("cannot set string(%s) of %s",
+			s.c_str(), demangle(typeid(*this).name()).c_str());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw std::runtime_error(msg);
+		throw std::runtime_error("cannot set string value");
+	}
+
 };
 
 //////////////////////////////////////////////////////////////////////
 // ParameterDescription for boolean parameters
 //////////////////////////////////////////////////////////////////////
 class ParameterDescriptionImplBoolean : public ParameterDescriptionImpl {
+	bool	_value;
 public:
-	ParameterDescriptionImplBoolean() : ParameterDescriptionImpl() { }
+	ParameterDescriptionImplBoolean() : ParameterDescriptionImpl() {
+		_value = false;
+	}
+	virtual ~ParameterDescriptionImplBoolean() {
+	}
 	virtual bool	isvalid(const std::string& value) const {
 		return (value == "true") || (value == "false");
 	}
 	virtual bool	isvalid(const float& value) const {
 		return (value) || (!(value));
+	}
+	virtual void	set_boolean(bool v) {
+		_value = v;
+	}
+	virtual void	set_string(const std::string& v) {
+		_value = (v == "true");
+	}
+	virtual bool	get_boolean() const {
+		return _value;
+	}
+	virtual std::string	get_string() const {
+		return (_value) ? std::string("true") : std::string("false");
 	}
 };
 
@@ -68,16 +130,33 @@ public:
 // ParameterDescription for range parameters
 //////////////////////////////////////////////////////////////////////
 class ParameterDescriptionImplRange : public ParameterDescriptionImpl {
+	float	_value;
 protected:
 	float	_from, _to;
 public:
 	ParameterDescriptionImplRange(float from, float to)
 		: _from(from), _to(to) { }
+	virtual ~ParameterDescriptionImplRange() { }
 	virtual bool	isvalid(const float& value) const {
 		return (_from <= value) && (value <= _to);
 	}
 	virtual float	from() const { return _from; }
 	virtual float	to() const { return _to; }
+	virtual float	get_float() const {
+		return _value;
+	}
+	virtual void	set_float(float f) {
+		if (!(this->isvalid(f))) {
+			throw std::range_error("invalid float parameter");
+		}
+		_value = f;
+	}
+	virtual std::string	get_string() const {
+		return stringprintf("%f", _value);
+	}
+	virtual void	set_string(const std::string& s) {
+		set_float(std::stof(s));
+	}
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -88,6 +167,7 @@ class ParameterDescriptionImplSequence : public ParameterDescriptionImplRange {
 public:
 	ParameterDescriptionImplSequence(float from, float to, float step)
 		: ParameterDescriptionImplRange(from, to), _step(step) { }
+	virtual ~ParameterDescriptionImplSequence() { }
 	virtual bool	isvalid(const float& value) const {
 		if (!ParameterDescriptionImplRange::isvalid(value)) {
 			return false;
@@ -104,6 +184,7 @@ public:
 //////////////////////////////////////////////////////////////////////
 template<typename T>
 class ParameterDescriptionImplSet : public ParameterDescriptionImpl {
+	T	_value;
 protected:
 	std::set<T>	_values;
 public:
@@ -113,14 +194,28 @@ public:
 		copy(values.begin(), values.end(),
 			std::inserter(_values, _values.begin()));
 	}
+	virtual ~ParameterDescriptionImplSet() { }
 	virtual bool	isvalid(const T& value) const {
 		return (_values.end() != _values.find(value));
 	}
 	virtual void	add(const T& value) {
 		_values.insert(value);
 	}
+protected:
+	T	get() const {
+		return _value;
+	}
+	void	set(T v) {
+		if (!(this->isvalid(v))) {
+			throw std::runtime_error("invalid parameter value");
+		}
+		_value = v;
+	}
 };
 
+/**
+ * \brief Additiobnal methods for processing of float values
+ */
 class ParameterDescriptionImplSetFloat
 	: public ParameterDescriptionImplSet<float> {
 public:
@@ -128,11 +223,15 @@ public:
 		: ParameterDescriptionImplSet<float>(values) { }
 	ParameterDescriptionImplSetFloat(const std::vector<float> values)
 		: ParameterDescriptionImplSet<float>(values) { }
+	virtual ~ParameterDescriptionImplSetFloat() { }
 	virtual void	add(const std::string& value) {
 		ParameterDescriptionImplSet<float>::add(std::stod(value));
 	}
 	virtual bool	isvalid(const float& value) const;
 	virtual std::set<float>	floatValues() const { return _values; }
+
+	virtual float	get_float() const { return get(); }
+	virtual void	set_float(float f) { set(f); }
 };
 
 class ClosestValues {
@@ -235,6 +334,13 @@ public:
 	virtual std::set<std::string>	stringValues() const {
 		return _values;
 	}
+
+	virtual std::string	get_string() const {
+		return get();
+	}
+	virtual void	set_string(const std::string& s) {
+		set(s);
+	}
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -323,6 +429,30 @@ std::set<float>	ParameterDescription::floatValues() const {
 
 std::set<std::string>	ParameterDescription::stringValues() const {
 	return _impl->stringValues();
+}
+
+bool	ParameterDescription::get_boolean() const {
+	return _impl->get_boolean();
+}
+
+float	ParameterDescription::get_float() const {
+	return _impl->get_float();
+}
+
+std::string	ParameterDescription::get_string() const {
+	return _impl->get_string();
+}
+
+void	ParameterDescription::set_boolean(bool v) {
+	_impl->set_boolean(v);
+}
+
+void	ParameterDescription::set_float(float f) {
+	_impl->set_float(f);
+}
+
+void	ParameterDescription::set_string(const std::string& s) {
+	_impl->set_string(s);
 }
 
 } // namespace device

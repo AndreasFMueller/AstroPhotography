@@ -77,6 +77,21 @@ Device::parametermap_t::const_iterator	Device::findParameter(
 }
 
 /**
+ * \brief Find a modifiable parameter
+ */
+Device::parametermap_t::iterator	Device::findParameter(
+						const std::string& name) {
+	parametermap_t::iterator	result = _parameters.find(name);
+	if (result == _parameters.end()) {
+		std::string	msg = stringprintf("no parameter named '%s'",
+			name.c_str());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw std::runtime_error(msg);
+	}
+	return result;
+}
+
+/**
  * \brief Find out whether we have a parameter of this name
  */
 bool	Device::hasParameter(const std::string& name) const {
@@ -97,37 +112,29 @@ ParameterDescription	Device::parameter(const std::string& name) const {
  * The device base class does not have any parameters, so it only does the
  * test 
  */
-void	Device::parameter(const std::string& name, float /* value */) {
-	findParameter(name);
+void	Device::parameter(const std::string& name, float value) {
+	findParameter(name)->second.set_float(value);
 }
 
 /**
  * \brief set a parameter to a string
  */
-void	Device::parameter(const std::string& name, const std::string& /* value */) {
-	findParameter(name);
+void	Device::parameter(const std::string& name, const std::string& value) {
+	findParameter(name)->second.set_string(value);
 }
 
 /**
  * \brief get the float value of a parameter
  */
 float	Device::parameterValueFloat(const std::string& name) const {
-	std::string	msg
-		= stringprintf("Device class has not parameters for %s",
-			name.c_str());
-	debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
-	throw std::logic_error(msg);
+	return findParameter(name)->second.get_float();
 }
 
 /**
  * \brief get the string value of a parameter
  */
 std::string	Device::parameterValueString(const std::string& name) const {
-	std::string	msg
-		= stringprintf("Device class has not parameters for %s",
-			name.c_str());
-	debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
-	throw std::logic_error(msg);
+	return findParameter(name)->second.get_string();
 }
 
 void	Device::add(ParameterDescription parameter) {
