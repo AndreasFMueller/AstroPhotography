@@ -249,6 +249,7 @@ void	instrumentdisplay::deleteSelected() {
 
 	// find out whether this is a guiderport item
 	bool	isGuiderCCD = (item->parent()->text(0) == QString("GuiderCCD"));
+	bool	isFinderCCD = (item->parent()->text(0) == QString("FinderCCD"));
 
 	// read name, type and index from the item
 	snowstar::InstrumentComponentType	type;
@@ -260,6 +261,9 @@ void	instrumentdisplay::deleteSelected() {
 	int	index = item->text(1).toInt();
 	if (isGuiderCCD) {
 		type = snowstar::InstrumentGuiderCCD;
+	}
+	if (isFinderCCD) {
+		type = snowstar::InstrumentFinderCCD;
 	}
 	try {
 		_instrument->remove(type, index);

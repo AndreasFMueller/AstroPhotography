@@ -22,14 +22,39 @@ namespace simulator {
  */
 SimCamera::SimCamera(SimLocator& locator)
 	: Camera("camera:simulator/camera"), _locator(locator) {
-	DeviceName	ccdname = CcdInfo::defaultname(name(), "ccd");
-	CcdInfo	ccdi(ccdname, ImageSize(640, 480), 0);
-	ccdi.addMode(Binning(1,1));
-	ccdi.addMode(Binning(2,2));
-	ccdi.shutter(true);
-	ccdi.pixelwidth(0.00001);
-	ccdi.pixelheight(0.00001);
-	ccdinfo.push_back(ccdi);
+	// imaging CCD
+	{
+		DeviceName ccdname = CcdInfo::defaultname(name(), "ccd");
+		CcdInfo	ccdi(ccdname, ImageSize(1920, 1080), 0);
+		ccdi.addMode(Binning(1,1));
+		ccdi.addMode(Binning(2,2));
+		ccdi.addMode(Binning(3,3));
+		ccdi.shutter(true);
+		ccdi.pixelwidth(0.000006);
+		ccdi.pixelheight(0.000006);
+		ccdinfo.push_back(ccdi);
+	}
+	// guide CCD
+	{
+		DeviceName ccdname = CcdInfo::defaultname(name(), "guideccd");
+		CcdInfo	ccdi(ccdname, ImageSize(640, 480), 0);
+		ccdi.addMode(Binning(1,1));
+		ccdi.addMode(Binning(2,2));
+		ccdi.shutter(false);
+		ccdi.pixelwidth(0.000005);
+		ccdi.pixelheight(0.000005);
+		ccdinfo.push_back(ccdi);
+	}
+	// finder ccd
+	{
+		DeviceName ccdname = CcdInfo::defaultname(name(), "finder");
+		CcdInfo	ccdi(ccdname, ImageSize(1024, 1024), 0);
+		ccdi.addMode(Binning(1,1));
+		ccdi.shutter(false);
+		ccdi.pixelwidth(0.000003);
+		ccdi.pixelheight(0.000003);
+		ccdinfo.push_back(ccdi);
+	}
 }
 
 /**
@@ -38,10 +63,10 @@ SimCamera::SimCamera(SimLocator& locator)
  * The simulator camera only implements a single ccd.
  */
 CcdPtr	SimCamera::getCcd0(size_t ccdid) {
-	if (0 != ccdid) {
-		throw NotFound("only ccd 0 exists");
+	if (2 < ccdid) {
+		throw NotFound("only ccds 0-2 exist");
 	}
-	CcdInfo	info = getCcdInfo(0);
+	CcdInfo	info = getCcdInfo(ccdid);
 	return CcdPtr(new SimCcd(info, _locator));
 }
 

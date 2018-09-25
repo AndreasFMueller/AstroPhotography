@@ -31,7 +31,7 @@ class SimMount;
 class SimLocator : public astro::device::DeviceLocator {
 	AdaptiveOpticsPtr	_adaptiveoptics;
 	CameraPtr	_camera;
-	CcdPtr		_ccd;
+	CcdPtr		_ccd[3];
 	GuidePortPtr	_guideport;
 	FilterWheelPtr	_filterwheel;
 	CoolerPtr	_cooler;
@@ -46,7 +46,7 @@ public:
 
 	AdaptiveOpticsPtr	adaptiveoptics() { return _adaptiveoptics; }
 	CameraPtr	camera() { return _camera; }
-	CcdPtr	ccd() { return _ccd; }
+	CcdPtr	ccd(int ccdid) { return _ccd[ccdid]; }
 	GuidePortPtr	guideport() { return _guideport; }
 	FilterWheelPtr	filterwheel() { return _filterwheel; }
 	CoolerPtr	cooler() { return _cooler; }
@@ -55,7 +55,7 @@ public:
 
 	SimAdaptiveOptics	*simadaptiveoptics();
 	SimCamera	*simcamera();
-	SimCcd		*simccd();
+	SimCcd		*simccd(size_t ccdid);
 	SimGuidePort	*simguideport();
 	SimFilterWheel	*simfilterwheel();
 	SimCooler	*simcooler();

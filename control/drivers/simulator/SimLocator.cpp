@@ -77,9 +77,11 @@ SimLocator::SimLocator() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "camera: %s",
 		_camera->name().toString().c_str());
 
-	_ccd = CcdPtr(new SimCcd(_camera->getCcdInfo(0), *this));
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "ccd: %s",
-		_ccd->name().toString().c_str());
+	for (size_t i = 0; i < 3; i++) {
+		_ccd[i] = CcdPtr(new SimCcd(_camera->getCcdInfo(i), *this));
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "ccd: %s",
+			_ccd[i]->name().toString().c_str());
+	}
 
 	_guideport = GuidePortPtr(new SimGuidePort(*this));
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "guideport: %s",
@@ -144,6 +146,8 @@ std::vector<std::string>	SimLocator::getDevicelist(
 		break;
 	case DeviceName::Ccd:
 		names.push_back(std::string("ccd:simulator/camera/ccd"));
+		names.push_back(std::string("ccd:simulator/camera/guideccd"));
+		names.push_back(std::string("ccd:simulator/camera/finder"));
 		break;
 	case DeviceName::Guideport:
 		names.push_back(std::string("guideport:simulator/guideport"));
@@ -195,12 +199,19 @@ AdaptiveOpticsPtr	SimLocator::getAdaptiveOptics0(const DeviceName& name) {
 
 CcdPtr	SimLocator::getCcd0(const DeviceName& name) {
 	std::string	sname = name;
-	if (sname != "ccd:simulator/camera/ccd") {
-		debug(LOG_ERR, DEBUG_LOG, 0, "ccd %s does not exist",
-			sname.c_str());
-		throw NotFound("no such ccd");
+	if (sname == "ccd:simulator/camera/ccd") {
+		return _ccd[0];
 	}
-	return _ccd;
+	if (sname == "ccd:simulator/camera/guideccd") {
+		return _ccd[1];
+	} 
+	if (sname == "ccd:simulator/camera/finder") {
+		return _ccd[2];
+	}
+	std::string	msg = stringprintf("ccd %s does not exist",
+		sname.c_str());
+	debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+	throw NotFound(msg);
 }
 
 GuidePortPtr	SimLocator::getGuidePort0(const DeviceName& name) {
@@ -263,8 +274,8 @@ SimAdaptiveOptics	*SimLocator::simadaptiveoptics() {
 	return dynamic_cast<SimAdaptiveOptics *>(&*_adaptiveoptics);
 }
 
-SimCcd	*SimLocator::simccd() {
-	return dynamic_cast<SimCcd *>(&*_ccd);
+SimCcd	*SimLocator::simccd(size_t ccdid) {
+	return dynamic_cast<SimCcd *>(&*_ccd[ccdid]);
 }
 
 SimFilterWheel	*SimLocator::simfilterwheel() {
