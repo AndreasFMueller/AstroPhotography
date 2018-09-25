@@ -169,6 +169,11 @@ Image<double>	*StarCameraBase::operator()(StarField& field) {
 	Point	shift = Point(origin - offset) - translation();
 
 	Image<double>	image(size);
+	for (int x = 0; x < size.width(); x++) {
+		for (int y = 0; y < size.height(); y++) {
+			image.pixel(x, y) = 0;
+		}
+	}
 
 	if (light()) {
 		switch (_content) {
@@ -277,6 +282,7 @@ void	StarCameraBase::addSunIntensity(Image<double>& image,
 void	StarCameraBase::addStarIntensity(Image<double>& image,
 		StellarObjectPtr star, const Point& shift) const {
 	ImagePoint	c(star->position().x(), star->position().y());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "add star at %s", c.toString().c_str());
 
 	int	xmin = c.x() - 20;
 	if (xmin < 0) { xmin = 0; }
