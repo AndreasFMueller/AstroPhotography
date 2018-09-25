@@ -11,6 +11,7 @@
 #include <SimFocuser.h>
 #include <SimAdaptiveOptics.h>
 #include <includes.h>
+#include <AstroCatalog.h>
 
 using namespace astro::image;
 
@@ -121,12 +122,18 @@ void    SimCcd::startExposure(const Exposure& exposure) {
 	// update the mount position
 	RaDec	rd = _locator.mount()->getRaDec();
 	if (rd != _last_direction) {
-		double	s = log2(1 + fabs(rd.ra().radians()
-			+ rd.dec().radians()));
-		s = s - trunc(s) + 30;
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "log of seed: %f", s);
-		unsigned long	seed = trunc(pow(2, s));
-		starfield.rebuild(seed);
+		if (rd == RaDec()) {
+			double	s = log2(1 + fabs(rd.ra().radians()
+				+ rd.dec().radians()));
+			s = s - trunc(s) + 30;
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "log of seed: %f", s);
+			unsigned long	seed = trunc(pow(2, s));
+			starfield.rebuild(seed);
+		} else {
+			debug(LOG_DEBUG, DEBUG_LOG, 0,
+				"create star field from catalog");
+			catalogStarfield(rd);
+		}
 	}
 
 	// start the exposure
@@ -134,6 +141,31 @@ void    SimCcd::startExposure(const Exposure& exposure) {
 	starttime = simtime();
 	state(CcdState::exposing);
 	shutter = exposure.shutter();
+}
+
+
+/**
+ * \brief Construct a star field from the direciton
+ */
+void	SimCcd::catalogStarfield(const RaDec& direction) {
+	// get the parameters
+	float	focallength = parameterValueFloat("focallength");
+	float	azimuth = parameterValueFloat("azimuth");
+	float	limit_magniture = parameterValueFloat("limit_magnitude");
+
+	// compute the width and height of the image
+	Angle	anglewidth(getInfo().size().width() * getInfo().pixelwidth()
+			/ focallength);
+	Angle	angleheight(getInfo().size().height() * getInfo().pixelheight()
+			/ focallength);
+
+	// get a SkyWindow of appropriate size
+	catalog::SkyWindow	window(direction, anglewidth, angleheight);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "%s", window.toString().c_str());
+
+	// XXX get the appropriate catalog and retrieve the 
+
+	starfield.rebuild(4711);
 }
 
 /**

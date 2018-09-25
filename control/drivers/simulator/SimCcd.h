@@ -21,6 +21,7 @@ class SimCcd : public Ccd {
 	StarField	starfield;
 	StarCamera<unsigned short>	starcamera;
 	RaDec	_last_direction;
+	void	catalogStarfield(const RaDec& direction);
 public:
 	SimCcd(const CcdInfo& _info, SimLocator& locator);
 
