@@ -251,6 +251,9 @@ private:
 			const StarField& field,
 			const Point& shift) const;
 
+	void	addBodyIntensity(Image<double>& image,
+			const Point& shift, int radius) const;
+
 	void	addSunIntensity(Image<double>& image,
 			const Point& shift) const;
 

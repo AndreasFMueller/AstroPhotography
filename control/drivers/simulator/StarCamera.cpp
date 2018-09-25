@@ -175,7 +175,10 @@ Image<double>	*StarCameraBase::operator()(StarField& field) {
 		}
 	}
 
+	// if this is a light image, we have to expose the stars from the
+	// star field
 	if (light()) {
+		// depending on the content, call the methods to expose
 		switch (_content) {
 		case STARS:
 			addStarIntensities(image, field, shift);
@@ -223,26 +226,26 @@ Image<double>	*StarCameraBase::operator()(StarField& field) {
 }
 
 /**
- * \brief Add intensity for a simulated planet
+ * \brief Add the intensity of a body of a given radius
  */
-void	StarCameraBase::addPlanetIntensity(Image<double>& image,
-		const Point& shift) const {
+void	StarCameraBase::addBodyIntensity(Image<double>& image,
+		const Point& shift, int radius) const {
 	int	w = image.size().width();
 	int	h = image.size().height();
 	ImagePoint	body = image.size().center();
 	for (int x = 0; x < w; x++) {
 		for (int y = 0; y < h; y++) {
-			// apply the transform to the current point
+			// apply the shift to the current point
 			Point   p(shift.x() + x, shift.y() + y);
 			double  value = 0;
 			double	r = (p - body).abs();
-			if (r < 10) {
+			if (r < radius) {
 				value = 1.;
-			} else if (r > 12) {
+			} else if (r > (radius + 2)) {
 				value = 0;
 			} else {
 				// interpolate between 100 and 102
-				value = (12 - r) / 2;
+				value = (radius + 2 - r) / 2;
 			}
 			image.pixel(x, y) = value;
 		}
@@ -250,30 +253,19 @@ void	StarCameraBase::addPlanetIntensity(Image<double>& image,
 }
 
 /**
+ * \brief Add intensity for a simulated planet
+ */
+void	StarCameraBase::addPlanetIntensity(Image<double>& image,
+		const Point& shift) const {
+	addBodyIntensity(image, shift, 10);
+}
+
+/**
  * \brief Add intensity for a simulated sun
  */
 void	StarCameraBase::addSunIntensity(Image<double>& image,
 		const Point& shift) const {
-	int	w = image.size().width();
-	int	h = image.size().height();
-	ImagePoint	body = image.size().center();
-	for (int x = 0; x < w; x++) {
-		for (int y = 0; y < h; y++) {
-			// apply the transform to the current point
-			Point   p(shift.x() + x, shift.y() + y);
-			double  value = 0;
-			double	r = (p - body).abs();
-			if (r < 100) {
-				value = 1.;
-			} else if (r > 102) {
-				value = 0;
-			} else {
-				// interpolate between 100 and 102
-				value = (102 - r) / 2;
-			}
-			image.pixel(x, y) = value;
-		}
-	}
+	addBodyIntensity(image, shift, 100);
 }
 
 /**
@@ -328,12 +320,9 @@ void	StarCameraBase::addStarIntensities(Image<double>& image,
 		const StarField& field,
 		const Point& shift) const {
 	ImageSize	size = image.size();
-	for (int i = 0; i < field.nObjects(); i++) {
-		// get the object
-		StellarObjectPtr	star = field[i];
-
-		// now add the object intensity
-		addStarIntensity(image, star, shift);
+	for (unsigned int i = 0; i < field.nObjects(); i++) {
+		// now add the object intensity for object i
+		addStarIntensity(image, field[i], shift);
 	}
 }
 
