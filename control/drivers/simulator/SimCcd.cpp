@@ -53,6 +53,9 @@ SimCcd::SimCcd(const CcdInfo& _info, SimLocator& locator)
 	device::ParameterDescription	focallength_description(
 						"focallength", 0.01, 4.0);
 	Device::add(focallength_description);
+	device::ParameterDescription	azimuth_description(
+						"azimuth", 0.0, 360.0);
+	Device::add(azimuth_description);
 	device::ParameterDescription	limit_magnitude_description(
 						"limit_magnitude", 0.0, 16.0);
 	Device::add(limit_magnitude_description);
@@ -69,6 +72,19 @@ SimCcd::SimCcd(const CcdInfo& _info, SimLocator& locator)
 	parameter("focallength", focallength);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "using focallength %.3f[m]",
 		parameterValueFloat("focallength"));
+
+	// get the azimuth parameter 
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "querying 'azimuth' for %s",
+		name().toString().c_str());
+	float	azimuth = 0;
+	if (hasProperty("azimuth")) {
+		azimuth = std::stod(getProperty("azimuth"));
+	} else {
+		azimuth = 1.1111;
+	}
+	parameter("azimuth", azimuth);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "using azimuth %.3f[degrees]",
+		parameterValueFloat("azimuth"));
 
 	// get limit magnitude parameter
 	float	limit_magnitude = 0;
