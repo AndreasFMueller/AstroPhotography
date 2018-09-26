@@ -43,7 +43,7 @@ static double	reduce(double x, double left) {
 }
 
 std::string	SkyWindow::toString() const {
-	return stringprintf("%.3fx%.3f@%s", _rawidth.hours(),
+	return stringprintf("%.3f[h]x%.3f[deg]@%s", _rawidth.hours(),
 		_decheight.degrees(), _center.toString().c_str());
 }
 

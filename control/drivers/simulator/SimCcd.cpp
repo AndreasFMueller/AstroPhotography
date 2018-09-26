@@ -157,19 +157,22 @@ void	SimCcd::catalogStarfield(const RaDec& direction) {
 	float	azimuth = parameterValueFloat("azimuth");
 	float	limit_magnitude = parameterValueFloat("limit_magnitude");
 
+	// angular resolution
+	float	pxlx = getInfo().pixelwidth() / focallength;
+	float	pxly = getInfo().pixelheight() / focallength;
+	Point	center(starfield.size().center());
+
 	// compute the width and height of the image
-	Angle	anglewidth(getInfo().size().width() * getInfo().pixelwidth()
-			/ focallength);
-	Angle	angleheight(getInfo().size().height() * getInfo().pixelheight()
-			/ focallength);
+	Angle	anglewidth(getInfo().size().width() * pxlx);
+	Angle	angleheight(getInfo().size().height() * pxly);
 
 	// get a SkyWindow of appropriate size
 	SkyWindow	window(direction, anglewidth, angleheight);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "%s", window.toString().c_str());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "window: %s", window.toString().c_str());
 
 	// get the appropriate catalog
 	CatalogPtr	catalog = CatalogFactory::get(CatalogFactory::Combined,
-                                        "/usr/local/starcatalog");
+                                        "/usr/local/starcatalogs");
 	// XXX the path to the star catalogs should be tied to the configuration
 	// XXX e.g. by basing it on the prefix
 
@@ -181,8 +184,13 @@ void	SimCcd::catalogStarfield(const RaDec& direction) {
 	// add the stars to the star field
 	Catalog::starset::const_iterator	s;
 	for (s = stars->begin(); s != stars->end(); s++) {
-		// XXX compute the pixel coordinates for this position
-		Point	position;
+		// get the object
+		RaDec	pos = s->position(2000) - direction;
+
+		// compute the pixel coordinates for this position
+		Point	offset(pos.ra().radians() / pxlx,
+				pos.dec().radians() / pxly);
+		Point	position = center + offset;
 
 		// create the new star
 		astro::StellarObjectPtr	ns(new astro::Star(position, s->mag()));
