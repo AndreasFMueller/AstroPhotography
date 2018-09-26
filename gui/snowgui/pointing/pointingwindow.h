@@ -19,6 +19,13 @@ class pointingwindow : public InstrumentWidget {
 	Q_OBJECT
 	ccddata	_ccddata;
 
+	astro::RaDec	_finder_direction;
+	astro::RaDec	_guider_direction;
+	astro::RaDec	_imager_direction;
+	ccddata		_finder_ccddata;
+	ccddata		_guider_ccddata;
+	ccddata		_imager_ccddata;
+
 public:
 	explicit pointingwindow(QWidget *parent = 0);
 	virtual void	instrumentSetup(
@@ -26,9 +33,15 @@ public:
 		snowstar::RemoteInstrument instrument);
 	~pointingwindow();
 
+private:
+	void	pointSelected(astro::image::ImagePoint, const astro::RaDec&,
+			const ccddata&);
+
 public slots:
 	void	newImage(astro::image::ImagePtr image);
-	void	pointSelected(astro::image::ImagePoint);
+	void	finderPointSelected(astro::image::ImagePoint);
+	void	guiderPointSelected(astro::image::ImagePoint);
+	void	imagerPointSelected(astro::image::ImagePoint);
 	void	ccddataSelected(ccddata);
 
 private:

@@ -102,6 +102,8 @@ SimCcd::SimCcd(const CcdInfo& _info, SimLocator& locator)
 
 /**
  * \brief Start simulated exposure
+ *
+ * \param exposure	exposure parameters
  */
 void    SimCcd::startExposure(const Exposure& exposure) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "starting exposure");
@@ -135,6 +137,7 @@ void    SimCcd::startExposure(const Exposure& exposure) {
 				"create star field from catalog");
 			catalogStarfield(rd);
 		}
+		_last_direction = rd;
 	}
 
 	// start the exposure
@@ -144,9 +147,10 @@ void    SimCcd::startExposure(const Exposure& exposure) {
 	shutter = exposure.shutter();
 }
 
-
 /**
  * \brief Construct a star field from the direciton
+ *
+ * \param direction	coordinates of center of the star field
  */
 void	SimCcd::catalogStarfield(const RaDec& direction) {
 	// clear the star field
@@ -200,8 +204,13 @@ void	SimCcd::catalogStarfield(const RaDec& direction) {
 	}
 
 	// rotate the star field
-	Angle	alpha(azimuth);
+	Angle	alpha;
+	alpha.degrees(-azimuth);
 	image::transform::Transform	transform(alpha.radians(), Point());
+	transform = image::transform::Transform(alpha.radians(),
+			center - transform(center));
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "rotation by %.1f degrees, %s",
+		alpha.degrees(), transform.toString().c_str());
 	starfield.transform(transform);
 }
 
@@ -327,6 +336,9 @@ ImagePtr  SimCcd::getRawImage() {
 	return image;
 }
 
+/**
+ * \brief Get a user friendly name for display
+ */
 std::string	SimCcd::userFriendlyName() const {
 	return std::string("SimCam 1.0");
 }

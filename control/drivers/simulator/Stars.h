@@ -23,7 +23,7 @@ class StellarObject {
 	Point	_position;
 	astro::image::RGB<double>	_color;
 protected:
-	double	distance(const Point& point) const { return point - _position; }
+	double	distance(const Point& point) const { return astro::distance(point, _position); }
 public:
 	StellarObject(const Point& position);
 	virtual ~StellarObject();
@@ -260,8 +260,8 @@ private:
 
 	void	addPlanetIntensity(Image<double>& image,
 			const Point& shift) const;
-public:
-	Image<double>	*operator()(StarField& field);
+protected:
+	Image<double>	*doubleImage(StarField& field);
 };
 
 /**
@@ -290,7 +290,7 @@ ImagePtr	StarCamera<P>::operator()(StarField& field) {
 //	}
 		
 	// compute the image
-	Image<double>	*rawimage = StarCameraBase::operator()(field);
+	Image<double>	*rawimage = StarCameraBase::doubleImage(field);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "new image created");
 
 	// bin the image,
@@ -301,7 +301,7 @@ ImagePtr	StarCamera<P>::operator()(StarField& field) {
 	// now add all the local stuff, which depends on the camera,
 	// not the star field
 	double	scale = std::numeric_limits<P>::max();
-	rescale(*rawimage, scale);
+	rescale(*rawimage, scale / 2);
 
 	// turn pixels hot, this must respsect the binning
 	addhot(*rawimage, scale);
@@ -318,8 +318,8 @@ ImagePtr	StarCamera<P>::operator()(StarField& field) {
 	int	deltay = binning().y();
 	for (int x = 0; x < width; x++) {
 		for (int y = 0; y < height; y++) {
-			image->pixel(x, y)
-				= rawimage->pixel(x * deltax, y * deltay);
+			double	v = rawimage->pixel(x * deltax, y * deltay);
+			image->pixel(x, y) = v;
 		}
 	}
 

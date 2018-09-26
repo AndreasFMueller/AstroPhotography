@@ -14,6 +14,18 @@
    <string>Form</string>
   </property>
   <layout class="QHBoxLayout" name="horizontalLayout">
+   <property name="leftMargin">
+    <number>6</number>
+   </property>
+   <property name="topMargin">
+    <number>6</number>
+   </property>
+   <property name="rightMargin">
+    <number>6</number>
+   </property>
+   <property name="bottomMargin">
+    <number>6</number>
+   </property>
    <item>
     <widget class="QWidget" name="leftWidget" native="true">
      <layout class="QVBoxLayout" name="verticalLayout_2">
@@ -25,7 +37,26 @@
        </widget>
       </item>
       <item>
-       <widget class="snowgui::imagedisplaywidget" name="imageWidget" native="true"/>
+       <widget class="QTabWidget" name="tabWidget">
+        <property name="currentIndex">
+         <number>0</number>
+        </property>
+        <widget class="snowgui::imagedisplaywidget" name="finderImageWidget">
+         <attribute name="title">
+          <string>Finder</string>
+         </attribute>
+        </widget>
+        <widget class="snowgui::imagedisplaywidget" name="guiderImageWidget">
+         <attribute name="title">
+          <string>Guider</string>
+         </attribute>
+        </widget>
+        <widget class="snowgui::imagedisplaywidget" name="imagerImageWidget">
+         <attribute name="title">
+          <string>Imager</string>
+         </attribute>
+        </widget>
+       </widget>
       </item>
      </layout>
     </widget>
@@ -48,6 +79,14 @@
          <number>0</number>
         </property>
         <widget class="snowgui::guideportcontrollerwidget" name="guideportcontrollerWidget">
+         <property name="geometry">
+          <rect>
+           <x>0</x>
+           <y>0</y>
+           <width>255</width>
+           <height>299</height>
+          </rect>
+         </property>
          <attribute name="label">
           <string>Guideport</string>
          </attribute>
@@ -57,7 +96,7 @@
           <rect>
            <x>0</x>
            <y>0</y>
-           <width>326</width>
+           <width>249</width>
            <height>287</height>
           </rect>
          </property>
@@ -66,16 +105,40 @@
          </attribute>
         </widget>
         <widget class="snowgui::coolercontrollerwidget" name="coolercontrollerWidget">
+         <property name="geometry">
+          <rect>
+           <x>0</x>
+           <y>0</y>
+           <width>249</width>
+           <height>287</height>
+          </rect>
+         </property>
          <attribute name="label">
           <string>Cooler</string>
          </attribute>
         </widget>
         <widget class="snowgui::filterwheelcontrollerwidget" name="filterwheelcontrollerWidget">
+         <property name="geometry">
+          <rect>
+           <x>0</x>
+           <y>0</y>
+           <width>249</width>
+           <height>287</height>
+          </rect>
+         </property>
          <attribute name="label">
           <string>Filterwheel</string>
          </attribute>
         </widget>
         <widget class="snowgui::focusercontrollerwidget" name="focusercontrollerWidget">
+         <property name="geometry">
+          <rect>
+           <x>0</x>
+           <y>0</y>
+           <width>249</width>
+           <height>287</height>
+          </rect>
+         </property>
          <attribute name="label">
           <string>Focuser</string>
          </attribute>
@@ -85,7 +148,7 @@
           <rect>
            <x>0</x>
            <y>0</y>
-           <width>326</width>
+           <width>249</width>
            <height>287</height>
           </rect>
          </property>

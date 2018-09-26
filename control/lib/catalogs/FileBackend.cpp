@@ -57,19 +57,36 @@ Catalog::starsetptr	FileBackend::find(const SkyWindow& window,
 	Catalog::starset	*result = new Catalog::starset;
 	Catalog::starsetptr	resultptr(result);
 
+	// get the brightest stars from the BSC catalog (because the
+	// brightest stars are not in the Hipparcos catalog)
+	{
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "adding stars from BSC");
+		starsetptr	stars = bsc_catalog->find(window, magrange);
+		starset::const_iterator	s;
+		for (s = stars->begin(); s != stars->end(); s++) {
+			Star	star = *s;
+			result->insert(star);
+		}
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "%d stars from BSC added, "
+			"now %d stars", stars->size(), result->size());
+	}
+
 #define	Hipparcos_Complete_Magnitude	7.
 #define	Tycho2_Complete_Magnitude	10.
 
 	// if any there are stars requested from the Hipparcos catalog, get them
 	{
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "adding stars from Hipparcos");
 		// get brightest stars from Hipparcos catalog
-		Hipparcos::starsetptr	stars
+		starsetptr	stars
 			= hipparcos_catalog->find(window, magrange);
-		Hipparcos::starset::const_iterator	s;
+		starset::const_iterator	s;
 		for (s = stars->begin(); s != stars->end(); s++) {
 			Star	star = *s;
 			result->insert(star);
 		}
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "%d stars from Hipparcos added, "
+			"now %d stars", stars->size(), result->size());
 	}
 
 	// if the faintest magnitude is brighter than the magnitude to
@@ -84,9 +101,10 @@ Catalog::starsetptr	FileBackend::find(const SkyWindow& window,
 	// get the intermediate stars from the Tycho2 catalog, but skip the
 	// stars already retrieved from the Hipparcos catalog
 	{
-		Tycho2::starsetptr	stars
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "adding stars from Tycho2");
+		starsetptr	stars
 			= tycho2_catalog->find(window, magrange);
-		Tycho2::starset::const_iterator	s;
+		starset::const_iterator	s;
 		for (s = stars->begin(); s != stars->end(); s++) {
 			// only take stars not in the Hipparcos catalog and
 			// brighter than magnitude 10, as we will get the
@@ -96,6 +114,8 @@ Catalog::starsetptr	FileBackend::find(const SkyWindow& window,
 				result->insert(star);
 			}
 		}
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "%d stars from Tycho2 added, "
+			"now %d stars", stars->size(), result->size());
 	}
 
 	// if the faintestmagnitude is bright enough so that the Tycho-2
@@ -108,15 +128,18 @@ Catalog::starsetptr	FileBackend::find(const SkyWindow& window,
 
 	// get all matching stars from the UCAC4 catalog
 	{
-		Ucac4::starsetptr	stars
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "adding stars from UCAC4");
+		starsetptr	stars
 			= ucac4_catalog->find(window, magrange);
-		Ucac4::starset::const_iterator	s;
+		starset::const_iterator	s;
 		for (s = stars->begin(); s != stars->end(); s++) {
 			if (!s->isDuplicate()) {
 				Star	star = *s;
 				result->insert(star);
 			}
 		}
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "%d stars from UCAC4 added, "
+			"now %d stars", stars->size(), result->size());
 	}
 
 	return resultptr;

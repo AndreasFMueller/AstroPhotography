@@ -102,6 +102,7 @@ public:
 		_mag = 0;
 		_duplicate = '\0';
 	}
+	virtual ~Star() { }
 	virtual std::string	toString() const;
 };
 

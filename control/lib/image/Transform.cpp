@@ -81,6 +81,10 @@ Transform::Transform(const Transform& other) {
 
 /**
  * \brief Create an affine transform from angle translation and scale factor
+ *
+ * \param angle		rotation angle in radians
+ * \param translation	translation vector
+ * \param scale		scaling factor
  */
 Transform::Transform(double angle, const Point& translation, double scale) {
 	a[0] = scale * cos(angle); a[1] = -scale * sin(angle);

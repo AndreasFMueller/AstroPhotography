@@ -73,18 +73,20 @@ Star::~Star() {
 /**
  * \brief Intensity distribution for a star
  */
-#define	AIRY_RADIUS	1.5
-static const double	vpeak = (0.5 / AIRY_RADIUS);
+#define	AIRY_RADIUS	2.0
+//static const double	vpeak = (0.5 / AIRY_RADIUS);
 double	Star::intensity(const Point& where) const {
 	double	d = distance(where);
 	// short circuit far away points to improve speed
-	if (d > 10) {
+	if (d > 30) {
 		return 0;
 	}
-	double	r = sqr(distance(where));
+	//double	r = sqr(distance(where));
+	double	r = distance(where);
 	double	v = 1;
 	if (r > 0) {
-		v = fabs(j1(r / AIRY_RADIUS) / r) / vpeak;
+		//v = fabs(j1(r / AIRY_RADIUS) / r) / vpeak;
+		v = exp(-sqr(r) / sqr(AIRY_RADIUS));
 	}
 	return _peak * v;
 }
@@ -99,8 +101,8 @@ double	Star::intensity(const Point& where) const {
  */
 void	Star::magnitude(const double& magnitude) {
 	_magnitude = magnitude;
-	_peak = pow(10, -(magnitude / 2.5));
-	//debug(LOG_DEBUG, DEBUG_LOG, 0, "peak(%f) = %f", _magnitude, _peak);
+	_peak = pow(10, -(magnitude / 2.5)) * 1e3;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "peak(%f) = %f", _magnitude, _peak);
 }
 
 /**

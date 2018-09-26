@@ -105,7 +105,7 @@ void    StarCameraBase::noise(double n) {
  * This method computes the distribution of the stars, with appropriate
  * transformations, and the effect of the focuser.
  */
-Image<double>	*StarCameraBase::operator()(StarField& field) {
+Image<double>	*StarCameraBase::doubleImage(StarField& field) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "start building base image");
 	// find out how large we should make the field which we will later
 	// transform. This must be large enough so that we catch starts that 
@@ -273,42 +273,43 @@ void	StarCameraBase::addSunIntensity(Image<double>& image,
  */
 void	StarCameraBase::addStarIntensity(Image<double>& image,
 		StellarObjectPtr star, const Point& shift) const {
-	ImagePoint	c(star->position().x(), star->position().y());
+	ImagePoint	c(star->position().x() - shift.x(),
+				star->position().y() - shift.y());
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "add star at %s", c.toString().c_str());
 
-	int	xmin = c.x() - 20;
+	int	xmin = c.x() - 30;
 	if (xmin < 0) { xmin = 0; }
 
-	int	xmax = c.x() + 21;
+	int	xmax = c.x() + 31;
 	if (xmax > image.size().width()) { xmax = image.size().width(); }
 
-	int	ymin = c.y() - 20;
+	int	ymin = c.y() - 30;
 	if (ymin < 0) { ymin = 0; }
 
-	int	ymax = c.y() + 20;
+	int	ymax = c.y() + 31;
 	if (ymax > image.size().height()) { ymax = image.size().height(); }
 
 	for (int x = xmin; x < xmax; x++) {
 		for (int y = ymin; y < ymax; y++) {
-			double	value = 0;
+			double	value = image.pixel(x,y);
 			Point	p(shift.x() + x, shift.y() + y);
 			switch (color()) {
 			case 0:
-				value = star->intensity(p);
+				value += star->intensity(p);
 				break;
 			case 1:
-				value = star->intensityR(p);
+				value += star->intensityR(p);
 				break;
 			case 2:
-				value = star->intensityG(p);
+				value += star->intensityG(p);
 				break;
 			case 3:
-				value = star->intensityB(p);
+				value += star->intensityB(p);
 				break;
 			default:
 				break;
 			}
-			image.pixel(x, y) = image.pixel(x,y) + value;
+			image.pixel(x, y) = value;
 		}
 	}
 }
@@ -343,17 +344,22 @@ void	StarCameraBase::addnoise(Image<double>& image) const {
  * \brief Rescale the image
  *
  * Rescale the image so that all pixel values lie between 0 and the
- * scale argument
+ * scale argument. This is done by cutting of all values below 0
+ * and above <scale>
  */
 void	StarCameraBase::rescale(Image<double>& image, double scale) const {
 	int	width = image.size().width();
 	int	height = image.size().height();
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "rescaling %dx%d image", width, height);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "rescaling %dx%d image with scale %f",
+		width, height, scale);
 	for (int x = 0; x < width; x++) {
 		for (int y = 0; y < height; y++) {
 			double	value = scale * image.pixel(x, y);
 			if (value > scale) {
 				value = scale;
+			}
+			if (value < 0) {
+				value = 0;
 			}
 			image.pixel(x, y) = value;
 		}

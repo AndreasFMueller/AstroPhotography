@@ -67,12 +67,16 @@ void	StarField::rebuild(const RaDec& radec) {
  * overshoot to the camera frame on each side. The magnitudes follow
  * a power distribution, which may not be entirely accurate, but is
  * a sufficiently good model for this simulation.
+ *
+ * \param size		size of the star field
+ * \param number 	of pixels to add around the border for movement
  */
 void	StarField::createStar(const ImageSize& size, int overshoot) {
 	int	x = (random() % (size.width() + 2 * overshoot)) - overshoot;
 	int	y = (random() % (size.height() + 2 * overshoot)) - overshoot;
 	// create magnitudes with a power distribution
-	double	magnitude = log2(8 + (random() % 56)) - 3;
+	//double	magnitude = log2(8 + (random() % 56)) - 3;
+	double	magnitude = log2(8 + (random() % 56)) + 4.5;
 
 	StellarObject	*newstar = new Star(Point(x, y), magnitude);
 
@@ -95,15 +99,26 @@ void	StarField::createStar(const ImageSize& size, int overshoot) {
  * \brief Add a new stellar object
  *
  * This method accepts stars or nebulae
+ *
+ * \param object	object to add
  */
 void	StarField::addObject(StellarObjectPtr object) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "add new object %d %p", objects.size(),
-		&*object);
+	Star	*star = dynamic_cast<Star*>(&*object);
+	if (star) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "add star %d at %s, m=%.2f",
+			objects.size(), star->position().toString().c_str(),
+			star->magnitude());
+	} else {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "add new object %d %p",
+			objects.size(), &*object);
+	}
 	objects.push_back(object);
 }
 
 /**
  * \brief Compute cumulated intensity for all objects in the star field
+ *
+ * \param where 	point where we want to get the intensity
  */
 double	StarField::intensity(const Point& where) const {
 	std::vector<StellarObjectPtr>::const_iterator	i;
@@ -116,6 +131,8 @@ double	StarField::intensity(const Point& where) const {
 
 /**
  * \brief Compute cumulated intensity for all objects in the star field
+ *
+ * \param where		point where we want to get the intensity
  */
 double	StarField::intensityR(const Point& where) const {
 	std::vector<StellarObjectPtr>::const_iterator	i;
@@ -128,6 +145,8 @@ double	StarField::intensityR(const Point& where) const {
 
 /**
  * \brief Compute cumulated intensity for all objects in the star field
+ *
+ * \param where		point where we want to get the intensity
  */
 double	StarField::intensityG(const Point& where) const {
 	std::vector<StellarObjectPtr>::const_iterator	i;
@@ -140,6 +159,8 @@ double	StarField::intensityG(const Point& where) const {
 
 /**
  * \brief Compute cumulated intensity for all objects in the star field
+ *
+ * \param where		point where we want to get the intensity
  */
 double	StarField::intensityB(const Point& where) const {
 	std::vector<StellarObjectPtr>::const_iterator	i;
@@ -152,6 +173,8 @@ double	StarField::intensityB(const Point& where) const {
 
 /**
  * \brief Extract a stellar object from the star field
+ *
+ * \param index		index of the object to be retrieved
  */
 StellarObjectPtr	StarField::operator[](size_t index) const {
 	if (index >= objects.size()) {
@@ -175,6 +198,8 @@ void	StarField::clear() {
  *
  * This method is used to rotate the star field after it has been
  * created.
+ *
+ * \param transform	transform to apply to all the objects in the star field
  */
 void	StarField::transform(const image::transform::Transform& transform) {
 	std::vector<StellarObjectPtr>::const_iterator	i;
