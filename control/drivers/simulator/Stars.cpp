@@ -51,6 +51,13 @@ double	StellarObject::intensityG(const Point& where) const {
 }
 
 /**
+ * \brief Transform an object with a transformation
+ */
+void	StellarObject::transform(const image::transform::Transform& transform) {
+	_position = transform(_position);
+}
+
+/**
  * \brief Create a new star
  */
 Star::Star(const Point& position, double magnitude)

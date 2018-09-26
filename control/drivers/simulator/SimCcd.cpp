@@ -14,6 +14,7 @@
 #include <AstroCatalog.h>
 
 using namespace astro::image;
+using namespace astro::catalog;
 
 namespace astro {
 namespace camera {
@@ -148,10 +149,13 @@ void    SimCcd::startExposure(const Exposure& exposure) {
  * \brief Construct a star field from the direciton
  */
 void	SimCcd::catalogStarfield(const RaDec& direction) {
+	// clear the star field
+	starfield.clear();
+
 	// get the parameters
 	float	focallength = parameterValueFloat("focallength");
 	float	azimuth = parameterValueFloat("azimuth");
-	float	limit_magniture = parameterValueFloat("limit_magnitude");
+	float	limit_magnitude = parameterValueFloat("limit_magnitude");
 
 	// compute the width and height of the image
 	Angle	anglewidth(getInfo().size().width() * getInfo().pixelwidth()
@@ -160,12 +164,37 @@ void	SimCcd::catalogStarfield(const RaDec& direction) {
 			/ focallength);
 
 	// get a SkyWindow of appropriate size
-	catalog::SkyWindow	window(direction, anglewidth, angleheight);
+	SkyWindow	window(direction, anglewidth, angleheight);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "%s", window.toString().c_str());
 
-	// XXX get the appropriate catalog and retrieve the 
+	// get the appropriate catalog
+	CatalogPtr	catalog = CatalogFactory::get(CatalogFactory::Combined,
+                                        "/usr/local/starcatalog");
+	// XXX the path to the star catalogs should be tied to the configuration
+	// XXX e.g. by basing it on the prefix
 
-	starfield.rebuild(4711);
+	// retrieve the stars
+	MagnitudeRange	magrange(-30, limit_magnitude);
+	Catalog::starsetptr	stars = catalog->find(window, magrange);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "got %d stars", stars->size());
+
+	// add the stars to the star field
+	Catalog::starset::const_iterator	s;
+	for (s = stars->begin(); s != stars->end(); s++) {
+		// XXX compute the pixel coordinates for this position
+		Point	position;
+
+		// create the new star
+		astro::StellarObjectPtr	ns(new astro::Star(position, s->mag()));
+		
+		// add the star to the field
+		starfield.addObject(ns);
+	}
+
+	// rotate the star field
+	Angle	alpha(azimuth);
+	image::transform::Transform	transform(alpha.radians(), Point());
+	starfield.transform(transform);
 }
 
 /**

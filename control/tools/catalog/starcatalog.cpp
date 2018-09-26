@@ -30,6 +30,12 @@ void	starmain(CatalogPtr catalog, const std::string& starname) {
 	std::cout << star.toString() << std::endl;
 }
 
+/**
+ * \brief Retrieve an area of stars
+ *
+ * \param catalog	catalog to use to retrieve stars
+ * \param minmag	minimum magnitude to consider
+ */
 void	areamain(CatalogPtr catalog, double minmag) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0,
 		"list stars in area centered at %s/%s, w=%.3f, h=%.3f",
@@ -72,13 +78,15 @@ static void	usage(const char *progname) {
 		<< std::endl;
 	std::cout << "    -p,--path=<path>       path to the star catalogs"
 		<< std::endl;
-	std::cout << "    -R,--ra=<ra>           right ascension of center"
+	std::cout << "                           (default /usr/local/starcatalogs)"
 		<< std::endl;
-	std::cout << "    -D,--dec=<dec>         declination of center"
+	std::cout << "    -R,--ra=<ra>           right ascension of center [h]"
 		<< std::endl;
-	std::cout << "    -H,--height=<height>   angular height of image"
+	std::cout << "    -D,--dec=<dec>         declination of center [deg]"
 		<< std::endl;
-	std::cout << "    -W,--width=<width>     angular width of image"
+	std::cout << "    -H,--height=<height>   angular height of image [deg]"
+		<< std::endl;
+	std::cout << "    -W,--width=<width>     angular width of image [deg]"
 		<< std::endl;
 	std::cout << "    -h,-?,--help           display this help emssage"
 		<< std::endl;

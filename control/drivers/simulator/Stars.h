@@ -42,6 +42,7 @@ public:
 	virtual std::string	toString() const {
 		return _position.toString();
 	}
+	void	transform(const image::transform::Transform& transform);
 };
 
 /**
@@ -105,17 +106,17 @@ public:
 		unsigned int nobjects = 100);
 	StarField(const StarField&) = delete;
 	StarField&	operator=(const StarField&) = delete;
+	void	clear();
 	void	rebuild(unsigned long seed);
 	void	rebuild(const RaDec& radec);
-private:
 	void	addObject(StellarObjectPtr object);
-public:
 	virtual double	intensity(const Point& where) const;
 	virtual double	intensityR(const Point& where) const;
 	virtual double	intensityG(const Point& where) const;
 	virtual double	intensityB(const Point& where) const;
 	size_t	nObjects() const { return objects.size(); }
 	StellarObjectPtr	operator[](size_t index) const;
+	void	transform(const image::transform::Transform& transform);
 };
 
 /**

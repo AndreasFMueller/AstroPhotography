@@ -163,4 +163,24 @@ StellarObjectPtr	StarField::operator[](size_t index) const {
 	return objects[index];
 }
 
+/**
+ * \brief clear the starfield from any objects
+ */
+void	StarField::clear() {
+	objects.clear();
+}
+
+/**
+ * \brief Apply a transform to all objects of a star field
+ *
+ * This method is used to rotate the star field after it has been
+ * created.
+ */
+void	StarField::transform(const image::transform::Transform& transform) {
+	std::vector<StellarObjectPtr>::const_iterator	i;
+	for (i = objects.begin(); i != objects.end(); i++) {
+		(*i)->transform(transform);
+	}
+}
+
 } // namespace astro
