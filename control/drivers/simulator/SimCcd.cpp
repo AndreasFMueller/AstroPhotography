@@ -176,7 +176,7 @@ void	SimCcd::catalogStarfield(const RaDec& direction) {
 
 	// get the appropriate catalog
 	CatalogPtr	catalog = CatalogFactory::get(CatalogFactory::Combined,
-                                        "/usr/local/starcatalogs");
+					DATAROOTDIR "/starcatalogs");
 	// XXX the path to the star catalogs should be tied to the configuration
 	// XXX e.g. by basing it on the prefix
 
