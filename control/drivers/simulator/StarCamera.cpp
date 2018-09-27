@@ -209,9 +209,10 @@ Image<double>	*StarCameraBase::doubleImage(StarField& field) {
 		r.toString().c_str());
 
 	// stretch the values
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "stretch factor = %.1f", _stretch);
 	for (int x = 0; x < size.width(); x++) {
 		for (int y = 0; y < size.height(); y++) {
-			image.pixel(x, y) = _stretch * image.pixel(x,y);
+			result->pixel(x, y) = _stretch * result->pixel(x,y);
 		}
 	}
 

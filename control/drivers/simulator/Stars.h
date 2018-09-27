@@ -301,7 +301,7 @@ ImagePtr	StarCamera<P>::operator()(StarField& field) {
 	// now add all the local stuff, which depends on the camera,
 	// not the star field
 	double	scale = std::numeric_limits<P>::max();
-	rescale(*rawimage, scale / 2);
+	rescale(*rawimage, scale);
 
 	// turn pixels hot, this must respsect the binning
 	addhot(*rawimage, scale);
