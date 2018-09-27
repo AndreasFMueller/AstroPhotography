@@ -78,7 +78,7 @@ static void	usage(const char *progname) {
 		<< std::endl;
 	std::cout << "    -p,--path=<path>       path to the star catalogs"
 		<< std::endl;
-	std::cout << "                           (default /usr/local/starcatalogs)"
+	std::cout << "                           (default " << DATAROOTDIR << "/starcatalogs)"
 		<< std::endl;
 	std::cout << "    -R,--ra=<ra>           right ascension of center [h]"
 		<< std::endl;
@@ -110,7 +110,7 @@ static struct option	longopts[] = {
 int	main(int argc, char *argv[]) {
 	int	c;
 	int	longindex;
-	std::string	path("/usr/local/starcatalogs");
+	std::string	path(DATAROOTDIR "/starcatalogs");
 	while (EOF != (c = getopt_long(argc, argv, "dp:R:D:H:W:h?",
 		longopts, &longindex)))
 		switch (c) {
