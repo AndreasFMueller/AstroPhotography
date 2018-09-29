@@ -101,7 +101,6 @@ snowstar::ModulesPrx	NiceLocator::getModules(const std::string& servicename) {
 	// get a proxy to Modules
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "not known yet, discovering service '%s'",
 		servicename.c_str());
-	//ServiceKey	key = discovery->find(servicename);
 	ServiceKey	key = discovery->waitfor(servicename);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "found service '%s'",
 		key.toString().c_str());
