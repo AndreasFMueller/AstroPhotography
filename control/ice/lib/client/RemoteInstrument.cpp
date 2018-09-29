@@ -268,7 +268,7 @@ GuiderPrx	RemoteInstrument::guider(unsigned int ccdindex,
 
 	// check guideport
 	guiderdescriptor.guideportIndex = guideportindex;
-	int	n = _instrument->nComponentsOfType(InstrumentGuidePort);
+	unsigned int	n = _instrument->nComponentsOfType(InstrumentGuidePort);
 	if (guideportindex >= n) {
 		guiderdescriptor.guideportIndex = -1;
 	}

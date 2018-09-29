@@ -270,7 +270,7 @@ int	snowstar_main(int argc, char *argv[]) {
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "command line parsed");
 
-	// go inter the background
+	// go into the background
 	if (!foreground) {
 		pid_t	pid = fork();
 		if (pid < 0) {
@@ -291,6 +291,11 @@ int	snowstar_main(int argc, char *argv[]) {
 		}
 		umask(027);
 	}
+
+	// start the service descovery, because the nice driver needs it
+	astro::discover::ServiceDiscoveryPtr	servicediscovery
+		= astro::discover::ServiceDiscovery::get();
+	servicediscovery->start();
 
 	{
 		// by opening a new brace we ensure that the pdifile will

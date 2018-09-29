@@ -341,6 +341,7 @@ FilterMethod	GuiderI::getFilterMethod(const Ice::Current& /* current */) {
 	case astro::guiding::FilterGAIN:	return FilterGAIN;
 	case astro::guiding::FilterKALMAN:	return FilterKALMAN;
 	}
+	throw std::runtime_error("unknown filter method");
 }
 
 } // namespace snowstar
