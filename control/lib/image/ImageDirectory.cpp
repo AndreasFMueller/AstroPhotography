@@ -28,10 +28,33 @@ void	ImageDirectory::basedir(const std::string& b) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "setting base directory to %s",
 		b.c_str());
 	_basedir = b;
+
+	// check for existence of base directory of the imagedirectory
+	struct stat	sb;
+	if (stat(_basedir.c_str(), &sb) < 0) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "cannot stat base dir %s",
+			_basedir.c_str());
+		if (ENOENT == errno) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "need to create %s",
+				_basedir.c_str());
+			if (mkdir(_basedir.c_str(), 022) < 0) {
+				std::string	msg = stringprintf("cannot "
+					"create base directory '%s': %s",
+					_basedir.c_str(), strerror(errno));
+				debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+				throw std::runtime_error(msg);
+			}
+		}
+	}
 }
 
 /**
- * \brief Build the full name from a 
+ * \brief Build the full path name from a file name only
+ *
+ * This method combines the basedirectory name with the filename to
+ * create a full path name of the image file
+ *
+ * \param filename	name of the file
  */
 std::string	ImageDirectory::fullname(const std::string& filename) const {
 	return basedir() + "/" + filename;
@@ -39,6 +62,8 @@ std::string	ImageDirectory::fullname(const std::string& filename) const {
 
 /**
  * \brief Test whether a file exists
+ *
+ * \param filename	base name of the file to test
  */
 bool	ImageDirectory::isFile(const std::string& filename) const {
 	std::string	fn = fullname(filename);
@@ -53,6 +78,8 @@ bool	ImageDirectory::isFile(const std::string& filename) const {
 
 /**
  * \brief Get the size of the file
+ *
+ * \param name	base name of the file to test
  */
 long	ImageDirectory::fileSize(const std::string& name) const {
 	std::string	fn = fullname(name);
@@ -67,6 +94,8 @@ long	ImageDirectory::fileSize(const std::string& name) const {
 
 /**
  * \brief Get the age of the file
+ *
+ * \param name	base name of the file
  */
 long	ImageDirectory::fileAge(const std::string& name) const {
 	std::string	fn = fullname(name);
@@ -85,6 +114,8 @@ long	ImageDirectory::fileAge(const std::string& name) const {
  * 
  * For this we read the headers of the FITS file, and derive the size from
  * the header information.
+ *
+ * \param filename	base name of the file
  */
 int	ImageDirectory::bytesPerPixel(const std::string& filename) const {
 	std::string	f = fullname(filename);
@@ -180,6 +211,8 @@ std::list<std::string>	ImageDirectory::fileList() {
 
 /**
  * \brief Get the base filename from a path
+ *
+ * \param fullname	full name to analyze
  */
 static std::string	basename(const std::string& fullname) {
 	size_t	offset = fullname.rfind('/');
@@ -188,16 +221,20 @@ static std::string	basename(const std::string& fullname) {
 
 /**
  * \brief Save an image in the directory, return the short name
+ *
+ * \param image	image to save
  */
 std::string	ImageDirectory::save(astro::image::ImagePtr image) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "saving an image");
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "saving an %s image",
+		image->size().toString().c_str());
 	// create a temporary file name in the base directory
 	char	buffer[1024];
 	snprintf(buffer, sizeof(buffer), "%s/XXXXXXXX.fits", basedir().c_str());
 	int	fd = mkstemps(buffer, 5);
 	if (fd < 0) {
 		std::string	cause = stringprintf("cannot create a tmp "
-			"image file: %s", strerror(errno));
+			"image file in '%s': %s", basedir().c_str(),
+			strerror(errno));
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", cause.c_str());
 		throw std::runtime_error(cause);
 	}
@@ -224,6 +261,9 @@ std::string	ImageDirectory::save(astro::image::ImagePtr image) {
  *
  * This method is protected because we don't want other parts of the
  * system to randomly overwrite files
+ *
+ * \param image		image to write to a file
+ * \param filename	name of file to write image to
  */
 void	ImageDirectory::write(astro::image::ImagePtr image,
 		const std::string& filename) {
@@ -248,6 +288,8 @@ void	ImageDirectory::write(astro::image::ImagePtr image,
 
 /**
  * \brief Remove an image from the directory
+ *
+ * \param filename	name of the file to remove
  */
 void	ImageDirectory::remove(const std::string& filename) {
 	if (!isFile(filename)) {
@@ -264,6 +306,8 @@ void	ImageDirectory::remove(const std::string& filename) {
 
 /**
  * \brief retrieve an image from the image directory
+ *
+ * \param filename	name of the image file
  */
 ImagePtr	ImageDirectory::getImagePtr(const std::string& filename) {
 	astro::io::FITSin	in(fullname(filename));
@@ -272,6 +316,9 @@ ImagePtr	ImageDirectory::getImagePtr(const std::string& filename) {
 
 /**
  * \brief Get a meta value from an image
+ *
+ * \param filename	name of the file
+ * \param keyword	keyword to query from the image
  */
 Metavalue	ImageDirectory::getMetadata(const std::string& filename,
 			const std::string& keyword) {
@@ -280,6 +327,9 @@ Metavalue	ImageDirectory::getMetadata(const std::string& filename,
 
 /**
  * \brief Set the meta data in an image
+ *
+ * \param filename	name of the image file where to set the metaadta
+ * \param metadata	metadata to set in the image
  */
 void	ImageDirectory::setMetadata(const std::string& filename,
 		const ImageMetadata& metadata) {

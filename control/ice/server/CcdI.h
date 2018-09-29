@@ -14,11 +14,14 @@ namespace snowstar {
 
 /**
  * \brief Sink class for the stream mode
+ *
+ * This class is supposed to absorb images
  */
 class CcdSink : public astro::camera::ImageSink {
 	ImageSinkPrx	sinkprx;
 public:
 	CcdSink(const Ice::Identity& identity, const Ice::Current& current);
+	virtual ~CcdSink() { }
 	void	operator()(const astro::camera::ImageQueueEntry& entry);
 	void	stop();
 };
