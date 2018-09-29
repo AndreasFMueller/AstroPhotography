@@ -15,7 +15,7 @@ noinst_PROGRAMS = tests singletest
 
 # single test
 singletest_SOURCES = singletest.cpp 					\
-	MedianTest.cpp
+	JulianDateTest.cpp
 singletest_LDADD = $(test_ldadd)
 singletest_DEPENDENCIES = $(test_dependencies)
 
@@ -25,6 +25,7 @@ single:	singletest
 ## general tests
 tests_SOURCES = tests.cpp 						\
 	ConcatenatorTest.cpp 						\
+	JulianDateTest.cpp						\
 	MedianTest.cpp							\
 	PathTest.cpp 							\
 	SplitterTest.cpp						\

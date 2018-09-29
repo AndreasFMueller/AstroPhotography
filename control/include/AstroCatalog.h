@@ -34,6 +34,7 @@ public:
 	SkyWindow(const RaDec& center, const Angle& rawidth,
 		const Angle& decheight);
 	SkyWindow(const ImageBase& image);
+	SkyWindow();
 	bool	contains(const RaDec& position) const;
 	std::pair<double, double>	decinterval() const;
 	Angle	leftra() const;
@@ -112,6 +113,7 @@ public:
 class DeepSkyObject : public CelestialObject {
 public:
 	DeepSkyObject() { _mag = 0; }
+	virtual ~DeepSkyObject() { }
 	std::string	name;
 	std::string	constellation;
 	typedef enum { Galaxy, OpenCluster, GlobularCluster, BrightNebula,
@@ -228,6 +230,8 @@ public:
 	} BackendType;
 	static CatalogPtr	get(BackendType type,
 					const std::string& parameter);
+	static CatalogPtr	get(BackendType type);
+	static CatalogPtr	get();
 };
 
 } // namespace catalog

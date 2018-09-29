@@ -32,5 +32,28 @@ CatalogPtr	CatalogFactory::get(BackendType type,
 	throw std::runtime_error("unknown catalog");
 }
 
+CatalogPtr	CatalogFactory::get(BackendType type) {
+	std::string	pathbase(DATAROOTDIR "/starcatalogs");
+	switch (type) {
+	case BSC:
+		return CatalogPtr(new catalog::BSC(pathbase + "/bsc"));
+	case Hipparcos:
+		return CatalogPtr(new catalog::Hipparcos(pathbase + "/hipparcos"));
+	case Tycho2:
+		return CatalogPtr(new catalog::Tycho2(pathbase + "/tycho2"));
+	case Ucac4:
+		return CatalogPtr(new catalog::Ucac4(pathbase + "/u4"));
+	case Combined:
+		return CatalogPtr(new FileBackend(pathbase));
+	case Database:
+		throw std::runtime_error("database path required");
+	}
+	throw std::runtime_error("unknown catalog");
+}
+
+CatalogPtr	CatalogFactory::get() {
+	return get(Combined);
+}
+
 } // namespace catalog
 } // namespace astro

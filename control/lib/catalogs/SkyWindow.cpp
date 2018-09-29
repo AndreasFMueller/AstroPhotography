@@ -15,6 +15,13 @@ using namespace astro::io;
 namespace astro {
 namespace catalog {
 
+/**
+ * \brief Construct a sky window based on a angles given as arguments
+ *
+ * \param center	center of the sky window
+ * \param rawidth	width of the window
+ * \param decheight	height of the window
+ */
 SkyWindow::SkyWindow(const RaDec& center,
 	const Angle& rawidth, const Angle& decheight) : _center(center) {
 	if (rawidth.radians() >= 2 * M_PI) {
@@ -27,6 +34,11 @@ SkyWindow::SkyWindow(const RaDec& center,
 	_decheight = decheight.reduced(-M_PI / 2);
 }
 
+/**
+ * \brief Construct SkyWindow based on the data found in an image
+ *
+ * \param image		image to read window dimensions from metadata
+ */
 SkyWindow::SkyWindow(const ImageBase& image) {
 	_center.ra().hours(
 		(double)(image.getMetadata(std::string("RACENTR"))));
@@ -36,6 +48,14 @@ SkyWindow::SkyWindow(const ImageBase& image) {
 		(double)(image.getMetadata(std::string("RAWIDTH"))));
 	_decheight.degrees(
 		(double)(image.getMetadata(std::string("DECHIGHT"))));
+}
+
+/**
+ * \brief Construct a SkyWindow that contains the complete sky
+ */
+SkyWindow::SkyWindow() {
+	_rawidth.radians(4 * M_PI);
+	_decheight.radians(2 * M_PI);
 }
 
 static double	reduce(double x, double left) {

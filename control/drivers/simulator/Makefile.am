@@ -21,7 +21,6 @@ noinst_LTLIBRARIES = libsimulator.la
 libsimulator_la_SOURCES = $(SRCFILES)
 libsimulator_la_DEPENDENCIES = ../../lib/libastro.la
 libsimulator_la_LIBADD = ../../lib/libastro.la
-libsimulator_la_CXXFLAGS = -DDATAROOTDIR=\"${datarootdir}\"
 
 noinst_PROGRAMS = simulatortests
 simulatortests_SOURCES = simulatortests.cpp \
@@ -40,5 +39,4 @@ simulator_la_SOURCES = $(SRCFILES)
 simulator_la_LDFLAGS = -module
 simulator_la_DEPENDENCIES = ../../lib/libastro.la
 simulator_la_LIBADD = ../../lib/libastro.la
-simulator_la_CXXFLAGS = -DDATAROOTDIR=\"${datarootdir}\"
 

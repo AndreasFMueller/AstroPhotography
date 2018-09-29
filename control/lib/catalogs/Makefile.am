@@ -73,5 +73,6 @@ libastrocatalogs_la_SOURCES =						\
 	Ucac4.cpp							\
 	WindowPredicate.cpp
 
-libastrocatalogs_la_CPPFLAGS = -DPKGLIBDIR=\"$(pkglibdir)\" \
-	-DDEVICEPROPERTIES=\"@DEVICEPROPERTIES@\"
+libastrocatalogs_la_CPPFLAGS = -DPKGLIBDIR=\"$(pkglibdir)\"		\
+	-DDEVICEPROPERTIES=\"@DEVICEPROPERTIES@\"			\
+	-DDATAROOTDIR=\"${datarootdir}\"

@@ -10,6 +10,7 @@ libastroutils_la_SOURCES = 						\
 	Angle.cpp							\
 	AsynchronousAction.cpp						\
 	AttributeValuePairs.cpp						\
+	AzmAltConverter.cpp						\
 	Barrier.cpp							\
 	BarycentricCoordinates.cpp					\
 	BlockStopWatch.cpp						\
@@ -20,6 +21,7 @@ libastroutils_la_SOURCES = 						\
 	Exceptions.cpp							\
 	Format.cpp							\
 	ImageCoordinates.cpp						\
+	JulianDate.cpp							\
 	Path.cpp							\
 	Pidfile.cpp							\
 	Point.cpp							\

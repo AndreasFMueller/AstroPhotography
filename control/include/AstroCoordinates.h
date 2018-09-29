@@ -10,6 +10,7 @@
 
 #include <math.h>
 #include <string>
+#include <time.h>
 
 namespace astro {
 
@@ -250,6 +251,32 @@ public:
 		bool mirror = false);
 	RaDec	offset(const Point& offset) const;
 	RaDec	operator()(const Point& offset) const;
+};
+
+/**
+ * \brief Julian Date
+ */
+class JulianDate {
+	double	_H;
+	double	_T;
+	void	setup(time_t when);
+public:
+	JulianDate();
+	JulianDate(time_t when);
+	double	T() const { return _T; }
+	Angle	GMST() const;
+};
+
+/**
+ * \brief Converter class from RA/DEC to azimutal coordinates
+ */
+class AzmAltConverter : public JulianDate {
+	LongLat	_longlat;
+	Angle	_lmst;
+public:
+	AzmAltConverter(time_t when, const LongLat& longlat);
+	AzmAltConverter(const LongLat& longlat);
+	AzmAlt	operator()(const RaDec& radec);
 };
 
 } // namespace astro

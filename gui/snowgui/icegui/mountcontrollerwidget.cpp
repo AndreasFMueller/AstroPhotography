@@ -6,6 +6,8 @@
 #include "mountcontrollerwidget.h"
 #include "ui_mountcontrollerwidget.h"
 #include <QMessageBox>
+#include <SkyDisplayWidget.h>
+#include <IceConversions.h>
 
 namespace snowgui {
 
@@ -21,11 +23,15 @@ mountcontrollerwidget::mountcontrollerwidget(QWidget *parent)
 
 	connect(ui->gotoButton, SIGNAL(clicked()),
 		this, SLOT(gotoClicked()));
+	connect(ui->viewskyButton, SIGNAL(clicked()),
+		this, SLOT(viewskyClicked()));
 
 	_statusTimer.setInterval(1000);
 
 	connect(&_statusTimer, SIGNAL(timeout()),
 		this, SLOT(statusUpdate()));
+
+	_skydisplay = NULL;
 }
 
 /**
@@ -76,17 +82,18 @@ void	mountcontrollerwidget::setupMount() {
 	_statusTimer.stop();
 	_previousstate = snowstar::MountIDLE;
 	if (_mount) {
-		ui->raField->setEnabled(true);
-		ui->decField->setEnabled(true);
+		ui->targetRaField->setEnabled(true);
+		ui->targetDecField->setEnabled(true);
 		ui->gotoButton->setEnabled(true);
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "start the mount timer");
 		_statusTimer.start();
 	} else {
-		ui->raField->setEnabled(false);
-		ui->decField->setEnabled(false);
+		ui->targetRaField->setEnabled(false);
+		ui->targetDecField->setEnabled(false);
 		ui->gotoButton->setEnabled(false);
 		ui->gotoButton->setText(QString("GOTO"));
-		ui->currentField->setText(QString("(idle)"));
+		ui->currentRaField->setText(QString("(idle)"));
+		ui->currentDecField->setText(QString("(idle)"));
 	}
 }
 
@@ -110,7 +117,7 @@ void	mountcontrollerwidget::gotoClicked() {
 		break;
 	}
 	snowstar::RaDec	radec;
-	radec.ra = ui->raField->text().toDouble();
+	radec.ra = ui->targetRaField->text().toDouble();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "found RA = %.4f", radec.ra);
 	if ((radec.ra < 0) || (radec.ra > 24)) {
 		QMessageBox	message(this);
@@ -119,7 +126,7 @@ void	mountcontrollerwidget::gotoClicked() {
 		message.exec();
 		return;
 	}
-	radec.dec = ui->decField->text().toDouble();
+	radec.dec = ui->targetDecField->text().toDouble();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "found DEC = %.4f", radec.dec);
 	if ((radec.dec < -90) || (radec.dec > 90)) {
 		QMessageBox	message(this);
@@ -145,12 +152,14 @@ void	mountcontrollerwidget::statusUpdate() {
 		_previousstate = state;
 		switch (state) {
 		case snowstar::MountIDLE:
-			ui->currentField->setText(QString("(idle)"));
+			ui->currentRaField->setText(QString("(idle)"));
+			ui->currentDecField->setText(QString("(idle)"));
 			ui->gotoButton->setText(QString("GOTO"));
 			ui->gotoButton->setEnabled(false);
 			return;
 		case snowstar::MountALIGNED:
-			ui->currentField->setText(QString("(aligned)"));
+			ui->currentRaField->setText(QString("(aligned)"));
+			ui->currentDecField->setText(QString("(aligned)"));
 			ui->gotoButton->setText(QString("GOTO"));
 			ui->gotoButton->setEnabled(true);
 			return;
@@ -165,9 +174,14 @@ void	mountcontrollerwidget::statusUpdate() {
 		}
 	}
 	snowstar::RaDec	radec = _mount->getRaDec();
-	std::string	s = astro::stringprintf("RA: %.4f, DEC: %.4f",
-		radec.ra, radec.dec);
-	ui->currentField->setText(QString(s.c_str()));
+	if ((_position.ra != radec.ra) || (_position.dec != radec.dec)) {
+		ui->currentRaField->setText(QString(
+			astro::stringprintf("%.4f", radec.ra).c_str()));
+		ui->currentDecField->setText(QString(
+			astro::stringprintf("%.4f", radec.dec).c_str()));
+		_position = radec;
+		emit positionChanged(convert(radec));
+	}
 }
 
 /**
@@ -185,10 +199,14 @@ void	mountcontrollerwidget::mountChanged(int index) {
  */
 astro::RaDec	mountcontrollerwidget::current() {
 	snowstar::RaDec	radec = _mount->getRaDec();
+#if 0
 	astro::Angle	ra, dec;
 	ra.hours(radec.ra);
 	dec.degrees(radec.dec);
 	return astro::RaDec(ra, dec);
+#else
+	return convert(radec);
+#endif
 }
 
 /**
@@ -201,8 +219,25 @@ void	mountcontrollerwidget::setTarget(const astro::RaDec& target) {
 	while (_target.ra < 0) { _target.ra += 24; }
 	while (_target.ra >= 24) { _target.ra -= 24; }
 	_target.dec = target.dec().degrees();
-	ui->raField->setText(QString(astro::stringprintf("%.4f", _target.ra).c_str()));
-	ui->decField->setText(QString(astro::stringprintf("%.4f", _target.dec).c_str()));
+	ui->targetRaField->setText(QString(astro::stringprintf("%.4f", _target.ra).c_str()));
+	ui->targetDecField->setText(QString(astro::stringprintf("%.4f", _target.dec).c_str()));
+}
+
+/**
+ * \brief Method called when the view Sky button is clicked
+ */
+void	mountcontrollerwidget::viewskyClicked() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "viewskyClicked()");
+	if (_skydisplay) {
+		_skydisplay->raise();
+		return;
+	}
+	_skydisplay = new SkyDisplayWidget(NULL);
+	astro::RaDec	radec = current();
+	_skydisplay->telescope(radec);
+	connect(this, SIGNAL(positionChanged(astro::RaDec)),
+		_skydisplay, SLOT(telescopeChanged(astro::RaDec)));
+	_skydisplay->show();
 }
 
 } // namespace snowgui

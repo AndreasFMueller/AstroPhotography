@@ -175,10 +175,7 @@ void	SimCcd::catalogStarfield(const RaDec& direction) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "window: %s", window.toString().c_str());
 
 	// get the appropriate catalog
-	CatalogPtr	catalog = CatalogFactory::get(CatalogFactory::Combined,
-					DATAROOTDIR "/starcatalogs");
-	// XXX the path to the star catalogs should be tied to the configuration
-	// XXX e.g. by basing it on the prefix
+	CatalogPtr	catalog = CatalogFactory::get(CatalogFactory::Combined);
 
 	// retrieve the stars
 	MagnitudeRange	magrange(-30, limit_magnitude);

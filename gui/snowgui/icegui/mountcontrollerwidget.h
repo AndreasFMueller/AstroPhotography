@@ -9,6 +9,7 @@
 #include <InstrumentWidget.h>
 #include <QTimer>
 #include <AstroCoordinates.h>
+#include <SkyDisplayWidget.h>
 
 namespace snowgui {
 
@@ -23,6 +24,9 @@ class mountcontrollerwidget : public InstrumentWidget {
 	snowstar::mountstate	_previousstate;
 	snowstar::MountPrx	_mount;
 
+	snowstar::RaDec		_position;
+	SkyDisplayWidget	*_skydisplay;
+
 public:
 	explicit mountcontrollerwidget(QWidget *parent = 0);
 	~mountcontrollerwidget();
@@ -34,6 +38,7 @@ public:
 
 signals:
 	void	mountSelected(int);
+	void	positionChanged(astro::RaDec);
 
 private:
 	Ui::mountcontrollerwidget *ui;
@@ -45,6 +50,7 @@ public slots:
 	void	mountChanged(int);
 	void	gotoClicked();
 	void	statusUpdate();
+	void	viewskyClicked();
 };
 
 } // namespace snowgui

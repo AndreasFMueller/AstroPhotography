@@ -47,6 +47,7 @@ SOURCES += 								\
 	LogSpinBox.cpp							\
 	Scaler.cpp							\
 	SelectableImage.cpp						\
+	SkyDisplayWidget.cpp						\
 	$${WIDGETSOURCES}
 
 HEADERS  += 								\
@@ -63,6 +64,7 @@ HEADERS  += 								\
 	LogSpinBox.h							\
 	Scaler.h							\
 	SelectableImage.h						\
+	SkyDisplayWidget.h						\
 	$${WIDGETHEADERS}
 
 
