@@ -344,7 +344,7 @@ Calibration     convert(const astro::guiding::CalibrationPtr cal) {
 	result.quality = cal->quality();
 
 	// copy the calibration points
-	for (int i = 0; i < cal->size(); i++) {
+	for (unsigned int i = 0; i < cal->size(); i++) {
 		result.points.push_back(convert((*cal)[i]));
 	}
 
@@ -378,7 +378,7 @@ astro::guiding::CalibrationPtr	convert(const Calibration& cal) {
 	result->interval(cal.interval);
 	result->guiderate(cal.guiderate);
 
-	for (int i = 0; i < cal.points.size(); i++) {
+	for (unsigned int i = 0; i < cal.points.size(); i++) {
 		result->push_back(convert(cal.points[i]));
 	}
 	return astro::guiding::CalibrationPtr(result);
