@@ -37,7 +37,7 @@ void	ImageDirectory::basedir(const std::string& b) {
 		if (ENOENT == errno) {
 			debug(LOG_DEBUG, DEBUG_LOG, 0, "need to create %s",
 				_basedir.c_str());
-			if (mkdir(_basedir.c_str(), 022) < 0) {
+			if (mkdir(_basedir.c_str(), 0777) < 0) {
 				std::string	msg = stringprintf("cannot "
 					"create base directory '%s': %s",
 					_basedir.c_str(), strerror(errno));
