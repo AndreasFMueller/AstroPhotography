@@ -19,8 +19,9 @@ AzmAltConverter::AzmAltConverter(const LongLat& longlat)
 AzmAlt	AzmAltConverter::operator()(const RaDec& radec) {
 	Angle	hourangle = _lmst - radec.ra();
 	AzmAlt	result;
-	result.alt().radians(sin(_longlat.latitude()) * sin(radec.dec())
-		+ cos(_longlat.latitude()) * cos(radec.dec()) * cos(hourangle));
+	double	sh = sin(_longlat.latitude()) * sin(radec.dec())
+		+ cos(_longlat.latitude()) * cos(radec.dec()) * cos(hourangle);
+	result.alt().radians(asin(sh));
 	double	y = sin(hourangle);
 	double	x = cos(hourangle) * sin(_longlat.latitude())
 			- tan(radec.dec()) * cos(_longlat.latitude());

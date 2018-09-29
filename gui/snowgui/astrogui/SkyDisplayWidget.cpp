@@ -68,8 +68,8 @@ astro::AzmAlt	SkyDisplayWidget::convert(const astro::RaDec& radec) {
 QPoint	SkyDisplayWidget::convert(const astro::AzmAlt& azmalt) {
 	float	r = _radius * (1 - azmalt.alt().radians() / (M_PI / 2));
 	double	phi = azmalt.azm().radians();
-	QPoint	starcenter(_center.x() + r * cos(phi),
-			_center.y() - r * sin(phi));
+	QPoint	starcenter(_center.x() + r * sin(phi),
+			_center.y() + r * cos(phi));
 	return starcenter;
 }
 
