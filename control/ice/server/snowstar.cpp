@@ -292,11 +292,6 @@ int	snowstar_main(int argc, char *argv[]) {
 		umask(027);
 	}
 
-	// start the service descovery, because the nice driver needs it
-	astro::discover::ServiceDiscoveryPtr	servicediscovery
-		= astro::discover::ServiceDiscovery::get();
-	servicediscovery->start();
-
 	{
 		// by opening a new brace we ensure that the pdifile will
 		// be removed when we exit from the server
