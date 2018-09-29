@@ -64,6 +64,8 @@ namespace nice {
 //////////////////////////////////////////////////////////////////////
 
 NiceLocator::NiceLocator() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "starting service discovery for nice "
+		"locator");
 	discovery = ServiceDiscovery::get();
 	discovery->start();
 }
@@ -86,22 +88,34 @@ std::string	NiceLocator::getVersion() const {
  * it has talked to.
  */
 snowstar::ModulesPrx	NiceLocator::getModules(const std::string& servicename) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "get a service named '%s'",
+		servicename.c_str());
 	std::unique_lock<std::mutex>	lock(modules_mtx);
 	ModulesMap::iterator	i = modules.find(servicename);
 	if (i != modules.end()) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "module for '%s' already known",
+			servicename.c_str());
 		return i->second;
 	}
 
 	// get a proxy to Modules
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "get service '%s'", servicename.c_str());
-	ServiceKey	key = discovery->find(servicename);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "not known yet, discovering service '%s'",
+		servicename.c_str());
+	//ServiceKey	key = discovery->find(servicename);
+	ServiceKey	key = discovery->waitfor(servicename);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "found service '%s'",
+		key.toString().c_str());
 	return getModules(key);
 }
 
 /**
  * \brief Get a modules proxy from a key
+ *
+ * \param key	service key for which to find the modules
  */
 snowstar::ModulesPrx	NiceLocator::getModules(const ServiceKey& key) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "get modules for key %s",
+		key.toString().c_str());
 	ServiceObject	object = discovery->find(key);
 
 	// we need a connection 
@@ -118,6 +132,9 @@ snowstar::ModulesPrx	NiceLocator::getModules(const ServiceKey& key) {
 
 /**
  * \brief Get a DriverModule proxy for a given module name
+ *
+ * \param servicename	service name
+ * \param module	name of the module
  */
 snowstar::DriverModulePrx	NiceLocator::getDriverModule(
 	const std::string& servicename, const std::string& modulename) {
@@ -126,6 +143,9 @@ snowstar::DriverModulePrx	NiceLocator::getDriverModule(
 
 /** 
  * \brief Get a driver module to a service key and a module name
+ *
+ * \param key		service key
+ * \param modulename	name of the module
  */
 snowstar::DriverModulePrx	NiceLocator::getDriverModule(
 	const ServiceKey& key, const std::string& modulename) {
@@ -134,6 +154,9 @@ snowstar::DriverModulePrx	NiceLocator::getDriverModule(
 
 /**
  * \brief Get a DeviceLocator proxy for a given module name
+ *
+ * \param servicename	service name (essentially host name)
+ * \param modulename	name of the module for which to get a locator
  */
 snowstar::DeviceLocatorPrx	NiceLocator::getLocator(
 	const std::string& servicename, const std::string& modulename) {
@@ -150,6 +173,9 @@ snowstar::DeviceLocatorPrx	NiceLocator::getLocator(
 
 /**
  * \brief Get the DeviceLocator proxy for a key and modulename
+ *
+ * \param key		key for the service to get a locator for
+ * \param modulename	module name of the module to get a locator
  */
 snowstar::DeviceLocatorPrx	NiceLocator::getLocator(const ServiceKey& key,
 					const std::string& modulename) {
@@ -164,6 +190,9 @@ snowstar::DeviceLocatorPrx	NiceLocator::getLocator(const ServiceKey& key,
 
 /**
  * \brief Get a Device list for a given module
+ *
+ * \param device	type of device to list
+ * \param module	module driving the device
  */
 std::vector<std::string>	NiceLocator::getDevicelist(
 					DeviceName::device_type device,
@@ -185,6 +214,9 @@ std::vector<std::string>	NiceLocator::getDevicelist(
 
 /**
  * \brief Get the dvice names from a given service
+ *
+ * \param device	type of device to list
+ * \param key		key for the service to get devices from
  */
 std::vector<std::string>	NiceLocator::getDevicelist(
 					DeviceName::device_type device,
@@ -218,6 +250,8 @@ std::vector<std::string>	NiceLocator::getDevicelist(
  * \brief Get a list of all devices available through nice
  *
  * This means iterating through all the available services
+ *
+ * \param device	type of devices to list
  */
 std::vector<std::string>	NiceLocator::getDevicelist(
 					DeviceName::device_type device) {
@@ -247,6 +281,9 @@ std::vector<std::string>	NiceLocator::getDevicelist(
 
 /**
  * \brief Check whether the name is of the right type
+ *
+ * \param name	name of the device
+ * \param type	type of the device
  */
 void	NiceLocator::check(const DeviceName& name,
 		DeviceName::device_type type) {
