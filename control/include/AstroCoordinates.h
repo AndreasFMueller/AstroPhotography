@@ -256,6 +256,8 @@ public:
 		bool mirror = false);
 	RaDec	offset(const Point& offset) const;
 	RaDec	operator()(const Point& offset) const;
+	Point	offset(const RaDec& direction) const;
+	Point	operator()(const RaDec& direction) const;
 };
 
 /**

@@ -31,9 +31,10 @@ pointingwindow::pointingwindow(QWidget *parent)
         ui->imagerImageWidget->setRectangleSelectionEnabled(false);
         ui->imagerImageWidget->setPointSelectionEnabled(true);
 
-	ui->tabWidget->setTabEnabled(0, false);
+	ui->tabWidget->setTabEnabled(0, true);
 	ui->tabWidget->setTabEnabled(1, false);
 	ui->tabWidget->setTabEnabled(2, false);
+	ui->tabWidget->setTabEnabled(3, false);
 
 	// set up the imager
 	//ui->imagercontrollerWidget->hideSubframe(true);
@@ -61,6 +62,13 @@ pointingwindow::pointingwindow(QWidget *parent)
 		SIGNAL(pointSelected(astro::image::ImagePoint)),
 		this,
 		SLOT(imagerPointSelected(astro::image::ImagePoint)));
+
+	// when the telesope points to a  new direction, update the
+	// star chart
+	connect(ui->mountcontrollerWidget,
+		SIGNAL(telescopeChanged(astro::RaDec)),
+		ui->chartWidget,
+		SLOT(directionChanged(astro::RaDec)));
 }
 
 /**
@@ -103,22 +111,22 @@ void    pointingwindow::newImage(astro::image::ImagePtr _image) {
 	switch (_ccddata.type()) {
 	case snowstar::InstrumentFinderCCD:
 		ui->finderImageWidget->setImage(_image);
-		ui->tabWidget->setTabEnabled(0, true);
-		ui->tabWidget->setCurrentIndex(0);
+		ui->tabWidget->setTabEnabled(1, true);
+		ui->tabWidget->setCurrentIndex(1);
 		_finder_direction = ui->mountcontrollerWidget->current();
 		_finder_ccddata = _ccddata;
 		break;
 	case snowstar::InstrumentGuiderCCD:
 		ui->guiderImageWidget->setImage(_image);
-		ui->tabWidget->setTabEnabled(1, true);
-		ui->tabWidget->setCurrentIndex(1);
+		ui->tabWidget->setTabEnabled(2, true);
+		ui->tabWidget->setCurrentIndex(2);
 		_guider_direction = ui->mountcontrollerWidget->current();
 		_guider_ccddata = _ccddata;
 		break;
 	case snowstar::InstrumentCCD:
 		ui->imagerImageWidget->setImage(_image);
-		ui->tabWidget->setTabEnabled(2, true);
-		ui->tabWidget->setCurrentIndex(2);
+		ui->tabWidget->setTabEnabled(3, true);
+		ui->tabWidget->setCurrentIndex(3);
 		_imager_direction = ui->mountcontrollerWidget->current();
 		_imager_ccddata = _ccddata;
 		break;

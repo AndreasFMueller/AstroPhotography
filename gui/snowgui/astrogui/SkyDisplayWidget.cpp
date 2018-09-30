@@ -400,6 +400,11 @@ void	SkyDisplayWidget::positionChanged(astro::LongLat longlat) {
 	repaint();
 }
 
+/**
+ * \brief All mouse events are processed the same way with this method
+ *
+ * \param e	the mouse event to process
+ */
 void	SkyDisplayWidget::mouseCommon(QMouseEvent *e) {
 	double	deltax = e->pos().x() - _center.x();
 	double	deltay = e->pos().y() - _center.y();

@@ -56,4 +56,43 @@ RaDec	ImageCoordinates::operator()(const Point& _offset) const {
 	return _center + offset(_offset);
 }
 
+/**
+ * \brief Compute points relative to the center direction
+ */
+Point	ImageCoordinates::operator()(const RaDec& direction) const {
+	// we use a spherical triangle from the north pole (B)
+	// to the center (C) to the direction (A):
+	//
+	//          B
+	//         / \
+	//      a /   \ c
+	//       /     \
+	//      C-------A
+	//          b
+	// The angle gamma is at the point C
+	// a is a right angle - declination of C
+	// c is a right angle - declination of A
+	// beta (the angle at B) is the difference of right ascensions
+	//      of A and C
+	// this allows to determine b with the law of cosines
+	Angle	a = Angle::right_angle - _center.dec();
+	Angle	c = Angle::right_angle - direction.dec();
+	Angle	beta = direction.ra() - _center.ra();
+	double	cosb = cos(c) * cos(a) + sin(c) * sin(a) * cos(beta);
+	Angle	b = arccos(cosb);
+
+	// sin(gamma) can be determined with the law of sines
+	double	singamma = sin(c) * sin(beta) / sin(b);
+
+	// cos(gamma9 can be determined with the law of cosines
+	double	cosgamma = (cos(c) - cos(a) * cos(b)) / (sin(a) * sin(b));
+
+	// determine the radius
+	double	r = b.radians() / _angular_resolution.radians(); // pixels
+
+	// convert polar coordinates into cartesian coordinates
+	Point	result(r * singamma, r * cosgamma);
+	return result;
+}
+
 } // namespace astro
