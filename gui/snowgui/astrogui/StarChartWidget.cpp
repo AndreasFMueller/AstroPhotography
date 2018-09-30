@@ -15,8 +15,8 @@ namespace snowgui {
  * \brief Construct a new Star chart
  */
 StarChartWidget::StarChartWidget(QWidget *parent) : QWidget(parent),
-	_converter(astro::RaDec(), astro::Angle(1 / 200.), astro::Angle(0)) {
-	_resolution.degrees(1 / 200.); // 1 deg/200 pixels
+	_converter(astro::RaDec(), astro::Angle(1 / 100.), astro::Angle(0)) {
+	_resolution.degrees(1 / 100.); // 1 deg/200 pixels
 	_limit_magnitude = 10;
 	_negative = false;
 }
