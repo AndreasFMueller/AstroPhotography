@@ -211,6 +211,7 @@ private: // prevent copying of configuration
 	Configuration&	operator=(const Configuration& other);
 public:
 	Configuration() { }
+	virtual ~Configuration() { }
 	// factory methods for the configuration
 static ConfigurationPtr	get();
 static ConfigurationPtr	get(const std::string& filename);

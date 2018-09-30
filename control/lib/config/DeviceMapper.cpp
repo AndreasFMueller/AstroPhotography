@@ -24,6 +24,7 @@ class DeviceMapperBackend : public DeviceMapper {
 public:
 	DeviceMapperBackend(Database _database)
 		: database(_database), devicemap(_database) { }
+	virtual ~DeviceMapperBackend() { }
 	int	id(const std::string& name);
 	int	id(const DeviceName& name, int unitid,
 			const std::string& servername);

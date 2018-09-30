@@ -133,6 +133,14 @@ Angle	arcsin(double x) {
 	return Angle(asin(x));
 }
 
+Angle	arctan(double x) {
+	return Angle(atan(x));
+}
+
+Angle	arctan2(double y, double x) {
+	return Angle(atan2(y, x));
+}
+
 Angle	operator*(double l, const Angle& a) {
 	return a * l;
 }

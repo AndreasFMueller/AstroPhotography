@@ -1058,7 +1058,7 @@ public:
 		camera::CcdPtr ccd, camera::GuidePortPtr guideport,
 		camera::AdaptiveOpticsPtr adaptiveoptics,
 		persistence::Database database = NULL);
-	~Guider();
+	virtual ~Guider();
 
 	/**
 	 * \brief Launch the calibration process

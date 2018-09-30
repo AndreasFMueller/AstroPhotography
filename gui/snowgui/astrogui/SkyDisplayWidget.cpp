@@ -69,10 +69,10 @@ astro::AzmAlt	SkyDisplayWidget::convert(const astro::RaDec& radec) {
  *
  * \param azmalt	azimuth and altitude to convert
  */
-QPoint	SkyDisplayWidget::convert(const astro::AzmAlt& azmalt) {
+QPointF	SkyDisplayWidget::convert(const astro::AzmAlt& azmalt) {
 	float	r = _radius * (1 - azmalt.alt().radians() / (M_PI / 2));
 	double	phi = azmalt.azm().radians();
-	QPoint	starcenter(_center.x() + r * sin(phi),
+	QPointF	starcenter(_center.x() + r * sin(phi),
 			_center.y() + r * cos(phi));
 	return starcenter;
 }
@@ -95,7 +95,7 @@ void	SkyDisplayWidget::drawStar(QPainter& painter, const Star& star) {
 	}
 
 	// compute coordinates where to draw the star
-	QPoint	starcenter = convert(azmalt);
+	QPointF	starcenter = convert(azmalt);
 
 	// compute the radius of the circle from the magnitude of the star
 	float	sr = 4 - star.mag() / 1.8;
@@ -136,7 +136,7 @@ void	SkyDisplayWidget::drawTelescope(QPainter& painter) {
 	painter.setPen(pen);
 
 	// compose the path
-	QPoint	markerpoint = convert(azmalt);
+	QPointF	markerpoint = convert(azmalt);
 	telescopemarker.addEllipse(markerpoint, 7, 7);
 
 	// draw the marker in red
@@ -162,10 +162,12 @@ void	SkyDisplayWidget::drawAltaz(QPainter& painter) {
 	}
 	
 	// draw the radial lines
-	for (double a = 0; a < 2 * M_PI; a += M_PI / 6) {
-		QPoint	target(_center.x() + _radius * cos(a),
+	for (double a = 0; a < M_PI; a += M_PI / 6) {
+		QPointF	p1(_center.x() + _radius * cos(a),
 				_center.y() + _radius * sin(a));
-		painter.drawLine(_center, target);
+		QPointF	p2(_center.x() - _radius * cos(a),
+				_center.y() - _radius * sin(a));
+		painter.drawLine(p1, p2);
 	}
 }
 
@@ -181,24 +183,26 @@ void	SkyDisplayWidget::drawRadec(QPainter& painter) {
 	painter.setPen(pen);
 
 	// draw constant RA lines
-	double	decstep = (M_PI - 0.01) / 100;
+	double	l = M_PI - 0.0001;
+	double	decstep = l / 100;
+	double	declimit = l/2 - decstep/2;
 	for (double ra = 0; ra < 2 * M_PI; ra += M_PI / 6) {
-		for (double dec = -M_PI / 2;
-			dec < M_PI / 2 - decstep/2; dec += decstep) {
+		for (double dec = -l / 2; dec < declimit; dec += decstep) {
 			astro::RaDec	from(ra, dec), to(ra, dec + decstep);
-			QPoint	F = convert(convert(from));
-			QPoint	T = convert(convert(to));
+			QPointF	F = convert(convert(from));
+			QPointF	T = convert(convert(to));
 			painter.drawLine(F, T);
 		}
 	}
 
 	// draw the DEC lines
 	double	rastep = M_PI / 100;
+	double	ralimit = 2 * M_PI - rastep/2;
 	for (double dec = M_PI / 2; dec > -M_PI/2; dec -= M_PI / 6) {
-		for (double ra = 0; ra < 2 * M_PI; ra += rastep) {
+		for (double ra = 0; ra < ralimit; ra += rastep) {
 			astro::RaDec	from(ra, dec), to(ra + rastep, dec);
-			QPoint	F = convert(convert(from));
-			QPoint	T = convert(convert(to));
+			QPointF	F = convert(convert(from));
+			QPointF	T = convert(convert(to));
 			painter.drawLine(F, T);
 		}
 	}
@@ -210,7 +214,7 @@ void	SkyDisplayWidget::drawRadec(QPainter& painter) {
 void	SkyDisplayWidget::draw() {
 	// set up the parameters of drawing: radius and center
 	_radius = std::min<float>(width() / 2., height() / 2);
-	_center = QPoint(width() / 2, height() / 2);
+	_center = QPointF(width() / 2, height() / 2);
 
 	// set up a painter for drawing operations
 	QPainter	painter(this);
@@ -244,14 +248,34 @@ void	SkyDisplayWidget::draw() {
  * \brief  Paint event handler
  */
 void	SkyDisplayWidget::paintEvent(QPaintEvent * /* event */) {
+	// make sure we have a update to date converter
+	if (NULL != _converter) {
+		delete _converter;
+	}
+	_converter = new astro::AzmAltConverter(_position);
+	_converter->update(); // updates to the current time
+
+	// now start drawing
 	draw();
 }
 
 /**
  * \brief Redraw the sky with a new postion of the telescope marker
+ *
+ * \param radec		direction into which the telescope is pointing
  */
 void	SkyDisplayWidget::telescopeChanged(astro::RaDec radec) {
 	telescope(radec);
+	repaint();
+}
+
+/**
+ * \brief Redraw the sky with a new position of the telescope on earth
+ *
+ * \param longlat	geographical position of the observatory on earth
+ */
+void	SkyDisplayWidget::positionChanged(astro::LongLat longlat) {
+	position(longlat);
 	repaint();
 }
 

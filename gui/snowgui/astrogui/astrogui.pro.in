@@ -37,6 +37,7 @@ SOURCES += 								\
 	ChannelData.cpp							\
 	ChannelDisplayWidget.cpp					\
 	ChannelPainter.cpp						\
+	ClockWidget.cpp							\
 	ColorArithmetic.cpp						\
 	ColorRectangles.cpp						\
 	FitsTable.cpp							\
@@ -44,6 +45,7 @@ SOURCES += 								\
 	FocusPointsWidget.cpp						\
 	Histogram.cpp							\
 	Image2Pixmap.cpp						\
+	LocalSiderealTime.cpp						\
 	LogSpinBox.cpp							\
 	Scaler.cpp							\
 	SelectableImage.cpp						\
@@ -54,6 +56,7 @@ HEADERS  += 								\
 	AutoGain.h							\
 	ChannelData.h							\
 	ChannelDisplayWidget.h						\
+	ClockWidget.h							\
 	ColorArithmetic.h						\
 	ColorRectangles.h						\
 	FitsTable.h							\
@@ -61,6 +64,7 @@ HEADERS  += 								\
 	FocusPointsWidget.h						\
 	Histogram.h							\
 	Image2Pixmap.h							\
+	LocalSiderealTime.h						\
 	LogSpinBox.h							\
 	Scaler.h							\
 	SelectableImage.h						\

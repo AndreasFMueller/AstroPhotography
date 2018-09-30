@@ -14,7 +14,7 @@ namespace astro {
  * it uses the algorithm described on the wikipedia page
  * https://de.wikipedia.org/wiki/Julianisches_Datum
  */
-void	JulianDate::setup(time_t when) {
+void	JulianDate::update(time_t when) {
 	struct tm	result;
 	gmtime_r(&when, &result);
 
@@ -41,19 +41,28 @@ void	JulianDate::setup(time_t when) {
 }
 
 /**
+ * \brief update to the current time
+ */
+void	JulianDate::update() {
+	time_t	now;
+	time(&now);
+	this->update(now);
+}
+
+/**
  * \brief Construct Julian Date for current point in time
  */
 JulianDate::JulianDate() {
 	time_t	now;
 	time(&now);
-	setup(now);
+	update(now);
 }
 
 /**
  * \brief Construct Julian Date for a given point in time
  */
 JulianDate::JulianDate(time_t when) {
-	setup(when);
+	update(when);
 }
 
 /**

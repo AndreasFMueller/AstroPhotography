@@ -65,6 +65,8 @@ double	csc(const Angle& a);
 
 Angle	arccos(double x);
 Angle	arcsin(double x);
+Angle	arctan(double x);
+Angle	arctan2(double y, double x);
 
 /**
  * \brief Class combining two angles
@@ -221,6 +223,9 @@ public:
 	bool	inside() const;
 };
 
+/**
+ * \brief Barycentric coordinates
+ */
 class BarycentricCoordinates {
 	Point	_p1, _p2, _p3;
 	double	b[9];
@@ -259,10 +264,12 @@ public:
 class JulianDate {
 	double	_H;
 	double	_T;
-	void	setup(time_t when);
 public:
+	virtual void	update(time_t when);
+	void	update();
 	JulianDate();
 	JulianDate(time_t when);
+	virtual ~JulianDate() { }
 	double	T() const { return _T; }
 	Angle	GMST() const;
 };
@@ -274,9 +281,13 @@ class AzmAltConverter : public JulianDate {
 	LongLat	_longlat;
 	Angle	_lmst;
 public:
+	virtual void	update(time_t when);
+	virtual void	update();
 	AzmAltConverter(time_t when, const LongLat& longlat);
 	AzmAltConverter(const LongLat& longlat);
+	virtual ~AzmAltConverter() { }
 	AzmAlt	operator()(const RaDec& radec);
+	Angle	LMST() const { return _lmst; }
 };
 
 } // namespace astro

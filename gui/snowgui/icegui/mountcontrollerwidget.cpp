@@ -19,6 +19,9 @@ mountcontrollerwidget::mountcontrollerwidget(QWidget *parent)
 	  ui(new Ui::mountcontrollerwidget) {
 	ui->setupUi(this);
 
+	setTabOrder(ui->targetRaField, ui->targetDecField);
+	setTabOrder(ui->targetDecField, ui->targetRaField);
+
 	_previousstate = snowstar::MountIDLE;
 
 	connect(ui->gotoButton, SIGNAL(clicked()),
@@ -82,9 +85,32 @@ void	mountcontrollerwidget::setupMount() {
 	_statusTimer.stop();
 	_previousstate = snowstar::MountIDLE;
 	if (_mount) {
+		// read longitude and latitude from the mount
+		if (_mount->hasParameter("longitude")) {
+			_position.longitude().degrees(
+				_mount->parameterValueFloat("longitude"));
+		}
+		if (_mount->hasParameter("latitude")) {
+			_position.latitude().degrees(
+				_mount->parameterValueFloat("latitude"));
+		}
+
+		// write the position to the position label
+		std::string	pl;
+		pl += astro::stringprintf("%.4f",
+			fabs(_position.longitude().degrees()));
+		pl += (_position.longitude().degrees() < 0) ? "W" : "E";
+		pl += " ";
+		pl += astro::stringprintf("%.4f",
+			fabs(_position.latitude().degrees()));
+		pl += (_position.longitude().degrees() < 0) ? "S" : "N";
+		ui->observatoryField->setText(QString(pl.c_str()));
+		
+		// turn on the buttons
 		ui->targetRaField->setEnabled(true);
 		ui->targetDecField->setEnabled(true);
 		ui->gotoButton->setEnabled(true);
+		ui->viewskyButton->setEnabled(true);
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "start the mount timer");
 		_statusTimer.start();
 	} else {
@@ -92,8 +118,10 @@ void	mountcontrollerwidget::setupMount() {
 		ui->targetDecField->setEnabled(false);
 		ui->gotoButton->setEnabled(false);
 		ui->gotoButton->setText(QString("GOTO"));
+		ui->viewskyButton->setEnabled(false);
 		ui->currentRaField->setText(QString("(idle)"));
 		ui->currentDecField->setText(QString("(idle)"));
+		ui->observatoryField->setText(QString("(unknown)"));
 	}
 }
 
@@ -174,13 +202,13 @@ void	mountcontrollerwidget::statusUpdate() {
 		}
 	}
 	snowstar::RaDec	radec = _mount->getRaDec();
-	if ((_position.ra != radec.ra) || (_position.dec != radec.dec)) {
+	if ((_telescope.ra != radec.ra) || (_telescope.dec != radec.dec)) {
 		ui->currentRaField->setText(QString(
 			astro::stringprintf("%.4f", radec.ra).c_str()));
 		ui->currentDecField->setText(QString(
 			astro::stringprintf("%.4f", radec.dec).c_str()));
-		_position = radec;
-		emit positionChanged(convert(radec));
+		_telescope = radec;
+		emit telescopeChanged(convert(radec));
 	}
 }
 
@@ -199,18 +227,13 @@ void	mountcontrollerwidget::mountChanged(int index) {
  */
 astro::RaDec	mountcontrollerwidget::current() {
 	snowstar::RaDec	radec = _mount->getRaDec();
-#if 0
-	astro::Angle	ra, dec;
-	ra.hours(radec.ra);
-	dec.degrees(radec.dec);
-	return astro::RaDec(ra, dec);
-#else
 	return convert(radec);
-#endif
 }
 
 /**
  * \brief set the target
+ *
+ * This sets the position where the telescope is supposed to move next
  */
 void	mountcontrollerwidget::setTarget(const astro::RaDec& target) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "setting new target: %s",
@@ -219,8 +242,10 @@ void	mountcontrollerwidget::setTarget(const astro::RaDec& target) {
 	while (_target.ra < 0) { _target.ra += 24; }
 	while (_target.ra >= 24) { _target.ra -= 24; }
 	_target.dec = target.dec().degrees();
-	ui->targetRaField->setText(QString(astro::stringprintf("%.4f", _target.ra).c_str()));
-	ui->targetDecField->setText(QString(astro::stringprintf("%.4f", _target.dec).c_str()));
+	ui->targetRaField->setText(QString(astro::stringprintf("%.4f",
+		_target.ra).c_str()));
+	ui->targetDecField->setText(QString(astro::stringprintf("%.4f",
+		_target.dec).c_str()));
 }
 
 /**
@@ -233,9 +258,10 @@ void	mountcontrollerwidget::viewskyClicked() {
 		return;
 	}
 	_skydisplay = new SkyDisplayWidget(NULL);
+	_skydisplay->position(_position);
 	astro::RaDec	radec = current();
 	_skydisplay->telescope(radec);
-	connect(this, SIGNAL(positionChanged(astro::RaDec)),
+	connect(this, SIGNAL(telescopeChanged(astro::RaDec)),
 		_skydisplay, SLOT(telescopeChanged(astro::RaDec)));
 	_skydisplay->show();
 }

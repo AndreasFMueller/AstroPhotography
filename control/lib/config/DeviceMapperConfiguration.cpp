@@ -25,6 +25,7 @@ class DeviceMapperConfigurationBackend : public DeviceMapperConfiguration {
 public:
 	DeviceMapperConfigurationBackend(ConfigurationPtr config)
 		: _config(config) { }
+	virtual ~DeviceMapperConfigurationBackend() { }
 
 	// devicemapper access
 	virtual DeviceMapperPtr	devicemapper();

@@ -28,6 +28,7 @@ public:
 	// constructor
 	ImageRepoConfigurationBackend(ConfigurationPtr config)
 		: _config(config) { }
+	virtual ~ImageRepoConfigurationBackend() { }
 
 	// access to repositories
 	virtual bool	exists(const std::string& name);

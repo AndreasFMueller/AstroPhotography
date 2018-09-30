@@ -24,7 +24,8 @@ class mountcontrollerwidget : public InstrumentWidget {
 	snowstar::mountstate	_previousstate;
 	snowstar::MountPrx	_mount;
 
-	snowstar::RaDec		_position;
+	snowstar::RaDec		_telescope;
+	astro::LongLat	_position;
 	SkyDisplayWidget	*_skydisplay;
 
 public:
@@ -38,7 +39,7 @@ public:
 
 signals:
 	void	mountSelected(int);
-	void	positionChanged(astro::RaDec);
+	void	telescopeChanged(astro::RaDec);
 
 private:
 	Ui::mountcontrollerwidget *ui;

@@ -27,6 +27,7 @@ class ProjectConfigurationBackend : public ProjectConfiguration {
 public:
 	ProjectConfigurationBackend(ConfigurationPtr config) : _config(config) {
 	}
+	virtual ~ProjectConfigurationBackend() { }
 	// project definition
 	virtual project::Project	project(const std::string& name);
 	virtual void	addproject(const project::Project& project);
