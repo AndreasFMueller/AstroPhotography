@@ -27,7 +27,16 @@ class SkyDisplayWidget : public QWidget {
 	astro::AzmAlt	convert(const astro::RaDec& radec);
 	QPoint	_center;
 	float	_radius;
-
+	bool	_show_altaz;
+public:
+	bool	show_altaz() const { return _show_altaz; }
+	void	show_altaz(bool a) { _show_altaz = a; }
+private:
+	bool	_show_radec;
+public:
+	bool	show_radec() const { return _show_radec; }
+	void	show_radec(bool r) { _show_radec = r; }
+private:
 	astro::RaDec	_telescope;
 public:
 	void	telescope(const astro::RaDec& t) { _telescope = t; }
@@ -41,6 +50,8 @@ public:
 private:
 	void	drawStar(QPainter& painter, const astro::catalog::Star& star);
 	void	drawTelescope(QPainter& painter);
+	void	drawAltaz(QPainter& painter);
+	void	drawRadec(QPainter& painter);
 	QPoint	convert(const astro::AzmAlt& azmalt);
 
 public:

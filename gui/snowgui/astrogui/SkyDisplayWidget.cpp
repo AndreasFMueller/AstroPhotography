@@ -37,6 +37,10 @@ SkyDisplayWidget::SkyDisplayWidget(QWidget *parent) : QWidget(parent) {
 	// for the time being, wie fake the logitude an latitude
 	_position.longitude().degrees(8.83);
 	_position.latitude().degrees(47.15);
+
+	// show the altaz grid by default
+	_show_altaz = true;
+	_show_radec = true;
 }
 
 /**
@@ -140,6 +144,67 @@ void	SkyDisplayWidget::drawTelescope(QPainter& painter) {
 }
 
 /**
+ * \brief Draw the AltAz grid
+ */
+void	SkyDisplayWidget::drawAltaz(QPainter& painter) {
+	// prepare a pen for drawing
+	QPen	pen(Qt::SolidLine);
+	pen.setWidth(1);
+	QColor	orange(255,204,0);
+	pen.setColor(orange);
+	painter.setPen(pen);
+
+	// draw the circles
+	for (double r = 1./3; r < 1.1; r += 1./3) {
+		QPainterPath	path;
+		path.addEllipse(_center, r * _radius, r * _radius);
+		painter.drawPath(path);
+	}
+	
+	// draw the radial lines
+	for (double a = 0; a < 2 * M_PI; a += M_PI / 6) {
+		QPoint	target(_center.x() + _radius * cos(a),
+				_center.y() + _radius * sin(a));
+		painter.drawLine(_center, target);
+	}
+}
+
+/**
+ * \brief Draw the RA/DEC grid
+ */
+void	SkyDisplayWidget::drawRadec(QPainter& painter) {
+	// prepare a pen for drawing
+	QPen	pen(Qt::SolidLine);
+	pen.setWidth(1);
+	QColor	blue(102,204,255);
+	pen.setColor(blue);
+	painter.setPen(pen);
+
+	// draw constant RA lines
+	double	decstep = (M_PI - 0.01) / 100;
+	for (double ra = 0; ra < 2 * M_PI; ra += M_PI / 6) {
+		for (double dec = -M_PI / 2;
+			dec < M_PI / 2 - decstep/2; dec += decstep) {
+			astro::RaDec	from(ra, dec), to(ra, dec + decstep);
+			QPoint	F = convert(convert(from));
+			QPoint	T = convert(convert(to));
+			painter.drawLine(F, T);
+		}
+	}
+
+	// draw the DEC lines
+	double	rastep = M_PI / 100;
+	for (double dec = M_PI / 2; dec > -M_PI/2; dec -= M_PI / 6) {
+		for (double ra = 0; ra < 2 * M_PI; ra += rastep) {
+			astro::RaDec	from(ra, dec), to(ra + rastep, dec);
+			QPoint	F = convert(convert(from));
+			QPoint	T = convert(convert(to));
+			painter.drawLine(F, T);
+		}
+	}
+}
+
+/**
  * \brief paint the sky anew
  */
 void	SkyDisplayWidget::draw() {
@@ -161,6 +226,14 @@ void	SkyDisplayWidget::draw() {
 	Catalog::starset::const_iterator	i;
 	for (i = _stars->begin(); i != _stars->end(); i++) {
 		drawStar(painter, *i);
+	}
+
+	// draw the grids
+	if (show_altaz()) {
+		drawAltaz(painter);
+	}
+	if (show_radec()) {
+		drawRadec(painter);
 	}
 
 	// draw the telescope marker
