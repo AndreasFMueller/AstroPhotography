@@ -288,6 +288,7 @@ public:
 	virtual ~AzmAltConverter() { }
 	AzmAlt	operator()(const RaDec& radec);
 	Angle	LMST() const { return _lmst; }
+	RaDec	inverse(const AzmAlt& azmalt);
 };
 
 } // namespace astro

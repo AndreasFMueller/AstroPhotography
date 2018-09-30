@@ -65,4 +65,33 @@ void	AzmAltConverter::update() {
 	JulianDate::update();
 }
 
+/**
+ * \brief convert azimuth and altitude into right ascension and declination
+ */
+RaDec	AzmAltConverter::inverse(const AzmAlt& azmalt) {
+	// compute the nautic traingle
+	Angle	a = Angle::right_angle - azmalt.alt();
+	Angle	c = Angle::right_angle - _longlat.latitude();
+	Angle	beta = Angle(M_PI) - azmalt.azm();
+	double	cosb = cos(c) * cos(a) + sin(c) * sin(a) * cos(beta);
+	Angle	b = arccos(cosb);
+
+	// compute the declination
+	Angle	dec = Angle::right_angle - b;
+
+	// computing the hour angle is a little more difficult
+	double	sinalpha = sin(a) * sin(beta) / sin(b);
+	double	cosalpha = (cos(a) - cos(b) * cos(c)) / (sin(b) * sin(c));
+
+	// compute the hour angle
+	Angle	hourangle = arctan2(sinalpha, cosalpha);
+
+	// convert hour angle to right ascension
+	Angle	ra = _lmst - hourangle;
+
+	// convert the result
+	RaDec	result(ra, dec);
+	return result;
+}
+
 } // namespace astro

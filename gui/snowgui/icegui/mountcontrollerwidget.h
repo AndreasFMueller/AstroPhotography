@@ -52,6 +52,7 @@ public slots:
 	void	gotoClicked();
 	void	statusUpdate();
 	void	viewskyClicked();
+	void	targetChanged(astro::RaDec);
 };
 
 } // namespace snowgui

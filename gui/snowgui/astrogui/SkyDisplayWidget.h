@@ -29,20 +29,26 @@ class SkyDisplayWidget : public QWidget {
 	float	_radius;
 	// whether or not to show the altaz grid lines
 	bool	_show_altaz;
+	bool	_show_radec;
+	bool	_show_constellations;
+	bool	_show_target;
+	bool	_show_labels;
 public:
 	bool	show_altaz() const { return _show_altaz; }
 	void	show_altaz(bool a) { _show_altaz = a; }
-
-	// whether or not to show the right ascension and declination grid
-private:
-	bool	_show_radec;
-public:
 	bool	show_radec() const { return _show_radec; }
 	void	show_radec(bool r) { _show_radec = r; }
+	bool	show_constellations() const { return _show_constellations; }
+	void	show_constellations(bool c) { _show_constellations = c; }
+	bool	show_target() const { return _show_target; }
+	void	show_target(bool c) { _show_target = c; }
+	bool	show_labels() const { return _show_labels; }
+	void	show_labels(bool l) { _show_labels = l; }
 
 	// telescope direction in right ascension and declination
 private:
 	astro::RaDec	_telescope;
+	astro::RaDec	_target;
 public:
 	void	telescope(const astro::RaDec& t) { _telescope = t; }
 	const astro::RaDec&	telescope() const { return _telescope; }
@@ -56,12 +62,22 @@ public:
 
 	// some private drawing functions
 private:
+	void	drawLine(QPainter& painter, const astro::RaDec& from,
+			const astro::RaDec& to);
 	void	drawStar(QPainter& painter, const astro::catalog::Star& star);
 	void	drawTelescope(QPainter& painter);
 	void	drawAltaz(QPainter& painter);
 	void	drawRadec(QPainter& painter);
+	void	drawTarget(QPainter& painter);
+	void	drawConstellations(QPainter& painter);
+	void	drawLabels(QPainter& painter);
 	void	draw();
 	QPointF	convert(const astro::AzmAlt& azmalt);
+
+protected:
+	void	mouseCommon(QMouseEvent *e);
+	void	mousePressEvent(QMouseEvent *e);
+	void	mouseMoveEvent(QMouseEvent *e);
 
 	// constructors
 public:
@@ -73,6 +89,9 @@ public:
 public slots:
 	void	telescopeChanged(astro::RaDec);
 	void	positionChanged(astro::LongLat);
+
+signals:
+	void	pointSelected(astro::RaDec);
 };
 
 } // namespace snowgui 

@@ -263,7 +263,16 @@ void	mountcontrollerwidget::viewskyClicked() {
 	_skydisplay->telescope(radec);
 	connect(this, SIGNAL(telescopeChanged(astro::RaDec)),
 		_skydisplay, SLOT(telescopeChanged(astro::RaDec)));
+	connect(_skydisplay, SIGNAL(pointSelected(astro::RaDec)),
+		this, SLOT(targetChanged(astro::RaDec)));
 	_skydisplay->show();
+}
+
+/**
+ * \brief Slot to accept the new position
+ */
+void	mountcontrollerwidget::targetChanged(astro::RaDec radec) {
+	setTarget(radec);
 }
 
 } // namespace snowgui

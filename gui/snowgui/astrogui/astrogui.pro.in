@@ -40,6 +40,7 @@ SOURCES += 								\
 	ClockWidget.cpp							\
 	ColorArithmetic.cpp						\
 	ColorRectangles.cpp						\
+	drawConstellations.cpp						\
 	FitsTable.cpp							\
 	FocusPoints.cpp							\
 	FocusPointsWidget.cpp						\

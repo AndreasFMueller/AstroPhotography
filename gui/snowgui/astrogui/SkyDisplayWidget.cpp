@@ -6,6 +6,7 @@
 #include "SkyDisplayWidget.h"
 #include <AstroFormat.h>
 #include <algorithm>
+#include <QMouseEvent>
 
 using namespace astro::catalog;
 
@@ -41,6 +42,8 @@ SkyDisplayWidget::SkyDisplayWidget(QWidget *parent) : QWidget(parent) {
 	// show the altaz grid by default
 	_show_altaz = true;
 	_show_radec = true;
+	_show_constellations = true;
+	_show_labels = true;
 }
 
 /**
@@ -75,6 +78,66 @@ QPointF	SkyDisplayWidget::convert(const astro::AzmAlt& azmalt) {
 	QPointF	starcenter(_center.x() + r * sin(phi),
 			_center.y() + r * cos(phi));
 	return starcenter;
+}
+
+/**
+ * \brief Draw a line
+ *
+ * This method takes care that lines that have both alts negative are not
+ * drawn at all, and lines that have precisely one alt negative are 
+ * interpolated in a way so that they can be drawn precisely to the boundary.
+ *
+ * \param painter	painter to use for drawing
+ * \param from		initial point
+ * \param to		target point
+ */
+void	SkyDisplayWidget::drawLine(QPainter& painter, const astro::RaDec& from,
+		const astro::RaDec& to) {
+	astro::AzmAlt	From = convert(from);
+	astro::AzmAlt	To = convert(to);
+
+	// segment completely outside the circle
+	if ((From.alt().radians() < 0) && (To.alt().radians() < 0)) {
+		return;
+	}
+
+	// segment completely inside the circle
+	if ((From.alt().radians() > 0) && (To.alt().radians() > 0)) {
+		QPointF	F = convert(From);
+		QPointF	T = convert(To);
+		painter.drawLine(F, T);
+		return;
+	}
+
+	// remaining cases, start with the differences
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "divide %.3f/%.3f - %.3f/%.3f",
+		From.azm().degrees(), From.alt().degrees(),
+		To.azm().degrees(), From.alt().degrees());
+	astro::Angle	delta = To.azm() - From.azm();
+	if (delta.radians() > M_PI) {
+		delta.radians(delta.radians() - 2 * M_PI);
+	}
+	if (delta.radians() < -M_PI) {
+		delta.radians(delta.radians() + 2 * M_PI);
+	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "divide delta: %.4f degrees",
+		delta.degrees());
+
+	// now divide the segment to get the boundary point
+	double	t = From.alt().radians() / (To.alt() - From.alt()).radians();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "divide with t = %.3f", t);
+	astro::AzmAlt	boundary;
+	boundary.azm() = From.azm() - delta * t;
+
+	// now draw the segment to the boundary
+	QPointF	B = convert(boundary);
+	if (From.alt().radians() > 0) {
+		QPointF	F = convert(From);
+		painter.drawLine(F, B);
+	} else {
+		QPointF	T = convert(To);
+		painter.drawLine(B, T);
+	}
 }
 
 /**
@@ -144,6 +207,35 @@ void	SkyDisplayWidget::drawTelescope(QPainter& painter) {
 }
 
 /**
+ * \brief Draw a target marker
+ *
+ * \param painter	the QPainter to use to draw the telescope marker
+ */
+void	SkyDisplayWidget::drawTarget(QPainter& painter) {
+	// find out where to draw the marker
+	astro::AzmAlt	t = convert(_target);
+	if (!visible(t)) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "target below horizon");
+		return;
+	}
+
+	// set up drawing the telescope marker
+	QPainterPath	targetmarker;
+	QPen	pen(Qt::SolidLine);
+	pen.setWidth(2);
+	QColor	green(0, 255, 0);
+	pen.setColor(green);
+	painter.setPen(pen);
+
+	// compose the path
+	QPointF	markerpoint = convert(t);
+	targetmarker.addEllipse(markerpoint, 7, 7);
+
+	// draw the marker in red
+	painter.drawPath(targetmarker);
+}
+
+/**
  * \brief Draw the AltAz grid
  */
 void	SkyDisplayWidget::drawAltaz(QPainter& painter) {
@@ -189,9 +281,7 @@ void	SkyDisplayWidget::drawRadec(QPainter& painter) {
 	for (double ra = 0; ra < 2 * M_PI; ra += M_PI / 6) {
 		for (double dec = -l / 2; dec < declimit; dec += decstep) {
 			astro::RaDec	from(ra, dec), to(ra, dec + decstep);
-			QPointF	F = convert(convert(from));
-			QPointF	T = convert(convert(to));
-			painter.drawLine(F, T);
+			drawLine(painter, from, to);
 		}
 	}
 
@@ -201,9 +291,7 @@ void	SkyDisplayWidget::drawRadec(QPainter& painter) {
 	for (double dec = M_PI / 2; dec > -M_PI/2; dec -= M_PI / 6) {
 		for (double ra = 0; ra < ralimit; ra += rastep) {
 			astro::RaDec	from(ra, dec), to(ra + rastep, dec);
-			QPointF	F = convert(convert(from));
-			QPointF	T = convert(convert(to));
-			painter.drawLine(F, T);
+			drawLine(painter, from, to);
 		}
 	}
 }
@@ -226,12 +314,6 @@ void	SkyDisplayWidget::draw() {
 	QColor	black(0, 0, 0);
 	painter.fillPath(circle, black);
 
-	// draw the stars
-	Catalog::starset::const_iterator	i;
-	for (i = _stars->begin(); i != _stars->end(); i++) {
-		drawStar(painter, *i);
-	}
-
 	// draw the grids
 	if (show_altaz()) {
 		drawAltaz(painter);
@@ -239,9 +321,48 @@ void	SkyDisplayWidget::draw() {
 	if (show_radec()) {
 		drawRadec(painter);
 	}
+	if (show_constellations()) {
+		drawConstellations(painter);
+	}
+
+	// draw the stars
+	Catalog::starset::const_iterator	i;
+	for (i = _stars->begin(); i != _stars->end(); i++) {
+		drawStar(painter, *i);
+	}
 
 	// draw the telescope marker
 	drawTelescope(painter);
+	if (show_target()) {
+		drawTarget(painter);
+	}
+
+	if (show_labels()) {
+		drawLabels(painter);
+	}
+}
+
+/**
+ * \brief Draw direction labels
+ */
+void	SkyDisplayWidget::drawLabels(QPainter& painter) {
+	QPen	pen;
+	QColor	white(255,255,255);
+	pen.setColor(white);
+	painter.setPen(pen);
+
+	painter.drawText(_center.x() - 10, _center.y() + _radius - 20,
+		20, 20, Qt::AlignCenter, QString("S"));
+
+	painter.drawText(_center.x() - 10, _center.y() - _radius,
+		20, 20, Qt::AlignCenter, QString("N"));
+
+	painter.drawText(_center.x() - _radius, _center.y() - 10,
+		20, 20, Qt::AlignCenter, QString("E"));
+
+	painter.drawText(_center.x() + _radius - 20, _center.y() - 10,
+		20, 20, Qt::AlignCenter, QString("W"));
+
 }
 
 /**
@@ -277,6 +398,60 @@ void	SkyDisplayWidget::telescopeChanged(astro::RaDec radec) {
 void	SkyDisplayWidget::positionChanged(astro::LongLat longlat) {
 	position(longlat);
 	repaint();
+}
+
+void	SkyDisplayWidget::mouseCommon(QMouseEvent *e) {
+	double	deltax = e->pos().x() - _center.x();
+	double	deltay = e->pos().y() - _center.y();
+
+	// compute the radius
+	double	f = hypot(deltax, deltay) / _radius;
+	if (f > 1) {
+		return;
+	}
+
+	// convert the radius to an angle
+	astro::Angle	s((1 - f) * M_PI / 2);
+
+	astro::AzmAlt	azmalt(astro::arctan2(deltax, deltay), s);
+	
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "azm = %.3f, alt = %.3f",
+		azmalt.azm().degrees(), azmalt.alt().degrees());
+
+	// convert the to RaDec
+	_target = _converter->inverse(azmalt);
+
+	// emit the position
+	emit pointSelected(_target);
+
+	// draw a green circle to verify the position computed
+	show_target(true);
+	repaint();
+
+}
+
+/**
+ * \brief Mouse press event
+ *
+ * computes the coordinates where the mouse was pressed and emits them
+ * with the signal pointSelected(astro::RaDec)
+ */
+void	SkyDisplayWidget::mousePressEvent(QMouseEvent *e) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "mousePressEvent %d,%d",
+		e->pos().x(), e->pos().y());
+	mouseCommon(e);
+}
+
+/**
+ * \brief Mouse move event
+ *
+ * computes the coordinates where the mouse was pressed and emits them
+ * with the signal pointSelected(astro::RaDec)
+ */
+void	SkyDisplayWidget::mouseMoveEvent(QMouseEvent *e) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "mouseMoveEvent %d,%d",
+		e->pos().x(), e->pos().y());
+	mouseCommon(e);
 }
 
 } // namespace snowgui
