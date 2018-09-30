@@ -166,6 +166,10 @@ void	SimCcd::catalogStarfield(const RaDec& direction) {
 	float	pxly = getInfo().pixelheight() / focallength;
 	Point	center(starfield.size().center());
 
+	// ImageCoordinate converter
+	Angle	resolution(getInfo().pixelwidth() / focallength);
+	ImageCoordinates	coord(direction, resolution, Angle(0));
+
 	// compute the width and height of the image
 	Angle	anglewidth(getInfo().size().width() * pxlx);
 	Angle	angleheight(getInfo().size().height() * pxly);
@@ -186,12 +190,8 @@ void	SimCcd::catalogStarfield(const RaDec& direction) {
 	Catalog::starset::const_iterator	s;
 	for (s = stars->begin(); s != stars->end(); s++) {
 		// get the object
-		RaDec	pos = s->position(2000) - direction;
-
-		// compute the pixel coordinates for this position
-		Point	offset(pos.ra().radians() / pxlx,
-				pos.dec().radians() / pxly);
-		Point	position = center + offset;
+		RaDec	pos = s->position(2000);
+		Point	position = center + coord(pos);
 
 		// create the new star
 		astro::StellarObjectPtr	ns(new astro::Star(position, s->mag()));

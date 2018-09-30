@@ -23,6 +23,8 @@ ImageCoordinates::ImageCoordinates(const RaDec& center,
 RaDec	ImageCoordinates::offset(const Point& _offset) const {
 	double	s = (_mirror) ? -1 : 1;
 	// convert to polar coordinates
+	// XXX there probably is a bug here because right ascension
+	// XXX increases to the right
 	double	radius = hypot(_offset.x(), s * _offset.y());
 	Angle	phi(atan2(s * _offset.y(), _offset.x()));
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "%s -> r = %.2f, phi = %.1f degrees",
@@ -91,7 +93,7 @@ Point	ImageCoordinates::operator()(const RaDec& direction) const {
 	double	r = b.radians() / _angular_resolution.radians(); // pixels
 
 	// convert polar coordinates into cartesian coordinates
-	Point	result(r * singamma, r * cosgamma);
+	Point	result(-r * singamma, r * cosgamma);
 	return result;
 }
 
