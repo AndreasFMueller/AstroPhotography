@@ -55,9 +55,9 @@ RaDec	ImageCoordinates::offset(const Point& _offset) const {
 	// this method uses the following spherical triangle
 	//
 	//              N beta
-	//             / \
+	//             / \\
 	//           a/   \c
-	//           /     \
+	//           /     \\
 	//   gamma  P-------C alpha
 	//              b
 	// P = point for which to determine RA/DEC
@@ -127,9 +127,9 @@ Point	ImageCoordinates::offset(const RaDec& direction) const {
 	// to the center (C) to the direction (A):
 	//
 	//          B
-	//         / \
+	//         / \\
 	//      a /   \ c
-	//       /     \
+	//       /     \\
 	//      C-------A
 	//          b
 	// The angle gamma is at the point C
