@@ -459,6 +459,13 @@ void	SkyDisplayWidget::mouseMoveEvent(QMouseEvent *e) {
 	mouseCommon(e);
 }
 
+/**
+ * /brief Ensure that the object is deleted when it is hit by a close event
+ */
+void	SkyDisplayWidget::closeEvent(QCloseEvent * /* event */) {
+	deleteLater();
+}
+
 } // namespace snowgui
 
 

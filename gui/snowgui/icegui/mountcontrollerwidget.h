@@ -52,6 +52,7 @@ public slots:
 	void	gotoClicked();
 	void	statusUpdate();
 	void	viewskyClicked();
+	void	skyviewDestroyed();
 	void	targetChanged(astro::RaDec);
 };
 

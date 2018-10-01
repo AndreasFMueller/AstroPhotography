@@ -47,6 +47,9 @@ mountcontrollerwidget::~mountcontrollerwidget() {
 
 /**
  * \brief Setup the instrument
+ *
+ * \param serviceobject		the service discovery object
+ * \param instrument		the remote instrument
  */
 void	mountcontrollerwidget::instrumentSetup(
 		astro::discover::ServiceObject serviceobject,
@@ -257,15 +260,30 @@ void	mountcontrollerwidget::viewskyClicked() {
 		_skydisplay->raise();
 		return;
 	}
+
+	// create a new SkyDisplayWidget
 	_skydisplay = new SkyDisplayWidget(NULL);
 	_skydisplay->position(_position);
 	astro::RaDec	radec = current();
 	_skydisplay->telescope(radec);
+
+	// connect the widget
 	connect(this, SIGNAL(telescopeChanged(astro::RaDec)),
 		_skydisplay, SLOT(telescopeChanged(astro::RaDec)));
 	connect(_skydisplay, SIGNAL(pointSelected(astro::RaDec)),
 		this, SLOT(targetChanged(astro::RaDec)));
+	connect(_skydisplay, SIGNAL(destroyed()),
+		this, SLOT(skyviewDestroyed()));
+
+	// show the window
 	_skydisplay->show();
+}
+
+/*
+ * \brief Slot to call when the skyview widget is destroyed
+ */
+void	mountcontrollerwidget::skyviewDestroyed() {
+	_skydisplay = NULL;
 }
 
 /**
