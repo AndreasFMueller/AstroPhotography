@@ -6,6 +6,7 @@
 #include "StarChartWidget.h"
 #include <AstroDebug.h>
 #include <QPainter>
+#include <QMouseEvent>
 
 using namespace astro::catalog;
 
@@ -15,8 +16,9 @@ namespace snowgui {
  * \brief Construct a new Star chart
  */
 StarChartWidget::StarChartWidget(QWidget *parent) : QWidget(parent),
-	_converter(astro::RaDec(), astro::Angle(1 / 100.), astro::Angle(0)) {
-	_resolution.degrees(1 / 100.); // 1 deg/200 pixels
+	_converter(astro::RaDec(), astro::Angle((M_PI / 180) / 100.),
+		astro::Angle(0)) {
+	_resolution.degrees(1 / 100.); // 1 deg/100 pixels
 	_limit_magnitude = 10;
 	_negative = false;
 }
@@ -145,6 +147,39 @@ void	StarChartWidget::directionChanged(astro::RaDec direction) {
 
 	// let the repaint event handle the redrawing
 	repaint();
+}
+
+/**
+ * \brief Common method for mouse events
+ */
+void	StarChartWidget::mouseCommon(QMouseEvent *event) {
+	// get the pixel coordinates from the event relative to the center
+	astro::Point	offset(event->pos().x() - _center.x(),
+				_center.y() - event->pos().y());
+
+	// convert into RA/DEC
+	astro::RaDec	radec = _converter(offset);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "RA/DEC of point: %s",
+		radec.toString().c_str());
+	emit pointSelected(radec);
+}
+
+/**
+ * \brief Handle mouse click
+ */
+void	StarChartWidget::mousePressEvent(QMouseEvent *event) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "handle mouse click at (%d,%d)",
+		event->pos().x(), event->pos().y());
+	mouseCommon(event);
+}
+
+/**
+ * \brief Handle mouse move
+ */
+void	StarChartWidget::mouseMoveEvent(QMouseEvent *event) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "handle mouse move to (%d,%d)",
+		event->pos().x(), event->pos().y());
+	mouseCommon(event);
 }
 
 } // namespace snowgui

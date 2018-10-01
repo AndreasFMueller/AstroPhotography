@@ -69,6 +69,10 @@ pointingwindow::pointingwindow(QWidget *parent)
 		SIGNAL(telescopeChanged(astro::RaDec)),
 		ui->chartWidget,
 		SLOT(directionChanged(astro::RaDec)));
+	connect(ui->chartWidget,
+		SIGNAL(pointSelected(astro::RaDec)),
+		ui->mountcontrollerWidget,
+		SLOT(targetChanged(astro::RaDec)));
 }
 
 /**

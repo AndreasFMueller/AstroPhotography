@@ -38,12 +38,18 @@ public:
 	explicit StarChartWidget(QWidget *parent = NULL);
 	virtual ~StarChartWidget();
 
+signals:
+	void	pointSelected(astro::RaDec);
+
 private:
 	void	draw();
 	void	drawStar(QPainter& painter, const astro::catalog::Star& star);
+	void	mouseCommon(QMouseEvent *event);
 
 protected:
 	void	paintEvent(QPaintEvent *event);
+	void	mousePressEvent(QMouseEvent *event);
+	void	mouseMoveEvent(QMouseEvent *event);
 
 public slots:
 	void	directionChanged(astro::RaDec);

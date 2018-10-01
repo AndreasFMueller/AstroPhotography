@@ -74,13 +74,13 @@ RaDec	ImageCoordinates::offset(const Point& _offset) const {
 	// compute the angle alpha
 	//
 	//   P        |
-	//    o       |c        P.x = radius * sin(alpha)
-	//     -___   |         P.y = radius * cos(alpha)
-	//         ` C    ==> alpha = arctan2(P.x, P.y)
+	//    o       |c        P.x = -radius * sin(alpha)
+	//     -___   |         P.y =  radius * cos(alpha)
+	//         ` C    ==> alpha = arctan2(-P.x, P.y)
 	//       b         
 
 	// compute the angle alpha in 
-	Angle	alpha = arctan2(_offset.x(), s * _offset.y());
+	Angle	alpha = arctan2(-_offset.x(), s * _offset.y());
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "%s -> r = %.2f, alpha = %.1f degrees",
 		_offset.toString().c_str(), radius, alpha.degrees());
 
@@ -151,10 +151,12 @@ Point	ImageCoordinates::offset(const RaDec& direction) const {
 	double	cosgamma = (cos(c) - cos(a) * cos(b)) / (sin(a) * sin(b));
 
 	// determine the radius
-	double	r = tan(b) * _angular_resolution.radians(); // pixels
+	double	r = tan(b) / _angular_resolution.radians(); // pixels
 
 	// convert polar coordinates into cartesian coordinates
 	Point	result(-r * singamma, r * cosgamma);
+
+	// XXX now also perform the rotation around the azimuth
 	return result;
 }
 
