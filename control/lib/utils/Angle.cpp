@@ -90,6 +90,10 @@ Angle	Angle::operator-(const Angle& other) const {
 	return Angle(_angle - other._angle);
 }
 
+Angle	Angle::operator-() const {
+	return Angle(-_angle);
+}
+
 Angle	Angle::operator*(const double& other) const {
 	return Angle(_angle * other);
 }

@@ -175,7 +175,8 @@ void	SimCcd::catalogStarfield(const RaDec& direction) {
 	Angle	angleheight(getInfo().size().height() * pxly);
 
 	// get a SkyWindow of appropriate size
-	SkyWindow	window(direction, anglewidth, angleheight);
+	SkyWindow	window = SkyWindow::hull(direction,
+					anglewidth, angleheight);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "window: %s", window.toString().c_str());
 
 	// get the appropriate catalog

@@ -88,8 +88,8 @@ void	StarChartWidget::drawStar(QPainter& painter, const Star& star) {
  */
 void	StarChartWidget::drawLine(QPainter& painter, const astro::RaDec& from,
 		const astro::RaDec& to) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "Grid line from %s to %s",
-		from.toString().c_str(), to.toString().c_str());
+	//debug(LOG_DEBUG, DEBUG_LOG, 0, "Grid line from %s to %s",
+	//	from.toString().c_str(), to.toString().c_str());
 	QPointF	From = convert(from);
 	QPointF	To = convert(to);
 	painter.drawLine(From, To);
@@ -110,20 +110,47 @@ void	StarChartWidget::drawGrid(QPainter& painter) {
 	pen.setWidth(1);
 	painter.setPen(pen);
 
+	// construct a Skywindow to know which lines we have to draw
+	astro::catalog::SkyWindow	window = SkyWindow::hull(_direction, 
+				width() * _resolution, height() * _resolution);
+
 	// start drawing the grid lines spaced 1degree or 4minutes
-	int	ralines = 2 + width() / 100;
-	int	declines = 2 + height() / 100;
-	astro::Angle	initialra;
-	initialra.degrees(trunc(_direction.ra().degrees()));
-	astro::Angle	rastep(M_PI / 180);
-	initialra = initialra - ralines * rastep;
-	astro::Angle	initialdec;
-	initialdec.degrees(trunc(_direction.dec().degrees()));
-	astro::Angle	decstep(M_PI / 180);
-	initialdec = initialdec - declines * decstep;
+
+	// first find out where to strt
+	astro::Angle	initialra = window.leftra();
+	initialra.degrees(trunc(initialra.degrees()));
+	astro::Angle	initialdec = window.bottomdec();
+	initialdec.degrees(trunc(initialdec.degrees()));
+
+	// find the maximum
+	double	raspan = (window.rightra() - window.leftra()).degrees();
+	int	ralines = 360;
+	if (raspan > 0) {
+		ralines = trunc(raspan + 2);
+	}
+	double	decspan = (window.topdec() - window.bottomdec()).degrees();
+	int	declines = trunc(decspan + 2);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "RA lines = %d, DEC lines = %d",
 		ralines, declines);
-	
+
+	// step size
+	astro::Angle	rastep(M_PI / 180);
+	astro::Angle	decstep(M_PI / 180);
+
+	if (_direction.dec() > astro::Angle(80 * M_PI / 180)) {
+		initialra.degrees(20 * trunc(initialra.degrees() / 20));
+		ralines = ralines / 20;
+		rastep.degrees(20);
+	} else if (_direction.dec() > astro::Angle(70 * M_PI / 180)) {
+		initialra.degrees(10 * trunc(initialra.degrees() / 10));
+		ralines = ralines / 10;
+		rastep.degrees(10);
+	} else if (_direction.dec() > astro::Angle(60 * M_PI / 180)) {
+		initialra.degrees(5 * trunc(initialra.degrees() / 5));
+		ralines = ralines / 5;
+		rastep.degrees(5);
+	}
+
 	// line parameters
 	astro::Angle	ra;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "RA line spacing %s",
@@ -133,11 +160,11 @@ void	StarChartWidget::drawGrid(QPainter& painter) {
 		decstep.dms().c_str());
 
 	// draw RA lines
-	for (int r = 0; r <= 2 * ralines; r++) {
+	for (int r = 0; r <= ralines; r++) {
 		ra = initialra + r * rastep;
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "RA = %s", ra.hms().c_str());
+		//debug(LOG_DEBUG, DEBUG_LOG, 0, "RA = %s", ra.hms().c_str());
 		astro::Angle	dstep = 0.1 * decstep;
-		for (int d = 0; d <= 20 * declines; d++) {
+		for (int d = 0; d <= 10 * declines; d++) {
 			dec = initialdec + d * dstep;
 			astro::RaDec	from(ra, dec);
 			astro::RaDec	to(ra, dec + dstep);
@@ -146,11 +173,11 @@ void	StarChartWidget::drawGrid(QPainter& painter) {
 	}
 
 	// draw DEC lines
-	for (int d = 0; d <= 2 * declines; d++) {
+	for (int d = 0; d <= declines; d++) {
 		dec = initialdec + d * decstep;
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "DEC = %s", dec.dms().c_str());
+		//debug(LOG_DEBUG, DEBUG_LOG, 0, "DEC = %s", dec.dms().c_str());
 		astro::Angle	rstep = 0.1 * rastep;
-		for (int r = 0; r <= 20 * ralines; r++) {
+		for (int r = 0; r <= 10 * ralines; r++) {
 			ra = initialra + r * rstep;
 			astro::RaDec	from(ra, dec);
 			astro::RaDec	to(ra + rstep, dec);
@@ -222,7 +249,7 @@ void	StarChartWidget::directionChanged(astro::RaDec direction) {
 	// compute the width and height of the star chart
 	astro::Angle	rawidth(1.5 * width() * _resolution.radians());
 	astro::Angle	decheight(1.5 * height() * _resolution.radians());
-	SkyWindow	window(_direction, rawidth, decheight);
+	SkyWindow	window = SkyWindow::hull(_direction, rawidth, decheight);
 
 	// get the stars from the catalog
 	// XXX this takes too much time, we should do this in a separate

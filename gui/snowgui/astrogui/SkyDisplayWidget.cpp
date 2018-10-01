@@ -46,6 +46,7 @@ SkyDisplayWidget::SkyDisplayWidget(QWidget *parent) : QWidget(parent) {
 	_show_constellations = true;
 	_show_labels = true;
 	_show_target = false;
+	_show_telescope = true;
 
 	// start the update timer
 	_timer = new QTimer();
@@ -121,9 +122,9 @@ void	SkyDisplayWidget::drawLine(QPainter& painter, const astro::RaDec& from,
 	}
 
 	// remaining cases, start with the differences
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "divide %.3f/%.3f - %.3f/%.3f",
-		From.azm().degrees(), From.alt().degrees(),
-		To.azm().degrees(), From.alt().degrees());
+	//debug(LOG_DEBUG, DEBUG_LOG, 0, "divide %.3f/%.3f - %.3f/%.3f",
+	//	From.azm().degrees(), From.alt().degrees(),
+	//	To.azm().degrees(), From.alt().degrees());
 	astro::Angle	delta = To.azm() - From.azm();
 	if (delta.radians() > M_PI) {
 		delta.radians(delta.radians() - 2 * M_PI);
@@ -131,12 +132,12 @@ void	SkyDisplayWidget::drawLine(QPainter& painter, const astro::RaDec& from,
 	if (delta.radians() < -M_PI) {
 		delta.radians(delta.radians() + 2 * M_PI);
 	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "divide delta: %.4f degrees",
-		delta.degrees());
+	//debug(LOG_DEBUG, DEBUG_LOG, 0, "divide delta: %.4f degrees",
+	//	delta.degrees());
 
 	// now divide the segment to get the boundary point
 	double	t = From.alt().radians() / (To.alt() - From.alt()).radians();
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "divide with t = %.3f", t);
+	//debug(LOG_DEBUG, DEBUG_LOG, 0, "divide with t = %.3f", t);
 	astro::AzmAlt	boundary;
 	boundary.azm() = From.azm() - delta * t;
 
@@ -163,8 +164,8 @@ void	SkyDisplayWidget::drawStar(QPainter& painter, const Star& star) {
 
 	// decide whether to draw the star at all
 	if (!visible(azmalt)) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "skipping star %s",
-			star.toString().c_str());
+		//debug(LOG_DEBUG, DEBUG_LOG, 0, "skipping star %s",
+		//	star.toString().c_str());
 		return;
 	}
 
@@ -176,8 +177,8 @@ void	SkyDisplayWidget::drawStar(QPainter& painter, const Star& star) {
 	if (sr < 0.8) {
 		sr = 0.8;
 	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "drawing star %s at position %s r=%.1f",
-		star.toString().c_str(), S(azmalt).c_str(), sr);
+	//debug(LOG_DEBUG, DEBUG_LOG, 0, "drawing star %s at %s r=%.1f",
+	//	star.toString().c_str(), S(azmalt).c_str(), sr);
 
 	// now prepare a path for the star
 	QPainterPath	starcircle;
