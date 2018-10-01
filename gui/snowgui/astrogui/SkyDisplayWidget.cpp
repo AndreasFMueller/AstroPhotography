@@ -1,5 +1,5 @@
 /* 
- * SkyDisplayWidget.cpp
+ * SkyDisplayWidget.cpp -- Widget to display the visible sky
  *
  * (c) 2018 Prof Dr Andreas Müller, Hochschule Rapperswil
  */
@@ -45,12 +45,14 @@ SkyDisplayWidget::SkyDisplayWidget(QWidget *parent) : QWidget(parent) {
 	_show_radec = true;
 	_show_constellations = true;
 	_show_labels = true;
+	_show_target = false;
 
 	// start the update timer
 	_timer = new QTimer();
 	_timer->setInterval(60000);
 	connect(_timer, SIGNAL(timeout()),
 		this, SLOT(update()));
+	_timer->start();
 }
 
 /**

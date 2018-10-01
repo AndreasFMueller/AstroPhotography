@@ -21,6 +21,7 @@ StarChartWidget::StarChartWidget(QWidget *parent) : QWidget(parent),
 	_resolution.degrees(1 / 100.); // 1 deg/100 pixels
 	_limit_magnitude = 10;
 	_negative = false;
+	_show_grid = true;
 }
 
 /**
@@ -35,6 +36,12 @@ StarChartWidget::~StarChartWidget() {
 void	StarChartWidget::paintEvent(QPaintEvent * /* event */) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "redraw the star chart");
 	draw();
+}
+
+QPointF	StarChartWidget::convert(const astro::RaDec& radec) {
+	astro::Point	p = _converter(radec);
+	QPointF	P(_center.x() + p.x(), _center.y() - p.y());
+	return P;
 }
 
 /**
@@ -77,6 +84,82 @@ void	StarChartWidget::drawStar(QPainter& painter, const Star& star) {
 }
 
 /**
+ * \brief Draw a Line segment
+ */
+void	StarChartWidget::drawLine(QPainter& painter, const astro::RaDec& from,
+		const astro::RaDec& to) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "Grid line from %s to %s",
+		from.toString().c_str(), to.toString().c_str());
+	QPointF	From = convert(from);
+	QPointF	To = convert(to);
+	painter.drawLine(From, To);
+}
+
+/**
+ * \brief Draw the coordinate grid
+ */
+void	StarChartWidget::drawGrid(QPainter& painter) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "draw the coordinate grid, center %s",
+		_direction.toString().c_str());
+
+	// prepare the pen used for drawing 
+	QPen	pen;
+	QColor	blue(102,204,255);
+	QColor	darkblue(51,0,255);
+	pen.setColor((_negative) ? darkblue : blue);
+	pen.setWidth(1);
+	painter.setPen(pen);
+
+	// start drawing the grid lines spaced 1degree or 4minutes
+	int	ralines = 2 + width() / 100;
+	int	declines = 2 + height() / 100;
+	astro::Angle	initialra;
+	initialra.degrees(trunc(_direction.ra().degrees()));
+	astro::Angle	rastep(M_PI / 180);
+	initialra = initialra - ralines * rastep;
+	astro::Angle	initialdec;
+	initialdec.degrees(trunc(_direction.dec().degrees()));
+	astro::Angle	decstep(M_PI / 180);
+	initialdec = initialdec - declines * decstep;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "RA lines = %d, DEC lines = %d",
+		ralines, declines);
+	
+	// line parameters
+	astro::Angle	ra;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "RA line spacing %s",
+		rastep.hms().c_str());
+	astro::Angle	dec;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "DEC line spacing %s",
+		decstep.dms().c_str());
+
+	// draw RA lines
+	for (int r = 0; r <= 2 * ralines; r++) {
+		ra = initialra + r * rastep;
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "RA = %s", ra.hms().c_str());
+		astro::Angle	dstep = 0.1 * decstep;
+		for (int d = 0; d <= 20 * declines; d++) {
+			dec = initialdec + d * dstep;
+			astro::RaDec	from(ra, dec);
+			astro::RaDec	to(ra, dec + dstep);
+			drawLine(painter, from, to);
+		}
+	}
+
+	// draw DEC lines
+	for (int d = 0; d <= 2 * declines; d++) {
+		dec = initialdec + d * decstep;
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "DEC = %s", dec.dms().c_str());
+		astro::Angle	rstep = 0.1 * rastep;
+		for (int r = 0; r <= 20 * ralines; r++) {
+			ra = initialra + r * rstep;
+			astro::RaDec	from(ra, dec);
+			astro::RaDec	to(ra + rstep, dec);
+			drawLine(painter, from, to);
+		}
+	}
+}
+
+/**
  * \brief Redraw the star chart
  */
 void	StarChartWidget::draw() {
@@ -101,6 +184,10 @@ void	StarChartWidget::draw() {
 	QColor	black(0,0,0);
 	painter.fillPath(rectangle, (_negative) ? white : black);
 
+	// draw the grid
+	if (show_grid()) {
+		drawGrid(painter);
+	}
 
 	// draw the stars
 	if (_stars) {

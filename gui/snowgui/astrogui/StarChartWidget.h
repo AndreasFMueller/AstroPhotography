@@ -24,7 +24,10 @@ class StarChartWidget : public QWidget {
 	astro::ImageCoordinates	_converter;
 	float	_limit_magnitude;
 	bool	_negative;
+	bool	_show_grid;
+
 	QPointF	_center;
+	QPointF	convert(const astro::RaDec& radec);
 public:
 	const astro::Angle&	resolution() const { return _resolution; }
 	void	resolution(const astro::Angle& r) { _resolution = r; }
@@ -35,6 +38,9 @@ public:
 	void	negative(bool n) { _negative = n; }
 	bool	negative() const { return _negative; }
 
+	void	show_grid(bool g) { _show_grid = g; }
+	bool	show_grid() const { return _show_grid; }
+
 	explicit StarChartWidget(QWidget *parent = NULL);
 	virtual ~StarChartWidget();
 
@@ -44,6 +50,10 @@ signals:
 private:
 	void	draw();
 	void	drawStar(QPainter& painter, const astro::catalog::Star& star);
+	void	drawLine(QPainter& painter, const astro::RaDec& from,
+			const astro::RaDec& to);
+	void	drawGrid(QPainter& painter);
+
 	void	mouseCommon(QMouseEvent *event);
 
 protected:
