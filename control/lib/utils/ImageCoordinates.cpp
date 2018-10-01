@@ -122,7 +122,7 @@ RaDec	ImageCoordinates::operator()(const Point& _offset) const {
  * \param direction	RA and DEC of the point
  * \returns		image center 
  */
-Point	ImageCoordinates::operator()(const RaDec& direction) const {
+Point	ImageCoordinates::offset(const RaDec& direction) const {
 	// we use a spherical triangle from the north pole (B)
 	// to the center (C) to the direction (A):
 	//
@@ -151,7 +151,7 @@ Point	ImageCoordinates::operator()(const RaDec& direction) const {
 	double	cosgamma = (cos(c) - cos(a) * cos(b)) / (sin(a) * sin(b));
 
 	// determine the radius
-	double	r = b.radians() / _angular_resolution.radians(); // pixels
+	double	r = tan(b) * _angular_resolution.radians(); // pixels
 
 	// convert polar coordinates into cartesian coordinates
 	Point	result(-r * singamma, r * cosgamma);
