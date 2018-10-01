@@ -24,13 +24,16 @@ INCLUDEPATH += $${ASTROPATH}/include
 INCLUDEPATH += /usr/local/include
 
 FORMS    +=								\
-	imagedisplaywidget.ui
+	imagedisplaywidget.ui						\
+	skydisplaydialog.ui
 
 WIDGETSOURCES =								\
-	imagedisplaywidget.cpp
+	imagedisplaywidget.cpp						\
+	skydisplaydialog.cpp
 
 WIDGETHEADERS =								\
-	imagedisplaywidget.h
+	imagedisplaywidget.h						\
+	skydisplaydialog.h
 
 SOURCES += 								\
 	AutoGain.cpp							\

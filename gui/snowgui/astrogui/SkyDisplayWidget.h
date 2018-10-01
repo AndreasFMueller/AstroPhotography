@@ -21,6 +21,7 @@ namespace snowgui {
  */
 class SkyDisplayWidget : public QWidget {
 	Q_OBJECT
+	QTimer	*_timer;
 	astro::catalog::Catalog::starsetptr	_stars;
 
 	astro::AzmAltConverter	*_converter;
@@ -31,6 +32,7 @@ class SkyDisplayWidget : public QWidget {
 	bool	_show_altaz;
 	bool	_show_radec;
 	bool	_show_constellations;
+	bool	_show_telescope;
 	bool	_show_target;
 	bool	_show_labels;
 public:
@@ -40,6 +42,8 @@ public:
 	void	show_radec(bool r) { _show_radec = r; }
 	bool	show_constellations() const { return _show_constellations; }
 	void	show_constellations(bool c) { _show_constellations = c; }
+	bool	show_telescope() const { return _show_telescope; }
+	void	show_telescope(bool c) { _show_telescope = c; }
 	bool	show_target() const { return _show_target; }
 	void	show_target(bool c) { _show_target = c; }
 	bool	show_labels() const { return _show_labels; }
@@ -52,6 +56,8 @@ private:
 public:
 	void	telescope(const astro::RaDec& t) { _telescope = t; }
 	const astro::RaDec&	telescope() const { return _telescope; }
+	void	target(const astro::RaDec& t) { _target = t; }
+	const astro::RaDec&	target() const { return _target; }
 
 	// position on earth of the observatory
 private:
@@ -90,6 +96,7 @@ public:
 public slots:
 	void	telescopeChanged(astro::RaDec);
 	void	positionChanged(astro::LongLat);
+	void	update();
 
 signals:
 	void	pointSelected(astro::RaDec);

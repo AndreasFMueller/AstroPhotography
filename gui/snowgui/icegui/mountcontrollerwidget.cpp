@@ -6,7 +6,6 @@
 #include "mountcontrollerwidget.h"
 #include "ui_mountcontrollerwidget.h"
 #include <QMessageBox>
-#include <SkyDisplayWidget.h>
 #include <IceConversions.h>
 
 namespace snowgui {
@@ -262,7 +261,7 @@ void	mountcontrollerwidget::viewskyClicked() {
 	}
 
 	// create a new SkyDisplayWidget
-	_skydisplay = new SkyDisplayWidget(NULL);
+	_skydisplay = new SkyDisplayDialog(NULL);
 	_skydisplay->position(_position);
 	astro::RaDec	radec = current();
 	_skydisplay->telescope(radec);

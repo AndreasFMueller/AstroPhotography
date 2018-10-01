@@ -9,7 +9,7 @@
 #include <InstrumentWidget.h>
 #include <QTimer>
 #include <AstroCoordinates.h>
-#include <SkyDisplayWidget.h>
+#include <skydisplaydialog.h>
 
 namespace snowgui {
 
@@ -26,7 +26,7 @@ class mountcontrollerwidget : public InstrumentWidget {
 
 	snowstar::RaDec		_telescope;
 	astro::LongLat	_position;
-	SkyDisplayWidget	*_skydisplay;
+	SkyDisplayDialog	*_skydisplay;
 
 public:
 	explicit mountcontrollerwidget(QWidget *parent = 0);

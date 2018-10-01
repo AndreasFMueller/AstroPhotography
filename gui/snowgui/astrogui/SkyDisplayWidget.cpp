@@ -7,6 +7,7 @@
 #include <AstroFormat.h>
 #include <algorithm>
 #include <QMouseEvent>
+#include <QTimer>
 
 using namespace astro::catalog;
 
@@ -44,6 +45,12 @@ SkyDisplayWidget::SkyDisplayWidget(QWidget *parent) : QWidget(parent) {
 	_show_radec = true;
 	_show_constellations = true;
 	_show_labels = true;
+
+	// start the update timer
+	_timer = new QTimer();
+	_timer->setInterval(60000);
+	connect(_timer, SIGNAL(timeout()),
+		this, SLOT(update()));
 }
 
 /**
@@ -53,6 +60,8 @@ SkyDisplayWidget::~SkyDisplayWidget() {
 	if (_converter) {
 		delete _converter;
 	}
+	_timer->stop();
+	delete _timer;
 }
 
 /**
@@ -201,6 +210,10 @@ void	SkyDisplayWidget::drawTelescope(QPainter& painter) {
 	// compose the path
 	QPointF	markerpoint = convert(azmalt);
 	telescopemarker.addEllipse(markerpoint, 7, 7);
+	telescopemarker.moveTo(QPointF(markerpoint.x(), markerpoint.y() - 12));
+	telescopemarker.lineTo(QPointF(markerpoint.x(), markerpoint.y() + 12));
+	telescopemarker.moveTo(QPointF(markerpoint.x() - 12, markerpoint.y()));
+	telescopemarker.lineTo(QPointF(markerpoint.x() + 12, markerpoint.y()));
 
 	// draw the marker in red
 	painter.drawPath(telescopemarker);
@@ -332,7 +345,9 @@ void	SkyDisplayWidget::draw() {
 	}
 
 	// draw the telescope marker
-	drawTelescope(painter);
+	if (show_telescope()) {
+		drawTelescope(painter);
+	}
 	if (show_target()) {
 		drawTarget(painter);
 	}
@@ -460,10 +475,17 @@ void	SkyDisplayWidget::mouseMoveEvent(QMouseEvent *e) {
 }
 
 /**
- * /brief Ensure that the object is deleted when it is hit by a close event
+ * \brief Ensure that the object is deleted when it is hit by a close event
  */
 void	SkyDisplayWidget::closeEvent(QCloseEvent * /* event */) {
 	deleteLater();
+}
+
+/**
+ * \brief Slot to trigger a redrawing
+ */
+void	SkyDisplayWidget::update() {
+	repaint();
 }
 
 } // namespace snowgui
