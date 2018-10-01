@@ -8,58 +8,119 @@
 
 namespace astro {
 
+/**
+ * \brief Construct ImageCoordinates object
+ *
+ * \param center		image center RA/DEC
+ * \param angular_resolution	angular resolution angle/pixel
+ * \param azimut		azimuth (rotation of the image)
+ * \param mirror		whether or not the image was vertically mirrored
+ */
 ImageCoordinates::ImageCoordinates(const RaDec& center,
 	const Angle& angular_resolution, const Angle& azimut, bool mirror)
 	: _center(center), _angular_resolution(angular_resolution),
 	  _azimut(azimut), _mirror(mirror) {
 }
 
+/**
+ * \brief Construct ImageCoordinates object
+ *
+ * This constructor assumes azimuth angle 0
+ *
+ * \param center		image center RA/DEC
+ * \param angular_resolution	angular resolution angle/pixel
+ * \param mirror		whether or not the image was vertically mirrored
+ */
 ImageCoordinates::ImageCoordinates(const RaDec& center,
 	const Angle& angular_resolution, bool mirror)
 	: _center(center), _angular_resolution(angular_resolution),
 	  _azimut(0), _mirror(mirror) {
 }
 
+/**
+ * \brief Convert pixel offset to RA and DEC
+ *
+ * This method converts an offset from the image center to RA and DEC of
+ * the point.
+ *
+ * \param _offset	_offset from image center
+ * \returns		RA and DEC of the point
+ */
 RaDec	ImageCoordinates::offset(const Point& _offset) const {
 	double	s = (_mirror) ? -1 : 1;
+
+	// XXX take azimuth into account, we should do this right at the
+	// XXX beginning by rotating in the image plane
+
+	// this method uses the following spherical triangle
+	//
+	//              N beta
+	//             / \
+	//           a/   \c
+	//           /     \
+	//   gamma  P-------C alpha
+	//              b
+	// P = point for which to determine RA/DEC
+	// C = center of image
+	// N = north pole
+	// beta is positive 
+
 	// convert to polar coordinates
-	// XXX there probably is a bug here because right ascension
-	// XXX increases to the right
-	double	radius = hypot(_offset.x(), s * _offset.y());
-	Angle	phi(atan2(s * _offset.y(), _offset.x()));
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "%s -> r = %.2f, phi = %.1f degrees",
-		_offset.toString().c_str(), radius, phi.degrees());
+	double	radius = hypot(_offset.x(), _offset.y());
 
-	// compute spherical triangle
-	Angle	a = Angle::right_angle - _center.dec();
-	Angle	gamma = Angle::right_angle - (phi + _azimut);
-	Angle	b = radius * _angular_resolution;
-	
-	Angle	c = arccos(cos(a) * cos(b) + sin(a) * sin(b) * cos(gamma));
-	Angle	d = a - c;
+	// compute the angle (side) b
+	Angle	b = arctan(radius * _angular_resolution.radians());
 
-	Angle	beta(arcsin(sin(b) * sin(gamma) / sin(c)));
+	// compute the angle alpha
+	//
+	//   P        |
+	//    o       |c        P.x = radius * sin(alpha)
+	//     -___   |         P.y = radius * cos(alpha)
+	//         ` C    ==> alpha = arctan2(P.x, P.y)
+	//       b         
 
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "a = %.4f[deg], b = %.4f[deg], "
-		"c = %.4f[deg], gamma = %.4f[deg], beta = %.4f[deg]",
-		a.degrees(), b.degrees(), c.degrees(),
-		gamma.degrees(), beta.degrees());
+	// compute the angle alpha in 
+	Angle	alpha = arctan2(_offset.x(), s * _offset.y());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "%s -> r = %.2f, alpha = %.1f degrees",
+		_offset.toString().c_str(), radius, alpha.degrees());
 
+	// compute spherical triangle, using law of cosines at C to
+	// find a
+	Angle	c = Angle::right_angle - _center.dec();
+	double	cosa = cos(b) * cos(c) + sin(b) * sin(c) * cos(alpha);
+	Angle	a = arccos(cosa);
+
+	// use law of sines to compute angle beta
+	double	sinbeta = sin(b) * sin(alpha) / sin(a);
+	Angle	beta = arcsin(sinbeta);
+
+	// compute new coordinates
+	RaDec	result(_center.ra() + beta, Angle::right_angle - a);
+
+	// report findings
 	debug(LOG_DEBUG, DEBUG_LOG, 0,
 		"Delta RA = %.6f[h], Delta DEC = %.6f[deg]",
-		beta.hours(), d.degrees());
-
-	// extract RA and DEC
-	RaDec	result(beta, d);
+		result.ra().hours(), result.dec().degrees());
 	return result;
 }
 
+/**
+ * \brief Operator version of the Point to RA/DEC conversion
+ *
+ * This method just wraps 
+ */
 RaDec	ImageCoordinates::operator()(const Point& _offset) const {
-	return _center + offset(_offset);
+	return offset(_offset);
 }
 
 /**
  * \brief Compute points relative to the center direction
+ *
+ * This method computes the coordinates in the image of a point
+ * at a given RA/DEC.
+ *
+ * \param direction	RA and DEC of the point
+ * \returns		image center 
  */
 Point	ImageCoordinates::operator()(const RaDec& direction) const {
 	// we use a spherical triangle from the north pole (B)
@@ -95,6 +156,13 @@ Point	ImageCoordinates::operator()(const RaDec& direction) const {
 	// convert polar coordinates into cartesian coordinates
 	Point	result(-r * singamma, r * cosgamma);
 	return result;
+}
+
+/**
+ * \brief Operator version of the image coordinate conversion
+ */
+Point	ImageCoordinates::operator()(const RaDec& direction) const {
+	return offset(direction);
 }
 
 } // namespace astro
