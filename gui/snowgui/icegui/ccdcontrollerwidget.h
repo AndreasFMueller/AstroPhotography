@@ -11,6 +11,9 @@
 #include <AstroCoordinates.h>
 #include <image.h>
 #include <QTimer>
+#include <QThread>
+#include <HideWidget.h>
+#include <HideProgress.h>
 
 namespace snowgui {
 
@@ -46,6 +49,21 @@ public:
 	std::string	toString() const;
 };
 
+class ccdcontrollerwidget;
+/**
+ * \brief Thread to retrieve an image from a CCD device
+ */
+class ImageRetrieverThread : public QThread {
+	Q_OBJECT
+	ccdcontrollerwidget	*_ccdcontrollerwidget;
+public:
+	ImageRetrieverThread(ccdcontrollerwidget *c);
+	virtual ~ImageRetrieverThread();
+	void	run();
+signals:
+	void	failed(QString);
+};
+
 /**
  * \brief A reusable component to control a CCD
  */
@@ -67,6 +85,10 @@ class ccdcontrollerwidget : public InstrumentWidget {
 
 	std::vector<ccddata>	_ccddata;
 	ccddata	_current_ccddata;
+
+	ImageRetrieverThread	*_imageretriever;
+	HideWidget	*_hide;
+	HideProgress	*_hideprogress;
 
 public:
 	explicit ccdcontrollerwidget(QWidget *parent = NULL);
@@ -108,7 +130,8 @@ private:
 	void	displayFrame(astro::image::ImageRectangle);
 
 	// retrieve an image
-	void	retrieveImage();
+	void	retrieveImageStart();
+	void	retrieveImageWork();
 
 	Ui::ccdcontrollerwidget *ui;
 	QTimer	statusTimer;
@@ -139,6 +162,12 @@ public slots:
 	// needed internally for status udpates
 	void	statusUpdate();
 
+	// needed by the image retrieval thread 
+	void	retrieveImageComplete();
+	void	retrieveImageFailed(QString);
+
+	// allow the ImageRetrieverThread access to private methods
+	friend class ImageRetrieverThread;
 };
 
 } // namespace snowgui

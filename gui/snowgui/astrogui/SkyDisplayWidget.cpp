@@ -8,6 +8,7 @@
 #include <algorithm>
 #include <QMouseEvent>
 #include <QTimer>
+#include <QToolTip>
 
 using namespace astro::catalog;
 
@@ -47,6 +48,8 @@ SkyDisplayWidget::SkyDisplayWidget(QWidget *parent) : QWidget(parent) {
 	_show_labels = true;
 	_show_target = false;
 	_show_telescope = true;
+	_show_tooltip = true;
+	_mouse_pressed = false;
 
 	// start the update timer
 	_timer = new QTimer();
@@ -54,6 +57,9 @@ SkyDisplayWidget::SkyDisplayWidget(QWidget *parent) : QWidget(parent) {
 	connect(_timer, SIGNAL(timeout()),
 		this, SLOT(update()));
 	_timer->start();
+
+	// enable mouse tracking
+	setMouseTracking(true);
 }
 
 /**
@@ -418,19 +424,14 @@ void	SkyDisplayWidget::positionChanged(astro::LongLat longlat) {
 	repaint();
 }
 
-/**
- * \brief All mouse events are processed the same way with this method
- *
- * \param e	the mouse event to process
- */
-void	SkyDisplayWidget::mouseCommon(QMouseEvent *e) {
+astro::RaDec	SkyDisplayWidget::convert(QMouseEvent *e) {
 	double	deltax = e->pos().x() - _center.x();
 	double	deltay = e->pos().y() - _center.y();
 
 	// compute the radius
 	double	f = hypot(deltax, deltay) / _radius;
 	if (f > 1) {
-		return;
+		throw std::range_error("outside circle");
 	}
 
 	// convert the radius to an angle
@@ -442,7 +443,16 @@ void	SkyDisplayWidget::mouseCommon(QMouseEvent *e) {
 		azmalt.azm().degrees(), azmalt.alt().degrees());
 
 	// convert the to RaDec
-	_target = _converter->inverse(azmalt);
+	return _converter->inverse(azmalt);
+}
+
+/**
+ * \brief All mouse events are processed the same way with this method
+ *
+ * \param e	the mouse event to process
+ */
+void	SkyDisplayWidget::mouseCommon(const astro::RaDec& target) {
+	_target = target;
 
 	// emit the position
 	emit pointSelected(_target);
@@ -450,7 +460,6 @@ void	SkyDisplayWidget::mouseCommon(QMouseEvent *e) {
 	// draw a green circle to verify the position computed
 	show_target(true);
 	repaint();
-
 }
 
 /**
@@ -462,7 +471,17 @@ void	SkyDisplayWidget::mouseCommon(QMouseEvent *e) {
 void	SkyDisplayWidget::mousePressEvent(QMouseEvent *e) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "mousePressEvent %d,%d",
 		e->pos().x(), e->pos().y());
-	mouseCommon(e);
+	try {
+		astro::RaDec	t = convert(e);
+		mouseCommon(t);
+	} catch (...) { }
+}
+
+/**
+ * \brief Mouse release event
+ */
+void	SkyDisplayWidget::mouseReleaseEvent(QMouseEvent * /* e */) {
+	_mouse_pressed = false;
 }
 
 /**
@@ -471,10 +490,19 @@ void	SkyDisplayWidget::mousePressEvent(QMouseEvent *e) {
  * computes the coordinates where the mouse was pressed and emits them
  * with the signal pointSelected(astro::RaDec)
  */
-void	SkyDisplayWidget::mouseMoveEvent(QMouseEvent *e) {
+void	SkyDisplayWidget::mouseMoveEvent(QMouseEvent *event) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "mouseMoveEvent %d,%d",
-		e->pos().x(), e->pos().y());
-	mouseCommon(e);
+		event->pos().x(), event->pos().y());
+	try {
+		astro::RaDec	t = convert(event);
+		if (_mouse_pressed) {
+			mouseCommon(t);
+		}
+		QString tiptext(astro::stringprintf("RA: %s DEC: %s",
+				t.ra().hms(':', -1).c_str(),
+				t.dec().dms(':', -1).c_str()).c_str());
+		QToolTip::showText(event->globalPos(), tiptext);
+	} catch (...) { }
 }
 
 /**

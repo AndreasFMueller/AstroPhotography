@@ -37,6 +37,7 @@ WIDGETHEADERS =								\
 
 SOURCES += 								\
 	AutoGain.cpp							\
+	BusyWidget.cpp							\
 	ChannelData.cpp							\
 	ChannelDisplayWidget.cpp					\
 	ChannelPainter.cpp						\
@@ -47,6 +48,8 @@ SOURCES += 								\
 	FitsTable.cpp							\
 	FocusPoints.cpp							\
 	FocusPointsWidget.cpp						\
+	HideProgress.cpp						\
+	HideWidget.cpp							\
 	Histogram.cpp							\
 	Image2Pixmap.cpp						\
 	LocalSiderealTime.cpp						\
@@ -60,6 +63,7 @@ SOURCES += 								\
 
 HEADERS  += 								\
 	AutoGain.h							\
+	BusyWidget.h							\
 	ChannelData.h							\
 	ChannelDisplayWidget.h						\
 	ClockWidget.h							\
@@ -68,6 +72,8 @@ HEADERS  += 								\
 	FitsTable.h							\
 	FocusPoints.h							\
 	FocusPointsWidget.h						\
+	HideProgress.h							\
+	HideWidget.h							\
 	Histogram.h							\
 	Image2Pixmap.h							\
 	LocalSiderealTime.h						\

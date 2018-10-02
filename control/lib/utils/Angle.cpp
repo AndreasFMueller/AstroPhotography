@@ -14,15 +14,21 @@
 
 namespace astro {
 
-static std::string	xms(double value, const char separator) {
+static std::string	xms(double value, const char separator, int precision) {
 	int	sign = (value >= 0) ? 1 : -1;
 	value = fabs(value);
 	int	X = floor(value);
 	value = 60 * (value - X);
 	int	M = floor(value);
 	double	S = 60 * (value - M);
-	return stringprintf("%c%02d%c%02d%c%06.3f", (sign < 0) ? '-' : '+',
-		X, separator, M, separator, S);
+	if (precision < 0) {
+		return stringprintf("%c%02d%c%02d",
+			(sign < 0) ? '-' : '+', X, separator, M);
+	} else {
+		return stringprintf("%c%02d%c%02d%c%06.*f",
+			(sign < 0) ? '-' : '+',
+			X, separator, M, separator, precision, S);
+	}
 }
 
 static double	angle_reduction(const double a, const double base) {
@@ -66,8 +72,8 @@ void	Angle::degrees(double degrees) {
 	_angle = degrees_to_radians(degrees);
 }
 
-std::string	Angle::dms(const char separator) const {
-	return xms(degrees(), separator);
+std::string	Angle::dms(const char separator, int precision) const {
+	return xms(degrees(), separator, precision);
 }
 
 double	Angle::hours() const {
@@ -78,8 +84,8 @@ void	Angle::hours(double hours) {
 	_angle = hours_to_radians(hours);
 }
 
-std::string	Angle::hms(const char separator) const {
-	return xms(hours(), separator);
+std::string	Angle::hms(const char separator, int precision) const {
+	return xms(hours(), separator, precision);
 }
 
 Angle	Angle::operator+(const Angle& other) const {

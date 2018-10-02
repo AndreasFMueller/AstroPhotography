@@ -29,10 +29,10 @@ public:
 	Angle(double angle = 0);
 	double	degrees() const;
 	void	degrees(double degrees);
-	std::string	dms(const char separator = ':') const;
+	std::string	dms(const char separator = ':', int precision = 3) const;
 	double	hours() const;
 	void	hours(double hours);
-	std::string	hms(const char separator = ':') const;
+	std::string	hms(const char separator = ':', int precision = 3) const;
 	double	radians() const { return _angle; }
 	void	radians(double radians) { _angle = radians; }
 	Angle	operator+(const Angle& other) const;

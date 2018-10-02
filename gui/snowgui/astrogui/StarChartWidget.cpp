@@ -7,6 +7,7 @@
 #include <AstroDebug.h>
 #include <QPainter>
 #include <QMouseEvent>
+#include <QToolTip>
 
 using namespace astro::catalog;
 
@@ -24,8 +25,11 @@ StarChartWidget::StarChartWidget(QWidget *parent) : QWidget(parent),
 	_show_grid = true;
 	_retriever = NULL;
 	_retrieval_necessary = true;
+	_mouse_pressed = false;
 
 	qRegisterMetaType<astro::catalog::Catalog::starsetptr>("astro::catalog::Catalog::starsetptr");
+
+	setMouseTracking(true);
 }
 
 /**
@@ -286,6 +290,13 @@ void	StarChartWidget::directionChanged(astro::RaDec direction) {
 	// start the retrieval
 	startRetrieval();
 
+	// start the busy widget
+	const int busysize = 100;
+	_busywidget = new BusyWidget(this);
+	_busywidget->resize(busysize, busysize);
+	_busywidget->move(width()/2 - busysize/2, height()/2 - busysize/2);
+	_busywidget->setVisible(true);
+
 	// let the repaint event handle the redrawing
 	repaint();
 }
@@ -311,7 +322,12 @@ void	StarChartWidget::mouseCommon(QMouseEvent *event) {
 void	StarChartWidget::mousePressEvent(QMouseEvent *event) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "handle mouse click at (%d,%d)",
 		event->pos().x(), event->pos().y());
+	_mouse_pressed = true;
 	mouseCommon(event);
+}
+
+void	StarChartWidget::mouseReleaseEvent(QMouseEvent * /* event */) {
+	_mouse_pressed = false;
 }
 
 /**
@@ -320,7 +336,18 @@ void	StarChartWidget::mousePressEvent(QMouseEvent *event) {
 void	StarChartWidget::mouseMoveEvent(QMouseEvent *event) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "handle mouse move to (%d,%d)",
 		event->pos().x(), event->pos().y());
-	mouseCommon(event);
+	// if the button is pressed, we have to handle it like a click
+	if (_mouse_pressed) {
+		mouseCommon(event);
+		return;
+	}
+	astro::Point	offset(event->pos().x() - _center.x(),
+				_center.y() - event->pos().y());
+	astro::RaDec	tiptarget = _converter(offset);
+	QString	tiptext(astro::stringprintf("RA: %s DEC: %s",
+			tiptarget.ra().hms(':', -1).c_str(),
+			tiptarget.dec().dms(':', -1).c_str()).c_str());
+	QToolTip::showText(event->globalPos(), tiptext);
 }
 
 /**
@@ -349,6 +376,12 @@ void	StarChartWidget::workerFinished() {
 		0, 0);
 	delete _retriever;
 	_retriever = NULL;
+
+	// remove the busy widget
+	if (_busywidget) {
+		delete _busywidget;
+		_busywidget = NULL;
+	}
 
 	// start a new thread if necessary
 	if (_retrieval_necessary) {

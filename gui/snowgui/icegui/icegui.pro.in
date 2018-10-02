@@ -113,6 +113,7 @@ SOURCES += 								\
 	FocusButton.cpp							\
 	GuiderButton.cpp						\
 	ImageForwarder.cpp						\
+	ImageRetrieverThread.cpp					\
 	InstrumentWidget.cpp						\
 	MonitorImage.cpp						\
 	TrackingMonitorImage.cpp					\
@@ -131,6 +132,7 @@ HEADERS  += 								\
 	FocusButton.h							\
 	GuiderButton.h							\
 	ImageForwarder.h						\
+	ImageRetrieverThread.h						\
 	InstrumentWidget.h						\
 	MonitorImage.h							\
 	TrackingMonitorImage.h						\

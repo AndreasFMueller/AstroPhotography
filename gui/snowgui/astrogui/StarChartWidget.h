@@ -10,6 +10,7 @@
 #include <QThread>
 #include <AstroCoordinates.h>
 #include <AstroCatalog.h>
+#include <BusyWidget.h>
 
 namespace snowgui {
 
@@ -49,6 +50,7 @@ class StarChartWidget : public QWidget {
 
 	bool	_retrieval_necessary;
 	StarChartRetriever	*_retriever;
+	BusyWidget	*_busywidget;
 
 	QPointF	_center;
 	QPointF	convert(const astro::RaDec& radec);
@@ -82,9 +84,11 @@ private:
 
 	void	startRetrieval();
 
+	bool	_mouse_pressed;
 protected:
 	void	paintEvent(QPaintEvent *event);
 	void	mousePressEvent(QMouseEvent *event);
+	void	mouseReleaseEvent(QMouseEvent *event);
 	void	mouseMoveEvent(QMouseEvent *event);
 
 public slots:

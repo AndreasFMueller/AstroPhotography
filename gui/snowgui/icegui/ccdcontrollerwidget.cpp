@@ -11,7 +11,10 @@
 #include <AstroIO.h>
 #include <AstroImageops.h>
 #include <AstroFormat.h>
+#include <AstroUtils.h>
 #include <QMessageBox>
+#include <HideWidget.h>
+#include <HideProgress.h>
 
 using namespace astro::image;
 using namespace astro::io;
@@ -649,6 +652,12 @@ void	ccdcontrollerwidget::captureClicked() {
 		ui->captureButton->setEnabled(false);
 		ui->streamButton->setEnabled(false);
 		ui->cancelButton->setEnabled(true);
+
+		// start the hide widget which will tell the user that
+		// something is going on
+		_hideprogress = new HideProgress(_exposure.exposuretime(), this);
+		_hideprogress->setGeometry(0, height() - 10, width(), 10);
+		_hideprogress->setVisible(true);
 	} catch (const std::exception& x) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "cannot start exposure");
 	}
@@ -683,20 +692,37 @@ void	ccdcontrollerwidget::streamClicked() {
 }
 
 /**
- * \brief Slot to handle new images
- *
- * This method retrieves an image from the remote server and then emits
- * the imageReceived signal
+ * \brief initiate the image retrieval thread
  */
-void	ccdcontrollerwidget::retrieveImage() {
-	// it may happen that some other program initiated the exposure,
-	// so we check whether this is our exposure. If not, we give up
-	// at this point
+void	ccdcontrollerwidget::retrieveImageStart() {
+	// make sure we are actually accessing our own exposure
 	if (!ourexposure) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "not our exposure, giving up");
 		return;
 	}
-	ourexposure = false;
+
+	// prepare the retrieval thread
+	_imageretriever = new ImageRetrieverThread(this);
+	connect(_imageretriever, SIGNAL(finished()),
+		this, SLOT(retrieveImageComplete()));
+	connect(_imageretriever, SIGNAL(failed(QString)),
+		this, SLOT(retrieveImageFailed(QString)));
+
+	// prepare the hide widget
+	_hide = new HideWidget( QString("retrieving image..."), this);
+	_hide->setGeometry(0, 0, width(), height());
+	_hide->setVisible(true);
+
+	// now start working
+	_imageretriever->start();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "image retriever thread started");
+}
+
+/**
+ * \brief Do the main work for retrievin an image
+ */
+void	ccdcontrollerwidget::retrieveImageWork() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "start work thread to retrieve image");
 	try {
 		_imageproxy = _ccd->getImage();
 		if (!_imageproxy->hasMeta("INSTRUME")) {
@@ -725,16 +751,33 @@ void	ccdcontrollerwidget::retrieveImage() {
 		}
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "image dimensions now %s",
 			_image->getFrame().toString().c_str());
-
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "image received, emit signal");
-		emit imageReceived(_image);
 	} catch (const std::exception& x) {
 		std::string	msg = astro::stringprintf("cannot retrieve "
 			"image: exception %s, cause=%s",
 			astro::demangle(typeid(x).name()).c_str(), x.what());
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
-		ccdFailed(x);
+		emit retrieveImageFailed(QString(msg.c_str()));
 	}
+}
+
+/**
+ * \brief Slot used to signal image retrieval completion to the controller
+ */
+void	ccdcontrollerwidget::retrieveImageComplete() {
+	// turn of the HideWidget
+	delete _hide;
+	_hide = NULL;
+	delete _imageretriever;
+	_imageretriever = NULL;
+	// signal that the image was received
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "image received, emit signal");
+	emit imageReceived(_image);
+}
+
+void	ccdcontrollerwidget::retrieveImageFailed(QString x) {
+	delete _hide;
+	_hide = NULL;
+	// XXX show a dialog that reports the reason for the failure
 }
 
 /**
@@ -758,6 +801,10 @@ void	ccdcontrollerwidget::statusUpdate() {
 	}
 	switch (newstate) {
 	case snowstar::IDLE:
+		if (_hideprogress) {
+			delete _hideprogress;
+			_hideprogress = NULL;
+		}
 		ui->captureButton->setEnabled(true);
 		ui->cancelButton->setEnabled(false);
 		ui->streamButton->setEnabled(true);
@@ -771,7 +818,11 @@ void	ccdcontrollerwidget::statusUpdate() {
 	case snowstar::EXPOSED:
 		// if we get to this point, then an exposure just completed,
 		// and we we should retrieve the image
-		retrieveImage();
+		if (_hideprogress) {
+			delete _hideprogress;
+			_hideprogress = NULL;
+		}
+		retrieveImageStart();
 		ui->captureButton->setEnabled(false);
 		ui->cancelButton->setEnabled(false);
 		ui->streamButton->setEnabled(false);

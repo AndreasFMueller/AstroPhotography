@@ -35,6 +35,7 @@ class SkyDisplayWidget : public QWidget {
 	bool	_show_telescope;
 	bool	_show_target;
 	bool	_show_labels;
+	bool	_show_tooltip;
 public:
 	bool	show_altaz() const { return _show_altaz; }
 	void	show_altaz(bool a) { _show_altaz = a; }
@@ -48,6 +49,8 @@ public:
 	void	show_target(bool c) { _show_target = c; }
 	bool	show_labels() const { return _show_labels; }
 	void	show_labels(bool l) { _show_labels = l; }
+	bool	show_tooltip() const { return _show_tooltip; }
+	void	show_tooltip(bool l) { _show_tooltip = l; }
 
 	// telescope direction in right ascension and declination
 private:
@@ -79,10 +82,13 @@ private:
 	void	drawLabels(QPainter& painter);
 	void	draw();
 	QPointF	convert(const astro::AzmAlt& azmalt);
+	astro::RaDec	convert(QMouseEvent *event);
 
+	bool	_mouse_pressed;
 protected:
-	void	mouseCommon(QMouseEvent *e);
+	void	mouseCommon(const astro::RaDec& target);
 	void	mousePressEvent(QMouseEvent *e);
+	void	mouseReleaseEvent(QMouseEvent *e);
 	void	mouseMoveEvent(QMouseEvent *e);
 	void	closeEvent(QCloseEvent *e);
 
