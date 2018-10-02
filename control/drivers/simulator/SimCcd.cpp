@@ -100,6 +100,10 @@ SimCcd::SimCcd(const CcdInfo& _info, SimLocator& locator)
 		limit_magnitude);
 }
 
+static void	imageconstruction_main(SimCcd *simccd) {
+	simccd->createimage();
+}
+
 /**
  * \brief Start simulated exposure
  *
@@ -122,6 +126,28 @@ void    SimCcd::startExposure(const Exposure& exposure) {
 		"focallength = %.3f, limit_magnitude = %.2f",
 		focallength, limit_magnitude);
 
+	// start the image construction thread
+	_thread = new std::thread(imageconstruction_main, this);
+
+	// start the exposure
+	Ccd::startExposure(exposure);
+	starttime = simtime();
+	state(CcdState::exposing);
+	shutter = exposure.shutter();
+}
+
+/**
+ * \brief Work function for the thread
+ *
+ * This method retrieves the image and then rebuilds the image
+ * and stores it in _image.
+ */
+void	SimCcd::createimage() {
+	// start timer
+	Timer	timer;
+	timer.start();
+
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "start image construction thread");
 	// update the mount position
 	RaDec	rd = _locator.mount()->getRaDec();
 	if (rd != _last_direction) {
@@ -140,11 +166,65 @@ void    SimCcd::startExposure(const Exposure& exposure) {
 		_last_direction = rd;
 	}
 
-	// start the exposure
-	Ccd::startExposure(exposure);
-	starttime = simtime();
-	state(CcdState::exposing);
-	shutter = exposure.shutter();
+	// we need a camera to convert the starfield into an image
+	starcamera.rectangle(exposure.frame());
+
+	// exposure influence
+	starcamera.stretch(exposure.exposuretime());
+	starcamera.light(exposure.shutter() == Shutter::OPEN);
+
+	// flat images need special treatment
+	if (exposure.purpose() == Exposure::flat) {
+		starcamera.light(false);
+		starcamera.dark(20000. * exposure.exposuretime());
+	}
+
+	// geometric distortion (guideport)
+	starcamera.translation(_locator.simguideport()->offset()
+		+ _locator.simadaptiveoptics()->offset());
+
+	// color (filterwheel)
+	starcamera.colorfactor(_locator.filterwheel()->currentPosition());
+
+	// temperature influence on noise
+	starcamera.noise(0.2 * exp2(-_locator.simcooler()->belowambient()));
+
+	// focuser effect
+	double	radius = _locator.simfocuser()->radius();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "radius = %f", radius);
+	starcamera.radius(radius);
+	starcamera.innerradius(0.4 * radius);
+
+	// binning mode
+	starcamera.binning(exposure.mode());
+
+	// check whether exposure time is already over, this can happen
+	// if the starfield had to be rebuilt from the catalog
+	if ((timer.gettime() - timer.startTime()) > exposure.exposuretime()) {
+		state(CcdState::exposed);
+	}
+
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "build a new image");
+	ImagePtr	image = starcamera(starfield);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "got an %s image: %s",
+		image->getFrame().toString().c_str(), image->info().c_str());
+
+	// compute the remaining exposure time
+	double	remaining = exposure.exposuretime()
+				- (timer.gettime() - timer.startTime());
+	if (remaining > 0) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "wait for remaining time %.3f",
+			remaining);
+		Timer::sleep(remaining);
+	}
+
+	// now signal that the image is exposed
+	state(CcdState::exposed);
+
+	// origin
+	image->setOrigin(exposure.frame().origin());
+	_image = image;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "image construction thread terminated");
 }
 
 /**
@@ -290,48 +370,13 @@ void    SimCcd::setShuterState(const Shutter::state& state) {
  * \brief Retrieve an image
  */
 ImagePtr  SimCcd::getRawImage() {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "get image from simulator");
-	// we need a camera to convert the starfield into an image
-	starcamera.rectangle(exposure.frame());
+	// wait for the thread 
+	_thread->join();
 
-	// exposure influence
-	starcamera.stretch(exposure.exposuretime());
-	starcamera.light(exposure.shutter() == Shutter::OPEN);
+	// let the client wait another second
+	usleep(3000000);
 
-	// flat images need special treatment
-	if (exposure.purpose() == Exposure::flat) {
-		starcamera.light(false);
-		starcamera.dark(20000. * exposure.exposuretime());
-	}
-
-	// geometric distortion (guideport)
-	starcamera.translation(_locator.simguideport()->offset()
-		+ _locator.simadaptiveoptics()->offset());
-
-	// color (filterwheel)
-	starcamera.colorfactor(_locator.filterwheel()->currentPosition());
-
-	// temperature influence on noise
-	starcamera.noise(0.2 * exp2(-_locator.simcooler()->belowambient()));
-
-	// focuser effect
-	double	radius = _locator.simfocuser()->radius();
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "radius = %f", radius);
-	starcamera.radius(radius);
-	starcamera.innerradius(0.4 * radius);
-
-	// binning mode
-	starcamera.binning(exposure.mode());
-
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "build a new image");
-	ImagePtr	image = starcamera(starfield);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "got an %s image: %s",
-		image->getFrame().toString().c_str(), image->info().c_str());
-	state(CcdState::idle);
-
-	// origin
-	image->setOrigin(exposure.frame().origin());
-	return image;
+	return _image;
 }
 
 /**
