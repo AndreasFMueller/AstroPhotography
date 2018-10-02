@@ -22,6 +22,10 @@ StarChartWidget::StarChartWidget(QWidget *parent) : QWidget(parent),
 	_limit_magnitude = 10;
 	_negative = false;
 	_show_grid = true;
+	_retriever = NULL;
+	_retrieval_necessary = true;
+
+	qRegisterMetaType<astro::catalog::Catalog::starsetptr>("astro::catalog::Catalog::starsetptr");
 }
 
 /**
@@ -48,16 +52,16 @@ QPointF	StarChartWidget::convert(const astro::RaDec& radec) {
  * \brief Draw a star
  */
 void	StarChartWidget::drawStar(QPainter& painter, const Star& star) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "draw star %s", star.toString().c_str());
+	//debug(LOG_DEBUG, DEBUG_LOG, 0, "draw star %s", star.toString().c_str());
 	// convert the position into a x/y coordinates
 	astro::Point	p = _converter(star.position(2000));
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "Point: %s", p.toString().c_str());
+	//debug(LOG_DEBUG, DEBUG_LOG, 0, "Point: %s", p.toString().c_str());
 
 	// if the point is outside the widget rectangle, we quit
 	double	w = 5 + width() / 2.;
 	double	h = 5 + height() / 2.;
 	if ((fabs(p.x()) > w) || (fabs(p.y()) > h)) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "star outside rectangle");
+		//debug(LOG_DEBUG, DEBUG_LOG, 0, "star outside rectangle");
 		return;
 	}
 
@@ -69,9 +73,9 @@ void	StarChartWidget::drawStar(QPainter& painter, const Star& star) {
 	if (sr < 0.8) {
 		sr = 0.8;
 	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0,
-		"drawing star %s at position (%.1f, %.1f), r=%.1f",
-		star.toString().c_str(), p.x(), p.y(), sr);
+	//debug(LOG_DEBUG, DEBUG_LOG, 0,
+	//	"drawing star %s at position (%.1f, %.1f), r=%.1f",
+	//	star.toString().c_str(), p.x(), p.y(), sr);
 
 	// draw the circle
 	QPainterPath	starcircle;
@@ -230,6 +234,39 @@ void	StarChartWidget::draw() {
 }
 
 /**
+ * \brief Work needed to start a new retrieval
+ */
+void	StarChartWidget::startRetrieval() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "initiate new star retrieval");
+	// compute the width and height of the star chart
+	astro::Angle	rawidth(1.5 * width() * _resolution.radians());
+	astro::Angle	decheight(1.5 * height() * _resolution.radians());
+	SkyWindow	window = SkyWindow::hull(_direction, rawidth, decheight);
+
+	// if no retriever is running, start one
+	if (NULL == _retriever) {
+		// get the stars from the catalog
+		_retriever = new StarChartRetriever();
+		_retriever->limit_magnitude(limit_magnitude());
+		_retriever->window(window);
+		connect(_retriever,
+			SIGNAL(starsReady(astro::catalog::Catalog::starsetptr)),
+			this,
+			SLOT(useStars(astro::catalog::Catalog::starsetptr)));
+		connect(_retriever,
+			SIGNAL(finished()),
+			this,
+			SLOT(workerFinished()));
+		_retriever->start();
+		_retrieval_necessary = false;
+	} else {
+		// remember to restart star retrieval as soon as the present
+		// retrieval is complete
+		_retrieval_necessary = true;
+	}
+}
+
+/**
  * \brief Change the center 
  *
  * This triggers getting a new set of stars from the catalog
@@ -246,18 +283,8 @@ void	StarChartWidget::directionChanged(astro::RaDec direction) {
 	_converter = astro::ImageCoordinates(_direction, _resolution,
 			astro::Angle(0));
 
-	// compute the width and height of the star chart
-	astro::Angle	rawidth(1.5 * width() * _resolution.radians());
-	astro::Angle	decheight(1.5 * height() * _resolution.radians());
-	SkyWindow	window = SkyWindow::hull(_direction, rawidth, decheight);
-
-	// get the stars from the catalog
-	// XXX this takes too much time, we should do this in a separate
-	// XXX thread
-	CatalogPtr catalog = CatalogFactory::get();
-	MagnitudeRange	magrange(-30, limit_magnitude());
-	_stars = catalog->find(window, magrange);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "%d stars found", _stars->size());
+	// start the retrieval
+	startRetrieval();
 
 	// let the repaint event handle the redrawing
 	repaint();
@@ -294,6 +321,39 @@ void	StarChartWidget::mouseMoveEvent(QMouseEvent *event) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "handle mouse move to (%d,%d)",
 		event->pos().x(), event->pos().y());
 	mouseCommon(event);
+}
+
+/**
+ * \brief receive a new set of stars from the worker thread
+ *
+ * This method receives a new set of stars from the worker thread and
+ * redisplays the sky with this new set of stars
+ */
+void	StarChartWidget::useStars(astro::catalog::Catalog::starsetptr stars) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "receiveing %d new stars",
+		stars->size());
+	_stars = stars;
+	repaint();
+}
+
+/**
+ * \brief Handle termination of the thread
+ */
+void	StarChartWidget::workerFinished() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "StartChartRetriever has finished");
+	// disconnect the retriever
+	disconnect(_retriever,
+		SIGNAL(starsReady(astro::catalog::Catalog::starsetptr)),
+		0, 0);
+	disconnect(_retriever, SIGNAL(finished()),
+		0, 0);
+	delete _retriever;
+	_retriever = NULL;
+
+	// start a new thread if necessary
+	if (_retrieval_necessary) {
+		startRetrieval();
+	}
 }
 
 } // namespace snowgui

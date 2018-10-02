@@ -54,6 +54,7 @@ SOURCES += 								\
 	Scaler.cpp							\
 	SelectableImage.cpp						\
 	SkyDisplayWidget.cpp						\
+	StarChartRetriever.cpp						\
 	StarChartWidget.cpp						\
 	$${WIDGETSOURCES}
 

@@ -41,6 +41,10 @@ mountcontrollerwidget::mountcontrollerwidget(QWidget *parent)
  */
 mountcontrollerwidget::~mountcontrollerwidget() {
 	_statusTimer.stop();
+
+	if (_skydisplay) {
+		delete _skydisplay;
+	}
 	delete ui;
 }
 

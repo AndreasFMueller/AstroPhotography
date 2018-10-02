@@ -7,10 +7,31 @@
 #define _StarChartWidget_h
 
 #include <QWidget>
+#include <QThread>
 #include <AstroCoordinates.h>
 #include <AstroCatalog.h>
 
 namespace snowgui {
+
+/**
+ * \brief Worker class to retrieve sets of stars
+ */
+class StarChartRetriever : public QThread {
+	Q_OBJECT
+	void	run() override;
+	float	_limit_magnitude;
+	astro::catalog::SkyWindow	_window;
+public:
+	void	limit_magnitude(float l) { _limit_magnitude = l; }
+	float	limit_magnitude() const { return _limit_magnitude; }
+
+	const astro::catalog::SkyWindow& window() const { return _window; }
+	void	window(const astro::catalog::SkyWindow& w) { _window = w; }
+
+	StarChartRetriever(QObject *parent = NULL);
+signals:
+	void	starsReady(astro::catalog::Catalog::starsetptr);
+};
 
 /**
  * \brief A widget to display a chart of a window into the sky 
@@ -25,6 +46,9 @@ class StarChartWidget : public QWidget {
 	float	_limit_magnitude;
 	bool	_negative;
 	bool	_show_grid;
+
+	bool	_retrieval_necessary;
+	StarChartRetriever	*_retriever;
 
 	QPointF	_center;
 	QPointF	convert(const astro::RaDec& radec);
@@ -56,6 +80,8 @@ private:
 
 	void	mouseCommon(QMouseEvent *event);
 
+	void	startRetrieval();
+
 protected:
 	void	paintEvent(QPaintEvent *event);
 	void	mousePressEvent(QMouseEvent *event);
@@ -63,6 +89,8 @@ protected:
 
 public slots:
 	void	directionChanged(astro::RaDec);
+	void	useStars(astro::catalog::Catalog::starsetptr);
+	void	workerFinished();
 };
 
 } // namespace snowgui
