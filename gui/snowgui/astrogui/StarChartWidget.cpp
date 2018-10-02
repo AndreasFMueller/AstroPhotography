@@ -40,12 +40,17 @@ StarChartWidget::~StarChartWidget() {
 
 /**
  * \brief Redraw the star chart
+ *
+ * \param event	
  */
 void	StarChartWidget::paintEvent(QPaintEvent * /* event */) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "redraw the star chart");
 	draw();
 }
 
+/**
+ * \brief convert RA/DEC into point coordinates on the star chart
+ */
 QPointF	StarChartWidget::convert(const astro::RaDec& radec) {
 	astro::Point	p = _converter(radec);
 	QPointF	P(_center.x() + p.x(), _center.y() - p.y());

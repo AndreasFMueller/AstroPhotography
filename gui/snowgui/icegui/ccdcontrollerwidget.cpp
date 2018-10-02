@@ -40,6 +40,11 @@ ccdcontrollerwidget::ccdcontrollerwidget(QWidget *parent) :
 	// setup user interface components
 	ui->setupUi(this);
 
+	// register some types
+	qRegisterMetaType<astro::camera::Exposure>("astro::camera::Exposure");
+	qRegisterMetaType<astro::image::ImagePtr>("astro::image::ImagePtr");
+	qRegisterMetaType<snowstar::ImagePrx>("snowstar::ImagePrx");
+
 	// install all internal connections
 	ui->ccdSelectionBox->blockSignals(true);
 	connect(ui->ccdSelectionBox, SIGNAL(currentIndexChanged(int)),
@@ -700,6 +705,13 @@ void	ccdcontrollerwidget::retrieveImageStart() {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "not our exposure, giving up");
 		return;
 	}
+	ourexposure = false;
+
+	// this seams to be our exposure
+	if (_hideprogress) {
+		delete _hideprogress;
+		_hideprogress = NULL;
+	}
 
 	// prepare the retrieval thread
 	_imageretriever = new ImageRetrieverThread(this);
@@ -818,10 +830,6 @@ void	ccdcontrollerwidget::statusUpdate() {
 	case snowstar::EXPOSED:
 		// if we get to this point, then an exposure just completed,
 		// and we we should retrieve the image
-		if (_hideprogress) {
-			delete _hideprogress;
-			_hideprogress = NULL;
-		}
 		retrieveImageStart();
 		ui->captureButton->setEnabled(false);
 		ui->cancelButton->setEnabled(false);

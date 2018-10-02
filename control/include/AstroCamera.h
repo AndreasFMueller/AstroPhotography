@@ -143,6 +143,7 @@ static purpose_t	string2purpose(const std::string& p);
 	Exposure();
 	Exposure(const astro::image::ImageRectangle& _frame,
 		float _exposuretime = 1);
+	virtual ~Exposure() { }
 
 	virtual std::string	toString() const;
 
