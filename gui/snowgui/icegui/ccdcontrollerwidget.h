@@ -10,7 +10,6 @@
 #include <AstroCamera.h>
 #include <AstroCoordinates.h>
 #include <image.h>
-#include <QTimer>
 #include <QThread>
 #include <HideWidget.h>
 #include <HideProgress.h>
@@ -65,6 +64,21 @@ signals:
 };
 
 /**
+ * \brief Thread to monitor the exposure state
+ */
+class StateMonitoringThread : public QThread {
+	Q_OBJECT
+	ccdcontrollerwidget	*_ccdcontrollerwidget;
+	volatile bool	_running;
+public:
+	StateMonitoringThread(ccdcontrollerwidget *c);
+	virtual ~StateMonitoringThread();
+	void	run();
+signals:
+	void	stateChanged(snowstar::ExposureState);
+};
+
+/**
  * \brief A reusable component to control a CCD
  */
 class ccdcontrollerwidget : public InstrumentWidget {
@@ -90,6 +104,7 @@ class ccdcontrollerwidget : public InstrumentWidget {
 	HideWidget	*_hide;
 	HideProgress	*_hideprogress;
 
+	StateMonitoringThread	*_statemonitoringthread;
 public:
 	explicit ccdcontrollerwidget(QWidget *parent = NULL);
 	~ccdcontrollerwidget();
@@ -134,8 +149,6 @@ private:
 	void	retrieveImageWork();
 
 	Ui::ccdcontrollerwidget *ui;
-	QTimer	statusTimer;
-	snowstar::ExposureState	previousstate;
 	bool	ourexposure;
 
 public slots:
@@ -160,7 +173,7 @@ public slots:
 	void	hideButtons(bool);
 
 	// needed internally for status udpates
-	void	statusUpdate();
+	void	statusUpdate(snowstar::ExposureState);
 
 	// needed by the image retrieval thread 
 	void	retrieveImageComplete();
@@ -168,6 +181,7 @@ public slots:
 
 	// allow the ImageRetrieverThread access to private methods
 	friend class ImageRetrieverThread;
+	friend class StateMonitoringThread;
 };
 
 } // namespace snowgui

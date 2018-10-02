@@ -44,6 +44,7 @@ ccdcontrollerwidget::ccdcontrollerwidget(QWidget *parent) :
 	qRegisterMetaType<astro::camera::Exposure>("astro::camera::Exposure");
 	qRegisterMetaType<astro::image::ImagePtr>("astro::image::ImagePtr");
 	qRegisterMetaType<snowstar::ImagePrx>("snowstar::ImagePrx");
+	qRegisterMetaType<snowstar::ExposureState>("snowstar::ExposureState");
 
 	// install all internal connections
 	ui->ccdSelectionBox->blockSignals(true);
@@ -70,10 +71,7 @@ ccdcontrollerwidget::ccdcontrollerwidget(QWidget *parent) :
 		this, SLOT(guiChanged()));
 
 	// setup and connect the timer
-	connect(&statusTimer, SIGNAL(timeout()), this, SLOT(statusUpdate()));
-	statusTimer.setInterval(100);
 	ourexposure = false;
-	previousstate = snowstar::IDLE;
 	_guiderccdonly = false;
 	_nosubframe = false;
 	_nobuttons = false;
@@ -83,6 +81,13 @@ ccdcontrollerwidget::ccdcontrollerwidget(QWidget *parent) :
 	ui->ccdInfo->setEnabled(false);
 	ui->frameWidget->setEnabled(false);
 	ui->buttonArea->setEnabled(false);
+
+	// start the state monitoring thread
+	_statemonitoringthread = new StateMonitoringThread(this);
+	connect(_statemonitoringthread,
+		SIGNAL(stateChanged(snowstar::ExposureState)),
+		this, SLOT(statusUpdate(snowstar::ExposureState)));
+	_statemonitoringthread->start();
 }
 
 /**
@@ -95,7 +100,8 @@ ccdcontrollerwidget::ccdcontrollerwidget(QWidget *parent) :
 void	ccdcontrollerwidget::instrumentSetup(
 		astro::discover::ServiceObject serviceobject,
 		snowstar::RemoteInstrument instrument) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "begin ccdcontrollerwidget::instrumentSetup()");
+	debug(LOG_DEBUG, DEBUG_LOG, 0,
+		"begin ccdcontrollerwidget::instrumentSetup()");
 	ui->ccdSelectionBox->blockSignals(true);
 
 	// parent setup
@@ -241,7 +247,7 @@ void	ccdcontrollerwidget::instrumentSetup(
  * \brief Destroy the CCD controller
  */
 ccdcontrollerwidget::~ccdcontrollerwidget() {
-	statusTimer.stop();
+	delete _statemonitoringthread;
 	delete ui;
 }
 
@@ -251,7 +257,6 @@ ccdcontrollerwidget::~ccdcontrollerwidget() {
 void	ccdcontrollerwidget::setupCcd() {
 	// we set the previous state to idle, but if that is not correct, then
 	// then the first status update will fix it.
-	previousstate = snowstar::IDLE;
 	ui->captureButton->setEnabled(true);
 	ui->cancelButton->setEnabled(false);
 	ui->streamButton->setEnabled(true);
@@ -300,11 +305,9 @@ void	ccdcontrollerwidget::setupCcd() {
 		if (dec > 0) { dec = 0; } else { dec = -dec; }
 		ui->exposureSpinBox->setDecimals(dec);
 
-		// start the timer
-		statusTimer.start();
+		// query the status
+		statusUpdate(_ccd->exposureStatus());
 	}
-
-	// emit the 
 
 	// now reenable signals
 	ui->binningSelectionBox->blockSignals(false);
@@ -597,7 +600,6 @@ void	ccdcontrollerwidget::setImage(ImagePtr image) {
 void	ccdcontrollerwidget::ccdChanged(int index) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "CCD changed: %d from %d", index,
 		_ccddata.size());
-	statusTimer.stop();
 	try {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "checking index = %d", index);
 		_current_ccddata = _ccddata[index];
@@ -625,7 +627,8 @@ void	ccdcontrollerwidget::ccdChanged(int index) {
 			throw std::runtime_error("internal error: bad type");
 		}
 	} catch (const std::exception& x) {
-		debug(LOG_ERR, DEBUG_LOG, 0, "cannot get ccd: %s", x.what());
+		debug(LOG_ERR, DEBUG_LOG, 0, "cannot get ccd[%d]: %s",
+			index, x.what());
 		ccdFailed(x);
 		return;
 	}
@@ -635,6 +638,7 @@ void	ccdcontrollerwidget::ccdChanged(int index) {
 	emit ccdSelected(index);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "emitting ccddataSelected(%d)", index);
 	emit ccddataSelected(_current_ccddata);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "get the current state");
 }
 
 /**
@@ -650,6 +654,8 @@ void	ccdcontrollerwidget::captureClicked() {
 		try {
 			_ccd->startExposure(snowstar::convert(_exposure));
 		} catch (const std::exception& x) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0,
+				"cannot start exposure: %s", x.what());
 			ccdFailed(x);
 			return;
 		}
@@ -677,6 +683,7 @@ void	ccdcontrollerwidget::cancelClicked() {
 	} catch (const snowstar::BadState& x) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "bad state: %s", x.what());
 	} catch (const std::exception& x) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "cannot cancel: %s", x.what());
 		ccdFailed(x);
 		return;
 	}
@@ -689,8 +696,11 @@ void	ccdcontrollerwidget::streamClicked() {
 	try {
 		_ccd->startStream(snowstar::convert(_exposure));
 	} catch (const snowstar::BadState& x) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "bad state: %s", x.what());
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "bad state for stream: %s",
+			x.what());
 	} catch (const std::exception& x) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "cannot start stream: %s",
+			x.what());
 		ccdFailed(x);
 		return;
 	}
@@ -797,18 +807,9 @@ void	ccdcontrollerwidget::retrieveImageFailed(QString x) {
  *
  * This slot is called by the 
  */
-void	ccdcontrollerwidget::statusUpdate() {
+void	ccdcontrollerwidget::statusUpdate(snowstar::ExposureState newstate) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "state update: %d", newstate);
 	if (!_ccd) {
-		return;
-	}
-	snowstar::ExposureState	newstate;
-	try {
-		newstate = _ccd->exposureStatus();
-	} catch (const std::exception& x) {
-		ccdFailed(x);
-		return;
-	}
-	if (newstate == previousstate) {
 		return;
 	}
 	switch (newstate) {
@@ -847,7 +848,6 @@ void	ccdcontrollerwidget::statusUpdate() {
 		ui->streamButton->setText(QString("Stop"));
 		break;
 	}
-	previousstate = newstate;
 }
 
 void	ccdcontrollerwidget::hideSubframe(bool sf) {
@@ -874,6 +874,7 @@ void	ccdcontrollerwidget::ccdFailed(const std::exception& x) {
 	out << "The reason for the failure was: " << x.what() << std::endl;
 	out << "The CCD has been disabled and can no longer be used.";
 	message.setInformativeText(QString(out.str().c_str()));
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "ccdFailed: %s", out.str().c_str());
 	message.exec();
 }
 

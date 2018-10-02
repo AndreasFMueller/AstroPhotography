@@ -116,6 +116,7 @@ SOURCES += 								\
 	ImageRetrieverThread.cpp					\
 	InstrumentWidget.cpp						\
 	MonitorImage.cpp						\
+	StateMonitoringThread.cpp					\
 	TrackingMonitorImage.cpp					\
 	TrackingMonitorController.cpp					\
 	$${WIDGETSOURCES}

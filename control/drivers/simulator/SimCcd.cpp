@@ -372,6 +372,7 @@ void    SimCcd::setShuterState(const Shutter::state& state) {
 ImagePtr  SimCcd::getRawImage() {
 	// wait for the thread 
 	_thread->join();
+	delete _thread;
 
 	// let the client wait another second
 	usleep(3000000);
