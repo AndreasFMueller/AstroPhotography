@@ -9,34 +9,39 @@
 
 namespace snowgui {
 
+/**
+ * \brief Create a State monitoring thread
+ */
 StateMonitoringThread::StateMonitoringThread(ccdcontrollerwidget *c)
 	: QThread(NULL), _ccdcontrollerwidget(c) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "thread created");
 	_running = true;
 }
 
+/**
+ * \brief stop a state monitoring thread
+ */
 StateMonitoringThread::~StateMonitoringThread() {
 	_running = false;
+	// can we speed up this process by sending this thread a signal?
 	wait();
 }
 
+/**
+ * \brief Main method doing the state monitoring
+ */
 void	StateMonitoringThread::run() {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "thread started");
 	snowstar::ExposureState	previousstate = snowstar::IDLE;
 	while (_running) {
 		if (_ccdcontrollerwidget->_ccd) {
 			snowstar::ExposureState	newstate
 				= _ccdcontrollerwidget->_ccd->exposureStatus();
-			debug(LOG_DEBUG, DEBUG_LOG, 0, "state: %d", newstate);
 			if (newstate != previousstate) {
-				debug(LOG_DEBUG, DEBUG_LOG, 0, "state change");
 				emit stateChanged(newstate);
 			}
 			previousstate = newstate;
 		}
 		usleep(100000);
 	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "thread terminated");
 }
 
 } // namespace snowgui

@@ -645,6 +645,20 @@ void	ccdcontrollerwidget::ccdChanged(int index) {
  * \brief Slot to handle click on the "Capture" button
  */
 void	ccdcontrollerwidget::captureClicked() {
+	// first find out what state the ccd is in
+	try {
+		if (_ccd->exposureStatus() == snowstar::EXPOSED) {
+			// make it our exposure
+			ourexposure = true;
+			retrieveImageStart();
+			return;
+		}
+	} catch (const std::exception& x) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "cannot get exposure status: %s",
+			x.what());
+	}
+
+	// now try to start a new exposure
 	try {
 		debug(LOG_DEBUG, DEBUG_LOG, 0,
 			"start exposure with time=%.3f, shutter = %s",
@@ -818,12 +832,14 @@ void	ccdcontrollerwidget::statusUpdate(snowstar::ExposureState newstate) {
 			delete _hideprogress;
 			_hideprogress = NULL;
 		}
+		ui->captureButton->setText(QString("Capture"));
 		ui->captureButton->setEnabled(true);
 		ui->cancelButton->setEnabled(false);
 		ui->streamButton->setEnabled(true);
 		ui->streamButton->setText(QString("Stream"));
 		break;
 	case snowstar::EXPOSING:
+		ui->captureButton->setText(QString("Capture"));
 		ui->captureButton->setEnabled(false);
 		ui->cancelButton->setEnabled(true);
 		ui->streamButton->setEnabled(false);
@@ -831,17 +847,24 @@ void	ccdcontrollerwidget::statusUpdate(snowstar::ExposureState newstate) {
 	case snowstar::EXPOSED:
 		// if we get to this point, then an exposure just completed,
 		// and we we should retrieve the image
-		retrieveImageStart();
-		ui->captureButton->setEnabled(false);
+		if (ourexposure) {
+			retrieveImageStart();
+			ui->captureButton->setEnabled(false);
+		} else {
+			ui->captureButton->setText(QString("Get Image"));
+			ui->captureButton->setEnabled(true);
+		}
 		ui->cancelButton->setEnabled(false);
 		ui->streamButton->setEnabled(false);
 		break;
 	case snowstar::CANCELLING:
+		ui->captureButton->setText(QString("Capture"));
 		ui->captureButton->setEnabled(false);
 		ui->cancelButton->setEnabled(false);
 		ui->streamButton->setEnabled(false);
 		break;
 	case snowstar::STREAMING:
+		ui->captureButton->setText(QString("Capture"));
 		ui->captureButton->setEnabled(false);
 		ui->cancelButton->setEnabled(false);
 		ui->streamButton->setEnabled(true);

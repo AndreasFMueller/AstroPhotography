@@ -12,6 +12,9 @@ namespace snowgui {
 
 /**
  * \brief Construct a progressbar
+ *
+ * \param duration	duration of the exposure
+ * \param parent	parent widget
  */
 HideProgress::HideProgress(float duration, QWidget *parent)
 	: QWidget(parent), _duration(duration) {
@@ -49,6 +52,8 @@ HideProgress::~HideProgress() {
 
 /**
  * \brief Handle a resize event, the new size must be propagated
+ *
+ * \param event		resize event
  */
 void	HideProgress::resizeEvent(QResizeEvent *event) {
 	_progressbar->setGeometry(0, 0, event->size().width(), 10);
@@ -58,7 +63,8 @@ void	HideProgress::resizeEvent(QResizeEvent *event) {
  * \brief Timer Update 
  */
 void	HideProgress::update() {
-	int	p = trunc(100 * (_start.gettime() - _start.startTime()) / _duration);
+	double	timepast = _start.gettime() - _start.startTime();
+	int	p = trunc(100 * timepast / _duration);
 	if (p > 100) {
 		p = 100;
 	}

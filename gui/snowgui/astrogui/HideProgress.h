@@ -13,6 +13,12 @@
 
 namespace snowgui {
 
+/**
+ * \brief Progress indicator that overlays an existing widget
+ *
+ * This class is used in the ccdcontrollerwidget to display how the 
+ * exposure time passes.
+ */
 class HideProgress : public QWidget {
 	Q_OBJECT
 	float	_duration;
@@ -20,7 +26,7 @@ class HideProgress : public QWidget {
 	QTimer	*_timer;
 	QProgressBar	*_progressbar;
 public:
-	HideProgress(float duration, QWidget *parent = NULL);
+	explicit HideProgress(float duration, QWidget *parent = NULL);
 	virtual ~HideProgress();
 protected:
 	void	resizeEvent(QResizeEvent *event);
