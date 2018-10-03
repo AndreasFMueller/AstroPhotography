@@ -30,12 +30,24 @@ static bool	visible(const astro::AzmAlt& a) {
  */
 SkyDisplayWidget::SkyDisplayWidget(QWidget *parent) : QWidget(parent) {
 	// get all the stars from the BSC catalog
+#if 0
 	CatalogPtr catalog = CatalogFactory::get();
 	SkyWindow	windowall;
 	MagnitudeRange	magrange(-30, 6);
 	_stars = catalog->find(windowall, magrange);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "found %d stars", _stars->size());
+#else
+	SkyStarThread	*_skystarthread = new SkyStarThread(this);
+	connect(_skystarthread,
+		SIGNAL(stars(astro::catalog::Catalog::starsetptr)),
+		this,
+		SLOT(useStars(astro::catalog::Catalog::starsetptr)));
+	connect(_skystarthread, SIGNAL(finished()),
+		_skystarthread, SLOT(deleteLater()));
+	_skystarthread->start();
+#endif
 	_converter = NULL;
+
 
 	// for the time being, wie fake the logitude an latitude
 	_position.longitude().degrees(8.83);
@@ -348,9 +360,11 @@ void	SkyDisplayWidget::draw() {
 	}
 
 	// draw the stars
-	Catalog::starset::const_iterator	i;
-	for (i = _stars->begin(); i != _stars->end(); i++) {
-		drawStar(painter, *i);
+	if (_stars) {
+		Catalog::starset::const_iterator	i;
+		for (i = _stars->begin(); i != _stars->end(); i++) {
+			drawStar(painter, *i);
+		}
 	}
 
 	// draw the telescope marker
@@ -516,6 +530,14 @@ void	SkyDisplayWidget::closeEvent(QCloseEvent * /* event */) {
  * \brief Slot to trigger a redrawing
  */
 void	SkyDisplayWidget::update() {
+	repaint();
+}
+
+/**
+ * \brief slot to give stars to the display widget
+ */
+void	SkyDisplayWidget::useStars(Catalog::starsetptr stars) {
+	_stars = stars;
 	repaint();
 }
 

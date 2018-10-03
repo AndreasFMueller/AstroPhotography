@@ -13,8 +13,24 @@
 #include <AstroUtils.h>
 #include <AstroCatalog.h>
 #include <AstroCoordinates.h>
+#include <QThread>
 
 namespace snowgui {
+
+class SkyDisplayWidget;
+/**
+ * \brief Thread to retrieve set of stars
+ */
+class SkyStarThread : public QThread {
+	Q_OBJECT
+	SkyDisplayWidget	*_skydisplaywidget;
+public:
+	explicit SkyStarThread(QObject *parent = NULL);
+	virtual ~SkyStarThread();
+	void	run();
+signals:
+	void	stars(astro::catalog::Catalog::starsetptr);
+};
 
 /**
  * \brief Widget to display the sky with stars and telescope marker
@@ -103,6 +119,7 @@ public slots:
 	void	telescopeChanged(astro::RaDec);
 	void	positionChanged(astro::LongLat);
 	void	update();
+	void	useStars(astro::catalog::Catalog::starsetptr);
 
 signals:
 	void	pointSelected(astro::RaDec);
