@@ -63,8 +63,8 @@ RaDec	RaDec::operator-(const RaDec& other) const {
 }
 
 Ecliptic	RaDec::ecliptic() const {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "converting %s to Ecliptic",
-		toString().c_str());
+//	debug(LOG_DEBUG, DEBUG_LOG, 0, "converting %s to Ecliptic",
+//		toString().c_str());
 	double	sinbeta = sin(dec()) * cos(Angle::ecliptic_angle)
 		- cos(dec()) * sin(Angle::ecliptic_angle) * sin(ra());
 	Angle	beta = arcsin(sinbeta);
@@ -74,6 +74,12 @@ Ecliptic	RaDec::ecliptic() const {
 		/ (cos(beta) * sin(Angle::ecliptic_angle));
 	Angle	lambda = arctan2(sinlambda, coslambda);
 	return Ecliptic(lambda, beta);
+}
+
+void	RaDec::precess(const Precession& precession) {
+	RaDec	precessed = precession(*this);
+	ra() = precessed.ra();
+	dec() = precessed.dec();
 }
 
 } // namespace astro

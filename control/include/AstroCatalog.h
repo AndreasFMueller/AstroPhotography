@@ -218,6 +218,9 @@ public:
 	CatalogIterator	end();
 };
 
+Catalog::starsetptr	precess(const Precession& precession,
+				Catalog::starsetptr stars);
+
 /**
  * \brief Factory class to retrieve a Catalog
  */

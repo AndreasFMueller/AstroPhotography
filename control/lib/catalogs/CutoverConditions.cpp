@@ -74,25 +74,25 @@ BSCCondition::BSCCondition()
 //////////////////////////////////////////////////////////////////////
 // HipparcosCondition implementation
 //////////////////////////////////////////////////////////////////////
-const float	HipparcosCondition::complete_mag = 10.;
+const float	HipparcosCondition::complete_mag = 7.;
 
 HipparcosCondition::HipparcosCondition(const float limit_mag,
 	const float bsc_mag)
-	: CutoverCondition('\0', bsc_mag, limit_mag) {
+	: CutoverCondition('B', bsc_mag, limit_mag) {
 }
 
 HipparcosCondition::HipparcosCondition(const float limit_mag)
-	: CutoverCondition('\0', -30, limit_mag) {
+	: CutoverCondition('B', BSCCondition::complete_mag, limit_mag) {
 }
 
 HipparcosCondition::HipparcosCondition()
-	: CutoverCondition('\0', -30, complete_mag) {
+	: CutoverCondition('B', BSCCondition::complete_mag, complete_mag) {
 }
 
 //////////////////////////////////////////////////////////////////////
 // Tycho2Condition implementation
 //////////////////////////////////////////////////////////////////////
-const float	Tycho2Condition::complete_mag = 11;
+const float	Tycho2Condition::complete_mag = 10;
 
 Tycho2Condition::Tycho2Condition(float limit_mag, float hipparcos_mag)
 	: CutoverCondition('H', hipparcos_mag, limit_mag) {

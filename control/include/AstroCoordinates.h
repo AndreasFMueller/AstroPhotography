@@ -118,6 +118,7 @@ Angle	operator-(const SphericalCoordinates& s1, const SphericalCoordinates& s2);
 
 class Vector;
 class Ecliptic;
+class Precession;
 /**
  * \brief Class for right ascension and declination
  *
@@ -147,6 +148,7 @@ public:
 static const RaDec	north_pole;
 static const RaDec	south_pole;
 	Ecliptic	ecliptic() const;
+	void	precess(const Precession& precession);
 };
 
 /**
@@ -164,6 +166,7 @@ public:
 	const Angle&	beta() const { return a2(); }
 	Angle&	beta() { return a2(); }
 	RaDec	radec() const;
+	void	precess(const Precession& precession);
 	virtual std::string	toString() const;
 };
 

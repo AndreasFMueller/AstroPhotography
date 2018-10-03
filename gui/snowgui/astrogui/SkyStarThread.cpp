@@ -6,6 +6,7 @@
 #include <SkyDisplayWidget.cpp>
 #include <AstroDebug.h>
 #include <QThread>
+#include <AstroCoordinates.h>
 
 using namespace astro::catalog;
 
@@ -35,6 +36,8 @@ void	SkyStarThread::run() {
 	SkyWindow	windowall;
 	MagnitudeRange  magrange(-30, 6);
 	Catalog::starsetptr	_stars = catalog->find(windowall, magrange);
+	astro::Precession	precession;
+	_stars = precess(precession, _stars);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "star retrieval complete");
 	emit stars(_stars);
 }

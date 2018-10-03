@@ -39,6 +39,7 @@ libastrocatalogs_la_SOURCES =						\
 	CatalogBackend.cpp						\
 	CatalogFactory.cpp						\
 	CatalogIterator.cpp						\
+	CelestialObject.cpp						\
 	Chart.cpp							\
 	ChartFactory.cpp						\
 	ChartFactoryBase.cpp						\
@@ -47,6 +48,7 @@ libastrocatalogs_la_SOURCES =						\
 	DatabaseBackend.cpp						\
 	DatabaseBackendCreator.cpp					\
 	DatabaseBackendIterator.cpp					\
+	DeepSkyObject.cpp						\
 	EndIterator.cpp							\
 	FileBackend.cpp							\
 	FileBackendIterator.cpp						\
@@ -55,6 +57,7 @@ libastrocatalogs_la_SOURCES =						\
 	ImageGeometry.cpp						\
 	ImageNormalizer.cpp						\
 	IteratorImplementation.cpp					\
+	MagnitudeRange.cpp						\
 	MappedFile.cpp							\
 	NGCIC.cpp							\
 	PointSpreadFunctionAdapter.cpp					\

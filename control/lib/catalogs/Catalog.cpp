@@ -14,43 +14,6 @@
 namespace astro {
 namespace catalog {
 
-//////////////////////////////////////////////////////////////////////
-// Celestial Object implementation
-//////////////////////////////////////////////////////////////////////
-/**
- * \brief Compute proper motion corrected position of an object
- */
-RaDec	CelestialObject::position(const double epoch) const {
-	RaDec	result;
-	result.ra() = ra() + pm().ra() * epoch;
-	result.dec() = dec() + pm().dec() * epoch;
-	return result;
-}
-
-//////////////////////////////////////////////////////////////////////
-// DeepSkyObject implementation
-//////////////////////////////////////////////////////////////////////
-/**
- * \brief string representation of a DeepSkyObject
- */
-std::string	DeepSkyObject::toString() const {
-	return stringprintf("%s: %s %s %.2f (%s)", name.c_str(),
-			ra().hms().c_str(), dec().dms().c_str(), mag(),
-			constellation.c_str());
-}
-
-//////////////////////////////////////////////////////////////////////
-// MagnitudeRange implementation
-//////////////////////////////////////////////////////////////////////
-std::string	MagnitudeRange::toString() const {
-	return stringprintf("[%.2f, %.2f]", brightest(), faintest());
-}
-
-
-//////////////////////////////////////////////////////////////////////
-// Catalog implementation
-//////////////////////////////////////////////////////////////////////
-
 /**
  * \brief Destructor
  */
@@ -90,6 +53,23 @@ CatalogIterator	Catalog::begin() {
 				typeid(*this).name());
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "%s", msg.c_str());
 	throw std::logic_error(msg);
+}
+
+/**
+ * \brief function to perform precession on a starsetptr
+ */
+Catalog::starsetptr	precess(const Precession& precession,
+				Catalog::starsetptr stars) {
+	Catalog::starset	*precessedstars = new Catalog::starset();
+	Catalog::starsetptr	result(precessedstars);
+	
+	Catalog::starset::const_iterator	i;
+	for (i = stars->begin(); i != stars->end(); i++) {
+		Star	s = *i;
+		s.precess(precession);
+		precessedstars->insert(s);
+	}
+	return result;
 }
 
 } // namespace catalog

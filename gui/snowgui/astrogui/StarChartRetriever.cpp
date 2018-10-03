@@ -26,6 +26,8 @@ void	StarChartRetriever::run() {
         MagnitudeRange  magrange(-30, limit_magnitude());
         astro::catalog::Catalog::starsetptr	stars
 		= catalog->find(window(), magrange);
+	astro::Precession	precession;
+	stars = precess(precession, stars);
         debug(LOG_DEBUG, DEBUG_LOG, 0, "%d stars found", stars->size());
 	emit starsReady(stars);
 }

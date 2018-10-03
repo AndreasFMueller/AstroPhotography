@@ -101,13 +101,16 @@ static std::string	hipparcos_filename(const std::string filename) {
  *			hip_main.dat
  */
 Hipparcos::Hipparcos(const std::string& filename)
-	: MappedFile(hipparcos_filename(filename), 451) {
+	: MappedFile(hipparcos_filename(filename), 451),
+	  precession(2000.0 - 1991.25) {
 	backendname = stringprintf("Hipparcos(%s)", filename.c_str());
 	int	skipped = 0;
 	for (size_t recno = 0; recno < nrecords(); recno++) {
 		std::string	record = get(recno);
 		try {
 			HipparcosStar	star(record);
+			// XXX do we really need to precess stars?
+			//star.precess(precession);
 			stars.insert(std::make_pair(star.hip, star));
 		} catch (...) {
 			skipped++;

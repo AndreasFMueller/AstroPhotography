@@ -34,6 +34,7 @@ public:
  * \brief Hipparcos Star catalog
  */
 class Hipparcos : public MappedFile, public Catalog {
+	Precession	precession;
 public:
 	typedef std::map<unsigned int, HipparcosStar>	starmap_t;
 private:
