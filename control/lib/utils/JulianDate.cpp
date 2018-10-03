@@ -88,4 +88,11 @@ Angle	JulianDate::GMST() const {
 	return result;
 }
 
+/**
+ * \brief Get the number of julian centuries
+ */
+double	JulianDate::years() const {
+	return (_T - 2451545.0) / 36525;
+}
+
 } // namespace astro

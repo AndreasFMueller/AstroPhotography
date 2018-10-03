@@ -53,6 +53,8 @@ static Angle	dms_to_angle(const std::string& dms);
 	bool	operator==(const Angle& other) const;
 	bool	operator!=(const Angle& other) const;
 static const Angle right_angle;
+static const Angle ecliptic_angle;
+static Angle	ecliptic(double T);
 };
 
 Angle	operator*(double l, const Angle& a);
@@ -115,6 +117,7 @@ public:
 Angle	operator-(const SphericalCoordinates& s1, const SphericalCoordinates& s2);
 
 class Vector;
+class Ecliptic;
 /**
  * \brief Class for right ascension and declination
  *
@@ -126,8 +129,10 @@ public:
 	RaDec(const TwoAngles& ta) : TwoAngles(ta) { }
 	RaDec(const Angle& ra, const Angle& dec) : TwoAngles(ra, dec) { }
 	RaDec(const SphericalCoordinates& spherical)
-		: TwoAngles(spherical.phi(), Angle(M_PI / 2) - spherical.theta()) { }
+		: TwoAngles(spherical.phi(),
+			Angle(M_PI / 2) - spherical.theta()) { }
 	RaDec(const Vector& vector);
+	RaDec(const Ecliptic& ecliptic);
 	const Angle&	ra() const { return a1(); }
 	Angle&	ra() { return a1(); }
 	const Angle&	dec() const { return a2(); }
@@ -141,6 +146,39 @@ public:
 	virtual std::string	toString() const;
 static const RaDec	north_pole;
 static const RaDec	south_pole;
+	Ecliptic	ecliptic() const;
+};
+
+/**
+ * \brief Ecliptic coordinates
+ */
+class Ecliptic : public TwoAngles {
+public:
+	Ecliptic() { }
+	Ecliptic(const TwoAngles& ta) : TwoAngles(ta) { }
+	Ecliptic(const Angle& lambda, const Angle& beta)
+		: TwoAngles(lambda, beta) { }
+	Ecliptic(const RaDec& radec);
+	const Angle&	lambda() const { return a1(); }
+	Angle&	lambda() { return a1(); }
+	const Angle&	beta() const { return a2(); }
+	Angle&	beta() { return a2(); }
+	RaDec	radec() const;
+	virtual std::string	toString() const;
+};
+
+/**
+ * \brief Precession operator
+ */
+class Precession {
+	Angle	precessionangle;
+	void	setup(time_t when);
+public:
+	Precession();
+	Precession(time_t when);
+	Precession(double years);
+	Ecliptic	operator()(const Ecliptic& ecliptic) const;
+	RaDec	operator()(const RaDec& radec) const;
 };
 
 //class	UnitVector;
@@ -274,6 +312,7 @@ public:
 	JulianDate(time_t when);
 	virtual ~JulianDate() { }
 	double	T() const { return _T; }
+	double	years() const;
 	Angle	GMST() const;
 };
 

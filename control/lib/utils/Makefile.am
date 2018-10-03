@@ -18,6 +18,7 @@ libastroutils_la_SOURCES = 						\
 	Concatenator.cpp						\
 	debug.cpp							\
 	demangle.cpp							\
+	Ecliptic.cpp							\
 	Exceptions.cpp							\
 	Format.cpp							\
 	ImageCoordinates.cpp						\
@@ -25,6 +26,7 @@ libastroutils_la_SOURCES = 						\
 	Path.cpp							\
 	Pidfile.cpp							\
 	Point.cpp							\
+	Precession.cpp							\
 	RaDec.cpp							\
 	Rectangle.cpp							\
 	Rotation.cpp							\

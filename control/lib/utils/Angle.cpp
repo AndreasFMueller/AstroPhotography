@@ -253,4 +253,13 @@ Angle	Angle::dms_to_angle(const std::string& dms) {
 
 const Angle Angle::right_angle(M_PI/2);
 
+const Angle Angle::ecliptic_angle(23.43 * M_PI / 180);
+
+Angle	Angle::ecliptic(double T) {
+	// JPL formular (see https://en.wikipedia.org/wiki/Ecliptic)
+	double	a = 23.4392794 + (-0.0130102136
+			+ (-0.00000005086 + 0.000000556 * T) * T) * T;
+	return Angle(a * M_PI / 180);
+}
+
 } // namespace astro
