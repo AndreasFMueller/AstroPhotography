@@ -35,6 +35,8 @@ listcatalog_LDADD = $(catalogs_ldadd)
 
 libastrocatalogs_la_SOURCES =						\
 	BSC.cpp								\
+	BSCStar.cpp							\
+	BSCIterator.cpp							\
 	Catalog.cpp							\
 	CatalogBackend.cpp						\
 	CatalogFactory.cpp						\
