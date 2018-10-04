@@ -56,6 +56,8 @@ libastrocatalogs_la_SOURCES =						\
 	FileBackendIterator.cpp						\
 	FileBackendWindowIterator.cpp					\
 	Hipparcos.cpp							\
+	HipparcosStar.cpp						\
+	HipparcosIterator.cpp						\
 	ImageGeometry.cpp						\
 	ImageNormalizer.cpp						\
 	IteratorImplementation.cpp					\
@@ -69,6 +71,8 @@ libastrocatalogs_la_SOURCES =						\
 	Star.cpp							\
 	StereographicChart.cpp						\
 	Tycho2.cpp							\
+	Tycho2Star.cpp							\
+	Tycho2Iterator.cpp						\
 	Ucac4Iterator.cpp						\
 	Ucac4Star.cpp							\
 	Ucac4StarNumber.cpp						\

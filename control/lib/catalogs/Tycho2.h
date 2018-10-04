@@ -11,6 +11,8 @@
 #include "MappedFile.h"
 #include "CatalogIterator.h"
 
+#define TYCHO2_RECORD_LENGTH	207
+
 namespace astro {
 namespace catalog {
 

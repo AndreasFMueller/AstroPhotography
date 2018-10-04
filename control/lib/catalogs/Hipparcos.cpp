@@ -11,58 +11,6 @@
 namespace astro {
 namespace catalog {
 
-//////////////////////////////////////////////////////////////////////
-// Hipparcos star implementation
-//////////////////////////////////////////////////////////////////////
-
-/**
- * \brief Construct a Hipparcos star from a line in the Hipparcos catalog
- *
- * \param line	The line is a 451 character long record containing the star
- *		information in text form
- */
-HipparcosStar::HipparcosStar(const std::string& line)
-	: Star(stringprintf("HIP%06u", std::stoi(std::string(line, 8, 6)))) {
-	hip = std::stoi(std::string(line, 8, 6));
-	catalog('H');
-	catalognumber(hip);
-	ra().hours(std::stoi(line.substr(17, 2))
-		+ std::stoi(line.substr(20, 2)) / 60.
-		+ std::stod(line.substr(23, 5)) / 3600.);
-	dec().degrees(
-		((line[29] == '-') ? (-1) : 1) *
-		(std::stoi(line.substr(30, 2))
-		 + std::stoi(line.substr(33, 2)) / 60.
-		 + std::stod(line.substr(36, 4)) / 3600.));
-	pm().ra().degrees(std::stod(line.substr(87, 8)) / 3600000.);
-	pm().dec().degrees((std::stod(line.substr(96, 8)) / 3600000.)
-		/ cos(dec()));
-	mag(std::stod(line.substr(41, 5)));
-}
-
-std::string	HipparcosStar::toString() const {
-	return stringprintf("HIP%u ", hip) + Star::toString();
-}
-
-bool	HipparcosStar::operator<(const HipparcosStar& other) const {
-	return hip < other.hip;
-}
-
-bool	HipparcosStar::operator>(const HipparcosStar& other) const {
-	return hip > other.hip;
-}
-
-bool	HipparcosStar::operator<=(const HipparcosStar& other) const {
-	return hip <= other.hip;
-}
-
-bool	HipparcosStar::operator>=(const HipparcosStar& other) const {
-	return hip >= other.hip;
-}
-
-//////////////////////////////////////////////////////////////////////
-// Hipparcos catalog implementation
-//////////////////////////////////////////////////////////////////////
 static std::string	hipparcos_filename(const std::string filename) {
 	// first find out whether filename is actually a directory name
 	struct stat	sb;
@@ -174,38 +122,6 @@ unsigned long	Hipparcos::numberOfStars() {
 CatalogIterator	Hipparcos::begin() {
 	IteratorImplementationPtr impl(new HipparcosIterator(stars));
 	return CatalogIterator(impl);
-}
-
-//////////////////////////////////////////////////////////////////////
-// Hipparcos Iterator implementation
-//////////////////////////////////////////////////////////////////////
-HipparcosIterator::HipparcosIterator(Hipparcos::starmap_t& stars)
-	: IteratorImplementation(true), _stars(stars) {
-	_i = _stars.begin();
-}
-
-Star	HipparcosIterator::operator*() {
-	return _i->second;
-}
-
-bool	HipparcosIterator::operator==(const HipparcosIterator& other) const {
-	return (_i == other._i);
-}
-
-bool	HipparcosIterator::operator==(const IteratorImplementation& other) const {
-	return equal_implementation(this, other);
-}
-
-void	HipparcosIterator::increment() {
-	if (isEnd()) {
-		return;
-	}
-	++_i;
-	_isEnd = (_i == _stars.end());
-}
-
-std::string	HipparcosIterator::toString() const {
-	return stringprintf("%d", _i->first);
 }
 
 } // namespace catalog
