@@ -19,7 +19,7 @@ noinst_PROGRAMS = tests singletest
 
 # single test
 singletest_SOURCES = singletest.cpp \
-	VectorFieldTest.cpp					
+	BlurrTest.cpp					
 #	DebayerTest.cpp
 #	FWHMTest.cpp
 #	EuclideanDisplacementTest.cpp
