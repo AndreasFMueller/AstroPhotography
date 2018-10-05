@@ -124,6 +124,10 @@ void	SkyDisplayDialog::targetChanged(int state) {
 }
 
 void	SkyDisplayDialog::targetChanged(astro::RaDec target) {
+	ui->targetCheckBox->blockSignals(true);
+	ui->targetCheckBox->setCheckState(Qt::Checked);
+	ui->targetCheckBox->blockSignals(false);
+	ui->skydisplayWidget->show_target(true);
 	ui->skydisplayWidget->targetChanged(target);
 }
 
