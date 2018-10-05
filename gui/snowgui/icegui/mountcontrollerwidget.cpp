@@ -249,8 +249,13 @@ void	mountcontrollerwidget::mountChanged(int index) {
  * \brief get the RA and DEC from the mount
  */
 astro::RaDec	mountcontrollerwidget::current() {
-	snowstar::RaDec	radec = _mount->getRaDec();
-	return convert(radec);
+	if (_mount) {
+		snowstar::RaDec	radec = _mount->getRaDec();
+		return convert(radec);
+	} else {
+		throw std::runtime_error("cannot get current position without "
+			"a mount");
+	}
 }
 
 /**
