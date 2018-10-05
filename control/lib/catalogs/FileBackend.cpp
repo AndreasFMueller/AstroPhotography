@@ -63,7 +63,7 @@ Catalog::starsetptr	FileBackend::find(const SkyWindow& window,
 
 	// get the brightest stars from the BSC catalog (because the
 	// brightest stars are not in the Hipparcos catalog)
-	if (magrange.brightest() < BSC_cutover_magnitude) {
+	if (magrange.brightest() <= BSC_cutover_magnitude) {
 		// construct magnitude range to retrieve from BSC
 		MagnitudeRange	bsc_range(-30,
 			(magrange.faintest() > BSC_cutover_magnitude) ?
@@ -80,7 +80,7 @@ Catalog::starsetptr	FileBackend::find(const SkyWindow& window,
 	}
 
 	// if any there are stars requested from the Hipparcos catalog, get them
-	if (magrange.brightest() < Hipparcos_cutover_magnitude) {
+	if (magrange.brightest() <= Hipparcos_cutover_magnitude) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "adding stars from Hipparcos");
 		// get brightest stars from Hipparcos catalog
 		starsetptr	stars
@@ -105,7 +105,7 @@ Catalog::starsetptr	FileBackend::find(const SkyWindow& window,
 
 	// get the intermediate stars from the Tycho2 catalog, but skip the
 	// stars already retrieved from the Hipparcos catalog
-	if (magrange.brightest() < Tycho2_cutover_magnitude) {
+	if (magrange.brightest() <= Tycho2_cutover_magnitude) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "adding stars from Tycho2");
 		starsetptr	stars
 			= tycho2_catalog->find(window, magrange);
