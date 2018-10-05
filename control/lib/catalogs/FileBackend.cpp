@@ -15,6 +15,10 @@
 namespace astro {
 namespace catalog {
 
+const float	BSC_cutover_magnitude = 4.5;
+const float	Hipparcos_cutover_magnitude = 7;
+const float	Tycho2_cutover_magnitude = 10;
+
 /**
  * \brief Create a file based catalog backend
  *
@@ -59,9 +63,13 @@ Catalog::starsetptr	FileBackend::find(const SkyWindow& window,
 
 	// get the brightest stars from the BSC catalog (because the
 	// brightest stars are not in the Hipparcos catalog)
-	{
+	if (magrange.brightest() < BSC_cutover_magnitude) {
+		// construct magnitude range to retrieve from BSC
+		MagnitudeRange	bsc_range(-30,
+			(magrange.faintest() > BSC_cutover_magnitude) ?
+				BSC_cutover_magnitude : magrange.faintest());
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "adding stars from BSC");
-		starsetptr	stars = bsc_catalog->find(window, magrange);
+		starsetptr	stars = bsc_catalog->find(window, bsc_range);
 		starset::const_iterator	s;
 		for (s = stars->begin(); s != stars->end(); s++) {
 			Star	star = *s;
@@ -71,11 +79,8 @@ Catalog::starsetptr	FileBackend::find(const SkyWindow& window,
 			"now %d stars", stars->size(), result->size());
 	}
 
-#define	Hipparcos_Complete_Magnitude	7.
-#define	Tycho2_Complete_Magnitude	10.
-
 	// if any there are stars requested from the Hipparcos catalog, get them
-	{
+	if (magrange.brightest() < Hipparcos_cutover_magnitude) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "adding stars from Hipparcos");
 		// get brightest stars from Hipparcos catalog
 		starsetptr	stars
@@ -92,7 +97,7 @@ Catalog::starsetptr	FileBackend::find(const SkyWindow& window,
 	// if the faintest magnitude is brighter than the magnitude to
 	// which the Hipparcos catalog is complete, then we can skip 
 	// Tacho-2 and UCAC4
-	if (magrange.faintest() < Hipparcos_Complete_Magnitude) {
+	if (magrange.faintest() < Hipparcos_cutover_magnitude) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "faintest magnitude complete "
 			"in Hipparcos catalog");
 		return resultptr;
@@ -100,7 +105,7 @@ Catalog::starsetptr	FileBackend::find(const SkyWindow& window,
 
 	// get the intermediate stars from the Tycho2 catalog, but skip the
 	// stars already retrieved from the Hipparcos catalog
-	{
+	if (magrange.brightest() < Tycho2_cutover_magnitude) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "adding stars from Tycho2");
 		starsetptr	stars
 			= tycho2_catalog->find(window, magrange);
@@ -120,7 +125,7 @@ Catalog::starsetptr	FileBackend::find(const SkyWindow& window,
 
 	// if the faintestmagnitude is bright enough so that the Tycho-2
 	// catalog is complete up to this magnitude, then we can skip UCAC4
-	if (magrange.faintest() < Tycho2_Complete_Magnitude) {
+	if (magrange.faintest() < Tycho2_cutover_magnitude) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "faintest magnitude complete "
 			"in Tycho-2 catalog");
 		return resultptr;
