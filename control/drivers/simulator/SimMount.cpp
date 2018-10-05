@@ -120,44 +120,6 @@ void	SimMount::cancel() {
 	_target = _direction;
 }
 
-#if 0
-/**
- * \brief set a parameter by name
- *
- * \param name		name of the parameter
- * \param angle		angle in degrees of the parameter
- */
-void	SimMount::parameter(const std::string& name, float angle) {
-	if (name == std::string("longitude")) {
-		_position.longitude().degrees(angle);
-		return;
-	}
-	if (name == std::string("latitude")) {
-		_position.latitude().degrees(angle);
-		return;
-	}
-	debug(LOG_ERR, DEBUG_LOG, 0, "no parameter %s, %f",
-		name.c_str(), angle);
-	throw std::logic_error("no such parameter");
-}
-
-/**
- * \brief get the value of a parameter
- *
- * \param name		name of the parameter
- */
-float	SimMount::parameterValueFloat(const std::string& name) const {
-	if (name == std::string("longitude")) {
-		return _position.longitude().degrees();
-	}
-	if (name == std::string("latitude")) {
-		return _position.latitude().degrees();
-	}
-	debug(LOG_ERR, DEBUG_LOG, 0, "no parameter named '%s'", name.c_str());
-	throw std::logic_error("no such parameter");
-}
-#endif
-
 } // namespace simulator
 } // namespace camera
 } // namespace astro
