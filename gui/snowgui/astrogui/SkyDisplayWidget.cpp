@@ -541,6 +541,13 @@ void	SkyDisplayWidget::useStars(Catalog::starsetptr stars) {
 	repaint();
 }
 
+void	SkyDisplayWidget::targetChanged(astro::RaDec target) {
+	_target = target;
+	if (show_target()) {
+		repaint();
+	}
+}
+
 } // namespace snowgui
 
 

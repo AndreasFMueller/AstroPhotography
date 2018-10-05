@@ -47,6 +47,7 @@ public slots:
 	void	constellationsChanged(int);
 	void	telescopeChanged(int);
 	void	targetChanged(int);
+	void	targetChanged(astro::RaDec);
 	void	labelsChanged(int);
 	void	update();
 

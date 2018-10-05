@@ -117,6 +117,7 @@ public:
 
 public slots:
 	void	telescopeChanged(astro::RaDec);
+	void	targetChanged(astro::RaDec);
 	void	positionChanged(astro::LongLat);
 	void	update();
 	void	useStars(astro::catalog::Catalog::starsetptr);

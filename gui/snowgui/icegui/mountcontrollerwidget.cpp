@@ -269,6 +269,11 @@ void	mountcontrollerwidget::setTarget(const astro::RaDec& target) {
 		_target.ra).c_str()));
 	ui->targetDecField->setText(QString(astro::stringprintf("%.4f",
 		_target.dec).c_str()));
+
+	// if the _skyview is open also change the target there
+	if (_skydisplay) {
+		_skydisplay->targetChanged(convert(_target));
+	}
 }
 
 /**

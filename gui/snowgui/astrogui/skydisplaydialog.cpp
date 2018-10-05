@@ -123,6 +123,10 @@ void	SkyDisplayDialog::targetChanged(int state) {
 	ui->skydisplayWidget->update();
 }
 
+void	SkyDisplayDialog::targetChanged(astro::RaDec target) {
+	ui->skydisplayWidget->targetChanged(target);
+}
+
 void	SkyDisplayDialog::labelsChanged(int state) {
 	bool	checked = (state == Qt::Checked);
 	ui->skydisplayWidget->show_labels(checked);
