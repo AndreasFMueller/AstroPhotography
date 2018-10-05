@@ -39,6 +39,7 @@ public:
 
 signals:
 	void	mountSelected(int);
+	void	stateChanged(astro::device::Mount::state_type);
 	void	telescopeChanged(astro::RaDec);
 
 private:

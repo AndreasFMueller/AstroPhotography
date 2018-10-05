@@ -91,6 +91,7 @@ public:
 	Angle&	operator[](int i);
 	TwoAngles	operator+(const TwoAngles& other) const;
 	TwoAngles	operator-(const TwoAngles& other) const;
+	TwoAngles	operator*(double t) const;
 	bool	operator==(const TwoAngles& other) const;
 	bool	operator!=(const TwoAngles& other) const;
 };
@@ -144,6 +145,7 @@ public:
 	bool	operator>=(const RaDec& other) const;
 	RaDec	operator+(const RaDec& other) const;
 	RaDec	operator-(const RaDec& other) const;
+	RaDec	operator*(double t) const;
 	virtual std::string	toString() const;
 static const RaDec	north_pole;
 static const RaDec	south_pole;

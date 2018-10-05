@@ -22,13 +22,11 @@ static std::string	getserialname(const std::string& devicename) {
 	try {
 		int	unit = std::stod(dev.unitname());
 		Properties	properties(devicename);
-		std::string	propertyname
-			= stringprintf("celestron.device.%d", unit);
-		std::string	serialname
-			= properties.getProperty(propertyname);
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "found serial name: %s",
-			serialname.c_str());
-		return serialname;
+		std::string	serialdevicename
+			= properties.getProperty("device");
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "found serial device name: %s",
+			serialdevicename.c_str());
+		return serialdevicename;
 	} catch (const std::exception& x) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0,
 			"could not find the serial name: %s", x.what());

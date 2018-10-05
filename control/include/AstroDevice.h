@@ -268,8 +268,11 @@ public:
 	static state_type	string2state(const std::string& s);
 
 	static DeviceName::device_type	devicetype;
-	Mount(const std::string& name) : Device(name, DeviceName::Mount) { }
-	Mount(const DeviceName& name) : Device(name, DeviceName::Mount) { }
+private:
+	void	propertySetup();
+public:
+	Mount(const std::string& name);
+	Mount(const DeviceName& name);
 	virtual ~Mount() { }
 
 	// state

@@ -20,7 +20,7 @@ typedef struct {
 	bool	unique;
 } FITSKeyword;
 
-#define	Nkeywors	84
+#define	Nkeywors	85
 FITSKeyword	keywors[Nkeywors] = {
 // standard keywords
 { // 0
@@ -493,36 +493,42 @@ FITSKeyword	keywors[Nkeywors] = {
 	true
 },
 { // 78
+	std::string("LONGITUD"),
+	std::string("Observatory longitude in degrees"),
+	std::type_index(typeid(float)),
+	true
+},
+{ // 79
 	std::string("BADPIXEL"),
 	std::string("Number of bad pixels"),
 	std::type_index(typeid(long)),
 	true
 },
-{ // 79
+{ // 80
 	std::string("IMGCOUNT"),
 	std::string("Number of images used to build dark/flat"),
 	std::type_index(typeid(long)),
 	true
 },
-{ // 80
+{ // 81
 	std::string("BDPXLLIM"),
 	std::string("number of std devs to consider a pixel bad"),
 	std::type_index(typeid(double)),
 	true
 },
-{ // 81
+{ // 82
 	std::string("CCDWIDTH"),
 	std::string("width of CCD area in mm"),
 	std::type_index(typeid(double)),
 	true
 },
-{ // 82
+{ // 83
 	std::string("CCDHIGHT"),
 	std::string("height of CCD area in mm"),
 	std::type_index(typeid(double)),
 	true
 },
-{ // 83
+{ // 84
 	std::string("CAMERA"),
 	std::string("name of the camera"),
 	std::type_index(typeid(std::string)),

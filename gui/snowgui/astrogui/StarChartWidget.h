@@ -10,6 +10,7 @@
 #include <QThread>
 #include <AstroCoordinates.h>
 #include <AstroCatalog.h>
+#include <AstroDevice.h>
 #include <BusyWidget.h>
 
 namespace snowgui {
@@ -43,6 +44,7 @@ class StarChartWidget : public QWidget {
 	astro::catalog::Catalog::starsetptr	_stars;
 	astro::Angle	_resolution;	// angle per pixel
 	astro::RaDec	_direction;
+	astro::device::Mount::state_type	_state;
 	astro::ImageCoordinates	_converter;
 	float	_limit_magnitude;
 	bool	_negative;
@@ -93,6 +95,7 @@ protected:
 
 public slots:
 	void	directionChanged(astro::RaDec);
+	void	stateChanged(astro::device::Mount::state_type);
 	void	useStars(astro::catalog::Catalog::starsetptr);
 	void	workerFinished();
 };

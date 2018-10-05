@@ -5,6 +5,7 @@
  */
 #include "StarChartWidget.h"
 #include <AstroDebug.h>
+#include <AstroDevice.h>
 #include <QPainter>
 #include <QMouseEvent>
 #include <QToolTip>
@@ -292,17 +293,25 @@ void	StarChartWidget::directionChanged(astro::RaDec direction) {
 	_converter = astro::ImageCoordinates(_direction, _resolution,
 			astro::Angle(0));
 
-	// start the retrieval
-	startRetrieval();
+	// a new retrieval should only be started in tracking mode.
+	// In any other mound we expect the state to change again very
+	// soon
+	if (_state == astro::device::Mount::TRACKING) {
+		// start the retrieval
+		startRetrieval();
 
-	// start the busy widget
-	const int busysize = 100;
-	_busywidget = new BusyWidget(this);
-	_busywidget->resize(busysize, busysize);
-	_busywidget->move(width()/2 - busysize/2, height()/2 - busysize/2);
-	_busywidget->setVisible(true);
+		// start the busy widget
+		const int busysize = 100;
+		_busywidget = new BusyWidget(this);
+		_busywidget->resize(busysize, busysize);
+		_busywidget->move(width()/2 - busysize/2,
+			height()/2 - busysize/2);
+		_busywidget->setVisible(true);
+	}
 
-	// let the repaint event handle the redrawing
+	// let the repaint event handle the redrawing. Doing the repaing
+	// always allows the image to track the movement of the telescope
+	// which should make for a nice animation
 	repaint();
 }
 
@@ -323,6 +332,8 @@ void	StarChartWidget::mouseCommon(QMouseEvent *event) {
 
 /**
  * \brief Handle mouse click
+ *
+ * \param event		mouse event containing position information
  */
 void	StarChartWidget::mousePressEvent(QMouseEvent *event) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "handle mouse click at (%d,%d)",
@@ -337,6 +348,8 @@ void	StarChartWidget::mouseReleaseEvent(QMouseEvent * /* event */) {
 
 /**
  * \brief Handle mouse move
+ *
+ * \param event		 mouse event contining position information
  */
 void	StarChartWidget::mouseMoveEvent(QMouseEvent *event) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "handle mouse move to (%d,%d)",
@@ -360,6 +373,8 @@ void	StarChartWidget::mouseMoveEvent(QMouseEvent *event) {
  *
  * This method receives a new set of stars from the worker thread and
  * redisplays the sky with this new set of stars
+ *
+ * \param stars		set of stars to display in the star chart
  */
 void	StarChartWidget::useStars(astro::catalog::Catalog::starsetptr stars) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "receiveing %d new stars",
@@ -392,6 +407,15 @@ void	StarChartWidget::workerFinished() {
 	if (_retrieval_necessary) {
 		startRetrieval();
 	}
+}
+
+/**
+ * \brief Update the state
+ *
+ * \param state		new state to remember
+ */
+void	StarChartWidget::stateChanged(astro::device::Mount::state_type state) {
+	_state = state;
 }
 
 } // namespace snowgui

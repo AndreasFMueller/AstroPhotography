@@ -23,6 +23,62 @@ namespace camera {
 DeviceName::device_type	Ccd::devicetype = DeviceName::Ccd;
 
 /**
+ * \brief Construct a CCD device
+ */
+Ccd::Ccd(const CcdInfo& _info)
+	: astro::device::Device(_info.name(), DeviceName::Ccd),
+	  info(_info), _state(CcdState::idle) {
+
+	// add parameter descriptors for focal length and limiting magnitude
+	device::ParameterDescription    focallength_description(
+						"focallength", 0.01, 4.0);
+	Device::add(focallength_description);
+	device::ParameterDescription    azimuth_description(
+						"azimuth", 0.0, 360.0);
+	Device::add(azimuth_description);
+	device::ParameterDescription    limit_magnitude_description(
+						"limit_magnitude", 0.0, 16.0);
+	Device::add(limit_magnitude_description);
+
+	// get focal length parameter
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "querying 'focallength' for %s",
+		name().toString().c_str());
+	float   focallength = 0;
+	if (hasProperty("focallength")) {
+		focallength = std::stod(getProperty("focallength"));
+	} else {
+		focallength = 1.1111;
+	}
+	parameter("focallength", focallength);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "using focallength %.3f[m]",
+		parameterValueFloat("focallength"));
+
+	// get the azimuth parameter 
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "querying 'azimuth' for %s",
+		name().toString().c_str());
+	float   azimuth = 0;
+	if (hasProperty("azimuth")) {
+		azimuth = std::stod(getProperty("azimuth"));
+	} else {
+		azimuth = 1.1111;
+	}
+	parameter("azimuth", azimuth);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "using azimuth %.3f[degrees]",
+		parameterValueFloat("azimuth"));
+
+	// get limit magnitude parameter
+	float   limit_magnitude = 0;
+	if (hasProperty("limit_magnitude")) {
+		limit_magnitude = std::stod(getProperty("limit_magnitude"));
+	} else {
+		limit_magnitude = 11.111;
+	}
+	parameter("limit_magnitude", limit_magnitude);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "using limit magnitude %.2f",
+		limit_magnitude);
+}
+
+/**
  * \brief Get the state
  */
 CcdState::State	Ccd::state() {

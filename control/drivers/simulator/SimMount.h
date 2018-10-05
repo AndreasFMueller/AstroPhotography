@@ -8,6 +8,7 @@
 
 #include <AstroDevice.h>
 #include <SimLocator.h>
+#include <thread>
 
 namespace astro {
 namespace camera {
@@ -15,8 +16,12 @@ namespace simulator {
 
 class SimMount : public astro::device::Mount {
 	SimLocator&	_locator;
-	LongLat	_position;
 	RaDec	_direction;
+	// dynamic movement: target and time when the target will be reached
+	std::recursive_mutex	_mutex; // protext the state variables
+	RaDec	_target;
+	double	_when;
+	void	updateState();
 public:
 	astro::device::Mount::state_type	state();
 	SimMount(SimLocator &locator);
@@ -25,9 +30,7 @@ public:
 	void	Goto(const RaDec& radec);
 	void	Goto(const AzmAlt& azmalt);
 	void	cancel();
-	virtual void    parameter(const std::string& name, float value);
-	virtual float	parameterValueFloat(const std::string& name) const;
-	const RaDec&	direction() const { return _direction; }
+	RaDec	direction();
 };
 
 } // namespace simulator

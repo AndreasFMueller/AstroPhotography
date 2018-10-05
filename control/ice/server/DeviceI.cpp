@@ -9,6 +9,14 @@
 namespace snowstar {
 
 DeviceI::DeviceI(astro::device::Device& device) : _device(device) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "constructing device %s",
+		_device.name().toString().c_str());
+	std::list<std::string>	pn = _device.parameterNames();
+	std::list<std::string>::const_iterator	s;
+	for (s = pn.begin(); s != pn.end(); s++) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "%s parameter: %s",
+			_device.name().toString().c_str(), s->c_str());
+	}
 }
 
 DeviceI::~DeviceI() {
@@ -28,11 +36,15 @@ std::vector<std::string>	DeviceI::parameterNames(
 
 bool	DeviceI::hasParameter(const std::string& name,
 		const Ice::Current& /* current */) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "does device parameter '%s' exist?",
+		name.c_str());
 	return _device.hasParameter(name);
 }
 
 ParameterDescription	DeviceI::parameter(const std::string& name,
 		const Ice::Current& /* current */) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "querying device parameter '%s'",
+		name.c_str());
 	return convert(_device.parameter(name));
 }
 

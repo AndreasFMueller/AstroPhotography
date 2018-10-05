@@ -62,6 +62,10 @@ RaDec	RaDec::operator-(const RaDec& other) const {
 	return RaDec(TwoAngles::operator-(other));
 }
 
+RaDec	RaDec::operator*(double t) const {
+	return RaDec(TwoAngles::operator*(t));
+}
+
 Ecliptic	RaDec::ecliptic() const {
 //	debug(LOG_DEBUG, DEBUG_LOG, 0, "converting %s to Ecliptic",
 //		toString().c_str());

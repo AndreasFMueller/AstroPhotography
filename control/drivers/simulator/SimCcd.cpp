@@ -51,6 +51,7 @@ SimCcd::SimCcd(const CcdInfo& _info, SimLocator& locator)
 	// from the star catalog
 	_last_direction.ra().degrees(-1);
 
+#if 0
 	// add parameter descriptors for focal length and limiting magnitude
 	device::ParameterDescription	focallength_description(
 						"focallength", 0.01, 4.0);
@@ -98,6 +99,7 @@ SimCcd::SimCcd(const CcdInfo& _info, SimLocator& locator)
 	parameter("limit_magnitude", limit_magnitude);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "using limit magnitude %.2f",
 		limit_magnitude);
+#endif
 }
 
 static void	imageconstruction_main(SimCcd *simccd) {

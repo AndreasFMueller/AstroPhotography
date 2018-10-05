@@ -12,11 +12,16 @@ namespace snowgui {
 
 /**
  * \brief Create a new mount controller widget
+ *
+ * \param parent	the parent widget
  */
 mountcontrollerwidget::mountcontrollerwidget(QWidget *parent)
 	: InstrumentWidget(parent),
 	  ui(new Ui::mountcontrollerwidget) {
 	ui->setupUi(this);
+
+	qRegisterMetaType<astro::device::Mount::state_type>(
+		"astro::device::Mount::state_type");
 
 	setTabOrder(ui->targetRaField, ui->targetDecField);
 	setTabOrder(ui->targetDecField, ui->targetRaField);
@@ -95,10 +100,16 @@ void	mountcontrollerwidget::setupMount() {
 		if (_mount->hasParameter("longitude")) {
 			_position.longitude().degrees(
 				_mount->parameterValueFloat("longitude"));
+		} else {
+			debug(LOG_ERR, DEBUG_LOG, 0,
+				"longitude parameter not set for mount");
 		}
 		if (_mount->hasParameter("latitude")) {
 			_position.latitude().degrees(
 				_mount->parameterValueFloat("latitude"));
+		} else {
+			debug(LOG_ERR, DEBUG_LOG, 0,
+				"latitude parameter not set for mount");
 		}
 
 		// write the position to the position label
@@ -183,6 +194,7 @@ void	mountcontrollerwidget::statusUpdate() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "Mount status udpate");
 	snowstar::mountstate state = _mount->state();
 	if (state != _previousstate) {
+		emit stateChanged(convert(state));
 		_previousstate = state;
 		switch (state) {
 		case snowstar::MountIDLE:
@@ -208,7 +220,12 @@ void	mountcontrollerwidget::statusUpdate() {
 		}
 	}
 	snowstar::RaDec	radec = _mount->getRaDec();
-	if ((_telescope.ra != radec.ra) || (_telescope.dec != radec.dec)) {
+	double	deltaRa = (_telescope.ra - radec.ra);
+	if (deltaRa > M_PI) { deltaRa -= 2 *M_PI; }
+	if (deltaRa < -M_PI) { deltaRa += 2 * M_PI; }
+	double	deltaDec = (_telescope.dec - radec.dec);
+	double	change = hypot(deltaRa, deltaDec);
+	if (change > 0.001) {
 		ui->currentRaField->setText(QString(
 			astro::stringprintf("%.4f", radec.ra).c_str()));
 		ui->currentDecField->setText(QString(

@@ -13,6 +13,56 @@ namespace device {
 DeviceName::device_type Mount::devicetype = DeviceName::Mount;
 
 /**
+ * \brief Construct a mount from the stringified name
+ */
+Mount::Mount(const std::string& name) : Device(name, DeviceName::Mount) {
+	propertySetup();
+}
+
+/**
+ * \brief Construct a mount from the structured name
+ */
+Mount::Mount(const DeviceName& name) : Device(name, DeviceName::Mount) {
+	propertySetup();
+}
+
+/**
+ * \brief Prepare the properties
+ *
+ * Every mount has longitude and latitude associated with it
+ */
+void	Mount::propertySetup() {
+	// parameter properties
+	ParameterDescription	longitude_desc("longitude", -180, 180);
+	add(longitude_desc);
+	ParameterDescription	latitude_desc("latitude", -90, 90);
+	add(latitude_desc);
+
+	// get the position from the device.properties
+	float	longitude = 0;
+	if (hasProperty("longitude")) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "found longitude property");
+		longitude = std::stod(getProperty("longitude"));
+	} else {
+		longitude = 8.83; // Altendorf
+	}
+	parameter("longitude", longitude);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "set longitude parameter to %s",
+		parameterValueString("longitude").c_str());
+
+	float	latitude = 0;
+	if (hasProperty("latitude")) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "found latitude property");
+		latitude = std::stod(getProperty("latitude"));
+	} else {
+		latitude = 47.19; // Altendorf
+	}
+	parameter("latitude", latitude);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "set latitude parameter to %s",
+		parameterValueString("latitude").c_str());
+}
+
+/**
  * \brief Get current mount position in RA and DEC
  */
 RaDec	Mount::getRaDec() {
@@ -48,6 +98,9 @@ void	Mount::cancel() {
 
 /**
  * \brief Convert mount state type into a string
+ *
+ * \param	state code
+ * \return	string representation of the state
  */
 std::string	Mount::state2string(Mount::state_type s) {
 	switch (s) {
@@ -65,6 +118,9 @@ std::string	Mount::state2string(Mount::state_type s) {
 
 /**
  * \brief Convert mount state string into state code
+ *
+ * \param s	string representaton of the state
+ * \return	state code
  */
 Mount::state_type	Mount::string2state(const std::string& s) {
 	if (s == "idle") {
@@ -84,6 +140,8 @@ Mount::state_type	Mount::string2state(const std::string& s) {
 
 /**
  * \brief Add the current position information to the image
+ *
+ * \param image		image to add the meta data
  */
 void	Mount::addPositionMetadata(astro::image::ImageBase& image) {
 	RaDec   position = getRaDec();
@@ -102,6 +160,10 @@ void	Mount::addPositionMetadata(astro::image::ImageBase& image) {
 	if (hasParameter("latitude")) {
 		image.setMetadata(astro::io::FITSKeywords::meta("LATITUDE",
 			parameterValueFloat("latitude")));
+	}
+	if (hasParameter("longitude")) {
+		image.setMetadata(astro::io::FITSKeywords::meta("LONGITUD",
+			parameterValueFloat("longitude")));
 	}
 }
 

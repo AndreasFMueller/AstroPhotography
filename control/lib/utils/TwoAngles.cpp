@@ -38,6 +38,10 @@ TwoAngles	TwoAngles::operator-(const TwoAngles& other) const {
 	return TwoAngles(_a1 - other._a1, _a2 - other._a2);
 }
 
+TwoAngles	TwoAngles::operator*(double t) const {
+	return TwoAngles(_a1 * t, _a2 * t);
+}
+
 bool	TwoAngles::operator==(const TwoAngles& other) const {
 	return (_a1 == other._a1) && (_a2 == other._a2);
 }

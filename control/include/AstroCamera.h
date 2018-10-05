@@ -398,9 +398,7 @@ public:
 					const std::string& unitname);
 
 	// constructor
-	Ccd(const CcdInfo& _info)
-		: astro::device::Device(_info.name(), DeviceName::Ccd),
-		info(_info), _state(CcdState::idle) { }
+	Ccd(const CcdInfo& _info);
 	virtual	~Ccd() { }
 	const CcdInfo&	getInfo() const { return info; }
 
