@@ -113,18 +113,27 @@ snowstar::ModulesPrx	NiceLocator::getModules(const std::string& servicename) {
  * \param key	service key for which to find the modules
  */
 snowstar::ModulesPrx	NiceLocator::getModules(const ServiceKey& key) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "get modules for key %s",
-		key.toString().c_str());
-	ServiceObject	object = discovery->find(key);
+	snowstar::ModulesPrx	mprx;
+	try {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "get modules for key %s",
+			key.toString().c_str());
+		ServiceObject	object = discovery->find(key);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "discovery object found");
 
-	// we need a connection 
-	Ice::CommunicatorPtr	ic = snowstar::CommunicatorSingleton::get();
-	Ice::ObjectPrx	base = ic->stringToProxy(object.connect("Modules"));
-	snowstar::ModulesPrx	mprx = snowstar::ModulesPrx::checkedCast(base);
+		// we need a connection 
+		Ice::CommunicatorPtr	ic = snowstar::CommunicatorSingleton::get();
+		std::string	connectstring = object.connect("Modules");
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "connect string: '%s'", connectstring.c_str());
+		Ice::ObjectPrx	base = ic->stringToProxy(connectstring);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "connecting to Modules: %p", base.get());
+		mprx = snowstar::ModulesPrx::checkedCast(base);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "got modules proxy");
 
-	// store the new proxy in the modules map
-	modules.insert(std::make_pair(key.name(), mprx));
-
+		// store the new proxy in the modules map
+		modules.insert(std::make_pair(key.name(), mprx));
+	} catch (const std::exception& x) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "cannot get a proxy: %s", x.what());
+	}
 	// here we have the new proxy
 	return mprx;
 }
@@ -137,7 +146,14 @@ snowstar::ModulesPrx	NiceLocator::getModules(const ServiceKey& key) {
  */
 snowstar::DriverModulePrx	NiceLocator::getDriverModule(
 	const std::string& servicename, const std::string& modulename) {
-	return getModules(servicename)->getModule(modulename);
+	snowstar::ModulesPrx	mprx = getModules(servicename);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "get module '%s' from service '%s'",
+		modulename.c_str(), servicename.c_str());
+	snowstar::DriverModulePrx	dmprx = mprx->getModule(modulename);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "got a driver module");
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "driver module version: %s",
+		dmprx->getVersion().c_str());
+	return dmprx;
 }
 
 /** 
@@ -148,7 +164,14 @@ snowstar::DriverModulePrx	NiceLocator::getDriverModule(
  */
 snowstar::DriverModulePrx	NiceLocator::getDriverModule(
 	const ServiceKey& key, const std::string& modulename) {
-	return getModules(key)->getModule(modulename);
+	snowstar::ModulesPrx	mprx = getModules(key);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "get module '%s' from service '%s'",
+		modulename.c_str(), key.toString().c_str());
+	snowstar::DriverModulePrx	dmprx =  mprx->getModule(modulename);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "got a driver module");
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "driver module version: %s",
+		dmprx->getVersion().c_str());
+	return dmprx;
 }
 
 /**
@@ -274,7 +297,9 @@ std::vector<std::string>	NiceLocator::getDevicelist(
 	}
 
 	// we are done, return the result
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "found %d devices", result.size());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "found %d %s devices",
+		DeviceName::type2string(device).c_str(),
+		result.size());
 	return result;
 }
 
@@ -328,7 +353,7 @@ CcdPtr	NiceLocator::getCcd0(const DeviceName& name) {
 
 GuidePortPtr	NiceLocator::getGuidePort0(const DeviceName& name) {
 	check(name, DeviceName::Guideport);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieving nice device %s",
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieving nice guideport %s",
 		name.toString().c_str());
 
 	astro::DeviceName	remotename = name.localdevice();

@@ -24,7 +24,8 @@ CommunicatorSingleton::CommunicatorSingleton(int& argc, char *argv[]) {
 
 	// set property to turn off ACM, because it will be useless in
 	// all the programs that use fixed proxies and callbacks
-	props->setProperty("Ice.ACM.Client", "0");
+	// XXX temporarily turned off
+	//props->setProperty("Ice.ACM.Client", "0");
 
 	// the large message size is required because we have cases
 	// where we transfer entire images as messages

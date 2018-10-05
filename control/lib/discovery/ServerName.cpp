@@ -89,7 +89,7 @@ std::string	ServerName::connect(const std::string& service) const {
 	}
 	std::string	connectstring = stringprintf("%s:default -h %s -p %hu",
 		service.c_str(), h.c_str(), p);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "connecting to %s",
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "connection string %s",
 		connectstring.c_str());
 	return connectstring;
 }

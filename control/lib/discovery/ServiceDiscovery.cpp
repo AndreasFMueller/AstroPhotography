@@ -167,6 +167,8 @@ void	ServiceDiscovery::add(const ServiceKey& key) {
 		remove(key);
 	}
 	servicekeys.insert(key);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "notifying waiting clients of key %s", 
+			key.toString().c_str());
 	servicecondition.notify_all();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "key '%s' added",
 		key.toString().c_str());
