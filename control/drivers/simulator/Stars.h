@@ -9,6 +9,7 @@
 #include <AstroTypes.h>
 #include <AstroTransform.h>
 #include <AstroCamera.h>
+#include <AstroIO.h>
 #include <set>
 
 namespace astro {

@@ -25,12 +25,14 @@ public:
 	void	testBlurr();
 	void	testBlurr2();
 	void	testBlurr3();
+	void	testBlurr4();
 	//void	testXXX();
 
 	CPPUNIT_TEST_SUITE(BlurrTest);
 	CPPUNIT_TEST(testBlurr);
 	CPPUNIT_TEST(testBlurr2);
 	CPPUNIT_TEST(testBlurr3);
+	CPPUNIT_TEST(testBlurr4);
 	//CPPUNIT_TEST(testXXX);
 	CPPUNIT_TEST_SUITE_END();
 };
@@ -112,6 +114,14 @@ void	BlurrTest::testBlurr3() {
 	Blurr	blurr(30, 12);
 	performTest(size, blurr);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testBlurr3() end");
+}
+
+void	BlurrTest::testBlurr4() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testBlurr4() begin");
+	ImageSize	size(1280, 1280);
+	Blurr	blurr(24, 9.6);
+	performTest(size, blurr);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testBlurr4() end");
 }
 
 #if 0

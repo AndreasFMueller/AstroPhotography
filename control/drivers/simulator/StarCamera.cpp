@@ -210,8 +210,10 @@ Image<double>	*StarCameraBase::doubleImage(StarField& field) {
 
 	// stretch the values
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "stretch factor = %.1f", _stretch);
-	for (int x = 0; x < size.width(); x++) {
-		for (int y = 0; y < size.height(); y++) {
+	int	width = r.size().width();
+	int	height = r.size().height();
+	for (int x = 0; x < width; x++) {
+		for (int y = 0; y < height; y++) {
 			result->pixel(x, y) = _stretch * result->pixel(x,y);
 		}
 	}
@@ -336,7 +338,8 @@ void	StarCameraBase::addnoise(Image<double>& image) const {
 	int	height = image.size().height();
 	for (int x = 0; x < width; x++) {
 		for (int y = 0; y < height; y++) {
-			image.pixel(x, y) += noisevalue();
+			double	n = noisevalue();
+			image.pixel(x, y) = image.pixel(x, y) + n;
 		}
 	}
 }
