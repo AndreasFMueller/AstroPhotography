@@ -20,6 +20,22 @@ coolercontrollerwidget::coolercontrollerwidget(QWidget *parent) :
 	ui->actualTemperatureField->setEnabled(false);
 	ui->setTemperatureSpinBox->setEnabled(false);
 	ui->activeWidget->setEnabled(false);
+	ui->activeWidget->setValue(1);
+
+	// connect signals
+	connect(ui->coolerSelectionBox, SIGNAL(currentIndexChanged(int)),
+		this, SLOT(coolerChanged(int)));
+
+	connect(ui->setTemperatureSpinBox, SIGNAL(valueChanged(double)),
+		this, SLOT(guiChanged()));
+	connect(ui->setTemperatureSpinBox, SIGNAL(editingFinished()),
+		this, SLOT(editingFinished()));
+	connect(ui->activeWidget, SIGNAL(toggled(bool)),
+		this, SLOT(activeToggled(bool)));
+
+	// initialize the timer
+	connect(&statusTimer, SIGNAL(timeout()), this, SLOT(statusUpdate()));
+	statusTimer.setInterval(100);
 }
 
 /**
@@ -40,7 +56,7 @@ void	coolercontrollerwidget::instrumentSetup(
 			std::string	sn = _instrument.displayname(
 					snowstar::InstrumentCooler, index,
 					serviceobject.name());
-			ui->coolerSelectionBox->addItem(QString(sn.c_str()));
+			_cooler_names.push_back(sn);
 			if (!_cooler) {
 				_cooler = cooler;
 				emit coolerSelected(index);
@@ -50,24 +66,17 @@ void	coolercontrollerwidget::instrumentSetup(
 		}
 		index++;
 	}
+}
 
-	// connect signals
-	connect(ui->coolerSelectionBox, SIGNAL(currentIndexChanged(int)),
-		this, SLOT(coolerChanged(int)));
-
-	connect(ui->setTemperatureSpinBox, SIGNAL(valueChanged(double)),
-		this, SLOT(guiChanged()));
-	connect(ui->setTemperatureSpinBox, SIGNAL(editingFinished()),
-		this, SLOT(editingFinished()));
-	connect(ui->activeWidget, SIGNAL(toggled(bool)),
-		this, SLOT(activeToggled(bool)));
-
-	// make sure the temperature indicator is at "warm"
-	ui->activeWidget->setValue(1);
-
-	// initialize the timer
-	connect(&statusTimer, SIGNAL(timeout()), this, SLOT(statusUpdate()));
-	statusTimer.setInterval(100);
+/**
+ * \brief main thread initializations
+ */
+void	coolercontrollerwidget::setupComplete() {
+	// add the cooler names
+	std::vector<std::string>::const_iterator	i;
+	for (i = _cooler_names.begin(); i != _cooler_names.end(); i++) {
+		ui->coolerSelectionBox->addItem(QString(i->c_str()));
+	}
 
 	// set the cooler
 	setupCooler();

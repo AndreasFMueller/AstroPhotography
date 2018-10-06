@@ -81,7 +81,6 @@ int	main(int argc, char *argv[]) {
 
 	// create a service discover object
 	ServiceDiscoveryPtr	sd = ServiceDiscovery::get();
-	sd->start();
 
 	// find the service keys
 	ServiceDiscovery::ServiceKeySet	keys;

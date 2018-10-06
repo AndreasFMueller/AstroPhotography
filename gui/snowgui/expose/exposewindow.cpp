@@ -42,21 +42,21 @@ void	exposewindow::instrumentSetup(
 	InstrumentWidget::instrumentSetup(serviceobject, instrument);
 
 	// perform instrument setup in all child InstrumentWidgets
-	ui->ccdcontrollerWidget->instrumentSetup(serviceobject,
+	ui->ccdcontrollerWidget->launchInstrumentSetup(serviceobject,
 		instrument);
-	ui->focusercontrollerWidget->instrumentSetup(serviceobject,
+	ui->focusercontrollerWidget->launchInstrumentSetup(serviceobject,
 		instrument);
-	ui->coolercontrollerWidget->instrumentSetup(serviceobject,
+	ui->coolercontrollerWidget->launchInstrumentSetup(serviceobject,
 		instrument);
-	ui->filterwheelcontrollerWidget->instrumentSetup(serviceobject,
+	ui->filterwheelcontrollerWidget->launchInstrumentSetup(serviceobject,
 		instrument);
-	ui->guideportcontrollerWidget->instrumentSetup(serviceobject,
+	ui->guideportcontrollerWidget->launchInstrumentSetup(serviceobject,
 		instrument);
-	ui->adaptiveopticscontrollerWidget->instrumentSetup(serviceobject,
+	ui->adaptiveopticscontrollerWidget->launchInstrumentSetup(serviceobject,
 		instrument);
-	ui->mountcontrollerWidget->instrumentSetup(serviceobject,
+	ui->mountcontrollerWidget->launchInstrumentSetup(serviceobject,
 		instrument);
-	ui->exposeWidget->instrumentSetup(serviceobject,
+	ui->exposeWidget->launchInstrumentSetup(serviceobject,
 		instrument);
 
 	// give this application a name

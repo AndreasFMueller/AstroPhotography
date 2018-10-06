@@ -88,14 +88,23 @@ void	taskwindow::instrumentSetup(
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "setting up instrument");
 
 	InstrumentWidget::instrumentSetup(serviceobject, instrument);
-	ui->ccdcontrollerWidget->instrumentSetup(serviceobject, instrument);
-	ui->coolercontrollerWidget->instrumentSetup(serviceobject, instrument);
-	ui->filterwheelcontrollerWidget->instrumentSetup(serviceobject,
+	ui->ccdcontrollerWidget->launchInstrumentSetup(serviceobject,
+		instrument);
+	ui->coolercontrollerWidget->launchInstrumentSetup(serviceobject,
+		instrument);
+	ui->filterwheelcontrollerWidget->launchInstrumentSetup(serviceobject,
 		instrument);
 	ui->taskstatusWidget->setServiceObject(serviceobject);
-	ui->tasksubmissionWidget->instrumentSetup(serviceobject, instrument);
+	ui->tasksubmissionWidget->launchInstrumentSetup(serviceobject,
+		instrument);
 	ui->taskmonitorWidget->setServiceObject(serviceobject);
 	ui->taskqueuemanagerWidget->setServiceObject(serviceobject);
+}
+
+/**
+ * \brief Main thread initialization tasks
+ */
+void	taskwindow::setupComplete() {
 	setAppname("Tasks");
 }
 

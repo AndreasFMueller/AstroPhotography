@@ -11,6 +11,7 @@ using namespace astro::discover;
 namespace snowgui {
 
 InstrumentWidget::InstrumentWidget(QWidget *parent) : QWidget(parent) {
+	qRegisterMetaType<std::string>("std::string");
 }
 
 InstrumentWidget::~InstrumentWidget() {
@@ -29,13 +30,35 @@ void	InstrumentWidget::instrumentSetup(ServiceObject serviceobject,
 		SLOT(sendImage(astro::image::ImagePtr, std::string)));
 
 	// get the instrument name into the title
-	std::string     title
-		= astro::stringprintf("Instrument %s @ %s",
+	std::string     title = astro::stringprintf("Instrument %s @ %s",
 		_instrument.name().c_str(), serviceobject.toString().c_str());
 	setWindowTitle(QString(title.c_str()));
 
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "window starting on instrument %s",
-		instrumentname().c_str());
+	std::string     t = astro::demangle(typeid(*this).name());
+
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "%s starting on instrument %s",
+		t.c_str(), instrumentname().c_str());
+}
+
+void	InstrumentWidget::setupComplete() {
+	std::string     t = astro::demangle(typeid(*this).name());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "%s setup complete", t.c_str());
+}
+
+void	InstrumentWidget::setupCompletion() {
+	std::string     t = astro::demangle(typeid(*this).name());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "%s setupCompletion()", t.c_str());
+	this->setupComplete();
+}
+
+void	InstrumentWidget::launchInstrumentSetup(
+				astro::discover::ServiceObject serviceobject,
+                                snowstar::RemoteInstrument instrument) {
+	// start a thread for the setup
+	// start the instrument setup thread
+        InstrumentSetupThread   *setupthread
+                = new InstrumentSetupThread(this, instrument, serviceobject);
+        setupthread->start();
 }
 
 std::string	InstrumentWidget::instrumentname() {

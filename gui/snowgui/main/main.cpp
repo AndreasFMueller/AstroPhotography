@@ -108,7 +108,6 @@ int main(int argc, char *argv[]) {
 	// get the service discovery object
 	astro::discover::ServiceDiscoveryPtr	servicediscovery
 		= astro::discover::ServiceDiscovery::get();
-	servicediscovery->start();
 
 	// decide how start: if the servername is set, then we start with
 	// the main window configured to talk to the server, otherwise

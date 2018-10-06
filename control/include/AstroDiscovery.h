@@ -221,7 +221,7 @@ public:
 };
 
 class ServiceDiscovery;
-typedef std::shared_ptr<ServiceDiscovery>	ServiceDiscoveryPtr;
+typedef ServiceDiscovery	*ServiceDiscoveryPtr;
 
 /**
  * \brief A class encapsulating service discovery on different plattforms
@@ -238,9 +238,6 @@ public:
 
 	// factory method for an implementation class
 	static ServiceDiscoveryPtr	get();
-
-	// start it
-	virtual void	start() = 0;
 
 	// we keep a set of services we have published and a set of
 	// services that have been seen. Both are of type ServiceSet

@@ -23,22 +23,15 @@ using namespace astro::camera;
 namespace snowgui {
 
 /**
- * \brief convert ccddata to a string
- */
-std::string	ccddata::toString() const {
-	return astro::stringprintf("%s[%d] f=%.3f, azi=%.2f, %s",
-		(_type == snowstar::InstrumentCCD) ? "imaging" :
-		(_type == snowstar::InstrumentFinderCCD) ? "finder" : "guider",
-		_index, _focallength, _azimut.degrees(), _name.c_str());
-}
-
-/**
  * \brief Constructor for the CCD controller
  */
 ccdcontrollerwidget::ccdcontrollerwidget(QWidget *parent) :
 	InstrumentWidget(parent), ui(new Ui::ccdcontrollerwidget) {
 	// setup user interface components
 	ui->setupUi(this);
+	_hideprogress = NULL;
+	_hide = NULL;
+	_imageretriever = NULL;
 
 	// register some types
 	qRegisterMetaType<astro::camera::Exposure>("astro::camera::Exposure");
@@ -88,6 +81,9 @@ ccdcontrollerwidget::ccdcontrollerwidget(QWidget *parent) :
 		SIGNAL(stateChanged(snowstar::ExposureState)),
 		this, SLOT(statusUpdate(snowstar::ExposureState)));
 	_statemonitoringthread->start();
+
+	// make sure no signals are emitted during setup
+	ui->ccdSelectionBox->blockSignals(true);
 }
 
 /**
@@ -102,7 +98,6 @@ void	ccdcontrollerwidget::instrumentSetup(
 		snowstar::RemoteInstrument instrument) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0,
 		"begin ccdcontrollerwidget::instrumentSetup()");
-	ui->ccdSelectionBox->blockSignals(true);
 
 	// parent setup
 	InstrumentWidget::instrumentSetup(serviceobject, instrument);
@@ -159,7 +154,6 @@ void	ccdcontrollerwidget::instrumentSetup(
 				std::string	sn = instrument.displayname(
 					snowstar::InstrumentCCD, index,
 					serviceobject.name());
-				ui->ccdSelectionBox->addItem(QString(sn.c_str()));
 				ccddata	d(snowstar::InstrumentCCD, index,
 					focallength, azimuth, sn);
 				d.ccdinfo(ccd->getInfo());
@@ -187,7 +181,6 @@ void	ccdcontrollerwidget::instrumentSetup(
 					snowstar::InstrumentFinderCCD, index,
 					serviceobject.name());
 				sn = sn + " (finder)";
-				ui->ccdSelectionBox->addItem(QString(sn.c_str()));
 				ccddata	d(snowstar::InstrumentFinderCCD, index,
 					finderfocallength, finderazimuth, sn);
 				d.ccdinfo(ccd->getInfo());
@@ -216,7 +209,6 @@ void	ccdcontrollerwidget::instrumentSetup(
 				snowstar::InstrumentGuiderCCD, index,
 				serviceobject.name());
 			sn = sn + " (guider)";
-			ui->ccdSelectionBox->addItem(QString(sn.c_str()));
 			ccddata	d(snowstar::InstrumentGuiderCCD, index,
 				guiderfocallength, guiderazimuth, sn);
 			d.ccdinfo(ccd->getInfo());
@@ -235,10 +227,24 @@ void	ccdcontrollerwidget::instrumentSetup(
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "found total of %d ccds",
 		_ccddata.size());
+}
+
+/**
+ * \brief setup stuff to be executed on the main thread
+ */
+void	ccdcontrollerwidget::setupComplete() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "setup complete");
+	// add the entries to the menu
+	std::vector<ccddata>::const_iterator	i;
+	for (i = _ccddata.begin(); i != _ccddata.end(); i++) {
+		std::string	sn = i->name();
+		ui->ccdSelectionBox->addItem(QString(sn.c_str()));
+	}
 
 	// add additional information about this ccd
 	setupCcd();
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "end ccdcontrollerwidget::instrumentSetup()");
+	debug(LOG_DEBUG, DEBUG_LOG, 0,
+		"end ccdcontrollerwidget::instrumentSetup()");
 	ui->ccdSelectionBox->blockSignals(false);
 	emit ccddataSelected(_current_ccddata);
 }
@@ -255,6 +261,7 @@ ccdcontrollerwidget::~ccdcontrollerwidget() {
  * \brief Read information from the ccd and show it
  */
 void	ccdcontrollerwidget::setupCcd() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "setupCcd() begin");
 	// we set the previous state to idle, but if that is not correct, then
 	// then the first status update will fix it.
 	ui->captureButton->setEnabled(true);
@@ -317,6 +324,7 @@ void	ccdcontrollerwidget::setupCcd() {
 	ui->ccdInfo->setEnabled(true);
 	ui->frameWidget->setEnabled(true);
 	ui->buttonArea->setEnabled(true);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "setupCcd() end");
 }
 
 /**
@@ -822,7 +830,7 @@ void	ccdcontrollerwidget::retrieveImageFailed(QString x) {
  * This slot is called by the 
  */
 void	ccdcontrollerwidget::statusUpdate(snowstar::ExposureState newstate) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "state update: %d", newstate);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "state update: newstate=%d", newstate);
 	if (!_ccd) {
 		return;
 	}

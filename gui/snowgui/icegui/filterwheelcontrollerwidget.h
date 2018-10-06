@@ -29,6 +29,7 @@ public:
 	virtual void	instrumentSetup(
 		astro::discover::ServiceObject serviceobject,
 		snowstar::RemoteInstrument instrument);
+	virtual void	setupComplete();
 
 signals:
 	void	filterInstalled();
@@ -41,7 +42,6 @@ private:
 
 	void	setupFilterwheel();
 	void	displayFilter(int index);
-
 
 public slots:
 	void	setFilter(int index);

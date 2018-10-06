@@ -107,6 +107,7 @@ SOURCES += 								\
 	CalibrationDisplayWidget.cpp					\
 	CalibrationImageMonitor.cpp					\
 	calibrationimagewidget.cpp					\
+	ccddata.cpp							\
 	CoolerActive.cpp						\
 	EventMonitor.cpp						\
 	FilterWheelBusy.cpp						\
@@ -114,6 +115,7 @@ SOURCES += 								\
 	GuiderButton.cpp						\
 	ImageForwarder.cpp						\
 	ImageRetrieverThread.cpp					\
+	InstrumentSetupThread.cpp					\
 	InstrumentWidget.cpp						\
 	MonitorImage.cpp						\
 	StateMonitoringThread.cpp					\

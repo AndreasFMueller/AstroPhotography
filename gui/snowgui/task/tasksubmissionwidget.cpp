@@ -75,8 +75,7 @@ void	tasksubmissionwidget::instrumentSetup(
 			if (!_camera) {
 				_camera = camera;
 			}
-			QString	cameraname(camera->getName().c_str());
-			ui->cameraBox->addItem(cameraname);
+			_camera_names.push_back(camera->getName());
 		} catch (const std::exception& x) {
 			debug(LOG_DEBUG, DEBUG_LOG, 0, "ignoring camera %d: %s",
 				index, x.what());
@@ -84,6 +83,20 @@ void	tasksubmissionwidget::instrumentSetup(
 		index++;
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "instrument setup complete");
+}
+
+/**
+ * \brief Main thread initializations
+ *
+ * this method fills the menu with the camera names
+ */
+void	tasksubmissionwidget::setupComplete() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "main thread initializations");
+	std::vector<std::string>::const_iterator	i;
+	for (i = _camera_names.begin(); i != _camera_names.end(); i++) {
+		QString	cameraname(i->c_str());
+		ui->cameraBox->addItem(cameraname);
+	}
 }
 
 /**

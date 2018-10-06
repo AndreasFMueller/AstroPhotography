@@ -29,6 +29,7 @@ class tasksubmissionwidget : public InstrumentWidget {
 	int	_coolerindex;
 	int	_filterwheelindex;
 	int	_mountindex;
+	std::vector<std::string>	_camera_names;
 
 public:
 	explicit tasksubmissionwidget(QWidget *parent = 0);
@@ -37,6 +38,7 @@ public:
 	virtual void	instrumentSetup(
 		astro::discover::ServiceObject serviceobject,
 		snowstar::RemoteInstrument instrument);
+	virtual void	setupComplete();
 	void	setRepositories(snowstar::RepositoriesPrx repositories);
 
 public slots:

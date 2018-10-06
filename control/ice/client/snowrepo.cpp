@@ -416,7 +416,6 @@ int	main(int argc, char *argv[]) {
 	if (!remote) {
 		astro::discover::ServiceDiscoveryPtr     sd
 			= astro::discover::ServiceDiscovery::get();
-		sd->start();
 		astro::discover::ServiceObject	so
 			= sd->find(sd->waitfor(server));
 		if (!so.has(astro::discover::ServiceSubset::REPOSITORY)) {

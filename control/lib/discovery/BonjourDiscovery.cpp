@@ -83,6 +83,9 @@ ServiceObject	BonjourDiscovery::find(const ServiceKey& key) {
 	return resolver.resolved();
 }
 
+/**
+ * \brief Construct a Bonjour-based discovery object
+ */
 BonjourDiscovery::BonjourDiscovery() : ServiceDiscovery() {
 	thread = NULL;
 	sdRef = NULL;
@@ -90,19 +93,27 @@ BonjourDiscovery::BonjourDiscovery() : ServiceDiscovery() {
 		kDNSServiceInterfaceIndexAny,
 		"_astro._tcp", NULL, discover::browsereply_callback, this);
 	if (error != kDNSServiceErr_NoError) {
-		debug(LOG_ERR, DEBUG_LOG, 0, "browser failed: %d", error);
-		throw std::runtime_error("cannot create browser");
+		std::string	msg = stringprintf("browser failed: %d", error);
+
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw std::runtime_error(msg);
 	}
 	assert(sdRef != NULL);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "DNSServiceBrowse started");
 }
 
+/**
+ * \brief Start the discovery
+ */
 void	BonjourDiscovery::start() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "start discovery thread");
 	// start a thread
 	thread = new std::thread(discover::main, this);
 }
 
+/**
+ * /brief Destroy the bonjour discover object
+ */
 BonjourDiscovery::~BonjourDiscovery() {
 	if (sdRef) {
 		close(DNSServiceRefSockFD(sdRef));

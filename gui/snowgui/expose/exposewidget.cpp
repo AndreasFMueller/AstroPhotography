@@ -111,6 +111,12 @@ void	exposewidget::instrumentSetup(astro::discover::ServiceObject serviceobject,
 }
 
 /**
+ * \brief main thread setup completion
+ */
+void	exposewidget::setupComplete() {
+}
+
+/**
  * \brief Set the repositories proxy and read the repository names
  */
 void	exposewidget::setRepositories(snowstar::RepositoriesPrx repositories) {

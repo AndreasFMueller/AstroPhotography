@@ -19,11 +19,14 @@ class coolercontrollerwidget : public InstrumentWidget {
 	Q_OBJECT
 
 	snowstar::CoolerPrx	_cooler;
+	std::vector<std::string>	_cooler_names;
 public:
 	explicit coolercontrollerwidget(QWidget *parent = 0);
 	~coolercontrollerwidget();
-	void	instrumentSetup(astro::discover::ServiceObject serviceobject,
+	virtual void	instrumentSetup(
+				astro::discover::ServiceObject serviceobject,
 				snowstar::RemoteInstrument instrument);
+	virtual void	setupComplete();
 
 signals:
 	void	setTemperatureReached();

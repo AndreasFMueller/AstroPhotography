@@ -66,10 +66,20 @@ void    SimCcd::startExposure(const Exposure& exposure) {
 
 	// find the current position, this ensures that the filter wheel
 	// has settled
-	_locator.filterwheel()->currentPosition();
+	if (_locator.filterwheel()) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "waiting for filterwheel");
+		_locator.filterwheel()->currentPosition();
+	} else {
+		debug(LOG_ERR, DEBUG_LOG, 0, "no filterwheel found");
+	}
 
 	// ensure that the guideport ist updated before we start exposing
-	_locator.simguideport()->update();
+	if (_locator.simguideport()) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "update guideport");
+		_locator.simguideport()->update();
+	} else {
+		debug(LOG_ERR, DEBUG_LOG, 0, "no guideport found");
+	}
 
 	// find focal length and limit magnitude
 	float	focallength = parameterValueFloat("focallength");

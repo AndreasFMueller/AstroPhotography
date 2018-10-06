@@ -80,17 +80,24 @@ imagercontrollerwidget::imagercontrollerwidget(QWidget *parent) :
 void	imagercontrollerwidget::instrumentSetup(
 		astro::discover::ServiceObject serviceobject,
 		snowstar::RemoteInstrument instrument) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "begin imagercontrollerwidget::instrumentSetup()");
+	debug(LOG_DEBUG, DEBUG_LOG, 0,
+		"begin imagercontrollerwidget::instrumentSetup()");
 	// parent setup
 	InstrumentWidget::instrumentSetup(serviceobject, instrument);
 
 	// read information about CCDs available on this instrument, and 
 	// remember the first ccd you can find
 	_guider = instrument.guider(0, 0, 0);
+	debug(LOG_DEBUG, DEBUG_LOG, 0,
+		"end imagercontrollerwidget::instrumentSetup()");
+}
 
+/**
+ * \brief Main thread initializations
+ */
+void	imagercontrollerwidget::setupComplete() {
 	// add additional information about this ccd
 	setupCcd();
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "end imagercontrollerwidget::instrumentSetup()");
 }
 
 /**

@@ -22,6 +22,7 @@ public:
 	virtual void	instrumentSetup(
 		astro::discover::ServiceObject serviceobject,
 		snowstar::RemoteInstrument instrument);
+	virtual void	setupComplete();
 	~takeimagewindow();
 
 private:

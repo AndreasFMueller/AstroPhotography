@@ -11,6 +11,8 @@
 #include <AstroFormat.h>
 #include <stdexcept>
 #include <algorithm>
+#include <thread>
+#include <mutex>
 
 #ifdef USE_SD_AVAHI
 #include "AvahiDiscovery.h"
@@ -49,20 +51,16 @@ ServiceDiscovery::~ServiceDiscovery() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "destroy the service discovery object");
 }
 
-/**
- * \brief Factory method to create a service implementation
- *
- * This method creates a service discovery instance suitable for the
- * plattform.
- */
-ServiceDiscoveryPtr	ServiceDiscovery::get() {
-	ServiceDiscoveryPtr	sd;
+static std::once_flag	service_discovery_flag;
+static ServiceDiscoveryPtr	service_discovery;
+
+static void	setup_service_discovery() {
 	// if we are on linux, we should create an instance of the
 	// AvahiDiscovery class
 #ifdef USE_SD_AVAHI
 	debug(LOG_DEBUG, DEBUG_LOG, 0,
 		"creating Avahi based service discovery");
-	sd = ServiceDiscoveryPtr(new AvahiDiscovery());
+	AvahiDiscovery	*sd = = new AvahiDiscovery();
 #endif /* USE_SD_AVAHI */
 
 	// on the Mac, we us an implementation that uses Apples Bonjour
@@ -70,9 +68,26 @@ ServiceDiscoveryPtr	ServiceDiscovery::get() {
 #ifdef USE_SD_BONJOUR
 	debug(LOG_DEBUG, DEBUG_LOG, 0,
 		"creating Bonjour based service discovery");
-	sd = ServiceDiscoveryPtr(new BonjourDiscovery());
+	BonjourDiscovery	*sd = new BonjourDiscovery();
 #endif /* USE_SD_BONJOUR */
-	return sd;
+
+	// start the service discovery
+	sd->start();
+
+	// return the service discovery object
+	service_discovery = sd;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "service discovery created");
+}
+
+/**
+ * \brief Factory method to create a service implementation
+ *
+ * This method creates a service discovery instance suitable for the
+ * plattform.
+ */
+ServiceDiscoveryPtr	ServiceDiscovery::get() {
+	std::call_once(service_discovery_flag, setup_service_discovery);
+	return service_discovery;
 }
 
 /**

@@ -7,11 +7,34 @@
 #define _InstrumentWidget_h
 
 #include <QWidget>
+#include <QThread>
 #include <AstroDiscovery.h>
 #include <RemoteInstrument.h>
 
 namespace snowgui {
 
+class InstrumentWidget;
+
+/**
+ * \brief Thread class that can be used to 
+ */
+class InstrumentSetupThread : public QThread {
+	Q_OBJECT
+	InstrumentWidget		*_instrumentwidget;
+	snowstar::RemoteInstrument		_remoteinstrument;
+	astro::discover::ServiceObject	_serviceobject;
+public:
+	InstrumentSetupThread(InstrumentWidget *, snowstar::RemoteInstrument,
+		astro::discover::ServiceObject);
+	virtual ~InstrumentSetupThread();
+	void	run();
+signals:
+	void	setupCompletion();
+};
+
+/**
+ * \brief Base class for Instrument based widgets
+ */
 class InstrumentWidget : public QWidget {
 	Q_OBJECT
 	std::string	_appname;
@@ -28,12 +51,18 @@ protected:
 public:
 	explicit InstrumentWidget(QWidget *parent = NULL);
 	~InstrumentWidget();
+	void	launchInstrumentSetup(
+				astro::discover::ServiceObject serviceobject,
+				snowstar::RemoteInstrument instrument);
 	virtual void	instrumentSetup(
 				astro::discover::ServiceObject serviceobject,
 				snowstar::RemoteInstrument instrument);
+	virtual void	setupComplete();
 	std::string	instrumentname();
 	void	sendImage(astro::image::ImagePtr image, std::string title);
 	void	changeEvent(QEvent *);
+public slots:
+	void	setupCompletion();
 
 signals:
 	void	offerImage(astro::image::ImagePtr, std::string);

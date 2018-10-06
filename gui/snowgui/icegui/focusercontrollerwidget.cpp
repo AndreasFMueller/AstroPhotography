@@ -58,7 +58,13 @@ void	focusercontrollerwidget::instrumentSetup(
 		ui->focuserSelectionBox->addItem(QString(sn.c_str()));
 		index++;
 	}
+}
 
+/**
+ * \brief Main thread initializations for the focuser
+ */
+void	focusercontrollerwidget::setupComplete() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "setup complete");
 	// setup the focuser
 	setupFocuser();
 }

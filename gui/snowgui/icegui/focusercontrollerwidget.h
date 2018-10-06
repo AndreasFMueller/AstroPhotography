@@ -29,6 +29,7 @@ public:
 	virtual void	instrumentSetup(
 		astro::discover::ServiceObject serviceobject,
 		snowstar::RemoteInstrument instrument);
+	virtual void	setupComplete();
 	int	getCurrentPosition();
 	int	_previousposition;
 
@@ -55,7 +56,6 @@ public slots:
 	void	focuserChanged(int);
 	void	editingFinished();
 	void	guiChanged();
-
 };
 
 } // namespace snowgui

@@ -66,7 +66,9 @@ void	guideportcontrollerwidget::instrumentSetup(
 		ui->guideportSelectionBox->addItem(QString(dn.c_str()));
 		index++;
 	}
+}
 
+void	guideportcontrollerwidget::setupComplete() {
 	// set up the guideport
 	setupGuideport();
 }

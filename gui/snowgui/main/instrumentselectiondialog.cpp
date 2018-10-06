@@ -7,6 +7,7 @@
 #include "ui_instrumentselectiondialog.h"
 #include <CommunicatorSingleton.h>
 #include "mainwindow.h"
+#include "../icegui/InstrumentWidget.h"
 
 using namespace astro::discover;
 
@@ -69,6 +70,22 @@ void	InstrumentSelectionDialog::accept() {
 void	InstrumentSelectionDialog::launch(const std::string& instrumentname) {
 	debug(LOG_ERR, DEBUG_LOG, 0, "%s: can only launch from derived class",
 		instrumentname.c_str());
+}
+
+void	InstrumentSelectionDialog::launch(const std::string& instrumentname,
+		InstrumentWidget *a) {
+	snowstar::RemoteInstrument      ri(instruments, instrumentname);
+	// get the main window and connect the offerImage signal
+	// to the imageForSaving option
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "connect offerImage()");
+
+	// start the instrument setup thread
+	a->launchInstrumentSetup(_serviceobject, ri);
+
+	// make the application visible
+	a->show();
+	QApplication::setActiveWindow(a);
+	a->raise();
 }
 
 } // namespace snowgui

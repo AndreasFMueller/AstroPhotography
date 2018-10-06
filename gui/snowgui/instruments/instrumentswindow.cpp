@@ -26,7 +26,6 @@ instrumentswindow::instrumentswindow(QWidget *parent,
 	// get service discover
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "start discovery");
 	_discovery = astro::discover::ServiceDiscovery::get();
-	_discovery->start();
 	_discoveryTimer = new QTimer();
 	_discoveryTimer->setInterval(1000);
 

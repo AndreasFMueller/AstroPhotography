@@ -13,7 +13,6 @@ astro::discover::ServiceObject	IceDiscovery::discover(
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "service: %s", name.c_str());
 	astro::discover::ServiceDiscoveryPtr	discovery
 		= astro::discover::ServiceDiscovery::get();
-	discovery->start();
 	astro::discover::ServiceKey	key = discovery->waitfor(name);
 	astro::discover::ServiceObject	serviceobject = discovery->find(key);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "host: %s, port: %d",

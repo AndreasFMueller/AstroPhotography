@@ -62,7 +62,12 @@ void	adaptiveopticscontrollerwidget::instrumentSetup(
 		ui->adaptiveopticsSelectionBox->addItem(QString(sn.c_str()));
 		index++;
 	}
+}
 
+/**
+ * \brief Main thread initializations
+ */
+void	adaptiveopticscontrollerwidget::setupComplete() {
 	// set the adaptive optics unit
 	setupAdaptiveOptics();
 }

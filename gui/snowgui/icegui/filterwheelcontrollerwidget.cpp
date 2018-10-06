@@ -62,7 +62,12 @@ void	filterwheelcontrollerwidget::instrumentSetup(
 		}
 		index++;
 	}
+}
 
+/**
+ * \brief main thread stuff for filterwheel initialization
+ */
+void	filterwheelcontrollerwidget::setupComplete() {
 	// set the filterwheel up
 	setupFilterwheel();
 }

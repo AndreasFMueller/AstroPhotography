@@ -83,8 +83,14 @@ void	mountcontrollerwidget::instrumentSetup(
 		ui->mountSelectionBox->addItem(QString(sn.c_str()));
 		index++;
 	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "found total of %d mounts", index);
+}
 
-	// setup the mount
+/**
+ * \brief Main thread initializations for the mount
+ */
+void	mountcontrollerwidget::setupComplete() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "setup complete");
 	setupMount();
 }
 

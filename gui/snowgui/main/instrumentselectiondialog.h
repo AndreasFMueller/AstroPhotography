@@ -20,6 +20,11 @@ namespace Ui {
 	class InstrumentSelectionDialog;
 }
 
+class InstrumentWidget;
+
+/**
+ * \brief create an instrument selection dialog
+ */
 class InstrumentSelectionDialog : public QDialog {
 	Q_OBJECT
 protected:
@@ -32,14 +37,13 @@ public:
 	~InstrumentSelectionDialog();
 
 	virtual void	launch(const std::string& instrumentname);
+	void	launch(const std::string& instrumentname, InstrumentWidget *a);
 
 public slots:
         void    accept();
 
 private:
 	Ui::InstrumentSelectionDialog *ui;
-
-
 };
 
 class MainWindow;
@@ -55,15 +59,24 @@ public:
 		: InstrumentSelectionDialog(parent, serviceobject) {
 	}
 	virtual void	launch(const std::string& instrumentname) {
-		snowstar::RemoteInstrument	ri(instruments, instrumentname);
 		application	*a = new application(NULL);
+#if 0
+		snowstar::RemoteInstrument	ri(instruments, instrumentname);
 		// get the main window and connect the offerImage signal
 		// to the imageForSaving option
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "connect offerImage()");
-		a->instrumentSetup(_serviceobject, ri);
+
+		// start the instrument setup thread
+		InstrumentSetupThread	*setupthread
+			= new InstrumentSetupThread(a, _serviceobject, ri);
+		setupthread->start();
+
+		// make the application visible
 		a->show();
 		QApplication::setActiveWindow(a);
 		a->raise();
+#endif
+		InstrumentSelectionDialog::launch(instrumentname, (InstrumentWidget *)a);
 	}
 };
 

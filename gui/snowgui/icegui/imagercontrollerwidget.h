@@ -46,6 +46,7 @@ public:
 	virtual void	instrumentSetup(
 		astro::discover::ServiceObject serviceobject,
 		snowstar::RemoteInstrument instrument);
+	virtual void	setupComplete();
 
 	const astro::camera::Exposure&	exposure() const { return _exposure; }
 	const astro::image::ImagePtr	image() const { return _image; }

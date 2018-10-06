@@ -30,7 +30,6 @@ static unsigned short	icestar_port() {
 
 static ServiceObject	resolve(const std::string& name) {
 	ServiceDiscoveryPtr	discovery = ServiceDiscovery::get();
-	discovery->start();
 	ServiceKey	key = discovery->waitfor(name);
 	return discovery->find(key);
 }

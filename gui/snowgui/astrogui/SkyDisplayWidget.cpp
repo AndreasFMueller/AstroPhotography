@@ -29,14 +29,9 @@ static bool	visible(const astro::AzmAlt& a) {
  * \param parent	parent widget
  */
 SkyDisplayWidget::SkyDisplayWidget(QWidget *parent) : QWidget(parent) {
+	qRegisterMetaType<astro::catalog::Catalog::starsetptr>("astro::catalog::Catalog::starsetptr");
+
 	// get all the stars from the BSC catalog
-#if 0
-	CatalogPtr catalog = CatalogFactory::get();
-	SkyWindow	windowall;
-	MagnitudeRange	magrange(-30, 6);
-	_stars = catalog->find(windowall, magrange);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "found %d stars", _stars->size());
-#else
 	SkyStarThread	*_skystarthread = new SkyStarThread(this);
 	connect(_skystarthread,
 		SIGNAL(stars(astro::catalog::Catalog::starsetptr)),
@@ -45,7 +40,6 @@ SkyDisplayWidget::SkyDisplayWidget(QWidget *parent) : QWidget(parent) {
 	connect(_skystarthread, SIGNAL(finished()),
 		_skystarthread, SLOT(deleteLater()));
 	_skystarthread->start();
-#endif
 	_converter = NULL;
 
 

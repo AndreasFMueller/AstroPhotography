@@ -189,7 +189,12 @@ void	guidercontrollerwidget::instrumentSetup(
 	_guiderdescriptor.ccdIndex = 0;
 	_guiderdescriptor.guideportIndex = 0;
 	_guiderdescriptor.adaptiveopticsIndex = 0;
+}
 
+/**
+ * \brief Main thread initializations
+ */
+void	guidercontrollerwidget::setupComplete() {
 	// set up the guider
 	setupGuider();
 }

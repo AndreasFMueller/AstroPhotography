@@ -34,6 +34,7 @@ public:
 	virtual void	instrumentSetup(
 		astro::discover::ServiceObject serviceobject,
 		snowstar::RemoteInstrument instrument);
+	virtual void	setupComplete();
 	astro::RaDec	current();
 	void	setTarget(const astro::RaDec& target);
 

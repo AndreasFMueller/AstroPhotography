@@ -50,17 +50,26 @@ void	takeimagewindow::instrumentSetup(
 		astro::discover::ServiceObject serviceobject,
 		snowstar::RemoteInstrument instrument) {
 	InstrumentWidget::instrumentSetup(serviceobject, instrument);
-	ui->ccdcontrollerWidget->instrumentSetup(serviceobject, instrument);
-	ui->coolercontrollerWidget->instrumentSetup(serviceobject, instrument);
-	ui->focusercontrollerWidget->instrumentSetup(serviceobject, instrument);
-	ui->filterwheelcontrollerWidget->instrumentSetup(serviceobject,
+	ui->ccdcontrollerWidget->launchInstrumentSetup(serviceobject,
 		instrument);
-	ui->guideportcontrollerWidget->instrumentSetup(serviceobject,
+	ui->coolercontrollerWidget->launchInstrumentSetup(serviceobject,
 		instrument);
-	ui->adaptiveopticscontrollerWidget->instrumentSetup(serviceobject,
+	ui->focusercontrollerWidget->launchInstrumentSetup(serviceobject,
 		instrument);
-	ui->mountcontrollerWidget->instrumentSetup(serviceobject, instrument);
+	ui->filterwheelcontrollerWidget->launchInstrumentSetup(serviceobject,
+		instrument);
+	ui->guideportcontrollerWidget->launchInstrumentSetup(serviceobject,
+		instrument);
+	ui->adaptiveopticscontrollerWidget->launchInstrumentSetup(serviceobject,
+		instrument);
+	ui->mountcontrollerWidget->launchInstrumentSetup(serviceobject,
+		instrument);
+}
 
+/**
+ * \brief Main thread initializations
+ */
+void	takeimagewindow::setupComplete() {
 	setAppname("Take images");
 }
 

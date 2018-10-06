@@ -67,7 +67,6 @@ NiceLocator::NiceLocator() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "starting service discovery for nice "
 		"locator");
 	discovery = ServiceDiscovery::get();
-	discovery->start();
 }
 
 NiceLocator::~NiceLocator() {

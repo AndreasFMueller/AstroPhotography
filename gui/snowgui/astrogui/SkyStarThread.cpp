@@ -40,6 +40,7 @@ void	SkyStarThread::run() {
 	_stars = precess(precession, _stars);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "star retrieval complete");
 	emit stars(_stars);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "stars sent to main thread");
 }
 
 } // namespace snowgui
