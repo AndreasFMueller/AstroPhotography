@@ -71,7 +71,7 @@ void	HideProgress::update() {
 	if (p < 0) {
 		p = 0;
 	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "exposure value: %d", p);
+	//debug(LOG_DEBUG, DEBUG_LOG, 0, "exposure value: %d", p);
 	_progressbar->setValue(p);
 }
 
