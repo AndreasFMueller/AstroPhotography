@@ -42,6 +42,7 @@ class StarChartWidget : public QWidget {
 	Q_OBJECT
 
 	astro::catalog::Catalog::starsetptr	_stars;
+	astro::catalog::Catalog::starsetptr	_sky;
 	astro::Angle	_resolution;	// angle per pixel
 	astro::RaDec	_direction;
 	astro::device::Mount::state_type	_state;
@@ -97,6 +98,7 @@ public slots:
 	void	directionChanged(astro::RaDec);
 	void	stateChanged(astro::device::Mount::state_type);
 	void	useStars(astro::catalog::Catalog::starsetptr);
+	void	useSky(astro::catalog::Catalog::starsetptr);
 	void	workerFinished();
 };
 

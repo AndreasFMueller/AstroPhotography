@@ -4,6 +4,7 @@
  * (c) 2018 Prof Dr Andreas Müller, Hochschule Rapperswil
  */
 #include "StarChartWidget.h"
+#include "SkyDisplayWidget.h"
 #include <AstroDebug.h>
 #include <AstroDevice.h>
 #include <QPainter>
@@ -31,6 +32,16 @@ StarChartWidget::StarChartWidget(QWidget *parent) : QWidget(parent),
 	qRegisterMetaType<astro::catalog::Catalog::starsetptr>("astro::catalog::Catalog::starsetptr");
 
 	setMouseTracking(true);
+
+	// launch a thread to retrieve the 
+	SkyStarThread	*_skystarthread = new SkyStarThread(this);
+	connect(_skystarthread,
+		SIGNAL(stars(astro::catalog::Catalog::starsetptr)),
+		this,
+		SLOT(useSky(astro::catalog::Catalog::starsetptr)));
+	connect(_skystarthread, SIGNAL(finished()),
+		_skystarthread, SLOT(deleteLater()));
+	_skystarthread->start();
 }
 
 /**
@@ -231,15 +242,22 @@ void	StarChartWidget::draw() {
 	}
 
 	// draw the stars
+	Catalog::starset::const_iterator        i;
 	if (_stars) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "%d stars to draw",
 			_stars->size());
-		Catalog::starset::const_iterator        i;
 		for (i = _stars->begin(); i != _stars->end(); i++) {
 			drawStar(painter, *i);
 		}
 	} else {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "no stars");
+	}
+	// if the telescope is moving, we also display the sky stars
+	if ((_state == astro::device::Mount::GOTO) && (_sky)) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "adding sky stars");
+		for (i = _sky->begin(); i != _sky->end(); i++) {
+			drawStar(painter, *i);
+		}
 	}
 }
 
@@ -369,7 +387,7 @@ void	StarChartWidget::mouseMoveEvent(QMouseEvent *event) {
 }
 
 /**
- * \brief receive a new set of stars from the worker thread
+ * \brief Receive a new set of stars from the worker thread
  *
  * This method receives a new set of stars from the worker thread and
  * redisplays the sky with this new set of stars
@@ -380,6 +398,22 @@ void	StarChartWidget::useStars(astro::catalog::Catalog::starsetptr stars) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "receiveing %d new stars",
 		stars->size());
 	_stars = stars;
+	repaint();
+}
+
+/**
+ * \brief Receive a full set of sky stars
+ *
+ * While moving the telescope, we cannot see the stars to high limiting
+ * magnitude, but for the sake of an animation, we then use the sky stars
+ * in addition to the more detailed stars of the field of view only.
+ *
+ * \param sky	set of stars representing the full sky
+ */
+void	StarChartWidget::useSky(astro::catalog::Catalog::starsetptr sky) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "receiving sky with %d stars",
+		sky->size());
+	_sky = sky;
 	repaint();
 }
 
