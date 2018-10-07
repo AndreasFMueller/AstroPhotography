@@ -20,12 +20,12 @@ static std::string	getserialname(const std::string& devicename) {
 	// if the unit name is just a number, we should look up the
 	// associated serial device in the properties
 	try {
-		int	unit = std::stod(dev.unitname());
+		int	unit = std::stoi(dev.unitname());
 		Properties	properties(devicename);
 		std::string	serialdevicename
 			= properties.getProperty("device");
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "found serial device name: %s",
-			serialdevicename.c_str());
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "found serial device for unit %d name: %s",
+			unit, serialdevicename.c_str());
 		return serialdevicename;
 	} catch (const std::exception& x) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0,

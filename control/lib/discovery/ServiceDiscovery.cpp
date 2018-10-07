@@ -60,7 +60,7 @@ static void	setup_service_discovery() {
 #ifdef USE_SD_AVAHI
 	debug(LOG_DEBUG, DEBUG_LOG, 0,
 		"creating Avahi based service discovery");
-	AvahiDiscovery	*sd = = new AvahiDiscovery();
+	AvahiDiscovery	*sd = new AvahiDiscovery();
 #endif /* USE_SD_AVAHI */
 
 	// on the Mac, we us an implementation that uses Apples Bonjour

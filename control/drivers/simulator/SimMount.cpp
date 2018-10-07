@@ -109,6 +109,7 @@ void	SimMount::Goto(const AzmAlt& /* azmalt */) {
 	throw std::runtime_error("cannot goto AzmAlt");
 }
 
+#if 0
 /**
  * \brief Find out whether the mount is on the east or west
  *
@@ -118,6 +119,7 @@ void	SimMount::Goto(const AzmAlt& /* azmalt */) {
 void	SimMount::telescopePositionEast() {
 	std::unique_lock<std::recursive_mutex>	lock(_mutex);
 }
+#endif
 
 /**
  * \brief Cancel movement
