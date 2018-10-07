@@ -9,6 +9,9 @@ namespace astro {
 
 /**
  * \brief Construct a converter for a given time and place on earth
+ *
+ * \param when		unix point in time for which to construct the converter
+ * \param longlat	position on earth
  */
 AzmAltConverter::AzmAltConverter(time_t when, const LongLat& longlat) 
 	: _longlat(longlat) { 
@@ -17,6 +20,8 @@ AzmAltConverter::AzmAltConverter(time_t when, const LongLat& longlat)
 
 /**
  * \brief Construct a converter for the current time and a given place on earth
+ *
+ * \param longlat	place on earth
  */
 AzmAltConverter::AzmAltConverter(const LongLat& longlat)
 	: _longlat(longlat) {
@@ -26,21 +31,37 @@ AzmAltConverter::AzmAltConverter(const LongLat& longlat)
 }
 
 /**
+ * \brief Determine the hour angle for a position
+ *
+ * \param radec	RA/DEC of a position of which to compute the hour angle
+ */
+Angle	AzmAltConverter::hourangle(const RaDec& radec) const {
+	Angle	h = _lmst - radec.ra();
+	while (h > Angle(M_PI)) {
+		h = h - Angle(2 * M_PI);
+	}
+	while (h < Angle(-M_PI)) {
+		h = h + Angle(2 * M_PI);
+	}
+	return h;
+}
+
+/**
  * \brief Perform the conversion
  *
  * \param radec	celestial coordinates to convert
  */
 AzmAlt	AzmAltConverter::operator()(const RaDec& radec) {
-	Angle	hourangle = _lmst - radec.ra();
+	Angle	_hourangle = hourangle(radec);
 	AzmAlt	result;
 	// compute the altitude
 	double	sh = sin(_longlat.latitude()) * sin(radec.dec())
-		+ cos(_longlat.latitude()) * cos(radec.dec()) * cos(hourangle);
+		+ cos(_longlat.latitude()) * cos(radec.dec()) * cos(_hourangle);
 	result.alt() = arcsin(sh);
 
 	// compute the azimuth
-	double	y = sin(hourangle);
-	double	x = cos(hourangle) * sin(_longlat.latitude())
+	double	y = sin(_hourangle);
+	double	x = cos(_hourangle) * sin(_longlat.latitude())
 			- tan(radec.dec()) * cos(_longlat.latitude());
 	result.azm() = arctan2(y, x);
 

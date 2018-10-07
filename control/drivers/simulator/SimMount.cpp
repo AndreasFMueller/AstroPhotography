@@ -110,6 +110,16 @@ void	SimMount::Goto(const AzmAlt& /* azmalt */) {
 }
 
 /**
+ * \brief Find out whether the mount is on the east or west
+ *
+ * This method uses the hour angle to decide on which side the telescope
+ * is located
+ */
+void	SimMount::telescopePositionEast() {
+	std::unique_lock<std::recursive_mutex>	lock(_mutex);
+}
+
+/**
  * \brief Cancel movement
  *
  * This method is not implemented

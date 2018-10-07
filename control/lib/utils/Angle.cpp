@@ -60,8 +60,18 @@ double	Angle::radians_to_degrees(const double r) {
 	return 180. * r / M_PI;
 }
 
-Angle::Angle(double angle) : _angle(angle) {
-	//reduce();
+Angle::Angle(double angle, unit u) : _angle(angle) {
+	switch (u) {
+	case Radians:
+		_angle = angle;
+		return;
+	case Degrees:
+		degrees(angle);
+		return;
+	case Hours:
+		hours(angle);
+		return;
+	}
 }
 
 double	Angle::degrees() const {

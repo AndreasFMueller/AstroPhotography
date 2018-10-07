@@ -32,6 +32,7 @@ public:
 	virtual AzmAlt	getAzmAlt();
 	virtual void	Goto(const RaDec& radec);
 	virtual void	Goto(const AzmAlt& azmalt);
+	virtual bool	telescopePositionEast();
 	virtual void	cancel();
 };
 

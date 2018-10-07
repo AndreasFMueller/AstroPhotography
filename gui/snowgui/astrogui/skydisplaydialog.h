@@ -44,6 +44,7 @@ public slots:
 
 	void	altazChanged(int);
 	void	radecChanged(int);
+	void	eclipticChanged(int);
 	void	constellationsChanged(int);
 	void	telescopeChanged(int);
 	void	targetChanged(int);

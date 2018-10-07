@@ -26,7 +26,8 @@ class Angle {
 protected:
 	virtual void	reduce(double base = 0);
 public:
-	Angle(double angle = 0);
+	typedef enum { Radians, Degrees, Hours } unit;
+	Angle(double angle = 0, unit u = Radians);
 	double	degrees() const;
 	void	degrees(double degrees);
 	std::string	dms(const char separator = ':', int precision = 3) const;
@@ -336,6 +337,7 @@ public:
 	AzmAlt	operator()(const RaDec& radec);
 	Angle	LMST() const { return _lmst; }
 	RaDec	inverse(const AzmAlt& azmalt);
+	Angle	hourangle(const RaDec& radec) const;
 };
 
 } // namespace astro

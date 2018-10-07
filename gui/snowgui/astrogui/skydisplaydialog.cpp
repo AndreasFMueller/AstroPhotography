@@ -35,6 +35,8 @@ SkyDisplayDialog::SkyDisplayDialog(QWidget *parent)
 		this, SLOT(altazChanged(int)));
 	connect(ui->radecCheckBox, SIGNAL(stateChanged(int)),
 		this, SLOT(radecChanged(int)));
+	connect(ui->eclipticCheckBox, SIGNAL(stateChanged(int)),
+		this, SLOT(eclipticChanged(int)));
 	connect(ui->constellationsCheckBox, SIGNAL(stateChanged(int)),
 		this, SLOT(constellationsChanged(int)));
 	connect(ui->telescopeCheckBox, SIGNAL(stateChanged(int)),
@@ -102,6 +104,12 @@ void	SkyDisplayDialog::altazChanged(int state) {
 void	SkyDisplayDialog::radecChanged(int state) {
 	bool	checked = (state == Qt::Checked);
 	ui->skydisplayWidget->show_radec(checked);
+	ui->skydisplayWidget->update();
+}
+
+void	SkyDisplayDialog::eclipticChanged(int state) {
+	bool	checked = (state == Qt::Checked);
+	ui->skydisplayWidget->show_ecliptic(checked);
 	ui->skydisplayWidget->update();
 }
 

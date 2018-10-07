@@ -47,6 +47,7 @@ class SkyDisplayWidget : public QWidget {
 	// whether or not to show the altaz grid lines
 	bool	_show_altaz;
 	bool	_show_radec;
+	bool	_show_ecliptic;
 	bool	_show_constellations;
 	bool	_show_telescope;
 	bool	_show_target;
@@ -57,6 +58,8 @@ public:
 	void	show_altaz(bool a) { _show_altaz = a; }
 	bool	show_radec() const { return _show_radec; }
 	void	show_radec(bool r) { _show_radec = r; }
+	bool	show_ecliptic() const { return _show_ecliptic; }
+	void	show_ecliptic(bool r) { _show_ecliptic = r; }
 	bool	show_constellations() const { return _show_constellations; }
 	void	show_constellations(bool c) { _show_constellations = c; }
 	bool	show_telescope() const { return _show_telescope; }
@@ -93,6 +96,7 @@ private:
 	void	drawTelescope(QPainter& painter);
 	void	drawAltaz(QPainter& painter);
 	void	drawRadec(QPainter& painter);
+	void	drawEcliptic(QPainter& painter);
 	void	drawTarget(QPainter& painter);
 	void	drawConstellations(QPainter& painter);
 	void	drawLabels(QPainter& painter);

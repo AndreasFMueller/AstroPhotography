@@ -50,6 +50,7 @@ SkyDisplayWidget::SkyDisplayWidget(QWidget *parent) : QWidget(parent) {
 	// show the altaz grid by default
 	_show_altaz = true;
 	_show_radec = true;
+	_show_ecliptic = true;
 	_show_constellations = true;
 	_show_labels = true;
 	_show_target = false;
@@ -324,6 +325,33 @@ void	SkyDisplayWidget::drawRadec(QPainter& painter) {
 	}
 }
 
+static astro::RaDec	ecliptic_point(const astro::Angle ra) {
+	astro::Angle	dec = astro::arctan(sin(ra) * sin(astro::Angle::ecliptic_angle));
+	return astro::RaDec(ra, dec);
+}
+
+/**
+ * \brief Draw the Ecliptic
+ */
+void	SkyDisplayWidget::drawEcliptic(QPainter& painter) {
+	// prepare green pen for drawing
+	QPen	pen(Qt::SolidLine);
+	pen.setWidth(1);
+	QColor	green(51,153,51);
+	pen.setColor(green);
+	painter.setPen(pen);
+
+	// draw the ecliptic
+	astro::Angle	step(5 * M_PI / 180);
+	for (int i = 0; i <= 355 / 5; i++) {
+		astro::Angle	ra = step * i;
+		astro::RaDec	from = ecliptic_point(ra);
+		ra = step * (i + 1);
+		astro::RaDec	to = ecliptic_point(ra);
+		drawLine(painter, from, to);
+	}
+}
+
 /**
  * \brief paint the sky anew
  */
@@ -348,6 +376,9 @@ void	SkyDisplayWidget::draw() {
 	}
 	if (show_radec()) {
 		drawRadec(painter);
+	}
+	if (show_ecliptic()) {
+		drawEcliptic(painter);
 	}
 	if (show_constellations()) {
 		drawConstellations(painter);

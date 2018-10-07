@@ -170,6 +170,15 @@ AzmAlt	CelestronMount::getAzmAlt() {
 	return AzmAlt(Angle(a.first), Angle(a.second));
 }
 
+bool	CelestronMount::telescopePositionEast() {
+	// XXX use the location on earth and the azm angle to find out
+	// XXX on which side the telescope currently is, at least for
+	// XXX GE mounts
+
+	// XXX until that is implemented, use the default method
+	return Mount::telescopePositionEast();
+}
+
 double	CelestronMount::angle(uint16_t a) {
 	return 2 * M_PI * a / 65536.;
 }

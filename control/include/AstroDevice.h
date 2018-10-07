@@ -270,7 +270,13 @@ public:
 	static DeviceName::device_type	devicetype;
 private:
 	void	propertySetup();
+	bool	_has_location;
+	LongLat	_location;
+protected:
+	void	location(const LongLat& l);
 public:
+	LongLat	location();
+
 	Mount(const std::string& name);
 	Mount(const DeviceName& name);
 	virtual ~Mount() { }
@@ -286,6 +292,9 @@ public:
 	virtual void	Goto(const RaDec& radec);
 	virtual void	Goto(const AzmAlt& azmalt);
 	virtual void	cancel();
+
+	// Whether the telescope is on the east side of the mount
+	virtual bool	telescopePositionEast();
 
 	// add position metadata to an image
 	void	addPositionMetadata(astro::image::ImageBase& image);

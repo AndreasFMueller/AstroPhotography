@@ -38,13 +38,18 @@ void	Mount::propertySetup() {
 	ParameterDescription	latitude_desc("latitude", -90, 90);
 	add(latitude_desc);
 
+	// we assume to have a location
+	_has_location = true;
+
 	// get the position from the device.properties
 	float	longitude = 0;
 	if (hasProperty("longitude")) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "found longitude property");
 		longitude = std::stod(getProperty("longitude"));
+		_location.longitude() = Angle(longitude, Angle::Degrees);
 	} else {
 		longitude = 8.83; // Altendorf
+		_has_location = false;
 	}
 	parameter("longitude", longitude);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "set longitude parameter to %s",
@@ -54,12 +59,15 @@ void	Mount::propertySetup() {
 	if (hasProperty("latitude")) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "found latitude property");
 		latitude = std::stod(getProperty("latitude"));
+		_location.latitude() = Angle(latitude, Angle::Degrees);
 	} else {
 		latitude = 47.19; // Altendorf
+		_has_location = false;
 	}
 	parameter("latitude", latitude);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "set latitude parameter to %s",
 		parameterValueString("latitude").c_str());
+
 }
 
 /**
@@ -88,6 +96,39 @@ void	Mount::Goto(const RaDec& /* radec */) {
  */	
 void	Mount::Goto(const AzmAlt& /* azmalt */) {
 	throw std::runtime_error("Goto not implemented");
+}
+
+/**
+ * \brief Find out on which side of the mount the telescope currently is
+ */
+bool	Mount::telescopePositionEast() {
+	// use the hour angle to decide whether the telescope is on the
+	// east or west
+	AzmAltConverter	azmaltconverter(location());
+	Angle	hourangle = azmaltconverter.hourangle(this->getRaDec());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "hour angle: %.4f", hourangle.hours());
+	return (hourangle > 0);
+}
+
+/**
+ * \brief Use the position 
+ */
+LongLat	Mount::location() {
+	if (_has_location) {
+		return _location;
+	}
+	throw std::runtime_error("position not available");
+}
+
+/**
+ * \brief protected method to set the location
+ *
+ * This can be used in a derived class to set the location e.g. from a
+ * GPS receiver attached to the telescope
+ */
+void	Mount::location(const LongLat& l) {
+	_has_location = true;
+	_location = l;
 }
 
 /**
