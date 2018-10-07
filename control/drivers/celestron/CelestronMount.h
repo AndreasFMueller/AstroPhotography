@@ -8,6 +8,7 @@
 
 #include <AstroDevice.h>
 #include <Serial.h>
+#include <mutex>
 
 namespace astro {
 namespace device {
@@ -22,6 +23,8 @@ class CelestronMount : public astro::device::Mount,
 	uint16_t	angle16(const Angle& a);
 	uint32_t	angle32(const Angle& a);
 	std::pair<double, double>	parseangles(const std::string& s);
+	// mutex to protect serial communication from concurrent commands
+	std::recursive_mutex	_mutex;
 public:
 	CelestronMount(const std::string& devicename);
 	virtual ~CelestronMount();

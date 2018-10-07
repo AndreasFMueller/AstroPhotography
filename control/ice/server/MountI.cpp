@@ -26,6 +26,10 @@ void	MountI::cancel(const Ice::Current& /* current */) {
 	_mount->cancel();
 }
 
+bool	MountI::telescopePositionEast(const Ice::Current& /* current */) {
+	return _mount->telescopePositionEast();
+}
+
 void	MountI::GotoAzmAlt(const AzmAlt& azmalt,
 		const Ice::Current& /* current */) {
 	_mount->Goto(convert(azmalt));

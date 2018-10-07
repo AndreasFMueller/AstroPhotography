@@ -41,6 +41,8 @@ CelestronMount::CelestronMount(const std::string& devicename)
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "creating Celestron mount on %s",
 		serialdevice().c_str());
 
+	std::unique_lock<std::recursive_mutex>	lock(_mutex);
+
 	// check communication
 	write("Kx");
 	std::string	k = read(1);
@@ -79,6 +81,8 @@ void	CelestronMount::getprompt() {
 }
 
 Mount::state_type	CelestronMount::state() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "locking for state command");
+	std::unique_lock<std::recursive_mutex>	lock(_mutex);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "sending J command to check alignment");
 	write("J");
 	std::string	s = readto('#');
@@ -100,11 +104,17 @@ Mount::state_type	CelestronMount::state() {
 }
 
 void	CelestronMount::cancel() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "locking for cancel command");
+	std::unique_lock<std::recursive_mutex>	lock(_mutex);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "sending cancel command");
 	write("M");
 	getprompt();
 }
 
 void	CelestronMount::Goto(const AzmAlt& azmalt) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "locking for GOTO command");
+	std::unique_lock<std::recursive_mutex>	lock(_mutex);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "sending GOTO AzmAtl command");
 	std::string	cmd;
 	if (version > 202) {
 		cmd = stringprintf("b%08X,%08X",
@@ -119,6 +129,9 @@ void	CelestronMount::Goto(const AzmAlt& azmalt) {
 }
 
 void	CelestronMount::Goto(const RaDec& radec) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "locking for GOTO command");
+	std::unique_lock<std::recursive_mutex>	lock(_mutex);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "sending GOTO RaDec command");
 	std::string	cmd;
 	if (version > 106) {
 		cmd = stringprintf("r%08X,%08X",
@@ -150,6 +163,9 @@ std::pair<double, double>	CelestronMount::parseangles(const std::string& respons
 }
 
 RaDec	CelestronMount::getRaDec() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "locking for get command");
+	std::unique_lock<std::recursive_mutex>	lock(_mutex);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "sending get RaDec command");
 	if (version >= 106) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "sending e command");
 		write("e");
@@ -164,6 +180,9 @@ RaDec	CelestronMount::getRaDec() {
 }
 
 AzmAlt	CelestronMount::getAzmAlt() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "locking for get command");
+	std::unique_lock<std::recursive_mutex>	lock(_mutex);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "sending get AzmAlt command");
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "sending z command");
 	write("z");
 	std::pair<double, double>	a = parseangles(readto('#'));
@@ -174,6 +193,21 @@ bool	CelestronMount::telescopePositionEast() {
 	// XXX use the location on earth and the azm angle to find out
 	// XXX on which side the telescope currently is, at least for
 	// XXX GE mounts
+	
+#if 0
+	// first query the mount to find out whether the telescope is 
+	// actually equatorial by using the "t" command 
+	bool	north = true; // XXX use t command
+
+	// depending on the orientation, use the azm angle to decied whether
+	// or not we are on the east/west side
+	AzmAlt	azmalt = getAzmAlt();
+	if (north) {
+		return azmalt.azm() < 0;
+	} else {
+		return azmalt.azm() < 0;
+	}
+#endif
 
 	// XXX until that is implemented, use the default method
 	return Mount::telescopePositionEast();
