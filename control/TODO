@@ -1,5 +1,8 @@
 configuration system:
 
+Pointing:
+      - azimuth not evaluated
+
 Devices:
       -	reservation of devices to ensure that a CCD e.g. used for guiging
 	is not used for other exposures at the same time
@@ -66,16 +69,22 @@ Drivers:
 	Can we have persistent names for these devices?
       -	It should be possible to reread the devices of a module, just in
 	case a new device was added during runtime.
-      -	ATIK driver should not crash if exposure time is too long for the
-	small camera, just reduce the exposure time ignore the large time
+      - NICE driver cannot talk from Ubuntu 16.04 to other systems (ICE
+	help request pending)
 
 ICE client/server:
       - USB Timeout in a driver should always be converted to a decent timeout
 	exception sent back to the client and hopefully handled there
       -	shutter option für snowtask.cpp
 
+Catalog:
+      -	Why is precession in Hipparcos catalog not needed?
+
 General:
       - Template class with variadic constructor for throwing exceptions
 	(doing the usual msg = stringprintf, debug(LOG_ERR,...) and throw
 	all at once by simply instatiating the template).
+
+Hardware:
+      - Label Cameras with up direction so that pointing becomes easier.
 
