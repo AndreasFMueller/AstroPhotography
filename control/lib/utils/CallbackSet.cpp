@@ -53,8 +53,19 @@ public:
  * \brief let all callbacks operate on data
  */
 CallbackDataPtr	CallbackSet::operator()(CallbackDataPtr data) {
+	// make sure we have data
+	if (!data) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "no data");
+		return data;
+	}
 	CallbackCaller	caller(data);
-	for_each(begin(), end(), caller);
+	try {
+		for_each(begin(), end(), caller);
+	} catch (const std::exception& x) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "failed to call: %s", x.what());
+	} catch (...) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "unknown callback failure");
+	}
 	return data;
 }
 
