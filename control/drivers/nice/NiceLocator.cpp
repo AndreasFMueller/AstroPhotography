@@ -89,7 +89,8 @@ std::string	NiceLocator::getVersion() const {
 snowstar::ModulesPrx	NiceLocator::getModules(const std::string& servicename) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "get a service named '%s'",
 		servicename.c_str());
-	std::unique_lock<std::mutex>	lock(modules_mtx);
+	std::unique_lock<std::recursive_mutex>	lock(modules_mtx);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "modules lock acquired");
 	ModulesMap::iterator	i = modules.find(servicename);
 	if (i != modules.end()) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "module for '%s' already known",
@@ -112,6 +113,9 @@ snowstar::ModulesPrx	NiceLocator::getModules(const std::string& servicename) {
  * \param key	service key for which to find the modules
  */
 snowstar::ModulesPrx	NiceLocator::getModules(const ServiceKey& key) {
+	std::unique_lock<std::recursive_mutex>	lock(modules_mtx);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "lock acquired, key = %s",
+		key.toString().c_str());
 	snowstar::ModulesPrx	mprx;
 	try {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "get modules for key %s",
@@ -130,6 +134,8 @@ snowstar::ModulesPrx	NiceLocator::getModules(const ServiceKey& key) {
 
 		// store the new proxy in the modules map
 		modules.insert(std::make_pair(key.name(), mprx));
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "proxy added to map: %s",
+			key.name().c_str());
 	} catch (const std::exception& x) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "cannot get a proxy: %s", x.what());
 	}

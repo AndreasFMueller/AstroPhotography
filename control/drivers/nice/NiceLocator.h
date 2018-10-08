@@ -27,7 +27,7 @@ private:
 	// modules map
 	typedef	std::map<std::string, snowstar::ModulesPrx>	ModulesMap;
 	ModulesMap	modules;
-	std::mutex	modules_mtx;
+	std::recursive_mutex	modules_mtx;
 
 	// get ModulesPrx
 	snowstar::ModulesPrx	getModules(
