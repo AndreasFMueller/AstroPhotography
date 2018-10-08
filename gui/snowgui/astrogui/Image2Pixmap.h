@@ -48,6 +48,8 @@ class	Image2Pixmap {
 	int	_scale;
 	astro::image::ImageRectangle	_rectangle;
 	astro::image::MosaicType	_mosaic;
+	bool	_crosshairs;
+	astro::image::ImagePoint	_crosshairs_center;
 public:
 	Image2Pixmap();
 	~Image2Pixmap();
@@ -60,6 +62,14 @@ public:
 	void	logarithmic(bool l) { _logarithmic = l; }
 	int	scale() const { return _scale; }
 	void	scale(int s) { _scale = s; }
+	bool	crosshairs() const { return _crosshairs; }
+	void	crosshairs(bool c) { _crosshairs = c; }
+	astro::image::ImagePoint	crosshairs_center() const {
+		return _crosshairs_center;
+	}
+	void	crosshairs_center(const astro::image::ImagePoint& c) {
+		_crosshairs_center = c;
+	}
 	const astro::image::ImageRectangle&	rectangle() const {
 		return _rectangle;
 	}
@@ -91,6 +101,9 @@ private:
 	QImage	*convertRGB(astro::image::ImagePtr image);
 	QImage	*convertMono(astro::image::ImagePtr image);
 	QImage	*convertMosaic(astro::image::ImagePtr image);
+
+	// crosshairs
+	void	drawCrosshairs(QPixmap *);
 
 public:
 	QPixmap	*histogram(int width, int height);

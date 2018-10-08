@@ -28,6 +28,9 @@ StarChartWidget::StarChartWidget(QWidget *parent) : QWidget(parent),
 	_retriever = NULL;
 	_retrieval_necessary = true;
 	_mouse_pressed = false;
+	_show_crosshairs = false;
+	_show_directions = true; // XXX temporary
+	_flip = true;
 
 	qRegisterMetaType<astro::catalog::Catalog::starsetptr>("astro::catalog::Catalog::starsetptr");
 
@@ -65,6 +68,9 @@ void	StarChartWidget::paintEvent(QPaintEvent * /* event */) {
  */
 QPointF	StarChartWidget::convert(const astro::RaDec& radec) {
 	astro::Point	p = _converter(radec);
+	if (_flip) {
+		p = -p;
+	}
 	QPointF	P(_center.x() + p.x(), _center.y() - p.y());
 	return P;
 }
@@ -75,19 +81,18 @@ QPointF	StarChartWidget::convert(const astro::RaDec& radec) {
 void	StarChartWidget::drawStar(QPainter& painter, const Star& star) {
 	//debug(LOG_DEBUG, DEBUG_LOG, 0, "draw star %s", star.toString().c_str());
 	// convert the position into a x/y coordinates
-	astro::Point	p = _converter(star.position(2000));
+	QPointF	p = convert(star.position(2000));
 	//debug(LOG_DEBUG, DEBUG_LOG, 0, "Point: %s", p.toString().c_str());
 
 	// if the point is outside the widget rectangle, we quit
-	double	w = 5 + width() / 2.;
-	double	h = 5 + height() / 2.;
-	if ((fabs(p.x()) > w) || (fabs(p.y()) > h)) {
+	if ((p.x() < -5) || (p.x() > (width() + 5))
+		|| (p.y() < -5) || (p.y() > (height() + 5))) {
 		//debug(LOG_DEBUG, DEBUG_LOG, 0, "star outside rectangle");
 		return;
 	}
 
 	// compute the center
-	QPointF	starcenter(_center.x() + p.x(), _center.y() - p.y());
+	QPointF	starcenter(p);
 
 	// determine the radius
 	float	sr = 5 - star.mag() / 2;
@@ -212,6 +217,51 @@ void	StarChartWidget::drawGrid(QPainter& painter) {
 }
 
 /**
+ * \brief Draw the cross hairs
+ */
+void	StarChartWidget::drawCrosshairs(QPainter& painter) {
+	// set the pen for drawing the cross hairs
+	QPen	pen(Qt::SolidLine);
+	pen.setColor(Qt::red);
+	pen.setWidth(1);
+	painter.setPen(pen);
+
+	// compute the coordinates
+	int	w = width();
+	int	h = height();
+	int	x = w / 2;
+	int	y = h - h / 2;
+	painter.drawLine(QPoint(0, y), QPoint(x - 5, y));
+	painter.drawLine(QPoint(x + 5, y), QPoint(w - 1, y));
+	painter.drawLine(QPoint(x, 0), QPoint(x, y - 5));
+	painter.drawLine(QPoint(x, y + 5), QPoint(x, h - 1));
+}
+
+/**
+ * \brief Method to draw the directions
+ */
+void	StarChartWidget::drawDirections(QPainter& painter) {
+	// prepare pen for color
+	QPen	pen(Qt::SolidLine);
+	pen.setColor(Qt::green);
+	painter.setPen(pen);
+
+	// draw the labels
+	int	w = width();
+	int	h = height();
+	int	x = w / 2;
+	int	y = h / 2;
+	painter.drawText(0, y - 10, 20, 20, Qt::AlignCenter,
+		(_flip) ? QString("E") : QString("W"));
+	painter.drawText(w - 20, y - 10, 20, 20, Qt::AlignCenter,
+		(_flip) ? QString("W") : QString("E"));
+	painter.drawText(x - 10, 0, 20, 20, Qt::AlignCenter,
+		(_flip) ? QString("S") : QString("N"));
+	painter.drawText(x - 10, h - 20, 20, 20, Qt::AlignCenter,
+		(_flip) ? QString("N") : QString("S"));
+}
+
+/**
  * \brief Redraw the star chart
  */
 void	StarChartWidget::draw() {
@@ -239,6 +289,16 @@ void	StarChartWidget::draw() {
 	// draw the grid
 	if (show_grid()) {
 		drawGrid(painter);
+	}
+
+	// draw the cross hairs
+	if (show_crosshairs()) {
+		drawCrosshairs(painter);
+	}
+
+	// draw the direction labels
+	if (show_directions()) {
+		drawDirections(painter);
 	}
 
 	// draw the stars
@@ -340,6 +400,9 @@ void	StarChartWidget::mouseCommon(QMouseEvent *event) {
 	// get the pixel coordinates from the event relative to the center
 	astro::Point	offset(event->pos().x() - _center.x(),
 				_center.y() - event->pos().y());
+	if (_flip) {
+		offset = -offset;
+	}
 
 	// convert into RA/DEC
 	astro::RaDec	radec = _converter(offset);
@@ -450,6 +513,26 @@ void	StarChartWidget::workerFinished() {
  */
 void	StarChartWidget::stateChanged(astro::device::Mount::state_type state) {
 	_state = state;
+}
+
+/**
+ * \brief handle changing orientation
+ *
+ * The orientation parameter is true when the telescope is on the east, 
+ * where the camera is oriented so that north is up on the image. When
+ * the telescope is on the west side of the mount, the camera is upside
+ * down, so North is on the south. On the southern hemisphere, one will
+ * usually want to have this just the other way round, but that must be
+ * done by the widget calling this slot, because the StarChartWidget
+ * does not know where on earth the observatory is.
+ *
+ * \param east	orientation parameter
+ */
+void	StarChartWidget::orientationChanged(bool east) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "got orientation change: %s",
+		(east) ? "east" : "west");
+	flip(!east);
+	repaint();
 }
 
 } // namespace snowgui

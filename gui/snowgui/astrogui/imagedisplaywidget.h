@@ -42,7 +42,8 @@ class imagedisplaywidget : public QWidget {
 	snowgui::SelectableImage	*selectable;
 	// whether or not to debayer, and what bayer pattern to use
 	astro::image::MosaicType	_bayer_mosaic;
-
+	// whether or not to show crosshairs
+	bool	_crosshairs;
 public:
 	explicit imagedisplaywidget(QWidget *parent = 0);
 	~imagedisplaywidget();
@@ -57,10 +58,15 @@ public:
 	// the gain/scale/subframe settings can individually be made visible
 	bool	gainIsVisible();
 	void	setGainVisible(bool);
+
 	bool	scaleIsVisible();
 	void	setScaleVisible(bool);
+
 	bool	subframeIsVisible();
 	void	setSubframeVisible(bool);
+
+	bool	crosshairs();
+	void	crosshairs(bool);
 
 	// control whether the image information at the bottom is visible
 	bool	infoIsVisible();
@@ -126,6 +132,7 @@ public slots:
 	void	selectPoint(QPoint);
 	void	receiveImage(astro::image::ImagePtr);
 	void	bayerChanged(int);
+	void	crosshairsChanged(int);
 
 	void	redScaleChanged(double);
 	void	greenScaleChanged(double);

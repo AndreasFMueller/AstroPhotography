@@ -106,7 +106,8 @@ bool	Mount::telescopePositionEast() {
 	// east or west
 	AzmAltConverter	azmaltconverter(location());
 	Angle	hourangle = azmaltconverter.hourangle(this->getRaDec());
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "hour angle: %.4f", hourangle.hours());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "hour angle: %.4f, orientation=%s",
+		hourangle.hours(), (hourangle > 0) ? "east" : "west");
 	return (hourangle > 0);
 }
 

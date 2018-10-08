@@ -50,6 +50,9 @@ class StarChartWidget : public QWidget {
 	float	_limit_magnitude;
 	bool	_negative;
 	bool	_show_grid;
+	bool	_show_crosshairs;
+	bool	_show_directions;
+	bool	_flip;
 
 	bool	_retrieval_necessary;
 	StarChartRetriever	*_retriever;
@@ -70,6 +73,15 @@ public:
 	void	show_grid(bool g) { _show_grid = g; }
 	bool	show_grid() const { return _show_grid; }
 
+	void	show_crosshairs(bool c) { _show_crosshairs = c; }
+	bool	show_crosshairs() const { return _show_crosshairs; }
+
+	void	show_directions(bool d) { _show_directions = d; }
+	bool	show_directions() const { return _show_directions; }
+
+	void	flip(bool f) { _flip = f; }
+	bool	flip() const { return _flip; }
+
 	explicit StarChartWidget(QWidget *parent = NULL);
 	virtual ~StarChartWidget();
 
@@ -82,6 +94,8 @@ private:
 	void	drawLine(QPainter& painter, const astro::RaDec& from,
 			const astro::RaDec& to);
 	void	drawGrid(QPainter& painter);
+	void	drawCrosshairs(QPainter& painter);
+	void	drawDirections(QPainter& painter);
 
 	void	mouseCommon(QMouseEvent *event);
 
@@ -96,6 +110,7 @@ protected:
 
 public slots:
 	void	directionChanged(astro::RaDec);
+	void	orientationChanged(bool east);
 	void	stateChanged(astro::device::Mount::state_type);
 	void	useStars(astro::catalog::Catalog::starsetptr);
 	void	useSky(astro::catalog::Catalog::starsetptr);

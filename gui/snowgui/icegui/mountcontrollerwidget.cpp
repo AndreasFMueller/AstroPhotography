@@ -27,6 +27,7 @@ mountcontrollerwidget::mountcontrollerwidget(QWidget *parent)
 	setTabOrder(ui->targetDecField, ui->targetRaField);
 
 	_previousstate = snowstar::MountIDLE;
+	_previouseast = true;
 
 	connect(ui->gotoButton, SIGNAL(clicked()),
 		this, SLOT(gotoClicked()));
@@ -128,6 +129,10 @@ void	mountcontrollerwidget::setupMount() {
 			fabs(_position.latitude().degrees()));
 		pl += (_position.longitude().degrees() < 0) ? "S" : "N";
 		ui->observatoryField->setText(QString(pl.c_str()));
+
+		// make sure the star chart knows the orientation
+		_previouseast = _mount->telescopePositionEast();
+		emit orientationChanged(_previouseast);
 		
 		// turn on the buttons
 		ui->targetRaField->setEnabled(true);
@@ -225,6 +230,19 @@ void	mountcontrollerwidget::statusUpdate() {
 			break;
 		}
 	}
+
+	// check the side of the telescope on the mount
+	bool	east = _mount->telescopePositionEast();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "telescope orientation: %s",
+		(east) ? "east" : "west");
+	if (east != _previouseast) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "emit orientation change to %s",
+			(east) ? "east" : "west");
+		emit orientationChanged(east);
+		_previouseast = east;
+	}
+
+	// read the current position from the mount
 	snowstar::RaDec	radec = _mount->getRaDec();
 	double	deltaRa = (_telescope.ra - radec.ra);
 	if (deltaRa > M_PI) { deltaRa -= 2 *M_PI; }
