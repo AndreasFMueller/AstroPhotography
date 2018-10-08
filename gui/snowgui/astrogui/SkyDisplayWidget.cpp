@@ -410,8 +410,7 @@ void	SkyDisplayWidget::draw() {
  */
 void	SkyDisplayWidget::drawLabels(QPainter& painter) {
 	QPen	pen;
-	QColor	white(255,255,255);
-	pen.setColor(white);
+	pen.setColor(Qt::green);
 	painter.setPen(pen);
 
 	painter.drawText(_center.x() - 10, _center.y() + _radius - 20,
@@ -425,7 +424,6 @@ void	SkyDisplayWidget::drawLabels(QPainter& painter) {
 
 	painter.drawText(_center.x() + _radius - 20, _center.y() - 10,
 		20, 20, Qt::AlignCenter, QString("W"));
-
 }
 
 /**

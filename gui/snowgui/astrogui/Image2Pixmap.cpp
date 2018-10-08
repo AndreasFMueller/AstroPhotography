@@ -8,6 +8,7 @@
 #include <AstroAdapter.h>
 #include <AstroDemosaicAdapter.h>
 #include <AstroUtils.h>
+#include <QPainter>
 
 using namespace astro::image;
 using namespace astro::adapter;
@@ -24,6 +25,7 @@ Image2Pixmap::Image2Pixmap() {
 		_colorscales[i] = 1.;
 		_coloroffsets[i] = 0.;
 	}
+	_crosshairs = false;
 }
 
 Image2Pixmap::~Image2Pixmap() {
@@ -560,7 +562,30 @@ QPixmap	*Image2Pixmap::operator()(ImagePtr image) {
 	QPixmap	*result = new QPixmap(size.width(), size.height());
 	result->convertFromImage(*qimage);
 
+	// draw the crosshairs if necessary
+	if (_crosshairs) {
+		drawCrosshairs(result);
+	}
+
 	return result;;
+}
+
+/**
+ * \brief Draw the crosshairs to a QPixmap
+ */
+void	Image2Pixmap::drawCrosshairs(QPixmap *pixmap) {
+	QPainter	painter(pixmap);
+	QPen	pen(Qt::SolidLine);
+	pen.setColor(Qt::red);
+	painter.setPen(pen);
+	int	w = pixmap->size().width();
+	int	h = pixmap->size().height();
+	int	y = h - _crosshairs_center.y();
+	int	x = _crosshairs_center.x();
+        painter.drawLine(QPoint(0, y), QPoint(x - 5, y));
+	painter.drawLine(QPoint(x + 5, y), QPoint(w - 1, y));
+	painter.drawLine(QPoint(x, 0), QPoint(x, y - 5));
+	painter.drawLine(QPoint(x, y + 5), QPoint(x, h - 1));
 }
 
 /**

@@ -151,6 +151,14 @@ void	imagedisplaywidget::setInfoVisible(bool h) {
 	ui->infoFrame->setVisible(h);
 }
 
+bool	imagedisplaywidget::crosshairs() {
+	return _crosshairs;
+}
+
+void	imagedisplaywidget::crosshairs(bool b) {
+	_crosshairs = b;
+}
+
 ImageRectangle	imagedisplaywidget::imageRectangle() {
 	return _rectangle;
 }
@@ -955,6 +963,11 @@ void	imagedisplaywidget::changeEvent(QEvent *event) {
 		emit offerImage(_image, std::string());
 	}
 	QWidget::changeEvent(event);
+}
+
+void	imagedisplaywidget::crosshairsChanged(int c) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "crosshair mode changed");
+	crosshairs((c > 0));
 }
 
 } // namespace snowgui
