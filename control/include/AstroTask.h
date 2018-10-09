@@ -401,7 +401,7 @@ private:
 	// to much work, in particular from trying to post it's state 
 	// to the task queue before the task queue is ready to receive
 	// it. The constructor initially locks the mutex, and the 
-	std::mutex	release_mutex;
+	thread::Barrier	_barrier;
 public:
 	void	cancel();
 	void	wait();

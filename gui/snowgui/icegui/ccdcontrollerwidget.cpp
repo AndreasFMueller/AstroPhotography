@@ -246,6 +246,7 @@ void	ccdcontrollerwidget::setupComplete() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0,
 		"end ccdcontrollerwidget::instrumentSetup()");
 	ui->ccdSelectionBox->blockSignals(false);
+	emit ccdSelected(0);
 	emit ccddataSelected(_current_ccddata);
 }
 

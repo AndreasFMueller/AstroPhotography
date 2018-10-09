@@ -52,13 +52,13 @@ static void	taskmain(TaskExecutor *te) {
  */
 void	TaskExecutor::main() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "TaskExecutor::main() started");
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "LOCK(TaskExecutor::release_mutex,%d)",
-		_task.id());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "%d wait on barrier", _task.id());
 	// we try to lock the release_mutex, but because that mutex is
 	// locked by the constructor we will normally stop at this point.
 	// only when the lock is released by calling the release method
 	// will it be possible to acquire the lock and continue.
-	release_mutex.lock();
+	_barrier.await();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "%d release from barrier", _task.id());
 
 	try {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "entering main task region");
@@ -102,20 +102,22 @@ void	TaskExecutor::main() {
  * \param task		the task queue entry describing the task
  */
 TaskExecutor::TaskExecutor(TaskQueue& queue, const TaskQueueEntry& task)
-	: _queue(queue), _task(task) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0,
-		"constructor LOCK(TaskExecutor::release_mutex,%d)", _task.id());
-	release_mutex.lock();
+	: _queue(queue), _task(task), _barrier(2) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "%d constructing executor", _task.id());
 
 	// create a new ExposureTask object. The ExposureTask contains
 	// the logic to actually execute the task
-	exposurework = new ExposureWork(_task);
+	try {
+		exposurework = new ExposureWork(_task);
+	} catch (std::exception& x) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "cannot tart the task: %s",
+			x.what());
+		throw;
+	}
 
 	// initialize the thread. The constructor will return when the
 	// thread has started running. But it will then only proceed to
-	// the point where it tries to acquire the release_mutex. Only when
-	// we release the lock on the mutex in the release method the
-	// thread can go on and post state changes.
+	// the point where it waits on the barrier.
 	_thread = std::thread(taskmain, this);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "thread launched");
 }
@@ -129,9 +131,9 @@ TaskExecutor::TaskExecutor(TaskQueue& queue, const TaskQueueEntry& task)
  * the thread using this method.
  */
 void	TaskExecutor::release() {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "UNLOCK(TaskExecutor::release_lock,%d)",
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "%d releasing from barrier",
 		_task.id());
-	release_mutex.unlock();
+	_barrier.await();
 }
 
 /**

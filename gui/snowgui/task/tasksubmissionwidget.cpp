@@ -252,14 +252,18 @@ void	tasksubmissionwidget::ccdSelected(int ccdindex) {
 
 void	tasksubmissionwidget::coolerSelected(int coolerindex) {
 	_coolerindex = coolerindex;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "Cooler index: %d", _coolerindex);
 }
 
 void	tasksubmissionwidget::filterwheelSelected(int filterwheelindex) {
 	_filterwheelindex = filterwheelindex;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "Filterwheel index: %d",
+		_filterwheelindex);
 }
 
 void	tasksubmissionwidget::mountSelected(int mountindex) {
 	_mountindex = mountindex;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "Mount index: %d", _mountindex);
 }
 
 } // namespace snowgui

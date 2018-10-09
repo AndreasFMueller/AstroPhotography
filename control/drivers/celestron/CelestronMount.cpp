@@ -174,6 +174,9 @@ RaDec	CelestronMount::getRaDec() {
 		write("E");
 	}
 	std::pair<double, double>	a = parseangles(readto('#'));
+	if (a.second > M_PI) {
+		a.second -= 2 * M_PI;
+	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "ra = %f, dec = %f",
 		Angle(a.first).hours(), Angle(a.second).degrees());
 	return RaDec(Angle(a.first), Angle(a.second));
@@ -222,12 +225,12 @@ double	CelestronMount::angle(uint32_t a) {
 }
 
 uint16_t	CelestronMount::angle16(const Angle& a) {
-	uint16_t	result = 65536 * a.radians() / (2 * M_PI);
+	uint16_t	result = 65536 * a.reduced().radians() / (2 * M_PI);
 	return result;
 }
 
 uint32_t	CelestronMount::angle32(const Angle& a) {
-	uint32_t	result = 4294967296 * a.radians() / (2 * M_PI);
+	uint32_t	result = 4294967296 * a.reduced().radians() / (2 * M_PI);
 	return result;
 }
 

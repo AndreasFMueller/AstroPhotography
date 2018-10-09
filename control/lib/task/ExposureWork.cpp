@@ -33,6 +33,8 @@ namespace task {
  * not take any noticable time, in particular this can be done synchronously.
  */
 ExposureWork::ExposureWork(TaskQueueEntry& task) : _task(task) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "constructing Work object for task %s",
+		task.toString().c_str());
 	// create a repository, we are always using the default
 	// repository
 	astro::module::Repository	repository;
@@ -40,41 +42,72 @@ ExposureWork::ExposureWork(TaskQueueEntry& task) : _task(task) {
 	// get camera and ccd
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "get camera '%s' and ccd %s",
 		_task.camera().c_str(), _task.ccd().c_str());
-	{
+	try {
 		astro::device::DeviceAccessor<astro::camera::CameraPtr>
 			dc(repository);
 		camera = dc.get(_task.camera());
+	} catch (const std::exception& x) {
+		std::string	msg = stringprintf("cannot get camera: %s",
+			x.what());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw;
 	}
-	{
+	try {
 		astro::device::DeviceAccessor<astro::camera::CcdPtr>
 			dc(repository);
 		ccd = camera->getCcd(_task.ccd());
+	} catch (const std::exception& x) {
+		std::string	msg = stringprintf("cannot get ccd: %s",
+			x.what());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw;
 	}
 
 	// turn on the cooler
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "get cooler '%s', temperature %.2f ",
 		_task.cooler().c_str(), _task.ccdtemperature());
 	if ((_task.cooler().size() > 0) && (_task.ccdtemperature() > 0)) {
-		astro::device::DeviceAccessor<astro::camera::CoolerPtr>
-			df(repository);
-		cooler = df.get(_task.cooler());
+		try {
+			astro::device::DeviceAccessor<astro::camera::CoolerPtr>
+				df(repository);
+			cooler = df.get(_task.cooler());
+		} catch (std::exception& x) {
+			std::string	msg = stringprintf("cannot get cooler: %s",
+				x.what());
+			debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+			throw;
+		}
 	}
 
 	// get the filterwheel
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "get filter '%s' of wheel '%s'",
 		_task.filter().c_str(), _task.filterwheel().c_str());
 	if (_task.filterwheel().size() > 0) {
-		astro::device::DeviceAccessor<astro::camera::FilterWheelPtr>
-			df(repository);
-		filterwheel = df.get(_task.filterwheel());
+		try {
+			astro::device::DeviceAccessor<astro::camera::FilterWheelPtr>
+				df(repository);
+			filterwheel = df.get(_task.filterwheel());
+		} catch (const std::exception& x) {
+			std::string	msg = stringprintf("cannot get filterwheel: %s",
+				x.what());
+			debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+			throw;
+		}
 	}
 
 	// get the mount
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "get mount %s", _task.mount().c_str());
 	if (_task.mount().size() > 0) {
-		astro::device::DeviceAccessor<astro::device::MountPtr>
-			df(repository);
-		mount = df.get(_task.mount());
+		try {
+			astro::device::DeviceAccessor<astro::device::MountPtr>
+				df(repository);
+			mount = df.get(_task.mount());
+		} catch (const std::exception& x) {
+			std::string	msg = stringprintf("cannot get mount: %s",
+				x.what());
+			debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+			throw;
+		}
 	}
 
 	// if the task does not have a frame size, then take the one from the
