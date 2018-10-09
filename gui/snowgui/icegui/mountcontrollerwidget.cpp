@@ -249,7 +249,8 @@ void	mountcontrollerwidget::statusUpdate() {
 	if (deltaRa < -M_PI) { deltaRa += 2 * M_PI; }
 	double	deltaDec = (_telescope.dec - radec.dec);
 	double	change = hypot(deltaRa, deltaDec);
-	if (change > 0.001) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "change %.4f detected", change);
+	if (change > 0.01) {
 		ui->currentRaField->setText(QString(
 			astro::stringprintf("%.4f", radec.ra).c_str()));
 		ui->currentDecField->setText(QString(

@@ -8,6 +8,7 @@
 
 #include <AstroCamera.h>
 #include <AstroUSB.h>
+#include <thread>
 
 namespace astro {
 namespace camera {
@@ -15,8 +16,10 @@ namespace othello {
 
 class OthelloFocuser : public astro::camera::Focuser {
 	astro::usb::DevicePtr	deviceptr;
+	std::recursive_mutex	_mutex;
 	OthelloFocuser(const OthelloFocuser& other);
 	OthelloFocuser&	operator=(const OthelloFocuser& other);
+	long	_current;
 public:
 	OthelloFocuser(astro::usb::DevicePtr _deviceptr);
 	~OthelloFocuser();

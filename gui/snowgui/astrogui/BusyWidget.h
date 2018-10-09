@@ -4,6 +4,7 @@
  * (c) 2018 Prof Dr Andreas Müller, Hochschule Rapperswi
  */
 #include <QWidget>
+#include <QTimer>
 #include <AstroUtils.h>
 
 namespace snowgui {
@@ -13,7 +14,7 @@ namespace snowgui {
  */
 class BusyWidget : public QWidget {
 	Q_OBJECT
-	QTimer	*_timer;
+	QTimer	_timer;
 	void	draw();
 	astro::Timer	_start;
 public:

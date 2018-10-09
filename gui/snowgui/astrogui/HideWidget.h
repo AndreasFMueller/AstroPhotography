@@ -15,7 +15,7 @@ class HideWidget : public QWidget {
 	Q_OBJECT
 
 	QString	_text;
-	QTimer	*_timer;
+	QTimer	_timer;
 	bool	_hide;
 public:
 	HideWidget(QString text, QWidget *parent = NULL);

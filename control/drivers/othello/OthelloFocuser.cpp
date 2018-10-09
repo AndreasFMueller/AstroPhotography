@@ -25,7 +25,7 @@ namespace othello {
  */
 OthelloFocuser::OthelloFocuser(DevicePtr _deviceptr)
 	: Focuser(othellodevname(_deviceptr)), deviceptr(_deviceptr) {
-	
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "create a new focuser");
 }
 
 /**
@@ -54,18 +54,31 @@ typedef struct othello_set_s {
 
 /**
  * \brief get the current position of the focuser
+ *
+ * \return	current position of the focuser
  */
 long	OthelloFocuser::current() {
 	Request<othello_get_t>	request(
 		RequestBase::vendor_specific_type,
 		RequestBase::device_recipient, 0,
 		(uint8_t)FOCUSER_GET, 0);
-	deviceptr->controlRequest(&request);
-	return request.data()->current;
+	try {
+		deviceptr->controlRequest(&request);
+		_current = request.data()->current;
+		return _current;
+	} catch (const std::exception& x) {
+		std::string	msg = stringprintf("cannot get current: %s",
+			x.what());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+	}
+	// if current retrieval fails, just return the previous value
+	return _current;
 }
 
 /**
  * \brief Set the position to move to
+ *
+ * \param value		the value the focuser should move to
  */
 void	OthelloFocuser::set(long value) {
 	// bring the value into the interval
@@ -82,7 +95,18 @@ void	OthelloFocuser::set(long value) {
 		RequestBase::vendor_specific_type,
 		RequestBase::device_recipient, 1 /* fast move */,
 		(uint8_t)FOCUSER_SET, 0, &setdata);
-	deviceptr->controlRequest(&request);
+	int	retrycounter = 3;
+	while (retrycounter-- > 0) {
+		try {
+			deviceptr->controlRequest(&request);
+			return;
+		} catch (const std::exception& x) {
+			std::string	msg = stringprintf("control request "
+				"failed: %s", x.what());
+			debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		}
+	}
+	// lets hope the client realizes that the focuser is not moving
 }
 
 } // namespace astro

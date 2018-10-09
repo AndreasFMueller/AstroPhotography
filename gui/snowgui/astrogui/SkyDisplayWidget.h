@@ -14,6 +14,7 @@
 #include <AstroCatalog.h>
 #include <AstroCoordinates.h>
 #include <QThread>
+#include <QTimer>
 
 namespace snowgui {
 
@@ -37,7 +38,7 @@ signals:
  */
 class SkyDisplayWidget : public QWidget {
 	Q_OBJECT
-	QTimer	*_timer;
+	QTimer	_timer;
 	astro::catalog::Catalog::starsetptr	_stars;
 
 	astro::AzmAltConverter	*_converter;

@@ -16,9 +16,54 @@
 
 - Ubuntu GUI: where is the file menu?
 
-- repositories should be relative to a path stored in the repository database
-
 - tasks should be stored in a database that is in the same place as the
   repository stuff, i.e. on the USB stick
+
+8. 10.
+
+- ATIK camera does not work with linux
+
+- Focuser not recognized
+
+- remote Guideport leads to crashes when guiding (works when the client
+  talks to the process directly)
+
+- task application does not start
+
+- tasks submitted immediately go to failed status
+
+- no events generated when a task starts up and fails
+
+- RA/DEC tooltip in telescope position west wrong should be reversed
+
+- SX Trius 16 behaves strangely with after images
+
+- guideport monitoring should not be done with polling, but with callbacks
+
+- cooler monitoring should be done with polling, but with callbacks
+
+- camera status changes should use callbacks
+
+- star chart reloads too frequently
+
+- threading problems in all GUI applications, make sure connections
+  use queuing
+
+- Make othello guideport driver more robust: reset connection if device
+  has gone away. Just pretend to the client that the device is there and
+  try to reestablish the connection.
+
+- how can we debug segmentation faults in the server?
+
+- image retrieval leads to beachball of terror
+
+- increase number of client threads
+
+- position corrections should be possible with the guide port, this of course
+  depends on correct orientation of the camera
+
+- comparision between star chart and imager picture should be available to
+  simplify pointing
+
 
 

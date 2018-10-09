@@ -17,10 +17,9 @@ namespace snowgui {
  * \param parent	parent widget
  */
 BusyWidget::BusyWidget(QWidget *parent) : QWidget(parent) {
-	_timer = new QTimer();
-	_timer->setInterval(50);
-	connect(_timer, SIGNAL(timeout()), this, SLOT(update()));
-	_timer->start();
+	_timer.setInterval(50);
+	connect(&_timer, SIGNAL(timeout()), this, SLOT(update()));
+	_timer.start();
 
 	// start the clock
 	_start.start();
@@ -30,8 +29,7 @@ BusyWidget::BusyWidget(QWidget *parent) : QWidget(parent) {
  * \brief Destroy the widget
  */
 BusyWidget::~BusyWidget() {
-	_timer->stop();
-	delete _timer;
+	_timer.stop();
 }
 
 /**
@@ -107,7 +105,7 @@ void	BusyWidget::update() {
  * \brief start the busy indicator
  */
 void	BusyWidget::start() {
-	_timer->start();
+	_timer.start();
 	_start.start();
 }
 
@@ -115,7 +113,7 @@ void	BusyWidget::start() {
  * \brief stop the busy indicator
  */
 void	BusyWidget::stop() {
-	_timer->stop();
+	_timer.stop();
 	_start.end();
 }
 

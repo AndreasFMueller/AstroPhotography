@@ -88,6 +88,7 @@ class ccdcontrollerwidget : public InstrumentWidget {
 	snowstar::CcdInfo	_ccdinfo;
 	astro::camera::Exposure	_exposure;
 
+	std::recursive_mutex	_mutex;	// mutex to protect image state
 	astro::image::ImagePtr	_image;
 	astro::camera::Exposure	_imageexposure;
 	snowstar::ImagePrx	_imageproxy;

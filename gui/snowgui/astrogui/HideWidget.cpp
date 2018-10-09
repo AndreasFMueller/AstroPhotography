@@ -26,19 +26,17 @@ HideWidget::HideWidget(QString text, QWidget *parent)
 
 	// start the timer that will hide the base widget as soon as
 	// it expires after 1 second
-	_timer = new QTimer();
-	_timer->setInterval(500);
-	_timer->setSingleShot(true);
-	connect(_timer, SIGNAL(timeout()), this, SLOT(timeout()));
-	_timer->start();
+	_timer.setInterval(500);
+	_timer.setSingleShot(true);
+	connect(&_timer, SIGNAL(timeout()), this, SLOT(timeout()));
+	_timer.start();
 }
 
 /**
  * \brief Destroy the widget
  */
 HideWidget::~HideWidget() {
-	_timer->stop();
-	delete _timer;
+	_timer.stop();
 }
 
 /**

@@ -114,8 +114,8 @@ int	snowstar_main(int argc, char *argv[]) {
 		props->setProperty("Ice.MessageSizeMax", "65536"); // 64 MB
 		props->setProperty("Ice.Plugin.IceSSL", "IceSSL:createIceSSL");
 		props->setProperty("Ice.NullHandleAbort", "1");
-		props->setProperty("Ice.ThreadPool.Server.SizeMax", "3");
-		props->setProperty("Ice.ThreadPool.Client.SizeMax", "3");
+		props->setProperty("Ice.ThreadPool.Server.SizeMax", "10");
+		props->setProperty("Ice.ThreadPool.Client.SizeMax", "10");
 #if 0
 		props->setProperty("Ice.ThreadPool.Trace", "1");
 		props->setProperty("Ice.Trace.Network", "3");

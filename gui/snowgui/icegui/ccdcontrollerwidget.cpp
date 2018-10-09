@@ -598,6 +598,7 @@ void	ccdcontrollerwidget::guiChanged() {
  * \brief Slot to handle a new image
  */
 void	ccdcontrollerwidget::setImage(ImagePtr image) {
+	std::lock_guard<std::recursive_mutex>	_lock(_mutex);
 	_image = image;
 	emit imageReceived(_image);
 }
@@ -745,6 +746,14 @@ void	ccdcontrollerwidget::retrieveImageStart() {
 		_hideprogress = NULL;
 	}
 
+	// acquire a lock
+	std::lock_guard<std::recursive_mutex>	_lock(_mutex);
+
+	// make sure we can start the image retriever
+	if (_imageretriever) {
+		throw std::runtime_error("an image retriever is already running");
+	}
+
 	// prepare the retrieval thread
 	_imageretriever = new ImageRetrieverThread(this);
 	connect(_imageretriever, SIGNAL(finished()),
@@ -768,7 +777,15 @@ void	ccdcontrollerwidget::retrieveImageStart() {
 void	ccdcontrollerwidget::retrieveImageWork() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "start work thread to retrieve image");
 	try {
-		_imageproxy = _ccd->getImage();
+		// now assign the data to the state variables, but do this
+		// only after a lock is established, because otherwise
+		// the data may not be consistent
+		std::lock_guard<std::recursive_mutex>	_lock(_mutex);
+
+		// use a separate connection for the image transfer to
+		// ensure that the image transfor does not impact the
+		// other method calls
+		_imageproxy = _ccd->getImage()->ice_connectionId("image");
 		if (!_imageproxy->hasMeta("INSTRUME")) {
 			snowstar::Metavalue	v;
 			v.keyword = "INSTRUME";
@@ -779,7 +796,10 @@ void	ccdcontrollerwidget::retrieveImageWork() {
 			emit imageproxyReceived(_imageproxy);
 			return;
 		}
+
+		// at this point we actually download the image
 		ImagePtr	image = snowstar::convert(_imageproxy);
+
 		_image = image;
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "image frame: %s",
 			image->getFrame().toString().c_str());
@@ -811,8 +831,11 @@ void	ccdcontrollerwidget::retrieveImageComplete() {
 	// turn of the HideWidget
 	delete _hide;
 	_hide = NULL;
-	delete _imageretriever;
-	_imageretriever = NULL;
+	{
+		std::lock_guard<std::recursive_mutex>	_lock(_mutex);
+		delete _imageretriever;
+		_imageretriever = NULL;
+	}
 	// signal that the image was received
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "image received, emit signal");
 	emit imageReceived(_image);

@@ -59,11 +59,10 @@ SkyDisplayWidget::SkyDisplayWidget(QWidget *parent) : QWidget(parent) {
 	_mouse_pressed = false;
 
 	// start the update timer
-	_timer = new QTimer();
-	_timer->setInterval(60000);
-	connect(_timer, SIGNAL(timeout()),
+	_timer.setInterval(60000);
+	connect(&_timer, SIGNAL(timeout()),
 		this, SLOT(update()));
-	_timer->start();
+	_timer.start();
 
 	// enable mouse tracking
 	setMouseTracking(true);
@@ -76,8 +75,7 @@ SkyDisplayWidget::~SkyDisplayWidget() {
 	if (_converter) {
 		delete _converter;
 	}
-	_timer->stop();
-	delete _timer;
+	_timer.stop();
 }
 
 /**

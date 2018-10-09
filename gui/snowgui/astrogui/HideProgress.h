@@ -23,7 +23,7 @@ class HideProgress : public QWidget {
 	Q_OBJECT
 	float	_duration;
 	astro::Timer	_start;
-	QTimer	*_timer;
+	QTimer	_timer;
 	QProgressBar	*_progressbar;
 public:
 	explicit HideProgress(float duration, QWidget *parent = NULL);

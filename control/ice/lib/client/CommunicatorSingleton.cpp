@@ -31,8 +31,16 @@ CommunicatorSingleton::CommunicatorSingleton(int& argc, char *argv[]) {
 	// where we transfer entire images as messages
 	props->setProperty("Ice.MessageSizeMax", "65536");
 
+	// large image files should be compressed, and because the network
+	// is slow, it is OK to trade off some CPU cycles for this
+	props->setProperty("Ice.Compression.Level", "5");
+
 	// abort on null handle errors
 	props->setProperty("Ice.NullHandleAbort", "1");
+
+	// thread pool jproperties
+	props->setProperty("Ice.ThreadPool.Server.SizeMax", "5");
+	props->setProperty("Ice.ThreadPool.Client.SizeMax", "5");
 
 	Ice::InitializationData	id;
 	id.properties = props;

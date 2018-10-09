@@ -16,7 +16,7 @@ class LocalSiderealTime : public QLabel {
 	Q_OBJECT
 
 	astro::LongLat	_position;
-	QTimer	*_timer;
+	QTimer	_timer;
 public:
 	void	position(const astro::LongLat& p);
 	const astro::LongLat&	position() const { return _position; }

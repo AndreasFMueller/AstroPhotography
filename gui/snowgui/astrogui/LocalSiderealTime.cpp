@@ -12,18 +12,16 @@ namespace snowgui {
  */
 LocalSiderealTime::LocalSiderealTime(QWidget *parent) : QLabel(parent) {
 	_offset = 0;
-	_timer = new QTimer();
-	_timer->setInterval(1000);
-	connect(_timer, SIGNAL(timeout()), this, SLOT(update()));
-	_timer->start();
+	_timer.setInterval(1000);
+	connect(&_timer, SIGNAL(timeout()), this, SLOT(update()));
+	_timer.start();
 }
 
 /**
  * \brief Destroy the local sidereal time clock
  */
 LocalSiderealTime::~LocalSiderealTime() {
-	_timer->stop();
-	delete _timer;
+	_timer.stop();
 }
 
 /**

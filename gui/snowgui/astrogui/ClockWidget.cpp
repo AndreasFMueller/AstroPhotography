@@ -10,15 +10,13 @@ namespace snowgui {
 
 ClockWidget::ClockWidget(QWidget *parent) : QLabel(parent) {
 	_offset = 0;
-	_timer = new QTimer();
-	_timer->setInterval(1000);
-	connect(_timer, SIGNAL(timeout()), this, SLOT(update()));
-	_timer->start();
+	_timer.setInterval(1000);
+	connect(&_timer, SIGNAL(timeout()), this, SLOT(update()));
+	_timer.start();
 }
 
 ClockWidget::~ClockWidget() {
-	_timer->stop();
-	delete _timer;
+	_timer.stop();
 }
 
 void	ClockWidget::update() {

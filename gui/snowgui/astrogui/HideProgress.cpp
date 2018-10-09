@@ -33,10 +33,9 @@ HideProgress::HideProgress(float duration, QWidget *parent)
 	_progressbar->setVisible(true);
 
 	// start the timer
-	_timer = new QTimer();
-	connect(_timer, SIGNAL(timeout()), this, SLOT(update()));
-	_timer->setInterval(100);
-	_timer->start();
+	connect(&_timer, SIGNAL(timeout()), this, SLOT(update()));
+	_timer.setInterval(100);
+	_timer.start();
 	_start.start();
 }
 
@@ -44,9 +43,8 @@ HideProgress::HideProgress(float duration, QWidget *parent)
  * \brief Destroy the progress bar
  */
 HideProgress::~HideProgress() {
-	_timer->stop();
-	disconnect(_timer, SIGNAL(timeout()), 0, 0);
-	delete _timer;
+	_timer.stop();
+	disconnect(&_timer, SIGNAL(timeout()), 0, 0);
 	delete _progressbar;
 }
 

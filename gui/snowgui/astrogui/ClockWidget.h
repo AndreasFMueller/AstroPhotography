@@ -13,7 +13,7 @@ namespace snowgui {
  */
 class ClockWidget : public QLabel {
 	Q_OBJECT
-	QTimer	*_timer;
+	QTimer	_timer;
 	long	_offset;
 public:
 	long	offset() const { return _offset; }
