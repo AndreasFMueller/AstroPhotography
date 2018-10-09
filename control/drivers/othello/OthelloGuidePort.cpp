@@ -77,6 +77,7 @@ void	OthelloGuidePort::activate(float raplus, float raminus,
 		RequestBase::device_recipient, 0, GUIDEPORT_SET_ALL_TIMES,
 		0, &payload);
 	try {
+		std::lock_guard<std::recursive_mutex>	_lock(_mutex);
 		deviceptr->controlRequest(&r);
 	} catch (const std::exception& x) {
 		std::string 	cause = stringprintf(
@@ -103,6 +104,7 @@ uint8_t	OthelloGuidePort::active() {
 		RequestBase::device_recipient, 0xf,
 		(uint8_t)GUIDEPORT_GET, 0);
 	try {
+		std::lock_guard<std::recursive_mutex>	_lock(_mutex);
 		deviceptr->controlRequest(&request);
 	} catch (const std::exception& x) {
 		std::string	cause = stringprintf("can't get active: %s",
