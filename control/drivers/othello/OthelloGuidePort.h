@@ -9,6 +9,7 @@
 #include <AstroCamera.h>
 #include <BasicGuideport.h>
 #include <AstroUSB.h>
+#include <thread>
 
 namespace astro {
 namespace camera {
@@ -22,6 +23,7 @@ namespace othello {
  */
 class OthelloGuidePort : public GuidePort {
 	astro::usb::DevicePtr	deviceptr;
+	std::recursive_mutex	_mutex;
 public:
 	OthelloGuidePort(astro::usb::DevicePtr _deviceptr);
 	virtual ~OthelloGuidePort();

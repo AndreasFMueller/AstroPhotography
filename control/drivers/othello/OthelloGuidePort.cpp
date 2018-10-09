@@ -110,7 +110,9 @@ uint8_t	OthelloGuidePort::active() {
 		std::string	cause = stringprintf("can't get active: %s",
 			x.what());
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", cause.c_str());
-		throw x;
+		// fake inactive guide port
+		return 0;
+		//throw x;
 	}
 	// convert the data into the conventions used by 
 	uint8_t	result = *request.data();
