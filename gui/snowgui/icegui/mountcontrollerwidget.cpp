@@ -256,6 +256,10 @@ void	mountcontrollerwidget::statusUpdate() {
 		_telescope = radec;
 		emit telescopeChanged(convert(radec));
 	}
+
+	// read the current time from the mount
+	time_t	now = _mount->getTime();
+	emit updateTime(now);
 }
 
 /**

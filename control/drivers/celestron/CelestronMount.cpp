@@ -410,7 +410,7 @@ CelestronMount::gps_date_t	CelestronMount::gps_date() {
  * \brief Get the GPS year
  */
 int	CelestronMount::gps_year() {
-	std::vector<uint8_t>	xy = gps_command(3, 2, 2);
+	std::vector<uint8_t>	xy = gps_command(4, 2, 2);
 	int	year = (256 * xy[0] + xy[1]);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "GPS year: %d", year);
 	return year;
