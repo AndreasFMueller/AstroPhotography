@@ -177,7 +177,7 @@ std::string	Serial::readto(char promptchar) {
  * \param packet	the data packet to send
  */
 void	Serial::writeraw(const std::vector<uint8_t>& packet) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "%d bytes to send");
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "%lu bytes to send", packet.size());
 	uint8_t	*b = (uint8_t *)alloca(packet.size());
 	std::copy(packet.begin(), packet.end(), b);
 	int	l = ::write(fd, b, packet.size());
@@ -188,6 +188,7 @@ void	Serial::writeraw(const std::vector<uint8_t>& packet) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 		throw std::runtime_error(msg);
 	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "%lu bytes sent", packet.size());
 }
 
 /**
@@ -195,19 +196,25 @@ void	Serial::writeraw(const std::vector<uint8_t>& packet) {
  *
  * \param l	number of bytes to read
  */
-std::vector<uint8_t>	Serial::readraw(int l) {
-	uint8_t	b[l];
-	int	r = ::read(fd, b, l);
-	if (r != l) {
-		std::string	msg = stringprintf("could not read %d bytes: "
-			"%s", strerror(errno));
-		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
-		throw std::runtime_error(msg);
-	}
+std::vector<uint8_t>	Serial::readraw(int count) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "reading %d bytes", count);
+	uint8_t	buffer[count];
+	int	bytes = 0;
+	do {
+		int	rc = ::read(fd, buffer + bytes, count - bytes);
+		if (rc < 0) {
+			std::string	msg = stringprintf("cannot read %d "
+				"bytes: %s", count, strerror(errno));
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "%s", msg.c_str());
+			throw std::runtime_error(msg);
+		}
+		bytes += rc;
+	} while (count > bytes);
 	std::vector<uint8_t>	result;
-	for (int i = 0; i < l; i++) {
-		result.push_back(b[i]);
+	for (int i = 0; i < count; i++) {
+		result.push_back(buffer[i]);
 	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "received %lu bytes", result.size());
 	return result;
 }
 

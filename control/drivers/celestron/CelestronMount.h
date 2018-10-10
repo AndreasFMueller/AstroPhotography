@@ -47,6 +47,9 @@ class CelestronMount : public astro::device::Mount,
 	int	_last_time_offset;
 	time_t	_last_time_queried;
 
+	// also we prevent the location from being required all the time
+	time_t	_last_location_queried;
+
 public:
 	CelestronMount(const std::string& devicename);
 	virtual ~CelestronMount();

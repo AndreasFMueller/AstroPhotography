@@ -131,7 +131,7 @@ astro::LongLat	convert(const LongLat& longlat) {
 	astro::Angle	longitude;
 	longitude.degrees(longlat.longitude);
 	astro::Angle	latitude;
-	longitude.degrees(longlat.latitude);
+	latitude.degrees(longlat.latitude);
 	return astro::LongLat(longitude, latitude);
 }
 

@@ -15,15 +15,17 @@ std::string	LongLat::toString() const {
 	Angle	la = latitude();
 	std::ostringstream	out;
 	if (lo >= 0) {
-		out << "E " << lo.dms();
+		out << "E ";
 	} else {
-		out << "W " << (-lo).dms();
+		out << "W ";
 	}
+	out	 << lo.dms().substr(1);
 	if (la >= 0) {
-		out << " N " << la.dms();
+		out << " N ";
 	} else {
-		out << " S " << (-la).dms();
+		out << " S ";
 	}
+	out	 << la.dms().substr(1);
 	return out.str();
 }
 

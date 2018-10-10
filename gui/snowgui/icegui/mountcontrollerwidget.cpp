@@ -105,6 +105,8 @@ void	mountcontrollerwidget::setupMount() {
 	if (_mount) {
 		// read longitude and latitude from the mount
 		_position = convert(_mount->getLocation());
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "mount location: %s",
+			_position.toString().c_str());
 
 		// write the position to the position label
 		std::string	pl;
@@ -123,6 +125,7 @@ void	mountcontrollerwidget::setupMount() {
 
 		// try to get the time
 		try {
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "trying to get time");
 			emit updateTime(_mount->getTime());
 		} catch (std::exception& x) {
 			debug(LOG_ERR, DEBUG_LOG, 0, "cannot update time: %s",

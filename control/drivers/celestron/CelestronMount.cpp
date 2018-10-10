@@ -16,6 +16,8 @@ namespace astro {
 namespace device {
 namespace celestron {
 
+const unsigned int	query_interval = 60;
+
 /**
  * \brief Get the serial name from the properties
  *
@@ -82,6 +84,7 @@ CelestronMount::CelestronMount(const std::string& devicename)
 	// initialize the time variables
 	_last_time_offset = 0;
 	_last_time_queried = 0;
+	_last_location_queried = 0;
 }
 
 /**
@@ -353,7 +356,7 @@ std::vector<uint8_t>	CelestronMount::gps_command(uint8_t a, uint8_t b, size_t l)
 	writeraw(packet);
 	std::vector<uint8_t>	result = readraw(l);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "got %d byte response: %s",
-		packet.size(), packet2hex(packet).c_str());
+		result.size(), packet2hex(result).c_str());
 	getprompt();
 	return result;
 }
@@ -431,9 +434,16 @@ CelestronMount::gps_time_t	CelestronMount::gps_time() {
  * \brief Get the mount location
  */
 LongLat	CelestronMount::location() {
-	std::lock_guard<std::recursive_mutex>	_lock(_mutex);
-	if (gps_linked()) {
-		return LongLat(gps_longitude(), gps_latitude());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "location request");
+	time_t	now;
+	::time(&now);
+	if (now > (_last_location_queried + query_interval)) {
+		if (gps_linked()) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "have to read location");
+			_last_location_queried = now;
+			LongLat	loc = LongLat(gps_longitude(), gps_latitude());
+			Mount::location(loc);
+		}
 	}
 	return Mount::location();
 }
@@ -446,13 +456,14 @@ time_t	CelestronMount::time() {
 	::time(&now);
 	// if the last request is not too far back, use the offset to 
 	// compute the current time
-	if (now < (_last_time_queried + 60)) {
+	if (now < (_last_time_queried + query_interval)) {
 		return now + _last_time_offset;
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "offset too old, retrieving GPS time");
 
 	// if we have GPS, get the GPS time
 	if (gps_linked()) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "querying GPS time");
 		struct tm	t;
 		gps_date_t	d = gps_date();
 		t.tm_mon = d.month - 1;

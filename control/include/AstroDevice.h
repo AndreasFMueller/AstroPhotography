@@ -276,8 +276,8 @@ private:
 protected:
 	void	location(const LongLat& l);
 public:
-	LongLat	location();
-	time_t	time();
+	virtual LongLat	location();
+	virtual time_t	time();
 
 	Mount(const std::string& name);
 	Mount(const DeviceName& name);

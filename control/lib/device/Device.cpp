@@ -68,8 +68,8 @@ Device::parametermap_t::const_iterator	Device::findParameter(
 						const std::string& name) const {
 	parametermap_t::const_iterator	result = _parameters.find(name);
 	if (result == _parameters.end()) {
-		std::string	msg = stringprintf("no parameter named '%s'",
-			name.c_str());
+		std::string	msg = stringprintf("%s has no parameter named '%s'",
+			_name.toString().c_str(), name.c_str());
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 		throw std::runtime_error(msg);
 	}

@@ -45,8 +45,6 @@ void	Mount::propertySetup() {
 		longitude = 8.83; // Altendorf
 		_has_location = false;
 	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "set longitude parameter to %s",
-		parameterValueString("longitude").c_str());
 
 	float	latitude = 0;
 	if (hasProperty("latitude")) {
@@ -57,13 +55,8 @@ void	Mount::propertySetup() {
 		latitude = 47.19; // Altendorf
 		_has_location = false;
 	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "set latitude parameter to %s",
-		parameterValueString("latitude").c_str());
-
-	// use the property values to set the location
-	Angle	lo(longitude, Angle::Degrees);
-	Angle	la(latitude, Angle::Degrees);
-	_location = LongLat(lo, la);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "location: %s",
+		_location.toString().c_str());
 }
 
 /**
@@ -208,14 +201,10 @@ void	Mount::addPositionMetadata(astro::image::ImageBase& image) {
 			direction.azm().degrees()));
 	} catch (...) {
 	}
-	if (hasParameter("latitude")) {
-		image.setMetadata(astro::io::FITSKeywords::meta("LATITUDE",
-			parameterValueFloat("latitude")));
-	}
-	if (hasParameter("longitude")) {
-		image.setMetadata(astro::io::FITSKeywords::meta("LONGITUD",
-			parameterValueFloat("longitude")));
-	}
+	image.setMetadata(astro::io::FITSKeywords::meta("LATITUDE",
+		_location.latitude().degrees()));
+	image.setMetadata(astro::io::FITSKeywords::meta("LONGITUD",
+		_location.longitude().degrees()));
 }
 
 } // namespace device
