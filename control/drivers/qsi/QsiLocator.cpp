@@ -165,6 +165,8 @@ std::vector<std::string>	QsiCameraLocator::getDevicelist(DeviceName::device_type
 	return names;
 }
 
+std::recursive_mutex	_mutex;
+
 /**
  * \brief Construct a camera from a camera description
  *
@@ -172,6 +174,9 @@ std::vector<std::string>	QsiCameraLocator::getDevicelist(DeviceName::device_type
  * \return Camera with that name
  */
 CameraPtr	QsiCameraLocator::getCamera0(const DeviceName& name) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "locating camera %s",
+		name.toString().c_str());
+	std::lock_guard<std::recursive_mutex>	lock(_mutex);
 	return CameraPtr(new QsiCamera(name));
 }
 
@@ -182,6 +187,9 @@ CameraPtr	QsiCameraLocator::getCamera0(const DeviceName& name) {
  * \return	CcdPtr object of the CCD
  */
 CcdPtr	QsiCameraLocator::getCcd0(const DeviceName& ccdname) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "locating ccd %s",
+		ccdname.toString().c_str());
+	std::lock_guard<std::recursive_mutex>	lock(_mutex);
 	if (ccdname.size() < 2) {
 		std::string	msg = stringprintf("bad name: %s",
 			ccdname.toString().c_str());
@@ -204,6 +212,9 @@ CcdPtr	QsiCameraLocator::getCcd0(const DeviceName& ccdname) {
  * \return	CoolerPtr object of the Cooler
  */
 CoolerPtr	QsiCameraLocator::getCooler0(const DeviceName& coolername) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "locating cooler %s",
+		coolername.toString().c_str());
+	std::lock_guard<std::recursive_mutex>	lock(_mutex);
 	if (coolername.size() < 2) {
 		std::string	msg = stringprintf("bad name: %s",
 			coolername.toString().c_str());
@@ -225,6 +236,9 @@ CoolerPtr	QsiCameraLocator::getCooler0(const DeviceName& coolername) {
  * \return	FilterWheelPtr wrapper of the filterwheel of the camera
  */
 FilterWheelPtr	QsiCameraLocator::getFilterWheel0(const DeviceName& filterwheelname) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "locating filterwheel %s",
+			filterwheelname.toString().c_str());
+	std::lock_guard<std::recursive_mutex>	lock(_mutex);
 	if (filterwheelname.size() < 2) {
 		std::string	msg = stringprintf("bad name: %s",
 			filterwheelname.toString().c_str());
@@ -246,6 +260,9 @@ FilterWheelPtr	QsiCameraLocator::getFilterWheel0(const DeviceName& filterwheelna
  * \return	GuidePortPtr object pointing to the guider port of the camera
  */
 GuidePortPtr	QsiCameraLocator::getGuidePort0(const DeviceName& guideportname) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "locating guideport %s",
+		guideportname.toString().c_str());
+	std::lock_guard<std::recursive_mutex>	lock(_mutex);
 	if (guideportname.size() < 2) {
 		std::string	msg = stringprintf("bad name: %s",
 			guideportname.toString().c_str());

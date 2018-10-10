@@ -16,6 +16,7 @@ namespace qsi {
  * \brief Construct a QSI camera object
  */
 QsiCamera::QsiCamera(const std::string& _name) : Camera(_name) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "constructing camera %s", _name.c_str());
 	std::unique_lock<std::recursive_mutex>	lock(mutex);
 	try {
 		DeviceName	devname(name());
@@ -30,11 +31,15 @@ QsiCamera::QsiCamera(const std::string& _name) : Camera(_name) {
 
 	// get the name
 	_camera.get_Name(_userFriendlyName);
-
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "camera name: %s",
+		_userFriendlyName.c_str());
 
 	// get the filterwheel and guideport information
 	camera().get_HasFilterWheel(&_hasfilterwheel);
 	camera().get_CanPulseGuide(&_hasguideport);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "features: %s filterwheel, %s guideport",
+		(_hasfilterwheel) ? "has" : "no",
+		(_hasguideport) ? "has" : "no");
 
 	// query the information of the CCD
 	long	xsize, ysize;
@@ -57,6 +62,7 @@ QsiCamera::QsiCamera(const std::string& _name) : Camera(_name) {
 	double	maxexposuretime;
 	camera().get_MaxExposureTime(&maxexposuretime);
 	info.maxexposuretime(maxexposuretime);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "info: %s", info.toString().c_str());
 
 	// get the binning modes
 	bool	p2bin;
@@ -83,20 +89,27 @@ QsiCamera::QsiCamera(const std::string& _name) : Camera(_name) {
 			}
 		}
 	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "got %d binning modes",
+		info.modes().size());
 
 	// find out whether the camera has a shutter
 	bool	hasshutter = false;
 	camera().get_HasShutter(&hasshutter);
 	info.shutter(hasshutter);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "%s shutter",
+		(hasshutter) ? "has" : "no");
 
 	// add the ccdinfo to the 
 	ccdinfo.push_back(info);
+
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "camera construction complete");
 }
 
 /**
  * \brief Destroy the QSI camera object
  */
 QsiCamera::~QsiCamera() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "disconnect the camera");
 	camera().put_Connected(false);
 }
 
@@ -111,6 +124,7 @@ void	QsiCamera::reset() {
  * \brief Get the CCD from the camera
  */
 CcdPtr	QsiCamera::getCcd0(size_t id) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "get CCD %d", id);
 	if (id > 0) {
 		throw std::invalid_argument("only CCD 0 defined");
 	}
@@ -128,6 +142,7 @@ bool	QsiCamera::hasFilterWheel() const {
  * \brief Get the Filter wheel
  */
 FilterWheelPtr	QsiCamera::getFilterWheel0() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "get the filterwheel");
 	if (!_hasfilterwheel) {
 		throw std::invalid_argument("camera has no filter wheel");
 	}
@@ -145,6 +160,7 @@ bool	QsiCamera::hasGuidePort() const {
  * \brief Get the Guider port
  */
 GuidePortPtr	QsiCamera::getGuidePort0() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "get the guideport");
 	if (!_hasguideport) {
 		throw std::runtime_error("camera has no guider port");
 	}

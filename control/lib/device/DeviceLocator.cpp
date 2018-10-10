@@ -165,14 +165,17 @@ astro::camera::AdaptiveOpticsPtr	DeviceLocator::getAdaptiveOptics(const std::str
 }
 
 astro::camera::CameraPtr	DeviceLocator::getCamera(const std::string& name) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "camera %s requested", name.c_str());
 	return cameracache.get(name);
 }
 
 astro::camera::CcdPtr	DeviceLocator::getCcd(const std::string& name) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "ccd %s requested", name.c_str());
 	return ccdcache.get(name);
 }
 
 astro::camera::CoolerPtr	DeviceLocator::getCooler(const std::string& name) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "cooler %s requested", name.c_str());
 	return coolercache.get(name);
 }
 
@@ -185,18 +188,23 @@ astro::camera::CameraPtr	DeviceLocator::getCamera(size_t index) {
 }
 
 astro::camera::FilterWheelPtr	DeviceLocator::getFilterWheel(const std::string& name) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "filterwheel %s requested",
+		name.c_str());
 	return filterwheelcache.get(name);
 }
 
 astro::camera::FocuserPtr	DeviceLocator::getFocuser(const std::string& name) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "focuser %s requested", name.c_str());
 	return focusercache.get(name);
 }
 
 astro::camera::GuidePortPtr	DeviceLocator::getGuidePort(const std::string& name) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "guideport %s requested", name.c_str());
 	return guideportcache.get(name);
 }
 
 astro::device::MountPtr	DeviceLocator::getMount(const std::string& name) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "mount %s requested", name.c_str());
 	return mountcache.get(name);
 }
 

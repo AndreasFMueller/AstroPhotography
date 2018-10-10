@@ -17,6 +17,8 @@ namespace qsi {
 class QsiFilterWheel : public FilterWheel {
 	QsiCamera&	_camera;
 	unsigned int	nfilters;
+	unsigned int	lastPosition;
+	FilterWheel::State	lastState;
 	std::vector<std::string>	filternames;
 public:
 	QsiFilterWheel(QsiCamera& camera);

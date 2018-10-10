@@ -15,6 +15,8 @@ namespace qsi {
 
 class QsiCooler : public Cooler {
 	QsiCamera&	_camera;
+	float	_actual_temperature;
+	bool	_is_on;
 public:
 	QsiCooler(QsiCamera& camera);
 	virtual float	getSetTemperature();
