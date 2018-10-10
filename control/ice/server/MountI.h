@@ -20,7 +20,7 @@ public:
 	virtual RaDec	getRaDec(const Ice::Current& current);
 	virtual AzmAlt	getAzmAlt(const Ice::Current& current);
 	virtual LongLat	getLocation(const Ice::Current& current);
-	virtual long	getTime(const Ice::Current& current);
+	virtual Ice::Long	getTime(const Ice::Current& current);
 	virtual void	GotoRaDec(const RaDec& radec,
 				const Ice::Current& current);
 	virtual void	GotoAzmAlt(const AzmAlt& azmalt,

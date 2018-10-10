@@ -26,7 +26,7 @@ LongLat	MountI::getLocation(const Ice::Current& /* current */) {
 	return convert(_mount->location());
 }
 
-long	MountI::getTime(const Ice::Current& /* current */) {
+Ice::Long	MountI::getTime(const Ice::Current& /* current */) {
 	return _mount->time();
 }
 
