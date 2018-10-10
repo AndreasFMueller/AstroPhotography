@@ -110,7 +110,7 @@ protected:
 
 public slots:
 	void	directionChanged(astro::RaDec);
-	void	orientationChanged(bool east);
+	void	orientationChanged(bool west);
 	void	stateChanged(astro::device::Mount::state_type);
 	void	useStars(astro::catalog::Catalog::starsetptr);
 	void	useSky(astro::catalog::Catalog::starsetptr);

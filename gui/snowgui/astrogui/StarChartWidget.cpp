@@ -518,7 +518,7 @@ void	StarChartWidget::stateChanged(astro::device::Mount::state_type state) {
 /**
  * \brief handle changing orientation
  *
- * The orientation parameter is true when the telescope is on the east, 
+ * The orientation parameter is true when the telescope is on the west, 
  * where the camera is oriented so that north is up on the image. When
  * the telescope is on the west side of the mount, the camera is upside
  * down, so North is on the south. On the southern hemisphere, one will
@@ -526,12 +526,12 @@ void	StarChartWidget::stateChanged(astro::device::Mount::state_type state) {
  * done by the widget calling this slot, because the StarChartWidget
  * does not know where on earth the observatory is.
  *
- * \param east	orientation parameter
+ * \param west	orientation parameter
  */
-void	StarChartWidget::orientationChanged(bool east) {
+void	StarChartWidget::orientationChanged(bool west) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "got orientation change: %s",
-		(east) ? "east" : "west");
-	flip(!east);
+		(west) ? "west" : "east");
+	flip(!west);
 	repaint();
 }
 

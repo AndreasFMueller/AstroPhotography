@@ -53,6 +53,9 @@ astro::RaDec	convert(const RaDec& radec);
 AzmAlt	convert(const astro::AzmAlt& azmalt);
 astro::AzmAlt	convert(const AzmAlt& azmalt);
 
+LongLat	convert(const astro::LongLat& longlat);
+astro::LongLat	convert(const LongLat& longlat);
+
 Interval	convert(const std::pair<float, float>& interval);
 std::pair<float, float>	convert(const Interval& interval);
 

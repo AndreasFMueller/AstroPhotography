@@ -27,7 +27,7 @@ mountcontrollerwidget::mountcontrollerwidget(QWidget *parent)
 	setTabOrder(ui->targetDecField, ui->targetRaField);
 
 	_previousstate = snowstar::MountIDLE;
-	_previouseast = true;
+	_previouswest = true;
 
 	connect(ui->gotoButton, SIGNAL(clicked()),
 		this, SLOT(gotoClicked()));
@@ -104,20 +104,7 @@ void	mountcontrollerwidget::setupMount() {
 	_previousstate = snowstar::MountIDLE;
 	if (_mount) {
 		// read longitude and latitude from the mount
-		if (_mount->hasParameter("longitude")) {
-			_position.longitude().degrees(
-				_mount->parameterValueFloat("longitude"));
-		} else {
-			debug(LOG_ERR, DEBUG_LOG, 0,
-				"longitude parameter not set for mount");
-		}
-		if (_mount->hasParameter("latitude")) {
-			_position.latitude().degrees(
-				_mount->parameterValueFloat("latitude"));
-		} else {
-			debug(LOG_ERR, DEBUG_LOG, 0,
-				"latitude parameter not set for mount");
-		}
+		_position = convert(_mount->getLocation());
 
 		// write the position to the position label
 		std::string	pl;
@@ -131,8 +118,16 @@ void	mountcontrollerwidget::setupMount() {
 		ui->observatoryField->setText(QString(pl.c_str()));
 
 		// make sure the star chart knows the orientation
-		_previouseast = _mount->telescopePositionEast();
-		emit orientationChanged(_previouseast);
+		_previouswest = _mount->telescopePositionWest();
+		emit orientationChanged(_previouswest);
+
+		// try to get the time
+		try {
+			emit updateTime(_mount->getTime());
+		} catch (std::exception& x) {
+			debug(LOG_ERR, DEBUG_LOG, 0, "cannot update time: %s",
+				x.what());
+		}
 		
 		// turn on the buttons
 		ui->targetRaField->setEnabled(true);
@@ -232,14 +227,14 @@ void	mountcontrollerwidget::statusUpdate() {
 	}
 
 	// check the side of the telescope on the mount
-	bool	east = _mount->telescopePositionEast();
+	bool	west = _mount->telescopePositionWest();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "telescope orientation: %s",
-		(east) ? "east" : "west");
-	if (east != _previouseast) {
+		(west) ? "west" : "east");
+	if (west != _previouswest) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "emit orientation change to %s",
-			(east) ? "east" : "west");
-		emit orientationChanged(east);
-		_previouseast = east;
+			(west) ? "west" : "east");
+		emit orientationChanged(west);
+		_previouswest = west;
 	}
 
 	// read the current position from the mount

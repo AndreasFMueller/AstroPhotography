@@ -68,6 +68,14 @@ module snowstar {
 	};
 
 	/**
+	 * \brief Longitude and latitude, use for GPS positions from mount
+	 */
+	struct LongLat {
+		float	longitude;	// logitude in degrees
+		float	latitude;	// latitude in degrees
+	};
+
+	/**
 	 * \brief base class for all callbacks interfaces
 	 *
 	 * Callbacks monitor some process, so they all need notifcation when

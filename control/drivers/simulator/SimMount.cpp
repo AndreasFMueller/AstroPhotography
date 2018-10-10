@@ -21,6 +21,8 @@ SimMount::SimMount(SimLocator& locator)
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "constructing simulated mount");
 	_when = 0;
 	_direction = _target;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "location: %s",
+		location().toString().c_str());
 }
 
 const static double _movetime = 10;

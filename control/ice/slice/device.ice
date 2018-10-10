@@ -22,8 +22,10 @@ module snowstar {
 		AzmAlt	getAzmAlt();
 		void	GotoRaDec(RaDec radecposition);
 		void	GotoAzmAlt(AzmAlt azmaltposition);
-		bool	telescopePositionEast();
+		bool	telescopePositionWest();
 		void	cancel();
+		LongLat	getLocation();
+		long	getTime();
 	};
 
 	// device related stuff

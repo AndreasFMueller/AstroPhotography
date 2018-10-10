@@ -19,11 +19,13 @@ public:
 	virtual ~MountI();
 	virtual RaDec	getRaDec(const Ice::Current& current);
 	virtual AzmAlt	getAzmAlt(const Ice::Current& current);
+	virtual LongLat	getLocation(const Ice::Current& current);
+	virtual long	getTime(const Ice::Current& current);
 	virtual void	GotoRaDec(const RaDec& radec,
 				const Ice::Current& current);
 	virtual void	GotoAzmAlt(const AzmAlt& azmalt,
 				const Ice::Current& current);
-	virtual bool	telescopePositionEast(const Ice::Current& current);
+	virtual bool	telescopePositionWest(const Ice::Current& current);
 	virtual void	cancel(const Ice::Current& current);
 	virtual mountstate	state(const Ice::Current& current);
 };

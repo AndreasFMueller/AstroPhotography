@@ -253,6 +253,8 @@ public:
 	Angle&	longitude() { return a1(); }
 	const Angle&	latitude() const { return a2(); }
 	Angle&	latitude() { return a2(); }
+
+	std::string	toString() const;
 };
 
 /**

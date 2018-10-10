@@ -32,12 +32,6 @@ Mount::Mount(const DeviceName& name) : Device(name, DeviceName::Mount) {
  * Every mount has longitude and latitude associated with it
  */
 void	Mount::propertySetup() {
-	// parameter properties
-	ParameterDescription	longitude_desc("longitude", -180, 180);
-	add(longitude_desc);
-	ParameterDescription	latitude_desc("latitude", -90, 90);
-	add(latitude_desc);
-
 	// we assume to have a location
 	_has_location = true;
 
@@ -51,7 +45,6 @@ void	Mount::propertySetup() {
 		longitude = 8.83; // Altendorf
 		_has_location = false;
 	}
-	parameter("longitude", longitude);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "set longitude parameter to %s",
 		parameterValueString("longitude").c_str());
 
@@ -64,10 +57,13 @@ void	Mount::propertySetup() {
 		latitude = 47.19; // Altendorf
 		_has_location = false;
 	}
-	parameter("latitude", latitude);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "set latitude parameter to %s",
 		parameterValueString("latitude").c_str());
 
+	// use the property values to set the location
+	Angle	lo(longitude, Angle::Degrees);
+	Angle	la(latitude, Angle::Degrees);
+	_location = LongLat(lo, la);
 }
 
 /**
@@ -101,14 +97,14 @@ void	Mount::Goto(const AzmAlt& /* azmalt */) {
 /**
  * \brief Find out on which side of the mount the telescope currently is
  */
-bool	Mount::telescopePositionEast() {
+bool	Mount::telescopePositionWest() {
 	// use the hour angle to decide whether the telescope is on the
 	// east or west
 	AzmAltConverter	azmaltconverter(location());
 	Angle	hourangle = azmaltconverter.hourangle(this->getRaDec());
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "hour angle: %.4f, orientation=%s",
 		hourangle.hours(), (hourangle > 0) ? "east" : "west");
-	return (hourangle > 0);
+	return (hourangle <= 0);
 }
 
 /**
@@ -119,6 +115,19 @@ LongLat	Mount::location() {
 		return _location;
 	}
 	throw std::runtime_error("position not available");
+}
+
+/**
+ * \brief Get the time from the mount
+ *
+ * In most cases, this is just the system time. But if e.g. a Celestron mount
+ * has a GPS device attached, then this value of the time will be more
+ * reliable
+ */
+time_t	Mount::time() {
+	time_t	now;
+	::time(&now);
+	return now;
 }
 
 /**

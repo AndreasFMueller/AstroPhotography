@@ -23,6 +23,7 @@ libastroutils_la_SOURCES = 						\
 	Format.cpp							\
 	ImageCoordinates.cpp						\
 	JulianDate.cpp							\
+	LongLat.cpp							\
 	Path.cpp							\
 	Pidfile.cpp							\
 	Point.cpp							\

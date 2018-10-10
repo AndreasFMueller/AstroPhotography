@@ -127,4 +127,19 @@ AzmAlt	convert(const astro::AzmAlt& azmalt) {
 	return result;
 }
 
+astro::LongLat	convert(const LongLat& longlat) {
+	astro::Angle	longitude;
+	longitude.degrees(longlat.longitude);
+	astro::Angle	latitude;
+	longitude.degrees(longlat.latitude);
+	return astro::LongLat(longitude, latitude);
+}
+
+LongLat	convert(const astro::LongLat& longlat) {
+	LongLat	result;
+	result.longitude = longlat.longitude().degrees();
+	result.latitude = longlat.latitude().degrees();
+	return result;
+}
+
 } // namespace snowstar

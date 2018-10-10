@@ -10,11 +10,17 @@
 #include <includes.h>
 #include <stdexcept>
 #include <AstroDevice.h>
+#include <sstream>
 
 namespace astro {
 namespace device {
 namespace celestron {
 
+/**
+ * \brief Get the serial name from the properties
+ *
+ * \param devicename	name of the device
+ */
 static std::string	getserialname(const std::string& devicename) {
 	DeviceName	dev(devicename);
 	// if the unit name is just a number, we should look up the
@@ -24,8 +30,8 @@ static std::string	getserialname(const std::string& devicename) {
 		Properties	properties(devicename);
 		std::string	serialdevicename
 			= properties.getProperty("device");
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "found serial device for unit %d name: %s",
-			unit, serialdevicename.c_str());
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "found serial device for "
+			"unit %d name: %s", unit, serialdevicename.c_str());
 		return serialdevicename;
 	} catch (const std::exception& x) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0,
@@ -36,12 +42,17 @@ static std::string	getserialname(const std::string& devicename) {
 	return URL::decode(dev.unitname());
 }
 
+/**
+ * \brief Construct a celestron mount object
+ *
+ * \param devicename	name of the device
+ */
 CelestronMount::CelestronMount(const std::string& devicename)
 	: Mount(devicename), Serial(getserialname(devicename)) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "creating Celestron mount on %s",
 		serialdevice().c_str());
 
-	std::unique_lock<std::recursive_mutex>	lock(_mutex);
+	std::lock_guard<std::recursive_mutex>	lock(_mutex);
 
 	// check communication
 	write("Kx");
@@ -67,11 +78,23 @@ CelestronMount::CelestronMount(const std::string& devicename)
 		}
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "version: %d", version);
+
+	// initialize the time variables
+	_last_time_offset = 0;
+	_last_time_queried = 0;
 }
 
+/**
+ * \brief Destroy the mount object
+ */
 CelestronMount::~CelestronMount() {
 }
 
+/**
+ * \brief Read the next prompt
+ *
+ * read a character and make sure it is a prompt character
+ */
 void	CelestronMount::getprompt() {
 	std::string	s = read(1);
 	if (s != "#") {
@@ -80,9 +103,12 @@ void	CelestronMount::getprompt() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "got # back");
 }
 
+/**
+ * \brief Query the state of the mount
+ */
 Mount::state_type	CelestronMount::state() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "locking for state command");
-	std::unique_lock<std::recursive_mutex>	lock(_mutex);
+	std::lock_guard<std::recursive_mutex>	lock(_mutex);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "sending J command to check alignment");
 	write("J");
 	std::string	s = readto('#');
@@ -103,17 +129,25 @@ Mount::state_type	CelestronMount::state() {
 	return result;
 }
 
+/**
+ * \brief Cancel a movement command
+ */
 void	CelestronMount::cancel() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "locking for cancel command");
-	std::unique_lock<std::recursive_mutex>	lock(_mutex);
+	std::lock_guard<std::recursive_mutex>	lock(_mutex);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "sending cancel command");
 	write("M");
 	getprompt();
 }
 
+/**
+ * \brief Go to a specific azm/alt setting
+ *
+ * \param azmalt	AzmAlt object for the position to move to
+ */
 void	CelestronMount::Goto(const AzmAlt& azmalt) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "locking for GOTO command");
-	std::unique_lock<std::recursive_mutex>	lock(_mutex);
+	std::lock_guard<std::recursive_mutex>	lock(_mutex);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "sending GOTO AzmAtl command");
 	std::string	cmd;
 	if (version > 202) {
@@ -128,9 +162,14 @@ void	CelestronMount::Goto(const AzmAlt& azmalt) {
 	getprompt();
 }
 
+/**
+ * \brief Got to specific position in RA and DEC
+ *
+ * \param radec		sky position to move to
+ */
 void	CelestronMount::Goto(const RaDec& radec) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "locking for GOTO command");
-	std::unique_lock<std::recursive_mutex>	lock(_mutex);
+	std::lock_guard<std::recursive_mutex>	lock(_mutex);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "sending GOTO RaDec command");
 	std::string	cmd;
 	if (version > 106) {
@@ -145,7 +184,12 @@ void	CelestronMount::Goto(const RaDec& radec) {
 	getprompt();
 }
 
-std::pair<double, double>	CelestronMount::parseangles(const std::string& response) {
+/**
+ * \brief Parse the Celestron response and read two angles from it
+ *
+ */
+std::pair<double, double>	CelestronMount::parseangles(
+					const std::string& response) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "parsing angle response: '%s'",
 		response.c_str());
 	uint32_t	a1, a2;
@@ -155,16 +199,26 @@ std::pair<double, double>	CelestronMount::parseangles(const std::string& respons
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "%s", msg.c_str());
 		throw std::runtime_error(msg);
 	}
+	// long responses have a larger range, by shifting them we can now
 	if (response.size() <= 10) {
-		a1 *= 0x10000;
-		a2 *= 0x10000;
+		a1 <<= 16;
+		a2 <<= 16;
 	}
-	return std::pair<double, double>(angle(a1), angle(a2));
+	// the second angle can be negative, if it is larger than 2^32, 
+	// so we correct for that
+	double	correction = 0;
+	if (a2 >= 2147483648) {
+		correction = - 2 * M_PI;
+	}
+	return std::pair<double, double>(angle(a1), angle(a2) + correction);
 }
 
+/**
+ * \brief Retrieve the RA and DEC from the mount
+ */
 RaDec	CelestronMount::getRaDec() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "locking for get command");
-	std::unique_lock<std::recursive_mutex>	lock(_mutex);
+	std::lock_guard<std::recursive_mutex>	lock(_mutex);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "sending get RaDec command");
 	if (version >= 106) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "sending e command");
@@ -182,17 +236,26 @@ RaDec	CelestronMount::getRaDec() {
 	return RaDec(Angle(a.first), Angle(a.second));
 }
 
+/*
+ * \brief Retrieve the Azimuth and Altitude from the mount
+ *
+ * On GE mounts, Altitude und declination are essentially the same (except
+ * the DEC is the result of an alignment modell), and Azimuth is essentially
+ * the hour angle.
+ */
 AzmAlt	CelestronMount::getAzmAlt() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "locking for get command");
-	std::unique_lock<std::recursive_mutex>	lock(_mutex);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "sending get AzmAlt command");
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "sending z command");
+	std::lock_guard<std::recursive_mutex>	lock(_mutex);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "sending get AzmAlt (z) command");
 	write("z");
 	std::pair<double, double>	a = parseangles(readto('#'));
 	return AzmAlt(Angle(a.first), Angle(a.second));
 }
 
-bool	CelestronMount::telescopePositionEast() {
+/**
+ * \brief Find out whether the telescope is on the east or the west
+ */
+bool	CelestronMount::telescopePositionWest() {
 	// XXX use the location on earth and the azm angle to find out
 	// XXX on which side the telescope currently is, at least for
 	// XXX GE mounts
@@ -213,25 +276,215 @@ bool	CelestronMount::telescopePositionEast() {
 #endif
 
 	// XXX until that is implemented, use the default method
-	return Mount::telescopePositionEast();
+	return Mount::telescopePositionWest();
 }
 
+/**
+ * \brief Convert a 16 bit unsigned integer into an angle in radians
+ */
 double	CelestronMount::angle(uint16_t a) {
 	return 2 * M_PI * a / 65536.;
 }
 
+/**
+ * \brief Convert a 32 bit unsigned integer into an angle in radians
+ */
 double	CelestronMount::angle(uint32_t a) {
 	return 2 * M_PI * a / 4294967296.;
 }
 
+/**
+ * \brief Convert an angle into an unsigned 16 bit integer
+ */
 uint16_t	CelestronMount::angle16(const Angle& a) {
 	uint16_t	result = 65536 * a.reduced().radians() / (2 * M_PI);
 	return result;
 }
 
+/**
+ * \brief Convert an angle into an unsigned 32 bit integer
+ */
 uint32_t	CelestronMount::angle32(const Angle& a) {
 	uint32_t	result = 4294967296 * a.reduced().radians() / (2 * M_PI);
 	return result;
+}
+
+/**
+ * \brief Auxiliary function to hex encode a packet
+ *
+ * \param packet	raw data packet to encode
+ * \return		hex encoded packet
+ */
+static std::string	packet2hex(const std::vector<uint8_t>& packet) {
+	std::ostringstream	out;
+	std::vector<uint8_t>::const_iterator	i;
+	for (i = packet.begin(); i != packet.end(); i++) {
+		if (i != packet.begin()) {
+			out << ' ';
+		}
+		out << stringprintf("%02X", *i);
+	}
+	return out.str();
+}
+
+/**
+ * \brief Send a GPS packet command
+ *
+ * The GPS packet command has two variable bytes, they are handed in as 
+ * parameters a and b.
+ *
+ * \param a	byte index 3 in the packet
+ * \param b	byte index 7 in the packet
+ * \param l	size of the response
+ */
+std::vector<uint8_t>	CelestronMount::gps_command(uint8_t a, uint8_t b, size_t l) {
+	std::lock_guard<std::recursive_mutex>	_lock(_mutex);
+	std::vector<uint8_t>	packet;
+	packet.push_back('P');
+	packet.push_back(1);
+	packet.push_back(176);
+	packet.push_back(a);
+	packet.push_back(0);
+	packet.push_back(0);
+	packet.push_back(0);
+	packet.push_back(b);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "write 8 bytes: %s",
+		packet2hex(packet).c_str());
+	writeraw(packet);
+	std::vector<uint8_t>	result = readraw(l);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "got %d byte response: %s",
+		packet.size(), packet2hex(packet).c_str());
+	getprompt();
+	return result;
+}
+
+/**
+ * \brief Find out whether GPS is available
+ */
+bool	CelestronMount::gps_linked() {
+	std::vector<uint8_t>	x = gps_command(55, 1, 1);
+	return (x[0] > 0);
+}
+
+/**
+ * \brief Find the GPS longitude
+ */
+Angle	CelestronMount::gps_longitude() {
+	std::vector<uint8_t>	xyz = gps_command(2, 3, 3);
+	Angle	longitude(2 * M_PI * (65536 * xyz[0] + 256 * xyz[1] + xyz[2])
+		/ 16777216.);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "GPS longitude: %s",
+		longitude.dms().c_str());
+	return longitude;
+}
+
+/**
+ * \brief Find the GPS latitude
+ */
+Angle	CelestronMount::gps_latitude() {
+	std::vector<uint8_t>	xyz = gps_command(1, 3, 3);
+	Angle	latitude(2 * M_PI * (65536 * xyz[0] + 256 * xyz[1] + xyz[2])
+		/ 16777216.);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "GPS latitude: %s",
+		latitude.dms().c_str());
+	return latitude;
+}
+
+/**
+ * \brief Get the GPS date
+ */
+CelestronMount::gps_date_t	CelestronMount::gps_date() {
+	std::vector<uint8_t>	xy = gps_command(3, 2, 2);
+	gps_date_t	result;
+	result.day = xy[0];
+	result.month = xy[1];
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "GPS date: %d. %d.",
+		result.day, result.month);
+	return result;
+}
+
+/**
+ * \brief Get the GPS year
+ */
+int	CelestronMount::gps_year() {
+	std::vector<uint8_t>	xy = gps_command(3, 2, 2);
+	int	year = (256 * xy[0] + xy[1]);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "GPS year: %d", year);
+	return year;
+}
+
+/**
+ * \brief Get the GPS time
+ */
+CelestronMount::gps_time_t	CelestronMount::gps_time() {
+	std::vector<uint8_t>	xyz = gps_command(51, 3, 3);
+	gps_time_t	result;
+	result.hour = xyz[0];
+	result.minute = xyz[1];
+	result.seconds = xyz[2];
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "GPS time: %02d:%02d:%02d",
+		result.hour, result.minute, result.seconds);
+	return result;
+}
+
+/**
+ * \brief Get the mount location
+ */
+LongLat	CelestronMount::location() {
+	std::lock_guard<std::recursive_mutex>	_lock(_mutex);
+	if (gps_linked()) {
+		return LongLat(gps_longitude(), gps_latitude());
+	}
+	return Mount::location();
+}
+
+/**
+ * \brief Get the GPS time of the mount
+ */
+time_t	CelestronMount::time() {
+	time_t	now;
+	::time(&now);
+	// if the last request is not too far back, use the offset to 
+	// compute the current time
+	if (now < (_last_time_queried + 60)) {
+		return now + _last_time_offset;
+	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "offset too old, retrieving GPS time");
+
+	// if we have GPS, get the GPS time
+	if (gps_linked()) {
+		struct tm	t;
+		gps_date_t	d = gps_date();
+		t.tm_mon = d.month - 1;
+		t.tm_mday = d.day;
+		t.tm_wday = 0; // ignored by timegm
+		t.tm_year = gps_year() - 1900;
+		gps_time_t	h = gps_time();
+		t.tm_hour = h.hour;
+		t.tm_min = h.minute;
+		t.tm_sec = h.seconds;
+
+		// log what you have read from the mount
+		char	buffer[40];
+		strftime(buffer, sizeof(buffer), "%F %T", &t);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "date read from mount: %s",
+			buffer);
+
+		// convert into a time
+		time_t	result = timegm(&t);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "GPS time found: %s",
+			ctime(&result));
+
+		// recompute the time offset
+		::time(&now);
+		_last_time_queried = now;
+		_last_time_offset = (long long)result - (long long)now;
+
+		// return the current time
+		return result;
+	}
+	// if not linked, use the superclass time
+	return Mount::time();
 }
 
 } // namespace celestron

@@ -22,7 +22,7 @@ class mountcontrollerwidget : public InstrumentWidget {
 
 	snowstar::RaDec		_target;
 	snowstar::mountstate	_previousstate;
-	bool			_previouseast;
+	bool			_previouswest;
 	snowstar::MountPrx	_mount;
 
 	snowstar::RaDec		_telescope;
@@ -43,7 +43,8 @@ signals:
 	void	mountSelected(int);
 	void	stateChanged(astro::device::Mount::state_type);
 	void	telescopeChanged(astro::RaDec);
-	void	orientationChanged(bool east);
+	void	orientationChanged(bool west);
+	void	updateTime(time_t);
 
 private:
 	Ui::mountcontrollerwidget *ui;

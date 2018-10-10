@@ -29,8 +29,11 @@ public:
 	LocalSiderealTime(QWidget *parent = NULL);
 	~LocalSiderealTime();
 	
+private:
+	void	updateCommon(time_t);
 public slots:
 	void	update();
+	void	update(time_t);
 };
 
 } // 

@@ -156,6 +156,9 @@ std::string	Serial::read(int count) {
 	return std::string(buffer, count);
 }
 
+/**
+ * \brief Read until we find a special character
+ */
 std::string	Serial::readto(char promptchar) {
 	std::string	result;
 	char	c;
@@ -165,6 +168,46 @@ std::string	Serial::readto(char promptchar) {
 		}
 		result.push_back(c);
 	} while (c != promptchar);
+	return result;
+}
+
+/**
+ * \brief write a raw character array
+ *
+ * \param packet	the data packet to send
+ */
+void	Serial::writeraw(const std::vector<uint8_t>& packet) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "%d bytes to send");
+	uint8_t	*b = (uint8_t *)alloca(packet.size());
+	std::copy(packet.begin(), packet.end(), b);
+	int	l = ::write(fd, b, packet.size());
+	if (l != packet.size()) {
+		std::string	msg = stringprintf("failed to send %u bytes: "
+			"%d sent %s", packet.size(), l,
+			(l < 0) ? strerror(errno) : "");
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw std::runtime_error(msg);
+	}
+}
+
+/**
+ * \brief read a number of bytes
+ *
+ * \param l	number of bytes to read
+ */
+std::vector<uint8_t>	Serial::readraw(int l) {
+	uint8_t	b[l];
+	int	r = ::read(fd, b, l);
+	if (r != l) {
+		std::string	msg = stringprintf("could not read %d bytes: "
+			"%s", strerror(errno));
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw std::runtime_error(msg);
+	}
+	std::vector<uint8_t>	result;
+	for (int i = 0; i < l; i++) {
+		result.push_back(b[i]);
+	}
 	return result;
 }
 

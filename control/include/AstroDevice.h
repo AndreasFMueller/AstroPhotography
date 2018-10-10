@@ -225,6 +225,7 @@ protected:
 public:
 	Device(const std::string& name, DeviceName::device_type type);
 	Device(const DeviceName& name, DeviceName::device_type type);
+	// make sure devices cannot get copied or assigned
 	Device(const Device& other) = delete;
 	Device&	operator=(const Device& other) = delete;
 	virtual ~Device();
@@ -276,6 +277,7 @@ protected:
 	void	location(const LongLat& l);
 public:
 	LongLat	location();
+	time_t	time();
 
 	Mount(const std::string& name);
 	Mount(const DeviceName& name);
@@ -293,8 +295,8 @@ public:
 	virtual void	Goto(const AzmAlt& azmalt);
 	virtual void	cancel();
 
-	// Whether the telescope is on the east side of the mount
-	virtual bool	telescopePositionEast();
+	// Whether the telescope is on the west side of the mount
+	virtual bool	telescopePositionWest();
 
 	// add position metadata to an image
 	void	addPositionMetadata(astro::image::ImageBase& image);

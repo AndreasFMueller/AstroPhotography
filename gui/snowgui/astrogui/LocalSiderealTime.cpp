@@ -25,14 +25,13 @@ LocalSiderealTime::~LocalSiderealTime() {
 }
 
 /**
- * \brief Update the local sidereal time clock
+ * \brief Common update
+ *
+ * This method does not take the offset into account
+ *
+ * \param now	this is the absolute point in time for which LMST is desired
  */
-void	LocalSiderealTime::update() {
-	// compute the time
-	time_t	now;
-	time(&now);
-	now += _offset;
-
+void	LocalSiderealTime::updateCommon(time_t now) {
 	// compute the LMST and display
 	astro::AzmAltConverter	c(now, _position);
 	std::string	t = c.LMST().hms().substr(1);
@@ -41,6 +40,32 @@ void	LocalSiderealTime::update() {
 		t = t.substr(0, p);
 	}
 	setText(QString(t.c_str()));
+}
+
+/**
+ * \brief Update the local sidereal time clock
+ */
+void	LocalSiderealTime::update() {
+	// compute the time
+	time_t	now;
+	time(&now);
+	now += _offset;
+
+	// common update call
+	updateCommon(now);
+}
+
+/**
+ * \brief Slot for updates with time
+ *
+ * This slot implicitly updates the time offset so that the widget keeps
+ * displaying the time with the same time offset
+ */
+void	LocalSiderealTime::update(time_t now) {
+	time_t	localnow;
+	time(&localnow);
+	_offset = now - localnow;
+	updateCommon(now);
 }
 
 } // namespace snowgui

@@ -22,12 +22,20 @@ AzmAlt	MountI::getAzmAlt(const Ice::Current& /* current */) {
 	return convert(_mount->getAzmAlt());
 }
 
+LongLat	MountI::getLocation(const Ice::Current& /* current */) {
+	return convert(_mount->location());
+}
+
+long	MountI::getTime(const Ice::Current& /* current */) {
+	return _mount->time();
+}
+
 void	MountI::cancel(const Ice::Current& /* current */) {
 	_mount->cancel();
 }
 
-bool	MountI::telescopePositionEast(const Ice::Current& /* current */) {
-	return _mount->telescopePositionEast();
+bool	MountI::telescopePositionWest(const Ice::Current& /* current */) {
+	return _mount->telescopePositionWest();
 }
 
 void	MountI::GotoAzmAlt(const AzmAlt& azmalt,
