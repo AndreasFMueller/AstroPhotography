@@ -99,8 +99,8 @@ int	main(int argc, char *argv[]) {
 		}
 
 	// get the repository
-	Repository	repository;
-	ModulePtr	cameramodule = repository.getModule(cameramodulename);
+	ModuleRepositoryPtr	repository = getModuleRepository();
+	ModulePtr	cameramodule = repository->getModule(cameramodulename);
 	cameramodule->open();
 
 	// get the Camera
@@ -118,7 +118,7 @@ int	main(int argc, char *argv[]) {
 	DeviceLocatorPtr	focuserlocator = cameralocator;
 	if (std::string(focusermodulename) != std::string(cameramodulename)) {
 		ModulePtr	focusermodule
-			= repository.getModule(focusermodulename);
+			= repository->getModule(focusermodulename);
 		focuserlocator = focusermodule->getDeviceLocator();
 	}
 	FocuserPtr	focuser = focuserlocator->getFocuser(focusername);

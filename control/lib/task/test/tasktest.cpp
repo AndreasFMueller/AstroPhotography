@@ -34,7 +34,7 @@ int	main(int argc, char *argv[]) {
 		}
 
 	// initialize the focuser simulator to the focused position
-	Repository	repository;
+	ModuleRepositoryPtr	repository = getModuleRepository();
 	DeviceAccessor<FocuserPtr>	deviceaccessor(repository);
 	FocuserPtr	focuser = deviceaccessor.get(std::string("focuser:simulator/focuser"));
 	focuser->moveto((focuser->min() + focuser->max()) / 2, 30);

@@ -39,7 +39,7 @@ test:	tests
 
 # single test
 singletest_SOURCES = singletest.cpp 					\
-	ParameterDescriptionTest.cpp	
+	RepositoryTest.cpp
 singletest_LDADD = $(device_ldadd)
 singletest_DEPENDENCIES = $(device_dependencies)
 

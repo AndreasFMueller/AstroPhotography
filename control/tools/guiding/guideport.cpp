@@ -181,7 +181,7 @@ int	main(int argc, char *argv[]) {
 	DeviceName	devicename(argv[optind++]);
 
 	// retrieve the guider port
-	astro::module::Repository	repository;
+	astro::module::ModuleRepositoryPtr	repository = astro::module::getModuleRepository();
         astro::module::Devices	devices(repository);
 
 	astro::camera::GuidePortPtr	guideport

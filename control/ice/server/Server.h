@@ -22,7 +22,7 @@ class RepositoriesI;
 class Server {
 	Ice::CommunicatorPtr	ic;
 
-	astro::module::Repository	repository;
+	astro::module::ModuleRepositoryPtr	repository;
 	astro::module::Devices		devices;
 	astro::persistence::Database	database;
 	astro::guiding::GuiderFactory	guiderfactory;

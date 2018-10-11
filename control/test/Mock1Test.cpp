@@ -23,7 +23,7 @@ namespace astro {
 namespace test {
 
 class Mock1Test : public CppUnit::TestFixture {
-	Repository	*repository;
+	ModuleRepositoryPtr	repository;
 public:
 	void	setUp();
 	void	tearDown();
@@ -37,11 +37,11 @@ public:
 CPPUNIT_TEST_SUITE_REGISTRATION(Mock1Test);
 
 void	Mock1Test::setUp() {
-	repository = new Repository("../drivers/mock1/.libs");
+	repository = getModuleRepository("../drivers/mock1/.libs");
 }
 
 void	Mock1Test::tearDown() {
-	delete repository;
+	repository.reset();
 }
 
 void	Mock1Test::testMock1() {

@@ -47,8 +47,8 @@ public:
 };
 typedef std::shared_ptr<ModuleDescriptor>	ModuleDescriptorPtr;
 
-class Repository;
-class RepositoryBackend;
+class ModuleRepository;
+class ModuleRepositoryBackend;
 /**
  * \brief Dynamically loadable module to control various types of
  *        devices used for astrophotography.
@@ -57,7 +57,7 @@ class RepositoryBackend;
  * devices used in astrophotography. Modules can represent driver 
  * libraries for cameras, filterwheels, telescopes or others.
  * Modules are usually returned by the modules or the getModule method
- * of the Repository class. Once loaded, some special functions in
+ * of the ModuleRepository class. Once loaded, some special functions in
  * the loadable library are used to return pointers to other objects.
  * E. g. every module must implement a function getDescriptor with C
  * linkage that returns a pointer to a Descriptor object. The getDescriptor
@@ -87,7 +87,7 @@ public:
 	static bool	dlclose_on_close;
 	ModuleDescriptorPtr	getDescriptor();
 	astro::device::DeviceLocatorPtr	getDeviceLocator();
-	friend class RepositoryBackend;
+	friend class ModuleRepositoryBackend;
 	friend class ::astro::test::ModuleTest;
 };
 
@@ -103,7 +103,7 @@ public:
 typedef	std::shared_ptr<Module>	ModulePtr;
 
 /**
- * \brief Exceptions thrown when the Repository class meets a problem.
+ * \brief Exceptions thrown when the ModuleRepository class meets a problem.
  */
 class	repository_error : public std::runtime_error {
 public:
@@ -111,8 +111,16 @@ public:
 		: std::runtime_error(whatString) { }
 };
 
+typedef std::shared_ptr<ModuleRepository>	ModuleRepositoryPtr;
+
 /**
- * \brief A Repository gives access to a collection of modules.
+ * \brief Class to retrieve module repositories
+ */
+ModuleRepositoryPtr	getModuleRepository();
+ModuleRepositoryPtr	getModuleRepository(const std::string& path);
+
+/**
+ * \brief A ModuleRepository gives access to a collection of modules.
  *
  * A Repository object represents the loadable modules contained in
  * a given directory. The defualt constructor gives access to the
@@ -124,18 +132,17 @@ public:
  * the modules method to find out about available modules. To instantiate
  * modules known by name, it is preferable to use the getModule method.
  */
-class	Repository {
+class	ModuleRepository {
 	std::string	_path;
 public:
+	ModuleRepository(const std::string& path) : _path(path) { }
+	virtual ~ModuleRepository() { }
 	const std::string&	path() const { return _path; }
-public:
-	Repository();
-	Repository(const std::string& path);
-	long	numberOfModules() const;
-	std::vector<std::string>	moduleNames() const;
-	std::vector<ModulePtr>	modules() const;
-	bool	contains(const std::string& modulename) const;
-	ModulePtr	getModule(const std::string& modulename) ;
+	virtual long	numberOfModules() const = 0;
+	virtual std::vector<std::string>	moduleNames() const = 0;
+	virtual std::vector<ModulePtr>	modules() const = 0;
+	virtual bool	contains(const std::string& modulename) = 0;
+	virtual ModulePtr	getModule(const std::string& modulename) = 0;
 };
 
 /**
@@ -146,9 +153,9 @@ public:
  * the devices directly.
  */
 class Devices {
-	Repository&	_repository;
+	ModuleRepositoryPtr	_repository;
 public:
-	Devices(Repository& repository) : _repository(repository) { }
+	Devices(ModuleRepositoryPtr repository) : _repository(repository) { }
 	typedef	std::list<DeviceName>	devicelist;
 	devicelist	getDevicelist(DeviceName::device_type type);
 	camera::AdaptiveOpticsPtr	getAdaptiveOptics(const DeviceName& name);

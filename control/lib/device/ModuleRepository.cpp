@@ -1,8 +1,7 @@
 /*
- * Repository.cpp -- repository class implementation
+ * ModuleRepository.cpp -- module repository class implementation
  *
  * (c) 2012 Prof Dr Andreas Mueller, Hochschule Rapperswil
- * $Id$
  */
 #include <AstroLoader.h>
 #include <includes.h>
@@ -13,9 +12,6 @@
 
 namespace astro {
 namespace module {
-
-class RepositoryBackend;
-typedef std::shared_ptr<RepositoryBackend>	RepositoryBackendPtr;
 
 //////////////////////////////////////////////////////////////////////
 // Repositories collection
@@ -29,22 +25,30 @@ typedef std::shared_ptr<RepositoryBackend>	RepositoryBackendPtr;
  * The Repositories object mediates access to the repositories and thus
  * ensures that each repository is instantiated only once.
  */
-class Repositories {
+class ModuleRepositories {
 	std::recursive_mutex	mutex;
-	typedef	std::map<std::string, RepositoryBackendPtr>	backendmap;
+	typedef	std::map<std::string, ModuleRepositoryPtr>	backendmap;
 	backendmap	_repositories;
 public:
-	Repositories();
-	~Repositories();
-	RepositoryBackendPtr	get(const std::string& path);
+	ModuleRepositories();
+	ModuleRepositoryPtr	get(const std::string& path);
 };
 
-static Repositories	repositories;
+static ModuleRepositories	repositories;
 
-Repositories::Repositories() {
+ModuleRepositories::ModuleRepositories() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "create a module repository at %p",
+		this);
 }
 
-Repositories::~Repositories() {
+ModuleRepositoryPtr	getModuleRepository() {
+	return repositories.get(PKGLIBDIR);
+}
+
+ModuleRepositoryPtr	getModuleRepository(const std::string& path) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieve module repo at %s",
+		path.c_str());
+	return repositories.get(path);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -55,29 +59,26 @@ Repositories::~Repositories() {
  *
  * The repository backend is what the Repositories class returns.
  */
-class RepositoryBackend {
-	std::string	_path;
-public:
-	const std::string&	path() const { return _path; }
+class ModuleRepositoryBackend : public ModuleRepository {
 private:
 	std::recursive_mutex	_mutex;	// protect the map
 	typedef	std::map<std::string, ModulePtr>	modulemap;
 	modulemap	modulecache;
 	void	checkpath(const std::string& path) const;
 public:
-	RepositoryBackend();
-	RepositoryBackend(const std::string& path);
-	long	numberOfModules() const;
-	std::vector<std::string>	moduleNames() const;
-	std::vector<ModulePtr>	modules() const;
-	bool	contains(const std::string& modulename);
-	ModulePtr	getModule(const std::string& modulename);
+	ModuleRepositoryBackend(const std::string& path);
+	virtual ~ModuleRepositoryBackend() { }
+	virtual long	numberOfModules() const;
+	virtual std::vector<std::string>	moduleNames() const;
+	virtual std::vector<ModulePtr>	modules() const;
+	virtual bool	contains(const std::string& modulename);
+	virtual ModulePtr	getModule(const std::string& modulename);
 };
 
 /**
  * \brief Retrieve a repository backend associated with a path
  */
-RepositoryBackendPtr	Repositories::get(const std::string& path) {
+ModuleRepositoryPtr	ModuleRepositories::get(const std::string& path) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieve backend for '%s'",
 		path.c_str());
 	std::string	key = path;
@@ -93,7 +94,7 @@ RepositoryBackendPtr	Repositories::get(const std::string& path) {
 	}
 
 	// there is no backend yet, so we have to create it
-	RepositoryBackendPtr	rbp(new RepositoryBackend(key));
+	ModuleRepositoryPtr	rbp(new ModuleRepositoryBackend(key));
 	_repositories.insert(std::make_pair(key, rbp));
 	return rbp;
 }
@@ -109,7 +110,7 @@ RepositoryBackendPtr	Repositories::get(const std::string& path) {
  * \throws repository_error	is thrown when there is any problem with the
  *				directory specified
  */
-void	RepositoryBackend::checkpath(const std::string& path) const {
+void	ModuleRepositoryBackend::checkpath(const std::string& path) const {
 	// verify that the path exists and is a directory
 	struct stat	sb;
 	if (stat(path.c_str(), &sb) < 0) {
@@ -123,40 +124,26 @@ void	RepositoryBackend::checkpath(const std::string& path) const {
 }
 
 /**
- * \brief Repository of modules contained in a directory.
+ * \brief ModuleRepository of modules contained in a directory.
  *
- * Create a Repository object representing the modules contained in the 
- * directory _path. The directory must already exist when the Repository
+ * Create a ModuleRepository object representing the modules contained in the 
+ * directory _path. The directory must already exist when the ModuleRepository
  * object is constructed (the directory is not created by the constructor)
  * and must be accessible by the user running the program.
  *
  * \param path		path to the directory containing the modules
  */
-RepositoryBackend::RepositoryBackend(const std::string& path) : _path(path) {
+ModuleRepositoryBackend::ModuleRepositoryBackend(const std::string& p)
+	: ModuleRepository(p) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "creating repository backend at %s",
-		path.c_str());
-	if (_path.size() == 0) {
-		_path = std::string(PKGLIBDIR);
-	}
-	checkpath(_path);
-}
-
-/**
- * \brief Repository based on the pkglib directory.
- *
- * This is the prefered way to access a repository. Man applications
- * do not allow to specify a particular directory to search for
- * modules and thus rely on the modules being installed in the pkgdir
- * directory.
- */
-RepositoryBackend::RepositoryBackend() : _path(PKGLIBDIR) {
-	checkpath(_path);
+		path().c_str());
+	checkpath(path());
 }
 
 /**
  * \brief Retrieve the number of modules available from the repository
  */
-long	RepositoryBackend::numberOfModules() const {
+long	ModuleRepositoryBackend::numberOfModules() const {
 	return moduleNames().size();
 }
 
@@ -166,10 +153,10 @@ long	RepositoryBackend::numberOfModules() const {
  * This method just counts the module files that are installed, but it
  * may also count files that are ultimately not loadable
  */
-std::vector<std::string>	RepositoryBackend::moduleNames() const {
+std::vector<std::string>	ModuleRepositoryBackend::moduleNames() const {
 	std::vector<std::string>	result;
 	// search the directory for files ending in la
-	DIR	*dir = opendir(_path.c_str());
+	DIR	*dir = opendir(path().c_str());
 	if (NULL == dir) {
 		return result;
 	}
@@ -188,16 +175,16 @@ std::vector<std::string>	RepositoryBackend::moduleNames() const {
 }
 
 /**
- * \brief Retrieve a list of all available modules in the Repository.
+ * \brief Retrieve a list of all available modules in the ModuleRepository.
  *
  * The std::vector of ModulePtr objects returned is not just a list
  * of valid names. Each Module has already been checked whether the
  * file exists and is accessible.
  */
-std::vector<ModulePtr>	RepositoryBackend::modules() const {
+std::vector<ModulePtr>	ModuleRepositoryBackend::modules() const {
 	std::vector<ModulePtr>	result;
 	// search the directory for files ending in la
-	DIR	*dir = opendir(_path.c_str());
+	DIR	*dir = opendir(path().c_str());
 	if (NULL == dir) {
 		return result;
 	}
@@ -208,7 +195,7 @@ std::vector<ModulePtr>	RepositoryBackend::modules() const {
 			std::string	modulename
 				= std::string(dirent->d_name).substr(0, namelen - 3);
 			try {
-				result.push_back(ModulePtr(new Module(_path, modulename)));
+				result.push_back(ModulePtr(new Module(path(), modulename)));
 			} catch (std::exception) {
 				std::cerr << "module " << modulename <<
 					" corrupt" << std::endl;
@@ -224,25 +211,27 @@ std::vector<ModulePtr>	RepositoryBackend::modules() const {
  * \brief Check whether a module is available in the repository.
  *
  * Modules are identified by their name. This function allows to
- * check whether a certain module is available in the Repository.
+ * check whether a certain module is available in the ModuleRepository.
  * Since it actually instatiates (but does not return) the Module,
  * it also that not only the modules .la-file exists but rather that
  * that file is readable, contains a valid dlname specification and
  * the code file is also available and readable.
  */
-bool	RepositoryBackend::contains(const std::string& modulename) {
+bool	ModuleRepositoryBackend::contains(const std::string& modulename) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "check for module %s",
 		modulename.c_str());
 	std::unique_lock<std::recursive_mutex>	lock(_mutex);
 
 	// first find out whether we have already checked this module
 	if (modulecache.find(modulename) != modulecache.end()) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "module '%s' loaded",
+			modulename.c_str());
 		return true;
 	}
 
 	// if now, try to find the module and insert it into the module cache
 	try {
-		ModulePtr	module(new Module(_path, modulename));
+		ModulePtr	module(new Module(path(), modulename));
 		modulecache.insert(std::make_pair(modulename, module));
 		return true;
 	} catch (const std::exception& x) {
@@ -261,7 +250,7 @@ bool	RepositoryBackend::contains(const std::string& modulename) {
  *				has a corrupt .la file or the code file
  *				is missing.
  */
-ModulePtr	RepositoryBackend::getModule(const std::string& modulename) {
+ModulePtr	ModuleRepositoryBackend::getModule(const std::string& modulename) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "get module '%s'", modulename.c_str());
 	std::unique_lock<std::recursive_mutex>	lock(_mutex);
 	if (contains(modulename)) {
@@ -271,33 +260,6 @@ ModulePtr	RepositoryBackend::getModule(const std::string& modulename) {
 				modulename.c_str());
 	debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 	throw repository_error(msg);
-}
-
-//////////////////////////////////////////////////////////////////////
-// Repository wrapper class implementation
-//////////////////////////////////////////////////////////////////////
-Repository::Repository() : _path() { }
-
-Repository::Repository(const std::string& path) : _path(path) { }
-
-long    Repository::numberOfModules() const {
-	return repositories.get(_path)->numberOfModules();
-}
-
-std::vector<std::string>        Repository::moduleNames() const {
-	return repositories.get(_path)->moduleNames();
-}
-
-std::vector<ModulePtr>  Repository::modules() const {
-	return repositories.get(_path)->modules();
-}
-
-bool    Repository::contains(const std::string& modulename) const {
-	return repositories.get(_path)->contains(modulename);
-}
-
-ModulePtr       Repository::getModule(const std::string& modulename) {
-	return repositories.get(_path)->getModule(modulename);
 }
 
 } // namespace module

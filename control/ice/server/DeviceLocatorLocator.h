@@ -12,9 +12,9 @@
 namespace snowstar {
 
 class DeviceLocatorLocator : public Ice::ServantLocator {
-	astro::module::Repository	_repository;
+	astro::module::ModuleRepositoryPtr	_repository;
 public:
-	DeviceLocatorLocator(astro::module::Repository& repository);
+	DeviceLocatorLocator(astro::module::ModuleRepositoryPtr repository);
 	virtual ~DeviceLocatorLocator();
 	virtual Ice::ObjectPtr  locate(const Ice::Current& current,
 			Ice::LocalObjectPtr& cookie);

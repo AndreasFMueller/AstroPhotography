@@ -95,8 +95,8 @@ int	aotest_main(int argc, char *argv[]) {
 		devicestring.c_str());
 
 	// create the object
-	Repository	repository;
-	ModulePtr	module = repository.getModule(devicename.modulename());
+	ModuleRepositoryPtr	repository = getModuleRepository();
+	ModulePtr	module = repository->getModule(devicename.modulename());
 	DeviceLocatorPtr	devicelocator = module->getDeviceLocator();
 	AdaptiveOpticsPtr	ao = devicelocator->getAdaptiveOptics(devicename);
 

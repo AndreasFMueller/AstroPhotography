@@ -8,7 +8,7 @@
 
 namespace snowstar {
 
-DriverModuleLocator::DriverModuleLocator(astro::module::Repository& repository)
+DriverModuleLocator::DriverModuleLocator(astro::module::ModuleRepositoryPtr repository)
 	: _repository(repository) {
 }
 
@@ -22,7 +22,7 @@ Ice::ObjectPtr	DriverModuleLocator::locate(const Ice::Current& current,
 		modulename.c_str());
 
 	// create a DriverModule for this module name
-	return new DriverModuleI(_repository.getModule(modulename));
+	return new DriverModuleI(_repository->getModule(modulename));
 }
 
 void	DriverModuleLocator::finished(const Ice::Current& /* current */,

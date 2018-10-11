@@ -405,9 +405,9 @@ int	main(int argc, char *argv[]) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "format: %d", format);
 
 	// load the module
-	Repository      repository;
+	ModuleRepositoryPtr	repository = getModuleRepository();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "recovering module '%s'", modulename);
-	ModulePtr       module = repository.getModule(modulename);
+	ModulePtr       module = repository->getModule(modulename);
 	module->open();
 
         // get the camera list

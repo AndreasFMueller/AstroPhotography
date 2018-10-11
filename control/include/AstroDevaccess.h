@@ -24,14 +24,13 @@ namespace device {
  * locator of a module
  */
 class DeviceAccessorBase {
-	astro::module::Repository&	_repository;
+	astro::module::ModuleRepositoryPtr	_repository;
 protected:
 	DeviceName	accessible(const DeviceName& name) const;
 	void	check(const DeviceName& name,
 			DeviceName::device_type type) const;
 public:
-	DeviceAccessorBase(astro::module::Repository& repository)
-		: _repository(repository) { }
+	DeviceAccessorBase(astro::module::ModuleRepositoryPtr repository);
 	DeviceLocatorPtr	locator(const std::string& modulename);
 	DeviceLocatorPtr	locator(const DeviceName& devicename) {
 		return locator(devicename.modulename());
@@ -47,7 +46,7 @@ public:
 template<typename DeviceType>
 class DeviceAccessor : DeviceAccessorBase {
 public:
-	DeviceAccessor(astro::module::Repository& repository)
+	DeviceAccessor(astro::module::ModuleRepositoryPtr repository)
 		: DeviceAccessorBase(repository) { }
 	DeviceType	get(const DeviceName& /* name */) {
 		throw std::logic_error("DeviceAccessor::get not specialized "

@@ -28,7 +28,11 @@ namespace snowstar {
  * \brief Create the locator for device servants
  */
 DeviceServantLocator::DeviceServantLocator(
-	astro::module::Repository& repository) : _repository(repository) {
+	astro::module::ModuleRepositoryPtr repository)
+	: _repository(repository) {
+	if (!repository) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "no repository!");
+	}
 }
 
 /**

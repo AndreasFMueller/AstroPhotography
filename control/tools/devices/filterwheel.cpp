@@ -60,7 +60,7 @@ int	main(int argc, char *argv[]) {
 		name.toString().c_str());
 
 	// create a repository
-	astro::module::Repository	repository;
+	astro::module::ModuleRepositoryPtr	repository = module::getModuleRepository();
 	astro::device::DeviceAccessor<astro::camera::FilterWheelPtr>	access(repository);
 	astro::camera::FilterWheelPtr	filterwheel = access.get(name);
 

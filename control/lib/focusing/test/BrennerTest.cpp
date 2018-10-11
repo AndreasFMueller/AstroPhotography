@@ -52,7 +52,7 @@ void	BrennerTest::setUp() {
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "setting up images for autofocus");
 	// create a simulation camera 
-	astro::module::Repository	repository;
+	astro::module::ModuleRepositoryPtr	repository = module::getModuleRepository();
 	astro::module::Devices	devices(repository);
 	camera::CameraPtr	camera
 		= devices.getCamera(DeviceName("camera:simulator/camera"));

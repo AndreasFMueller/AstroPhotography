@@ -16,11 +16,11 @@ ModulesI::~ModulesI() {
 }
 
 int	ModulesI::numberOfModules(const Ice::Current& /* current */) {
-	return _repository.numberOfModules();
+	return _repository->numberOfModules();
 }
 
 ModuleNameList	ModulesI::getModuleNames(const Ice::Current& /* current */) {
-	ModuleNameList	result = _repository.moduleNames();
+	ModuleNameList	result = _repository->moduleNames();
 	// suppress names that should not be published
 	ModuleNameList::iterator	i;
 	i = find(result.begin(), result.end(), std::string("mock2"));

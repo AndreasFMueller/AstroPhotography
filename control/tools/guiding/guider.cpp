@@ -156,8 +156,8 @@ int	main(int argc, char *argv[]) {
 		}
 
 	// get the driver module
-	Repository	repository;
-	ModulePtr	module = repository.getModule(modulename);
+	ModuleRepositoryPtr	repository = getModuleRepository();
+	ModulePtr	module = repository->getModule(modulename);
 	module->open();
 
 	// get the camera

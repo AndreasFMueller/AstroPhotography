@@ -16,8 +16,8 @@ void	moduletest(ModulePtr module) {
 }
 
 void	test() {
-	Repository	repository;
-	ModulePtr	module1 = repository.getModule("mock1");
+	ModuleRepositoryPtr	repository = getModuleRepository();
+	ModulePtr	module1 = repository->getModule("mock1");
 	module1->open();
 #if 0
 	moduletest(module1);
@@ -30,7 +30,7 @@ void	test() {
 #endif
 	module1->close();
 
-	ModulePtr	module2 = repository.getModule("mock2");
+	ModulePtr	module2 = repository->getModule("mock2");
 	module2->open();
 #if 0
 	moduletest(module2);

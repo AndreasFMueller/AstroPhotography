@@ -1,8 +1,7 @@
 /*
- * RepositoryTest.cpp -- tests for the Repository class
+ * ModuleRepositoryTest.cpp -- tests for the ModuleRepository class
  *
  * (c) 2012 Prof Dr Andreas Mueller, Hochschule Rapperswil
- * $Id$
  */
 #include <AstroLoader.h>
 #include <cppunit/TestFixture.h>
@@ -18,7 +17,7 @@ using namespace astro::module;
 namespace astro {
 namespace test {
 
-class RepositoryTest : public CppUnit::TestFixture {
+class ModuleRepositoryTest : public CppUnit::TestFixture {
 	std::string	path;
 public:
 	void	setUp();
@@ -27,7 +26,7 @@ public:
 	void	testPathdoesnotexist();
 	void	testModules();
 
-	CPPUNIT_TEST_SUITE(RepositoryTest);
+	CPPUNIT_TEST_SUITE(ModuleRepositoryTest);
 	CPPUNIT_TEST(testPathexists);
 	CPPUNIT_TEST_EXCEPTION(testPathdoesnotexist, repository_error);
 	CPPUNIT_TEST(testModules);
@@ -48,7 +47,7 @@ static const char	*files[11] = {
 	"libmock2.so.0.0.0"
 };
 
-void	RepositoryTest::setUp() {
+void	ModuleRepositoryTest::setUp() {
 	// create a temporary directory
 	char	dirname[32];
 	strcpy(dirname, "/tmp/astroXXXXXX");
@@ -60,7 +59,7 @@ void	RepositoryTest::setUp() {
 	path = std::string(dirname);
 
 	// construct a repository on it
-	Repository	repository(path);
+	ModuleRepositoryPtr	repository = getModuleRepository(path);
 
 	// add some files to it
 	for (int i = 0; i < 11; i++) {
@@ -88,7 +87,7 @@ void	RepositoryTest::setUp() {
 	}
 }
 
-void	RepositoryTest::tearDown() {
+void	ModuleRepositoryTest::tearDown() {
 	// remove everything below the path
 	DIR	*dir = opendir(path.c_str());
 	struct dirent	*dirent;
@@ -104,35 +103,35 @@ void	RepositoryTest::tearDown() {
 	}
 }
 
-void	RepositoryTest::testPathexists() {
+void	ModuleRepositoryTest::testPathexists() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testPathexists() begin");
-	Repository	repository(".");
-	repository.modules();
+	ModuleRepositoryPtr	repository = getModuleRepository(".");
+	repository->modules();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testPathexists() end");
 }
 
-void	RepositoryTest::testPathdoesnotexist() {
+void	ModuleRepositoryTest::testPathdoesnotexist() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testPathdoesnotexist() begin");
-	Repository	repository("./this/path/quite/certainly/does/not/exit");
-	repository.modules();
+	ModuleRepositoryPtr	repository = getModuleRepository("./this/path/quite/certainly/does/not/exit");
+	repository->modules();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testPathdoesnotexist() end");
 }
 
 
-void	RepositoryTest::testModules() {
+void	ModuleRepositoryTest::testModules() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testModules() begin");
 	// query the list of modules, and verify it's contents
-	Repository	repository(path);
-	std::vector<ModulePtr>	m = repository.modules();
+	ModuleRepositoryPtr	repository = getModuleRepository(path);
+	std::vector<ModulePtr>	m = repository->modules();
 	CPPUNIT_ASSERT(m.size() == 1);
 
-	CPPUNIT_ASSERT(!repository.contains("libmock1"));
-	CPPUNIT_ASSERT(repository.contains("libmock2"));
-	CPPUNIT_ASSERT(!repository.contains("blubb"));
+	CPPUNIT_ASSERT(!repository->contains("libmock1"));
+	CPPUNIT_ASSERT(repository->contains("libmock2"));
+	CPPUNIT_ASSERT(!repository->contains("blubb"));
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testModules() end");
 }
 
-CPPUNIT_TEST_SUITE_REGISTRATION(RepositoryTest);
+CPPUNIT_TEST_SUITE_REGISTRATION(ModuleRepositoryTest);
 
 } // namespace test
 } // namespace astro

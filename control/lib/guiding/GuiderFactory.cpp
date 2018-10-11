@@ -45,8 +45,14 @@ GuiderPtr	GuiderFactory::get(const GuiderDescriptor& guiderdescriptor) {
 	// construct the name of the guider
 	GuiderName	guidername(guiderdescriptor.name());
 
+	// first get a module repository
+	ModuleRepositoryPtr	repository = getModuleRepository();
+	if (!repository) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "no module repository");
+		throw std::logic_error("no module repository");
+	}
+
 	// use the information in the descriptor to build a new guider
-	Repository	repository;
 	CcdPtr	ccd;
 	if (guiderdescriptor.ccd().size()) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "get CCD %s for guider %s",

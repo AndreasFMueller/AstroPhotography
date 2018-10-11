@@ -30,7 +30,7 @@ extern "C" astro::device::DeviceLocator	*getDeviceLocator();
 
 void	NiceCameraTest::testCamera() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testCamera() begin");
-	astro::module::Repository	repo;
+	astro::module::ModuleRepositoryPtr	repo = astro::module::getModuleRepository();
 	astro::module::Devices	devices(repo);
 	DeviceName	devicename("camera:nice/server/simulator/camera");
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "getting simulator camera: %s",

@@ -21,14 +21,14 @@ Devices::devicelist	Devices::getDevicelist(DeviceName::device_type type) {
 	Devices::devicelist	result;
 
 	// get a list of driver modules
-	std::vector<std::string>	modulenames = _repository.moduleNames();
+	std::vector<std::string>	modulenames = _repository->moduleNames();
 
 	// go through the list
 	std::vector<std::string>::const_iterator	i;
 	for (i = modulenames.begin(); i != modulenames.end(); i++) {
 		// get the associated module
 		std::string	modulename = *i;
-		ModulePtr	module = _repository.getModule(modulename);
+		ModulePtr	module = _repository->getModule(modulename);
 
 		// get the descriptor
 		ModuleDescriptorPtr	descriptor = module->getDescriptor();

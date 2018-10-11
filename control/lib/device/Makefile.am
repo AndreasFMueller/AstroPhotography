@@ -42,10 +42,10 @@ libastrodevice_la_SOURCES =						\
 	ImageWorkImager.cpp						\
 	Module.cpp							\
 	ModuleDescriptor.cpp						\
+	ModuleRepository.cpp						\
 	Mount.cpp							\
 	ParameterDescription.cpp					\
 	Properties.cpp							\
-	Repository.cpp							\
 	Serial.cpp							\
 	Shutter.cpp							\
 	ThreadCcd.cpp

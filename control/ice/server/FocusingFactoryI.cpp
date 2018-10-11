@@ -55,7 +55,7 @@ FocusingContext	FocusingSingleton::get(const std::string& ccd,
 	}
 
 	// we need pointers for deives
-	astro::module::Repository	repository;
+	astro::module::ModuleRepositoryPtr	repository = astro::module::getModuleRepository();
 	astro::module::Devices	devices(repository);
 
 	astro::DeviceName	ccdname(ccd);

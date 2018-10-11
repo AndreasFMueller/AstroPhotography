@@ -12,9 +12,9 @@
 namespace snowstar {
 
 class DriverModuleLocator : public Ice::ServantLocator {
-	astro::module::Repository	_repository;
+	astro::module::ModuleRepositoryPtr	_repository;
 public:
-	DriverModuleLocator(astro::module::Repository& repository);
+	DriverModuleLocator(astro::module::ModuleRepositoryPtr repository);
 	virtual ~DriverModuleLocator();
 	virtual Ice::ObjectPtr	locate(const Ice::Current& current,
 			Ice::LocalObjectPtr& cookie);

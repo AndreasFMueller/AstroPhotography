@@ -1199,13 +1199,13 @@ typedef std::shared_ptr<Guider>	GuiderPtr;
  * \brief GuiderFactory class
  */
 class GuiderFactory {
-	module::Repository	repository;
+	module::ModuleRepositoryPtr	repository;
 	persistence::Database	database;
 	typedef	std::map<GuiderDescriptor, GuiderPtr>	guidermap_t;
 	guidermap_t	guiders;
 public:
 	GuiderFactory() { }
-	GuiderFactory(module::Repository _repository,
+	GuiderFactory(module::ModuleRepositoryPtr _repository,
 		persistence::Database _database)
 		: repository(_repository), database(_database) { }
 	std::vector<GuiderDescriptor>	list() const;

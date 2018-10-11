@@ -84,7 +84,7 @@ int	main(int argc, char *argv[]) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "focuser: %s", focusername.c_str());
 
 	// get the camera
-	Repository	repository;
+	ModuleRepositoryPtr	repository = getModuleRepository();
 	Devices	devices(repository);
 	FocuserPtr	focuser = devices.getFocuser(focusername);
 	if (!focuser) {

@@ -225,7 +225,7 @@ int	main(int argc, char *argv[]) {
 	std::string	cameraurl = instrument->getCamera(0).deviceurl();
 
 	// get the devices
-	Repository	repository;
+	ModuleRepositoryPtr	repository = getModuleRepository();
 	Devices		devices(repository);
 	CameraPtr	camera = devices.getCamera(cameraurl);
 	CcdPtr	ccd = devices.getCcd(ccdurl);

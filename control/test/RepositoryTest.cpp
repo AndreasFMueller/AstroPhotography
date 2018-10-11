@@ -17,7 +17,7 @@ namespace astro {
 namespace test {
 
 class RepositoryTest : public CppUnit::TestFixture {
-	Repository	*repository;
+	ModuleRepositoryPtr	repository;
 	void	moduleTest(ModulePtr module);
 public:
 	void	setUp();
@@ -36,11 +36,11 @@ public:
 CPPUNIT_TEST_SUITE_REGISTRATION(RepositoryTest);
 
 void	RepositoryTest::setUp() {
-	repository = new Repository();
+	repository = getModuleRepository();
 }
 
 void	RepositoryTest::tearDown() {
-	delete repository;
+	repository.reset();
 }
 
 void	RepositoryTest::testListmodules() {

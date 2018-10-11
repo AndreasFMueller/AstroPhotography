@@ -8,7 +8,7 @@
 
 namespace snowstar {
 
-DeviceLocatorLocator::DeviceLocatorLocator(astro::module::Repository& repository) : _repository(repository) {
+DeviceLocatorLocator::DeviceLocatorLocator(astro::module::ModuleRepositoryPtr repository) : _repository(repository) {
 }
 
 DeviceLocatorLocator::~DeviceLocatorLocator() {
@@ -20,7 +20,7 @@ Ice::ObjectPtr	DeviceLocatorLocator::locate(const Ice::Current& current,
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "request for locator in module '%s'",
 		modulename.c_str());
 	astro::module::ModulePtr	module
-		= _repository.getModule(modulename);
+		= _repository->getModule(modulename);
 	return new DeviceLocatorI(module->getDeviceLocator());
 }
 

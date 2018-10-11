@@ -37,7 +37,7 @@ ExposureWork::ExposureWork(TaskQueueEntry& task) : _task(task) {
 		task.toString().c_str());
 	// create a repository, we are always using the default
 	// repository
-	astro::module::Repository	repository;
+	astro::module::ModuleRepositoryPtr	repository = module::getModuleRepository();
 	
 	// get camera and ccd
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "get camera '%s' and ccd %s",

@@ -216,6 +216,7 @@ static astro::persistence::Database	getdatabase(const std::string& databasefilen
 
 Server::Server(Ice::CommunicatorPtr _ic, const std::string& dbfilename)
 	: ic(_ic),
+	  repository(astro::module::getModuleRepository()),
 	  devices(repository),
 	  database(getdatabase(dbfilename)),
 	  guiderfactory(repository, database),

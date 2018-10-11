@@ -132,7 +132,7 @@ int	main(int argc, char *argv[]) {
 	}
 
 	// prepare a repository from which we can extract the devices
-	Repository	repository;
+	ModuleRepositoryPtr	repository = getModuleRepository();
 	Devices		devices(repository);
 
 	// get the devices

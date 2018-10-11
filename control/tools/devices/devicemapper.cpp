@@ -76,10 +76,10 @@ void	scan_module::operator()(const std::string& modulename) {
 		modulename.c_str());
 
 	// get a repository
-	Repository	repository;
+	ModuleRepositoryPtr	repository = getModuleRepository();
 
 	// get the module
-	ModulePtr	module = repository.getModule(modulename);
+	ModulePtr	module = repository->getModule(modulename);
 
 	// read the device locator from a module
 	DeviceLocatorPtr	locator = module->getDeviceLocator();

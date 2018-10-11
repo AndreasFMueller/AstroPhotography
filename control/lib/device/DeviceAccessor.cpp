@@ -36,10 +36,22 @@ DeviceName	DeviceAccessorBase::accessible(const DeviceName& name) const {
 }
 
 /**
+ * \brief Construct a Device access class
+ */
+DeviceAccessorBase::DeviceAccessorBase(
+	astro::module::ModuleRepositoryPtr repository)
+	: _repository(repository) {
+	if (!_repository) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "no module repository");
+		throw std::logic_error("no module repository");
+	}
+}
+
+/**
  * \brief Retrieve the device locator for the name
  */
 DeviceLocatorPtr	DeviceAccessorBase::locator(const std::string& name) {
-	astro::module::ModulePtr	module = _repository.getModule(name);
+	astro::module::ModulePtr	module = _repository->getModule(name);
 	return module->getDeviceLocator();
 }
 

@@ -45,8 +45,8 @@ static void	usage(const char *progname) {
  * \brief Modules command
  */
 static int	modules_command(bool /* verbose */) {
-	module::Repository	_repository;
-	std::vector<std::string>	modules = _repository.moduleNames();
+	module::ModuleRepositoryPtr	_repository = module::getModuleRepository();
+	std::vector<std::string>	modules = _repository->moduleNames();
 	for_each(modules.begin(), modules.end(),
 		[](const std::string& modulename) {
 			std::cout << modulename << std::endl; 
@@ -64,8 +64,8 @@ static void	showlist(const std::vector<std::string>& names) {
 }
 
 static int	scan_command(const std::string& modulename, bool verbose) {
-	module::Repository	_repository;
-	module::ModulePtr	module = _repository.getModule(modulename);
+	module::ModuleRepositoryPtr	_repository = module::getModuleRepository();
+	module::ModulePtr	module = _repository->getModule(modulename);
 	module::ModuleDescriptorPtr	moddesc = module->getDescriptor();
 	if (verbose) {
 		std::cout << "module " << modulename << " version ";

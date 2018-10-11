@@ -12,7 +12,7 @@
 namespace snowstar {
 
 class ModulesI : virtual public Modules {
-	astro::module::Repository	_repository;
+	astro::module::ModuleRepositoryPtr	_repository;
 public:
 	ModulesI();
 	virtual ~ModulesI();
