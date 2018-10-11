@@ -9,6 +9,7 @@
 #include <AstroDebug.h>
 #include <typeinfo>
 #include <AstroIO.h>
+#include <AstroCamera.h>
 
 namespace astro {
 namespace image {

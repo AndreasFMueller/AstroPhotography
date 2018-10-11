@@ -113,6 +113,8 @@ public:
 	 */
 	FunctionBase(const FunctionBase& other);
 
+	virtual ~FunctionBase() { }
+
 	/**
 	 * \brief Function evaluation
 	 *
@@ -142,6 +144,7 @@ public:
 	FunctionBaseAdapter(const ImageSize& size, const FunctionBase *funcp)
 		: ConstImageAdapter<float>(size), _funcp(funcp) {
 	}
+	virtual ~FunctionBaseAdapter() { }
 	float	pixel(int x, int y) const {
 		return (*_funcp)(x, y);
 	}
@@ -165,6 +168,8 @@ public:
 		: ConstImageAdapter<float>(size), _function(function),
 		  _origin(origin) {
 	}
+
+	virtual ~FunctionPtrAdapter() { }
 
 	float	pixel(int x, int y) const {
 		return _function->evaluate(_origin.x() + x, _origin.y() + y);
@@ -197,6 +202,7 @@ public:
 	// standard constructors
 	LinearFunction(const ImagePoint& point, bool symmetric);
 	LinearFunction(const LinearFunction& other);
+	virtual ~LinearFunction() { }
 
 	// constructor from data set
 	LinearFunction(const ImagePoint& center, bool symmetric,
@@ -234,6 +240,7 @@ protected:
 public:
 	QuadraticFunction(const ImagePoint& center, bool symmetric);
 	QuadraticFunction(const LinearFunction& linear);
+	virtual ~QuadraticFunction() { }
 	virtual double	evaluate(const Point& point) const;
 	virtual double	operator[](int i) const;
 	virtual double&	operator[](int i);
@@ -307,6 +314,8 @@ public:
 		this->reduce(converted);
 	}
 
+	virtual ~Function() { }
+
 	virtual Pixel	operator()(const Point& point) const {
 		Pixel	result = this->evaluate(point);
 		return result;
@@ -338,6 +347,8 @@ public:
 		ConstImageAdapter<float>(size), _func(func), _origin(origin) {
 	}
 
+	virtual ~ImageFunctionAdapter() { }
+
 	virtual float	pixel(int x, int y) const {
 		return _func(_origin.x() + x, _origin.y() + y);
 	}
@@ -358,6 +369,8 @@ public:
 		: ConstImageAdapter<float>(image.getSize()), _image(image),
 		  _func(func), _origin(origin) {
 	}
+
+	virtual ~FunctionSubtractionAdapter() { }
 
 	virtual float	pixel(int x, int y) const {
 		return _image.pixel(x, y)
@@ -437,6 +450,7 @@ public:
 	Background(const FunctionPtr R, const FunctionPtr G,
 		const FunctionPtr B) : _R(R), _G(G), _B(B) {
 	}
+	virtual ~Background() { }
 	virtual bool	gradient() const {
 		return _R->gradient();
 	}
@@ -484,6 +498,7 @@ public:
 		: ConstImageAdapter<float>(image.getSize()), _image(image),
 		  _function(function) {
 	}
+	virtual ~BackgroundFunctionAdapter() { }
 	virtual float	pixel(int x, int y) const {
 		float	v =  _image.pixel(x, y) - (*_function)(x, y);
 		if (v < 0) {
@@ -539,6 +554,7 @@ public:
 		: ConstImageAdapter<RGB<float> >(image.getSize()),
 		  _image(image) {
 	}
+	virtual ~BackgroundSubtractionAdapter() { }
 	virtual RGB<float>	pixel(int x, int y) const {
 		return _image.pixel(x, y) - _background(x, y);
 	}
@@ -588,6 +604,7 @@ public:
 		}
 		min = RGB<Pixel>(minvalue);
 	}
+	virtual ~BackgroundImageAdapter() { }
 	virtual RGB<Pixel>	pixel(int x, int y) const {
 		return (_background(ImagePoint(x, y)) - min) * scale;
 	}

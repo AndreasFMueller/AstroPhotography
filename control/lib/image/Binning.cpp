@@ -46,6 +46,24 @@ Binning::Binning(const std::string& binningspec) {
 	_y = std::stoi(matches[2]);
 }
 
+Binning::Binning(const ImageBase* image) : _x(1), _y(1) {
+	if (image->hasMetadata("XBINNING")) {
+		_x = (int)image->getMetadata("XBINNING");
+	}
+	if (image->hasMetadata("YBINNING")) {
+		_y = (int)image->getMetadata("YBINNING");
+	}
+}
+
+Binning::Binning(const ImagePtr image) : _x(1), _y(1) {
+	if (image->hasMetadata("XBINNING")) {
+		_x = (int)image->getMetadata("XBINNING");
+	}
+	if (image->hasMetadata("YBINNING")) {
+		_y = (int)image->getMetadata("YBINNING");
+	}
+}
+
 /**
  * \brief Compare binning modes: equality
  *

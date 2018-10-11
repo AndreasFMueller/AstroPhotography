@@ -36,6 +36,9 @@ ExposureState	CcdI::exposureStatus(const Ice::Current& /* current */) {
 	return convert(_ccd->exposureStatus());
 }
 
+/**
+ * \brief Start a new exposure
+ */
 void	CcdI::startExposure(const Exposure& exposure,
 		const Ice::Current& /* current */) {
 	if (_ccd->streaming()) {

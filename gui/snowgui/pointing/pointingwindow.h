@@ -25,6 +25,9 @@ class pointingwindow : public InstrumentWidget {
 	ccddata		_finder_ccddata;
 	ccddata		_guider_ccddata;
 	ccddata		_imager_ccddata;
+	astro::image::Binning	_finder_binning;
+	astro::image::Binning	_guider_binning;
+	astro::image::Binning	_imager_binning;
 
 public:
 	explicit pointingwindow(QWidget *parent = 0);
@@ -36,7 +39,7 @@ public:
 
 private:
 	void	pointSelected(astro::image::ImagePoint, const astro::RaDec&,
-			const ccddata&);
+			const ccddata&, const astro::image::Binning&);
 
 public slots:
 	void	newImage(astro::image::ImagePtr image);

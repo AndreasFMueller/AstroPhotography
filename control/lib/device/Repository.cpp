@@ -30,7 +30,7 @@ typedef std::shared_ptr<RepositoryBackend>	RepositoryBackendPtr;
  * ensures that each repository is instantiated only once.
  */
 class Repositories {
-	std::mutex	mutex;
+	std::recursive_mutex	mutex;
 	typedef	std::map<std::string, RepositoryBackendPtr>	backendmap;
 	backendmap	_repositories;
 public:
@@ -60,6 +60,7 @@ class RepositoryBackend {
 public:
 	const std::string&	path() const { return _path; }
 private:
+	std::recursive_mutex	_mutex;	// protect the map
 	typedef	std::map<std::string, ModulePtr>	modulemap;
 	modulemap	modulecache;
 	void	checkpath(const std::string& path) const;
@@ -69,7 +70,7 @@ public:
 	long	numberOfModules() const;
 	std::vector<std::string>	moduleNames() const;
 	std::vector<ModulePtr>	modules() const;
-	bool	contains(const std::string& modulename) const;
+	bool	contains(const std::string& modulename);
 	ModulePtr	getModule(const std::string& modulename);
 };
 
@@ -85,7 +86,7 @@ RepositoryBackendPtr	Repositories::get(const std::string& path) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "key for empty path is %s",
 			key.c_str());
 	}
-	// std::unique_lock(mutex);
+	std::unique_lock<std::recursive_mutex>	lock(mutex);
 	backendmap::iterator	r = _repositories.find(key);
 	if (r != _repositories.end()) {
 		return r->second;
@@ -229,15 +230,26 @@ std::vector<ModulePtr>	RepositoryBackend::modules() const {
  * that file is readable, contains a valid dlname specification and
  * the code file is also available and readable.
  */
-bool	RepositoryBackend::contains(const std::string& modulename) const {
+bool	RepositoryBackend::contains(const std::string& modulename) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "check for module %s",
 		modulename.c_str());
-	try {
-		Module(_path, modulename);
-	} catch (std::exception) {
-		return false;
+	std::unique_lock<std::recursive_mutex>	lock(_mutex);
+
+	// first find out whether we have already checked this module
+	if (modulecache.find(modulename) != modulecache.end()) {
+		return true;
 	}
-	return true;
+
+	// if now, try to find the module and insert it into the module cache
+	try {
+		ModulePtr	module(new Module(_path, modulename));
+		modulecache.insert(std::make_pair(modulename, module));
+		return true;
+	} catch (const std::exception& x) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "cannot load '%s': %s",
+			modulename.c_str(), x.what());
+	}
+	return false;
 }
 
 /**
@@ -251,17 +263,14 @@ bool	RepositoryBackend::contains(const std::string& modulename) const {
  */
 ModulePtr	RepositoryBackend::getModule(const std::string& modulename) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "get module '%s'", modulename.c_str());
-	try {
-		if (modulecache.find(modulename) == modulecache.end()) {
-			ModulePtr	module(new Module(_path, modulename));
-			modulecache.insert(std::make_pair(modulename, module));
-			return module;
-		} else {
-			return modulecache.find(modulename)->second;
-		}
-	} catch (std::exception& x) {
-		throw repository_error(x.what());
+	std::unique_lock<std::recursive_mutex>	lock(_mutex);
+	if (contains(modulename)) {
+		return modulecache.find(modulename)->second;
 	}
+	std::string	msg = stringprintf("module %s not found",
+				modulename.c_str());
+	debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+	throw repository_error(msg);
 }
 
 //////////////////////////////////////////////////////////////////////

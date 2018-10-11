@@ -138,6 +138,7 @@ void    pointingwindow::newImage(astro::image::ImagePtr _image) {
 		ui->tabWidget->setCurrentIndex(1);
 		_finder_direction = ui->mountcontrollerWidget->current();
 		_finder_ccddata = _ccddata;
+		_finder_binning = Binning(_image);
 		break;
 	case snowstar::InstrumentGuiderCCD:
 		ui->guiderImageWidget->setImage(_image);
@@ -145,6 +146,7 @@ void    pointingwindow::newImage(astro::image::ImagePtr _image) {
 		ui->tabWidget->setCurrentIndex(2);
 		_guider_direction = ui->mountcontrollerWidget->current();
 		_guider_ccddata = _ccddata;
+		_guider_binning = Binning(_image);
 		break;
 	case snowstar::InstrumentCCD:
 		ui->imagerImageWidget->setImage(_image);
@@ -152,6 +154,7 @@ void    pointingwindow::newImage(astro::image::ImagePtr _image) {
 		ui->tabWidget->setCurrentIndex(3);
 		_imager_direction = ui->mountcontrollerWidget->current();
 		_imager_ccddata = _ccddata;
+		_imager_binning = Binning(_image);
 		break;
 	default:
 		// ignored
@@ -174,12 +177,18 @@ void    pointingwindow::closeEvent(QCloseEvent * /* event */) {
  * \brief handle new point selection
  */
 void	pointingwindow::pointSelected(astro::image::ImagePoint p,
-		const astro::RaDec& radec, const ccddata& _ccd) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "point %s selected, ccd data %s",
-		p.toString().c_str(), _ccd.toString().c_str());
+		const astro::RaDec& radec, const ccddata& _ccd,
+		const Binning& binning) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0,
+		"point %s selected, ccd data %s, binning %s",
+		p.toString().c_str(), _ccd.toString().c_str(),
+		binning.toString().c_str());
 	// get the current coordinates from the mount
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "current position: %s",
 		radec.toString().c_str());
+
+	// binning correction
+	p = p * binning;
 
 	// compute angular resolution
 	astro::Angle	angular_resolution(_ccd.ccdinfo().pixelwidth /
@@ -207,21 +216,21 @@ void	pointingwindow::pointSelected(astro::image::ImagePoint p,
  * \brief direct to a position selected on the finder image
  */
 void	pointingwindow::finderPointSelected(astro::image::ImagePoint p) {
-	pointSelected(p, _finder_direction, _finder_ccddata);
+	pointSelected(p, _finder_direction, _finder_ccddata, _finder_binning);
 }
 
 /**
  * \brief direct to a position selected on the guider image
  */
 void	pointingwindow::guiderPointSelected(astro::image::ImagePoint p) {
-	pointSelected(p, _guider_direction, _guider_ccddata);
+	pointSelected(p, _guider_direction, _guider_ccddata, _guider_binning);
 }
 
 /**
  * \brief direct to a position selected on the main image
  */
 void	pointingwindow::imagerPointSelected(astro::image::ImagePoint p) {
-	pointSelected(p, _imager_direction, _imager_ccddata);
+	pointSelected(p, _imager_direction, _imager_ccddata, _imager_binning);
 }
 
 /**

@@ -50,6 +50,8 @@ SimCamera::SimCamera(SimLocator& locator)
 		DeviceName ccdname = CcdInfo::defaultname(name(), "finder");
 		CcdInfo	ccdi(ccdname, ImageSize(1024, 1024), 0);
 		ccdi.addMode(Binning(1,1));
+		ccdi.addMode(Binning(2,2));
+		ccdi.addMode(Binning(3,3));
 		ccdi.shutter(false);
 		ccdi.pixelwidth(0.000003);
 		ccdi.pixelheight(0.000003);
