@@ -9,6 +9,7 @@
 #include <atikccdusb.h>
 #include <AstroCamera.h>
 #include <mutex>
+#include <atomic>
 
 namespace astro {
 namespace camera {
@@ -45,6 +46,8 @@ public:
 	// cooler related stuff
 private:
 	int	_tempSensorCount;
+	std::atomic_bool	_is_on;
+	std::atomic<float>	_last_actual_temperature;
 	float	getSetTemperature(AtikCooler& cooler);
 	float	getActualTemperature(AtikCooler& cooler);
 	void	setTemperature(const float temperature, AtikCooler& cooler);

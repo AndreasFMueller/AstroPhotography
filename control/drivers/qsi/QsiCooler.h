@@ -8,6 +8,7 @@
 
 #include <AstroCamera.h>
 #include <QsiCamera.h>
+#include <atomic>
 
 namespace astro {
 namespace camera {
@@ -15,8 +16,8 @@ namespace qsi {
 
 class QsiCooler : public Cooler {
 	QsiCamera&	_camera;
-	float	_actual_temperature;
-	bool	_is_on;
+	std::atomic<float>	_actual_temperature;
+	std::atomic_bool	_is_on;
 public:
 	QsiCooler(QsiCamera& camera);
 	virtual float	getSetTemperature();

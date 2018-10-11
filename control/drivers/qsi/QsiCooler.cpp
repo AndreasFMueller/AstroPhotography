@@ -23,6 +23,8 @@ DeviceName	coolername(const DeviceName& cameraname) {
 QsiCooler::QsiCooler(QsiCamera& camera)
 	: Cooler(coolername(camera.name())), _camera(camera) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "constructing a QsiCooler");
+	std::unique_lock<std::recursive_mutex>	lock(_camera.mutex);
+
 	// get the temperature, this initializes the _actual_temperature
 	getActualTemperature();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "actual temperature: %.1f",		

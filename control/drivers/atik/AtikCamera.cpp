@@ -160,7 +160,8 @@ void	AtikCamera::exposureRun(Exposure& exposure, atik::AtikCcd& atikccd) {
 
 	// flip the vertical offset
 	int	xoffset = exposure.x();
-	int	yoffset = atikccd.getInfo().size().height() - exposure.y() - exposure.height();
+	int	yoffset = atikccd.getInfo().size().height() - exposure.y()
+				- exposure.height();
 
 	// set the shutter if we have
 	bool	shortexposure = true;
@@ -307,11 +308,10 @@ void    AtikCamera::abortExposure() {
  * \brief Ask the camera for the set temperature
  */
 float	AtikCamera::getSetTemperature(AtikCooler& cooler) {
-	std::unique_lock<std::recursive_mutex>	lock(_mutex, std::defer_lock);
-	if (!lock.try_lock()) {
-		std::string	msg("cannot lock in getSetTemperatur()");
-		//debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
-		throw std::runtime_error(msg);
+	std::unique_lock<std::recursive_mutex>	lock(_mutex, std::try_to_lock);
+	if (!lock) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "cannot get set temperature");
+		return cooler.Cooler::getSetTemperature();
 	}
 	COOLING_STATE	state;
 	float	targetTemp = 0;
@@ -329,11 +329,9 @@ float	AtikCamera::getSetTemperature(AtikCooler& cooler) {
  * \brief Get the actual temperature of the CCD
  */
 float	AtikCamera::getActualTemperature(AtikCooler& cooler) {
-	std::unique_lock<std::recursive_mutex>	lock(_mutex, std::defer_lock);
-	if (!lock.try_lock()) {
-		std::string	msg("cannot lock in getActualTemperature()");
-		//debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
-		throw std::runtime_error(msg);
+	std::unique_lock<std::recursive_mutex>	lock(_mutex, std::try_to_lock);
+	if (!lock) {
+		return _last_actual_temperature;
 	}
 	//debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieve current Temp (%d)",
 	//	_tempSensorCount);
@@ -342,7 +340,7 @@ float	AtikCamera::getActualTemperature(AtikCooler& cooler) {
 		_camera->getTemperatureSensorStatus(1, &currentTemp);
 		//debug(LOG_DEBUG, DEBUG_LOG, 0, "current Temp: %.1f",
 		//	currentTemp);
-		return currentTemp + 273.15;
+		return _last_actual_temperature = currentTemp + 273.15;
 	};
 	COOLING_STATE	state;
 	float	targetTemp = 0;
@@ -352,9 +350,10 @@ float	AtikCamera::getActualTemperature(AtikCooler& cooler) {
 	case COOLING_ON:
 	case COOLING_INACTIVE:
 	case WARMING_UP:
-		return 273.15 + 20;
+		return _last_actual_temperature = 273.15 + 20;
 	case COOLING_SETPOINT:
-		return cooler.Cooler::getSetTemperature();
+		return _last_actual_temperature
+				= cooler.Cooler::getSetTemperature();
 	}
 	std::string	msg = stringprintf("unknown cooling state: %d",
 		state);
@@ -366,15 +365,7 @@ float	AtikCamera::getActualTemperature(AtikCooler& cooler) {
  * \brief Set the temperature of the CCD
  */
 void	AtikCamera::setTemperature(const float temperature, AtikCooler& cooler) {
-	std::unique_lock<std::recursive_mutex>	lock(_mutex, std::defer_lock);
-	if (lock.try_lock()) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "locked");
-	} else {
-		std::string	msg = stringprintf("cannot lock in "
-			"setTemperature(%f)", temperature);
-		//debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
-		throw std::runtime_error(msg);
-	}
+	std::unique_lock<std::recursive_mutex>	lock(_mutex);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "set temperature: %f", temperature);
 	cooler.Cooler::setTemperature(temperature);
 	if (isOn(cooler)) {
@@ -388,11 +379,9 @@ void	AtikCamera::setTemperature(const float temperature, AtikCooler& cooler) {
  * \brief find out whether the cooler is on
  */
 bool	AtikCamera::isOn(AtikCooler& /* cooler */) {
-	std::unique_lock<std::recursive_mutex>	lock(_mutex, std::defer_lock);
-	if (!lock.try_lock()) {
-		std::string	msg("cannot lock in isOn()");
-		//debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
-		throw std::runtime_error(msg);
+	std::unique_lock<std::recursive_mutex>	lock(_mutex, std::try_to_lock);
+	if (!lock) {
+		return _is_on;
 	}
 	COOLING_STATE	state;
 	float	targetTemp = 0;
@@ -405,15 +394,7 @@ bool	AtikCamera::isOn(AtikCooler& /* cooler */) {
  * \brief turn the cooler on
  */
 void	AtikCamera::setOn(bool onoff, AtikCooler& cooler) {
-	std::unique_lock<std::recursive_mutex>	lock(_mutex, std::defer_lock);
-	if (lock.try_lock()) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "locked");
-	} else {
-		std::string	msg = stringprintf("cannot lock in setOn(%s)",
-			(onoff) ? "true" : "false");
-		//debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
-		throw std::runtime_error(msg);
-	}
+	std::unique_lock<std::recursive_mutex>	lock(_mutex);
 	if (onoff) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "turn cooling on");
 		_camera->setCooling(cooler.Cooler::getSetTemperature() - 273.15);
@@ -421,6 +402,7 @@ void	AtikCamera::setOn(bool onoff, AtikCooler& cooler) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "turn cooling off");
 		_camera->initiateWarmUp();
 	}
+	_is_on = onoff;
 }
 
 /**

@@ -8,6 +8,7 @@
 
 #include <AstroCamera.h>
 #include <QsiCamera.h>
+#include <atomic>
 
 namespace astro {
 namespace camera {
@@ -15,7 +16,7 @@ namespace qsi {
 
 class QsiCcd : public Ccd {
 	QsiCamera&	_camera;
-	CcdState::State	_last_state;
+	std::atomic<CcdState::State>	_last_state;
 public:
 	QsiCcd(const CcdInfo&, QsiCamera& camera);
 	virtual ~QsiCcd();

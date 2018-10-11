@@ -9,6 +9,7 @@
 #include <AstroCamera.h>
 #include <qsiapi.h>
 #include <QSIError.h>
+#include <atomic>
 
 namespace astro {
 namespace camera {

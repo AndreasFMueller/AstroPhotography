@@ -209,13 +209,11 @@ CcdState::State	QsiCcd::exposureStatus() {
  */
 void	QsiCcd::cancelExposure() {
 	std::unique_lock<std::recursive_mutex>	lock(_camera.mutex);
-	if (lock) {
-		_camera.camera().AbortExposure();
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "turn LED on");
-		_camera.camera().put_LEDEnabled(true);
-		_camera.camera().AbortExposure();
-		state(CcdState::idle);
-	}
+	_camera.camera().AbortExposure();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "turn LED on");
+	_camera.camera().put_LEDEnabled(true);
+	_camera.camera().AbortExposure();
+	state(CcdState::idle);
 }
 
 /**

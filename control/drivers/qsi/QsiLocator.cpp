@@ -165,7 +165,17 @@ std::vector<std::string>	QsiCameraLocator::getDevicelist(DeviceName::device_type
 	return names;
 }
 
-std::recursive_mutex	_mutex;
+/**
+ * \brief static mutex to protect the locator
+ *
+ * This ensures that only one device can be under construction at any
+ * one time. This solves the following problem: When a filterwheel object
+ * is constructed, then the camera has to be constructed first, and similarly
+ * for other devices. So if Ccd, Cooler and Filterwheel construction are
+ * initiated at the same time, the all trigger construction of the
+ * same camera. This will make the camera unusable.
+ */
+static std::recursive_mutex	_mutex;
 
 /**
  * \brief Construct a camera from a camera description

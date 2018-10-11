@@ -9,6 +9,7 @@
 #include <AstroCamera.h>
 #include <QsiCamera.h>
 #include <vector>
+#include <atomic>
 
 namespace astro {
 namespace camera {
@@ -17,9 +18,10 @@ namespace qsi {
 class QsiFilterWheel : public FilterWheel {
 	QsiCamera&	_camera;
 	unsigned int	nfilters;
-	unsigned int	lastPosition;
-	FilterWheel::State	lastState;
 	std::vector<std::string>	filternames;
+	// state variables, need to be protected from concurrent access
+	std::atomic_uint	lastPosition;
+	std::atomic<FilterWheel::State>	lastState;
 public:
 	QsiFilterWheel(QsiCamera& camera);
 	virtual ~QsiFilterWheel();

@@ -110,6 +110,7 @@ QsiCamera::QsiCamera(const std::string& _name) : Camera(_name) {
  */
 QsiCamera::~QsiCamera() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "disconnect the camera");
+	std::unique_lock<std::recursive_mutex>	lock(mutex);
 	camera().put_Connected(false);
 }
 
