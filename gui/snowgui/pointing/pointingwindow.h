@@ -28,6 +28,7 @@ class pointingwindow : public InstrumentWidget {
 	astro::image::Binning	_finder_binning;
 	astro::image::Binning	_guider_binning;
 	astro::image::Binning	_imager_binning;
+	bool	_west;
 
 public:
 	explicit pointingwindow(QWidget *parent = 0);
@@ -41,12 +42,16 @@ private:
 	void	pointSelected(astro::image::ImagePoint, const astro::RaDec&,
 			const ccddata&, const astro::image::Binning&);
 
+signals:
+	void	targetChanged(astro::RaDec);
+
 public slots:
 	void	newImage(astro::image::ImagePtr image);
 	void	finderPointSelected(astro::image::ImagePoint);
 	void	guiderPointSelected(astro::image::ImagePoint);
 	void	imagerPointSelected(astro::image::ImagePoint);
 	void	ccddataSelected(ccddata);
+	void	orientationChanged(bool);
 
 private:
 	Ui::pointingwindow *ui;

@@ -9,6 +9,7 @@
 #include <SimGuidePort.h>
 #include <SimCooler.h>
 #include <SimFocuser.h>
+#include <SimMount.h>
 #include <SimAdaptiveOptics.h>
 #include <includes.h>
 #include <AstroCatalog.h>
@@ -79,6 +80,11 @@ void    SimCcd::startExposure(const Exposure& exposure) {
 		_locator.simguideport()->update();
 	} else {
 		debug(LOG_ERR, DEBUG_LOG, 0, "no guideport found");
+	}
+
+	// get the orientation from the mount
+	if (_locator.simmount()) {
+		starcamera.west(_locator.simmount()->telescopePositionWest());
 	}
 
 	// find focal length and limit magnitude

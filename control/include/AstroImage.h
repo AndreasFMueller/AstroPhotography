@@ -113,6 +113,10 @@ public:
 	// reduction 
 	ImagePoint	operator()(const int x, const int y) const;
 	ImagePoint	operator()(const ImagePoint& p) const;
+	// flip operations for points inside an image rectangle
+	ImagePoint	flip(const ImagePoint& p) const;
+	ImagePoint	horizontalFlip(const ImagePoint& p) const;
+	ImagePoint	verticalFlip(const ImagePoint& p) const;
 	// find out whether the rectangle is uninitialized
 	bool	isEmpty() const { return (_width == 0) && (_height == 0); }
 	// border distance

@@ -22,6 +22,7 @@ class guideportcontrollerwidget : public InstrumentWidget {
 	float	_activationtime;
 	QTimer	_statusTimer;
 	unsigned char	_active;
+	float	_guiderate;
 public:
 	explicit guideportcontrollerwidget(QWidget *parent = 0);
 	~guideportcontrollerwidget();
@@ -49,6 +50,8 @@ public slots:
 	void	setActivationTime(double);
 	void	changeActivationTime(double);
 	void	statusUpdate();
+	void	radecCorrection(astro::RaDec,bool);
+	void	activateClicked();
 };
 
 } // namespace snowogui

@@ -45,6 +45,7 @@ signals:
 	void	telescopeChanged(astro::RaDec);
 	void	orientationChanged(bool west);
 	void	updateTime(time_t);
+	void	radecCorrection(astro::RaDec,bool);
 
 private:
 	Ui::mountcontrollerwidget *ui;

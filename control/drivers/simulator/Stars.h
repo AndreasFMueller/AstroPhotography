@@ -28,8 +28,6 @@ protected:
 public:
 	StellarObject(const Point& position);
 	virtual ~StellarObject();
-	StellarObject(const StellarObject&) = delete;
-	StellarObject&	operator=(const StellarObject&) = delete;
 	const Point&	position() const { return _position; }
 	void	position(const Point& position) { _position = position; }
 	const astro::image::RGB<double>&	color() const { return _color; }
@@ -182,6 +180,10 @@ private:
 	double	bin0(Image<double>& image, int x, int y) const;
 	void	fill0(Image<double>& image, const ImagePoint& point,
 			double fillvalue) const;
+	/**
+	 * \brief Telescope position on EQ mount
+	 */
+	bool	_west;
 protected:
 	void	addnoise(Image<double>& image) const;
 	void	addhot(Image<double>& image, double hotvalue) const;
@@ -241,13 +243,16 @@ public:
 	const astro::image::Binning&	binning() const { return _binning; }
 	void	binning(const astro::image::Binning& binning) {
 			_binning = binning;
-}
+	}
+
+	// telescope orientation
+	bool	west() const { return _west; }
+	void	west(bool w) { _west = w; }
 
 	// imaging operator
 private:
 	void	addStarIntensity(Image<double>& image,
-			StellarObjectPtr star,
-			const Point& shift) const;
+			StellarObjectPtr star, Point shift) const;
 
 	void	addStarIntensities(Image<double>& image,
 			const StarField& field,

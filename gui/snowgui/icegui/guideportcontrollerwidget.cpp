@@ -16,6 +16,9 @@ guideportcontrollerwidget::guideportcontrollerwidget(QWidget *parent)
 	ui->guideWidget->setEnabled(false);
 	ui->activationWidget->setEnabled(false);
 
+	// guiderate
+	_guiderate = 0.5;
+
 	// connect signals
 	connect(ui->guideportSelectionBox, SIGNAL(currentIndexChanged(int)),
 		this, SLOT(guideportChanged(int)));
@@ -31,6 +34,9 @@ guideportcontrollerwidget::guideportcontrollerwidget(QWidget *parent)
 
 	connect(ui->activationtimeSpinBox, SIGNAL(valueChanged(double)),
 		this, SLOT(changeActivationTime(double)));
+
+	connect(ui->activateButton, SIGNAL(clicked()),
+		this, SLOT(activateClicked()));
 
 	// start the timer
 	_active = 0;
@@ -65,6 +71,11 @@ void	guideportcontrollerwidget::instrumentSetup(
 			index, serviceobject.name());
 		ui->guideportSelectionBox->addItem(QString(dn.c_str()));
 		index++;
+	}
+
+	// get the guiderate from the instrument
+	if (_instrument.hasProperty("guiderate")) {
+		_guiderate = _instrument.doubleProperty("guiderate");
 	}
 }
 
@@ -138,6 +149,60 @@ void	guideportcontrollerwidget::statusUpdate() {
 	} catch (const std::exception& x) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "couldn't get active data: %s",
 			x.what());
+	}
+}
+
+void	guideportcontrollerwidget::radecCorrection(astro::RaDec correction, bool west) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "correction received: %s",
+		correction.toString().c_str());
+
+	// convert the correction into a proposed activation of the
+	// the guide port pins
+	astro::Angle	ra = correction.ra().reduced(-M_PI);
+	astro::Angle	dec = correction.dec().reduced(-M_PI);
+
+	// we need the guide rate as an Angle
+	astro::Angle	sidereal_rate(2 * M_PI / 86400);
+	astro::Angle	omega = sidereal_rate * _guiderate;
+
+	// compute the changes
+	float	racorrection = ra.radians() / omega.radians();
+	float	deccorrection = ((west) ? 1 : -1) * dec.radians() / omega.radians();
+
+	// propose the activation to the user
+	ui->raField->setText(QString(astro::stringprintf("%.1f",
+		racorrection).c_str()));
+	ui->decField->setText(QString(astro::stringprintf("%.1f",
+		deccorrection).c_str()));
+}
+
+void	guideportcontrollerwidget::activateClicked() {
+	if (!_guideport) { return; }
+
+	// read the activation times from the fields
+	bool	ok = true;
+	float	racorrection = ui->raField->text().toFloat(&ok);
+	if (!ok) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "cannot convert value: %s",
+			ui->raField->text().toLatin1().data());
+		racorrection = 0;
+	}
+	float	deccorrection = ui->decField->text().toFloat(&ok);
+	if (!ok) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "cannot convert value: %s",
+			ui->decField->text().toLatin1().data());
+		deccorrection = 0;
+	}
+
+	// activate the pins
+	try {
+		debug(LOG_DEBUG, DEBUG_LOG, 0,
+			"guideport activations: %.3fs,%.3fs",
+			racorrection, deccorrection);
+		_guideport->activate(racorrection, deccorrection);
+	} catch (const std::exception& x) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "cannot activate %.3f,%.3f: %s",
+			racorrection, deccorrection, x.what());
 	}
 }
 

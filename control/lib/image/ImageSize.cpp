@@ -237,6 +237,18 @@ ImagePoint	ImageSize::operator()(const ImagePoint& p) const {
 	return result;
 }
 
+ImagePoint	ImageSize::flip(const ImagePoint& p) const {
+	return ImagePoint(_width - 1 - p.x(), _height - 1 - p.y());
+}
+
+ImagePoint	ImageSize::horizontalFlip(const ImagePoint& p) const {
+	return ImagePoint(_width - 1 - p.x(), p.y());
+}
+
+ImagePoint	ImageSize::verticalFlip(const ImagePoint& p) const {
+	return ImagePoint(p.x(), _height - 1 - p.y());
+}
+
 /**
  * \brief Find the number of pixels to the border
  *

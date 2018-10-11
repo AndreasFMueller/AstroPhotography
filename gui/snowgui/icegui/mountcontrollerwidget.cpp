@@ -346,8 +346,16 @@ void	mountcontrollerwidget::skyviewDestroyed() {
 /**
  * \brief Slot to accept the new position
  */
-void	mountcontrollerwidget::targetChanged(astro::RaDec radec) {
-	setTarget(radec);
+void	mountcontrollerwidget::targetChanged(astro::RaDec newtarget) {
+	// compute the difference to the current target
+	astro::RaDec	correction = newtarget - convert(_telescope);
+
+	// emit the movement in RA/DEC
+	emit radecCorrection(correction,_previouswest);
+
+	// set the new target
+	setTarget(newtarget);
+
 }
 
 } // namespace snowgui

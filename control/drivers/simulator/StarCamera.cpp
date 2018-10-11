@@ -167,6 +167,8 @@ Image<double>	*StarCameraBase::doubleImage(StarField& field) {
 	// fill in the points. 
 	ImagePoint	origin = rectangle().origin();
 	Point	shift = Point(origin - offset) - translation();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "shift = %s",
+		shift.toString().c_str());
 
 	Image<double>	image(size);
 	for (int x = 0; x < size.width(); x++) {
@@ -275,11 +277,38 @@ void	StarCameraBase::addSunIntensity(Image<double>& image,
  * \brief Add the intensity of one particular star
  */
 void	StarCameraBase::addStarIntensity(Image<double>& image,
-		StellarObjectPtr star, const Point& shift) const {
+		StellarObjectPtr star, Point shift) const {
+	// compute the position on the image
 	ImagePoint	c(star->position().x() - shift.x(),
 				star->position().y() - shift.y());
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "add star at %s", c.toString().c_str());
 
+	// depending on the orientation, we have to flip the star
+	Star	*starp = dynamic_cast<Star *>(&*star);
+	if (NULL == starp) {
+		return;
+	}
+	Star	fstar = *starp;
+	if (!_west) {
+		// flip the image point
+		c = image.size().flip(c);
+
+		// flip the star
+		Point	p = fstar.position();
+		Point	flipped(image.size().width() - 1 - p.x(),
+				image.size().height() - 1 - p.y());
+		fstar.position(flipped);
+
+		// flip the shift
+#if 1
+		shift = -shift;
+#endif
+	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "add star at c = %s, p = %s, shift = %s",
+		c.toString().c_str(), fstar.position().toString().c_str(),
+		shift.toString().c_str());
+
+	// compute the area around the star for which we have to modify
+	// the image to add the diffraction image of the star
 	int	xmin = c.x() - 30;
 	if (xmin < 0) { xmin = 0; }
 
@@ -292,22 +321,23 @@ void	StarCameraBase::addStarIntensity(Image<double>& image,
 	int	ymax = c.y() + 31;
 	if (ymax > image.size().height()) { ymax = image.size().height(); }
 
+	// update the environment
 	for (int x = xmin; x < xmax; x++) {
 		for (int y = ymin; y < ymax; y++) {
 			double	value = image.pixel(x,y);
 			Point	p(shift.x() + x, shift.y() + y);
 			switch (color()) {
 			case 0:
-				value += star->intensity(p);
+				value += fstar.intensity(p);
 				break;
 			case 1:
-				value += star->intensityR(p);
+				value += fstar.intensityR(p);
 				break;
 			case 2:
-				value += star->intensityG(p);
+				value += fstar.intensityG(p);
 				break;
 			case 3:
-				value += star->intensityB(p);
+				value += fstar.intensityB(p);
 				break;
 			default:
 				break;

@@ -39,6 +39,9 @@ pointingwindow::pointingwindow(QWidget *parent)
 	// set up the imager
 	//ui->imagercontrollerWidget->hideSubframe(true);
 
+	// default setting for the telescope orientation
+	_west = true;
+
 	// send new images around
 	connect(ui->ccdcontrollerWidget,
 		SIGNAL(imageReceived(astro::image::ImagePtr)),
@@ -81,6 +84,20 @@ pointingwindow::pointingwindow(QWidget *parent)
 		SIGNAL(pointSelected(astro::RaDec)),
 		ui->mountcontrollerWidget,
 		SLOT(targetChanged(astro::RaDec)));
+
+	// handle target changes and corrections
+	connect(this,
+		SIGNAL(targetChanged(astro::RaDec)),
+		ui->mountcontrollerWidget,
+		SLOT(targetChanged(astro::RaDec)));
+	connect(ui->mountcontrollerWidget,
+		SIGNAL(radecCorrection(astro::RaDec,bool)),
+		ui->guideportcontrollerWidget,
+		SLOT(radecCorrection(astro::RaDec,bool)));
+	connect(ui->mountcontrollerWidget,
+		SIGNAL(orientationChanged(bool)),
+		this,
+		SLOT(orientationChanged(bool)));
 }
 
 /**
@@ -202,6 +219,9 @@ void	pointingwindow::pointSelected(astro::image::ImagePoint p,
 	astro::image::ImagePoint	center
 		= snowstar::convert(_ccd.ccdinfo().size).center();
 	astro::image::ImagePoint	offset = p - center;
+	if (!_west) {
+		offset = astro::image::ImagePoint(-offset.x(), -offset.y());
+	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "offset = %s",
 		offset.toString().c_str());
 
@@ -209,7 +229,7 @@ void	pointingwindow::pointSelected(astro::image::ImagePoint p,
 	astro::RaDec	target = coord(offset);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "new target: %s",
 		target.toString().c_str());
-	ui->mountcontrollerWidget->setTarget(target);
+	emit targetChanged(target);
 }
 
 /**
@@ -240,6 +260,13 @@ void	pointingwindow::ccddataSelected(ccddata d) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "got a new CCDdata record: %s",
 		d.toString().c_str());
 	_ccddata = d;
+}
+
+/**
+ * \brief Handle meridian flip of the telescope
+ */
+void	pointingwindow::orientationChanged(bool west) {
+	_west = west;
 }
 
 } // namespace snowgui

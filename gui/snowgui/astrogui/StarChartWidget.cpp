@@ -252,9 +252,9 @@ void	StarChartWidget::drawDirections(QPainter& painter) {
 	int	x = w / 2;
 	int	y = h / 2;
 	painter.drawText(0, y - 10, 20, 20, Qt::AlignCenter,
-		(_flip) ? QString("E") : QString("W"));
-	painter.drawText(w - 20, y - 10, 20, 20, Qt::AlignCenter,
 		(_flip) ? QString("W") : QString("E"));
+	painter.drawText(w - 20, y - 10, 20, 20, Qt::AlignCenter,
+		(_flip) ? QString("E") : QString("W"));
 	painter.drawText(x - 10, 0, 20, 20, Qt::AlignCenter,
 		(_flip) ? QString("S") : QString("N"));
 	painter.drawText(x - 10, h - 20, 20, 20, Qt::AlignCenter,
@@ -442,6 +442,9 @@ void	StarChartWidget::mouseMoveEvent(QMouseEvent *event) {
 	}
 	astro::Point	offset(event->pos().x() - _center.x(),
 				_center.y() - event->pos().y());
+	if (_flip) {
+		offset = -offset;
+	}
 	astro::RaDec	tiptarget = _converter(offset);
 	QString	tiptext(astro::stringprintf("RA: %s DEC: %s",
 			tiptarget.ra().hms(':', -1).c_str(),
