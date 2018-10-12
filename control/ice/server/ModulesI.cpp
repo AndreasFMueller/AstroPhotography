@@ -10,6 +10,7 @@
 namespace snowstar {
 
 ModulesI::ModulesI() {
+	_repository = astro::module::getModuleRepository();
 }
 
 ModulesI::~ModulesI() {
