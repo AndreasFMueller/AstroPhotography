@@ -39,6 +39,8 @@ GuiderPtr	GuiderFactory::get(const GuiderDescriptor& guiderdescriptor) {
 		GuiderPtr	guider = i->second;
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "found guider '%s' in cache",
 			guider->name().c_str());
+		// XXX we should update the parameters, because they
+		// XXX  might have changed
 		return guider;
 	}
 

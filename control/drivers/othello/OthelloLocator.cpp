@@ -62,6 +62,8 @@ namespace othello {
 // Implementation of the Camera Locator for Othello Devices
 //////////////////////////////////////////////////////////////////////
 
+static std::recursive_mutex	_mutex;
+
 OthelloLocator::OthelloLocator() {
 	// context.setDebugLevel(0);
 }
@@ -100,6 +102,7 @@ std::vector<std::string>	OthelloLocator::getDevicelist(DeviceName::device_type d
 		// ever, but on Linux, we may not have permission to open
 		// all devices
 		try {
+			std::lock_guard<std::recursive_mutex>	lock(_mutex);
 			DevicePtr	devptr = *i;
 			devptr->open();
 			try {
@@ -141,6 +144,30 @@ std::vector<std::string>	OthelloLocator::getDevicelist(DeviceName::device_type d
 }
 
 /**
+ * \brief Auxiliary function that retries reading the serial number
+ */
+static std::string	getSerial(astro::usb::DevicePtr dptr,
+				const DeviceName& name) {
+	int	retries = 3;
+	while (retries-- > 0) {
+		try {
+			std::string	devserial
+				= dptr->descriptor()->iSerialNumber();
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "device serial: %s",
+				devserial.c_str());
+			return devserial;
+		} catch (const std::exception& x) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "read failed: %s",
+				x.what());
+		}
+	}
+	std::string	msg = stringprintf("cannot get serial after 3 retries "
+		"while looking for %s", name.toString().c_str());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "%s", msg.c_str());
+	throw std::runtime_error(msg);
+}
+
+/**
  * \brief Get a guider port by name
  */
 GuidePortPtr	OthelloLocator::getGuidePort0(const DeviceName& name) {
@@ -156,6 +183,7 @@ GuidePortPtr	OthelloLocator::getGuidePort0(const DeviceName& name) {
 	std::vector<astro::usb::DevicePtr>::const_iterator	i;
 	for (i = d.begin(); i != d.end(); i++) {
 		try {
+			std::lock_guard<std::recursive_mutex>	lock(_mutex);
 			astro::usb::DevicePtr	dptr = (*i);
 			DeviceDescriptorPtr	descriptor = dptr->descriptor();
 			uint16_t	vendor = descriptor->idVendor();
@@ -171,10 +199,7 @@ GuidePortPtr	OthelloLocator::getGuidePort0(const DeviceName& name) {
 			} else {
 				dptr->open();
 			}
-			std::string	devserial
-				= dptr->descriptor()->iSerialNumber();
-			debug(LOG_DEBUG, DEBUG_LOG, 0, "device serial: %s",
-				devserial.c_str());
+			std::string	devserial = getSerial(dptr, name);
 			if (devserial == serial) {
 				debug(LOG_DEBUG, DEBUG_LOG, 0,
 					"matching guider port");
@@ -191,9 +216,10 @@ GuidePortPtr	OthelloLocator::getGuidePort0(const DeviceName& name) {
 				"device, skipping");
 		}
 	}
-	debug(LOG_ERR, DEBUG_LOG, 0, "coult no find device %s",
-		name.toString().c_str());
-	throw std::runtime_error("device not found");
+	std::string	msg = stringprintf("could not find device %s",
+				name.toString().c_str());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "%s", msg.c_str());
+	throw std::runtime_error(msg);
 }
 
 /**
@@ -214,6 +240,7 @@ FocuserPtr	OthelloLocator::getFocuser0(const DeviceName& name) {
 	std::vector<astro::usb::DevicePtr>::const_iterator	i;
 	for (i = d.begin(); i != d.end(); i++) {
 		try {
+			std::lock_guard<std::recursive_mutex>	lock(_mutex);
 			astro::usb::DevicePtr	dptr = (*i);
 			DeviceDescriptorPtr	descriptor = dptr->descriptor();
 			uint16_t	vendor = descriptor->idVendor();
@@ -242,9 +269,7 @@ FocuserPtr	OthelloLocator::getFocuser0(const DeviceName& name) {
 				// was not open
 				descriptor = dptr->descriptor();
 			}
-			std::string	devserial = descriptor->iSerialNumber();
-			debug(LOG_DEBUG, DEBUG_LOG, 0, "device serial: %s",
-				devserial.c_str());
+			std::string	devserial = getSerial(dptr, name);
 			if (devserial == serial) {
 				debug(LOG_DEBUG, DEBUG_LOG, 0,
 					"matching focuser");
@@ -261,12 +286,13 @@ FocuserPtr	OthelloLocator::getFocuser0(const DeviceName& name) {
 				"device: '%s', skipping", x.what());
 		} catch (...) {
 			debug(LOG_DEBUG, DEBUG_LOG, 0, "cannot work with "
-				"device, skipping");
+				"device (unknown reason), skipping");
 		}
 	}
-	debug(LOG_ERR, DEBUG_LOG, 0, "coult no find device %s",
-		name.toString().c_str());
-	throw std::runtime_error("device not found");
+	std::string	msg = stringprintf("cold not find device %s",
+				name.toString().c_str());
+	debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+	throw std::runtime_error(msg);
 }
 
 } // namespace othello
