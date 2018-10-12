@@ -91,7 +91,9 @@ static DeepSkyObject	Object_from_Record(const std::string& record) {
 
 	// size
 	try {
-		result.size.degrees(std::stod(record.substr(33, 5)) / 60);
+		Angle	s(std::stod(record.substr(33, 5)) / 60, Angle::Degrees);
+		result.size.a1() = s;
+		result.size.a2() = s;
 	} catch (...) {
 		//debug(LOG_DEBUG, DEBUG_LOG, 0, "no size for %s",
 		//	result.name.c_str());

@@ -124,7 +124,8 @@ public:
 			Knot, TripleStar, DoubleStar, SingleStar, Uncertain,
 			Unidentified, Nonexistent, PlateDefect } object_class;
 	object_class	classification;
-	Angle	size;
+	TwoAngles	size;
+	Angle		azimuth;
 	std::string	toString() const;
 };
 
@@ -238,6 +239,36 @@ public:
 					const std::string& parameter);
 	static CatalogPtr	get(BackendType type);
 	static CatalogPtr	get();
+};
+
+/**
+ * \brief DeepSkyCatalog
+ */
+class DeepSkyCatalog {
+protected:
+	std::string	_basedir;
+public:
+	DeepSkyCatalog(const std::string& basedir) : _basedir(basedir)  { }
+	virtual ~DeepSkyCatalog() { }
+
+	typedef std::set<DeepSkyObject>	deepskyobjectset;
+	typedef std::shared_ptr<deepskyobjectset> deepskyobjectsetptr;
+
+	virtual deepskyobjectsetptr	find(const SkyWindow&) = 0;
+	virtual DeepSkyObject	find(const std::string& name) = 0;
+};
+typedef std::shared_ptr<DeepSkyCatalog>	DeepSkyCatalogPtr;
+
+/**
+ * \brief A Factory to build deep sky catalogs
+ */
+class DeepSkyCatalogFactory {
+	std::string	_basedir;
+public:
+	typedef enum deepskycatalog_e { Messier, NGCIC } deepskycatalog_t;
+	DeepSkyCatalogFactory(const std::string& basedir) : _basedir(basedir) { }
+	DeepSkyCatalogFactory();
+	DeepSkyCatalogPtr	get(deepskycatalog_t ct);
 };
 
 } // namespace catalog

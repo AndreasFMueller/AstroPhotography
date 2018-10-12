@@ -17,7 +17,7 @@ namespace catalog {
 /**
  * \brief NGC/IC catalog class
  */
-class NGCIC : std::map<std::string, DeepSkyObject> {
+class NGCIC : public std::map<std::string, DeepSkyObject> {
 public:
 	typedef std::set<DeepSkyObject>	objectset;
 	typedef std::shared_ptr<objectset>	objectsetptr;

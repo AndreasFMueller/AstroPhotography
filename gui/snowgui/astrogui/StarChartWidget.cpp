@@ -31,20 +31,33 @@ StarChartWidget::StarChartWidget(QWidget *parent) : QWidget(parent),
 	_show_crosshairs = false;
 	_show_directions = true; // XXX temporary
 	_flip = true;
+	_show_deepsky = true;
 
 	qRegisterMetaType<astro::catalog::Catalog::starsetptr>("astro::catalog::Catalog::starsetptr");
+	qRegisterMetaType<astro::catalog::DeepSkyCatalog::deepskyobjectsetptr>("astro::catalog::DeepSkyCatalog::deepskyobjectsetptr");
 
 	setMouseTracking(true);
 
 	// launch a thread to retrieve the 
-	SkyStarThread	*_skystarthread = new SkyStarThread(this);
-	connect(_skystarthread,
+	SkyStarThread	*skystarthread = new SkyStarThread(this);
+	connect(skystarthread,
 		SIGNAL(stars(astro::catalog::Catalog::starsetptr)),
 		this,
 		SLOT(useSky(astro::catalog::Catalog::starsetptr)));
-	connect(_skystarthread, SIGNAL(finished()),
-		_skystarthread, SLOT(deleteLater()));
-	_skystarthread->start();
+	connect(skystarthread, SIGNAL(finished()),
+		skystarthread, SLOT(deleteLater()));
+	skystarthread->start();
+
+	// launch a thred to retrieve the deep sky objects
+	DeepSkyRetriever	*deepsky_thread
+		= new DeepSkyRetriever(this);
+	connect(deepsky_thread,
+		SIGNAL(deepskyReady(astro::catalog::DeepSkyCatalog::deepskyobjectsetptr)),
+		this,
+		SLOT(useDeepSky(astro::catalog::DeepSkyCatalog::deepskyobjectsetptr)));
+	connect(deepsky_thread, SIGNAL(finished()),
+		this, SLOT(finished()));
+	deepsky_thread->start();
 }
 
 /**
@@ -111,6 +124,59 @@ void	StarChartWidget::drawStar(QPainter& painter, const Star& star) {
 	QColor	black(0,0,0);
 	QColor	white(255,255,255);
 	painter.fillPath(starcircle, (_negative) ? black : white);
+}
+
+/**
+ * \brief draw a deep sky object
+ */
+void	StarChartWidget::drawDeepSkyObject(QPainter& painter,
+	const DeepSkyObject& deepskyobject) {
+	// make sure we draw in red
+	QPen	pen(Qt::SolidLine);
+	pen.setColor(Qt::red);
+	pen.setWidth(1);
+	painter.setPen(pen);
+
+	// get the position
+	QPointF	p = convert(deepskyobject.position(2000));
+
+	// if the point is outside the widget rectangle, we quit
+	if ((p.x() < -5) || (p.x() > (width() + 5))
+		|| (p.y() < -5) || (p.y() > (height() + 5))) {
+		//debug(LOG_DEBUG, DEBUG_LOG, 0, "star outside rectangle");
+		return;
+	}
+
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "draw deep sky object %s",
+		deepskyobject.name.c_str());
+
+	// get the axes
+	double	a = deepskyobject.size.a1().radians() / _resolution.radians();
+	double	b = deepskyobject.size.a2().radians() / _resolution.radians();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "axes: %f, %f", a, b);
+
+	// draw an ellipse at the position of the object
+	QPainterPath	ellipse;
+	double	s = sin(deepskyobject.azimuth);
+	double	c = cos(deepskyobject.azimuth);
+	double	phi = 0;
+	double	x = a * c;
+	double	y = -a * s;
+	ellipse.moveTo(p.x() + x, p.y() + y);
+	double	phistep = M_PI / 50;
+	while (phi < 2 * M_PI + phistep/2) {
+		phi += phistep;
+		x = a * cos(phi);
+		y = b * sin(phi);
+		ellipse.lineTo(p.x() + c * x + s * y, p.y() - s * x + c * y);
+	}
+	painter.drawPath(ellipse);
+
+	// draw the name of the object
+	painter.drawText(p.x() - 40, p.y() - 10, 80, 20,
+		Qt::AlignCenter,
+		QString(deepskyobject.name.c_str()));
+	
 }
 
 /**
@@ -312,6 +378,15 @@ void	StarChartWidget::draw() {
 	} else {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "no stars");
 	}
+
+	// draw the deep sky objects
+	if (show_deepsky() && _deepsky) {
+		DeepSkyCatalog::deepskyobjectset::const_iterator	i;
+		for (i = _deepsky->begin(); i != _deepsky->end(); i++) {
+			drawDeepSkyObject(painter, *i);
+		}
+	}
+
 	// if the telescope is moving, we also display the sky stars
 	if ((_state == astro::device::Mount::GOTO) && (_sky)) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "adding sky stars");
@@ -480,6 +555,19 @@ void	StarChartWidget::useSky(astro::catalog::Catalog::starsetptr sky) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "receiving sky with %d stars",
 		sky->size());
 	_sky = sky;
+	repaint();
+}
+
+/**
+ * \brief Receive a set of deep sky objects
+ *
+ * \param deepsky	set of deep ky objects to display in the star chart
+ */
+void	StarChartWidget::useDeepSky(
+		astro::catalog::DeepSkyCatalog::deepskyobjectsetptr deepsky) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "got %d deepsky objects",
+		deepsky->size());
+	_deepsky = deepsky;
 	repaint();
 }
 

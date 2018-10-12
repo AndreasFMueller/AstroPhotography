@@ -36,6 +36,23 @@ signals:
 };
 
 /**
+ * \brief Worker class to retrieve the deep sky objects in a window
+ */
+class DeepSkyRetriever : public QThread {
+	Q_OBJECT
+	void	run() override;
+	astro::catalog::SkyWindow	_window;
+
+public:
+	const astro::catalog::SkyWindow& window() const { return _window; }
+	void	window(const astro::catalog::SkyWindow& w) { _window = w; }
+
+	DeepSkyRetriever(QObject *parent = NULL);
+signals:
+	void	deepskyReady(astro::catalog::DeepSkyCatalog::deepskyobjectsetptr);
+};
+
+/**
  * \brief A widget to display a chart of a window into the sky 
  */
 class StarChartWidget : public QWidget {
@@ -43,6 +60,7 @@ class StarChartWidget : public QWidget {
 
 	astro::catalog::Catalog::starsetptr	_stars;
 	astro::catalog::Catalog::starsetptr	_sky;
+	astro::catalog::DeepSkyCatalog::deepskyobjectsetptr	_deepsky;
 	astro::Angle	_resolution;	// angle per pixel
 	astro::RaDec	_direction;
 	astro::device::Mount::state_type	_state;
@@ -52,6 +70,7 @@ class StarChartWidget : public QWidget {
 	bool	_show_grid;
 	bool	_show_crosshairs;
 	bool	_show_directions;
+	bool	_show_deepsky;
 	bool	_flip;
 
 	bool	_retrieval_necessary;
@@ -79,6 +98,9 @@ public:
 	void	show_directions(bool d) { _show_directions = d; }
 	bool	show_directions() const { return _show_directions; }
 
+	void	show_deepsky(bool d) { _show_deepsky = d; }
+	bool	show_deepsky() const { return _show_deepsky; }
+
 	void	flip(bool f) { _flip = f; }
 	bool	flip() const { return _flip; }
 
@@ -91,6 +113,8 @@ signals:
 private:
 	void	draw();
 	void	drawStar(QPainter& painter, const astro::catalog::Star& star);
+	void	drawDeepSkyObject(QPainter& painter,
+			const astro::catalog::DeepSkyObject& deepskyobject);
 	void	drawLine(QPainter& painter, const astro::RaDec& from,
 			const astro::RaDec& to);
 	void	drawGrid(QPainter& painter);
@@ -114,6 +138,7 @@ public slots:
 	void	stateChanged(astro::device::Mount::state_type);
 	void	useStars(astro::catalog::Catalog::starsetptr);
 	void	useSky(astro::catalog::Catalog::starsetptr);
+	void	useDeepSky(astro::catalog::DeepSkyCatalog::deepskyobjectsetptr);
 	void	workerFinished();
 };
 

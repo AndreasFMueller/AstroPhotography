@@ -21,6 +21,7 @@ noinst_HEADERS =							\
 	CatalogBackend.h						\
 	CatalogIterator.h						\
 	CutoverConditions.h						\
+	DeepSkyCatalogs.h						\
 	Hipparcos.h							\
 	MappedFile.h							\
 	NGCIC.h								\
@@ -51,6 +52,7 @@ libastrocatalogs_la_SOURCES =						\
 	DatabaseBackendCreator.cpp					\
 	DatabaseBackendIterator.cpp					\
 	DeepSkyObject.cpp						\
+	DeepSkyCatalogFactory.cpp					\
 	EndIterator.cpp							\
 	FileBackend.cpp							\
 	FileBackendIterator.cpp						\
@@ -63,7 +65,9 @@ libastrocatalogs_la_SOURCES =						\
 	IteratorImplementation.cpp					\
 	MagnitudeRange.cpp						\
 	MappedFile.cpp							\
+	MessierCatalog.cpp						\
 	NGCIC.cpp							\
+	NGCICCatalog.cpp						\
 	PointSpreadFunctionAdapter.cpp					\
 	PointSpreadFunction.cpp						\
 	SkyRectangle.cpp						\
