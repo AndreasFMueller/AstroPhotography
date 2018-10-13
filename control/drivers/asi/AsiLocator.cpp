@@ -76,6 +76,13 @@ std::string	AsiCameraLocator::getVersion() const {
 	return VERSION;
 }
 
+/**
+ * \brief Initialize the array of camera open flags
+ *
+ * The cameraopen array keeps track of which cameras have been opened.
+ * It has to be initialize to a length corresponding to the number of
+ * cameras available. All cameras are flagged as closed initially.
+ */
 void	AsiCameraLocator::initialize_cameraopen() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "initialize the cameraopen array");
 	int	n = ASIGetNumOfConnectedCameras();
@@ -179,7 +186,9 @@ void	AsiCameraLocator::addCoolerNames(std::vector<std::string>& names) {
  *
  * \param device	type of the devices to list
  */
-std::vector<std::string>	AsiCameraLocator::getDevicelist(DeviceName::device_type device) {
+std::vector<std::string>	AsiCameraLocator::getDevicelist(
+		DeviceName::device_type device) {
+	std::lock_guard<std::recursive_mutex>	lock(_mutex);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "get ASI device list");
 	std::vector<std::string>	names;
 	switch (device) {
@@ -213,6 +222,7 @@ std::vector<std::string>	AsiCameraLocator::getDevicelist(DeviceName::device_type
  * \param index		index of the camera
  */
 bool	AsiCameraLocator::isopen(int index) {
+	std::lock_guard<std::recursive_mutex>	lock(_mutex);
 	std::call_once(cameraopen_flag, initialize_cameraopen);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "check camera %d", index);
 	if (index >= AsiCameraLocator::cameraopen.size()) {
@@ -231,6 +241,7 @@ bool	AsiCameraLocator::isopen(int index) {
  * \param o		whether or not the camera is open
  */
 void	AsiCameraLocator::setopen(int index, bool o) {
+	std::lock_guard<std::recursive_mutex>	lock(_mutex);
 	std::call_once(cameraopen_flag, initialize_cameraopen);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "remember camera %d state %s", index,
 		(o) ? "open" : "closed");
@@ -244,6 +255,7 @@ void	AsiCameraLocator::setopen(int index, bool o) {
  */
 std::vector<std::string>	AsiCameraLocator::imgtypes(int index) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieving image types for %d", index);
+	std::lock_guard<std::recursive_mutex>	lock(_mutex);
 	// make sure the index is valid
 	if (index >= ASIGetNumOfConnectedCameras()) {
 		std::string	msg = stringprintf("");
@@ -300,6 +312,9 @@ std::vector<std::string>	AsiCameraLocator::imgtypes(int index) {
  * \param name	name of the camera
  */
 CameraPtr	AsiCameraLocator::getCamera0(const DeviceName& name) {
+	std::lock_guard<std::recursive_mutex>	lock(_mutex);
+
+	// locate a camera
 	std::string	sname = name;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "locate camera %s", sname.c_str());
 	std::vector<std::string>	cameras = getDevicelist();
@@ -307,7 +322,7 @@ CameraPtr	AsiCameraLocator::getCamera0(const DeviceName& name) {
 	size_t	index = 0;
 	for (i = cameras.begin(); i != cameras.end(); i++, index++) {
 		if (name == *i) {
-			return CameraPtr(new AsiCamera(index));
+			return CameraPtr(new AsiCamera(*this, index));
 		}
 	}
 	std::string	msg = stringprintf("camera %s not found",

@@ -19,10 +19,11 @@ namespace asi {
  *
  * \param _index	index of the camera
  */
-AsiCamera::AsiCamera(int index) : Camera(asiCameraName(index)), _index(index) {
+AsiCamera::AsiCamera(AsiCameraLocator& locator, int index)
+	: Camera(asiCameraName(index)), _locator(locator), _index(index) {
 	// if the camera is already open, this constructors should not be
 	// called
-	if (AsiCameraLocator::isopen(_index)) {
+	if (_locator.isopen(_index)) {
 		std::string	msg = stringprintf("%s: internal error, "
 			"already open", name().toString().c_str());
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
@@ -42,7 +43,7 @@ AsiCamera::AsiCamera(int index) : Camera(asiCameraName(index)), _index(index) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 		throw std::runtime_error(msg);
 	}
-	AsiCameraLocator::setopen(_index, true);
+	_locator.setopen(_index, true);
 
 	// initialize the caomera
 	rc = ASIInitCamera(index);
@@ -87,7 +88,7 @@ AsiCamera::AsiCamera(int index) : Camera(asiCameraName(index)), _index(index) {
 
 	// construct a CcdInfo object for each image format
 	std::vector<std::string>	ccdnames
-		= AsiCameraLocator::imgtypes(index);
+		= _locator.imgtypes(index);
 	std::vector<std::string>::const_iterator	i;
 	for (i = ccdnames.begin(); i != ccdnames.end(); i++) {
 		// construct the name for this 
@@ -139,7 +140,7 @@ AsiCamera::~AsiCamera() {
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 		return;
 	}
-	AsiCameraLocator::setopen(_index, false);
+	_locator.setopen(_index, false);
 }
 
 /**

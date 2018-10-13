@@ -3,6 +3,8 @@
  *
  * (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
+#ifndef _AsiLocator_h
+#define _AsiLocator_h
 
 #include <AstroLoader.h>
 #include <AstroCamera.h>
@@ -25,7 +27,9 @@ class AsiCamera;
  * an adapter class to the CameraLocator class.
  */
 class AsiCameraLocator : public DeviceLocator {
+	std::recursive_mutex	_mutex;
 	static std::vector<bool>	cameraopen;
+	static void	initialize_cameraopen();
 public:
 	AsiCameraLocator();
 	virtual ~AsiCameraLocator();
@@ -36,12 +40,11 @@ protected:
 	virtual CameraPtr	getCamera0(const DeviceName& name);
 public:
 	// stuff that is available to open cameras
-	static std::vector<std::string>	imgtypes(int index);
-	static bool	isopen(int index);
+	std::vector<std::string>	imgtypes(int index);
+	bool	isopen(int index);
 	friend class AsiCamera;
-	static void	initialize_cameraopen();
 private:
-	static void	setopen(int index, bool o);
+	void	setopen(int index, bool o);
 	void	addCameraNames(std::vector<std::string>& names);
 	void	addCcdNames(std::vector<std::string>& names);
 	void	addCoolerNames(std::vector<std::string>& names);
@@ -52,3 +55,4 @@ private:
 } // namespace camera
 } // namespace astro
 
+#endif /* _AsiLocator_h */

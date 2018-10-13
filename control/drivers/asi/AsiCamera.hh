@@ -6,6 +6,7 @@
 #ifndef _AsiCamera_hh
 #define _AsiCamera_hh
 
+#include <AsiLocator.h>
 #include <AstroCamera.h>
 #include <ASICamera2.h>
 
@@ -58,6 +59,7 @@ public:
  * \brief AsiCamera class
  */
 class AsiCamera : public Camera {
+	AsiCameraLocator&	_locator;
 	std::recursive_mutex	_api_mutex;
 	int	_id;
 	int	_index;
@@ -68,7 +70,7 @@ public:
 private:
 	bool	_hasCooler;
 public:
-	AsiCamera(int index);
+	AsiCamera(AsiCameraLocator&, int index);
 	~AsiCamera();
 
 	// prevent copying of the camera class
