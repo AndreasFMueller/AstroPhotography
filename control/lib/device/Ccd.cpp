@@ -82,7 +82,6 @@ Ccd::Ccd(const CcdInfo& _info)
  * \brief Get the state
  */
 CcdState::State	Ccd::state() {
-	std::unique_lock<std::recursive_mutex>	lock(_mutex);
 	return _state;
 }
 
@@ -90,7 +89,6 @@ CcdState::State	Ccd::state() {
  * \brief Set the state, notify threads waiting for a state change
  */
 void	Ccd::state(CcdState::State s) {
-	std::unique_lock<std::recursive_mutex>	lock(_mutex);
 	_state = s;
 	_condition.notify_all();
 }

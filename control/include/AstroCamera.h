@@ -382,7 +382,7 @@ private:
 	// lock/condition variable to protect the state
 	std::recursive_mutex		_mutex;
 	std::condition_variable_any	_condition;
-	volatile CcdState::State	_state;
+	volatile std::atomic<CcdState::State>	_state;
 protected:
 	CcdState::State	state();
 	void	state(CcdState::State s);
