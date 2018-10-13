@@ -90,6 +90,8 @@ std::vector<DevicePtr>	Context::devices(uint16_t vendor_id) {
 	USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "getting devices for vendor %04x",
 		vendor_id);
 	std::vector<DevicePtr>	result;
+
+	// construct a list of devices
 	libusb_device	**devlist;
 	ssize_t	length = libusb_get_device_list(context->context(), &devlist);
 	if (length < 0) {
@@ -98,6 +100,8 @@ std::vector<DevicePtr>	Context::devices(uint16_t vendor_id) {
 		USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "%s", msg.c_str());
 		throw USBError(msg);
 	}
+
+	// scan the device list for devices from a given vendor
 	USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "scan %d devices", length);
 	for (int i = 0; i < length; i++) {
 		int	rc;

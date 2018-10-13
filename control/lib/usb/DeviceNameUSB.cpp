@@ -78,7 +78,8 @@ void	DeviceNameUSB::parse(const std::string& name) {
 DeviceNameUSB::DeviceNameUSB(const std::string& modulename,
 	unsigned short modulevendor, astro::usb::DevicePtr deviceptr)
 	: _modulename(modulename), _modulevendor(modulevendor) {
-	usb::USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "DeviceNameUSB constructor on USB: %s",
+	usb::USBdebug(LOG_DEBUG, DEBUG_LOG, 0,
+		"DeviceNameUSB constructor on USB: %s",
 		deviceptr->getDeviceName().c_str());
 	usb::DeviceDescriptorPtr	descriptor = deviceptr->descriptor();
 	if (_modulevendor != descriptor->idVendor()) {
