@@ -120,6 +120,8 @@ CcdState::State	QsiCcd::exposureStatus() {
 	std::unique_lock<std::recursive_mutex>	lock(_camera.mutex,
 		std::try_to_lock);
 	if (!lock) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "return last state %d",
+			(int)_last_state);
 		return _last_state;
 	}
 	try {

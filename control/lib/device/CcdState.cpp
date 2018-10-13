@@ -4,6 +4,7 @@
  * (c) 2016 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
 #include <AstroCamera.h>
+#include <AstroDebug.h>
 
 namespace astro {
 namespace camera {
@@ -19,7 +20,9 @@ std::string	CcdState::state2string(State s) {
 	case cancelling:
 		return std::string("cancelling");
 	}
-	throw std::runtime_error("unknown exposure state");
+	std::string	msg = stringprintf("bad exposure state: %d", (int)s);
+	debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+	throw std::runtime_error(msg);
 }
 
 CcdState::State	CcdState::string2state(const std::string& s) {
@@ -35,7 +38,10 @@ CcdState::State	CcdState::string2state(const std::string& s) {
 	if (s == "cancelling") {
 		return cancelling;
 	}
-	throw std::runtime_error("unknown exposure state");
+	std::string	msg = stringprintf("unknown exposure state '%s'",
+		s.c_str());
+	debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+	throw std::runtime_error(msg);
 }
 
 } // namespace camera

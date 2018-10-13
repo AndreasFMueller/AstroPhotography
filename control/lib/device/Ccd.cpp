@@ -273,6 +273,7 @@ astro::image::ImagePtr	Ccd::getRawImage() {
  * the common metadata.
  */
 astro::image::ImagePtr	Ccd::getImage() {
+	std::unique_lock<std::recursive_mutex>	lock(_mutex);
 	// must have an exposed image to call this method
 	if (CcdState::exposed != this->exposureStatus()) {
 		std::string	msg = stringprintf("no exposed image to "

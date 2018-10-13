@@ -107,6 +107,8 @@ std::string	CcdInfo::toString(bool withbinningmodes) const {
 	} else {
 		out << stringprintf("%d binning modes", binningmodes.size());
 	}
+	out << stringprintf("%.3f <= t <= %.3f",
+		_minexposuretime, _maxexposuretime);
 	return out.str();
 }
 
