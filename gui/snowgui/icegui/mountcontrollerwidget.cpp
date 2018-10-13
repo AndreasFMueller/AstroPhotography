@@ -33,6 +33,8 @@ mountcontrollerwidget::mountcontrollerwidget(QWidget *parent)
 		this, SLOT(gotoClicked()));
 	connect(ui->viewskyButton, SIGNAL(clicked()),
 		this, SLOT(viewskyClicked()));
+	connect(ui->catalogButton, SIGNAL(clicked()),
+		this, SLOT(catalogClicked()));
 
 	_statusTimer.setInterval(1000);
 
@@ -40,6 +42,7 @@ mountcontrollerwidget::mountcontrollerwidget(QWidget *parent)
 		this, SLOT(statusUpdate()));
 
 	_skydisplay = NULL;
+	_catalogdialog = NULL;
 }
 
 /**
@@ -50,6 +53,9 @@ mountcontrollerwidget::~mountcontrollerwidget() {
 
 	if (_skydisplay) {
 		delete _skydisplay;
+	}
+	if (_catalogdialog) {
+		delete _catalogdialog;
 	}
 	delete ui;
 }
@@ -343,6 +349,10 @@ void	mountcontrollerwidget::skyviewDestroyed() {
 	_skydisplay = NULL;
 }
 
+void	mountcontrollerwidget::catalogDestroyed() {
+	_catalogdialog = NULL;
+}
+
 /**
  * \brief Slot to accept the new position
  */
@@ -356,6 +366,23 @@ void	mountcontrollerwidget::targetChanged(astro::RaDec newtarget) {
 	// set the new target
 	setTarget(newtarget);
 
+}
+
+/**
+ * \brief Slot called to bring up the catalog
+ */
+void	mountcontrollerwidget::catalogClicked() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "catalogClicked()");
+	if (_catalogdialog) {
+		_catalogdialog->raise();
+		return;
+	}
+	_catalogdialog = new CatalogDialog(NULL);
+	connect(_catalogdialog, SIGNAL(objectSelected(astro::RaDec)),
+		this, SLOT(targetChanged(astro::RaDec)));
+	connect(_catalogdialog, SIGNAL(destroyed()),
+		this, SLOT(catalogDestroyed()));
+	_catalogdialog->show();
 }
 
 } // namespace snowgui

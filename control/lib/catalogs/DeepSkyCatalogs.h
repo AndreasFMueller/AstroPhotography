@@ -20,6 +20,7 @@ public:
 	MessierCatalog(const std::string& basedir) : DeepSkyCatalog(basedir) { }
 	virtual deepskyobjectsetptr	find(const SkyWindow&);
 	virtual DeepSkyObject	find(const std::string& name);
+	virtual std::set<std::string>	findLike(const std::string& name);
 };
 
 /**
@@ -30,6 +31,7 @@ public:
 	NGCICCatalog(const std::string& basedir);
 	virtual deepskyobjectsetptr	find(const SkyWindow&);
 	virtual DeepSkyObject	find(const std::string& name);
+	virtual std::set<std::string>	findLike(const std::string& name);
 };
 
 } // namespace catalog

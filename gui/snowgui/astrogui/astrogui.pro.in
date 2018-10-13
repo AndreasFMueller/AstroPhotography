@@ -24,14 +24,17 @@ INCLUDEPATH += $${ASTROPATH}/include
 INCLUDEPATH += /usr/local/include
 
 FORMS    +=								\
+	catalogdialog.ui						\
 	imagedisplaywidget.ui						\
 	skydisplaydialog.ui
 
 WIDGETSOURCES =								\
+	catalogdialog.cpp						\
 	imagedisplaywidget.cpp						\
 	skydisplaydialog.cpp
 
 WIDGETHEADERS =								\
+	catalogdialog.h							\
 	imagedisplaywidget.h						\
 	skydisplaydialog.h
 

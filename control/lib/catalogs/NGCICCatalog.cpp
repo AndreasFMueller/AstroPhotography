@@ -12,7 +12,7 @@ namespace catalog {
  * \brief Construct the NGCIC catalog
  */
 NGCICCatalog::NGCICCatalog(const std::string& path)
-	: DeepSkyCatalog(path), NGCIC(path + "/ngc2000.dat") {
+	: DeepSkyCatalog(path), NGCIC(path) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "NGCIC with %d objects", size());
 }
 
@@ -25,7 +25,11 @@ DeepSkyCatalog::deepskyobjectsetptr     NGCICCatalog::find(const SkyWindow& wind
 
 
 DeepSkyObject	NGCICCatalog::find(const std::string& name) {
-	throw std::runtime_error("find by name not implemented yet");
+	return NGCIC::find(name);
+}
+
+std::set<std::string>	NGCICCatalog::findLike(const std::string& name) {
+	return NGCIC::findLike(name);
 }
 
 } // namespace catalog

@@ -10,6 +10,7 @@
 #include <QTimer>
 #include <AstroCoordinates.h>
 #include <skydisplaydialog.h>
+#include <catalogdialog.h>
 
 namespace snowgui {
 
@@ -28,6 +29,7 @@ class mountcontrollerwidget : public InstrumentWidget {
 	snowstar::RaDec		_telescope;
 	astro::LongLat	_position;
 	SkyDisplayDialog	*_skydisplay;
+	CatalogDialog		*_catalogdialog;
 
 public:
 	explicit mountcontrollerwidget(QWidget *parent = 0);
@@ -60,6 +62,8 @@ public slots:
 	void	viewskyClicked();
 	void	skyviewDestroyed();
 	void	targetChanged(astro::RaDec);
+	void	catalogClicked();
+	void	catalogDestroyed();
 };
 
 } // namespace snowgui

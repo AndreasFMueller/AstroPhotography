@@ -7,6 +7,7 @@
 #include "MappedFile.h"
 #include <AstroDebug.h>
 #include <AstroFormat.h>
+#include <fstream>
 
 namespace astro {
 namespace catalog {
@@ -106,28 +107,73 @@ static DeepSkyObject	Object_from_Record(const std::string& record) {
 /**
  * \brief Construct the catalog from the file
  */
-NGCIC::NGCIC(const std::string& filename) {
+NGCIC::NGCIC(const std::string& dirname) {
 	// map the file into the address space
-	MappedFile	ngcfile(filename, 97);
+	std::string	ngcfilename(dirname + "/ngc2000.dat");
+	MappedFile	ngcfile(ngcfilename, 97);
 
 	// now iterate through all the records
 	for (size_t recno = 0; recno < ngcfile.nrecords(); recno++) {
 		std::string	record = ngcfile.get(recno);
 		DeepSkyObject	object = Object_from_Record(record);
 		insert(std::make_pair(object.name, object));
+		names.insert(std::make_pair(object.name, object.name));
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "%u objects in catalog", size());
+
+	// Open the names file to build the names map
+	std::string	namesfilename(dirname + "/names.dat");
+	std::ifstream	in(namesfilename.c_str());
+
+	// read the stream line by line
+	do {
+		char	buffer[1024];
+		in.getline(buffer, sizeof(buffer));
+		int	number = std::stoi(std::string(buffer + 37, 4));
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "number: %d", number);
+		std::string	name;
+		if (buffer[36] == 'I') {
+			name = stringprintf("IC%d", number);
+		} else {
+			name = stringprintf("NGC%d", number);
+		}
+
+		// name 
+		std::string	n;
+		if ((buffer[0] == 'M') && (buffer[1] == ' ')) {
+			// Messier names
+			n = std::string("M") + trim(std::string(buffer + 1, 5));
+		} else {
+			n = trim(std::string(buffer, 36));
+		}
+
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "installing '%s' -> '%s'",
+			n.c_str(), name.c_str());
+		names.insert(std::make_pair(n, name));
+	} while (!in.eof());
 }
 
 /**
  * \brief retrieve a single object by name
  */
 DeepSkyObject	NGCIC::find(const std::string& name) const {
+	// direct search
 	const_iterator	o = std::map<std::string, DeepSkyObject>::find(name);
-	if (o == end()) {
-		throw std::runtime_error("object " + name + " not found");
+	if (o != end()) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "generic %s found",
+			name.c_str());
+		return o->second;
 	}
-	return o->second;
+
+	// name search
+	auto	i = names.find(name);
+	if (i != names.end()) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "name %s found", name.c_str());
+		return find(i->second);
+	}
+
+	// 
+	throw std::runtime_error("object " + name + " not found");
 }
 
 /**
@@ -143,6 +189,36 @@ NGCIC::objectsetptr	NGCIC::find(const SkyWindow& window) const {
 		}
 	}
 	return resultptr;
+}
+
+std::set<std::string>	NGCIC::findLike(const std::string& name) const {
+	std::set<std::string>	result;
+	size_t	l = name.size();
+	// find matching names
+	for (auto i = names.begin(); i != names.end(); i++) {
+		if (i->first.size() < l)
+			continue;
+		if ((i->first.size() == l) && (i->first == name)) {
+			result.insert(i->first);
+			continue;
+		}
+		if (i->first.substr(0, l) == name) {
+			result.insert(i->first);
+		}
+	}
+	// find matching NGC/IC names
+	for (auto i = begin(); i != end(); i++) {
+		if (i->first.size() < l)
+			continue;
+		if ((i->first.size() == l) && (i->first == name)) {
+			result.insert(i->first);
+			continue;
+		}
+		if (i->first.substr(0, l) == name) {
+			result.insert(i->first);
+		}
+	}
+	return result;
 }
 
 } // namespace catalog

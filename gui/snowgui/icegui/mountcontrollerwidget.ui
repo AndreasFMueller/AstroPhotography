@@ -50,6 +50,87 @@
       <property name="bottomMargin">
        <number>0</number>
       </property>
+      <item row="2" column="5" rowspan="2">
+       <widget class="QPushButton" name="gotoButton">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>97</width>
+          <height>75</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>97</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>GOTO</string>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="3">
+       <widget class="snowgui::ClockWidget" name="utcTime">
+        <property name="maximumSize">
+         <size>
+          <width>70</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>00:00:00</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="3" colspan="2">
+       <widget class="QLineEdit" name="targetDecField">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>120</width>
+          <height>16777215</height>
+         </size>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="3" colspan="3">
+       <widget class="QLabel" name="observatoryField">
+        <property name="text">
+         <string>(unknown)</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="2">
+       <widget class="QLabel" name="targetDecLabel">
+        <property name="maximumSize">
+         <size>
+          <width>40</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>DEC:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QLabel" name="currentLabel">
+        <property name="maximumSize">
+         <size>
+          <width>55</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>Current</string>
+        </property>
+       </widget>
+      </item>
       <item row="1" column="2">
        <widget class="QLabel" name="currentDecLabel">
         <property name="maximumSize">
@@ -67,28 +148,6 @@
        <widget class="QLabel" name="observatoryLabel">
         <property name="text">
          <string>Observatory:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="5" rowspan="2">
-       <widget class="QPushButton" name="viewskyButton">
-        <property name="enabled">
-         <bool>false</bool>
-        </property>
-        <property name="minimumSize">
-         <size>
-          <width>97</width>
-          <height>75</height>
-         </size>
-        </property>
-        <property name="maximumSize">
-         <size>
-          <width>97</width>
-          <height>16777215</height>
-         </size>
-        </property>
-        <property name="text">
-         <string>View Sky</string>
         </property>
        </widget>
       </item>
@@ -118,54 +177,6 @@
         </property>
        </widget>
       </item>
-      <item row="0" column="1">
-       <widget class="QLabel" name="currentLabel">
-        <property name="maximumSize">
-         <size>
-          <width>55</width>
-          <height>16777215</height>
-         </size>
-        </property>
-        <property name="text">
-         <string>Current</string>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="2">
-       <widget class="QLabel" name="targetDecLabel">
-        <property name="maximumSize">
-         <size>
-          <width>40</width>
-          <height>16777215</height>
-         </size>
-        </property>
-        <property name="text">
-         <string>DEC:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="5" rowspan="2">
-       <widget class="QPushButton" name="gotoButton">
-        <property name="enabled">
-         <bool>false</bool>
-        </property>
-        <property name="minimumSize">
-         <size>
-          <width>97</width>
-          <height>75</height>
-         </size>
-        </property>
-        <property name="maximumSize">
-         <size>
-          <width>97</width>
-          <height>16777215</height>
-         </size>
-        </property>
-        <property name="text">
-         <string>GOTO</string>
-        </property>
-       </widget>
-      </item>
       <item row="0" column="2">
        <widget class="QLabel" name="currentRaLabel">
         <property name="maximumSize">
@@ -176,13 +187,6 @@
         </property>
         <property name="text">
          <string>RA:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="5" column="5">
-       <widget class="snowgui::LocalSiderealTime" name="siderealTime">
-        <property name="text">
-         <string>00:00:00</string>
         </property>
        </widget>
       </item>
@@ -199,36 +203,10 @@
         </property>
        </widget>
       </item>
-      <item row="5" column="3">
-       <widget class="snowgui::ClockWidget" name="utcTime">
-        <property name="maximumSize">
-         <size>
-          <width>70</width>
-          <height>16777215</height>
-         </size>
-        </property>
+      <item row="5" column="5">
+       <widget class="snowgui::LocalSiderealTime" name="siderealTime">
         <property name="text">
          <string>00:00:00</string>
-        </property>
-       </widget>
-      </item>
-      <item row="4" column="3" colspan="3">
-       <widget class="QLabel" name="observatoryField">
-        <property name="text">
-         <string>(unknown)</string>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="3" colspan="2">
-       <widget class="QLineEdit" name="targetDecField">
-        <property name="enabled">
-         <bool>false</bool>
-        </property>
-        <property name="maximumSize">
-         <size>
-          <width>120</width>
-          <height>16777215</height>
-         </size>
         </property>
        </widget>
       </item>
@@ -258,6 +236,13 @@
         </property>
        </widget>
       </item>
+      <item row="5" column="1" colspan="2">
+       <widget class="QLabel" name="utcLabel">
+        <property name="text">
+         <string>UTC:</string>
+        </property>
+       </widget>
+      </item>
       <item row="0" column="3" colspan="2">
        <widget class="QLabel" name="currentRaField">
         <property name="maximumSize">
@@ -271,10 +256,20 @@
         </property>
        </widget>
       </item>
-      <item row="5" column="1" colspan="2">
-       <widget class="QLabel" name="utcLabel">
+      <item row="0" column="5">
+       <widget class="QPushButton" name="viewskyButton">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
         <property name="text">
-         <string>UTC:</string>
+         <string>View Sky</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="5">
+       <widget class="QPushButton" name="catalogButton">
+        <property name="text">
+         <string>Catalog</string>
         </property>
        </widget>
       </item>

@@ -256,6 +256,7 @@ public:
 
 	virtual deepskyobjectsetptr	find(const SkyWindow&) = 0;
 	virtual DeepSkyObject	find(const std::string& name) = 0;
+	virtual	std::set<std::string>	findLike(const std::string& name) = 0;
 };
 typedef std::shared_ptr<DeepSkyCatalog>	DeepSkyCatalogPtr;
 

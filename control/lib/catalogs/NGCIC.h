@@ -21,10 +21,12 @@ class NGCIC : public std::map<std::string, DeepSkyObject> {
 public:
 	typedef std::set<DeepSkyObject>	objectset;
 	typedef std::shared_ptr<objectset>	objectsetptr;
+	std::map<std::string, std::string>	names;
 public:
 	NGCIC(const std::string& filename);
 	DeepSkyObject	find(const std::string& name) const;
 	objectsetptr	find(const SkyWindow& window) const;
+	std::set<std::string>	findLike(const std::string& name) const;
 };
 
 } // namespace catalog
