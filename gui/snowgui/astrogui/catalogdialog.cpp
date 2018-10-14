@@ -11,6 +11,11 @@ using namespace astro::catalog;
 
 namespace snowgui {
 
+/**
+ * \brief Construct a new catalog widget
+ *
+ * \param parent 	parent widget
+ */
 CatalogDialog::CatalogDialog(QWidget *parent)
 	: QDialog(parent), ui(new Ui::CatalogDialog) {
 	ui->setupUi(this);
@@ -28,10 +33,18 @@ CatalogDialog::CatalogDialog(QWidget *parent)
 	_catalog = factory.get(DeepSkyCatalogFactory::NGCIC);
 }
 
+/**
+ * \brief Destroy the catalog dialog
+ */
 CatalogDialog::~CatalogDialog() {
 	delete ui;
 }
 
+/**
+ * \brief Common work for the full name search§
+ *
+ * \param name		name of the object to search for
+ */
 void	CatalogDialog::searchCommon(const std::string& name) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "searchCommon(\"%s\")", name.c_str());
 	try {
@@ -44,6 +57,12 @@ void	CatalogDialog::searchCommon(const std::string& name) {
 	}
 }
 
+/**
+ * \brief Slot called when the user clicks the search button
+ *
+ * This slot reads the name of the nebula from the search box and then
+ * performs a search just as if the user had pressed <return>
+ */
 void	CatalogDialog::searchClicked() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "looking for object '%s'",
 		ui->objectnameField->text().toLatin1().data());
@@ -51,6 +70,12 @@ void	CatalogDialog::searchClicked() {
 	searchCommon(name);
 }
 
+/**
+ * \brief Slot called when the text in the search box is finalized
+ *
+ * By finalized whe mean that the user pressed <return> and thus meant
+ * to select that object.
+ */
 void	CatalogDialog::searchChanged(const QString& newtext) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "search for %s",
 		newtext.toLatin1().data());
@@ -58,6 +83,14 @@ void	CatalogDialog::searchChanged(const QString& newtext) {
 	searchCommon(name);
 }
 
+/**
+ * \brief Slot called when the text in the search box changes
+ *
+ * This method considers the text in the search box a prefix and searches
+ * all matching nebulae in the catalog and displays them in the list widget.
+ *
+ * \param newtext	prefix to search for in the catalog
+ */
 void	CatalogDialog::textEdited(const QString& newtext) {
 	std::string	prefix(newtext.toLatin1().data());
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "search for prefix %s", prefix.c_str());
@@ -69,11 +102,22 @@ void	CatalogDialog::textEdited(const QString& newtext) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "found %d matching names", names.size());
 }
 
+/**
+ * \brief Slot called when an item in the list is double clicked
+ *
+ * When a user double clicks on an item, it is retrieved from the catalog
+ * and its data is sent to the mount controller widget for a search.
+ *
+ * \param item		list item that contains the name of the object
+ */
 void	CatalogDialog::nameActivated(QListWidgetItem *item) {
 	// get the name from thje widget and use the searchChanged slot
 	searchChanged(item->text());
 }
 
+/**
+ * \brief Handle destruction of the dialog
+ */
 void	CatalogDialog::closeEvent(QCloseEvent * /* event */) {
 	deleteLater();
 }

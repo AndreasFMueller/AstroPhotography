@@ -18,7 +18,7 @@ TasksIndicator::~TasksIndicator() {
 void	TasksIndicator::update(snowstar::QueueState state) {
 	_state = state;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "state update");
-	repaint();
+	//repaint();
 }
 
 void	TasksIndicator::paintEvent(QPaintEvent * /* event */) {

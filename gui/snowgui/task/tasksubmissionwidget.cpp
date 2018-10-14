@@ -42,6 +42,7 @@ tasksubmissionwidget::~tasksubmissionwidget() {
 void	tasksubmissionwidget::instrumentSetup(
 		astro::discover::ServiceObject serviceobject,
 		snowstar::RemoteInstrument instrument) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "setting up instrument for task sub");
 
 	// parent setup
 	InstrumentWidget::instrumentSetup(serviceobject, instrument);
