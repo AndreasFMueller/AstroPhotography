@@ -57,11 +57,24 @@ void	filterwheelcontrollerwidget::instrumentSetup(
 					snowstar::InstrumentFilterWheel,
 					index, serviceobject.name());
 		ui->filterwheelSelectionBox->addItem(QString(sn.c_str()));
+
+		// query the filterwheel before making it generally available
+		// this is supposed to prevent clients from asking the
+		// filterwheel anything before it is ready
+		debug(LOG_DEBUG, DEBUG_LOG, 0,
+			"current filterwheel position: %d",
+			filterwheel->currentPosition());
+
+		// by setting the filterwheel proxy, the filter wheel becomes
+		// generally available
 		if (!_filterwheel) {
 			_filterwheel = filterwheel;
 		}
 		index++;
 	}
+
+	// ask for the current position (because that may take a long
+	// time initially
 }
 
 /**

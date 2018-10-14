@@ -20,6 +20,8 @@ CatalogDialog::CatalogDialog(QWidget *parent)
 	: QDialog(parent), ui(new Ui::CatalogDialog) {
 	ui->setupUi(this);
 
+	setWindowTitle(QString("Search deep sky catalog"));
+
 	connect(ui->searchButton, SIGNAL(clicked()),
 		this, SLOT(searchClicked()));
 	connect(ui->objectnameField, SIGNAL(returnPressed()),

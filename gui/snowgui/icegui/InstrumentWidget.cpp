@@ -17,6 +17,9 @@ InstrumentWidget::InstrumentWidget(QWidget *parent) : QWidget(parent) {
 InstrumentWidget::~InstrumentWidget() {
 }
 
+/**
+ * \brief Common stuff for instrument setup
+ */
 void	InstrumentWidget::instrumentSetup(ServiceObject serviceobject,
 		snowstar::RemoteInstrument instrument) {
 	// remember service object and instrument
@@ -40,17 +43,26 @@ void	InstrumentWidget::instrumentSetup(ServiceObject serviceobject,
 		t.c_str(), instrumentname().c_str());
 }
 
+/**
+ * \brief common instrument setup completion 
+ */
 void	InstrumentWidget::setupComplete() {
 	std::string     t = astro::demangle(typeid(*this).name());
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "%s setup complete", t.c_str());
 }
 
+/**
+ * \brief Slot to handle the completion signal from the setup thread
+ */
 void	InstrumentWidget::setupCompletion() {
 	std::string     t = astro::demangle(typeid(*this).name());
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "%s setupCompletion()", t.c_str());
 	this->setupComplete();
 }
 
+/**
+ * \brief Start the instrument setup thread
+ */
 void	InstrumentWidget::launchInstrumentSetup(
 				astro::discover::ServiceObject serviceobject,
                                 snowstar::RemoteInstrument instrument) {

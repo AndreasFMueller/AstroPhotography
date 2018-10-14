@@ -61,6 +61,7 @@ void	taskstatuswidget::setServiceObject(
 	// start the timer so that we will get updates at regular intervals
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "starting the status timer");
 	emit started();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "setup service object complete");
 }
 
 /**

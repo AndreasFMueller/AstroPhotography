@@ -37,7 +37,7 @@ void	JulianDate::update(time_t when) {
 		+ day + _H + B - 1524.5;
 	char	buffer[30];
 	strftime(buffer, sizeof(buffer), "%F %D", &result);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "%s is JD=%.3f", buffer, _T);
+	//debug(LOG_DEBUG, DEBUG_LOG, 0, "%s is JD=%.3f", buffer, _T);
 }
 
 /**
@@ -75,16 +75,16 @@ Angle	JulianDate::GMST() const {
 	// We are using UTC instead of UT1
 	// first compute the julian date at midnight
 	double	t = trunc(_T + 0.5) - 0.5;
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "julian date at midnight: %.1f", t);
+	//debug(LOG_DEBUG, DEBUG_LOG, 0, "julian date at midnight: %.1f", t);
 	double	T = (t - 2451545.0) / 36525;
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "julian centuries: %.8f", T);
+	//debug(LOG_DEBUG, DEBUG_LOG, 0, "julian centuries: %.8f", T);
 	double	g = 24110.54841 + T * (8640184.812866 + T * (0.093104 - 0.0000062 * T));
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "GMST at midnight: %f", g);
+	//debug(LOG_DEBUG, DEBUG_LOG, 0, "GMST at midnight: %f", g);
 	double	s = (1.00273790935 + 5.9e-11 * T) * _H * 86400;
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "time of day: %.4f", s);
+	//debug(LOG_DEBUG, DEBUG_LOG, 0, "time of day: %.4f", s);
 	Angle	result(((g + s) / 86400) * (2 * M_PI));
 	result = result.reduced();
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "GMST: %s", result.hms().c_str());
+	//debug(LOG_DEBUG, DEBUG_LOG, 0, "GMST: %s", result.hms().c_str());
 	return result;
 }
 

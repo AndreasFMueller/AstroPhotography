@@ -17,6 +17,8 @@ taskqueuemanagerwidget::taskqueuemanagerwidget(QWidget *parent)
 	ui->setupUi(this);
 	ui->taskTree->setSelectionMode(QAbstractItemView::ExtendedSelection);
 
+	qRegisterMetaType<QVector<int>>("QVector<int>");
+
 	ui->cancelButton->setEnabled(false);
 	ui->downloadButton->setEnabled(false);
 
@@ -337,6 +339,7 @@ void	taskqueuemanagerwidget::addTasks() {
  */
 void	taskqueuemanagerwidget::setServiceObject(
 		astro::discover::ServiceObject serviceobject) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "set service object");
 	// get the Tasks proxy
 	Ice::CommunicatorPtr    ic = snowstar::CommunicatorSingleton::get();
 	Ice::ObjectPrx  base = ic->stringToProxy(
@@ -372,6 +375,7 @@ void	taskqueuemanagerwidget::setServiceObject(
 
 	// add the tasks
 	addTasks();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "set service object complete");
 }
 
 void	taskqueuemanagerwidget::infoClicked() {

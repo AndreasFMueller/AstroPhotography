@@ -35,6 +35,7 @@ taskmonitorwidget::~taskmonitorwidget() {
 
 void	taskmonitorwidget::setServiceObject(
 		astro::discover::ServiceObject serviceobject) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "set service object");
 	Ice::CommunicatorPtr    ic = snowstar::CommunicatorSingleton::get();
         astro::ServerName       servername(serviceobject.name());
         Ice::ObjectPrx  base
@@ -52,6 +53,7 @@ void	taskmonitorwidget::setServiceObject(
 	// connect the task monitor to this widget
 	connect(_taskmonitor, SIGNAL(taskUpdate(snowstar::TaskMonitorInfo)),
 		this, SLOT(taskUpdate(snowstar::TaskMonitorInfo)));
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "set service object complete");
 }
 
 void	taskmonitorwidget::taskUpdate(snowstar::TaskMonitorInfo info) {

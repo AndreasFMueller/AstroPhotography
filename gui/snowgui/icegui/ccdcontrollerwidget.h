@@ -130,6 +130,7 @@ signals:
 	void	imageproxyReceived(snowstar::ImagePrx image);
 	void	ccdSelected(int);
 	void	ccddataSelected(ccddata);
+	void	imageNotReceived(QString);
 
 private:
 	void	setupCcd();

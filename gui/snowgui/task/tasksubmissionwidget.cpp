@@ -147,6 +147,7 @@ void	tasksubmissionwidget::exposureChanged(
  */
 void	tasksubmissionwidget::filterwheelSelected(
 		snowstar::FilterWheelPrx filterwheel) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "got the filter wheel");
 	// return if we have not filterwheel proxy
 	if (!filterwheel) {
 		return;
@@ -159,6 +160,7 @@ void	tasksubmissionwidget::filterwheelSelected(
 	}
 
 	// update the list of filters 
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "querying current filter wheel state");
 	int	nfilters = filterwheel->nFilters();
 	for (int i = 0; i < nfilters; i++) {
 		std::string	name = filterwheel->filterName(i);

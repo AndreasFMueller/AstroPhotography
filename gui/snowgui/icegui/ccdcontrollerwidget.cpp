@@ -82,6 +82,10 @@ ccdcontrollerwidget::ccdcontrollerwidget(QWidget *parent) :
 		this, SLOT(statusUpdate(snowstar::ExposureState)));
 	_statemonitoringthread->start();
 
+	// handle failed image downloads
+	connect(this, SIGNAL(imageNotReceived(QString)),
+		this, SLOT(retrieveImageFailed(QString)));
+
 	// make sure no signals are emitted during setup
 	ui->ccdSelectionBox->blockSignals(true);
 }
@@ -821,7 +825,7 @@ void	ccdcontrollerwidget::retrieveImageWork() {
 			"image: exception %s, cause=%s",
 			astro::demangle(typeid(x).name()).c_str(), x.what());
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
-		emit retrieveImageFailed(QString(msg.c_str()));
+		emit imageNotReceived(QString(msg.c_str()));
 	}
 }
 
@@ -843,9 +847,23 @@ void	ccdcontrollerwidget::retrieveImageComplete() {
 }
 
 void	ccdcontrollerwidget::retrieveImageFailed(QString x) {
+	// delete the hide dialog
 	delete _hide;
 	_hide = NULL;
-	// XXX show a dialog that reports the reason for the failure
+
+	// show a dialog that reports the reason for the failure
+	_ccd = NULL;
+	QMessageBox	message;
+	message.setText(QString("Image download failed"));
+	std::ostringstream	out;
+	out << "Downloading the image from CCD '";
+	out << ui->ccdSelectionBox->currentText().toLatin1().data();
+	out << "' failed." << std::endl;
+	out << "The reason for the failure was: " << x.toLatin1().data();
+	out << std::endl;
+	message.setInformativeText(QString(out.str().c_str()));
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "ccdFailed: %s", out.str().c_str());
+	message.exec();
 }
 
 /**
@@ -901,6 +919,9 @@ void	ccdcontrollerwidget::statusUpdate(snowstar::ExposureState newstate) {
 		ui->cancelButton->setEnabled(false);
 		ui->streamButton->setEnabled(true);
 		ui->streamButton->setText(QString("Stop"));
+		break;
+	case snowstar::BROKEN:
+		// desable the device
 		break;
 	}
 }

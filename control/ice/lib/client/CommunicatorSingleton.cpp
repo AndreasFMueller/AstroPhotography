@@ -39,8 +39,8 @@ CommunicatorSingleton::CommunicatorSingleton(int& argc, char *argv[]) {
 	props->setProperty("Ice.NullHandleAbort", "1");
 
 	// thread pool jproperties
-	props->setProperty("Ice.ThreadPool.Server.SizeMax", "5");
-	props->setProperty("Ice.ThreadPool.Client.SizeMax", "5");
+	props->setProperty("Ice.ThreadPool.Server.SizeMax", "15");
+	props->setProperty("Ice.ThreadPool.Client.SizeMax", "15");
 
 	Ice::InitializationData	id;
 	id.properties = props;

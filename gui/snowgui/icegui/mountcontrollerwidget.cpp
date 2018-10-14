@@ -206,7 +206,7 @@ void	mountcontrollerwidget::statusUpdate() {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "no active mount");
 		return;
 	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "Mount status udpate");
+	//debug(LOG_DEBUG, DEBUG_LOG, 0, "Mount status udpate");
 	snowstar::mountstate state = _mount->state();
 	if (state != _previousstate) {
 		emit stateChanged(convert(state));
@@ -237,8 +237,8 @@ void	mountcontrollerwidget::statusUpdate() {
 
 	// check the side of the telescope on the mount
 	bool	west = _mount->telescopePositionWest();
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "telescope orientation: %s",
-		(west) ? "west" : "east");
+	//debug(LOG_DEBUG, DEBUG_LOG, 0, "telescope orientation: %s",
+	//	(west) ? "west" : "east");
 	if (west != _previouswest) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "emit orientation change to %s",
 			(west) ? "west" : "east");
@@ -253,8 +253,8 @@ void	mountcontrollerwidget::statusUpdate() {
 	if (deltaRa < -M_PI) { deltaRa += 2 * M_PI; }
 	double	deltaDec = (_telescope.dec - radec.dec);
 	double	change = hypot(deltaRa, deltaDec);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "change %.4f detected", change);
 	if (change > 0.01) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "change %.4f detected", change);
 		ui->currentRaField->setText(QString(
 			astro::stringprintf("%.4f", radec.ra).c_str()));
 		ui->currentDecField->setText(QString(
