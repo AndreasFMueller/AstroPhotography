@@ -54,6 +54,10 @@ signals:
 
 /**
  * \brief A widget to display a chart of a window into the sky 
+ *
+ * XXX desirable features: allow for the display of a rectangle of the
+ * XXX size of the CCD chip. The difficulty is how how to select the
+ * XXX from the three sizes of guider, finder and imager
  */
 class StarChartWidget : public QWidget {
 	Q_OBJECT

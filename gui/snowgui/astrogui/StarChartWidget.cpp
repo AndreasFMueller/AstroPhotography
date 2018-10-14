@@ -17,6 +17,8 @@ namespace snowgui {
 
 /**
  * \brief Construct a new Star chart
+ *
+ * \param parent	the parent QWidget
  */
 StarChartWidget::StarChartWidget(QWidget *parent) : QWidget(parent),
 	_converter(astro::RaDec(), astro::Angle((M_PI / 180) / 100.),
@@ -29,8 +31,8 @@ StarChartWidget::StarChartWidget(QWidget *parent) : QWidget(parent),
 	_retrieval_necessary = true;
 	_mouse_pressed = false;
 	_show_crosshairs = false;
-	_show_directions = true; // XXX temporary
-	_flip = true;
+	_show_directions = true;
+	_flip = true; // XXX is this correct?
 	_show_deepsky = true;
 
 	qRegisterMetaType<astro::catalog::Catalog::starsetptr>("astro::catalog::Catalog::starsetptr");
@@ -69,7 +71,10 @@ StarChartWidget::~StarChartWidget() {
 /**
  * \brief Redraw the star chart
  *
- * \param event	
+ * This event is called by the event loop when it is necessary to redraw
+ * the widget.
+ *
+ * \param event		the QPaintEvent
  */
 void	StarChartWidget::paintEvent(QPaintEvent * /* event */) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "redraw the star chart");
@@ -78,6 +83,11 @@ void	StarChartWidget::paintEvent(QPaintEvent * /* event */) {
 
 /**
  * \brief convert RA/DEC into point coordinates on the star chart
+ *
+ * The coordinates returned are flipped by 180 degrees if the _flip
+ * flag is set
+ *
+ * \param radec		RA/DEC coordinates
  */
 QPointF	StarChartWidget::convert(const astro::RaDec& radec) {
 	astro::Point	p = _converter(radec);
@@ -90,6 +100,9 @@ QPointF	StarChartWidget::convert(const astro::RaDec& radec) {
 
 /**
  * \brief Draw a star
+ *
+ * \param painter	the QPainter to draw on
+ * \param star		the star object to display
  */
 void	StarChartWidget::drawStar(QPainter& painter, const Star& star) {
 	//debug(LOG_DEBUG, DEBUG_LOG, 0, "draw star %s", star.toString().c_str());
@@ -128,7 +141,16 @@ void	StarChartWidget::drawStar(QPainter& painter, const Star& star) {
 
 /**
  * \brief draw a deep sky object
+ *
+ * This draws a deep sky object at its position in the widget
+ *
+ * \param painter		the QPainter to draw on
+ * \param deepskyobject		the deep sky object to display
  */
+// XXX suggested improvements:
+// XXX - background behind the object label to make it more readable
+// XXX - distinguish between Glx, Nebula, globular cluster (at least)
+// XXX - get different half axes and azimuth for objects that are not circular
 void	StarChartWidget::drawDeepSkyObject(QPainter& painter,
 	const DeepSkyObject& deepskyobject) {
 	// make sure we draw in red
@@ -181,6 +203,10 @@ void	StarChartWidget::drawDeepSkyObject(QPainter& painter,
 
 /**
  * \brief Draw a Line segment
+ *
+ * \param painter	the QPainter to draw on
+ * \param from		initial point on the celestial sphere
+ * \param to		final point on the celestial sphere
  */
 void	StarChartWidget::drawLine(QPainter& painter, const astro::RaDec& from,
 		const astro::RaDec& to) {
@@ -193,6 +219,8 @@ void	StarChartWidget::drawLine(QPainter& painter, const astro::RaDec& from,
 
 /**
  * \brief Draw the coordinate grid
+ *
+ * \param painter	the QPainter to draw on
  */
 void	StarChartWidget::drawGrid(QPainter& painter) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "draw the coordinate grid, center %s",
@@ -211,6 +239,8 @@ void	StarChartWidget::drawGrid(QPainter& painter) {
 				width() * _resolution, height() * _resolution);
 
 	// start drawing the grid lines spaced 1degree or 4minutes
+	astro::Angle	rastep(M_PI / 180);
+	astro::Angle	decstep(M_PI / 180);
 
 	// first find out where to strt
 	astro::Angle	initialra = window.leftra();
@@ -218,21 +248,11 @@ void	StarChartWidget::drawGrid(QPainter& painter) {
 	astro::Angle	initialdec = window.bottomdec();
 	initialdec.degrees(trunc(initialdec.degrees()));
 
-	// find the maximum
-	double	raspan = (window.rightra() - window.leftra()).degrees();
+	// initial number of lines
 	int	ralines = 360;
-	if (raspan > 0) {
-		ralines = trunc(raspan + 2);
-	}
-	double	decspan = (window.topdec() - window.bottomdec()).degrees();
-	int	declines = trunc(decspan + 2);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "RA lines = %d, DEC lines = %d",
-		ralines, declines);
 
-	// step size
-	astro::Angle	rastep(M_PI / 180);
-	astro::Angle	decstep(M_PI / 180);
-
+	// use one degree steps by default, but for declinations 
+	// close to the pole, use smaller RA steps
 	if (_direction.dec() > astro::Angle(80 * M_PI / 180)) {
 		initialra.degrees(20 * trunc(initialra.degrees() / 20));
 		ralines = ralines / 20;
@@ -246,6 +266,20 @@ void	StarChartWidget::drawGrid(QPainter& painter) {
 		ralines = ralines / 5;
 		rastep.degrees(5);
 	}
+
+	// add some security by going another degree lower just to be on
+	// the safe side
+	initialdec = initialdec - decstep;
+	double	decspan = (window.topdec() - initialdec).degrees();
+	int	declines = trunc(decspan + 2);
+
+	// find the maximum number of lines that we will have to draw in RA
+	double	raspan = (window.rightra() - initialra).degrees();
+	if (raspan > 0) { 
+		ralines = trunc(raspan + 2);
+	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "RA lines = %d, DEC lines = %d",
+		ralines, declines);
 
 	// line parameters
 	astro::Angle	ra;
@@ -284,6 +318,10 @@ void	StarChartWidget::drawGrid(QPainter& painter) {
 
 /**
  * \brief Draw the cross hairs
+ *
+ * Cross hairs are intended to help the user find the center of the chart
+ *
+ * \param painter	the QPainter to draw the crosshairs on
  */
 void	StarChartWidget::drawCrosshairs(QPainter& painter) {
 	// set the pen for drawing the cross hairs
@@ -305,6 +343,13 @@ void	StarChartWidget::drawCrosshairs(QPainter& painter) {
 
 /**
  * \brief Method to draw the directions
+ *
+ * These are labels that indicate the directions north, south, east and west
+ * on the chart. Diretions change then the image is flipped (like after a
+ * meridian flip then the telescope is on the east side of the mount), where
+ * we assume that the camera is oriented so that north is now down.
+ *
+ * \param painter	the QPainter to draw on
  */
 void	StarChartWidget::drawDirections(QPainter& painter) {
 	// prepare pen for color
@@ -398,6 +443,13 @@ void	StarChartWidget::draw() {
 
 /**
  * \brief Work needed to start a new retrieval
+ *
+ * This launches a StarCharRetriever thread on a given window. When the
+ * retriever completes, it sends the selection from the star catalog
+ * back to the star chart widget.
+ *
+ * If a retrieval thread is already running, the flag _retrieval_necessary
+ * is set to remind us of the fact that we should run a new retrieval.
  */
 void	StarChartWidget::startRetrieval() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "initiate new star retrieval");
@@ -432,7 +484,16 @@ void	StarChartWidget::startRetrieval() {
 /**
  * \brief Change the center 
  *
- * This triggers getting a new set of stars from the catalog
+ * This triggers getting a new set of stars from the catalog. The selection
+ * is such that all stars in contained in the image rectangle around 
+ * the direction specified are included. Due to the compliated shape of
+ * the selection area in RA/DEC coordinates, a somewhat larger area
+ * called a SkyWindow is selected which inclues the image rectangle.
+ * Additional stars don't really matter because they can be used to
+ * immediately display a complete star chart after slight movements, which
+ * imroves resonsiveness of the user interface.
+ *
+ * \param diretion	the direction w
  */
 void	StarChartWidget::directionChanged(astro::RaDec direction) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "change direction to %s",
@@ -470,6 +531,8 @@ void	StarChartWidget::directionChanged(astro::RaDec direction) {
 
 /**
  * \brief Common method for mouse events
+ *
+ * \param event		The mouse event to use for reading the coordinates.
  */
 void	StarChartWidget::mouseCommon(QMouseEvent *event) {
 	// get the pixel coordinates from the event relative to the center
@@ -498,12 +561,20 @@ void	StarChartWidget::mousePressEvent(QMouseEvent *event) {
 	mouseCommon(event);
 }
 
+/**
+ * \brief Handle events when the mouse is released
+ */
 void	StarChartWidget::mouseReleaseEvent(QMouseEvent * /* event */) {
 	_mouse_pressed = false;
 }
 
 /**
  * \brief Handle mouse move
+ *
+ * Them ouse is tracked on the widget and a tooltip with the current
+ * RA/DEC position is continually displayed. If the mouse is also
+ * pressed, the position is also forwarded to the mouseCommon slot, which
+ * emits the signal pointSelected.
  *
  * \param event		 mouse event contining position information
  */
