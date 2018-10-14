@@ -18,26 +18,48 @@
 
 namespace snowstar {
 
-CcdI::CcdI(astro::camera::CcdPtr ccd)
-		: DeviceI(*ccd), _ccd(ccd) {
+/**
+ * \brief Construct a Ccd server wrapper
+ */
+CcdI::CcdI(astro::camera::CcdPtr ccd) : DeviceI(*ccd), _ccd(ccd) {
 }
 
+/**
+ * \brief Destroy the Ccd server wrapper
+ */
 CcdI::~CcdI() {
 }
 
+/**
+ * \brief return the Ccd information
+ */
 CcdInfo	CcdI::getInfo(const Ice::Current& /* current */) {
 	return convert(_ccd->getInfo());
 }
 
+/**
+ * \brief return the Exposue status
+ */
 ExposureState	CcdI::exposureStatus(const Ice::Current& /* current */) {
 	if (_ccd->streaming()) {
 		return snowstar::STREAMING;
 	}
-	return convert(_ccd->exposureStatus());
+	// this method may not throw exceptions, so we need a state
+	// to indicate that the camera is broken, something we don't
+	// have in the original astro::camera:Ccd class
+	try {
+		return convert(_ccd->exposureStatus());
+	} catch (const std::exception& x) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "CCD is in unknown state: %s",
+			x.what());
+	}
+	return snowstar::BROKEN;
 }
 
 /**
  * \brief Start a new exposure
+ *
+ * \param start an exposue
  */
 void	CcdI::startExposure(const Exposure& exposure,
 		const Ice::Current& /* current */) {
@@ -58,10 +80,16 @@ void	CcdI::startExposure(const Exposure& exposure,
 	laststart = time(NULL);
 }
 
+/**
+ * \brief Return the time when the last exposure was started
+ */
 int	CcdI::lastExposureStart(const Ice::Current& /* current */) {
 	return laststart;
 }
 
+/**
+ * \brief Cancel an exposure
+ */
 void	CcdI::cancelExposure(const Ice::Current& /* current */) {
 	if (_ccd->streaming()) {
 		throw BadState("cannot cancel exposure while streaming");
@@ -79,6 +107,9 @@ void	CcdI::cancelExposure(const Ice::Current& /* current */) {
 	}
 }
 
+/**
+ * \brief Get the exposure data in use for the current/last exposure
+ */
 Exposure	CcdI::getExposure(const Ice::Current& /* current */) {
 	try {
 		return convert(_ccd->getExposure());
@@ -93,6 +124,9 @@ Exposure	CcdI::getExposure(const Ice::Current& /* current */) {
 	}
 }
 
+/**
+ * \brief Get an image proxy to retrieve an image
+ */
 ImagePrx	CcdI::getImage(const Ice::Current& current) {
 	if (_ccd->streaming()) {
 		throw BadState("cannot get image while streaming");

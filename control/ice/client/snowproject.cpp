@@ -137,7 +137,7 @@ int	command_image(const astro::project::Project& project,
 
 	// get an interface for that particular image
 	ImagePrx        image = images->getImage(info.filename);
-	ImageFile       imagefile = image->file();
+	ImageFile       imagefile = image->file(ImageEncodingFITS);
 
 	// convert the image file to an ImagePtr
 	astro::image::ImagePtr  imageptr = convertfile(imagefile);

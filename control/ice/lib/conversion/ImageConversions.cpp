@@ -18,7 +18,7 @@ namespace snowstar {
  */
 astro::image::ImagePtr	convert(ImagePrx image) {
 	// get the image data from the server
-	ImageFile	file = image->file();
+	ImageFile	file = image->file(ImageEncodingFITS);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "got image of size %d", file.size());
 
 	// construct a temporary file name

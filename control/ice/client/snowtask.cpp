@@ -416,7 +416,7 @@ int	command_image(TaskQueuePrx tasks, int id, const std::string& filename) {
 
 	// get an interface for that particular image
 	ImagePrx	image = images->getImage(info.filename);
-	ImageFile	imagefile = image->file();
+	ImageFile	imagefile = image->file(ImageEncodingFITS);
 
 	// write the image data into a file
 	int fd = open(filename.c_str(), O_CREAT | O_TRUNC | O_WRONLY, 0666);
@@ -464,7 +464,7 @@ int	command_repository(TaskQueuePrx tasks, int id,
 
 	// get an interface for that particular image
 	ImagePrx	image = images->getImage(info.filename);
-	ImageFile	imagefile = image->file();
+	ImageFile	imagefile = image->file(ImageEncodingFITS);
 
 	// convert the image file to an ImagePtr
 	astro::image::ImagePtr	imageptr = convertfile(imagefile);

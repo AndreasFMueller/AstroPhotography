@@ -16,6 +16,10 @@ module snowstar {
 	};
 	sequence<Metavalue>	Metadata;
 
+	enum ImageEncoding {
+		ImageEncodingFITS, ImageEncodingJPEG, ImageEncodingPNG
+	};
+
 	sequence<byte>	ImageFile;
 	/**
  	 * \brief Image base interface
@@ -61,7 +65,6 @@ module snowstar {
 		 * per pixel. Any unsigned integral type or floating point
 		 * type can be used as primitive pixel type, but cameras usuall
 		 * return either bytes or unsigned shorts.
-		 * 
 		 */
 		int	bytesPerPixel();
 
@@ -84,7 +87,7 @@ module snowstar {
 		 * This method returns the contents of the FITS file the server
 		 * collected.
 		 */
-		ImageFile	file();
+		ImageFile	file(ImageEncoding encoding) throws NotImplemented;
 
 		/**
 		 * \brief get the file size

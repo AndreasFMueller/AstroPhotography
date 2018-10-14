@@ -180,7 +180,19 @@ astro::image::ImagePtr	ImageI::image() {
 /**
  * \brief Retrieve the content of the FITS file
  */
-ImageFile       ImageI::file(const Ice::Current& /* current */) {
+ImageFile       ImageI::file(ImageEncoding encoding,
+			const Ice::Current& /* current */) {
+	// currently the JPEG and PNG encodings are not supported, so we throw
+	// a not found exception
+	if (encoding == ImageEncodingJPEG) {
+		NotImplemented	exception;
+		exception.cause = std::string("JPEG encoding not implemented");
+	}
+	if (encoding == ImageEncodingPNG) {
+		NotImplemented	exception;
+		exception.cause = std::string("PNG encoding not implemented");
+	}
+
 	std::vector<Ice::Byte>	result;
 	astro::image::ImageDirectory	_imagedirectory;
 	std::string	fullname = _imagedirectory.fullname(_filename);

@@ -96,7 +96,7 @@ void	imagedetailwidget::setImage(snowstar::ImagePrx image) {
  */
 void	imagedetailwidget::loadImage() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "load image %s", _image->name().c_str());
-	snowstar::ImageFile	file = _image->file();
+	snowstar::ImageFile	file = _image->file(snowstar::ImageEncodingFITS);
 	_imageptr = snowstar::convertfile(file);
 	if (_imageptr) {
 		ui->saveButton->setEnabled(true);
