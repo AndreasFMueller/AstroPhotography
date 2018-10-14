@@ -192,6 +192,11 @@ void    pointingwindow::closeEvent(QCloseEvent * /* event */) {
 
 /**
  * \brief handle new point selection
+ *
+ * \param p		p image point to convert to coordinates
+ * \param radec		RA/DEC of the center of the image
+ * \param _ccd		data about the ccd (pixel size and focal length)
+ * \param binning	binning parametrs
  */
 void	pointingwindow::pointSelected(astro::image::ImagePoint p,
 		const astro::RaDec& radec, const ccddata& _ccd,
@@ -214,16 +219,31 @@ void	pointingwindow::pointSelected(astro::image::ImagePoint p,
 		angular_resolution.degrees());
 	astro::ImageCoordinates	coord(radec, angular_resolution,
 					_ccd.azimut(), false);
+	// XXX mirror is initialized to false, this will change
 
-	// calculate the new target
+	// calculate the new target, this first means that we need the
+	// the change relative to the center
 	astro::image::ImagePoint	center
 		= snowstar::convert(_ccd.ccdinfo().size).center();
 	astro::image::ImagePoint	offset = p - center;
-	if (!_west) {
+
+	// take into account that the y-axis goes downward
+	offset.y(-offset.y());
+
+	// when on the east side, we have to invert everything, but we
+	// want to compute the correction, so this gives an additional
+	// minus sign
+	if (_west) {
 		offset = astro::image::ImagePoint(-offset.x(), -offset.y());
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "offset = %s",
 		offset.toString().c_str());
+
+	// XXX note that in this, we have not taken into account yet that in
+	// XXX the prime focus, the image may be upside down, so we have to
+	// XXX mirror it, but this can be down using the mirror funciton of
+	// XXX the ImageCoordinates class (instance coord). Currently we
+	// XXX initialize mirror to false (see above)
 
 	// send the new target to the mount controller widget
 	astro::RaDec	target = coord(offset);

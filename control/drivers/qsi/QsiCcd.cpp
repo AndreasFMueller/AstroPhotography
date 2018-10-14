@@ -251,6 +251,7 @@ ImagePtr	QsiCcd::getRawImage() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "reading image");
 	try {
 		_camera.camera().get_ImageArray(image->pixels);
+		image->flip(); // origin is in the upper left corner
 	} catch (const std::exception& x) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "cannot read: %s", x.what());
 	} catch (...) {
