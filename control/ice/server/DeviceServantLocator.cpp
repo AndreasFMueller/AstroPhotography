@@ -59,6 +59,9 @@ Ice::ObjectPtr	DeviceServantLocator::locate(const Ice::Current& current,
 	// convert the name into a devicename
 	astro::DeviceName	devicename(name);
 
+	// XXX in the following switch statement, we should make sure 
+	// XXX exceptions are properly handled
+
 	// depending on the device type, use a suitable accessor to
 	// get the device
 	switch (devicename.type()) {
