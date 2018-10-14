@@ -88,12 +88,18 @@ void	taskwindow::instrumentSetup(
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "setting up instrument");
 
 	InstrumentWidget::instrumentSetup(serviceobject, instrument);
+
+	// device controllers
 	ui->ccdcontrollerWidget->launchInstrumentSetup(serviceobject,
 		instrument);
 	ui->coolercontrollerWidget->launchInstrumentSetup(serviceobject,
 		instrument);
 	ui->filterwheelcontrollerWidget->launchInstrumentSetup(serviceobject,
 		instrument);
+	ui->mountcontrollerWidget->launchInstrumentSetup(serviceobject,
+		instrument);
+
+	// task status
 	ui->taskstatusWidget->setServiceObject(serviceobject);
 	ui->tasksubmissionWidget->launchInstrumentSetup(serviceobject,
 		instrument);
