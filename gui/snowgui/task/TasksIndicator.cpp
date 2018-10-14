@@ -9,23 +9,40 @@
 
 namespace snowgui {
 
+/**
+ * \brief Create a TaskIndicator
+ */
 TasksIndicator::TasksIndicator(QWidget *parent) : QWidget(parent) {
+	_state = snowstar::QueueIDLE;
 }
 
+/**
+ * \brief Destroy the task indicator
+ */
 TasksIndicator::~TasksIndicator() {
 }
 
+/**
+ * \brief Slot to update the current state
+ */
 void	TasksIndicator::update(snowstar::QueueState state) {
 	_state = state;
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "state update");
-	//repaint();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "state update: new state=%d", state);
+	repaint();
 }
 
+/**
+ * \brief Event handler to redraw the task indicator
+ */
 void	TasksIndicator::paintEvent(QPaintEvent * /* event */) {
 	draw();
 }
 
+/**
+ * \brief Draw the task indicator
+ */
 void	TasksIndicator::draw() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "draw the current state");
 	QPainter	painter(this);
 	painter.setRenderHint(QPainter::Antialiasing);
 
@@ -76,8 +93,6 @@ void	TasksIndicator::draw() {
 			Qt::AlignCenter, QString("STOPPED"));
 		break;
 	}
-
-	// write text over the indicator
 }
 
 } // namespace snowgui

@@ -20,20 +20,26 @@ namespace Ui {
 class taskstatuswidget : public QWidget {
 	Q_OBJECT
 
+	QTimer	_statusTimer;
+
 public:
 	explicit taskstatuswidget(QWidget *parent = 0);
 	~taskstatuswidget();
 
 	void	setServiceObject(astro::discover::ServiceObject serviceobject);
 
+	void	update(snowstar::QueueState);
+
+signals:
+	void	started();
+
 public slots:
 	void	startClicked();
-	void	update(snowstar::QueueState);
 	void	statusUpdate();
+	void	dostart();
 
 private:
 	Ui::taskstatuswidget *ui;
-	QTimer	statusTimer;
 	snowstar::TaskQueuePrx	_tasks;
 	snowstar::QueueState	_state;
 };
