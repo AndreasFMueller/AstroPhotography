@@ -111,6 +111,7 @@ SOURCES += 								\
 	CoolerActive.cpp						\
 	EventMonitor.cpp						\
 	FilterWheelBusy.cpp						\
+	filterwheelupdatethread.cpp					\
 	FocusButton.cpp							\
 	GuiderButton.cpp						\
 	ImageForwarder.cpp						\

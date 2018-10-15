@@ -35,7 +35,7 @@ coolercontrollerwidget::coolercontrollerwidget(QWidget *parent) :
 
 	// initialize the timer
 	connect(&statusTimer, SIGNAL(timeout()), this, SLOT(statusUpdate()));
-	statusTimer.setInterval(100);
+	statusTimer.setInterval(1000);
 }
 
 /**

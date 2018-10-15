@@ -34,11 +34,8 @@ class filterwheelupdatethread : public QThread {
 	Q_OBJECT
 	filterwheelcontrollerwidget	*_filterwheelcontrollerwidget;
 public:
-	filterwheelupdatethread(filterwheelcontrollerwidget *fwc)
-		: QThread(NULL), _filterwheelcontrollerwidget(fwc) {
-	}
-	~filterwheelupdatethread() {
-	}
+	filterwheelupdatethread(filterwheelcontrollerwidget *fwc);
+	~filterwheelupdatethread() { }
 public slots:
 	void	statusUpdate();
 	void	positionUpdate();
@@ -77,6 +74,7 @@ signals:
 private:
 	Ui::filterwheelcontrollerwidget *ui;
 	QTimer	statusTimer;
+	QTimer	positionTimer;
 
 	void	setupFilterwheel();
 	void	displayFilter(int index);

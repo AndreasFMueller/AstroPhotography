@@ -17,6 +17,10 @@ namespace device {
 
 //////////////////////////////////////////////////////////////////////
 // DeviceCacheAdapter implementation
+//
+// The DeviceCacheAdapter is essentially a forwarding service without
+// any logic, so we lave the locking stuff to the Device Cache and
+// the DeviceLocator, who do the real word
 //////////////////////////////////////////////////////////////////////
 
 template<>
@@ -63,9 +67,16 @@ MountPtr	DeviceCacheAdapter<Mount>::get0(const DeviceName& name) {
 // DeviceLocator implementation
 //////////////////////////////////////////////////////////////////////
 DeviceLocator::DeviceLocator() :
-	aocache(this), cameracache(this), ccdcache(this), coolercache(this),
-	filterwheelcache(this), focusercache(this), guideportcache(this),
-	mountcache(this) {
+	aocache(this, this->_mutex),
+	cameracache(this, this->_mutex),
+	ccdcache(this, this->_mutex),
+	coolercache(this, this->_mutex),
+	filterwheelcache(this, this->_mutex),
+	focusercache(this, this->_mutex),
+	guideportcache(this, this->_mutex),
+	mountcache(this, this->_mutex) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "constructing DeviceLocator %s at %p",
+		demangle(typeid(*this).name()).c_str(), this);
 }
 
 DeviceLocator::~DeviceLocator() {
@@ -90,12 +101,17 @@ std::vector<std::string>	DeviceLocator::getDevicelist(
 	return devices;
 }
 
+/**
+ * \brief Return a list of device names as DeviceName objects
+ *
+ * Note that there is only a very slight difference to the method that
+ * returns a list of string names: getDeviceList <-> getDevicelist
+ */
 std::vector<DeviceName>	DeviceLocator::getDeviceList(
 					const DeviceName::device_type device) {
 	std::vector<DeviceName>	devices;
 	std::vector<std::string>	l = getDevicelist(device);
-	std::vector<std::string>::const_iterator	i;
-	for (i = l.begin(); i != l.end(); i++) {
+	for (auto i = l.begin(); i != l.end(); i++) {
 		devices.push_back(DeviceName(*i));
 	}
 	return devices;
@@ -109,10 +125,26 @@ astro::camera::CameraPtr	DeviceLocator::getCamera0(const DeviceName&) {
 	throw std::runtime_error("cameras not implemented");
 }
 
+/**
+ * \brief Get a CCD
+ *
+ * The base class knows how to handle the case where a CCD is a direct
+ * parent of a camera. The last component of a CCD name is the name of
+ * the ccd. This method cuts of the ccd name at the end of the device
+ * name and turns it into a camera name. It then uses the locator to
+ * get a camera of this name (here it becomes really important that
+ * getCamera() properly locks the data structures). Finally it uses the
+ * getCcd() method of the camera to retrieve the camera
+ */
 astro::camera::CcdPtr	DeviceLocator::getCcd0(const DeviceName& name) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "find ccd %s", name.toString().c_str());
+
+	// first construct a comera name and retrieve the camera. As as side
+	// effect, this puts the camera into the cache
 	DeviceName	cameraname = name.parent(DeviceName::Camera);
 	CameraPtr	camera = this->getCamera(cameraname);
+
+	// now scan all the CCDs of the camera to find a matching ccd
 	int	nccds = camera->nCcds();
 	for (int i = 0; i < nccds; i++) {
 		CcdInfo	info = camera->getCcdInfo(i);
@@ -120,15 +152,29 @@ astro::camera::CcdPtr	DeviceLocator::getCcd0(const DeviceName& name) {
 			return camera->getCcd(i);
 		}
 	}
+
+	// if we get to this point, then a CCD of that name does
+	// not exist
 	throw NotFound(stringprintf("ccd %s not found",
 		name.toString().c_str()));
 }
 
+/**
+ * \brief Get a GuidePort
+ *
+ * As for getCcd0, this method implements the case where the guideport
+ * has is a direct child of the camera, but a different type.
+ */
 astro::camera::GuidePortPtr	DeviceLocator::getGuidePort0(const DeviceName& name) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "find guideport %s",
 		name.toString().c_str());
+	// construct the camera name as an immediate parent of the device
+	// name, then search for the camera.  As a side effect, this puts
+	// the camera into the cache.
 	DeviceName	cameraname = name.parent(DeviceName::Camera);
 	CameraPtr	camera = this->getCamera(cameraname);
+
+	// return the guide port if it exists
 	if (camera->hasGuidePort()) {
 		return camera->getGuidePort();
 	}
@@ -140,69 +186,126 @@ astro::camera::FilterWheelPtr	DeviceLocator::getFilterWheel0(const DeviceName&) 
 	throw std::runtime_error("filterwheel not implemented");
 }
 
+/**
+ * \brief Get a cooler
+ *
+ * The base class assumes that coolers have the some names as CCDs, just
+ * with a different type.
+ */
 astro::camera::CoolerPtr	DeviceLocator::getCooler0(const DeviceName& name) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "find cooler %s",
 		name.toString().c_str());
+	// construct the camera name as an immediate parent of the device
+	// name, then search for the ccd.  As a side effect, this puts
+	// the ccd into the cache.
 	DeviceName	ccdname = name.parent(DeviceName::Ccd);
 	CcdPtr	ccd = this->getCcd(ccdname);
+
+	// now get the cooler from the CCD
 	if (ccd->hasCooler()) {
 		return ccd->getCooler();
 	}
+
+	// if we get here, then there is no such cooler
 	throw NotFound(stringprintf("cooler %s not found",
 		name.toString().c_str()));
 }
 
+/**
+ * \brief No default method to get a focuser
+ */
 astro::camera::FocuserPtr	DeviceLocator::getFocuser0(const DeviceName&) {
 	throw std::runtime_error("focuser not implemented");
 }
 
+/**
+ * \brief No default method to get a mount
+ */
 astro::device::MountPtr	DeviceLocator::getMount0(const DeviceName&) {
 	throw std::runtime_error("mount not implemented");
 }
 
-astro::camera::AdaptiveOpticsPtr	DeviceLocator::getAdaptiveOptics(const std::string& name) {
+/**
+ * \brief Get an adaptive optics device
+ */
+astro::camera::AdaptiveOpticsPtr	DeviceLocator::getAdaptiveOptics(
+						const std::string& name) {
 	return aocache.get(name);
 }
 
-astro::camera::CameraPtr	DeviceLocator::getCamera(const std::string& name) {
+/**
+ * \brief Get a camera
+ */
+astro::camera::CameraPtr	DeviceLocator::getCamera(
+						const std::string& name) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "camera %s requested", name.c_str());
 	return cameracache.get(name);
 }
 
+/**
+ * \brief Get a ccd
+ */
 astro::camera::CcdPtr	DeviceLocator::getCcd(const std::string& name) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "ccd %s requested", name.c_str());
 	return ccdcache.get(name);
 }
 
-astro::camera::CoolerPtr	DeviceLocator::getCooler(const std::string& name) {
+/**
+ * \brief Get a cooler
+ */
+astro::camera::CoolerPtr	DeviceLocator::getCooler(
+					const std::string& name) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "cooler %s requested", name.c_str());
 	return coolercache.get(name);
 }
 
+/**
+ * \brief Get a camera
+ *
+ * \param index		index of the camera in the camera list
+ */
 astro::camera::CameraPtr	DeviceLocator::getCamera(size_t index) {
 	std::vector<std::string>	cameras = this->getDevicelist();
 	if (index >= cameras.size()) {
-		throw std::runtime_error("cannot create a camera from an index");
+		std::string	msg = stringprintf("index %d to large (max %d)",
+			index, cameras.size());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw std::range_error(msg);
 	}
 	return getCamera(cameras[index]);
 }
 
-astro::camera::FilterWheelPtr	DeviceLocator::getFilterWheel(const std::string& name) {
+/**
+ * \brief Get a filterwheel
+ */
+astro::camera::FilterWheelPtr	DeviceLocator::getFilterWheel(
+					const std::string& name) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "filterwheel %s requested",
 		name.c_str());
 	return filterwheelcache.get(name);
 }
 
-astro::camera::FocuserPtr	DeviceLocator::getFocuser(const std::string& name) {
+/**
+ * \brief Get a focuser
+ */
+astro::camera::FocuserPtr	DeviceLocator::getFocuser(
+					const std::string& name) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "focuser %s requested", name.c_str());
 	return focusercache.get(name);
 }
 
-astro::camera::GuidePortPtr	DeviceLocator::getGuidePort(const std::string& name) {
+/**
+ * \brief Get a guide port
+ */
+astro::camera::GuidePortPtr	DeviceLocator::getGuidePort(
+					const std::string& name) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "guideport %s requested", name.c_str());
 	return guideportcache.get(name);
 }
 
+/**
+ * \brief Get a mount
+ */
 astro::device::MountPtr	DeviceLocator::getMount(const std::string& name) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "mount %s requested", name.c_str());
 	return mountcache.get(name);

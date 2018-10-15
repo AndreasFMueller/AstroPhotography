@@ -258,7 +258,9 @@ void	ccdcontrollerwidget::setupComplete() {
  * \brief Destroy the CCD controller
  */
 ccdcontrollerwidget::~ccdcontrollerwidget() {
-	delete _statemonitoringthread;
+	_statemonitoringthread->stop();
+	_statemonitoringthread->wait();
+	_statemonitoringthread = NULL;
 	delete ui;
 }
 
@@ -841,9 +843,12 @@ void	ccdcontrollerwidget::retrieveImageComplete() {
 		delete _imageretriever;
 		_imageretriever = NULL;
 	}
+
 	// signal that the image was received
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "image received, emit signal");
 	emit imageReceived(_image);
+
+	// check what the state of the is no
 }
 
 void	ccdcontrollerwidget::retrieveImageFailed(QString x) {

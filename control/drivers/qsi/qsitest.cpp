@@ -31,7 +31,7 @@ extern "C" const char	*default_targetdirectory;
 extern "C" const char	*default_prefix;
 
 class qsitest : public CppUnit::TestFixture {
-	static QsiCameraLocator	*locator;
+	static QsiLocator	*locator;
 public:
 	void	setUp();
 	void	tearDown();
@@ -42,13 +42,13 @@ public:
 	CPPUNIT_TEST_SUITE_END();
 };
 
-QsiCameraLocator	*qsitest::locator = NULL;
+QsiLocator	*qsitest::locator = NULL;
 
 CPPUNIT_TEST_SUITE_REGISTRATION(qsitest);
 
 void	qsitest::setUp() {
 	if (NULL == locator) {
-		locator = new QsiCameraLocator();
+		locator = new QsiLocator();
 	}
 }
 

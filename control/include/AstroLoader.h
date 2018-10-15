@@ -76,6 +76,7 @@ class	Module {
 	bool	dlfileexists() const;
 	Module(const std::string& dirname, const std::string& modulename);
 	void	*getSymbol(const std::string& symbolname);
+	std::recursive_mutex	_mutex;
 	astro::device::DeviceLocatorPtr	devicelocator;
 public:
 	bool	operator==(const Module& other) const;
@@ -133,9 +134,11 @@ ModuleRepositoryPtr	getModuleRepository(const std::string& path);
  * modules known by name, it is preferable to use the getModule method.
  */
 class	ModuleRepository {
+	friend class ModuleRepositories;
 	std::string	_path;
+protected:
+	ModuleRepository(const std::string& path);
 public:
-	ModuleRepository(const std::string& path) : _path(path) { }
 	virtual ~ModuleRepository() { }
 	const std::string&	path() const { return _path; }
 	virtual long	numberOfModules() const = 0;

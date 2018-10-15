@@ -69,11 +69,12 @@ signals:
 class StateMonitoringThread : public QThread {
 	Q_OBJECT
 	ccdcontrollerwidget	*_ccdcontrollerwidget;
-	volatile bool	_running;
+	volatile std::atomic_bool	_running;
 public:
 	StateMonitoringThread(ccdcontrollerwidget *c);
 	virtual ~StateMonitoringThread();
 	void	run();
+	void	stop();
 signals:
 	void	stateChanged(snowstar::ExposureState);
 };

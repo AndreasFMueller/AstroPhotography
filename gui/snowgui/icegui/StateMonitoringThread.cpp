@@ -15,6 +15,7 @@ namespace snowgui {
 StateMonitoringThread::StateMonitoringThread(ccdcontrollerwidget *c)
 	: QThread(NULL), _ccdcontrollerwidget(c) {
 	_running = true;
+	connect(this, SIGNAL(finished()), this, SLOT(deleteLater()));
 }
 
 /**
@@ -32,7 +33,7 @@ StateMonitoringThread::~StateMonitoringThread() {
 void	StateMonitoringThread::run() {
 	snowstar::ExposureState	previousstate = snowstar::IDLE;
 	while (_running) {
-		if (_ccdcontrollerwidget->_ccd) {
+		if ((_ccdcontrollerwidget) && (_ccdcontrollerwidget->_ccd)) {
 			snowstar::ExposureState	newstate
 				= _ccdcontrollerwidget->_ccd->exposureStatus();
 			if (newstate != previousstate) {
@@ -40,8 +41,16 @@ void	StateMonitoringThread::run() {
 			}
 			previousstate = newstate;
 		}
-		usleep(100000);
+		usleep(100);
 	}
+}
+
+/**
+ * \brief Stop the thread
+ */
+void	StateMonitoringThread::stop() {
+	_running = false;
+	_ccdcontrollerwidget = NULL;
 }
 
 } // namespace snowgui

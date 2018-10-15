@@ -41,13 +41,23 @@ public:
 	}
 };
 
+static std::once_flag	descriptor_once;
+static astro::module::ModuleDescriptor	*descriptor;
+void	setup_descriptor() {
+	descriptor = new QsiDescriptor();
+}
+
 } // namespace qsi
 } // namespace module
 } // namespace astro
 
 extern "C"
 astro::module::ModuleDescriptor	*getDescriptor() {
-	return new astro::module::qsi::QsiDescriptor();
+	std::call_once(astro::module::qsi::descriptor_once,
+		astro::module::qsi::setup_descriptor);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "QsiDescriptor: %p", 
+		astro::module::qsi::descriptor);
+	return astro::module::qsi::descriptor;
 }
 
 namespace astro {
@@ -58,23 +68,24 @@ namespace qsi {
 // Implementation of the Camera Locator for QSI
 //////////////////////////////////////////////////////////////////////
 
-QsiCameraLocator::QsiCameraLocator() {
+QsiLocator::QsiLocator() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "constructing QsiLocator: %p", this);
 }
 
-QsiCameraLocator::~QsiCameraLocator() {
+QsiLocator::~QsiLocator() {
 }
 
 /**
  * \brief Get module name.
  */
-std::string	QsiCameraLocator::getName() const {
+std::string	QsiLocator::getName() const {
 	return std::string("qsi");
 }
 
 /**
  * \brief Get module version.
  */
-std::string	QsiCameraLocator::getVersion() const {
+std::string	QsiLocator::getVersion() const {
 	QSICamera cam;
 	cam.put_UseStructuredExceptions(true);
 	try {
@@ -95,7 +106,7 @@ public:
 /**
  * \brief Create name of a given type for the camera
  */
-std::string	QsiCameraLocator::name(const std::string& serial,
+std::string	QsiLocator::name(const std::string& serial,
 			DeviceName::device_type device) {
 	switch (device) {
 	case DeviceName::Camera:
@@ -124,7 +135,8 @@ std::string	QsiCameraLocator::name(const std::string& serial,
  *
  * \return a vector of strings that uniquely descript devices
  */
-std::vector<std::string>	QsiCameraLocator::getDevicelist(DeviceName::device_type device) {
+std::vector<std::string>	QsiLocator::getDevicelist(
+					DeviceName::device_type device) {
 	// list of names to return
 	std::vector<std::string>	names;
 
@@ -166,27 +178,14 @@ std::vector<std::string>	QsiCameraLocator::getDevicelist(DeviceName::device_type
 }
 
 /**
- * \brief static mutex to protect the locator
- *
- * This ensures that only one device can be under construction at any
- * one time. This solves the following problem: When a filterwheel object
- * is constructed, then the camera has to be constructed first, and similarly
- * for other devices. So if Ccd, Cooler and Filterwheel construction are
- * initiated at the same time, the all trigger construction of the
- * same camera. This will make the camera unusable.
- */
-static std::recursive_mutex	_mutex;
-
-/**
  * \brief Construct a camera from a camera description
  *
  * \param name		Name of the camera
  * \return Camera with that name
  */
-CameraPtr	QsiCameraLocator::getCamera0(const DeviceName& name) {
+CameraPtr	QsiLocator::getCamera0(const DeviceName& name) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "locating camera %s",
 		name.toString().c_str());
-	std::lock_guard<std::recursive_mutex>	lock(_mutex);
 	return CameraPtr(new QsiCamera(name));
 }
 
@@ -196,10 +195,9 @@ CameraPtr	QsiCameraLocator::getCamera0(const DeviceName& name) {
  * \param name	Name of the CCD
  * \return	CcdPtr object of the CCD
  */
-CcdPtr	QsiCameraLocator::getCcd0(const DeviceName& ccdname) {
+CcdPtr	QsiLocator::getCcd0(const DeviceName& ccdname) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "locating ccd %s",
 		ccdname.toString().c_str());
-	std::lock_guard<std::recursive_mutex>	lock(_mutex);
 	if (ccdname.size() < 2) {
 		std::string	msg = stringprintf("bad name: %s",
 			ccdname.toString().c_str());
@@ -221,10 +219,9 @@ CcdPtr	QsiCameraLocator::getCcd0(const DeviceName& ccdname) {
  * \param name	Name of the cooler
  * \return	CoolerPtr object of the Cooler
  */
-CoolerPtr	QsiCameraLocator::getCooler0(const DeviceName& coolername) {
+CoolerPtr	QsiLocator::getCooler0(const DeviceName& coolername) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "locating cooler %s",
 		coolername.toString().c_str());
-	std::lock_guard<std::recursive_mutex>	lock(_mutex);
 	if (coolername.size() < 2) {
 		std::string	msg = stringprintf("bad name: %s",
 			coolername.toString().c_str());
@@ -245,10 +242,10 @@ CoolerPtr	QsiCameraLocator::getCooler0(const DeviceName& coolername) {
  * \param name	Name of the filterhweel
  * \return	FilterWheelPtr wrapper of the filterwheel of the camera
  */
-FilterWheelPtr	QsiCameraLocator::getFilterWheel0(const DeviceName& filterwheelname) {
+FilterWheelPtr	QsiLocator::getFilterWheel0(
+			const DeviceName& filterwheelname) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "locating filterwheel %s",
 			filterwheelname.toString().c_str());
-	std::lock_guard<std::recursive_mutex>	lock(_mutex);
 	if (filterwheelname.size() < 2) {
 		std::string	msg = stringprintf("bad name: %s",
 			filterwheelname.toString().c_str());
@@ -269,10 +266,9 @@ FilterWheelPtr	QsiCameraLocator::getFilterWheel0(const DeviceName& filterwheelna
  * \param name	Name of the guider port
  * \return	GuidePortPtr object pointing to the guider port of the camera
  */
-GuidePortPtr	QsiCameraLocator::getGuidePort0(const DeviceName& guideportname) {
+GuidePortPtr	QsiLocator::getGuidePort0(const DeviceName& guideportname) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "locating guideport %s",
 		guideportname.toString().c_str());
-	std::lock_guard<std::recursive_mutex>	lock(_mutex);
 	if (guideportname.size() < 2) {
 		std::string	msg = stringprintf("bad name: %s",
 			guideportname.toString().c_str());
@@ -294,5 +290,5 @@ GuidePortPtr	QsiCameraLocator::getGuidePort0(const DeviceName& guideportname) {
 
 extern "C"
 astro::device::DeviceLocator    *getDeviceLocator() {
-	return new astro::camera::qsi::QsiCameraLocator();
+	return new astro::camera::qsi::QsiLocator();
 }

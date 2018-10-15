@@ -16,8 +16,9 @@ namespace qsi {
  * \brief Construct a QSI camera object
  */
 QsiCamera::QsiCamera(const std::string& _name) : Camera(_name) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "constructing camera %s", _name.c_str());
-	std::unique_lock<std::recursive_mutex>	lock(mutex);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "constructing camera %s at %p",
+		_name.c_str(), this);
+	std::lock_guard<std::recursive_mutex>	lock(mutex);
 	try {
 		DeviceName	devname(name());
 		camera().put_UseStructuredExceptions(true);
@@ -102,7 +103,7 @@ QsiCamera::QsiCamera(const std::string& _name) : Camera(_name) {
 	// add the ccdinfo to the 
 	ccdinfo.push_back(info);
 
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "camera construction complete");
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "camera %p construction complete", this);
 }
 
 /**
@@ -110,7 +111,7 @@ QsiCamera::QsiCamera(const std::string& _name) : Camera(_name) {
  */
 QsiCamera::~QsiCamera() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "disconnect the camera");
-	std::unique_lock<std::recursive_mutex>	lock(mutex);
+	std::lock_guard<std::recursive_mutex>	lock(mutex);
 	camera().put_Connected(false);
 }
 
@@ -125,7 +126,7 @@ void	QsiCamera::reset() {
  * \brief Get the CCD from the camera
  */
 CcdPtr	QsiCamera::getCcd0(size_t id) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "get CCD %d", id);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "get CCD %d from %p", id, this);
 	if (id > 0) {
 		throw std::invalid_argument("only CCD 0 defined");
 	}
@@ -143,7 +144,7 @@ bool	QsiCamera::hasFilterWheel() const {
  * \brief Get the Filter wheel
  */
 FilterWheelPtr	QsiCamera::getFilterWheel0() {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "get the filterwheel");
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "get the filterwheel from %p", this);
 	if (!_hasfilterwheel) {
 		throw std::invalid_argument("camera has no filter wheel");
 	}

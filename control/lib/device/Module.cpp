@@ -235,6 +235,9 @@ ModuleDescriptorPtr	Module::getDescriptor() {
  * a DeviceLocator object for this to work.
  */
 DeviceLocatorPtr	Module::getDeviceLocator() {
+	// lock to guarantee integrity of the devicelocator member
+	std::lock_guard<std::recursive_mutex>	lock(_mutex);
+
 	// if we have retrieved the device locator before, we can just
 	// return it
 	if (devicelocator) {

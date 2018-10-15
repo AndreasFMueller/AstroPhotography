@@ -21,8 +21,10 @@ namespace qsi {
  */
 QsiCcd::QsiCcd(const CcdInfo& info, QsiCamera& camera)
 	: Ccd(info), _camera(camera) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "construct CCD %s",
+		getInfo().name().toString().c_str());
 	// initialize the state variables
-	std::unique_lock<std::recursive_mutex>	lock(_camera.mutex);
+	std::lock_guard<std::recursive_mutex>	lock(_camera.mutex);
 	_last_state = CcdState::idle;
 	_last_qsistate = QSICamera::CameraIdle;
 }
@@ -45,7 +47,9 @@ QsiCcd::~QsiCcd() {
  * \param exposure	exposure parameters
  */
 void	QsiCcd::startExposure(const Exposure& exposure) {
-	std::unique_lock<std::recursive_mutex>	lock(_camera.mutex);
+	std::lock_guard<std::recursive_mutex>	lock(_camera.mutex);
+
+	// set the state to exposure
 	Ccd::startExposure(exposure);
 
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "start QSI exposure");
@@ -121,6 +125,7 @@ std::string	state2string(QSICamera::CameraState qsistate) {
  * \return the current QSI state
  */
 CcdState::State	QsiCcd::exposureStatus() {
+	//debug(LOG_DEBUG, DEBUG_LOG, 0, "checking exopsure status");
 	std::unique_lock<std::recursive_mutex>	lock(_camera.mutex,
 		std::try_to_lock);
 	if (!lock) {
@@ -129,14 +134,17 @@ CcdState::State	QsiCcd::exposureStatus() {
 		return _last_state;
 	}
 	try {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "checking camera state");
+		//debug(LOG_DEBUG, DEBUG_LOG, 0, "checking camera state");
+		// reading the camera state
 		QSICamera::CameraState	qsistate;
 		_camera.camera().get_CameraState(&qsistate);
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "qsistate = %s",
-			state2string(qsistate).c_str());
+		//debug(LOG_DEBUG, DEBUG_LOG, 0, "qsistate = %s",
+		//	state2string(qsistate).c_str());
 		if (_last_qsistate == qsistate) {
 			return _last_state;
 		}
+
+		// compute the new state depending on the QSI state
 		switch (state()) {
 		case CcdState::idle:
 			switch (qsistate) {
@@ -203,9 +211,10 @@ CcdState::State	QsiCcd::exposureStatus() {
 			}
 			break;
 		}
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "new state %s",
-			CcdState::state2string(state()).c_str());
+		//debug(LOG_DEBUG, DEBUG_LOG, 0, "new state %s",
+		//	CcdState::state2string(state()).c_str());
 		_last_state = state();
+		_last_qsistate = qsistate;
 	} catch (const std::exception& x) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "could not get the state: %s",
 			x.what());
@@ -217,7 +226,7 @@ CcdState::State	QsiCcd::exposureStatus() {
  * \brief Cancel the current exposure
  */
 void	QsiCcd::cancelExposure() {
-	std::unique_lock<std::recursive_mutex>	lock(_camera.mutex);
+	std::lock_guard<std::recursive_mutex>	lock(_camera.mutex);
 	_camera.camera().AbortExposure();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "turn LED on");
 	_camera.camera().put_LEDEnabled(true);
@@ -243,7 +252,7 @@ void	QsiCcd::setShutterState(const Shutter::state& /* state */) {
  * \brief Retrieve a raw image from the camera
  */
 ImagePtr	QsiCcd::getRawImage() {
-	std::unique_lock<std::recursive_mutex>	lock(_camera.mutex);
+	std::lock_guard<std::recursive_mutex>	lock(_camera.mutex);
 	int	x, y, z;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "turn LED on");
 	_camera.camera().put_LEDEnabled(true);
@@ -265,6 +274,7 @@ ImagePtr	QsiCcd::getRawImage() {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "unknown read failre");
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "read complete");
+	state(CcdState::idle);
 	return result;
 }
 

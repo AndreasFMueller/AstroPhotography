@@ -11,26 +11,6 @@
 namespace snowgui {
 
 /**
- * \brief Filterwheel update thread
- *
- * This is just a slot to call the status update in the filterwheel instance.
- * This is not a method of the filterwheelcontrollerwidget, but since this
- * is the only method of the update thread class, it does not make sense
- * to put it into a separate file.
- */
-void    filterwheelupdatethread::statusUpdate() {
-	if (_filterwheelcontrollerwidget) {
-		_filterwheelcontrollerwidget->statusUpdate();
-	}
-}
-
-void    filterwheelupdatethread::positionUpdate() {
-	if (_filterwheelcontrollerwidget) {
-		_filterwheelcontrollerwidget->positionUpdate();
-	}
-}
-
-/**
  * \brief Create a new filterwheelcontrollerwidget
  */
 filterwheelcontrollerwidget::filterwheelcontrollerwidget(QWidget *parent)
@@ -38,6 +18,10 @@ filterwheelcontrollerwidget::filterwheelcontrollerwidget(QWidget *parent)
 	ui->setupUi(this);
 	ui->filterBox->setEnabled(false);
 	ui->filterIndicator->setEnabled(false);
+
+	// register the state
+	qRegisterMetaType<snowstar::FilterwheelState>(
+		"snowstar::FilterwheelState");
 
 	// connections of GUI components
 	connect(ui->filterwheelSelectionBox, SIGNAL(currentIndexChanged(int)),
@@ -58,11 +42,15 @@ filterwheelcontrollerwidget::filterwheelcontrollerwidget(QWidget *parent)
 
 	// initialize the timer
 	_updatethread = new filterwheelupdatethread(this);
+	_updatethread->moveToThread(_updatethread);
 	connect(&statusTimer, SIGNAL(timeout()),
 		_updatethread, SLOT(statusUpdate()));
-	connect(&statusTimer, SIGNAL(timeout()),
+	connect(&positionTimer, SIGNAL(timeout()),
 		_updatethread, SLOT(positionUpdate()));
+	_updatethread->start();
+
 	statusTimer.setInterval(100);
+	positionTimer.setInterval(1000);
 }
 
 /**
@@ -70,6 +58,7 @@ filterwheelcontrollerwidget::filterwheelcontrollerwidget(QWidget *parent)
  */
 filterwheelcontrollerwidget::~filterwheelcontrollerwidget() {
 	statusTimer.stop();
+	positionTimer.stop();
 	delete _updatethread;
 	delete ui;
 }
@@ -133,6 +122,7 @@ void	filterwheelcontrollerwidget::setupFilterwheel() {
 
 	// make sure the status timer does not fire
 	statusTimer.stop();
+	positionTimer.stop();
 
 	// remove previous content of the filterwheel
 	while (ui->filterBox->count() > 0) {
@@ -166,6 +156,7 @@ void	filterwheelcontrollerwidget::setupFilterwheel() {
 
 		// start the timer
 		statusTimer.start();
+		positionTimer.start();
 	}
 	ui->filterBox->blockSignals(false);
 
@@ -200,6 +191,7 @@ void    filterwheelcontrollerwidget::setFilter(int index) {
  */
 void    filterwheelcontrollerwidget::filterwheelChanged(int index) {
 	statusTimer.stop();
+	positionTimer.stop();
 	_filterwheel = _instrument.filterwheel(index);
 	setupFilterwheel();
 }
@@ -213,6 +205,7 @@ void    filterwheelcontrollerwidget::statusUpdate() {
 	if (!_filterwheel) {
 		return;
 	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "statusUpdate()");
 
 	// get the new state
 	snowstar::FilterwheelState	newstate;
@@ -243,10 +236,16 @@ void    filterwheelcontrollerwidget::statusUpdate() {
 	emit filterwheelStateChanged(newstate);
 }
 
+/**
+ * \brief Slot for timer position update
+ *
+ * This slot is connected to the timeout() signal of the position timer
+ */
 void	filterwheelcontrollerwidget::positionUpdate() {
 	if (!_filterwheel) {
 		return;
 	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "positionUpdate()");
 
 	try {
 		int	pos = _filterwheel->currentPosition();

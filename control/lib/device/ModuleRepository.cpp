@@ -29,6 +29,8 @@ class ModuleRepositories {
 	std::recursive_mutex	mutex;
 	typedef	std::map<std::string, ModuleRepositoryPtr>	backendmap;
 	backendmap	_repositories;
+	ModuleRepositories(const ModuleRepositories&) = delete;
+	ModuleRepositories&	operator=(const ModuleRepositories&) = delete;
 public:
 	ModuleRepositories();
 	ModuleRepositoryPtr	get(const std::string& path);
@@ -52,7 +54,15 @@ ModuleRepositoryPtr	getModuleRepository(const std::string& path) {
 }
 
 //////////////////////////////////////////////////////////////////////
-// Repositories collection
+// ModuleRepository
+//////////////////////////////////////////////////////////////////////
+ModuleRepository::ModuleRepository(const std::string& path) : _path(path) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "constructing module repository at %s",
+		path.c_str());
+}
+
+//////////////////////////////////////////////////////////////////////
+// ModuleRepositoryBackend
 //////////////////////////////////////////////////////////////////////
 /**
  * \brief Repository backend class
@@ -65,6 +75,9 @@ private:
 	typedef	std::map<std::string, ModulePtr>	modulemap;
 	modulemap	modulecache;
 	void	checkpath(const std::string& path) const;
+	ModuleRepositoryBackend(const ModuleRepositoryBackend&) = delete;
+	ModuleRepositoryBackend&	operator=(
+		const ModuleRepositoryBackend&) = delete;
 public:
 	ModuleRepositoryBackend(const std::string& path);
 	virtual ~ModuleRepositoryBackend() { }
@@ -77,9 +90,11 @@ public:
 
 /**
  * \brief Retrieve a repository backend associated with a path
+ *
+ * \param path		path where the modules are located
  */
 ModuleRepositoryPtr	ModuleRepositories::get(const std::string& path) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieve backend for '%s'",
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieve backend for directory '%s'",
 		path.c_str());
 	std::string	key = path;
 	if (key.size() == 0) {
@@ -87,7 +102,11 @@ ModuleRepositoryPtr	ModuleRepositories::get(const std::string& path) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "key for empty path is %s",
 			key.c_str());
 	}
+
+	// make sure we are the only thread working on the backend
 	std::unique_lock<std::recursive_mutex>	lock(mutex);
+
+	// find the backend
 	backendmap::iterator	r = _repositories.find(key);
 	if (r != _repositories.end()) {
 		return r->second;
@@ -224,15 +243,19 @@ bool	ModuleRepositoryBackend::contains(const std::string& modulename) {
 
 	// first find out whether we have already checked this module
 	if (modulecache.find(modulename) != modulecache.end()) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "module '%s' loaded",
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "module '%s' already loaded",
 			modulename.c_str());
 		return true;
 	}
 
 	// if now, try to find the module and insert it into the module cache
 	try {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "try to load '%s'",
+			modulename.c_str());
 		ModulePtr	module(new Module(path(), modulename));
 		modulecache.insert(std::make_pair(modulename, module));
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "module '%s' created at %p",
+			modulename.c_str(), &*module);
 		return true;
 	} catch (const std::exception& x) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "cannot load '%s': %s",
@@ -254,8 +277,11 @@ ModulePtr	ModuleRepositoryBackend::getModule(const std::string& modulename) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "get module '%s'", modulename.c_str());
 	std::unique_lock<std::recursive_mutex>	lock(_mutex);
 	if (contains(modulename)) {
+		// if we get to this point, the module already has been loaded
+		// so we can just return the module
 		return modulecache.find(modulename)->second;
 	}
+	// at this point, the module does not exists and we throw an exception
 	std::string	msg = stringprintf("module %s not found",
 				modulename.c_str());
 	debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
