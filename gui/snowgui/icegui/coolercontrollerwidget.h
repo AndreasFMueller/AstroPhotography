@@ -15,11 +15,34 @@ namespace Ui {
 	class coolercontrollerwidget;
 }
 
+class coolercontrollerwidget;
+
+/**
+ * \brief udpate thread
+ *
+ * see filterwheelcontrollerwidget for the rationale behind this class
+ */
+class coolerupdatethread : public QThread {
+	Q_OBJECT
+	coolercontrollerwidget	*_coolercontrollerwidget;
+	std::recursive_mutex	_mutex;
+public:
+	coolerupdatethread(coolercontrollerwidget *cc);
+	~coolerupdatethread() { }
+	void	stop();
+public slots:
+	void	statusUpdate();
+};
+
+/**
+ * \brief A reusable component to control a cooler
+ */
 class coolercontrollerwidget : public InstrumentWidget {
 	Q_OBJECT
 
 	snowstar::CoolerPrx	_cooler;
 	std::vector<std::string>	_cooler_names;
+	coolerupdatethread	*_updatethread;
 public:
 	explicit coolercontrollerwidget(QWidget *parent = 0);
 	~coolercontrollerwidget();
@@ -28,12 +51,15 @@ public:
 				snowstar::RemoteInstrument instrument);
 	virtual void	setupComplete();
 
+	void	statusUpdate();
+
 signals:
 	void	setTemperatureReached();
 	void	coolerSelected(int);
+	void	newCoolerState(float, float, bool);
+	void	newActualTemperature(float);
 
 private:
-	void	displayActualTemperature(float actual);
 	void	displaySetTemperature(float settemperature);
 
 	void	setupCooler();
@@ -46,7 +72,7 @@ private:
 public slots:
 	void	setActual();
 	void	setSetTemperature(double t);
-	void	statusUpdate();
+	void	displayActualTemperature(float actual);
 	void	guiChanged();
 	void	coolerChanged(int index);
 	void	editingFinished();

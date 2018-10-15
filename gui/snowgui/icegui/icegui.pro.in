@@ -109,6 +109,7 @@ SOURCES += 								\
 	calibrationimagewidget.cpp					\
 	ccddata.cpp							\
 	CoolerActive.cpp						\
+	coolerupdatethread.cpp						\
 	EventMonitor.cpp						\
 	FilterWheelBusy.cpp						\
 	filterwheelupdatethread.cpp					\

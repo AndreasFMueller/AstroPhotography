@@ -33,9 +33,11 @@ class filterwheelcontrollerwidget;
 class filterwheelupdatethread : public QThread {
 	Q_OBJECT
 	filterwheelcontrollerwidget	*_filterwheelcontrollerwidget;
+	std::recursive_mutex	_mutex;
 public:
 	filterwheelupdatethread(filterwheelcontrollerwidget *fwc);
 	~filterwheelupdatethread() { }
+	void	stop();
 public slots:
 	void	statusUpdate();
 	void	positionUpdate();

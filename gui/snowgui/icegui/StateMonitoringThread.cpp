@@ -23,8 +23,6 @@ StateMonitoringThread::StateMonitoringThread(ccdcontrollerwidget *c)
  */
 StateMonitoringThread::~StateMonitoringThread() {
 	_running = false;
-	// can we speed up this process by sending this thread a signal?
-	wait();
 }
 
 /**
@@ -33,6 +31,8 @@ StateMonitoringThread::~StateMonitoringThread() {
 void	StateMonitoringThread::run() {
 	snowstar::ExposureState	previousstate = snowstar::IDLE;
 	while (_running) {
+		usleep(100);
+		std::lock_guard<std::recursive_mutex>	lock(_mutex);
 		if ((_ccdcontrollerwidget) && (_ccdcontrollerwidget->_ccd)) {
 			snowstar::ExposureState	newstate
 				= _ccdcontrollerwidget->_ccd->exposureStatus();
@@ -41,7 +41,6 @@ void	StateMonitoringThread::run() {
 			}
 			previousstate = newstate;
 		}
-		usleep(100);
 	}
 }
 
@@ -49,6 +48,7 @@ void	StateMonitoringThread::run() {
  * \brief Stop the thread
  */
 void	StateMonitoringThread::stop() {
+	std::lock_guard<std::recursive_mutex>	lock(_mutex);
 	_running = false;
 	_ccdcontrollerwidget = NULL;
 }

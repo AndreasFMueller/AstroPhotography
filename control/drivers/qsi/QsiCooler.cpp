@@ -63,7 +63,7 @@ float	QsiCooler::getSetTemperature() {
  * camera happens to be locked
  */
 float	QsiCooler::getActualTemperature() {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "getting actual temperature");
+	//debug(LOG_DEBUG, DEBUG_LOG, 0, "getting actual temperature");
 	std::unique_lock<std::recursive_mutex>	lock(_camera.mutex,
 		std::try_to_lock);
 	if (!lock) {

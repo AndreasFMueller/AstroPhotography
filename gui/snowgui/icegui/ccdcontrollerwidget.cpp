@@ -80,6 +80,8 @@ ccdcontrollerwidget::ccdcontrollerwidget(QWidget *parent) :
 	connect(_statemonitoringthread,
 		SIGNAL(stateChanged(snowstar::ExposureState)),
 		this, SLOT(statusUpdate(snowstar::ExposureState)));
+	connect(_statemonitoringthread, SIGNAL(finished()),
+		_statemonitoringthread, SLOT(deleteLater()));
 	_statemonitoringthread->start();
 
 	// handle failed image downloads
@@ -259,8 +261,6 @@ void	ccdcontrollerwidget::setupComplete() {
  */
 ccdcontrollerwidget::~ccdcontrollerwidget() {
 	_statemonitoringthread->stop();
-	_statemonitoringthread->wait();
-	_statemonitoringthread = NULL;
 	delete ui;
 }
 

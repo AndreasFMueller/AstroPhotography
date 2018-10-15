@@ -32,12 +32,12 @@ public:
 	void	setValue(double v);
 	void	paintEvent(QPaintEvent *event);
 	void	draw();
-	void    update(float actualtemp, float settemp, bool active);
 
 signals:
 	void	toggled(bool);
 
 public slots:
+	void    update(float actualtemp, float settemp, bool active);
 	void	update();
 	void	buttonClicked();
 };

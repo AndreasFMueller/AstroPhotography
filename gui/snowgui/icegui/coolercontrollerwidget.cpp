@@ -33,8 +33,22 @@ coolercontrollerwidget::coolercontrollerwidget(QWidget *parent) :
 	connect(ui->activeWidget, SIGNAL(toggled(bool)),
 		this, SLOT(activeToggled(bool)));
 
+	// updating the active display from information read from the proxy
+	connect(this, SIGNAL(newCoolerState(float,float,bool)),
+		ui->activeWidget, SIGNAL(update(float,float,bool)));
+	connect(this, SIGNAL(newActualTemperature(float)),
+		this, SLOT(displayActualTemperature(float)));
+
+	_updatethread = new coolerupdatethread(this);
+	_updatethread->moveToThread(_updatethread);
+	connect(_updatethread, SIGNAL(finished()),
+		_updatethread, SLOT(deleteLater()));
+
 	// initialize the timer
-	connect(&statusTimer, SIGNAL(timeout()), this, SLOT(statusUpdate()));
+	connect(&statusTimer, SIGNAL(timeout()),
+		_updatethread, SLOT(statusUpdate()));
+	_updatethread->start();
+
 	statusTimer.setInterval(1000);
 }
 
@@ -87,6 +101,8 @@ void	coolercontrollerwidget::setupComplete() {
  */
 coolercontrollerwidget::~coolercontrollerwidget() {
 	statusTimer.stop();
+	_updatethread->stop();
+	_updatethread->quit();
 	delete ui;
 }
 
@@ -131,6 +147,9 @@ void	coolercontrollerwidget::setupCooler() {
 	ui->setTemperatureSpinBox->blockSignals(false);
 }
 
+/**
+ * \brief Display an error message if we cannot talk to the cooler
+ */
 void	coolercontrollerwidget::coolerFailed(const std::exception& x) {
 	_cooler = NULL;
 	ui->actualTemperatureField->setEnabled(false);
@@ -200,13 +219,26 @@ void	coolercontrollerwidget::statusUpdate() {
 	if (!_cooler) {
 		return;
 	}
-	float	actual = _cooler->getActualTemperature() - 273.15;
-	float	settemp = _cooler->getSetTemperature() - 273.15;
-	ui->activeWidget->update(actual, settemp, _cooler->isOn());
-	bool	actualreached = (actual == settemp);
-	displayActualTemperature(actual);
-	if (actualreached) {
-		emit setTemperatureReached();
+	try {
+		// get the information about the cooler
+		float	actual = _cooler->getActualTemperature() - 273.15;
+		float	settemp = _cooler->getSetTemperature() - 273.15;
+		bool	is_on = _cooler->isOn();
+
+		// emit the information to the active
+		emit newCoolerState(actual, settemp, is_on);
+
+		// emit the information about the new actual temperature
+		emit newActualTemperature(actual);
+
+		// have we already reached the temperature?
+		bool	actualreached = (actual == settemp);
+		if (actualreached) {
+			emit setTemperatureReached();
+		}
+	} catch (const std::exception& x) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "cannot talk to cooler: %s",
+			x.what());
 	}
 }
 

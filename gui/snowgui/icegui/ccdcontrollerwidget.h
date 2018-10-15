@@ -70,6 +70,7 @@ class StateMonitoringThread : public QThread {
 	Q_OBJECT
 	ccdcontrollerwidget	*_ccdcontrollerwidget;
 	volatile std::atomic_bool	_running;
+	std::recursive_mutex	_mutex;
 public:
 	StateMonitoringThread(ccdcontrollerwidget *c);
 	virtual ~StateMonitoringThread();
