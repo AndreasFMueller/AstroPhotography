@@ -11,6 +11,26 @@
 namespace snowgui {
 
 /**
+ * \brief Filterwheel update thread
+ *
+ * This is just a slot to call the status update in the filterwheel instance.
+ * This is not a method of the filterwheelcontrollerwidget, but since this
+ * is the only method of the update thread class, it does not make sense
+ * to put it into a separate file.
+ */
+void    filterwheelupdatethread::statusUpdate() {
+	if (_filterwheelcontrollerwidget) {
+		_filterwheelcontrollerwidget->statusUpdate();
+	}
+}
+
+void    filterwheelupdatethread::positionUpdate() {
+	if (_filterwheelcontrollerwidget) {
+		_filterwheelcontrollerwidget->positionUpdate();
+	}
+}
+
+/**
  * \brief Create a new filterwheelcontrollerwidget
  */
 filterwheelcontrollerwidget::filterwheelcontrollerwidget(QWidget *parent)
@@ -25,8 +45,23 @@ filterwheelcontrollerwidget::filterwheelcontrollerwidget(QWidget *parent)
 	connect(ui->filterBox, SIGNAL(currentIndexChanged(int)),
 		this, SLOT(setFilter(int)));
 
+	// connect start/stop signals
+	connect(this, SIGNAL(filterwheelStart()),
+		ui->filterIndicator, SLOT(start()));
+	connect(this, SIGNAL(filterwheelStop()),
+		ui->filterIndicator, SLOT(stop()));
+	connect(this,
+		SIGNAL(filterwheelStateChanged(snowstar::FilterwheelState)),
+		this, SLOT(filterwheelNewState(snowstar::FilterwheelState)));
+	connect(this, SIGNAL(filterwheelPositionChanged(int)),
+		this, SLOT(filterwheelNewPosition(int)));
+
 	// initialize the timer
-	connect(&statusTimer, SIGNAL(timeout()), this, SLOT(statusUpdate()));
+	_updatethread = new filterwheelupdatethread(this);
+	connect(&statusTimer, SIGNAL(timeout()),
+		_updatethread, SLOT(statusUpdate()));
+	connect(&statusTimer, SIGNAL(timeout()),
+		_updatethread, SLOT(positionUpdate()));
 	statusTimer.setInterval(100);
 }
 
@@ -35,6 +70,7 @@ filterwheelcontrollerwidget::filterwheelcontrollerwidget(QWidget *parent)
  */
 filterwheelcontrollerwidget::~filterwheelcontrollerwidget() {
 	statusTimer.stop();
+	delete _updatethread;
 	delete ui;
 }
 
@@ -177,32 +213,75 @@ void    filterwheelcontrollerwidget::statusUpdate() {
 	if (!_filterwheel) {
 		return;
 	}
-	snowstar::FilterwheelState	newstate = _filterwheel->getState();
-	if (newstate != _previousstate) {
-		_previousstate = newstate;
-		switch (newstate) {
-		case snowstar::FwMOVING:
-			ui->filterIndicator->start();
-			break;
-		case snowstar::FwIDLE:
-		case snowstar::FwUNKNOWN:
-			ui->filterIndicator->stop();
-			break;
-		}
+
+	// get the new state
+	snowstar::FilterwheelState	newstate;
+	try {
+		newstate = _filterwheel->getState();
+	} catch (...) {
+		return;
 	}
+
+	// if the state has not changed, don't do anything
+	if (newstate == _previousstate) {
+		return;
+	}
+
+	// emit filter wheel busy indicator signals if necessary
+	_previousstate = newstate;
+	switch (newstate) {
+	case snowstar::FwMOVING:
+		emit filterwheelStart();
+		break;
+	case snowstar::FwIDLE:
+	case snowstar::FwUNKNOWN:
+		emit filterwheelStop();
+		break;
+	}
+
+	// emit the signal that indicates the new state
+	emit filterwheelStateChanged(newstate);
+}
+
+void	filterwheelcontrollerwidget::positionUpdate() {
+	if (!_filterwheel) {
+		return;
+	}
+
+	try {
+		int	pos = _filterwheel->currentPosition();
+		if (pos != _position) {
+			emit filterwheelPositionChanged(pos);
+		}
+	} catch (const std::exception& x) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0,
+			"cannot get filterwheel position: %s", x.what());
+	}
+}
+
+/**
+ * \brief Changes to the user interface 
+ *
+ * This slot has to be executed on the main ghread
+ */
+void	filterwheelcontrollerwidget::filterwheelNewState(
+		snowstar::FilterwheelState newstate) {
+	// update user interface elements
 	switch (newstate) {
 	case snowstar::FwIDLE:
 		ui->filterBox->setEnabled(true);
 		ui->filterIndicator->setEnabled(true);
-		try {
-			displayFilter(_filterwheel->currentPosition());
-		} catch (...) { }
 		break;
 	case snowstar::FwMOVING:
 	case snowstar::FwUNKNOWN:
 		ui->filterBox->setEnabled(false);
 		break;
 	}
+}
+
+void	filterwheelcontrollerwidget::filterwheelNewPosition(int position) {
+	_position = position;
+	// update the menu position
 }
 
 } // namespace snowgui

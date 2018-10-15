@@ -21,6 +21,10 @@ namespace qsi {
  */
 QsiCcd::QsiCcd(const CcdInfo& info, QsiCamera& camera)
 	: Ccd(info), _camera(camera) {
+	// initialize the state variables
+	std::unique_lock<std::recursive_mutex>	lock(_camera.mutex);
+	_last_state = CcdState::idle;
+	_last_qsistate = QSICamera::CameraIdle;
 }
 
 /**
@@ -120,8 +124,8 @@ CcdState::State	QsiCcd::exposureStatus() {
 	std::unique_lock<std::recursive_mutex>	lock(_camera.mutex,
 		std::try_to_lock);
 	if (!lock) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "return last state %d",
-			(int)_last_state);
+		//debug(LOG_DEBUG, DEBUG_LOG, 0, "return last state %d",
+		//	(int)_last_state);
 		return _last_state;
 	}
 	try {
@@ -130,6 +134,9 @@ CcdState::State	QsiCcd::exposureStatus() {
 		_camera.camera().get_CameraState(&qsistate);
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "qsistate = %s",
 			state2string(qsistate).c_str());
+		if (_last_qsistate == qsistate) {
+			return _last_state;
+		}
 		switch (state()) {
 		case CcdState::idle:
 			switch (qsistate) {

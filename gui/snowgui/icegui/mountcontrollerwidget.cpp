@@ -177,7 +177,17 @@ void	mountcontrollerwidget::gotoClicked() {
 		break;
 	}
 	snowstar::RaDec	radec;
-	radec.ra = ui->targetRaField->text().toDouble();
+	bool	ok;
+	radec.ra = ui->targetRaField->text().toDouble(&ok);
+	if (!ok) {
+		std::string	f(ui->targetRaField->text().toLatin1().data());
+		try {
+			radec.ra = astro::Angle::hms_to_angle(f).hours();
+		} catch (const std::exception& x) {
+			debug(LOG_ERR, DEBUG_LOG, 0, "cannot parse '%s': %s",
+				f.c_str(), x.what());
+		}
+	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "found RA = %.4f", radec.ra);
 	if ((radec.ra < 0) || (radec.ra > 24)) {
 		QMessageBox	message(this);
@@ -186,7 +196,16 @@ void	mountcontrollerwidget::gotoClicked() {
 		message.exec();
 		return;
 	}
-	radec.dec = ui->targetDecField->text().toDouble();
+	radec.dec = ui->targetDecField->text().toDouble(&ok);
+	if (!ok) {
+		std::string	f(ui->targetDecField->text().toLatin1().data());
+		try {
+			radec.dec = astro::Angle::dms_to_angle(f).degrees();
+		} catch (const std::exception& x) {
+			debug(LOG_ERR, DEBUG_LOG, 0, "cannot parse '%s': %s",
+				f.c_str(), x.what());
+		}
+	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "found DEC = %.4f", radec.dec);
 	if ((radec.dec < -90) || (radec.dec > 90)) {
 		QMessageBox	message(this);

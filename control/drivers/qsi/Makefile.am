@@ -8,7 +8,7 @@ if ENABLE_QSI
 
 pkglib_LTLIBRARIES = qsi.la 
 noinst_HEADERS = QsiLocator.h QsiCamera.h QsiCcd.h QsiCooler.h \
-	QsiFilterWheel.h QsiGuidePort.h
+	QsiFilterWheel.h QsiGuidePort.h QsiUtils.h
 
 SRCFILES = QsiLocator.cpp QsiCamera.cpp QsiCcd.cpp QsiCooler.cpp \
 	QsiFilterWheel.cpp QsiGuidePort.cpp

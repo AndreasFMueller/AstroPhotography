@@ -24,8 +24,6 @@ class FilterWheelBusy : public QWidget {
 public:
 	explicit FilterWheelBusy(QWidget *parent = NULL);
 	virtual ~FilterWheelBusy();
-	void	start();
-	void	stop();
 	int	nfilters() const { return _nfilters; }
 	void	nfilters(int n) { _nfilters = n; }
 	void	draw();
@@ -33,6 +31,8 @@ public:
 	void	position(int p);
 public slots:
 	void	update();
+	void	start();
+	void	stop();
 };
 
 } // namespace snowgui

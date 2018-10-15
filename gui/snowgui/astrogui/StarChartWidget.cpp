@@ -176,6 +176,8 @@ void	StarChartWidget::drawDeepSkyObject(QPainter& painter,
 	double	a = deepskyobject.size.a1().radians() / _resolution.radians();
 	double	b = deepskyobject.size.a2().radians() / _resolution.radians();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "axes: %f, %f", a, b);
+	a /= 2;
+	b /= 2;
 
 	// draw an ellipse at the position of the object
 	QPainterPath	ellipse;

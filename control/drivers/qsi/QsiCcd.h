@@ -17,6 +17,7 @@ namespace qsi {
 class QsiCcd : public Ccd {
 	QsiCamera&	_camera;
 	std::atomic<CcdState::State>	_last_state;
+	std::atomic<QSICamera::CameraState>	_last_qsistate;
 public:
 	QsiCcd(const CcdInfo&, QsiCamera& camera);
 	virtual ~QsiCcd();
@@ -44,6 +45,5 @@ public:
 } // namespace qsi
 } // namespace camera
 } // namespace astro
-
 
 #endif /* _QsiCcd_h */

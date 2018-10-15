@@ -76,3 +76,52 @@ taskswindow:
 	the client was not able to process changes)
 
 
+QPainter::begin: A paint device can only be painted by one painter at a time.
+QPainter::setCompositionMode: Painter not active
+QWidget::repaint: Recursive repaint detected
+Okt 15 00:15:36 snowgui[10836/4] TasksIndicator.cpp:045: draw the current state
+stacktrace caused by signal 11
+QWidget::repaint: Recursive repaint detected
+Okt 15 00:15:36 snowgui[10836/1] TasksIndicator.cpp:045: draw the current state
+
+
+
+
+Okt 15 00:44:39 snowgui[11133/16] TrackingMonitorController.cpp:063: new tracking point received (timeago = 0.0)
+stacktrace caused by signal 11
+Okt 15 00:44:39 snowgui[11133/18] TrackingMonitorController.cpp:063: new tracking point received (timeago = 0.0)
+stacktrace caused by signal 11
+[0] 0   libastro.0.dylib                    0x00000001057e890c stderr_stacktrace + 92
+[1] 1   libsystem_platform.dylib            0x00007fff75e01f5a _sigtramp + 26
+[2] 2   ???                                 0x0000000000000000 0x0 + 0
+[3] 3   snowgui                             0x00000001053644f3 _ZThn16_N7snowgui25TrackingMonitorController6updateERKN8snowstar13TrackingPointERKN3Ice7CurrentE + 67
+[0] 0   libastro.0.dylib                    0x00000001057e890c stderr_stacktrace + 92
+[4] 4   libiceastro.0.dylib                 0x0000000105f15c2c _ZN8snowstar15TrackingMonitor12_iceD_updateERN11IceInternal8IncomingERKN3Ice7CurrentE + 172
+[1] 1   libsystem_platform.dylib            0x00007fff75e01f5a _sigtramp + 26
+[5] 5   libiceastro.0.dylib                 0x0000000105f15d50 _ZN8snowstar15TrackingMonitor12_iceDispatchERN11IceInternal8IncomingERKN3Ice7CurrentE + 256
+[2] 2   ???                                 0x0000000000000000 0x0 + 0
+[6] 6   libIce.37.dylib                     0x00000001061e4542 _ZN11IceInternal8Incoming6invokeERKNS_6HandleINS_14ServantManagerEEEPN3Ice11InputStreamE + 2082
+[3] 3   snowgui                             0x00000001053644f3 _ZThn16_N7snowgui25TrackingMonitorController6updateERKN8snowstar13TrackingPointERKN3Ice7CurrentE + 67
+[7] 7   libIce.37.dylib                     0x00000001061b9684 _ZN3Ice11ConnectionI9invokeAllERNS_11InputStreamEiihRKN11IceInternal6HandleINS3_14ServantManagerEEERKNS4_INS_13ObjectAdapterEEE + 196
+[4] 4   libiceastro.0.dylib                 0x0000000105f15c2c _ZN8snowstar15TrackingMonitor12_iceD_updateERN11IceInternal8IncomingERKN3Ice7CurrentE + 172
+[8] 8   libIce.37.dylib                     0x00000001061b8f5a _ZN3Ice11ConnectionI8dispatchERKN7IceUtil6HandleINS0_13StartCallbackEEERKNSt3__16vectorINS0_15OutgoingMessageENS7_9allocatorIS9_EEEEhiiRKN11IceInternal6HandleINSF_14ServantManagerEEERKNSG_INS_13ObjectAdapterEEERKNSG_INSF_17OutgoingAsyncBaseEEERKNSG_INS_17HeartbeatCallbackEEERNS_11InputStreamE + 378
+[5] 5   libiceastro.0.dylib                 0x0000000105f15d50 _ZN8snowstar15TrackingMonitor12_iceDispatchERN11IceInternal8IncomingERKN3Ice7CurrentE + 256
+[9] 9   libIce.37.dylib                     0x00000001061b5610 _ZN3Ice11ConnectionI7messageERN11IceInternal17ThreadPoolCurrentE + 2624
+[6] 6   libIce.37.dylib                     0x00000001061e4542 _ZN11IceInternal8Incoming6invokeERKNS_6HandleINS_14ServantManagerEEEPN3Ice11InputStreamE + 2082
+[10] 10  libIce.37.dylib                     0x00000001062f70ed _ZN11IceInternal10ThreadPool3runERKN7IceUtil6HandleINS0_18EventHandlerThreadEEE + 285
+[7] 7   libIce.37.dylib                     0x00000001061b9684 _ZN3Ice11ConnectionI9invokeAllERNS_11InputStreamEiihRKN11IceInternal6HandleINS3_14ServantManagerEEERKNS4_INS_13ObjectAdapterEEE + 196
+[11] 11  libIce.37.dylib                     0x00000001062f966e _ZN11IceInternal10ThreadPool18EventHandlerThread3runEv + 126
+[8] 8   libIce.37.dylib                     0x00000001061b8f5a _ZN3Ice11ConnectionI8dispatchERKN7IceUtil6HandleINS0_13StartCallbackEEERKNSt3__16vectorINS0_15OutgoingMessageENS7_9allocatorIS9_EEEEhiiRKN11IceInternal6HandleINSF_14ServantManagerEEERKNSG_INS_13ObjectAdapterEEERKNSG_INSF_17OutgoingAsyncBaseEEERKNSG_INS_17HeartbeatCallbackEEERNS_11InputStreamE + 378
+[12] 12  libIce.37.dylib                     0x00000001062f2912 _ZL9startHookPv + 98
+[9] 9   libIce.37.dylib                     0x00000001061b5610 _ZN3Ice11ConnectionI7messageERN11IceInternal17ThreadPoolCurrentE + 2624
+[13] 13  libsystem_pthread.dylib             0x00007fff75e0b661 _pthread_body + 340
+[10] 10  libIce.37.dylib                     0x00000001062f70ed _ZN11IceInternal10ThreadPool3runERKN7IceUtil6HandleINS0_18EventHandlerThreadEEE + 285
+[14] 14  libsystem_pthread.dylib             0x00007fff75e0b50d _pthread_body + 0
+[11] 11  libIce.37.dylib                     0x00000001062f966e _ZN11IceInternal10ThreadPool18EventHandlerThread3runEv + 126
+[15] 15  libsystem_pthread.dylib             0x00007fff75e0abf9 thread_start + 13
+[12] 12  libIce.37.dylib                     0x00000001062f2912 _ZL9startHookPv + 98
+[13] 13  libsystem_pthread.dylib             0x00007fff75e0b661 _pthread_body + 340
+[14] 14  libsystem_pthread.dylib             0x00007fff75e0b50d _pthread_body + 0
+[15] 15  libsystem_pthread.dylib             0x00007fff75e0abf9 thread_start + 13
+QObject::~QObject: Timers cannot be stopped from another thread
+!! 15.10.2018 00:44:39.183 error: communicator not destroyed during global destr

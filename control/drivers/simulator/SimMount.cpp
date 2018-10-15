@@ -21,8 +21,13 @@ SimMount::SimMount(SimLocator& locator)
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "constructing simulated mount");
 	_when = 0;
 	_direction = _target;
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "location: %s",
-		location().toString().c_str());
+	try {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "location: %s",
+			location().toString().c_str());
+	} catch (const std::exception& x) {
+		debug(LOG_ERR, DEBUG_LOG, 0,
+			"ERROR: define location for simulated mount");
+	}
 }
 
 const static double _movetime = 10;

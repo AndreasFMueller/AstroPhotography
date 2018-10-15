@@ -230,10 +230,11 @@ void	pointingwindow::pointSelected(astro::image::ImagePoint p,
 	// take into account that the y-axis goes downward
 	offset.y(-offset.y());
 
-	// when on the east side, we have to invert everything, but we
-	// want to compute the correction, so this gives an additional
-	// minus sign
-	if (_west) {
+	// XXX there is probably something wrong here:
+	// XXX when on the east side, we have to invert everything, but we
+	// XXX want to compute the correction, so this gives an additional
+	// XXX minus sign
+	if (!_west) {
 		offset = astro::image::ImagePoint(-offset.x(), -offset.y());
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "offset = %s",
