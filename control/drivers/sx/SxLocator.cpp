@@ -47,13 +47,23 @@ public:
 	}
 };
 
+static std::once_flag   descriptor_once;
+static astro::module::ModuleDescriptor  *descriptor;
+void	setup_descriptor() {
+	descriptor = new SxDescriptor();
+}
+
 } // namespace sx
 } // namespace module
 } // namespace astro
 
 extern "C"
 astro::module::ModuleDescriptor	*getDescriptor() {
-	return new astro::module::sx::SxDescriptor();
+	std::call_once(astro::module::sx::descriptor_once,
+		astro::module::sx::setup_descriptor);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "SxDescriptor: %p",
+		astro::module::sx::descriptor);
+	return astro::module::sx::descriptor;
 }
 
 namespace astro {

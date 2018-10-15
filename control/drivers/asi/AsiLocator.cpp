@@ -46,13 +46,23 @@ public:
 	}
 };
 
+static std::once_flag   descriptor_once;
+static astro::module::ModuleDescriptor  *descriptor;
+void    setup_descriptor() {
+        descriptor = new AsiDescriptor();
+}
+
 } // namespace asi
 } // namespace module
 } // namespace astro
 
 extern "C"
 astro::module::ModuleDescriptor	*getDescriptor() {
-	return new astro::module::asi::AsiDescriptor();
+	std::call_once(astro::module::asi::descriptor_once,
+		astro::module::asi::setup_descriptor);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "AsiDescriptor: %p",
+		astro::module::asi::descriptor);
+	return astro::module::asi::descriptor;
 }
 
 using namespace astro;

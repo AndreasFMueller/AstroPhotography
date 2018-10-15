@@ -31,13 +31,24 @@ public:
 	virtual bool	hasDeviceLocator() const { return true; }
 };
 
+static std::once_flag   descriptor_once;
+static astro::module::ModuleDescriptor  *descriptor;
+void	setup_descriptor() {
+	descriptor = new CelestronDescriptor();
+}
+
+
 } // namespace celestron
 } // namespace module
 } // namespace astro
 
 extern "C"
 astro::module::ModuleDescriptor	*getDescriptor() {
-	return new astro::module::celestron::CelestronDescriptor();
+	std::call_once(astro::module::celestron::descriptor_once,
+		astro::module::celestron::setup_descriptor);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "CelestronDescriptor: %p",
+		astro::module::celestron::descriptor);
+	return astro::module::celestron::descriptor;
 }
 
 using namespace astro::module::celestron;

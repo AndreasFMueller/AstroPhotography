@@ -45,13 +45,24 @@ public:
 	}
 };
 
+static std::once_flag   descriptor_once;
+static astro::module::ModuleDescriptor  *descriptor;
+void	setup_descriptor() {
+	descriptor = new OthelloDescriptor();
+}
+
+
 } // namespace othello
 } // namespace module
 } // namespace astro
 
 extern "C"
 astro::module::ModuleDescriptor	*getDescriptor() {
-	return new astro::module::othello::OthelloDescriptor();
+	std::call_once(astro::module::othello::descriptor_once,
+		astro::module::othello::setup_descriptor);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "OthelloDescriptor: %p",
+		astro::module::othello::descriptor);
+	return astro::module::othello::descriptor;
 }
 
 namespace astro {

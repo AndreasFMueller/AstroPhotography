@@ -46,13 +46,23 @@ public:
 	}
 };
 
+static std::once_flag   descriptor_once;
+static astro::module::ModuleDescriptor  *descriptor;
+void	setup_descriptor() {
+	descriptor = new AtikDescriptor();
+}
+
 } // namespace atik
 } // namespace module
 } // namespace astro
 
 extern "C"
 astro::module::ModuleDescriptor	*getDescriptor() {
-	return new astro::module::atik::AtikDescriptor();
+        std::call_once(astro::module::atik::descriptor_once,
+                astro::module::atik::setup_descriptor);
+        debug(LOG_DEBUG, DEBUG_LOG, 0, "AtikDescriptor: %p",
+                astro::module::atik::descriptor);
+        return astro::module::atik::descriptor;
 }
 
 using namespace astro;

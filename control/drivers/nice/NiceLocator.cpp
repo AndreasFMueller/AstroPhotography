@@ -18,10 +18,8 @@
 #include <NiceCooler.h>
 
 namespace astro {
-namespace camera {
+namespace module {
 namespace nice {
-
-using namespace astro::discover;
 
 //////////////////////////////////////////////////////////////////////
 // NiceDescriptor module descriptor class
@@ -45,6 +43,11 @@ public:
 	}
 };
 
+static std::once_flag   descriptor_once;
+static astro::module::ModuleDescriptor  *descriptor;
+void	setup_descriptor() {
+	descriptor = new NiceDescriptor();
+}
 
 } // namespace nice
 } // namespace camera
@@ -52,12 +55,18 @@ public:
 
 extern "C"
 astro::module::ModuleDescriptor *getDescriptor() {
-	return new astro::camera::nice::NiceDescriptor();
+	std::call_once(astro::module::nice::descriptor_once,
+		astro::module::nice::setup_descriptor);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "NiceDescriptor: %p",
+		astro::module::nice::descriptor);
+	return astro::module::nice::descriptor;
 }
 
 namespace astro {
 namespace camera {
 namespace nice {
+
+using namespace astro::discover;
 
 //////////////////////////////////////////////////////////////////////
 // NiceLocator class
@@ -73,11 +82,11 @@ NiceLocator::~NiceLocator() {
 }
 
 std::string	NiceLocator::getName() const {
-	return nice_name;
+	return astro::module::nice::nice_name;
 }
 
 std::string	NiceLocator::getVersion() const {
-	return nice_version;
+	return astro::module::nice::nice_version;
 }
 
 /**

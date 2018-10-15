@@ -54,13 +54,23 @@ public:
 	}
 };
 
+static std::once_flag   descriptor_once;
+static astro::module::ModuleDescriptor  *descriptor;
+void	setup_descriptor() {
+	descriptor = new SbigDescriptor();
+}
+
 } // namespace sbig
 } // namespace module
 } // namespace astro
 
 extern "C"
 astro::module::ModuleDescriptor	*getDescriptor() {
-	return new astro::module::sbig::SbigDescriptor();
+	std::call_once(astro::module::sbig::descriptor_once,
+		astro::module::sbig::setup_descriptor);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "SbigDescriptor: %p",
+		astro::module::sbig::descriptor);
+	return astro::module::sbig::descriptor;
 }
 
 using namespace astro;

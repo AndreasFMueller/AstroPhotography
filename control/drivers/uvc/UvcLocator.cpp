@@ -42,6 +42,11 @@ public:
 	}
 };
 
+static std::once_flag   descriptor_once;
+static astro::module::ModuleDescriptor  *descriptor;
+void	setup_descriptor() {
+	descriptor = new UvcDescriptor();
+}
 
 } // namespace uvc
 } // namespace module
@@ -49,7 +54,11 @@ public:
 
 extern "C"
 astro::module::ModuleDescriptor *getDescriptor() {
-	return new astro::module::uvc::UvcDescriptor();
+	std::call_once(astro::module::uvc::descriptor_once,
+		astro::module::uvc::setup_descriptor);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "UvcDescriptor: %p",
+		astro::module::uvc::descriptor);
+	return astro::module::uvc::descriptor;
 }
 
 //////////////////////////////////////////////////////////////////////
