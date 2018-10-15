@@ -4,6 +4,7 @@
  * (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
 #include <QsiCooler.h>
+#include <QsiUtils.h>
 
 namespace astro {
 namespace camera {
@@ -46,7 +47,9 @@ float	QsiCooler::getSetTemperature() {
 	}
 	try {
 		double	temp;
+		START_STOPWATCH;
 		_camera.camera().get_SetCCDTemperature(&temp);
+		END_STOPWATCH("get_SetCCDTemperature()");
 		//debug(LOG_DEBUG, DEBUG_LOG, 0, "got temerature %.1f", temp);
 		return temp + 273.13;
 	} catch (const std::exception& x) {
@@ -71,7 +74,9 @@ float	QsiCooler::getActualTemperature() {
 	}
 	try {
 		double	temp;
+		START_STOPWATCH;
 		_camera.camera().get_CCDTemperature(&temp);
+		END_STOPWATCH("get_CCDTemperature()");
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "got temperature %.1f", temp);
 		_actual_temperature = temp + 273.13;
 	} catch (const std::exception& x) {
@@ -92,7 +97,9 @@ void	QsiCooler::setTemperature(const float temperature) {
 	std::unique_lock<std::recursive_mutex>	lock(_camera.mutex);
 	Cooler::setTemperature(temperature);
 	double	temp = temperature - 273.13;
+	START_STOPWATCH;
 	_camera.camera().put_SetCCDTemperature(temp);
+	END_STOPWATCH("put_SetCCDTemperature()");
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "set temperature now %.1f", temp);
 }
 
@@ -108,7 +115,9 @@ bool	QsiCooler::isOn() {
 	}
 	try {
 		bool	cooleron;
+		START_STOPWATCH;
 		_camera.camera().get_CoolerOn(&cooleron);
+		END_STOPWATCH("get_CoolerOn()");
 		if (_is_on != cooleron) {
 			debug(LOG_DEBUG, DEBUG_LOG, 0, "cooler now %s",
 				(cooleron) ? "on" : "off");
@@ -131,7 +140,9 @@ void	QsiCooler::setOn(bool onoff) {
 	//	(onoff) ? "on" : "off");
 	std::unique_lock<std::recursive_mutex>	lock(_camera.mutex);
 	_is_on = onoff;
+	START_STOPWATCH;
 	_camera.camera().put_CoolerOn(onoff);
+	END_STOPWATCH("put_CoolerOn()");
 }
 
 } // namespace qsi

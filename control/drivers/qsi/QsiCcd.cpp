@@ -6,6 +6,7 @@
 
 #include <QsiCcd.h>
 #include <QsiCooler.h>
+#include <QsiUtils.h>
 #include <AstroDebug.h>
 #include <AstroExceptions.h>
 #include <includes.h>
@@ -55,8 +56,12 @@ void	QsiCcd::startExposure(const Exposure& exposure) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "start QSI exposure");
 	try {
 		// set the binning mode
+		START_STOPWATCH;
 		_camera.camera().put_BinX(Ccd::exposure.mode().x());
+		END_STOPWATCH("put_BinX()");
+		START_STOPWATCH;
 		_camera.camera().put_BinY(Ccd::exposure.mode().y());
+		END_STOPWATCH("put_BinY()");
 
 		// compute the frame size in binned pixels, as this is what
 		// the QSI camera expects
@@ -69,19 +74,31 @@ void	QsiCcd::startExposure(const Exposure& exposure) {
 			frame.toString().c_str());
 
 		// set the subframe
+		START_STOPWATCH;
 		_camera.camera().put_NumX(size.width());
+		END_STOPWATCH("put_NumX()");
+		START_STOPWATCH;
 		_camera.camera().put_NumY(size.height());
+		END_STOPWATCH("put_NumY()");
+		START_STOPWATCH;
 		_camera.camera().put_StartX(origin.x());
+		END_STOPWATCH("put_StartX()");
+		START_STOPWATCH;
 		_camera.camera().put_StartY(origin.y());
+		END_STOPWATCH("put_StartY()");
 
 		// turn off the led
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "turn LED off");
+		START_STOPWATCH;
 		_camera.camera().put_LEDEnabled(false);
+		END_STOPWATCH("put_LEDEnabled()");
 
 		// get shutter info
 		bool	light = (Ccd::exposure.shutter() == Shutter::OPEN);
+		START_STOPWATCH;
 		_camera.camera().StartExposure(Ccd::exposure.exposuretime(),
 			light);
+		END_STOPWATCH("StartExposure()()");
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "%fsec %s exposure started",
 			Ccd::exposure.exposuretime(),
 			(light) ? "light" : "dark");
@@ -137,7 +154,9 @@ CcdState::State	QsiCcd::exposureStatus() {
 		//debug(LOG_DEBUG, DEBUG_LOG, 0, "checking camera state");
 		// reading the camera state
 		QSICamera::CameraState	qsistate;
+		START_STOPWATCH;
 		_camera.camera().get_CameraState(&qsistate);
+		END_STOPWATCH("get_CameraState()");
 		//debug(LOG_DEBUG, DEBUG_LOG, 0, "qsistate = %s",
 		//	state2string(qsistate).c_str());
 		if (_last_qsistate == qsistate) {
@@ -255,8 +274,13 @@ ImagePtr	QsiCcd::getRawImage() {
 	std::lock_guard<std::recursive_mutex>	lock(_camera.mutex);
 	int	x, y, z;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "turn LED on");
+	START_STOPWATCH;
 	_camera.camera().put_LEDEnabled(true);
+	END_STOPWATCH("put_LEDEnabled()");
+	START_STOPWATCH;
 	_camera.camera().get_ImageArraySize(x, y, z);
+	END_STOPWATCH("put_ImageArraySize()");
+	
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "x = %d, y = %d, z = %d", x, y, z);
 	if (z != 2) {
 		throw std::runtime_error("only ushort images supported");
@@ -266,7 +290,9 @@ ImagePtr	QsiCcd::getRawImage() {
 	ImagePtr	result(image);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "reading image");
 	try {
+		START_STOPWATCH;
 		_camera.camera().get_ImageArray(image->pixels);
+		END_STOPWATCH("get_ImageArray()");
 		image->flip(); // origin is in the upper left corner
 	} catch (const std::exception& x) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "cannot read: %s", x.what());
