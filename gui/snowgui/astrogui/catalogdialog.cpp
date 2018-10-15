@@ -94,7 +94,12 @@ void	CatalogDialog::searchChanged(const QString& newtext) {
  * \param newtext	prefix to search for in the catalog
  */
 void	CatalogDialog::textEdited(const QString& newtext) {
-	std::string	prefix(newtext.toLatin1().data());
+	std::string	prefix;
+	for (char *d = newtext.toLatin1().data(); *d; d++) {
+		if (*d != ' ') {
+			prefix.push_back(*d);
+		}
+	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "search for prefix %s", prefix.c_str());
 	ui->listWidget->clear();
 	std::set<std::string>	names = _catalog->findLike(prefix);

@@ -22,14 +22,13 @@ class coolercontrollerwidget;
  *
  * see filterwheelcontrollerwidget for the rationale behind this class
  */
-class coolerupdatethread : public QThread {
+class coolerupdatework : public QObject {
 	Q_OBJECT
 	coolercontrollerwidget	*_coolercontrollerwidget;
 	std::recursive_mutex	_mutex;
 public:
-	coolerupdatethread(coolercontrollerwidget *cc);
-	~coolerupdatethread() { }
-	void	stop();
+	coolerupdatework(coolercontrollerwidget *cc);
+	~coolerupdatework();
 public slots:
 	void	statusUpdate();
 };
@@ -42,7 +41,8 @@ class coolercontrollerwidget : public InstrumentWidget {
 
 	snowstar::CoolerPrx	_cooler;
 	std::vector<std::string>	_cooler_names;
-	coolerupdatethread	*_updatethread;
+	QThread			*_updatethread;
+	coolerupdatework	*_updatework;
 public:
 	explicit coolercontrollerwidget(QWidget *parent = 0);
 	~coolercontrollerwidget();

@@ -109,10 +109,10 @@ SOURCES += 								\
 	calibrationimagewidget.cpp					\
 	ccddata.cpp							\
 	CoolerActive.cpp						\
-	coolerupdatethread.cpp						\
+	coolerupdatework.cpp						\
 	EventMonitor.cpp						\
 	FilterWheelBusy.cpp						\
-	filterwheelupdatethread.cpp					\
+	filterwheelupdatework.cpp					\
 	FocusButton.cpp							\
 	GuiderButton.cpp						\
 	ImageForwarder.cpp						\
@@ -137,7 +137,6 @@ HEADERS  += 								\
 	FocusButton.h							\
 	GuiderButton.h							\
 	ImageForwarder.h						\
-	ImageRetrieverThread.h						\
 	InstrumentWidget.h						\
 	MonitorImage.h							\
 	TrackingMonitorImage.h						\

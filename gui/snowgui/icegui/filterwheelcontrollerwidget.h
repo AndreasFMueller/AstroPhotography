@@ -30,14 +30,13 @@ class filterwheelcontrollerwidget;
  * It should be easy to turn this thread class into a template class for
  * other device controller widgets to use in a similar way.
  */
-class filterwheelupdatethread : public QThread {
+class filterwheelupdatework : public QObject {
 	Q_OBJECT
 	filterwheelcontrollerwidget	*_filterwheelcontrollerwidget;
 	std::recursive_mutex	_mutex;
 public:
-	filterwheelupdatethread(filterwheelcontrollerwidget *fwc);
-	~filterwheelupdatethread() { }
-	void	stop();
+	filterwheelupdatework(filterwheelcontrollerwidget *fwc);
+	~filterwheelupdatework();
 public slots:
 	void	statusUpdate();
 	void	positionUpdate();
@@ -52,7 +51,8 @@ class filterwheelcontrollerwidget : public InstrumentWidget {
 	snowstar::FilterWheelPrx	_filterwheel;
 	snowstar::FilterwheelState	_previousstate;
 	int				_position;
-	filterwheelupdatethread		*_updatethread;
+	filterwheelupdatework		*_updatework;
+	QThread				*_updatethread;
 public:
 	explicit filterwheelcontrollerwidget(QWidget *parent = 0);
 	~filterwheelcontrollerwidget();

@@ -39,14 +39,18 @@ coolercontrollerwidget::coolercontrollerwidget(QWidget *parent) :
 	connect(this, SIGNAL(newActualTemperature(float)),
 		this, SLOT(displayActualTemperature(float)));
 
-	_updatethread = new coolerupdatethread(this);
-	_updatethread->moveToThread(_updatethread);
+	// set up the update thread
+	_updatethread = new QThread(NULL);
 	connect(_updatethread, SIGNAL(finished()),
 		_updatethread, SLOT(deleteLater()));
 
+	// set up the update work class
+	_updatework = new coolerupdatework(this);
+	_updatework->moveToThread(_updatethread);
+
 	// initialize the timer
 	connect(&statusTimer, SIGNAL(timeout()),
-		_updatethread, SLOT(statusUpdate()));
+		_updatework, SLOT(statusUpdate()));
 	_updatethread->start();
 
 	statusTimer.setInterval(1000);
@@ -101,8 +105,9 @@ void	coolercontrollerwidget::setupComplete() {
  */
 coolercontrollerwidget::~coolercontrollerwidget() {
 	statusTimer.stop();
-	_updatethread->stop();
 	_updatethread->quit();
+	_updatethread->wait();
+	delete _updatework;
 	delete ui;
 }
 

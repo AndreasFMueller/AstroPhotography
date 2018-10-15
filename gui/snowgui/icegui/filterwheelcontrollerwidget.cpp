@@ -40,17 +40,22 @@ filterwheelcontrollerwidget::filterwheelcontrollerwidget(QWidget *parent)
 	connect(this, SIGNAL(filterwheelPositionChanged(int)),
 		this, SLOT(filterwheelNewPosition(int)));
 
-	// start the update thread
-	_updatethread = new filterwheelupdatethread(this);
+	// create the update thread
+	_updatethread = new QThread(NULL);
 	connect(_updatethread, SIGNAL(finished()),
 		_updatethread, SLOT(deleteLater()));
 
+	// create the work class
+	_updatework = new filterwheelupdatework(this);
+	_updatework->moveToThread(_updatethread);
+
 	// initialize the timer
-	_updatethread->moveToThread(_updatethread);
 	connect(&statusTimer, SIGNAL(timeout()),
-		_updatethread, SLOT(statusUpdate()));
+		_updatework, SLOT(statusUpdate()));
 	connect(&positionTimer, SIGNAL(timeout()),
-		_updatethread, SLOT(positionUpdate()));
+		_updatework, SLOT(positionUpdate()));
+
+	// start the thread
 	_updatethread->start();
 
 	statusTimer.setInterval(100);
@@ -63,8 +68,10 @@ filterwheelcontrollerwidget::filterwheelcontrollerwidget(QWidget *parent)
 filterwheelcontrollerwidget::~filterwheelcontrollerwidget() {
 	statusTimer.stop();
 	positionTimer.stop();
-	_updatethread->stop();
 	_updatethread->quit();
+	_updatethread->wait();
+	delete _updatethread;
+	delete _updatework;
 	delete ui;
 }
 
