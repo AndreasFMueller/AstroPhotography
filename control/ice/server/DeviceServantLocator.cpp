@@ -67,51 +67,121 @@ Ice::ObjectPtr	DeviceServantLocator::locate(const Ice::Current& current,
 	switch (devicename.type()) {
 	case astro::DeviceName::AdaptiveOptics:
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "getting an AO unit");
-		ptr = new AdaptiveOpticsI(
-			DeviceAccessor<astro::camera::AdaptiveOpticsPtr>(
-				_repository).get(devicename));
+		try {
+			ptr = new AdaptiveOpticsI(
+				DeviceAccessor<astro::camera::AdaptiveOpticsPtr>(
+					_repository).get(devicename));
+		} catch (const std::exception& x) {
+			NotFound	notfound;
+			notfound.cause = astro::stringprintf(
+				"cannot create '%s': %s",
+				devicename.toString().c_str(), x.what());
+			debug(LOG_ERR, DEBUG_LOG, 0, "%s",
+				notfound.cause.c_str());
+			throw notfound;
+		}
 		break;
 
 	case astro::DeviceName::Camera:
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "getting a camera");
-		ptr = new CameraI(
-			DeviceAccessor<astro::camera::CameraPtr>(
-				_repository).get(devicename));
+		try {
+			ptr = new CameraI(
+				DeviceAccessor<astro::camera::CameraPtr>(
+					_repository).get(devicename));
+		} catch (const std::exception& x) {
+			NotFound	notfound;
+			notfound.cause = astro::stringprintf(
+				"cannot create '%s': %s",
+				devicename.toString().c_str(), x.what());
+			debug(LOG_ERR, DEBUG_LOG, 0, "%s",
+				notfound.cause.c_str());
+			throw notfound;
+		}
 		break;
 
 	case astro::DeviceName::Ccd:
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "getting a CCD");
-		ptr = new CcdI(
-			DeviceAccessor<astro::camera::CcdPtr>(
-				_repository).get(devicename));
+		try {
+			ptr = new CcdI(
+				DeviceAccessor<astro::camera::CcdPtr>(
+					_repository).get(devicename));
+		} catch (const std::exception& x) {
+			NotFound	notfound;
+			notfound.cause = astro::stringprintf(
+				"cannot create '%s': %s",
+				devicename.toString().c_str(), x.what());
+			debug(LOG_ERR, DEBUG_LOG, 0, "%s",
+				notfound.cause.c_str());
+			throw notfound;
+		}
 		break;
 
 	case astro::DeviceName::Cooler:
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "getting a Cooler");
-		ptr = new CoolerI(
-			DeviceAccessor<astro::camera::CoolerPtr>(
-				_repository).get(devicename));
+		try {
+			ptr = new CoolerI(
+				DeviceAccessor<astro::camera::CoolerPtr>(
+					_repository).get(devicename));
+		} catch (const std::exception& x) {
+			NotFound	notfound;
+			notfound.cause = astro::stringprintf(
+				"cannot create '%s': %s",
+				devicename.toString().c_str(), x.what());
+			debug(LOG_ERR, DEBUG_LOG, 0, "%s",
+				notfound.cause.c_str());
+			throw notfound;
+		}
 		break;
 
 	case astro::DeviceName::Filterwheel:
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "getting a Filterwheel");
-		ptr = new FilterWheelI(
-			DeviceAccessor<astro::camera::FilterWheelPtr>(
-				_repository).get(devicename));
+		try {
+			ptr = new FilterWheelI(
+				DeviceAccessor<astro::camera::FilterWheelPtr>(
+					_repository).get(devicename));
+		} catch (const std::exception& x) {
+			NotFound	notfound;
+			notfound.cause = astro::stringprintf(
+				"cannot create '%s': %s",
+				devicename.toString().c_str(), x.what());
+			debug(LOG_ERR, DEBUG_LOG, 0, "%s",
+				notfound.cause.c_str());
+			throw notfound;
+		}
 		break;
 
 	case astro::DeviceName::Focuser:
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "getting a Focuser");
-		ptr = new FocuserI(
-			DeviceAccessor<astro::camera::FocuserPtr>(
-				_repository).get(devicename));
+		try {
+			ptr = new FocuserI(
+				DeviceAccessor<astro::camera::FocuserPtr>(
+					_repository).get(devicename));
+		} catch (const std::exception& x) {
+			NotFound	notfound;
+			notfound.cause = astro::stringprintf(
+				"cannot create '%s': %s",
+				devicename.toString().c_str(), x.what());
+			debug(LOG_ERR, DEBUG_LOG, 0, "%s",
+				notfound.cause.c_str());
+			throw notfound;
+		}
 		break;
 
 	case astro::DeviceName::Guideport:
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "getting a Guideport");
-		ptr = new GuidePortI(
-			DeviceAccessor<astro::camera::GuidePortPtr>(
-				_repository).get(devicename));
+		try {
+			ptr = new GuidePortI(
+				DeviceAccessor<astro::camera::GuidePortPtr>(
+					_repository).get(devicename));
+		} catch (const std::exception& x) {
+			NotFound	notfound;
+			notfound.cause = astro::stringprintf(
+				"cannot create '%s': %s",
+				devicename.toString().c_str(), x.what());
+			debug(LOG_ERR, DEBUG_LOG, 0, "%s",
+				notfound.cause.c_str());
+			throw notfound;
+		}
 		break;
 
 	case astro::DeviceName::Module:
@@ -120,9 +190,19 @@ Ice::ObjectPtr	DeviceServantLocator::locate(const Ice::Current& current,
 
 	case astro::DeviceName::Mount:
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "getting a mount");
-		ptr = new MountI(
-			DeviceAccessor<astro::device::MountPtr>(
-				_repository).get(devicename));
+		try {
+			ptr = new MountI(
+				DeviceAccessor<astro::device::MountPtr>(
+					_repository).get(devicename));
+		} catch (const std::exception& x) {
+			NotFound	notfound;
+			notfound.cause = astro::stringprintf(
+				"cannot create '%s': %s",
+				devicename.toString().c_str(), x.what());
+			debug(LOG_ERR, DEBUG_LOG, 0, "%s",
+				notfound.cause.c_str());
+			throw notfound;
+		}
 		break;
 	};
 

@@ -227,7 +227,7 @@ void	DaemonI::mount(const std::string& device, const std::string& mountpoint,
 }
 
 /**
- * \brief
+ * \brief unmount a directory
  */
 void	DaemonI::unmount(const std::string& mountpoint,
 		const Ice::Current& /* current */) {
@@ -251,6 +251,15 @@ void	DaemonI::unmount(const std::string& mountpoint,
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "%s", error.cause.c_str());
 		throw error;
 	}
+}
+
+/**
+ * \brief get the system time
+ */
+long	DaemonI::getSystemTime(const Ice::Current& /* current */) {
+	time_t	now;
+	time(&now);
+	return now;
 }
 
 /**

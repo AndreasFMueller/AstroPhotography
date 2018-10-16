@@ -19,9 +19,18 @@ Ice::ObjectPtr	DeviceLocatorLocator::locate(const Ice::Current& current,
 	std::string	modulename = current.id.name;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "request for locator in module '%s'",
 		modulename.c_str());
-	astro::module::ModulePtr	module
-		= _repository->getModule(modulename);
-	return new DeviceLocatorI(module->getDeviceLocator());
+	try {
+		astro::module::ModulePtr	module
+			= _repository->getModule(modulename);
+		return new DeviceLocatorI(module->getDeviceLocator());
+	} catch (const std::exception& x) {
+		NotFound	notfound;
+		notfound.cause = astro::stringprintf(
+			"cannot get DeviceLocator '%s': %s",
+			modulename.c_str(), x.what());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", notfound.cause.c_str());
+		throw notfound;
+	}
 }
 
 void	DeviceLocatorLocator::finished(const Ice::Current& /* current */,

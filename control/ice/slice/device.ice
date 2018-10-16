@@ -18,14 +18,14 @@ module snowstar {
 	 */
 	interface Mount extends Device {
 		mountstate	state();
-		RaDec	getRaDec();
-		AzmAlt	getAzmAlt();
-		void	GotoRaDec(RaDec radecposition);
-		void	GotoAzmAlt(AzmAlt azmaltposition);
-		bool	telescopePositionWest();
-		void	cancel();
-		LongLat	getLocation();
-		long	getTime();
+		RaDec	getRaDec() throws DeviceException;
+		AzmAlt	getAzmAlt() throws DeviceException;
+		void	GotoRaDec(RaDec radecposition) throws DeviceException;
+		void	GotoAzmAlt(AzmAlt azmaltposition) throws DeviceException;
+		bool	telescopePositionWest() throws DeviceException;
+		void	cancel() throws DeviceException;
+		LongLat	getLocation() throws DeviceException;
+		long	getTime() throws DeviceException;
 	};
 
 	// device related stuff

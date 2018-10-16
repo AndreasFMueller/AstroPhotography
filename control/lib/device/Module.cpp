@@ -214,7 +214,7 @@ void	*Module::getSymbol(const std::string& symbolname) {
  * a method named getDescriptor with C linkage which returns a pointer
  * to a Descriptor object for this method to work.
  */
-ModuleDescriptorPtr	Module::getDescriptor() {
+ModuleDescriptor	*Module::getDescriptor() {
 	void	*s = getSymbol(std::string("getDescriptor"));
 
 	// now cast the symbol to a function that returns a descriptor
@@ -223,7 +223,7 @@ ModuleDescriptorPtr	Module::getDescriptor() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "call the getDescriptor function");
 	ModuleDescriptor	*d = ((getter)s)();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "module descriptor at %p", d);
-	return ModuleDescriptorPtr(d);
+	return d;
 }
 
 /**

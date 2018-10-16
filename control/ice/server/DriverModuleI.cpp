@@ -27,8 +27,22 @@ bool	DriverModuleI::hasLocator(const Ice::Current& /* current */) {
 	return _module->getDescriptor()->hasDeviceLocator();
 }
 
-DeviceLocatorPrx	DriverModuleI::getDeviceLocator(const Ice::Current& current) {
-	return snowstar::createProxy<DeviceLocatorPrx>(std::string("devicelocator/") + _module->getDescriptor()->name(), current, false);
+DeviceLocatorPrx	DriverModuleI::getDeviceLocator(
+				const Ice::Current& current) {
+	std::string	modulename = _module->getDescriptor()->name();
+	try {
+		std::string	name = std::string("devicelocator/")
+					+ modulename;
+		return snowstar::createProxy<DeviceLocatorPrx>(name,
+			current, false);
+	} catch (const std::exception& x) {
+		NotFound	notfound;
+		notfound.cause = astro::stringprintf(
+			"cannot retrieve device locator for '%s': %s",
+			modulename.c_str(), x.what());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", notfound.cause.c_str());
+		throw notfound;
+	}
 }
 
 } // namespace snowstar

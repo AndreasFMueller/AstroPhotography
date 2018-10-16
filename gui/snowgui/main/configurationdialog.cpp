@@ -44,6 +44,14 @@ configurationdialog::configurationdialog(QWidget *parent,
 	}
 	setDaemon(daemon);
 
+	// modules connection
+	base = ic->stringToProxy(_serviceobject.connect("Modules"));
+	snowstar::ModulesPrx	modules = snowstar::ModulesPrx::checkedCast(base);
+	if (!base) {
+		throw std::runtime_error("cannot create modules app");
+	}
+	setModules(modules);
+
 	// find out whether the remote supports 
 	try {
 		Ice::ObjectPrx	base = ic->stringToProxy(
@@ -85,6 +93,17 @@ configurationdialog::configurationdialog(QWidget *parent,
 	connect(ui->mountButton, SIGNAL(clicked()),
 		this, SLOT(mountClicked()));
 
+	connect(ui->syncButton, SIGNAL(clicked()),
+		this, SLOT(syncClicked()));
+	connect(ui->setButton, SIGNAL(clicked()),
+		this, SLOT(setfromsourceClicked()));
+	connect(ui->sourceBox, SIGNAL(currentIndexChanged(int)),
+		this, SLOT(timesourceSelected(int)));
+
+	// set up the timer
+	connect(&_statusTimer, SIGNAL(timeout()), this, SLOT(timeUpdate()));
+	_statusTimer.setInterval(1000);
+
 	// title
 	setWindowTitle(QString("Configuration"));
 	std::string	title = astro::stringprintf("Remote configuration on %s", _serviceobject.toString().c_str());
@@ -98,6 +117,9 @@ configurationdialog::~configurationdialog() {
 	delete ui;
 }
 
+/**
+ * \brief 
+ */
 bool	configurationdialog::getService(const std::string& name) {
 	std::string	value("no");
 	if ((name == "devices") || (name == "images")) {
@@ -155,13 +177,20 @@ void	configurationdialog::setConfiguration(snowstar::ConfigurationPrx configurat
 	key.domain = "snowstar";
 	key.section = "repositories";
 	key.name = "directory";
-	if (_configuration->has(key)) {
-		snowstar::ConfigurationItem	item = _configuration->get(key);
-		ui->repodbField->setText(QString(item.value.c_str()));
+	try {
+		if (_configuration->has(key)) {
+			snowstar::ConfigurationItem	item = _configuration->get(key);
+			ui->repodbField->setText(QString(item.value.c_str()));
+		}
+	} catch (const std::exception& x) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "cannot get config: %s", x.what());
 	}
 	
 }
 
+/**
+ * \brief Method to set the dameon proxy
+ */
 void	configurationdialog::setDaemon(snowstar::DaemonPrx daemon) {
 	if (!daemon) {
 		return;
@@ -170,6 +199,48 @@ void	configurationdialog::setDaemon(snowstar::DaemonPrx daemon) {
 	ui->repositoryconfiguration->setDaemon(daemon);
 }
 
+/**
+ * \brief Method to set the modules proxy, initializes mount list
+ */
+void	configurationdialog::setModules(snowstar::ModulesPrx modules) {
+	if (!modules) {
+		return;
+	}
+	_modules = modules;
+	// construct a list of modules
+	snowstar::ModuleNameList	names = modules->getModuleNames();
+	for (auto i = names.begin(); i != names.end(); i++) {
+		snowstar::DriverModulePrx	module = modules->getModule(*i);
+		if (!module->hasLocator())
+			continue;
+		snowstar::DeviceLocatorPrx	locator
+			= module->getDeviceLocator();
+		snowstar::DeviceNameList	devnames
+			= locator->getDevicelist(snowstar::DevMOUNT);
+		for (auto j = devnames.begin(); j != devnames.end(); j++) {
+			timesourceinfo	*tsi = new timesourceinfo();
+			tsi->name = *j;
+			tsi->locator = locator;
+			timesourceinfoPtr	tsiptr(tsi);
+			_timesources.push_back(tsiptr);
+		}
+	}
+
+	// populate the source menu with the names
+	ui->sourceBox->blockSignals(true);
+	for (auto i = _timesources.begin(); i != _timesources.end(); i++) {
+		ui->sourceBox->addItem(QString((*i)->name.c_str()));
+	}
+	if (ui->sourceBox->count() > 0) {
+		ui->sourceBox->setCurrentIndex(0);
+		timesourceSelected(0);
+	}
+	ui->sourceBox->blockSignals(false);
+}
+
+/**
+ * \brief Method to change a configuration value
+ */
 void	configurationdialog::changevalue(const std::string& name,
 		bool defaultvalue, bool newvalue) {
 	std::string	targetvalue = (newvalue) ? "yes" : "no";
@@ -368,6 +439,9 @@ void	configurationdialog::operationFailed(const std::string& s) {
         message.exec();
 }
 
+/**
+ * \brief Slot called when the mount button is clicked
+ */
 void	configurationdialog::mountClicked() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "mountClicked()");
 	std::string devicename(ui->deviceField->text().toLatin1().data());
@@ -389,6 +463,109 @@ void	configurationdialog::mountClicked() {
 	} catch (const std::exception& x) {
 		operationFailed(x.what());
 	}
+}
+
+/**
+ * \brief Slot called when "Set from source" button is clicked
+ *
+ * This slot sets the system time of the daemon to the currently
+ * selected mount time
+ */
+void	configurationdialog::setfromsourceClicked() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "set from source clicked");
+	if (!_mount) {
+		return;
+	}
+	try {
+		_daemon->setSystemTime(_mount->getTime());
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "time set from source time");
+	} catch (const std::exception& x) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "cannot set the time: %s",
+			x.what());
+	}
+}
+
+/**
+ * \brief Slot called when the sync button is clicked
+ */
+void	configurationdialog::syncClicked() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "sync clicked");
+	if (!_daemon) {
+		return;
+	}
+	time_t	now;
+	time(&now);
+	try {
+		_daemon->setSystemTime(now);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "time set from local time");
+	} catch (const std::exception& x) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "cannot sync: %s", x.what());
+	}
+}
+
+static std::string	timeformat(time_t when) {
+	struct tm	*tmp = localtime(&when);
+	char	buffer[20];
+	strftime(buffer, sizeof(buffer), "%H:%M:%S", tmp);
+	return std::string(buffer);
+}
+
+/**
+ * \brief Slot called by the timer to update the time information
+ */
+void	configurationdialog::timeUpdate() {
+	// get local time and write to the localTimeField
+	time_t	now;
+	time(&now);
+	ui->localTimeField->setText(QString(timeformat(now).c_str()));
+
+	// get time from the remote system and write to the systemTimeField
+	try {
+		ui->systemTimeField->setText(QString(timeformat(
+					_daemon->getSystemTime()).c_str()));
+		ui->systemTimeField->setEnabled(true);
+		ui->syncButton->setEnabled(true);
+	} catch (const std::exception& x) {
+		ui->systemTimeField->setEnabled(false);
+		ui->systemTimeField->setText(QString(x.what()));
+		ui->syncButton->setEnabled(false);
+	}
+
+	// get time from the selected mount and write to the sourceTimeField
+	try {
+		ui->sourceTimeField->setText(QString(timeformat(
+			_mount->getTime()).c_str()));
+		ui->sourceTimeField->setEnabled(true);
+		ui->setButton->setEnabled(true);
+	} catch (const std::exception& x) {
+		ui->sourceTimeField->setEnabled(false);
+		ui->sourceTimeField->setText(QString(x.what()));
+		ui->setButton->setEnabled(false);
+	}
+}
+
+/**
+ * \brief Slot called when a different time source is selected
+ *
+ * \param index		index of the time source to consider
+ */
+void	configurationdialog::timesourceSelected(int index) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "time source changed to %d", index);
+	_statusTimer.stop();
+	timesourceinfoPtr	tsiptr = _timesources[index];
+	if (!tsiptr->mount) {
+		try {
+			tsiptr->mount = tsiptr->locator->getMount(tsiptr->name);
+		} catch (std::exception& x) {
+			debug(LOG_ERR, DEBUG_LOG, 0, "cannot get mount: %s",
+				x.what());
+		}
+	}
+	_mount = tsiptr->mount;
+	ui->setButton->setEnabled(true);
+	ui->sourceTimeField->setEnabled(true);
+	ui->sourceTimeLabel->setEnabled(true);
+	_statusTimer.start();
 }
 
 } // namespace snowgui

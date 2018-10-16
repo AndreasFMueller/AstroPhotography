@@ -66,7 +66,7 @@ static void	showlist(const std::vector<std::string>& names) {
 static int	scan_command(const std::string& modulename, bool verbose) {
 	module::ModuleRepositoryPtr	_repository = module::getModuleRepository();
 	module::ModulePtr	module = _repository->getModule(modulename);
-	module::ModuleDescriptorPtr	moddesc = module->getDescriptor();
+	module::ModuleDescriptor	*moddesc = module->getDescriptor();
 	if (verbose) {
 		std::cout << "module " << modulename << " version ";
 		std::cout << moddesc->version() << std::endl;

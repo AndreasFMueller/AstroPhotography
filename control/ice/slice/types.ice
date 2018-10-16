@@ -150,6 +150,7 @@ module snowstar {
 				throws NotFound, IOException, OperationFailed;
 		void	unmount(string mountpoint)
 				throws NotFound, IOException, OperationFailed;
+		long	getSystemTime();
 		void	setSystemTime(long unixtime);
 	};
 
@@ -164,8 +165,13 @@ module snowstar {
 	/**
 	 * \brief parameter value types
 	 */
-	enum ParameterType {	ParameterBoolean, ParameterRange,
-		ParameterSequence, ParameterSetFloat, ParameterSetString };
+	enum ParameterType {
+		ParameterBoolean,
+		ParameterRange,
+		ParameterSequence,
+		ParameterSetFloat,
+		ParameterSetString
+	};
 
 	sequence<float>	floatlist;
 	sequence<string>	stringlist;

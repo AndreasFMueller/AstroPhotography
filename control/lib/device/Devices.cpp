@@ -31,7 +31,7 @@ Devices::devicelist	Devices::getDevicelist(DeviceName::device_type type) {
 		ModulePtr	module = _repository->getModule(modulename);
 
 		// get the descriptor
-		ModuleDescriptorPtr	descriptor = module->getDescriptor();
+		ModuleDescriptor	*descriptor = module->getDescriptor();
 		if (!descriptor->hasDeviceLocator()) {
 			continue;
 		}

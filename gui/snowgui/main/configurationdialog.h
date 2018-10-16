@@ -7,7 +7,9 @@
 #define SNOWGUI_CONFIGURATIONDIALOG_H
 
 #include <QDialog>
+#include <QTimer>
 #include <types.h>
+#include <device.h>
 #include <AstroDiscovery.h>
 
 namespace snowgui {
@@ -15,6 +17,15 @@ namespace snowgui {
 namespace Ui {
 	class configurationdialog;
 }
+
+class timesourceinfo {
+public:
+	std::string			name;
+	snowstar::DeviceLocatorPrx	locator;
+	snowstar::MountPrx		mount;
+};
+
+typedef std::shared_ptr<timesourceinfo>	timesourceinfoPtr;
 
 class configurationdialog : public QDialog {
 	Q_OBJECT
@@ -25,6 +36,9 @@ class configurationdialog : public QDialog {
 	bool	_servicechangewarning;
 	bool	_mounting;
 
+	std::vector<timesourceinfoPtr>	_timesources;
+
+	QTimer	_statusTimer;
 public:
 	configurationdialog(QWidget *parent,
 		astro::discover::ServiceObject serviceobject);
@@ -32,9 +46,10 @@ public:
 
 	void	setConfiguration(snowstar::ConfigurationPrx);
 	void	setDaemon(snowstar::DaemonPrx);
-
+	void	setModules(snowstar::ModulesPrx);
 
 public slots:
+	// services offered
 	void	devicesToggled(bool);
 	void	instrumentsToggled(bool);
 	void	imagesToggled(bool);
@@ -43,17 +58,28 @@ public slots:
 	void	repositoriesToggled(bool);
 	void	tasksToggled(bool);
 	void	restartClicked();
+
+	// repository management
 	void	repodbChanged(QString);
 	void	repodbClicked();
 
+	// mountpoint management
 	void	deviceChanged(QString);
 	void	mountpointChanged(QString);
 	void	mountClicked();
+
+	// time management
+	void	syncClicked();
+	void	setfromsourceClicked();
+	void	timeUpdate();
+	void	timesourceSelected(int);
 private:
 	Ui::configurationdialog *ui;
 	astro::discover::ServiceObject	_serviceobject;
 	snowstar::ConfigurationPrx	_configuration;
 	snowstar::DaemonPrx	_daemon;
+	snowstar::ModulesPrx	_modules;
+	snowstar::MountPrx	_mount;
 
 	void	operationFailed(const std::string& s);
 };

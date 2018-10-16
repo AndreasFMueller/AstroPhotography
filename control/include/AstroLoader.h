@@ -45,7 +45,6 @@ public:
 	virtual std::string	version() const;
 	virtual	bool	hasDeviceLocator() const;
 };
-typedef std::shared_ptr<ModuleDescriptor>	ModuleDescriptorPtr;
 
 class ModuleRepository;
 class ModuleRepositoryBackend;
@@ -86,7 +85,7 @@ public:
 	void	open();
 	void	close();
 	static bool	dlclose_on_close;
-	ModuleDescriptorPtr	getDescriptor();
+	ModuleDescriptor	*getDescriptor();
 	astro::device::DeviceLocatorPtr	getDeviceLocator();
 	friend class ModuleRepositoryBackend;
 	friend class ::astro::test::ModuleTest;
