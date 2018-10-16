@@ -38,6 +38,7 @@ public:
 	virtual TaskInfo info(int taskid, const Ice::Current& current);
 	virtual void cancel(int taskid, const Ice::Current& current);
 	virtual void remove(int taskid, const Ice::Current& current);
+	virtual void resubmit(int taskid, const Ice::Current& current);
 	virtual taskidsequence tasklist(TaskState state,
 			const Ice::Current& current);
 	virtual TaskPrx getTask(int taskid, const Ice::Current& current);

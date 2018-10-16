@@ -12,7 +12,16 @@ module snowstar {
 	sequence<BinningMode>	BinningSet;
 
 	enum ShutterState { ShCLOSED, ShOPEN };
-	enum ExposurePurpose { ExLIGHT, ExDARK, ExFLAT, ExBIAS, ExTEST, ExGUIDE, ExFOCUS, ExFLOOD };
+	enum ExposurePurpose {
+		ExLIGHT,
+		ExDARK,
+		ExFLAT,
+		ExBIAS,
+		ExTEST,
+		ExGUIDE,
+		ExFOCUS,
+		ExFLOOD
+	};
 
 	/**
 	 * \brief Exposure request structure
@@ -89,7 +98,14 @@ module snowstar {
 
 	interface Cooler;
 
-	enum ExposureState { IDLE, EXPOSING, EXPOSED, CANCELLING, STREAMING, BROKEN };
+	enum ExposureState {
+		IDLE,
+		EXPOSING,
+		EXPOSED,
+		CANCELLING,
+		STREAMING,
+		BROKEN
+	};
 
 	struct Interval {
 		float	min;
@@ -291,7 +307,11 @@ module snowstar {
 	 * the filter wheel is in the idle or unknown state. One then should
 	 * wait until it is in the idle state, 
 	 */
-	enum FilterwheelState { FwIDLE, FwMOVING, FwUNKNOWN };
+	enum FilterwheelState {
+		FwIDLE,
+		FwMOVING,
+		FwUNKNOWN
+	};
 
 	/**
  	 * \brief FilterWheel interface

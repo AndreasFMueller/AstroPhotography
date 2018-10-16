@@ -25,6 +25,13 @@ taskqueuemanagerwidget::taskqueuemanagerwidget(QWidget *parent)
 	_taskinfowidget = NULL;
 	_taskmonitor = NULL;
 
+	// set the task times to zero
+	_totaltimes.insert(std::make_pair(snowstar::TskPENDING,   (double)0.0));
+	_totaltimes.insert(std::make_pair(snowstar::TskEXECUTING, (double)0.0));
+	_totaltimes.insert(std::make_pair(snowstar::TskFAILED,    (double)0.0));
+	_totaltimes.insert(std::make_pair(snowstar::TskCANCELLED, (double)0.0));
+	_totaltimes.insert(std::make_pair(snowstar::TskCOMPLETE,  (double)0.0));
+
 	// configure the task list
 	QStringList	headers;
 	headers << "ID";		//  0
@@ -107,6 +114,8 @@ taskqueuemanagerwidget::taskqueuemanagerwidget(QWidget *parent)
 		this, SLOT(downloadClicked()));
 	connect(ui->deleteButton, SIGNAL(clicked()),
 		this, SLOT(deleteClicked()));
+	connect(ui->resubmitButton, SIGNAL(clicked()),
+		this, SLOT(resubmitClicked()));
 
 	connect(ui->taskTree, SIGNAL(itemSelectionChanged()),
 		this, SLOT(itemSelectionChanged()));
@@ -170,6 +179,9 @@ void	taskqueuemanagerwidget::addTask(QTreeWidgetItem *parent,
 		list << QString(astro::stringprintf("%.0fs",
 			exposure.exposuretime()).c_str());
 	}
+	float	e = _totaltimes.find(info.state)->second;
+	e += exposure.exposuretime();
+	_totaltimes.find(info.state)->second = e;
 
 	// 6 filter
 	list << QString(parameters.filter.c_str());
@@ -257,9 +269,9 @@ void	taskqueuemanagerwidget::addTasks(QTreeWidgetItem *parent,
 			snowstar::TaskInfo	info = _tasks->info(*i);
 			snowstar::TaskParameters	parameters
 				= _tasks->parameters(*i);
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "task %d: repodb: %s",
-			info.taskid,
-			parameters.repodb.c_str());
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "task %d: repodb: %s",
+				info.taskid,
+				parameters.repodb.c_str());
 			addTask(parent, info, parameters);
 		} catch (const std::exception& x) {
 			debug(LOG_ERR, DEBUG_LOG, 0,
@@ -276,6 +288,7 @@ void	taskqueuemanagerwidget::setHeader(snowstar::TaskState state) {
 	std::string	tag;
 	QTreeWidgetItem	*top;
 	int	count;
+	float	exposuretime = _totaltimes.find(state)->second;
 	switch (state) {
 	case snowstar::TskCOMPLETE:
 		top = ui->taskTree->topLevelItem(0);
@@ -301,6 +314,13 @@ void	taskqueuemanagerwidget::setHeader(snowstar::TaskState state) {
 	count = top->childCount();
 	top->setText(1, QString(astro::stringprintf("%s (%d)",
 			tag.c_str(), count).c_str()));
+	top->setTextAlignment(5, Qt::AlignRight);
+	if (count > 0) {
+		top->setText(5, QString(astro::stringprintf("%.0fs",
+					exposuretime).c_str()));
+	} else {
+		top->setText(5, QString());
+	}
 }
 
 /**
@@ -491,6 +511,25 @@ void	taskqueuemanagerwidget::deleteClicked() {
 }
 
 /**
+ * \brief Slot to handle resubmission
+ */
+void	taskqueuemanagerwidget::resubmitClicked() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "resubmitClicked()");
+	QList<QTreeWidgetItem*>	todelete = ui->taskTree->selectedItems();
+	std::list<int>	taskids = selectedids();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "%d items to delete", todelete.size());
+	std::list<int>::const_iterator	j;
+	for (j = taskids.begin(); j != taskids.end(); j++) {
+		try {
+			_tasks->resubmit(*j);
+		} catch (const std::exception& x) {
+			debug(LOG_ERR, DEBUG_LOG, 0, "cannot resubmit %d: %s",
+				*j, x.what());
+		}
+	}
+}
+
+/**
  * \brief Reflect changed information in the task list entries
  */
 void	taskqueuemanagerwidget::updateInfo(QTreeWidgetItem *item,
@@ -513,6 +552,7 @@ void	taskqueuemanagerwidget::updateInfo(QTreeWidgetItem *item,
 			info.frame.size.width,
 			info.frame.size.height).c_str()));
 	}
+
 	// 4 last state change
 	time_t  when = snowstar::converttime(info.lastchange);
 	struct tm       *tmp = localtime(&when);
@@ -534,6 +574,7 @@ void	taskqueuemanagerwidget::taskUpdate(snowstar::TaskMonitorInfo info) {
 		return;
 	}
 
+	// get the task information
 	snowstar::TaskInfo	tinfo;
 	bool	hasinfo = false;
 	try {
@@ -548,28 +589,59 @@ void	taskqueuemanagerwidget::taskUpdate(snowstar::TaskMonitorInfo info) {
 
 	// for all other cases, we don't have to create new entries, but
 	// only move them around.
+	int	tasksection = -1;
 	for (int section = 0; section < 5; section++) {
 		QString id = QString::number(info.taskid);
 		debug(LOG_DEBUG, DEBUG_LOG, 0,
 			"checking section %d, task id %s", section,
 			id.toLatin1().data());
 		QTreeWidgetItem	*top = ui->taskTree->topLevelItem(section);
+
 		// go through all the children of the top level node in the
 		// hope of finding an item with the same id
 		for (int i = 0; i < top->childCount(); i++) {
 			QTreeWidgetItem	*child = top->child(i);
 			if (child->text(0) == id) {
 				debug(LOG_DEBUG, DEBUG_LOG, 0, "found item");
+				tasksection = section;
 				child = top->takeChild(i);
 				if (hasinfo) {
 					updateInfo(child, tinfo);
 				}
 				this->parent(info.newstate)->addChild(child);
-				setHeaders();
-				return;
+				goto summarize;
 			}
 		}
 	}
+	return;
+
+summarize:
+	// get the task parameters
+	float	exposuretime = _tasks->parameters(info.taskid).exp.exposuretime;
+
+	// remove the time from the section where we found it
+	snowstar::TaskState	state;
+	switch (tasksection) {
+	case 0:	state = snowstar::TskCOMPLETE;
+		break;
+	case 1:	state = snowstar::TskFAILED;
+		break;
+	case 2:	state = snowstar::TskCANCELLED;
+		break;
+	case 3:	state = snowstar::TskEXECUTING;
+		break;
+	case 4:	state = snowstar::TskPENDING;
+		break;
+	}
+	_totaltimes.find(state)->second = 
+		_totaltimes.find(state)->second - exposuretime;
+
+	// add the time to the section to which we moved it
+	_totaltimes.find(tinfo.state)->second = 
+		_totaltimes.find(tinfo.state)->second + exposuretime;
+
+	// display the headers
+	setHeaders();
 }
 
 /**
@@ -595,6 +667,7 @@ QTreeWidgetItem	*taskqueuemanagerwidget::parent(snowstar::TaskState state) {
  * \brief delete a task tree entry based on the task id
  */
 void	taskqueuemanagerwidget::deleteTask(int taskid) {
+	// remove the task from the list
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "delete with task id = %d", taskid);
 	for (int section = 0; section < 5; section++) {
 		QString	id = QString::number(taskid);
@@ -604,10 +677,18 @@ void	taskqueuemanagerwidget::deleteTask(int taskid) {
 			if (child->text(0) == id) {
 				child = top->takeChild(i);
 				delete child;
-				return;
+				goto summarize;
 			}
 		}
 	}
+	return;
+
+summarize:
+	// get the task information from the database to update the total time
+	snowstar::TaskInfo	ti = _tasks->info(taskid);
+	float	f = _totaltimes.find(ti.state)->second;
+	f -= _tasks->parameters(taskid).exp.exposuretime;
+	_totaltimes.find(ti.state)->second = f;
 }
 
 /**
@@ -626,8 +707,10 @@ void	taskqueuemanagerwidget::itemSelectionChanged() {
 	}
 	if (selected.count() > 0) {
 		ui->cancelButton->setEnabled(true);
+		ui->resubmitButton->setEnabled(true);
 	} else {
 		ui->cancelButton->setEnabled(false);
+		ui->resubmitButton->setEnabled(false);
 	}
 }
 

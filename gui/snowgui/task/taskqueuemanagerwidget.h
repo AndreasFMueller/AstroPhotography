@@ -30,6 +30,8 @@ class taskqueuemanagerwidget : public QWidget {
 	Ice::ObjectPtr	_taskmonitorptr;
 	taskinfowidget	*_taskinfowidget;
 
+	std::map<snowstar::TaskState, float>	_totaltimes;
+
 public:
 	explicit taskqueuemanagerwidget(QWidget *parent = 0);
 	~taskqueuemanagerwidget();
@@ -44,6 +46,7 @@ public slots:
 	void	imageClicked();
 	void	downloadClicked();
 	void	deleteClicked();
+	void	resubmitClicked();
 	void	itemSelectionChanged();
 	void	taskUpdate(snowstar::TaskMonitorInfo);
 	void	showInfo(QTreeWidgetItem*);

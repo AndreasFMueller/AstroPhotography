@@ -355,6 +355,11 @@ public:
 	TaskQueueEntry::taskstate	state() const { return _state; }
 	void	state(const TaskQueueEntry::taskstate& s) { _state = s; }
 private:
+	TaskQueueEntry::taskstate	_oldstate;
+public:
+	TaskQueueEntry::taskstate	oldstate() const { return _oldstate; }
+	void	oldstate(const TaskQueueEntry::taskstate& s) { _oldstate = s; }
+private:
 	time_t	_when;
 public:
 	time_t	when() const { return _when; }

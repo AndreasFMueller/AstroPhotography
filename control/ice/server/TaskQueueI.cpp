@@ -191,6 +191,9 @@ int TaskQueueI::submit(const TaskParameters& parameters,
 	}
 }
 
+/**
+ * \brief Retrieve parameters from the queue
+ */
 TaskParameters TaskQueueI::parameters(int taskid, const Ice::Current& /* current */) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "query parameters of task %d", taskid);
 	if (!taskqueue.exists(taskid)) {
@@ -213,6 +216,9 @@ TaskParameters TaskQueueI::parameters(int taskid, const Ice::Current& /* current
 	}
 }
 
+/**
+ * \brief Retrieve parameters from the queue
+ */
 TaskInfo TaskQueueI::info(int taskid, const Ice::Current& /* current */) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "query info of task %d", taskid);
 	if (!taskqueue.exists(taskid)) {
@@ -233,6 +239,9 @@ TaskInfo TaskQueueI::info(int taskid, const Ice::Current& /* current */) {
 	}
 }
 
+/**
+ * \brief cancel a task in the queue
+ */
 void TaskQueueI::cancel(int taskid, const Ice::Current& /* current */) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "cancel request for %d", taskid);
 	if (!taskqueue.exists(taskid)) {
@@ -255,6 +264,9 @@ void TaskQueueI::cancel(int taskid, const Ice::Current& /* current */) {
 	}
 }
 
+/**
+ * \brief Remove a task from the queue
+ */
 void TaskQueueI::remove(int taskid, const Ice::Current& /* current */) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "remove request for %d", taskid);
 	if (!taskqueue.exists(taskid)) {
@@ -275,6 +287,24 @@ void TaskQueueI::remove(int taskid, const Ice::Current& /* current */) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", cause.c_str());
 		throw BadParameter(cause);
 	}
+}
+
+/**
+ * \brief Resubmit a tesk
+ */
+void TaskQueueI::resubmit(int taskid, const Ice::Current& current) {
+	if (!taskqueue.exists(taskid)) {
+		std::string	cause = astro::stringprintf(
+			"task %d does not exist", taskid);
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", cause.c_str());
+		throw NotFound(cause);
+	}
+
+	// get the information from the task queue
+	astro::task::TaskParameters p = taskqueue.parameters(taskid);
+
+	// submit a job with the same parameters
+	submit(convert(p), current);
 }
 
 taskidsequence TaskQueueI::tasklist(TaskState state,

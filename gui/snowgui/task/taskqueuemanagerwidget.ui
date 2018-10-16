@@ -60,6 +60,13 @@
        </widget>
       </item>
       <item>
+       <widget class="QPushButton" name="resubmitButton">
+        <property name="text">
+         <string>Resubmit</string>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QPushButton" name="imageButton">
         <property name="text">
          <string>Image</string>

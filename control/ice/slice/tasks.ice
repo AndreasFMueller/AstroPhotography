@@ -48,8 +48,13 @@ module snowstar {
 	 * the failed state. A task can also be cancelled, after which it
 	 * is in the cancelled state.
 	 */
-	enum TaskState	{ TskPENDING, TskEXECUTING, TskFAILED,
-			TskCANCELLED, TskCOMPLETE };
+	enum TaskState	{
+		TskPENDING,
+		TskEXECUTING,
+		TskFAILED,
+		TskCANCELLED,
+		TskCOMPLETE
+	};
 
 	/**
 	 * \brief Information about a task
@@ -112,8 +117,12 @@ module snowstar {
 
 	sequence<int> taskidsequence;
 
-	enum QueueState { QueueIDLE, QueueLAUNCHING, QueueSTOPPING,
-		QueueSTOPPED };
+	enum QueueState {
+		QueueIDLE,
+		QueueLAUNCHING,
+		QueueSTOPPING,
+		QueueSTOPPED
+	};
 	/**
 	 * \brief Task queue
 	 *
@@ -161,6 +170,11 @@ module snowstar {
 		 * \brief Remove a task from the queue
 		 */
 		void	remove(int taskid) throws BadState, NotFound;
+
+		/**
+		 * \brief Resubmit a task
+		 */
+		void	resubmit(int taskid) throws BadState, NotFound;
 
 		/**
 		 * \brief retrieve a list of tasks
