@@ -14,45 +14,45 @@ namespace snowgui {
  */
 StateMonitoringWork::StateMonitoringWork(ccdcontrollerwidget *c)
 	: QObject(NULL), _ccdcontrollerwidget(c) {
-	_running = true;
+	_previousstate = snowstar::IDLE;
+	connect(this,
+		SIGNAL(stateChanged(snowstar::ExposureState)),
+		_ccdcontrollerwidget,
+		SLOT(statusUpdate(snowstar::ExposureState)));
 }
 
 /**
  * \brief stop a state monitoring thread
  */
 StateMonitoringWork::~StateMonitoringWork() {
-	_running = false;
 }
 
 /**
  * \brief Main method doing the state monitoring
  */
 void	StateMonitoringWork::updateStatus() {
-	snowstar::ExposureState	previousstate = snowstar::IDLE;
-	std::lock_guard<std::recursive_mutex>	lock(_mutex);
-	if ((_ccdcontrollerwidget) && (_ccdcontrollerwidget->_ccd)) {
-		try {
-			snowstar::ExposureState	newstate
-				= _ccdcontrollerwidget->_ccd->exposureStatus();
-			if (newstate != previousstate) {
-				emit stateChanged(newstate);
-			}
-			previousstate = newstate;
-		} catch (const std::exception& x) {
-			std::string	msg = astro::stringprintf(
-				"cannot get ccd state: %s", x.what());
-			debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
-		}
+	//debug(LOG_DEBUG, DEBUG_LOG, 0, "updateStatus()");
+	if (!_ccdcontrollerwidget->_ccd) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "no ccd");
+		return;
 	}
-}
-
-/**
- * \brief Stop the thread
- */
-void	StateMonitoringWork::stop() {
-	std::lock_guard<std::recursive_mutex>	lock(_mutex);
-	_running = false;
-	_ccdcontrollerwidget = NULL;
+	try {
+		snowstar::ExposureState	newstate
+			= _ccdcontrollerwidget->_ccd->exposureStatus();
+		if (newstate != _previousstate) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0,
+				"state change detected, new state %d",
+				newstate);
+			emit stateChanged(newstate);
+			debug(LOG_DEBUG, DEBUG_LOG, 0,
+				"stateChanged(%d) emitted", newstate);
+		}
+		_previousstate = newstate;
+	} catch (const std::exception& x) {
+		std::string	msg = astro::stringprintf(
+			"cannot get ccd state: %s", x.what());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+	}
 }
 
 } // namespace snowgui

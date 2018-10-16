@@ -16,7 +16,8 @@ namespace snowstar {
  * The constructor creates the ImageSink proxy via which it will talk
  * to the client
  */
-CcdSink::CcdSink(const Ice::Identity& identity, const Ice::Current& current) {
+CcdSink::CcdSink(astro::camera::CcdPtr ccd, const Ice::Identity& identity,
+		const Ice::Current& current) : _ccd(ccd) {
 	std::string	is = identity.name + "@" + identity.category;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "construct a CcdSink: %s", is.c_str());
 	Ice::ObjectPrx	oneway = current.con->createProxy(identity)
@@ -53,6 +54,7 @@ void	CcdSink::operator()(const astro::camera::ImageQueueEntry& entry) {
 		}
 	} else {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "ImageQueueEntry: sink stalled");
+		_ccd->stopStream();
 	}
 }
 
@@ -74,6 +76,7 @@ void	CcdSink::stop() {
 		}
 	} else {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "stop: sink stalled");
+		_ccd->stopStream();
 	}
 }
 

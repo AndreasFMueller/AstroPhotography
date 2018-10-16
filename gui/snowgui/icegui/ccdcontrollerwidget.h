@@ -70,13 +70,12 @@ signals:
 class StateMonitoringWork : public QObject {
 	Q_OBJECT
 	ccdcontrollerwidget	*_ccdcontrollerwidget;
-	volatile std::atomic_bool	_running;
-	std::recursive_mutex	_mutex;
+	snowstar::ExposureState	_previousstate;
 public:
 	StateMonitoringWork(ccdcontrollerwidget *c);
 	virtual ~StateMonitoringWork();
+public slots:
 	void	updateStatus();
-	void	stop();
 signals:
 	void	stateChanged(snowstar::ExposureState);
 };
@@ -135,7 +134,9 @@ signals:
 	void	imageproxyReceived(snowstar::ImagePrx image);
 	void	ccdSelected(int);
 	void	ccddataSelected(ccddata);
+	void	ccdprxSelected(snowstar::CcdPrx);
 	void	imageNotReceived(QString);
+	void	streamStart();
 
 private:
 	void	setupCcd();
@@ -180,12 +181,18 @@ public slots:
 	void	hideSubframe(bool);
 	void	hideButtons(bool);
 
+	// start the stream
+	void	startStream();
+
 	// needed internally for status udpates
 	void	statusUpdate(snowstar::ExposureState);
 
 	// needed by the image retrieval thread 
 	void	retrieveImageComplete();
 	void	retrieveImageFailed(QString);
+
+	// test slot
+	void	testSlot();
 
 	// allow the ImageRetrieverThread access to private methods
 	friend class ImageRetrieverThread;

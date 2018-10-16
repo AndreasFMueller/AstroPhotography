@@ -35,7 +35,7 @@ coolercontrollerwidget::coolercontrollerwidget(QWidget *parent) :
 
 	// updating the active display from information read from the proxy
 	connect(this, SIGNAL(newCoolerState(float,float,bool)),
-		ui->activeWidget, SIGNAL(update(float,float,bool)));
+		ui->activeWidget, SLOT(update(float,float,bool)));
 	connect(this, SIGNAL(newActualTemperature(float)),
 		this, SLOT(displayActualTemperature(float)));
 

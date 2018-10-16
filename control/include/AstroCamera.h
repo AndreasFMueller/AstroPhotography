@@ -60,7 +60,11 @@ std::ostream&	operator<<(std::ostream& out, const BinningSet& binningset);
 class CcdState {
 public:
 	typedef enum state_e {
-		idle = 0, exposing = 1, exposed = 2, cancelling = 3
+		idle = 0,
+		exposing = 1,
+		exposed = 2,
+		cancelling = 3,
+		streaming = 4
 	} State;
 static std::string	state2string(State s);
 static State	string2state(const std::string& s);
@@ -342,6 +346,7 @@ public:
 class ImageStream : public ImageQueue, public ImageSink {
 protected:
 	ImageSink	*_imagesink;
+	std::recursive_mutex	_mutex;
 	Exposure	_streamexposure;
 private:
 	void	*private_data;
@@ -358,7 +363,7 @@ public:
 	virtual void	stopStream();
 	virtual bool	streaming();
 	virtual void	streamExposure(const Exposure& exposure);
-	virtual const Exposure&	streamExposure();
+	virtual Exposure	streamExposure();
 	virtual void	operator()(const ImageQueueEntry& entry);
 };
 
@@ -434,7 +439,7 @@ public:
 	virtual void	startStream(const Exposure& exposure);
 	virtual void	stopStream();
 	virtual void	streamExposure(const Exposure& exposure);
-	virtual const Exposure&	streamExposure();
+	virtual Exposure	streamExposure();
 private:
 	void	checkStreaming();
 	// handling the cooler

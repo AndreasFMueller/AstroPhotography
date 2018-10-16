@@ -19,8 +19,10 @@ namespace snowstar {
  */
 class CcdSink : public astro::camera::ImageSink {
 	ImageSinkPrx	sinkprx;
+	astro::camera::CcdPtr	_ccd;
 public:
-	CcdSink(const Ice::Identity& identity, const Ice::Current& current);
+	CcdSink(astro::camera::CcdPtr ccd, const Ice::Identity& identity,
+		const Ice::Current& current);
 	virtual ~CcdSink() { }
 	void	operator()(const astro::camera::ImageQueueEntry& entry);
 	void	stop();

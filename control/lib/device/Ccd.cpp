@@ -368,7 +368,7 @@ void	Ccd::streamExposure(const Exposure& exposure) {
 /**
  * \brief get the current stream exposure
  */
-const Exposure& Ccd::streamExposure() {
+Exposure Ccd::streamExposure() {
 	checkStreaming();
 	return ImageStream::streamExposure();
 }

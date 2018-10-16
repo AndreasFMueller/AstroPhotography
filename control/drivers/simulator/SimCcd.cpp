@@ -54,7 +54,9 @@ SimCcd::SimCcd(const CcdInfo& _info, SimLocator& locator)
 }
 
 static void	imageconstruction_main(SimCcd *simccd) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "starting image construction");
 	simccd->createimage();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "image construction complete");
 }
 
 /**
@@ -118,6 +120,7 @@ void	SimCcd::createimage() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "start image construction thread");
 	// update the mount position
 	RaDec	rd = _locator.mount()->getRaDec();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "RA/DEC: %s", rd.toString().c_str());
 	if (rd != _last_direction) {
 		if (rd == RaDec()) {
 			double	s = log2(1 + fabs(rd.ra().radians()
@@ -272,6 +275,7 @@ CcdState::State	SimCcd::exposureStatus() {
 	case CcdState::idle:
 	case CcdState::exposed:
 	case CcdState::cancelling:
+	case CcdState::streaming:
 		return state();
 	case CcdState::exposing:
 		if (timepast > exposure.exposuretime()) {
@@ -343,7 +347,7 @@ ImagePtr  SimCcd::getRawImage() {
 	delete _thread;
 
 	// let the client wait another second
-	usleep(3000000);
+	//usleep(3000000);
 
 	return _image;
 }

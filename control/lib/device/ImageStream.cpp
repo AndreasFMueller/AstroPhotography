@@ -81,13 +81,15 @@ void	ImageStream::stopStream() {
  * \brief change the stream exposure
  */
 void	ImageStream::streamExposure(const Exposure& exposure) {
+	std::lock_guard<std::recursive_mutex>	lock(_mutex);
 	_streamexposure = exposure;
 }
 
 /**
  * \brief get the current exposure settings
  */
-const Exposure&	ImageStream::streamExposure() {
+Exposure	ImageStream::streamExposure() {
+	std::lock_guard<std::recursive_mutex>	lock(_mutex);
 	return _streamexposure;
 }
 
