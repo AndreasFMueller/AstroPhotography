@@ -127,6 +127,7 @@ void	QsiCamera::reset() {
  */
 CcdPtr	QsiCamera::getCcd0(size_t id) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "get CCD %d from %p", id, this);
+	std::lock_guard<std::recursive_mutex>	lock(mutex);
 	if (id > 0) {
 		throw std::invalid_argument("only CCD 0 defined");
 	}
@@ -145,6 +146,7 @@ bool	QsiCamera::hasFilterWheel() const {
  */
 FilterWheelPtr	QsiCamera::getFilterWheel0() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "get the filterwheel from %p", this);
+	std::lock_guard<std::recursive_mutex>	lock(mutex);
 	if (!_hasfilterwheel) {
 		throw std::invalid_argument("camera has no filter wheel");
 	}
@@ -163,6 +165,7 @@ bool	QsiCamera::hasGuidePort() const {
  */
 GuidePortPtr	QsiCamera::getGuidePort0() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "get the guideport");
+	std::lock_guard<std::recursive_mutex>	lock(mutex);
 	if (!_hasguideport) {
 		throw std::runtime_error("camera has no guider port");
 	}

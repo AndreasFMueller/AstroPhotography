@@ -61,6 +61,7 @@ void	ImageStreamThread::run() {
 			debug(LOG_DEBUG, DEBUG_LOG, 0, "start new exposure");
 			Exposure	exposure = _stream.streamExposure();
 			_ccd->startExposure(exposure);
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "waiting");
 			_ccd->wait();
 			ImagePtr	image = _ccd->getImage();
 			debug(LOG_DEBUG, DEBUG_LOG, 0, "image retrieved");
@@ -68,9 +69,16 @@ void	ImageStreamThread::run() {
 			// create a new entry
 			ImageQueueEntry	entry(_ccd->getExposure(), image);
 			entry.sequence = counter++;
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "image entry prepared");
 
 			// hand the entry over to the stream
 			_stream(entry);
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "image added");
+
+			// verify the state
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "CCD state: %s",
+				CcdState::state2string(_ccd->exposureStatus())
+					.c_str());
 		}
 	} catch (const std::exception& x) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "error in image loop: %s",

@@ -82,6 +82,7 @@ Ccd::Ccd(const CcdInfo& _info)
  * \brief Get the state
  */
 CcdState::State	Ccd::state() {
+	std::unique_lock<std::recursive_mutex>	lock(_mutex);
 	return _state;
 }
 
@@ -89,8 +90,14 @@ CcdState::State	Ccd::state() {
  * \brief Set the state, notify threads waiting for a state change
  */
 void	Ccd::state(CcdState::State s) {
-	_state = s;
-	_condition.notify_all();
+	std::unique_lock<std::recursive_mutex>	lock(_mutex);
+	if (_state != s) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "state change %s -> %s",
+			CcdState::state2string(_state).c_str(),
+			CcdState::state2string(s).c_str());
+		_state = s;
+		_condition.notify_all();
+	}
 }
 
 /**
@@ -240,14 +247,11 @@ bool	Ccd::wait() {
 	// notified, check whether the state has changed, and retry if not
 	while (std::cv_status::no_timeout == _condition.wait_for(lock,
 		std::chrono::seconds(delta))) {
-		if (statechange()) {
-			debug(LOG_DEBUG, DEBUG_LOG, 0, "wait complete %s",
-				CcdState::state2string(state()).c_str());
-			return (CcdState::exposed == this->state());
-		} else {
-			debug(LOG_DEBUG, DEBUG_LOG, 0, "state has not changed, "
-				"try again");
-		}
+		// if we get to this point, we know that the state
+		// actually changed
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "wait complete, state %s",
+			CcdState::state2string(state()).c_str());
+		return (CcdState::exposed == this->state());
 	}
 
 	// this really should not happen, it indicates a serious problem
@@ -292,6 +296,7 @@ astro::image::ImagePtr	Ccd::getImage() {
 
 	// set state to idle
 	state(CcdState::idle);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "state changed to idle");
 
 	// that's it, return the image
 	return image;

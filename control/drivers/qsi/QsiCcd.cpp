@@ -27,7 +27,7 @@ QsiCcd::QsiCcd(const CcdInfo& info, QsiCamera& camera)
 	// initialize the state variables
 	std::lock_guard<std::recursive_mutex>	lock(_camera.mutex);
 	_last_state = CcdState::idle;
-	_last_qsistate = QSICamera::CameraIdle;
+	_thread = NULL;
 }
 
 /**
@@ -42,6 +42,10 @@ QsiCcd::~QsiCcd() {
 	// XXX turn off the cooler
 }
 
+static void	start_main(QsiCcd *qsiccd) {
+	qsiccd->run();
+}
+
 /**
  * \brief start an exposure
  *
@@ -50,9 +54,19 @@ QsiCcd::~QsiCcd() {
 void	QsiCcd::startExposure(const Exposure& exposure) {
 	std::lock_guard<std::recursive_mutex>	lock(_camera.mutex);
 
-	// set the state to exposure
+	// set the state to exposure, this also ensures we actually
+	// are in a state where we could start a new exposure
 	Ccd::startExposure(exposure);
 
+	// before starting a new exposure, we should clean up the thread
+	// if it is still around
+	if (_thread) {
+		_thread->join();
+		delete _thread;
+		_thread = NULL;
+	}
+
+	// now set up the exposure
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "start QSI exposure");
 	try {
 		// set the binning mode
@@ -109,8 +123,9 @@ void	QsiCcd::startExposure(const Exposure& exposure) {
 		throw BadParameter(x.what());
 	}
 
-	// check the current state of the camera
-	exposureStatus();
+	// launch a thread waiting for the camera
+	_exposure_done = false;
+	_thread = new std::thread(start_main, this);
 }
 
 /**
@@ -137,6 +152,43 @@ std::string	state2string(QSICamera::CameraState qsistate) {
 }
 
 /**
+ * \brief main method for the exposure thread
+ */
+void	QsiCcd::run() {
+	while (1) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "get Ccd state");
+		QSICamera::CameraState	qsistate;
+		{
+			std::unique_lock<std::recursive_mutex>	lock(
+				_camera.mutex);
+
+			// get the camera state
+			START_STOPWATCH;
+			_camera.camera().get_CameraState(&qsistate);
+			END_STOPWATCH("get_CameraState()");
+		}
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "qsistate=%d", qsistate);
+		
+		// analyze the state
+		switch (qsistate) {
+		case QSICamera::CameraWaiting:
+		case QSICamera::CameraExposing:
+		case QSICamera::CameraDownload:
+		case QSICamera::CameraError:
+			break;
+		case QSICamera::CameraIdle:
+		case QSICamera::CameraReading:
+			state(CcdState::exposed);
+			return;
+		}
+
+		// sleep a little
+		Timer::sleep(0.1);
+	}
+	_exposure_done = true;
+}
+
+/**
  * \brief get the current camera state
  *
  * \return the current QSI state
@@ -150,6 +202,18 @@ CcdState::State	QsiCcd::exposureStatus() {
 		//	(int)_last_state);
 		return _last_state;
 	}
+	// while the exposure thread is running, we don't need to check
+	// the camera status
+	if (_thread) {
+		if (_exposure_done) {
+			_thread->join();
+			delete _thread;
+			_thread = NULL;
+		}
+		return _last_state = state();
+	}
+
+	// in all other cases, we have to query the camera again
 	try {
 		//debug(LOG_DEBUG, DEBUG_LOG, 0, "checking camera state");
 		// reading the camera state
@@ -159,9 +223,6 @@ CcdState::State	QsiCcd::exposureStatus() {
 		END_STOPWATCH("get_CameraState()");
 		//debug(LOG_DEBUG, DEBUG_LOG, 0, "qsistate = %s",
 		//	state2string(qsistate).c_str());
-		if (_last_qsistate == qsistate) {
-			return _last_state;
-		}
 
 		// compute the new state depending on the QSI state
 		switch (state()) {
@@ -229,11 +290,13 @@ CcdState::State	QsiCcd::exposureStatus() {
 				break;
 			}
 			break;
+		case CcdState::streaming:
+			// just ignore this state
+			break;
 		}
 		//debug(LOG_DEBUG, DEBUG_LOG, 0, "new state %s",
 		//	CcdState::state2string(state()).c_str());
 		_last_state = state();
-		_last_qsistate = qsistate;
 	} catch (const std::exception& x) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "could not get the state: %s",
 			x.what());
@@ -300,7 +363,6 @@ ImagePtr	QsiCcd::getRawImage() {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "unknown read failre");
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "read complete");
-	state(CcdState::idle);
 	return result;
 }
 
