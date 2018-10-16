@@ -29,6 +29,7 @@ public:
 			const Ice::Current& current);
 	void	unmount(const std::string& mountpoint,
 			const Ice::Current& current);
+	void	setSystemTime(long unixtime, const Ice::Current& current);
 };
 
 } // namespace snowstar

@@ -150,6 +150,7 @@ module snowstar {
 				throws NotFound, IOException, OperationFailed;
 		void	unmount(string mountpoint)
 				throws NotFound, IOException, OperationFailed;
+		void	setSystemTime(long unixtime);
 	};
 
 	/**

@@ -253,4 +253,28 @@ void	DaemonI::unmount(const std::string& mountpoint,
 	}
 }
 
+/**
+ * \brief set the system time
+ */
+void	DaemonI::setSystemTime(long unixtime,
+		const Ice::Current& /* current */) {
+	time_t	t = unixtime;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "setting system time to %s", ctime(&t));
+	// construct the command
+	struct tm	*tp = localtime(&t);
+	char	buffer[30];
+	strftime(buffer, sizeof(buffer), "%m%d%H%M%Y", tp);
+	std::string	cmd = astro::stringprintf("sudo date %s", buffer);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "time set command: %s", cmd.c_str());
+
+	// execute the command
+	int	rc = system(cmd.c_str());
+	if (rc) {
+		// throw an exception
+		OperationFailed	f;
+		f.cause = std::string(strerror(errno));
+		throw f;
+	}
+}
+
 } // namespace snowstar
