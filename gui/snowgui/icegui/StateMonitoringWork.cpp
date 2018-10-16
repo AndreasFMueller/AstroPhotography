@@ -1,5 +1,5 @@
 /*
- * StateMonitoringThread.cpp
+ * StateMonitoringWork.cpp
  *
  * (c) 2018 Prof Dr Andreas Müller, Hochschule Rapperswil
  */
@@ -12,34 +12,36 @@ namespace snowgui {
 /**
  * \brief Create a State monitoring thread
  */
-StateMonitoringThread::StateMonitoringThread(ccdcontrollerwidget *c)
-	: QThread(NULL), _ccdcontrollerwidget(c) {
+StateMonitoringWork::StateMonitoringWork(ccdcontrollerwidget *c)
+	: QObject(NULL), _ccdcontrollerwidget(c) {
 	_running = true;
-	connect(this, SIGNAL(finished()), this, SLOT(deleteLater()));
 }
 
 /**
  * \brief stop a state monitoring thread
  */
-StateMonitoringThread::~StateMonitoringThread() {
+StateMonitoringWork::~StateMonitoringWork() {
 	_running = false;
 }
 
 /**
  * \brief Main method doing the state monitoring
  */
-void	StateMonitoringThread::run() {
+void	StateMonitoringWork::updateStatus() {
 	snowstar::ExposureState	previousstate = snowstar::IDLE;
-	while (_running) {
-		usleep(100);
-		std::lock_guard<std::recursive_mutex>	lock(_mutex);
-		if ((_ccdcontrollerwidget) && (_ccdcontrollerwidget->_ccd)) {
+	std::lock_guard<std::recursive_mutex>	lock(_mutex);
+	if ((_ccdcontrollerwidget) && (_ccdcontrollerwidget->_ccd)) {
+		try {
 			snowstar::ExposureState	newstate
 				= _ccdcontrollerwidget->_ccd->exposureStatus();
 			if (newstate != previousstate) {
 				emit stateChanged(newstate);
 			}
 			previousstate = newstate;
+		} catch (const std::exception& x) {
+			std::string	msg = astro::stringprintf(
+				"cannot get ccd state: %s", x.what());
+			debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 		}
 	}
 }
@@ -47,7 +49,7 @@ void	StateMonitoringThread::run() {
 /**
  * \brief Stop the thread
  */
-void	StateMonitoringThread::stop() {
+void	StateMonitoringWork::stop() {
 	std::lock_guard<std::recursive_mutex>	lock(_mutex);
 	_running = false;
 	_ccdcontrollerwidget = NULL;

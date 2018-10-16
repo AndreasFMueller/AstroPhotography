@@ -217,7 +217,7 @@ void    filterwheelcontrollerwidget::statusUpdate() {
 	if (!_filterwheel) {
 		return;
 	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "statusUpdate()");
+	//debug(LOG_DEBUG, DEBUG_LOG, 0, "statusUpdate()");
 
 	// get the new state
 	snowstar::FilterwheelState	newstate;
@@ -257,7 +257,7 @@ void	filterwheelcontrollerwidget::positionUpdate() {
 	if (!_filterwheel) {
 		return;
 	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "positionUpdate()");
+	//debug(LOG_DEBUG, DEBUG_LOG, 0, "positionUpdate()");
 
 	try {
 		int	pos = _filterwheel->currentPosition();

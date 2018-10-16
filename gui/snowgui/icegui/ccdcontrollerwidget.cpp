@@ -76,17 +76,33 @@ ccdcontrollerwidget::ccdcontrollerwidget(QWidget *parent) :
 	ui->buttonArea->setEnabled(false);
 
 	// start the state monitoring thread
-	_statemonitoringthread = new StateMonitoringThread(this);
-	connect(_statemonitoringthread,
+	_statemonitoringwork = new StateMonitoringWork(this);
+	connect(_statemonitoringwork,
 		SIGNAL(stateChanged(snowstar::ExposureState)),
-		this, SLOT(statusUpdate(snowstar::ExposureState)));
-	connect(_statemonitoringthread, SIGNAL(finished()),
-		_statemonitoringthread, SLOT(deleteLater()));
-	_statemonitoringthread->start();
+		this,
+		SLOT(statusUpdate(snowstar::ExposureState)));
 
 	// handle failed image downloads
 	connect(this, SIGNAL(imageNotReceived(QString)),
 		this, SLOT(retrieveImageFailed(QString)));
+
+	// create the update thread
+	_statemonitoringthread = new QThread(NULL);
+	connect(_statemonitoringthread, SIGNAL(finished()),
+		_statemonitoringthread, SLOT(deleteLater()));
+
+	// create the udpate work
+	_statemonitoringwork = new StateMonitoringWork(this);
+	_statemonitoringwork->moveToThread(_statemonitoringthread);
+
+	// initialize the update timer
+	connect(&_statemonitoringTimer, SIGNAL(timeout()),
+		_statemonitoringwork, SLOT(updateStatus()));
+
+	// start the thread
+	_statemonitoringthread->start();
+
+	_statemonitoringTimer.setInterval(100);
 
 	// make sure no signals are emitted during setup
 	ui->ccdSelectionBox->blockSignals(true);
@@ -260,7 +276,12 @@ void	ccdcontrollerwidget::setupComplete() {
  * \brief Destroy the CCD controller
  */
 ccdcontrollerwidget::~ccdcontrollerwidget() {
-	_statemonitoringthread->stop();
+	_statemonitoringTimer.stop();
+	_statemonitoringwork->stop();
+	_statemonitoringthread->quit();
+	_statemonitoringthread->wait();
+	delete _statemonitoringthread;
+	delete _statemonitoringwork;
 	delete ui;
 }
 

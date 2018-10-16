@@ -120,7 +120,7 @@ SOURCES += 								\
 	InstrumentSetupThread.cpp					\
 	InstrumentWidget.cpp						\
 	MonitorImage.cpp						\
-	StateMonitoringThread.cpp					\
+	StateMonitoringWork.cpp						\
 	TrackingMonitorImage.cpp					\
 	TrackingMonitorController.cpp					\
 	$${WIDGETSOURCES}

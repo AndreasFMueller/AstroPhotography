@@ -11,6 +11,7 @@
 #include <AstroCoordinates.h>
 #include <image.h>
 #include <QThread>
+#include <QTimer>
 #include <HideWidget.h>
 #include <HideProgress.h>
 
@@ -66,15 +67,15 @@ signals:
 /**
  * \brief Thread to monitor the exposure state
  */
-class StateMonitoringThread : public QThread {
+class StateMonitoringWork : public QObject {
 	Q_OBJECT
 	ccdcontrollerwidget	*_ccdcontrollerwidget;
 	volatile std::atomic_bool	_running;
 	std::recursive_mutex	_mutex;
 public:
-	StateMonitoringThread(ccdcontrollerwidget *c);
-	virtual ~StateMonitoringThread();
-	void	run();
+	StateMonitoringWork(ccdcontrollerwidget *c);
+	virtual ~StateMonitoringWork();
+	void	updateStatus();
 	void	stop();
 signals:
 	void	stateChanged(snowstar::ExposureState);
@@ -107,7 +108,9 @@ class ccdcontrollerwidget : public InstrumentWidget {
 	HideWidget	*_hide;
 	HideProgress	*_hideprogress;
 
-	StateMonitoringThread	*_statemonitoringthread;
+	StateMonitoringWork	*_statemonitoringwork;
+	QThread	*_statemonitoringthread;
+	QTimer	_statemonitoringTimer;
 public:
 	explicit ccdcontrollerwidget(QWidget *parent = NULL);
 	~ccdcontrollerwidget();
@@ -186,7 +189,7 @@ public slots:
 
 	// allow the ImageRetrieverThread access to private methods
 	friend class ImageRetrieverThread;
-	friend class StateMonitoringThread;
+	friend class StateMonitoringWork;
 };
 
 } // namespace snowgui
