@@ -685,10 +685,15 @@ void	taskqueuemanagerwidget::deleteTask(int taskid) {
 
 summarize:
 	// get the task information from the database to update the total time
-	snowstar::TaskInfo	ti = _tasks->info(taskid);
-	float	f = _totaltimes.find(ti.state)->second;
-	f -= _tasks->parameters(taskid).exp.exposuretime;
-	_totaltimes.find(ti.state)->second = f;
+	try {
+		snowstar::TaskInfo	ti = _tasks->info(taskid);
+		float	f = _totaltimes.find(ti.state)->second;
+		f -= _tasks->parameters(taskid).exp.exposuretime;
+		_totaltimes.find(ti.state)->second = f;
+	} catch (const std::exception& x) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "could not get task info %d: %s",
+			taskid, x.what());
+	}
 }
 
 /**
