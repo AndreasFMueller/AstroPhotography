@@ -127,6 +127,26 @@ public slots:
 	void	update();
 	void	useStars(astro::catalog::Catalog::starsetptr);
 
+	void	setAltAzmGridVisible(bool);
+	void	setRaDecGridVisible(bool);
+	void	setConstellationsVisible(bool);
+	void	setTargetVisible(bool);
+	void	setTelescopeVisible(bool);
+	void	setTooltipVisible(bool);
+	void	setLabelsVisible(bool);
+	void	setEclipticVisible(bool);
+
+	void	toggleAltAzmGridVisible();
+	void	toggleRaDecGridVisible();
+	void	toggleConstellationsVisible();
+	void	toggleTargetVisible();
+	void	toggleTelescopeVisible();
+	void	toggleTooltipVisible();
+	void	toggleLabelsVisible();
+	void	toggleEclipticVisible();
+
+	void	showContextMenu(const QPoint& point);
+
 signals:
 	void	pointSelected(astro::RaDec);
 };
