@@ -1,0 +1,12 @@
+#
+# build -- auxiliary script to compile and launch the liveview app
+#
+# (c) 2018 Prof Dr Andreas Müller, Hochschule Rapperswil
+#
+make -j 8
+if [ -d snowlife.app ]
+then
+	snowlife.app/Contents/MacOS/snowlife --debug 2>&1 | tee build.log
+else
+	./snowlife --debug 2>&1 | tee build.log
+fi
