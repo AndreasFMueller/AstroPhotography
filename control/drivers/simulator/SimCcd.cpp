@@ -190,6 +190,7 @@ void	SimCcd::createimage() {
 	}
 
 	// now signal that the image is exposed
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "change state");
 	state(CcdState::exposed);
 
 	// origin
@@ -300,6 +301,7 @@ void    SimCcd::cancelExposure() {
 	state(CcdState::idle);
 }
 
+#if 0
 /**
  * \brief Wait for completion of the exopsure
  *
@@ -310,6 +312,7 @@ void    SimCcd::cancelExposure() {
  * that).
  */
 bool    SimCcd::wait() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "wait()");
 	if ((CcdState::idle == state()) || (CcdState::cancelling == state())) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "no exposure in progress");
 		throw BadState("no exposure in progress");
@@ -330,6 +333,7 @@ bool    SimCcd::wait() {
 	state(CcdState::exposed);
 	return true;
 }
+#endif
 
 /**
  * \brief Remember the shutter state
@@ -345,9 +349,6 @@ ImagePtr  SimCcd::getRawImage() {
 	// wait for the thread 
 	_thread->join();
 	delete _thread;
-
-	// let the client wait another second
-	//usleep(3000000);
 
 	return _image;
 }

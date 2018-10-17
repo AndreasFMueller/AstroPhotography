@@ -29,10 +29,12 @@ INCLUDEPATH += ../astrogui ../browser
 
 SNOWLIFESOURCES =							\
 	CameraLister.cpp						\
+	DeviceAction.cpp						\
 	liveview.cpp
 
 SNOWLIFEHEADERS =							\
 	CameraLister.h							\
+	DeviceAction.h							\
 	liveview.h
 
 FORMS    +=								\
