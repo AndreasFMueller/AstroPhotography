@@ -1,0 +1,42 @@
+#
+# snowlife.pro -- qt configuration file for the snowlife life view app
+#
+# (c) 2018 Prof Dr Andreas Mueller, Hochschule Rapperswil
+#
+
+QT       += core gui widgets
+
+TARGET = snowlife
+TEMPLATE = app
+
+QMAKE_MAC_SDK = @MACSDK@
+
+QMAKE_CXXFLAGS += @EXTRA_CXXFLAGS@
+QMAKE_LFLAGS += @EXTRA_LDFLAGS@
+
+# Directories for the astrophotography library
+ASTROPATH = @ASTROPATH@
+ASTROLIBDIR = @ASTROLIBDIR@
+
+LIBS += -L../astrogui -lastrogui 
+LIBS += -L../browser -lbrowser 
+LIBS += -L$${ASTROLIBDIR} -lastro
+LIBS += @EXTRA_LIBS@
+
+INCLUDEPATH += /usr/local/include
+INCLUDEPATH += $${ASTROPATH}/include
+INCLUDEPATH += ../astrogui ../browser
+
+SNOWLIFESOURCES =							\
+	liveview.cpp
+
+SNOWLIFEHEADERS =							\
+	liveview.h
+
+FORMS    +=								\
+	liveview.ui
+
+SOURCES += snowlife.cpp $${SNOWLIFESOURCES}
+
+HEADERS  += $${SNOWLIFEHEADERS}
+
