@@ -86,6 +86,8 @@ LiveView::~LiveView() {
 
 /**
  * \brief Open camera menu action
+ *
+ * \param cameraname	name of the camera
  */
 void	LiveView::openCamera(std::string cameraname) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "opening camera: %s",
@@ -139,6 +141,8 @@ void	LiveView::addCamera(std::string cameraname) {
 
 /**
  * \brief Slot called when a focuser is selected
+ *
+ * \param focusername	name of the focuser to open
  */
 void	LiveView::openFocuser(std::string focusername) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "opening focuser: %s",
@@ -198,15 +202,28 @@ void	LiveView::stopStream() {
 	_ccd->stopStream();
 }
 
+/**
+ * \brief Slot to set the subframe to display
+ *
+ * \param frame		the frame to use
+ */
 void	LiveView::setSubframe(astro::image::ImageRectangle frame) {
 	_exposure.frame(frame);
 	ui->rectangleField->setText(QString(frame.toString().c_str()));
 }
 
+/**
+ * \brief Slot to revert to the full frame
+ */
 void	LiveView::fullframeClicked() {
 	setSubframe(_ccd->getInfo().getFrame());
 }
 
+/**
+ * \brief Slot to set the exposure time
+ *
+ * \param t	the exposure time to use
+ */
 void	LiveView::setExposuretime(double t) {
 	_exposure.exposuretime(t);
 }
