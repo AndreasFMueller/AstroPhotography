@@ -35,6 +35,7 @@ public:
 	~ImageStreamThread();
 	void	run();
 	void	stop();
+	void	wait();
 };
 
 } // namespace camera

@@ -23,6 +23,42 @@ static bool	visible(const astro::AzmAlt& a) {
 	return (a.alt().radians() > 0);
 }
 
+/*
+
+The SkyDisplayWidget should have a custom context menu to turn on/off
+the various features.
+
+https://stackoverflow.com/questions/24254006/rightclick-event-in-qt-to-open-a-context-menu
+
+customContextMenuRequested is emitted when the widget's contextMenuPolicy
+is Qt::CustomContextMenu, and the user has requested a context menu
+on the widget. So in the constructor of your widget you can call
+setContextMenuPolicy and connect customContextMenuRequested to a
+slot to make a custom context menu.
+
+this->setContextMenuPolicy(Qt::CustomContextMenu);
+
+connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), 
+        this, SLOT(ShowContextMenu(const QPoint &)));
+ShowContextMenu slot should be a class member of plotspace like :
+
+void plotspace::ShowContextMenu(const QPoint &pos) 
+{
+   QMenu contextMenu(tr("Context menu"), this);
+
+   QAction action1("Remove Data Point", this);
+   connect(&action1, SIGNAL(triggered()), this, SLOT(removeDataPoint()));
+   contextMenu.addAction(&action1);
+
+   contextMenu.exec(mapToGlobal(pos));
+}
+
+
+http://www.setnode.com/blog/right-click-context-menus-with-qt/
+
+
+*/
+
 /**
  * \brief Construct the SkyDisplay
  *

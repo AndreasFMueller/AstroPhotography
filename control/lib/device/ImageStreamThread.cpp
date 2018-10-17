@@ -106,5 +106,12 @@ void	ImageStreamThread::stop() {
 	}
 }
 
+/**
+ * \brief wait for the CCD to become idle
+ */
+void	ImageStreamThread::wait() {
+	// XXX wait for the CCD to become idle
+}
+
 } // namespace camera
 } // namespace astro
