@@ -16,7 +16,7 @@
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="gridLayout">
     <item row="0" column="0">
-     <widget class="snowgui::imagedisplaywidget" name="widget" native="true"/>
+     <widget class="snowgui::imagedisplaywidget" name="imageWidget" native="true"/>
     </item>
    </layout>
   </widget>

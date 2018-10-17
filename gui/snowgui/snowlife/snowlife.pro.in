@@ -28,9 +28,11 @@ INCLUDEPATH += $${ASTROPATH}/include
 INCLUDEPATH += ../astrogui ../browser
 
 SNOWLIFESOURCES =							\
+	CameraLister.cpp						\
 	liveview.cpp
 
 SNOWLIFEHEADERS =							\
+	CameraLister.h							\
 	liveview.h
 
 FORMS    +=								\

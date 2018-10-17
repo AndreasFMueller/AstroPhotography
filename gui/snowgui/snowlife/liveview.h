@@ -21,6 +21,9 @@ class LiveView : public QMainWindow {
 	QMenu	*_ccdMenu;
 	std::list<QAction*>	_ccdActions;
 
+	QMenu	*_focuserMenu;
+	std::list<QAction*>	_focuserActions;
+
 public:
 	explicit LiveView(QWidget *parent = 0);
 	~LiveView();
@@ -30,6 +33,9 @@ private:
 
 public slots:
 	void	openCamera();
+	void	openFocuser();
+	void	addCamera(std::string);
+	void	addFocuser(std::string);
 };
 
 } // namespace snowgui

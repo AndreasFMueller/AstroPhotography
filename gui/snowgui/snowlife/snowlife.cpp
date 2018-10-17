@@ -69,6 +69,7 @@ int main(int argc, char *argv[]) {
 
 	// create a liveview main window
 	LiveView	liveview;
+	liveview.setWindowTitle("LiveView");
 	liveview.show();
 
 	return a.exec();

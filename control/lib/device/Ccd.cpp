@@ -43,35 +43,60 @@ Ccd::Ccd(const CcdInfo& _info)
 	// get focal length parameter
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "querying 'focallength' for %s",
 		name().toString().c_str());
-	float   focallength = 0;
+	float   focallength = 1.111;
 	if (hasProperty("focallength")) {
-		focallength = std::stod(getProperty("focallength"));
-	} else {
-		focallength = 1.1111;
+		try {
+			std::string	fl = getProperty("focallength");
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "got focallength: '%s'",
+				fl.c_str());
+			focallength = std::stod(fl);
+		} catch (const std::exception& x) {
+			debug(LOG_ERR, DEBUG_LOG, 0,
+				"cannot get focal length: %s", x.what());
+		}
 	}
-	parameter("focallength", focallength);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "using focallength %.3f[m]",
-		parameterValueFloat("focallength"));
+	try {
+		parameter("focallength", focallength);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "using focallength %.3f[m]",
+			parameterValueFloat("focallength"));
+	} catch (const std::exception& x) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "focal length unusable: %s",
+			x.what());
+	}
 
 	// get the azimuth parameter 
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "querying 'azimuth' for %s",
 		name().toString().c_str());
-	float   azimuth = 0;
+	float   azimuth = 1.111;
 	if (hasProperty("azimuth")) {
-		azimuth = std::stod(getProperty("azimuth"));
-	} else {
-		azimuth = 1.1111;
+		try {
+			std::string	az = getProperty("azimuth");
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "got azimuth: '%s'",
+				az.c_str());
+			azimuth = std::stod(az);
+		} catch (const std::exception& x) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "azimuth unusable: %s",
+				x.what());
+		}
 	}
-	parameter("azimuth", azimuth);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "using azimuth %.3f[degrees]",
-		parameterValueFloat("azimuth"));
+	try {
+		parameter("azimuth", azimuth);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "using azimuth %.3f[m]",
+			parameterValueFloat("azimuth"));
+	} catch (const std::exception& x) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "focal length unusable: %s",
+			x.what());
+	}
 
 	// get limit magnitude parameter
-	float   limit_magnitude = 0;
+	float   limit_magnitude = 11.111;
 	if (hasProperty("limit_magnitude")) {
+		try {
 		limit_magnitude = std::stod(getProperty("limit_magnitude"));
-	} else {
-		limit_magnitude = 11.111;
+		} catch (const std::exception& x) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0,
+				"limit_magnitude unusable: %s", x.what());
+		}
 	}
 	parameter("limit_magnitude", limit_magnitude);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "using limit magnitude %.2f",
