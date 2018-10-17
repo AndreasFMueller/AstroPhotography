@@ -10,6 +10,8 @@
 #include <QPainter>
 #include <QMouseEvent>
 #include <QToolTip>
+#include <QMenu>
+#include <QAction>
 
 using namespace astro::catalog;
 
@@ -39,6 +41,12 @@ StarChartWidget::StarChartWidget(QWidget *parent) : QWidget(parent),
 	qRegisterMetaType<astro::catalog::DeepSkyCatalog::deepskyobjectsetptr>("astro::catalog::DeepSkyCatalog::deepskyobjectsetptr");
 
 	setMouseTracking(true);
+
+	// context menu
+	setContextMenuPolicy(Qt::CustomContextMenu);
+	connect(this, SIGNAL(customContextMenuRequested(const QPoint &)),
+		this, SLOT(showContextMenu(const QPoint &)));
+
 
 	// launch a thread to retrieve the 
 	SkyStarThread	*skystarthread = new SkyStarThread(this);
@@ -698,5 +706,80 @@ void	StarChartWidget::orientationChanged(bool west) {
 	flip(!west);
 	repaint();
 }
+
+void	StarChartWidget::setGridVisible(bool s) {
+	show_grid(s);
+	repaint();
+}
+
+void	StarChartWidget::setCrosshairsVisible(bool s) {
+	show_crosshairs(s);
+	repaint();
+}
+
+void	StarChartWidget::setDirectionsVisible(bool s) {
+	show_directions(s);
+	repaint();
+}
+
+void	StarChartWidget::setDeepskyVisible(bool s) {
+	show_deepsky(s);
+	repaint();
+}
+
+
+void	StarChartWidget::toggleGridVisible() {
+	setGridVisible(!show_grid());
+}
+
+void	StarChartWidget::toggleCrosshairsVisible() {
+	setCrosshairsVisible(!show_crosshairs());
+}
+
+void	StarChartWidget::toggleDirectionsVisible() {
+	setDirectionsVisible(!show_directions());
+}
+
+void	StarChartWidget::toggleDeepskyVisible() {
+	setDeepskyVisible(!show_deepsky());
+}
+
+void	StarChartWidget::showContextMenu(const QPoint& point) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "show context menu at %d/%d",
+		point.x(), point.y());
+	QMenu	contextMenu(QString("Display options"), this);
+
+	QAction	actionGrid(QString("Grid"), this);
+	actionGrid.setCheckable(true);
+	actionGrid.setChecked(show_grid());
+	contextMenu.addAction(&actionGrid);
+	connect(&actionGrid, SIGNAL(triggered()),
+		this, SLOT(toggleGridVisible()));
+
+	QAction	actionCrosshairs(QString("Crosshairs"), this);
+	actionCrosshairs.setCheckable(true);
+	actionCrosshairs.setChecked(show_crosshairs());
+	contextMenu.addAction(&actionCrosshairs);
+	connect(&actionCrosshairs, SIGNAL(triggered()),
+		this, SLOT(toggleCrosshairsVisible()));
+
+	QAction	actionDirections(QString("Directions"), this);
+	actionDirections.setCheckable(true);
+	actionDirections.setChecked(show_directions());
+	contextMenu.addAction(&actionDirections);
+	connect(&actionDirections, SIGNAL(triggered()),
+		this, SLOT(toggleDirectionsVisible()));
+
+	QAction	actionDeepsky(QString("Deep Sky"), this);
+	actionDeepsky.setCheckable(true);
+	actionDeepsky.setChecked(show_deepsky());
+	contextMenu.addAction(&actionDeepsky);
+	connect(&actionDeepsky, SIGNAL(triggered()),
+		this, SLOT(toggleDeepskyVisible()));
+
+	contextMenu.exec(mapToGlobal(point));
+}
+
+
 
 } // namespace snowgui

@@ -144,6 +144,20 @@ public slots:
 	void	useSky(astro::catalog::Catalog::starsetptr);
 	void	useDeepSky(astro::catalog::DeepSkyCatalog::deepskyobjectsetptr);
 	void	workerFinished();
+
+	void	setGridVisible(bool);
+	void	setCrosshairsVisible(bool);
+	void	setDirectionsVisible(bool);
+	void	setDeepskyVisible(bool);
+	
+	void	toggleGridVisible();
+	void	toggleCrosshairsVisible();
+	void	toggleDirectionsVisible();
+	void	toggleDeepskyVisible();
+	
+	void    showContextMenu(const QPoint& point);
+
+	
 };
 
 } // namespace snowgui
