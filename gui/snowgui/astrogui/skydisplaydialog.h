@@ -42,14 +42,7 @@ public slots:
 	void	positionChanged(astro::LongLat);
 	void	targetSelected(astro::RaDec);
 
-	void	altazChanged(int);
-	void	radecChanged(int);
-	void	eclipticChanged(int);
-	void	constellationsChanged(int);
-	void	telescopeChanged(int);
-	void	targetChanged(int);
 	void	targetChanged(astro::RaDec);
-	void	labelsChanged(int);
 	void	update();
 
 signals:
