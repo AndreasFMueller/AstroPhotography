@@ -256,7 +256,7 @@ void	DaemonI::unmount(const std::string& mountpoint,
 /**
  * \brief get the system time
  */
-long	DaemonI::getSystemTime(const Ice::Current& /* current */) {
+Ice::Long	DaemonI::getSystemTime(const Ice::Current& /* current */) {
 	time_t	now;
 	time(&now);
 	return now;
@@ -265,7 +265,7 @@ long	DaemonI::getSystemTime(const Ice::Current& /* current */) {
 /**
  * \brief set the system time
  */
-void	DaemonI::setSystemTime(long unixtime,
+void	DaemonI::setSystemTime(Ice::Long unixtime,
 		const Ice::Current& /* current */) {
 	time_t	t = unixtime;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "setting system time to %s", ctime(&t));

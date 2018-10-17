@@ -8,6 +8,7 @@
 #include <AstroUtils.h>
 #include <mutex>
 #include <thread>
+#include <atomic>
 
 namespace astro {
 namespace camera {
