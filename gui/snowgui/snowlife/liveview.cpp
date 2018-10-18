@@ -37,12 +37,19 @@ LiveView::LiveView(QWidget *parent)
 
 	// prevent starting until we have a CCD
 	ui->startButton->setEnabled(false);
+	ui->singleButton->setEnabled(false);
 
 	// get a list of cameras
 	_ccdMenu = menuBar()->addMenu(QString("Cameras"));
 	_focuserMenu = menuBar()->addMenu(QString("Focusers"));
 
-	// create a thread to collect camears
+	// set up the work classes
+	_work = new ExposureWork(this);
+
+	_streamwork = new StreamWork(this);
+	_streamwork->interval(ui->intervalSpinBox->value());
+
+	// create a thread to collect cameras
 	CameraLister	*_lister = new CameraLister(NULL);
 	connect(_lister, SIGNAL(camera(std::string)),
 		this, SLOT(addCamera(std::string)));
@@ -56,6 +63,10 @@ LiveView::LiveView(QWidget *parent)
 		SIGNAL(newImage(astro::image::ImagePtr)),
 		ui->imageWidget,
 		SLOT(receiveImage(astro::image::ImagePtr)));
+	connect(this,
+		SIGNAL(newImage(astro::image::ImagePtr)),
+		this,
+		SLOT(receiveImage(astro::image::ImagePtr)));
 
 	// connect buttons
 	connect(ui->startButton, SIGNAL(clicked()),
@@ -68,6 +79,10 @@ LiveView::LiveView(QWidget *parent)
 		this, SLOT(fullframeClicked()));
 	connect(ui->exposureSpinBox, SIGNAL(valueChanged(double)),
 		this, SLOT(setExposuretime(double)));
+	connect(ui->intervalSpinBox, SIGNAL(valueChanged(double)),
+		_streamwork, SLOT(interval(double)));
+	connect(ui->singleButton, SIGNAL(clicked()),
+		this, SLOT(singleClicked()));
 
 	// initialize the exposure structure
 	_exposure.exposuretime(1);
@@ -81,6 +96,8 @@ LiveView::LiveView(QWidget *parent)
  */
 LiveView::~LiveView() {
 	delete ui;
+	delete _work;
+	delete _streamwork;
 }
 
 
@@ -117,6 +134,7 @@ void	LiveView::openCamera(std::string cameraname) {
 
 	// enable start/stop
 	ui->startButton->setEnabled(true);
+	ui->singleButton->setEnabled(true);
 }
 
 /**
@@ -179,15 +197,55 @@ void	LiveView::operator()(const astro::camera::ImageQueueEntry& entry) {
 }
 
 /**
+ * \brief start private stream
+ */
+void	LiveView::startStreamPrivate() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "start thread");
+	if (_thread) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "there already is a thread");
+	}
+
+	// set up the thread to do the work
+	_thread = new QThread;
+	//connect(_thread, SIGNAL(finished()), _thread, SLOT(deleteLater()));
+	connect(_thread, SIGNAL(finished()), this, SLOT(threadFinished()));
+	_thread->start();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "thread created");
+
+	// set up the work to be done
+	_streamwork->moveToThread(_thread);
+	QMetaObject::invokeMethod(_streamwork, "start", Qt::QueuedConnection);
+
+	// change button status
+	ui->singleButton->setEnabled(false);
+	ui->startButton->setText(QString("Stop"));
+}
+
+/**
+ * \brief Method to a privately managed stream
+ */
+void	LiveView::stopStreamPrivate() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "stopping private stream");
+	_streamwork->stop();
+	if (_thread) {
+		_thread->terminate();
+	}
+}
+
+/**
  * \brief Slot to start the stream
  */
 void	LiveView::startStream() {
 	if (!_ccd) {
 		return;
 	}
-	if (_ccd->streaming()) {
+	if (_ccd->streaming() || _streamwork->running()) {
 		stopStream();
 		ui->startButton->setText(QString("Start"));
+		return;
+	}
+	if (ui->intervalSpinBox->value() > 0) {
+		startStreamPrivate();
 		return;
 	}
 	ui->startButton->setText(QString("Stop"));
@@ -199,6 +257,11 @@ void	LiveView::startStream() {
  * \brief Slot to stop the stream
  */
 void	LiveView::stopStream() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "stop stream");
+	if (_streamwork) {
+		stopStreamPrivate();
+		return;
+	}
 	_ccd->stopStream();
 }
 
@@ -226,6 +289,93 @@ void	LiveView::fullframeClicked() {
  */
 void	LiveView::setExposuretime(double t) {
 	_exposure.exposuretime(t);
+}
+
+/**
+ * \brief Perform an exposure
+ *
+ * This method is called from the ExposureWork class and does the actual
+ * exposing. This allows the ExposureWork class not to have any important
+ * logic of it's own.
+ */
+void	LiveView::doExposure() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "start an exposure (t=%.3f)",
+		_exposure.exposuretime());
+	_ccd->startExposure(_exposure);
+	_ccd->wait();
+	astro::image::ImagePtr	image = _ccd->getImage();
+	emit newImage(image);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "exposure done");
+}
+
+/**
+ * \brief Slot to perform a single exposure
+ */
+void	LiveView::doSingleExposure() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "perform a single exposure");
+	doExposure();
+	_thread->terminate();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "thread stopped");
+}
+
+/**
+ * \brief Slot called when the single image button is clicked
+ */
+void	LiveView::singleClicked() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "single clicked");
+	if (!_ccd) {
+		return;
+	}
+
+	// make sure no other action can be initiated while we are exposing
+	ui->startButton->setEnabled(false);
+	ui->singleButton->setEnabled(false);
+
+	// make sure we remember that we are processing single images
+	_single = true;
+
+	// set up the thread to do the work
+	_thread = new QThread(NULL);
+	connect(_thread, SIGNAL(finished()), this, SLOT(threadFinished()));
+	//connect(_thread, SIGNAL(finished()), _thread, SLOT(deleteLater()));
+	connect(this, SIGNAL(doExposure()), _thread, SLOT(doSingleExposure()));
+	_thread->start();
+
+	// set up the work to be done
+	_work = new ExposureWork(this);
+	_work->moveToThread(_thread);
+	
+	// send the signal to the thread 
+	emit doExposure();
+}
+
+/**
+ * \brief Slot called when an image is received
+ *
+ * This slot is used to forward the image received in the separate thread
+ * to the main thread where it can be displayed
+ */
+void	LiveView::receiveImage(astro::image::ImagePtr image) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "image received");
+	if (!_single) {
+		return;
+	}
+
+	// we are done processing single images
+	_single = false;
+}
+
+/**
+ * \brief Slot called when the thread finishes
+ */
+void	LiveView::threadFinished() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "Thread finished");
+	// clean up the thread member
+	_thread = NULL;
+
+	// reenable the buttons
+	ui->startButton->setEnabled(true);
+	ui->singleButton->setEnabled(true);
 }
 
 } // namespace snowgui

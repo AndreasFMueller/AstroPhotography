@@ -60,6 +60,26 @@
         </widget>
        </item>
        <item>
+        <widget class="QLabel" name="intervalLabel">
+         <property name="text">
+          <string>Interval:</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QDoubleSpinBox" name="intervalSpinBox">
+         <property name="decimals">
+          <number>1</number>
+         </property>
+         <property name="maximum">
+          <double>10.000000000000000</double>
+         </property>
+         <property name="value">
+          <double>1.000000000000000</double>
+         </property>
+        </widget>
+       </item>
+       <item>
         <widget class="QLabel" name="rectangleLabel">
          <property name="text">
           <string>Rectangle:</string>
@@ -84,9 +104,16 @@
         </widget>
        </item>
        <item>
+        <widget class="QPushButton" name="singleButton">
+         <property name="text">
+          <string>Single</string>
+         </property>
+        </widget>
+       </item>
+       <item>
         <widget class="QPushButton" name="startButton">
          <property name="text">
-          <string>Start</string>
+          <string>Stream</string>
          </property>
         </widget>
        </item>
