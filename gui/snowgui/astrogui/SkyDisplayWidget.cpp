@@ -605,6 +605,8 @@ void	SkyDisplayWidget::useStars(Catalog::starsetptr stars) {
 }
 
 void	SkyDisplayWidget::targetChanged(astro::RaDec target) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "new target: %s",
+		target.toString().c_str());
 	_target = target;
 	if (show_target()) {
 		repaint();
@@ -693,7 +695,7 @@ void	SkyDisplayWidget::showContextMenu(const QPoint& point) {
 	actionAzmAlt.setChecked(show_altaz());
 	contextMenu.addAction(&actionAzmAlt);
 	connect(&actionAzmAlt, SIGNAL(triggered()),
-		this, SLOT(toggleAzmAltGridVisible()));
+		this, SLOT(toggleAltAzmGridVisible()));
 
 	QAction	actionEcliptic(QString("Ecliptic"), this);
 	actionEcliptic.setCheckable(true);

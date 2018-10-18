@@ -28,6 +28,7 @@ protected:
 public:
 	typedef enum { Radians, Degrees, Hours } unit;
 	Angle(double angle = 0, unit u = Radians);
+	virtual ~Angle() { }
 	double	degrees() const;
 	void	degrees(double degrees);
 	std::string	dms(const char separator = ':', int precision = 3) const;
@@ -136,6 +137,7 @@ public:
 			Angle(M_PI / 2) - spherical.theta()) { }
 	RaDec(const Vector& vector);
 	RaDec(const Ecliptic& ecliptic);
+	virtual ~RaDec() { }
 	const Angle&	ra() const { return a1(); }
 	Angle&	ra() { return a1(); }
 	const Angle&	dec() const { return a2(); }

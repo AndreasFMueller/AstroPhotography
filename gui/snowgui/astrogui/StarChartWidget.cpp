@@ -519,10 +519,10 @@ void	StarChartWidget::directionChanged(astro::RaDec direction) {
 
 	// decide whether the change is big enough to warrant computing
 	// a new catalog
-	double  deltaRa = (_direction.ra - direction.ra);
+	double  deltaRa = (_direction.ra() - direction.ra()).radians();
         if (deltaRa > M_PI) { deltaRa -= 2 *M_PI; }
         if (deltaRa < -M_PI) { deltaRa += 2 * M_PI; }
-        double  deltaDec = (_direction.dec - direction.dec);
+        double  deltaDec = (_direction.dec() - direction.dec()).radians();
         double  change = hypot(deltaRa, deltaDec);
 
 	if (change < 0.01) {

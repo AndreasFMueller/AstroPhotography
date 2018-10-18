@@ -14,6 +14,8 @@ using namespace astro::image;
 
 namespace snowgui {
 
+#define	MAX_FWHM_SIZE	800
+
 //////////////////////////////////////////////////////////////////////
 // FocusPoint implementation
 //////////////////////////////////////////////////////////////////////
@@ -28,7 +30,7 @@ FocusPoint::FocusPoint(astro::image::ImagePtr image, long position)
 	// XXX So we need a more reasonable rescaling method
 	_brenner = filter::focus_squaredbrenner(image) / _l1norm;
 	// use the classes in AstroFWHM.h to compute the FWHM
-	if (image->size().getPixels() < 200 * 200) {
+	if (image->size().getPixels() < MAX_FWHM_SIZE * MAX_FWHM_SIZE) {
 		fwhm::ComponentDecomposer	decomposer(image, false);
 		_fwhm = 2 * decomposer.maxradius();
 	} else {

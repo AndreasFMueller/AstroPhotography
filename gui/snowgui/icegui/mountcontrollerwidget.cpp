@@ -22,6 +22,7 @@ mountcontrollerwidget::mountcontrollerwidget(QWidget *parent)
 
 	qRegisterMetaType<astro::device::Mount::state_type>(
 		"astro::device::Mount::state_type");
+	qRegisterMetaType<astro::RaDec>("astro::RaDec");
 
 	setTabOrder(ui->targetRaField, ui->targetDecField);
 	setTabOrder(ui->targetDecField, ui->targetRaField);
@@ -40,6 +41,7 @@ mountcontrollerwidget::mountcontrollerwidget(QWidget *parent)
 	_updatethread = new QThread(NULL);
 	connect(_updatethread, SIGNAL(finished()),
 		_updatethread, SLOT(deleteLater()));
+	_updatethread->start();
 
 	// create the work class
 	_updatework = new mountupdatework(this);
@@ -60,7 +62,7 @@ mountcontrollerwidget::mountcontrollerwidget(QWidget *parent)
  */
 mountcontrollerwidget::~mountcontrollerwidget() {
 	_statusTimer.stop();
-
+	//_updatethread->terminate();
 	if (_skydisplay) {
 		delete _skydisplay;
 	}
@@ -278,12 +280,14 @@ void	mountcontrollerwidget::statusUpdate() {
 	// read the current position from the mount
 	snowstar::RaDec	radec = _mount->getRaDec();
 	astro::RaDec	rd = convert(radec);
+	if (rd != convert(_telescope)) {
+		emit telescopeChanged(rd);
+	}
 	ui->currentRaField->setText(QString(
 		rd.ra().hms(':',1).c_str()));
 	ui->currentDecField->setText(QString(
 		rd.dec().dms(':',0).c_str()));
 	_telescope = radec;
-	emit telescopeChanged(convert(radec));
 
 	// read the current time from the mount
 	time_t	now = _mount->getTime();
@@ -331,6 +335,7 @@ void	mountcontrollerwidget::setTarget(const astro::RaDec& target) {
 	astro::Angle	dec = target.dec();
 	ui->targetRaField->setText(QString(ra.hms(':', 1).c_str()));
 	ui->targetDecField->setText(QString(dec.dms(':', 0).c_str()));
+	_target = snowstar::convert(astro::RaDec(ra, dec));
 
 	// if the _skyview is open also change the target there
 	if (_skydisplay) {

@@ -26,10 +26,12 @@ mountupdatework::~mountupdatework() {
  * This slot just calls the statusUpdate method of the mount controller
  */
 void	mountupdatework::statusUpdate() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "update status");
 	std::lock_guard<std::recursive_mutex>	lock(_mutex);
 	if (_mountcontrollerwidget) {
 		_mountcontrollerwidget->statusUpdate();
 	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "status complete");
 }
 
 } // namespace snowgui
