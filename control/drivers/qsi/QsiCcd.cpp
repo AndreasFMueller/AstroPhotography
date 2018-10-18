@@ -77,12 +77,18 @@ void	QsiCcd::startExposure(const Exposure& exposure) {
 		_camera.camera().put_BinY(Ccd::exposure.mode().y());
 		END_STOPWATCH("put_BinY()");
 
+		// flip the origin
+		int	height = Ccd::exposure.frame().size().height();
+		ImagePoint	origin = Ccd::exposure.frame().origin();
+		ImageSize	size = Ccd::exposure.frame().size();
+		origin.y(height - (origin.y() + size.height()));
+
 		// compute the frame size in binned pixels, as this is what
 		// the QSI camera expects
-		ImagePoint origin = Ccd::exposure.frame().origin()
-					/ Ccd::exposure.mode();
-		ImageSize  size = Ccd::exposure.frame().size()
-					/ Ccd::exposure.mode();
+		origin = origin / Ccd::exposure.mode();
+		size = size / Ccd::exposure.mode();
+
+		// bild new image rectangle
 		ImageRectangle	frame(origin, size);
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "requesting %s image",
 			frame.toString().c_str());
