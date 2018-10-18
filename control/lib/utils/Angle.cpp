@@ -25,9 +25,10 @@ static std::string	xms(double value, const char separator, int precision) {
 		return stringprintf("%c%02d%c%02d",
 			(sign < 0) ? '-' : '+', X, separator, M);
 	} else {
-		return stringprintf("%c%02d%c%02d%c%06.*f",
+		return stringprintf("%c%02d%c%02d%c%0*.*f",
 			(sign < 0) ? '-' : '+',
-			X, separator, M, separator, precision, S);
+			X, separator, M, separator,
+			((precision > 0) ? 3 : 2) + precision, precision, S);
 	}
 }
 

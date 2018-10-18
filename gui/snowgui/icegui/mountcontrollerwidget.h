@@ -18,6 +18,25 @@ namespace Ui {
 	class mountcontrollerwidget;
 }
 
+class mountcontrollerwidget;
+
+/**
+ * \brief Update thread for the mount controller
+ */
+class	mountupdatework : public QObject {
+	Q_OBJECT
+	mountcontrollerwidget	*_mountcontrollerwidget;
+	std::recursive_mutex	_mutex;
+public:
+	mountupdatework(mountcontrollerwidget *mc);
+	~mountupdatework();
+public slots:
+	void	statusUpdate();
+};
+
+/**
+ * \brief Reusable component to control a telescope mount
+ */
 class mountcontrollerwidget : public InstrumentWidget {
 	Q_OBJECT
 
@@ -30,6 +49,9 @@ class mountcontrollerwidget : public InstrumentWidget {
 	astro::LongLat	_position;
 	SkyDisplayDialog	*_skydisplay;
 	CatalogDialog		*_catalogdialog;
+
+	mountupdatework	*_updatework;
+	QThread		*_updatethread;
 
 public:
 	explicit mountcontrollerwidget(QWidget *parent = 0);

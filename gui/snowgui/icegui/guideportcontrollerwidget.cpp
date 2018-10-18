@@ -9,6 +9,11 @@
 
 namespace snowgui {
 
+/**
+ * \brief Construct a Guideport controller
+ *
+ * \param parent	the parent widget
+ */
 guideportcontrollerwidget::guideportcontrollerwidget(QWidget *parent)
 	: InstrumentWidget(parent),
 	  ui(new Ui::guideportcontrollerwidget) {
@@ -47,11 +52,17 @@ guideportcontrollerwidget::guideportcontrollerwidget(QWidget *parent)
 	_activationtime = 5;
 }
 
+/**
+ * \brief Destroy the guideport controller
+ */
 guideportcontrollerwidget::~guideportcontrollerwidget() {
 	_statusTimer.stop();
 	delete ui;
 }
 
+/**
+ * \brief Setup the instrument comonents
+ */
 void	guideportcontrollerwidget::instrumentSetup(
 		astro::discover::ServiceObject serviceobject,
 		snowstar::RemoteInstrument instrument) {
@@ -79,11 +90,17 @@ void	guideportcontrollerwidget::instrumentSetup(
 	}
 }
 
+/**
+ * \brief Slot called when the guiderpot instrument setup is complete
+ */
 void	guideportcontrollerwidget::setupComplete() {
 	// set up the guideport
 	setupGuideport();
 }
 
+/**
+ * \brief GUI components setup
+ */
 void	guideportcontrollerwidget::setupGuideport() {
 	_statusTimer.stop();
 	if (_guideport) {
@@ -96,40 +113,66 @@ void	guideportcontrollerwidget::setupGuideport() {
 	}
 }
 
+/**
+ * \brief Slot called when a different guide port is selected
+ */
 void	guideportcontrollerwidget::guideportChanged(int index) {
 	_guideport = _instrument.guideport(index);
 	setupGuideport();
 	emit guideportSelected(index);
 }
 
+/**
+ * \brief Slot called when the user presses RA+
+ */
 void	guideportcontrollerwidget::activateRAplus() {
 	if (!_guideport) { return; }
 	_guideport->activate(_activationtime, 0);
 }
 
+/**
+ * \brief Slot called when the user presses RA-
+ */
 void	guideportcontrollerwidget::activateRAminus() {
 	if (!_guideport) { return; }
 	_guideport->activate(-_activationtime, 0);
 }
 
+/**
+ * \brief Slot called when the user presses DEC+
+ */
 void	guideportcontrollerwidget::activateDECplus() {
 	if (!_guideport) { return; }
 	_guideport->activate(0, _activationtime);
 }
 
+/**
+ * \brief Slot called when the user presses DEC-
+ */
 void	guideportcontrollerwidget::activateDECminus() {
 	if (!_guideport) { return; }
 	_guideport->activate(0, -_activationtime);
 }
 
+/**
+ * \brief Slot used to change the activation time display 
+ */
 void	guideportcontrollerwidget::setActivationTime(double t) {
 	ui->activationtimeSpinBox->setValue(t);
 }
 
+/**
+ * \brief Slot alled when the user changes the activation time
+ */
 void	guideportcontrollerwidget::changeActivationTime(double t) {
 	_activationtime = t;
 }
 
+/**
+ * \brief Slot called to update the status of the guide port
+ *
+ * This slot is activated by the timer at regular intervals
+ */
 void	guideportcontrollerwidget::statusUpdate() {
 	if (!_guideport) { return; }
 	try {
@@ -152,7 +195,14 @@ void	guideportcontrollerwidget::statusUpdate() {
 	}
 }
 
-void	guideportcontrollerwidget::radecCorrection(astro::RaDec correction, bool west) {
+/**
+ * \brief Slot called to compute the RA/DEC correction from an image point
+ *
+ * This slot computes the RA/DEC correction to correctly point the telesceop
+ * via a guideport correction
+ */
+void	guideportcontrollerwidget::radecCorrection(astro::RaDec correction,
+		bool west) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "correction received: %s",
 		correction.toString().c_str());
 
@@ -166,8 +216,9 @@ void	guideportcontrollerwidget::radecCorrection(astro::RaDec correction, bool we
 	astro::Angle	omega = sidereal_rate * _guiderate;
 
 	// compute the changes
-	float	racorrection = ra.radians() / omega.radians();
-	float	deccorrection = ((west) ? 1 : -1) * dec.radians() / omega.radians();
+	int	sign = (west) ? 1 : -1;
+	float	racorrection = 0.5 * ra.radians() / omega.radians();
+	float	deccorrection = -0.5 * sign * dec.radians() / omega.radians();
 
 	// propose the activation to the user
 	ui->raField->setText(QString(astro::stringprintf("%.1f",
@@ -176,6 +227,12 @@ void	guideportcontrollerwidget::radecCorrection(astro::RaDec correction, bool we
 		deccorrection).c_str()));
 }
 
+/**
+ * \brief Slot to perform the suggested RA/DEC correction
+ *
+ * This slot reads the activation times including their sign from the
+ * textfields and applies them to the guide port
+ */
 void	guideportcontrollerwidget::activateClicked() {
 	if (!_guideport) { return; }
 

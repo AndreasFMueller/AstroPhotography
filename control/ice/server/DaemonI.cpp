@@ -272,7 +272,7 @@ void	DaemonI::setSystemTime(Ice::Long unixtime,
 	// construct the command
 	struct tm	*tp = localtime(&t);
 	char	buffer[30];
-	strftime(buffer, sizeof(buffer), "%m%d%H%M%Y", tp);
+	strftime(buffer, sizeof(buffer), "%m%d%H%M%Y.%S", tp);
 	std::string	cmd = astro::stringprintf("sudo date %s", buffer);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "time set command: %s", cmd.c_str());
 
@@ -282,6 +282,8 @@ void	DaemonI::setSystemTime(Ice::Long unixtime,
 		// throw an exception
 		OperationFailed	f;
 		f.cause = std::string(strerror(errno));
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "setting time failed: %s",
+			f.cause.c_str());
 		throw f;
 	}
 }

@@ -227,9 +227,6 @@ void	pointingwindow::pointSelected(astro::image::ImagePoint p,
 		= snowstar::convert(_ccd.ccdinfo().size).center();
 	astro::image::ImagePoint	offset = p - center;
 
-	// take into account that the y-axis goes downward
-	offset.y(-offset.y());
-
 	// XXX there is probably something wrong here:
 	// XXX when on the east side, we have to invert everything, but we
 	// XXX want to compute the correction, so this gives an additional
@@ -242,7 +239,7 @@ void	pointingwindow::pointSelected(astro::image::ImagePoint p,
 
 	// XXX note that in this, we have not taken into account yet that in
 	// XXX the prime focus, the image may be upside down, so we have to
-	// XXX mirror it, but this can be down using the mirror funciton of
+	// XXX mirror it, but this can be down using the mirror function of
 	// XXX the ImageCoordinates class (instance coord). Currently we
 	// XXX initialize mirror to false (see above)
 

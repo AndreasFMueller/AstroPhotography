@@ -133,6 +133,7 @@ public slots:
 	void	receiveImage(astro::image::ImagePtr);
 	void	bayerChanged(int);
 	void	crosshairsChanged(int);
+	void	crosshairsCenter(astro::image::ImagePoint);
 
 	void	redScaleChanged(double);
 	void	greenScaleChanged(double);

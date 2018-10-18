@@ -98,6 +98,9 @@ imagedisplaywidget::imagedisplaywidget(QWidget *parent) :
 		this, SLOT(greenOffsetChanged(double)));
 	connect(ui->blueoffsetBox, SIGNAL(valueChanged(double)),
 		this, SLOT(blueOffsetChanged(double)));
+
+	// crosshairs
+	_crosshairs = true;
 }
 
 /**
@@ -174,6 +177,10 @@ void	imagedisplaywidget::setImageRectangle(const ImageRectangle& imagerectangle)
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "emitting rectangledSelected(%s)",
 		imagerectangle.toString().c_str());
 	emit rectangleSelected(imagerectangle);
+
+	// compute the center for the crosshairs relative to this image
+	int	cx;
+	int	cy;
 }
 
 /**
@@ -968,6 +975,10 @@ void	imagedisplaywidget::changeEvent(QEvent *event) {
 void	imagedisplaywidget::crosshairsChanged(int c) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "crosshair mode changed");
 	crosshairs((c > 0));
+}
+
+void	imagedisplaywidget::crosshairsCenter(astro::image::ImagePoint c) {
+	image2pixmap.crosshairs_center(c);
 }
 
 } // namespace snowgui

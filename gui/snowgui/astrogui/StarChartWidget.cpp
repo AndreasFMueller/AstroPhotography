@@ -36,6 +36,7 @@ StarChartWidget::StarChartWidget(QWidget *parent) : QWidget(parent),
 	_show_directions = true;
 	_flip = true; // XXX is this correct?
 	_show_deepsky = true;
+	_show_tooltips = true;
 
 	qRegisterMetaType<astro::catalog::Catalog::starsetptr>("astro::catalog::Catalog::starsetptr");
 	qRegisterMetaType<astro::catalog::DeepSkyCatalog::deepskyobjectsetptr>("astro::catalog::DeepSkyCatalog::deepskyobjectsetptr");
@@ -511,11 +512,27 @@ void	StarChartWidget::directionChanged(astro::RaDec direction) {
 	if (_direction == direction) {
 		return;
 	}
-	_direction = direction;
 
-	// update the converter
+	// update the converter to reflect the new center
 	_converter = astro::ImageCoordinates(_direction, _resolution,
 			astro::Angle(0));
+
+	// decide whether the change is big enough to warrant computing
+	// a new catalog
+	double  deltaRa = (_direction.ra - direction.ra);
+        if (deltaRa > M_PI) { deltaRa -= 2 *M_PI; }
+        if (deltaRa < -M_PI) { deltaRa += 2 * M_PI; }
+        double  deltaDec = (_direction.dec - direction.dec);
+        double  change = hypot(deltaRa, deltaDec);
+
+	if (change < 0.01) {
+		return;
+	}
+
+	// don't update the _direction member until now because otherwise
+	// we will have no basis for the decision whether a new catalog
+	// retrieval is warranted
+	_direction = direction;
 
 	// a new retrieval should only be started in tracking mode.
 	// In any other mound we expect the state to change again very
@@ -727,6 +744,15 @@ void	StarChartWidget::setDeepskyVisible(bool s) {
 	repaint();
 }
 
+void	StarChartWidget::setTooltipsVisible(bool s) {
+	show_tooltips(s);
+	repaint();
+}
+
+void	StarChartWidget::setNegative(bool s) {
+	negative(s);
+	repaint();
+}
 
 void	StarChartWidget::toggleGridVisible() {
 	setGridVisible(!show_grid());
@@ -742,6 +768,14 @@ void	StarChartWidget::toggleDirectionsVisible() {
 
 void	StarChartWidget::toggleDeepskyVisible() {
 	setDeepskyVisible(!show_deepsky());
+}
+
+void	StarChartWidget::toggleTooltipsVisible() {
+	setTooltipsVisible(!show_tooltips());
+}
+
+void	StarChartWidget::toggleNegative() {
+	setNegative(!negative());
 }
 
 void	StarChartWidget::showContextMenu(const QPoint& point) {
@@ -777,9 +811,21 @@ void	StarChartWidget::showContextMenu(const QPoint& point) {
 	connect(&actionDeepsky, SIGNAL(triggered()),
 		this, SLOT(toggleDeepskyVisible()));
 
+	QAction	actionTooltips(QString("Coordinates"), this);
+	actionTooltips.setCheckable(true);
+	actionTooltips.setChecked(show_tooltips());
+	contextMenu.addAction(&actionTooltips);
+	connect(&actionTooltips, SIGNAL(triggered()),
+		this, SLOT(toggleTooltipsVisible()));
+
+	QAction	actionNegative(QString("Negative"), this);
+	actionNegative.setCheckable(true);
+	actionNegative.setChecked(negative());
+	contextMenu.addAction(&actionNegative);
+	connect(&actionNegative, SIGNAL(triggered()),
+		this, SLOT(toggleNegative()));
+
 	contextMenu.exec(mapToGlobal(point));
 }
-
-
 
 } // namespace snowgui
