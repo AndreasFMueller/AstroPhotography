@@ -147,7 +147,9 @@ void	AsiCcd::startExposure(const Exposure& exposure) {
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "%s start exposure %s",
 		name().toString().c_str(), exposure.toString().c_str());
-	state(CcdState::exposing);
+
+	// call the Ccds startExposure method
+	Ccd::startExposure(exposure);
 	try {
 		setExposure(exposure);
 
@@ -155,7 +157,7 @@ void	AsiCcd::startExposure(const Exposure& exposure) {
 		_camera.startExposure(exposure.shutter() == Shutter::OPEN);
 	} catch (...) {
 	}
-	exposureStatus();
+	//exposureStatus();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "exposure started");
 }
 
@@ -383,6 +385,8 @@ bool	AsiCcd::wait() {
 		case CcdState::exposing:
 			usleep(100000);
 			break;
+		case CcdState::streaming:
+			return false;
 		}
 	} while (1);
 };
