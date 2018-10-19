@@ -10,6 +10,7 @@
 #include <AstroLoader.h>
 #include <QAction>
 #include "DeviceAction.h"
+#include <sstream>
 
 using namespace astro::device;
 using namespace astro::module;
@@ -30,6 +31,10 @@ LiveView::LiveView(QWidget *parent)
 	qRegisterMetaType<astro::image::ImageRectangle>(
 		"astro::image::ImageRectangle");
 
+	// make sure the focuser stuff is initally not visible
+	ui->focuserGroup->setVisible(false);
+	ui->exposureGroup->setVisible(false);
+
 	// don't display the metadata portion of the imagedisplaywidget
 	ui->imageWidget->crosshairs(true);
 	ui->imageWidget->setInfoVisible(false);
@@ -39,15 +44,15 @@ LiveView::LiveView(QWidget *parent)
 	ui->startButton->setEnabled(false);
 	ui->singleButton->setEnabled(false);
 
+	_mode = idle;
+
 	// get a list of cameras
 	_ccdMenu = menuBar()->addMenu(QString("Cameras"));
 	_focuserMenu = menuBar()->addMenu(QString("Focusers"));
 
 	// set up the work classes
-	_work = new ExposureWork(this);
-
-	_streamwork = new StreamWork(this);
-	_streamwork->interval(ui->intervalSpinBox->value());
+	_exposurework = NULL;
+	_streamwork = NULL;
 
 	// create a thread to collect cameras
 	CameraLister	*_lister = new CameraLister(NULL);
@@ -57,6 +62,7 @@ LiveView::LiveView(QWidget *parent)
 		this, SLOT(addFocuser(std::string)));
 	connect(_lister, SIGNAL(finished()),
 		_lister, SLOT(deleteLater()));
+	_lister->start();
 
 	// connect the sink to the imageWidget
 	connect(this,
@@ -79,16 +85,26 @@ LiveView::LiveView(QWidget *parent)
 		this, SLOT(fullframeClicked()));
 	connect(ui->exposureSpinBox, SIGNAL(valueChanged(double)),
 		this, SLOT(setExposuretime(double)));
-	connect(ui->intervalSpinBox, SIGNAL(valueChanged(double)),
-		_streamwork, SLOT(interval(double)));
 	connect(ui->singleButton, SIGNAL(clicked()),
 		this, SLOT(singleClicked()));
+	connect(ui->focuserSpinBox, SIGNAL(valueChanged(int)),
+		this, SLOT(focusChanged(int)));
 
 	// initialize the exposure structure
 	_exposure.exposuretime(1);
 
-	// start the lister thread
-	_lister->start();
+	// initialize the timer
+	_timer.setInterval(100);
+	connect(&_timer, SIGNAL(timeout()),
+		this, SLOT(focuserUpdate()));
+	_timer.start();
+
+	// set up the context menu for the focuser
+	ui->focuserSpinBox->setContextMenuPolicy(Qt::CustomContextMenu);
+	connect(ui->focuserSpinBox,
+		SIGNAL(customContextMenuRequested(const QPoint &)),
+		this,
+		SLOT(showFocuserStepsMenu(const QPoint &)));
 }
 
 /**
@@ -96,7 +112,7 @@ LiveView::LiveView(QWidget *parent)
  */
 LiveView::~LiveView() {
 	delete ui;
-	delete _work;
+	delete _exposurework;
 	delete _streamwork;
 }
 
@@ -126,6 +142,7 @@ void	LiveView::openCamera(std::string cameraname) {
 	if (!_ccd) {
 		return;
 	}
+	ui->exposureGroup->setVisible(true);
 
 	// initialize the frame size of the exposure structure
 	setSubframe(_ccd->getInfo().getFrame());
@@ -165,6 +182,49 @@ void	LiveView::addCamera(std::string cameraname) {
 void	LiveView::openFocuser(std::string focusername) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "opening focuser: %s",
 		focusername.c_str());
+
+	try {
+		Devices	_devices(getModuleRepository());
+		_focuser = _devices.getFocuser(focusername);
+	} catch (const std::exception& x) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "cannot open device %s: %s",
+			focusername.c_str(), x.what());
+	}
+
+	// return if we have no camera
+	if (!_focuser) {
+		return;
+	}
+
+	// configure the focuser group
+	ui->focuserSpinBox->blockSignals(true);
+	ui->focuserSpinBox->setMinimum(_focuser->min());
+	ui->focuserSpinBox->setMaximum(_focuser->max());
+	ui->focuserSpinBox->setValue(_focuser->current());
+	ui->focuserSpinBox->blockSignals(false);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "focuser maximum: %d",
+		ui->focuserSpinBox->maximum());
+
+	// make the focuser componentent visible
+	ui->focuserGroup->setVisible(true);
+
+	// window title
+	updateTitle();
+}
+
+/**
+ * \brief Create an informative title
+ */
+void	LiveView::updateTitle() {
+	std::ostringstream	out;
+	out << "LiveView";
+	if (_ccd) {
+		out << " @ " << _ccd->name();
+	}
+	if (_focuser) {
+		out << " (focuser: " << _focuser->name().toString() << ")";
+	}
+	setWindowTitle(QString(out.str().c_str()));
 }
 
 /**
@@ -212,6 +272,12 @@ void	LiveView::startStreamPrivate() {
 	_thread->start();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "thread created");
 
+	// create streamwork
+	_streamwork = new StreamWork(this);
+	_streamwork->interval(ui->intervalSpinBox->value());
+	connect(ui->intervalSpinBox, SIGNAL(valueChanged(double)),
+		_streamwork, SLOT(interval(double)));
+
 	// set up the work to be done
 	_streamwork->moveToThread(_thread);
 	QMetaObject::invokeMethod(_streamwork, "start", Qt::QueuedConnection);
@@ -239,11 +305,12 @@ void	LiveView::startStream() {
 	if (!_ccd) {
 		return;
 	}
-	if (_ccd->streaming() || _streamwork->running()) {
+	if (_mode == streaming) {
 		stopStream();
-		ui->startButton->setText(QString("Start"));
+		ui->startButton->setText(QString("Stream"));
 		return;
 	}
+	_mode = streaming;
 	if (ui->intervalSpinBox->value() > 0) {
 		startStreamPrivate();
 		return;
@@ -263,6 +330,7 @@ void	LiveView::stopStream() {
 		return;
 	}
 	_ccd->stopStream();
+	_mode = idle;
 }
 
 /**
@@ -305,17 +373,10 @@ void	LiveView::doExposure() {
 	_ccd->wait();
 	astro::image::ImagePtr	image = _ccd->getImage();
 	emit newImage(image);
+	if (single == _mode) {
+		_thread->terminate();
+	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "exposure done");
-}
-
-/**
- * \brief Slot to perform a single exposure
- */
-void	LiveView::doSingleExposure() {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "perform a single exposure");
-	doExposure();
-	_thread->terminate();
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "thread stopped");
 }
 
 /**
@@ -328,25 +389,29 @@ void	LiveView::singleClicked() {
 	}
 
 	// make sure no other action can be initiated while we are exposing
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "disable start buttons");
 	ui->startButton->setEnabled(false);
 	ui->singleButton->setEnabled(false);
 
 	// make sure we remember that we are processing single images
-	_single = true;
+	_mode = single;
 
 	// set up the thread to do the work
 	_thread = new QThread(NULL);
 	connect(_thread, SIGNAL(finished()), this, SLOT(threadFinished()));
 	//connect(_thread, SIGNAL(finished()), _thread, SLOT(deleteLater()));
-	connect(this, SIGNAL(doExposure()), _thread, SLOT(doSingleExposure()));
-	_thread->start();
 
 	// set up the work to be done
-	_work = new ExposureWork(this);
-	_work->moveToThread(_thread);
+	_exposurework = new ExposureWork(this);
+	_exposurework->moveToThread(_thread);
 	
+	// connect to the exposure work
+	connect(this, SIGNAL(triggerExposure()),
+		_exposurework, SLOT(doExposure()));
+	_thread->start();
+
 	// send the signal to the thread 
-	emit doExposure();
+	emit triggerExposure();
 }
 
 /**
@@ -357,12 +422,16 @@ void	LiveView::singleClicked() {
  */
 void	LiveView::receiveImage(astro::image::ImagePtr image) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "image received");
-	if (!_single) {
+	// update the status bar
+	std::string	m = astro::stringprintf("%s of pixel type %s",
+		image->info().c_str(),
+		astro::demangle(image->pixel_type().name()).c_str());
+	statusBar()->showMessage(QString(m.c_str()));
+
+	if (_mode == single) {
+		// cleanup
 		return;
 	}
-
-	// we are done processing single images
-	_single = false;
 }
 
 /**
@@ -372,10 +441,121 @@ void	LiveView::threadFinished() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "Thread finished");
 	// clean up the thread member
 	_thread = NULL;
+	_mode = idle;
 
 	// reenable the buttons
 	ui->startButton->setEnabled(true);
 	ui->singleButton->setEnabled(true);
+}
+
+/**
+ * \brief Slot called when the focus changes
+ */
+void	LiveView::focusChanged(int value) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "focus changed to %d", value);
+	if (_focuser) {
+		_focuser->set(value);
+	}
+}
+
+/**
+ * \brief Slot called by the timer to udpate the focuser info
+ */
+void	LiveView::focuserUpdate() {
+	if (!_focuser) {
+		return;
+	}
+	long	c = _focuser->current();
+	long	t = ui->focuserSpinBox->value();
+	if (c != t) {
+		statusBar()->showMessage(QString(
+			astro::stringprintf("Focuser moving: %d of %d",
+				c, t).c_str()
+		));
+	} else {
+		statusBar()->showMessage(QString(
+			astro::stringprintf("Focuser at %d", c).c_str()
+		));
+	}
+}
+
+/**
+ * \brief Slot called when the context menu for the focuser is requested
+ */
+void	LiveView::showFocuserStepsMenu(const QPoint& p) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "show focuser context menu at %d,%d",
+		p.x(), p.y());
+
+	int	stepsize = ui->focuserSpinBox->singleStep();
+
+	QMenu	contextMenu("Change step size");
+
+	QAction	action1(QString("1"), this);
+	action1.setCheckable(true);
+	action1.setChecked(stepsize == 1);
+	action1.setData(qVariantFromValue((int)1));
+	contextMenu.addAction(&action1);
+	connect(&action1, SIGNAL(triggered()),
+		this, SLOT(stepsizeChanged()));
+
+	QAction	action10(QString("10"), this);
+	action10.setCheckable(true);
+	action10.setChecked(stepsize == 10);
+	action10.setData(qVariantFromValue((int)10));
+	contextMenu.addAction(&action10);
+	connect(&action10, SIGNAL(triggered()),
+		this, SLOT(stepsizeChanged()));
+
+	QAction	action100(QString("100"), this);
+	action100.setCheckable(true);
+	action100.setChecked(stepsize == 100);
+	action100.setData(qVariantFromValue((int)100));
+	if (ui->focuserSpinBox->maximum() >= 100) {
+		contextMenu.addAction(&action100);
+		connect(&action100, SIGNAL(triggered()),
+			this, SLOT(stepsizeChanged()));
+	}
+
+	QAction	action1000(QString("1000"), this);
+	action1000.setCheckable(true);
+	action1000.setChecked(stepsize == 1000);
+	action1000.setData(qVariantFromValue((int)1000));
+	if (ui->focuserSpinBox->maximum() >= 1000) {
+		contextMenu.addAction(&action1000);
+		connect(&action1000, SIGNAL(triggered()),
+			this, SLOT(stepsizeChanged()));
+	}
+
+	QAction	action10000(QString("10000"), this);
+	action10000.setCheckable(true);
+	action10000.setChecked(stepsize == 10000);
+	action10000.setData(qVariantFromValue((int)10000));
+	if (ui->focuserSpinBox->maximum() >= 10000) {
+		contextMenu.addAction(&action10000);
+		connect(&action10000, SIGNAL(triggered()),
+			this, SLOT(stepsizeChanged()));
+	}
+
+	QAction	action100000(QString("100000"), this);
+	action100000.setCheckable(true);
+	action100000.setChecked(stepsize == 100000);
+	action100000.setData(qVariantFromValue((int)100000));
+	if (ui->focuserSpinBox->maximum() >= 100000) {
+		contextMenu.addAction(&action100000);
+		connect(&action100000, SIGNAL(triggered()),
+			this, SLOT(stepsizeChanged()));
+	}
+
+	contextMenu.exec(ui->focuserSpinBox->mapToGlobal(p));
+}
+
+void	LiveView::stepsizeChanged() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "stepsize changed");
+	QAction *act = qobject_cast<QAction *>(sender());
+	QVariant	v = act->data();
+	int	stepsize = v.value<int>();
+	ui->focuserSpinBox->setSingleStep(stepsize);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "stepsize changed: %d", stepsize);
 }
 
 } // namespace snowgui

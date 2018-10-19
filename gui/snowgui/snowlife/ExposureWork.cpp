@@ -15,7 +15,9 @@ ExposureWork::~ExposureWork() {
 }
 
 void	ExposureWork::doExposure() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "ExposureWork::doExposure() started");
 	_liveview->doExposure();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "ExposureWork::doExposure() terminated");
 }
 
 } // namespace snowgui

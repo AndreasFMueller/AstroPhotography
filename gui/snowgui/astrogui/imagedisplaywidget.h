@@ -57,21 +57,14 @@ public:
 
 	// the gain/scale/subframe settings can individually be made visible
 	bool	gainIsVisible();
-	void	setGainVisible(bool);
-
 	bool	scaleIsVisible();
-	void	setScaleVisible(bool);
-
 	bool	subframeIsVisible();
-	void	setSubframeVisible(bool);
+	bool	infoIsVisible();
 
 	bool	crosshairs();
 	void	crosshairs(bool);
 
 	// control whether the image information at the bottom is visible
-	bool	infoIsVisible();
-	void	setInfoVisible(bool);
-
 	// The next methods are for controlling the subrectangle display
 	// A subrectangle can be selected even if the subframe controls
 	// are not displayed
@@ -141,6 +134,22 @@ public slots:
 	void	redOffsetChanged(double);
 	void	greenOffsetChanged(double);
 	void	blueOffsetChanged(double);
+
+	void	setGainVisible(bool);
+	void	toggleGainVisible();
+
+	void	setScaleVisible(bool);
+	void	toggleScaleVisible();
+
+	void	setSubframeVisible(bool);
+	void	toggleSubframeVisible();
+
+	void	setInfoVisible(bool);
+	void	toggleInfoVisible();
+
+	void	setCrosshairsVisible(bool);
+	void	toggleCrosshairsVisible();
+	void	showContextMenu(const QPoint& point);
 private:
 	void	closeEvent(QCloseEvent *);
 	void	changeEvent(QEvent *);
