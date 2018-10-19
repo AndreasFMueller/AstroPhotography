@@ -57,7 +57,7 @@ void	Focuser::set(long /* value */) {
  *			reach the new position
  */
 bool	Focuser::moveto(long value, unsigned long timeout) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "moving to %hu", value);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "moving to %lu", value);
 	// record current time
 	time_t	starttime;
 	time(&starttime);
@@ -85,7 +85,7 @@ bool	Focuser::moveto(long value, unsigned long timeout) {
 		currentposition = current();
 		time(&now);
 	} while ((currentposition != value) && (now < timelimit));
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "final position is %hu after %d seconds",
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "final position is %lu after %d seconds",
 		currentposition, now - starttime);
 
 	// report whether we have reached the position
