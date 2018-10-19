@@ -58,6 +58,7 @@ bool	FocusWork::complete() {
 		debug(LOG_ERR, DEBUG_LOG, 0, "focuser not set");
 		return false;
 	}
+#if 0
 	if (!_focusing.evaluator()) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "evaluator not set");
 		return false;
@@ -66,6 +67,7 @@ bool	FocusWork::complete() {
 		debug(LOG_ERR, DEBUG_LOG, 0, "solver not set");
 		return false;
 	}
+#endif
 	return true;
 }
 
@@ -137,6 +139,11 @@ void	FocusWork::main(astro::thread::Thread<FocusWork>& /* thread */) {
 			image->size().toString().c_str());
 
 		// evaluate the image
+		if (!evaluator()) {
+			std::string	msg("no evaluator set");
+			debug(LOG_ERR, DEBUG_LOG, 0, "no evaluator set");
+			throw std::runtime_error(msg);
+		}
 		double	value = (*evaluator())(image);
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "evaluated to %f", value);
 
@@ -148,6 +155,11 @@ void	FocusWork::main(astro::thread::Thread<FocusWork>& /* thread */) {
 	}
 
 	// now solve we need a suitable solver for the method
+	if (!solver()) {
+		std::string	msg("no solver set");
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw std::runtime_error(msg);
+	}
 	int	targetposition = solver()->position(focusitems);
 	if ((targetposition < min()) || (targetposition > max())) {
 		std::string	msg = stringprintf(
@@ -156,6 +168,9 @@ void	FocusWork::main(astro::thread::Thread<FocusWork>& /* thread */) {
 		focusingstatus(Focusing::FAILED);
 		return;
 	}
+
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "final focus position: %d",
+		targetposition);
 
 	// move to the final focus position
 	focusingstatus(Focusing::MOVING);
@@ -190,6 +205,13 @@ void	FocusWork::moveto(unsigned short position) {
 	}
 	if (position > max()) {
 		throw std::runtime_error("interval error: focuser move above max()");
+	}
+
+	// if we don't have a focuser, we throw an exception
+	if (!focuser()) {
+		std::string	msg("no focuser set");
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw std::runtime_error(msg);
 	}
 
 	// switch state to moving

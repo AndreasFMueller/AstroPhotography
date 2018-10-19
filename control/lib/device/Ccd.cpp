@@ -107,7 +107,10 @@ Ccd::Ccd(const CcdInfo& _info)
  * \brief Get the state
  */
 CcdState::State	Ccd::state() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "LCK state query state()");
 	std::unique_lock<std::recursive_mutex>	lock(_mutex);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "--> LCK acquired state()");
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "<-- LCK released state()");
 	return _state;
 }
 
@@ -115,14 +118,19 @@ CcdState::State	Ccd::state() {
  * \brief Set the state, notify threads waiting for a state change
  */
 void	Ccd::state(CcdState::State s) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "LCK changing state to %s state(s)", 
+		CcdState::state2string(s).c_str());
 	std::unique_lock<std::recursive_mutex>	lock(_mutex);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "--> LCK acquired state(s)");
 	if (_state != s) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "state change %s -> %s",
 			CcdState::state2string(_state).c_str(),
 			CcdState::state2string(s).c_str());
 		_state = s;
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "notify all of state change");
 		_condition.notify_all();
 	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "<-- LCK released state(s)");
 }
 
 /**
@@ -136,7 +144,10 @@ void	Ccd::state(CcdState::State s) {
  * this method also sets up the infrastructure for the wait method.
  */
 void    Ccd::startExposure(const Exposure& _exposure) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "LCK start exposure %s startExposure()",
+		_exposure.toString().c_str());
 	std::unique_lock<std::recursive_mutex>	lock(_mutex);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "--> LCK acquired startExposure()");
 	// make sure we are in the right state, and only accept new exposures
 	// in that state. This is important because if we change the
 	// exposure member while an exposure is in progress, we may run into
@@ -180,6 +191,7 @@ void    Ccd::startExposure(const Exposure& _exposure) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "exposure started at %d",
 		lastexposurestart);
 	state(CcdState::exposing);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "<-- LCK released startExposure()");
 }
 
 /**
@@ -227,17 +239,21 @@ public:
  * available. 
  */
 bool	Ccd::wait() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "LCK waiting for image completion wait()");
 	// lock the _mutex, so we are shure the state variable will not
 	// change between checks
 	std::unique_lock<std::recursive_mutex>	lock(_mutex);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "--> LCK acquired wait()");
 
 	// now check the state variable, and handle the simple cases
 	CcdState::State	s = exposureStatus();
 	switch (s) {
 		// not exposing, no need to wait, and no image is available
 	case CcdState::idle:
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "<-- LCK released wait()");
 		return false;
 	case CcdState::exposed:
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "<-- LCK released wait()");
 		return true;
 	default:
 		// remainder of cases is handled outside this switch
@@ -268,13 +284,17 @@ bool	Ccd::wait() {
 	// remember the current state
 	CcdStateChange	statechange(this, s);
 
+	// by waiting on the condition variable, the lock is released
+	debug(LOG_DEBUG, DEBUG_LOG, 0,
+		"<-- LCK release lock for waiting wait()");
+
 	// wait for a state change. Whenever the condition variable is
 	// notified, check whether the state has changed, and retry if not
 	while (std::cv_status::no_timeout == _condition.wait_for(lock,
 		std::chrono::seconds(delta))) {
 		// if we get to this point, we know that the state
-		// actually changed
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "wait complete, state %s",
+		// actually changed, but we don't own the lock
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "--> LCK wait complete, state %s",
 			CcdState::state2string(state()).c_str());
 		return (CcdState::exposed == this->state());
 	}
@@ -282,6 +302,7 @@ bool	Ccd::wait() {
 	// this really should not happen, it indicates a serious problem
 	// with the camera. Should we rather throw an exception here?
 	debug(LOG_ERR, DEBUG_LOG, 0, "state change has timed out");
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "<-- LCK lock released wait()");
 	return false;
 }
 
@@ -300,7 +321,9 @@ astro::image::ImagePtr	Ccd::getRawImage() {
  * the common metadata.
  */
 astro::image::ImagePtr	Ccd::getImage() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "LCK retrieving raw image getImage()");
 	std::unique_lock<std::recursive_mutex>	lock(_mutex);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "--> LCK acquired getImage()");
 	// must have an exposed image to call this method
 	if (CcdState::exposed != this->exposureStatus()) {
 		std::string	msg = stringprintf("no exposed image to "
@@ -322,6 +345,8 @@ astro::image::ImagePtr	Ccd::getImage() {
 	// set state to idle
 	state(CcdState::idle);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "state changed to idle");
+
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "<-- LCK release lock getImage()");
 
 	// that's it, return the image
 	return image;

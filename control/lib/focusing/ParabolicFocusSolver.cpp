@@ -17,6 +17,10 @@ ParabolicSolver::ParabolicSolver() {
 
 /**
  * \brief Compute the minumum position of a set of focus items
+ *
+ * This method assumes that the values form a parabola, so we try to
+ * fit a parabola and then use the symmetry axis of the parabola as
+ * the solution to the focus problem.
  */
 int	ParabolicSolver::position(const FocusItems& focusitems) {
 	// allocate memory for the equation
