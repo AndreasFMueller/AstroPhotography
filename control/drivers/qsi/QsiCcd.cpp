@@ -162,7 +162,7 @@ std::string	state2string(QSICamera::CameraState qsistate) {
  */
 void	QsiCcd::run() {
 	while (1) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "get Ccd state");
+		//debug(LOG_DEBUG, DEBUG_LOG, 0, "get Ccd state");
 		QSICamera::CameraState	qsistate;
 		{
 			std::unique_lock<std::recursive_mutex>	lock(
@@ -173,7 +173,7 @@ void	QsiCcd::run() {
 			_camera.camera().get_CameraState(&qsistate);
 			END_STOPWATCH("get_CameraState()");
 		}
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "qsistate=%d", qsistate);
+		//debug(LOG_DEBUG, DEBUG_LOG, 0, "qsistate=%d", qsistate);
 		
 		// analyze the state
 		switch (qsistate) {

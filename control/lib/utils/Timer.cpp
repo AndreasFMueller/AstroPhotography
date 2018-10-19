@@ -32,7 +32,7 @@ double	Timer::elapsed() {
 }
 
 void    Timer::sleep(double t) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "sleep for %.3f seconds", t);
+	//debug(LOG_DEBUG, DEBUG_LOG, 0, "sleep for %.3f seconds", t);
 	if (t < 0) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "negative delay, "
 			"return immediately");
@@ -40,7 +40,7 @@ void    Timer::sleep(double t) {
 	}
 	unsigned int    tt = 1000000 * t;
 	usleep(tt);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "sleep complete");
+	//debug(LOG_DEBUG, DEBUG_LOG, 0, "sleep complete");
 }
 
 std::string	Timer::timestamp(const struct timeval& tv, int resolution) {
