@@ -5,6 +5,7 @@
 #define SNOWGUI_LIVEVIEW_H
 
 #include <QMainWindow>
+#include <QTimer>
 #include <AstroCamera.h>
 #include <atomic>
 
@@ -76,11 +77,17 @@ class LiveView : public QMainWindow, public astro::camera::ImageSink {
 	QThread			*_thread;
 
 	// variables to handle single exposures
-	std::atomic_bool	_single;
-	ExposureWork		*_work;
+	typedef enum { idle, single, streaming } mode_type;
+	std::atomic<mode_type>	_mode;
+
+	// single exposure work
+	ExposureWork		*_exposurework;
 
 	// variables to handle our own streaming
 	StreamWork	*_streamwork;
+
+	// focuser status timer	
+	QTimer	_timer;
 
 public:
 	explicit LiveView(QWidget *parent = 0);
@@ -94,9 +101,11 @@ private:
 
 	void	startStreamPrivate();
 	void	stopStreamPrivate();
+	void	updateTitle();
 
 signals:
 	void	newImage(astro::image::ImagePtr);
+	void	triggerExposure();
 
 public slots:
 	void	openCamera(std::string);
@@ -105,12 +114,13 @@ public slots:
 	void	addCamera(std::string);
 	void	addFocuser(std::string);
 
+	void	focusChanged(int);
+
 	void	setSubframe(astro::image::ImageRectangle);
 	void	setExposuretime(double);
 	void	fullframeClicked();
 
 	void	doExposure();
-	void	doSingleExposure();
 
 	void	startStream();
 	void	stopStream();
@@ -118,6 +128,12 @@ public slots:
 	void	singleClicked();
 	void	receiveImage(astro::image::ImagePtr);
 	void	threadFinished();
+
+	void	focuserUpdate();
+
+	// custom context menu für the focuser
+	void	showFocuserStepsMenu(const QPoint& p);
+	void	stepsizeChanged();
 };
 
 } // namespace snowgui

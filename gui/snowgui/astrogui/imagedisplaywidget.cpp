@@ -11,6 +11,8 @@
 #include <AstroFilterfunc.h>
 #include "AutoGain.h"
 #include <QScrollBar>
+#include <QMenu>
+#include <QAction>
 
 using namespace astro::image;
 
@@ -47,6 +49,16 @@ imagedisplaywidget::imagedisplaywidget(QWidget *parent) :
 	// connect the imageUpdated signal with the processNewImage slot
 	connect(this, SIGNAL(imageUpdated()), this,
 		SLOT(processNewImage()), Qt::QueuedConnection);
+
+	// enable context menu
+	// XXX problem: the menu does not show up
+	setContextMenuPolicy(Qt::CustomContextMenu);
+	connect(this, SIGNAL(customContextMenuRequested(const QPoint&)),
+		this, SLOT(showContextMenu(const QPoint&)));
+
+	selectable->setContextMenuPolicy(Qt::CustomContextMenu);
+	connect(selectable, SIGNAL(customContextMenuRequested(const QPoint&)),
+		this, SLOT(showContextMenu(const QPoint&)));
 
 	// make sure the subframe is disabled, it only becomes enabled
 	// when an image is added
@@ -179,8 +191,9 @@ void	imagedisplaywidget::setImageRectangle(const ImageRectangle& imagerectangle)
 	emit rectangleSelected(imagerectangle);
 
 	// compute the center for the crosshairs relative to this image
-	int	cx;
-	int	cy;
+	ImageSize	s = _image->size();
+	int	cx = s.width() / 2 - imagerectangle.size().width();
+	int	cy = s.height() / 2 - imagerectangle.size().height();
 }
 
 /**
@@ -209,7 +222,6 @@ ImagePoint	imagedisplaywidget::convertPoint(int x, int y) {
 
 	// if we are currently displaying a subimage
 	if (imageRectangleEnabled()) {
-		
 		x += _rectangle.origin().x();
 		y += _rectangle.origin().y();
 	}
@@ -610,12 +622,18 @@ void	imagedisplaywidget::processDisplayImage(ImagePtr image) {
 		hpos, vpos, previoussize.width(), previoussize.height());
 
 	// create a new pixmap and install it in the image
-	QPixmap *pixmap = image2pixmap(image);
+	QPixmap *pixmap = NULL;
+	try {
+		pixmap = image2pixmap(image);
+	} catch (const std::exception& x) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "cannot build pixmap: %s",
+			x.what());
+	}
 	if (NULL != pixmap) {
 		selectable->setPixmap(*pixmap);
+		selectable->setFixedSize(pixmap->width(), pixmap->height());
+		selectable->setMinimumSize(pixmap->width(), pixmap->height());
 	}
-	selectable->setFixedSize(pixmap->width(), pixmap->height());
-	selectable->setMinimumSize(pixmap->width(), pixmap->height());
 #if 0
 	connect(selectable, SIGNAL(rectangleSelected(QRect)),
 		this, SLOT(selectRectangle(QRect)));
@@ -972,6 +990,22 @@ void	imagedisplaywidget::changeEvent(QEvent *event) {
 	QWidget::changeEvent(event);
 }
 
+void	imagedisplaywidget::toggleSubframeVisible() {
+	setSubframeVisible(!subframeIsVisible());
+}
+
+void	imagedisplaywidget::toggleGainVisible() {
+	setGainVisible(!gainIsVisible());
+}
+
+void	imagedisplaywidget::toggleScaleVisible() {
+	setScaleVisible(!scaleIsVisible());
+}
+
+void	imagedisplaywidget::toggleInfoVisible() {
+	setInfoVisible(!infoIsVisible());
+}
+
 void	imagedisplaywidget::crosshairsChanged(int c) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "crosshair mode changed");
 	crosshairs((c > 0));
@@ -979,6 +1013,59 @@ void	imagedisplaywidget::crosshairsChanged(int c) {
 
 void	imagedisplaywidget::crosshairsCenter(astro::image::ImagePoint c) {
 	image2pixmap.crosshairs_center(c);
+}
+
+void	imagedisplaywidget::setCrosshairsVisible(bool c) {
+	crosshairs(c);
+	repaint();
+}
+
+void	imagedisplaywidget::toggleCrosshairsVisible() {
+	setCrosshairsVisible(!crosshairs());
+}
+
+void	imagedisplaywidget::showContextMenu(const QPoint& point) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "show contet manu at %d/%d",
+		point.x(), point.y());
+
+	QMenu	contextMenu("Options", this);
+
+	QAction	actionGain(QString("Gain"), this);
+	actionGain.setCheckable(true);
+	actionGain.setChecked(crosshairs());
+	contextMenu.addAction(&actionGain);
+	connect(&actionGain, SIGNAL(triggered()),
+		this, SLOT(toggleGainVisible()));
+
+	QAction	actionScale(QString("Scale"), this);
+	actionScale.setCheckable(true);
+	actionScale.setChecked(scaleIsVisible());
+	contextMenu.addAction(&actionScale);
+	connect(&actionScale, SIGNAL(triggered()),
+		this, SLOT(toggleScaleVisible()));
+
+	QAction	actionSubframe(QString("Subframe"), this);
+	actionSubframe.setCheckable(true);
+	actionSubframe.setChecked(subframeIsVisible());
+	contextMenu.addAction(&actionSubframe);
+	connect(&actionSubframe, SIGNAL(triggered()),
+		this, SLOT(toggleSubframeVisible()));
+
+	QAction	actionCrosshairs(QString("Crosshairs"), this);
+	actionCrosshairs.setCheckable(true);
+	actionCrosshairs.setChecked(crosshairs());
+	contextMenu.addAction(&actionCrosshairs);
+	connect(&actionCrosshairs, SIGNAL(triggered()),
+		this, SLOT(toggleCrosshairsVisible()));
+
+	QAction	actionInfo(QString("Image info"), this);
+	actionInfo.setCheckable(true);
+	actionInfo.setChecked(infoIsVisible());
+	contextMenu.addAction(&actionInfo);
+	connect(&actionInfo, SIGNAL(triggered()),
+		this, SLOT(toggleInfoVisible()));
+
+	contextMenu.exec(mapToGlobal(point));
 }
 
 } // namespace snowgui

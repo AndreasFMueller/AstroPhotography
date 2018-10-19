@@ -59,14 +59,12 @@ public:
 	bool	gainIsVisible();
 	bool	scaleIsVisible();
 	bool	subframeIsVisible();
+	bool	infoIsVisible();
 
 	bool	crosshairs();
 	void	crosshairs(bool);
 
 	// control whether the image information at the bottom is visible
-	bool	infoIsVisible();
-	void	setInfoVisible(bool);
-
 	// The next methods are for controlling the subrectangle display
 	// A subrectangle can be selected even if the subframe controls
 	// are not displayed
@@ -145,6 +143,9 @@ public slots:
 
 	void	setSubframeVisible(bool);
 	void	toggleSubframeVisible();
+
+	void	setInfoVisible(bool);
+	void	toggleInfoVisible();
 
 	void	setCrosshairsVisible(bool);
 	void	toggleCrosshairsVisible();
