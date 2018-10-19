@@ -1,5 +1,5 @@
 /*
- * CameraLister.h
+ * CameraLister.h -- axiliary class used to list devices
  *
  * (c) 2018 Prof Dr Andreas Mülle, Hochschule Rapperswil
  */
@@ -11,6 +11,13 @@
 
 namespace snowgui {
 
+/**
+ * \brief Class to list cameras connected to a system
+ *
+ * This class' run method emits signals for all cameras connected
+ * to the system. The LiveView class uses this to build the menu
+ * of available devices.
+ */
 class CameraLister : public QThread {
 	Q_OBJECT
 

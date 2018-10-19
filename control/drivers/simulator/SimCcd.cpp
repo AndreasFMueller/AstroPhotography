@@ -96,14 +96,14 @@ void    SimCcd::startExposure(const Exposure& exposure) {
 		"focallength = %.3f, limit_magnitude = %.2f",
 		focallength, limit_magnitude);
 
-	// start the image construction thread
-	_thread = new std::thread(imageconstruction_main, this);
-
 	// start the exposure
 	Ccd::startExposure(exposure);
 	starttime = simtime();
 	state(CcdState::exposing);
 	shutter = exposure.shutter();
+
+	// start the image construction thread
+	_thread = new std::thread(imageconstruction_main, this);
 }
 
 /**
@@ -169,12 +169,6 @@ void	SimCcd::createimage() {
 	// binning mode
 	starcamera.binning(exposure.mode());
 
-	// check whether exposure time is already over, this can happen
-	// if the starfield had to be rebuilt from the catalog
-	if ((timer.gettime() - timer.startTime()) > exposure.exposuretime()) {
-		state(CcdState::exposed);
-	}
-
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "build a new image");
 	ImagePtr	image = starcamera(starfield);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "got an %s image: %s",
@@ -189,13 +183,14 @@ void	SimCcd::createimage() {
 		Timer::sleep(remaining);
 	}
 
+	// origin
+	image->setOrigin(exposure.frame().origin());
+	_image = image;
+
 	// now signal that the image is exposed
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "change state");
 	state(CcdState::exposed);
 
-	// origin
-	image->setOrigin(exposure.frame().origin());
-	_image = image;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "image construction thread terminated");
 }
 
@@ -279,9 +274,6 @@ CcdState::State	SimCcd::exposureStatus() {
 	case CcdState::streaming:
 		return state();
 	case CcdState::exposing:
-		if (timepast > exposure.exposuretime()) {
-			state(CcdState::exposed);
-		}
 		return state();
 	}
 	// this exception is mainly thrown to silence the compiler, it should
@@ -300,40 +292,6 @@ void    SimCcd::cancelExposure() {
 	}
 	state(CcdState::idle);
 }
-
-#if 0
-/**
- * \brief Wait for completion of the exopsure
- *
- * This is a reimplementation of the wait method because during tests we don't
- * really want to wait for the exposure time to really elapse. So we fake it.
- * Note that this doesn't affect the exposureStatus method. If one only looks
- * at the exposureStatus, one can still wait (the Ccd::wait method would do
- * that).
- */
-bool    SimCcd::wait() {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "wait()");
-	if ((CcdState::idle == state()) || (CcdState::cancelling == state())) {
-		debug(LOG_ERR, DEBUG_LOG, 0, "no exposure in progress");
-		throw BadState("no exposure in progress");
-	}
-	if (CcdState::exposed == state()) {
-		return true;
-	}
-	// compute the remaining exposure time
-	double	remaining = exposure.exposuretime()
-			- (simtime() - starttime);
-	if (remaining > 0) {
-		unsigned int	remainingus = 1000000 * remaining;
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "sleeping for %.3f", remaining);
-		usleep(remainingus);
-	}
-
-	// exposure is now complete
-	state(CcdState::exposed);
-	return true;
-}
-#endif
 
 /**
  * \brief Remember the shutter state

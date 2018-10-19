@@ -1,5 +1,5 @@
 /*
- * CameraLister.cpp
+ * CameraLister.cpp -- implementation of CameraLister class
  *
  * (c) 2018 Prof Dr Andreas Müller, Hochschule Rapperswil
  */
@@ -12,13 +12,26 @@ using namespace astro::module;
 
 namespace snowgui {
 
+/**
+ * \brief Construct a camera lister
+ */
 CameraLister::CameraLister(QObject *parent) : QThread(parent) {
-	
 }
 
+/**
+ * \brief Destroy the camera lister
+ */
 CameraLister::~CameraLister() {
 }
 
+/**
+ * \brief Add cameras from a specified locator
+ *
+ * This method retrieves a list of all cameras available from the 
+ * locator and emits the camera name through the camera signal
+ *
+ * \param locator	DeviceLocator for the cameras
+ */
 void	CameraLister::addCameras(DeviceLocatorPtr locator) {
 	auto	names = locator->getDevicelist(astro::DeviceName::Ccd);
 	for (auto n = names.begin(); n != names.end(); n++) {
@@ -28,6 +41,14 @@ void	CameraLister::addCameras(DeviceLocatorPtr locator) {
 	}
 }
 
+/**
+ * \brief Add focusers from a specified locator
+ *
+ * This method retrieves a list of all focusers available from the 
+ * locator and emits the focuser name through the focuser signal
+ *
+ * \param locator	DeviceLocator for the focusers
+ */
 void	CameraLister::addFocusers(DeviceLocatorPtr locator) {
 	auto	names = locator->getDevicelist(astro::DeviceName::Focuser);
 	for (auto n = names.begin(); n != names.end(); n++) {
@@ -37,6 +58,9 @@ void	CameraLister::addFocusers(DeviceLocatorPtr locator) {
 	}
 }
 
+/**
+ * \brief Run method for the camera lister thread
+ */
 void	CameraLister::run() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "listing cameras");
 	// get a module repository

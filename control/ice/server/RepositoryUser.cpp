@@ -4,6 +4,7 @@
  * (c) 2014 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
 #include "RepositoryUser.h"
+#include "ImageRepo.h"
 
 namespace snowstar {
 
@@ -44,6 +45,7 @@ void	RepositoryUser::repositoryname(const std::string& reponame) {
 		return;
 	}
 
+#if 0
 	// check that this repository actually exists
 	astro::config::ImageRepoConfigurationPtr	config
 		= astro::config::ImageRepoConfiguration::get();
@@ -56,6 +58,10 @@ void	RepositoryUser::repositoryname(const std::string& reponame) {
 		throw exception;
 	}
 	_imagerepo = config->repo(reponame);
+#else
+	astro::project::ImageRepoPtr	repo;
+	_imagerepo = ImageRepo::repo(reponame);
+#endif
 	_repositoryname = reponame;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "using repository %s",
 		_repositoryname.c_str());

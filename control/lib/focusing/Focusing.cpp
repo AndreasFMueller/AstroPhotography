@@ -59,15 +59,25 @@ void	Focusing::start(int min, int max) {
 	FocusWork	*work = NULL;
 	switch (method()) {
 	case Focusing::BRENNER:
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "initialize Brenner");
 		evaluator(FocusEvaluatorFactory::get(
 			FocusEvaluatorFactory::BrennerOmni));
 		solver(FocusSolverPtr(new BrennerSolver()));
 		work = new FocusWork(*this);
 		break;
 	case Focusing::FWHM:
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "initialize FWHM");
+		// these fields are handled in the VCurveFocusWork
+		//evaluator(FocusEvaluatorFactory::get(
+		//	FocusEvaluatorFactory::FWHM));
+		//solver(FocusSolverPtr(new AbsoluteValueSolver()));
 		work = new VCurveFocusWork(*this);
 		break;
 	case Focusing::MEASURE:
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "initialize Measure");
+		//evaluator(FocusEvaluatorFactory::get(
+		//	FocusEvaluatorFactory::Measure));
+		//solver(FocusSolverPtr(new AbsoluteValueSolver()));
 		work = new MeasureFocusWork(*this);
 		break;
 	}

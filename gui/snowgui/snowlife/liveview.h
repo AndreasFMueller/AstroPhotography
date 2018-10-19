@@ -1,5 +1,7 @@
 /*
  * lifeview.h -- lifeview application main window header
+ *
+ * (c) 2018 Prof Dr Andreas Müller, Hochschule Rapperswil
  */
 #ifndef SNOWGUI_LIVEVIEW_H
 #define SNOWGUI_LIVEVIEW_H

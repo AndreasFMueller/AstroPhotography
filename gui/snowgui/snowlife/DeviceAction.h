@@ -10,6 +10,12 @@
 
 namespace snowgui {
 
+/**
+ * \brief An action containing the device name
+ *
+ * This could also be done using the QVariant class to encode the 
+ * device name as data to the action.
+ */
 class DeviceAction : public QAction {
 	Q_OBJECT
 	std::string	_devicename;

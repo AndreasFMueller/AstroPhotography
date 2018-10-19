@@ -625,7 +625,7 @@ void	imagedisplaywidget::processDisplayImage(ImagePtr image) {
 	QPixmap *pixmap = NULL;
 	try {
 		pixmap = image2pixmap(image);
-	} catch (const std::exception& x) {
+	} catch (const std::exception& x) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "cannot build pixmap: %s",
 			x.what());
 	}
@@ -1025,14 +1025,14 @@ void	imagedisplaywidget::toggleCrosshairsVisible() {
 }
 
 void	imagedisplaywidget::showContextMenu(const QPoint& point) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "show contet manu at %d/%d",
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "show context menu at %d/%d",
 		point.x(), point.y());
 
 	QMenu	contextMenu("Options", this);
 
 	QAction	actionGain(QString("Gain"), this);
 	actionGain.setCheckable(true);
-	actionGain.setChecked(crosshairs());
+	actionGain.setChecked(gainIsVisible());
 	contextMenu.addAction(&actionGain);
 	connect(&actionGain, SIGNAL(triggered()),
 		this, SLOT(toggleGainVisible()));
@@ -1065,7 +1065,16 @@ void	imagedisplaywidget::showContextMenu(const QPoint& point) {
 	connect(&actionInfo, SIGNAL(triggered()),
 		this, SLOT(toggleInfoVisible()));
 
-	contextMenu.exec(mapToGlobal(point));
+	QWidget	*s = dynamic_cast<QWidget*>(sender());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "s = %p", s);
+	if (NULL != s) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "found sender widget: %p", s);
+		contextMenu.exec(s->mapToGlobal(point));
+	} else {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "sender not a widget: %p",
+			sender());
+		contextMenu.exec(mapToGlobal(point));
+	}
 }
 
 } // namespace snowgui
