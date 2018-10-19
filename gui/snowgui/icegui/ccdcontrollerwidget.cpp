@@ -63,6 +63,15 @@ ccdcontrollerwidget::ccdcontrollerwidget(QWidget *parent) :
 	connect(ui->frameFullButton, SIGNAL(clicked()),
 		this, SLOT(guiChanged()));
 
+	connect(ui->frameSizeWidth, SIGNAL(valueChanged(int)),
+		this, SLOT(subframeWidth(int)));
+	connect(ui->frameSizeHeight, SIGNAL(valueChanged(int)),
+		this, SLOT(subframeHeight(int)));
+	connect(ui->frameOriginX, SIGNAL(valueChanged(int)),
+		this, SLOT(subframeOriginX(int)));
+	connect(ui->frameOriginY, SIGNAL(valueChanged(int)),
+		this, SLOT(subframeOriginY(int)));
+
 	// setup and connect the timer
 	ourexposure = false;
 	_guiderccdonly = false;
@@ -398,27 +407,32 @@ void	ccdcontrollerwidget::setExposure(Exposure e) {
  * sync, but it does not send any signals.
  */
 void	ccdcontrollerwidget::displayFrame(ImageRectangle r) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "setting the frame: %s",
+		r.toString().c_str());
 	// is the rectangle contained in the ccd
 	if (!snowstar::convert(_ccdinfo).size().bounds(r)) {
 		return;
 	}
 	_exposure.frame(r);
 	ui->frameSizeWidth->blockSignals(true);
-	ui->frameSizeWidth->setText(
-		QString(astro::stringprintf("%d", r.size().width()).c_str()));
-	ui->frameSizeWidth->blockSignals(false);
 	ui->frameSizeHeight->blockSignals(true);
-	ui->frameSizeHeight->setText(
-		QString(astro::stringprintf("%d", r.size().height()).c_str()));
-	ui->frameSizeHeight->blockSignals(false);
 	ui->frameOriginX->blockSignals(true);
-	ui->frameOriginX->setText(
-		QString(astro::stringprintf("%d", r.origin().x()).c_str()));
-	ui->frameOriginX->blockSignals(false);
 	ui->frameOriginY->blockSignals(true);
-	ui->frameOriginY->setText(
-		QString(astro::stringprintf("%d", r.origin().y()).c_str()));
+
+	ui->frameSizeWidth->setMaximum(_ccdinfo.size.width);
+	ui->frameSizeHeight->setMaximum(_ccdinfo.size.height);
+	ui->frameOriginX->setMaximum(_ccdinfo.size.width);
+	ui->frameOriginY->setMaximum(_ccdinfo.size.height);
+
+	ui->frameSizeWidth->blockSignals(false);
+	ui->frameSizeHeight->blockSignals(false);
+	ui->frameOriginX->blockSignals(false);
 	ui->frameOriginY->blockSignals(false);
+
+	ui->frameSizeWidth->setValue(r.size().width());
+	ui->frameSizeHeight->setValue(r.size().height());
+	ui->frameOriginX->setValue(r.origin().x());
+	ui->frameOriginY->setValue(r.origin().y());
 }
 
 /**
@@ -1066,6 +1080,34 @@ void	ccdcontrollerwidget::ccdFailed(const std::exception& x) {
  */
 void	ccdcontrollerwidget::testSlot() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testSlot()");
+}
+
+void	ccdcontrollerwidget::subframeWidth(int w) {
+	ImageRectangle	r = _exposure.frame();
+	r.setSize(ImageSize(w, r.size().height()));
+	ui->frameOriginX->setMaximum(_ccdinfo.size.width - w);
+	_exposure.frame(r);
+}
+
+void	ccdcontrollerwidget::subframeHeight(int h) {
+	ImageRectangle	r = _exposure.frame();
+	r.setSize(ImageSize(r.size().width(), h));
+	ui->frameOriginY->setMaximum(_ccdinfo.size.height - h);
+	_exposure.frame(r);
+}
+
+void	ccdcontrollerwidget::subframeOriginX(int x) {
+	ImageRectangle	r = _exposure.frame();
+	r.setOrigin(ImagePoint(x, r.origin().y()));
+	ui->frameSizeWidth->setMaximum(_ccdinfo.size.width - x);
+	_exposure.frame(r);
+}
+
+void	ccdcontrollerwidget::subframeOriginY(int y) {
+	ImageRectangle	r = _exposure.frame();
+	r.setOrigin(ImagePoint(r.origin().x(), y));
+	ui->frameSizeHeight->setMaximum(_ccdinfo.size.height - y);
+	_exposure.frame(r);
 }
 
 } // namespace snowgui

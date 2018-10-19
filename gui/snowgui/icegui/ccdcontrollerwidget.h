@@ -191,6 +191,12 @@ public slots:
 	void	retrieveImageComplete();
 	void	retrieveImageFailed(QString);
 
+	// slots to change the subframe
+	void	subframeWidth(int);
+	void	subframeHeight(int);
+	void	subframeOriginX(int);
+	void	subframeOriginY(int);
+
 	// test slot
 	void	testSlot();
 
