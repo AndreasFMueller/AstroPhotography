@@ -14,7 +14,7 @@ namespace focusing {
 /**
  * \brief Class to compute 
  */
-class FocusCompute : public std::map<unsigned short, double> {
+class FocusCompute : public std::map<unsigned long, double> {
 	std::pair<double, double>	solve(double *positions, double *values) const;
 public:
 	FocusCompute();

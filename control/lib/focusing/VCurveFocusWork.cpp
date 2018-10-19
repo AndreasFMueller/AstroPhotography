@@ -50,7 +50,7 @@ void	VCurveFocusWork::main(astro::thread::Thread<FocusWork>& /* thread */) {
 	unsigned long	delta = max() - min();
 	for (int i = 0; i < steps(); i++) {
 		// compute new position
-		unsigned short	position = min() + (i * delta) / (steps() - 1);
+		unsigned long	position = min() + (i * delta) / (steps() - 1);
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "measuring position %hu",
 			position);
 
@@ -70,7 +70,7 @@ void	VCurveFocusWork::main(astro::thread::Thread<FocusWork>& /* thread */) {
 		double	value = evaluator(image);
 
 		// add the new value 
-		fc.insert(std::pair<unsigned short, double>(position, value));
+		fc.insert(std::pair<unsigned long, double>(position, value));
 
 		// send the callback data
 		callback(evaluator.evaluated_image(), position, value);
@@ -97,7 +97,7 @@ void	VCurveFocusWork::main(astro::thread::Thread<FocusWork>& /* thread */) {
 	}
 
 	// move to the focus position
-	unsigned short	targetposition = focusposition;
+	unsigned long	targetposition = focusposition;
 	moveto(targetposition);
 	focusingstatus(Focusing::FOCUSED);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "target position reached");
