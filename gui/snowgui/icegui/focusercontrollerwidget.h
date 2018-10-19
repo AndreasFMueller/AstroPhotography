@@ -35,6 +35,7 @@ public:
 
 signals:
 	void	targetPositionReached();
+	void	newFocuserPosition(int);
 
 private:
 	void	setupFocuser();

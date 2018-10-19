@@ -20,6 +20,8 @@ focusscancontroller::focusscancontroller(QWidget *parent) : QWidget(parent),
 	scanning = false;
 	ui->scanProgress->setValue(0);
 	connect(ui->scanButton, SIGNAL(clicked()), this, SLOT(scanClicked()));
+	connect(ui->centerBox, SIGNAL(valueChanged(int)),
+		this, SLOT(changeCenter(int)));
 }
 
 focusscancontroller::~focusscancontroller() {
@@ -47,7 +49,6 @@ void	focusscancontroller::setScanning(bool s) {
 
 void	focusscancontroller::startScan() {
 	numberofsteps = ui->nstepsBox->value();
-	int	centerposition = ui->centerBox->value();
 	stepsize = ui->stepBox->value();
 	currentstep = 0;
 	position = centerposition - stepsize * (numberofsteps / 2);
@@ -103,6 +104,12 @@ void	focusscancontroller::imageReceived(ImagePtr image) {
 		"moving to position %d", position);
 	ui->statusLabel->setText(QString(status.c_str()));
 	emit movetoPosition(position);
+}
+
+void	focusscancontroller::changeCenter(int c) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "new center position: %d",
+		centerposition);
+	centerposition = c;
 }
 
 } // namespace snowgui
