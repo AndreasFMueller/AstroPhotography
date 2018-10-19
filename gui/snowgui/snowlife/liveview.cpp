@@ -171,7 +171,12 @@ void	LiveView::addCamera(std::string cameraname) {
 		this, SLOT(openCamera(std::string)));
 	_ccdMenu->addAction(action);
 
+	// inform in the status bar that we have found a new camera
+	statusBar()->showMessage(QString(astro::stringprintf("New camera: %s",
+		cameraname.c_str()).c_str()));
+
 	// XXX make sure the menu is updated or displayed at all
+	_ccdMenu->raise();
 }
 
 /**
@@ -243,6 +248,10 @@ void	LiveView::addFocuser(std::string focusername) {
 	connect(action, SIGNAL(openDevice(std::string)),
 		this, SLOT(openFocuser(std::string)));
 	_focuserMenu->addAction(action);
+
+	// inform in the status bar that we have found a new camera
+	statusBar()->showMessage(QString(astro::stringprintf("New focuser: %s",
+		focusername.c_str()).c_str()));
 
 	// XXX make sure the menu is updated or displayed at all
 }
@@ -481,6 +490,8 @@ void	LiveView::focuserUpdate() {
 
 /**
  * \brief Slot called when the context menu for the focuser is requested
+ *
+ * \param Point where the menu should be displayed
  */
 void	LiveView::showFocuserStepsMenu(const QPoint& p) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "show focuser context menu at %d,%d",
@@ -549,6 +560,9 @@ void	LiveView::showFocuserStepsMenu(const QPoint& p) {
 	contextMenu.exec(ui->focuserSpinBox->mapToGlobal(p));
 }
 
+/**
+ * \brief Slot called when the step size is changed
+ */
 void	LiveView::stepsizeChanged() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "stepsize changed");
 	QAction *act = qobject_cast<QAction *>(sender());

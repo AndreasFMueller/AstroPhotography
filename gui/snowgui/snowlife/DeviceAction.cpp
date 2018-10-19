@@ -7,15 +7,31 @@
 
 namespace snowgui {
 
+/**
+ * \brief Construct a DeviceAction object
+ *
+ * \param devicename	name of the device
+ * \param text		menu item text to display
+ * \param parent	parent object
+ */
 DeviceAction::DeviceAction(const std::string& devicename, QString text,
 	QObject *parent)
 		: QAction(text, parent), _devicename(devicename) {
 	connect(this, SIGNAL(triggered()), this, SLOT(doopen()));
 }
 
+/**
+ * \brief Destroy the DeviceAction object
+ */
 DeviceAction::~DeviceAction() {
 }
 
+/**
+ * \brief Slot called when the action is triggered
+ *
+ * This emmits the openDevice signal with the remembered devicename as
+ * the parameter.
+ */
 void	DeviceAction::doopen() {
 	emit openDevice(_devicename);
 }
