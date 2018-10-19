@@ -21,18 +21,18 @@ namespace focusing {
  * focus position.
  */
 class FocusWork {
-	unsigned short	_min;
+	unsigned long	_min;
 public:
-	unsigned short	min() const { return _min; }
-	void	min(unsigned short m) { _min = m; }
+	unsigned long	min() const { return _min; }
+	void	min(unsigned long m) { _min = m; }
 private:
-	unsigned short	_max;
+	unsigned long	_max;
 public:
-	unsigned short	max() const { return _max; }
-	void	max(unsigned short m) { _max = m; }
-	unsigned short	steps() const { return _focusing.steps(); }
-	unsigned short	backlash();
-	void	moveto(unsigned short position);
+	unsigned long	max() const { return _max; }
+	void	max(unsigned long m) { _max = m; }
+	unsigned long	steps() const { return _focusing.steps(); }
+	unsigned long	backlash();
+	void	moveto(unsigned long position);
 	astro::camera::CcdPtr	ccd() {
 		return _focusing.ccd();
 	}
@@ -91,9 +91,9 @@ public:
  */
 class FocusValue {
 public:
-	unsigned short	position;
+	unsigned long	position;
 	double	value;
-	FocusValue(unsigned short _position, double _value)
+	FocusValue(unsigned long _position, double _value)
 		: position(_position), value(_value) { }
 	std::string	toString() const;
 	bool	operator==(const FocusValue& other) const;
@@ -105,8 +105,8 @@ public:
 class FocusInterval : public std::pair<FocusValue, FocusValue> {
 public:
 	FocusInterval(const FocusValue& left, const FocusValue& right);
-	unsigned short	length() const;
-	unsigned short	center() const;
+	unsigned long	length() const;
+	unsigned long	center() const;
 	FocusValue&	left() { return first; }
 	FocusValue&	right() { return second; }
 	const FocusValue&	left() const { return first; }
@@ -123,7 +123,7 @@ public:
  */
 class MeasureFocusWork : public FocusWork {
 	int	counter;
-	FocusValue	measureat(unsigned short pos);
+	FocusValue	measureat(unsigned long pos);
 	FocusInterval	subdivide(const FocusInterval& interval);
 	ImagePtr	combine(ImagePtr image, FocusInfo& focusinf);
 public:
