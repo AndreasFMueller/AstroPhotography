@@ -114,7 +114,7 @@ int	command_get(MountPrx mount) {
 	astro::Angle	ra;	ra.hours(radec.ra);
 	astro::Angle	dec;	dec.degrees(radec.dec);
 	if (decimal) {
-		std::cout << ra.hms() << " " << dec.dms() << " ";
+		std::cout << ra.hms(':', 1) << " " << dec.dms(':', 0) << " ";
 	} else {
 		std::cout << ra.hours() << " " << dec.degrees() << " ";
 	}
