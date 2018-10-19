@@ -57,13 +57,8 @@ public:
 
 	// the gain/scale/subframe settings can individually be made visible
 	bool	gainIsVisible();
-	void	setGainVisible(bool);
-
 	bool	scaleIsVisible();
-	void	setScaleVisible(bool);
-
 	bool	subframeIsVisible();
-	void	setSubframeVisible(bool);
 
 	bool	crosshairs();
 	void	crosshairs(bool);
@@ -141,6 +136,19 @@ public slots:
 	void	redOffsetChanged(double);
 	void	greenOffsetChanged(double);
 	void	blueOffsetChanged(double);
+
+	void	setGainVisible(bool);
+	void	toggleGainVisible();
+
+	void	setScaleVisible(bool);
+	void	toggleScaleVisible();
+
+	void	setSubframeVisible(bool);
+	void	toggleSubframeVisible();
+
+	void	setCrosshairsVisible(bool);
+	void	toggleCrosshairsVisible();
+	void	showContextMenu(const QPoint& point);
 private:
 	void	closeEvent(QCloseEvent *);
 	void	changeEvent(QEvent *);
