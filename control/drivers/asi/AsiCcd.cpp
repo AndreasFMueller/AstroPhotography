@@ -17,6 +17,9 @@ namespace asi {
 
 /**
  * \brief Construct a new CCD object
+ *
+ * \param info		Information about the CCD
+ * \param camera	Camera to which this CCD belongs
  */
 AsiCcd::AsiCcd(const CcdInfo& info, AsiCamera& camera)
 	: Ccd(info), _camera(camera) {
@@ -144,8 +147,15 @@ static void     start_main(AsiCcd *asiccd) {
 
 /**
  * \brief Start a single exposure
+ *
+ * \param exposure	exposure structure to use for the single exposure
  */
 void	AsiCcd::startExposure(const Exposure& exposure) {
+	// the lock ensures that there can only ever by one thread inside
+	// this method. If the thread has already been started the exposure
+	// status is no longer compatible with starting an exposure and
+	// the second startExposure will fail.
+	std::lock_guard<std::recursive_mutex>	lock(_mutex);
 	if (streaming()) {
 		std::string	msg("camera is currently streaming");
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
@@ -179,12 +189,16 @@ void	AsiCcd::cancelExposure() {
 	state(CcdState::cancelling);
 }
 
+/**
+ * \brief Main function of the asi exposure thread
+ */
 void	AsiCcd::run() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "start thread");
 	do {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "tick %d", exposureStatus());
 		Timer::sleep(0.1);
 	} while (CcdState::exposing == exposureStatus());
+	std::lock_guard<std::recursive_mutex>	lock(_mutex);
 	_exposure_done = true;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "exposing finished");
 }
@@ -194,6 +208,7 @@ void	AsiCcd::run() {
  */
 CcdState::State	AsiCcd::exposureStatus() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "exposureStatus()");
+	std::lock_guard<std::recursive_mutex>	lock(_mutex);
 	if ((_thread) && (_exposure_done)) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "thread cleanup");
 		_thread->join();

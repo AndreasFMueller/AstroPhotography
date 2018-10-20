@@ -23,7 +23,9 @@ class AsiCcd : public Ccd {
 	AsiCamera&	_camera;
 	bool	_hasCooler;
 	std::string	imgtypename();
-	std::thread	*_thread;
+	// the _mutex is necessary to to protect the _thread.
+	std::recursive_mutex	_mutex;
+	std::thread		*_thread;
 	std::atomic_bool	_exposure_done;
 public:
 	static std::string	imgtype2string(int imgtype);
