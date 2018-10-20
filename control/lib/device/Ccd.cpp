@@ -299,7 +299,14 @@ bool	Ccd::wait() {
 		//	"--> LCK wait complete, state %s",
 		//	CcdState::state2string(state()).c_str());
 		if (CcdState::exposed == this->state()) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "state now exposed");
 			return true;
+		}
+		if (CcdState::exposing != this->state()) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0,
+				"state %s, waiting some more",
+			CcdState::state2string(this->state()).c_str());
+			return false;
 		}
 	}
 
