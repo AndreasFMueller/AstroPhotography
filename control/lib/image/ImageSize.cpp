@@ -264,5 +264,24 @@ int	ImageSize::borderDistance(const ImagePoint& point) const {
 	return m;
 }
 
+/**
+ * \brief Find the intersection of the size with the rectangle
+ *
+ * \param rectangle	make this rectangle fit in the size
+ */
+ImageRectangle	ImageSize::containing(const ImageRectangle& rectangle) const {
+	int	w = rectangle.size().width();
+	int	h = rectangle.size().height();
+	int	x = rectangle.size().width() + rectangle.origin().x();
+	int	y = rectangle.size().height() + rectangle.origin().y();
+	if (x > width()) {
+		w = width() - rectangle.origin().x();
+	}
+	if (y > height()) {
+		h = height() - rectangle.origin().y();
+	}
+	return ImageRectangle(rectangle.origin(), ImageSize(w, h));
+}
+
 } // namespace image
 } // namespace astro

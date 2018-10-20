@@ -95,6 +95,7 @@ public:
 	bool	bounds(const ImageRectangle& rectangle) const;
 	bool	contains(const ImagePoint& point) const;
 	bool	contains(int x, int y) const;
+	ImageRectangle	containing(const ImageRectangle& rectangle) const;
 	// characteristic function
 	int	chi(unsigned int x, unsigned int y) const;
 	// offset into pixel array
@@ -313,17 +314,27 @@ private:
 	static mosaic_type	string2type(const std::string& mosaic_name);
 	static std::string	type2string(mosaic_type t);
 public:
-	MosaicType(mosaic_type _mosaic = NONE) : mosaic(_mosaic) { }
-	MosaicType(const std::string& mosaicstring);
+	// geometric operations on the mosaic type
+	static mosaic_type	shift(mosaic_type t, const ImagePoint& offset);
+	static mosaic_type	vflip(mosaic_type t);
+	static mosaic_type	hflip(mosaic_type t);
+	static mosaic_type	rotate(mosaic_type t);
+	// constructors
+	MosaicType(mosaic_type _mosaic = NONE,
+		ImagePoint offset = ImagePoint());
+	MosaicType(const std::string& mosaicstring,
+		ImagePoint offset = ImagePoint());
+	// handling the mosaic type
 	mosaic_type	getMosaicType() const { return mosaic; }
-	void	setMosaicType(mosaic_type mosaic);
-	void	setMosaicType(const std::string& mosaic_name);
+	void	setMosaicType(mosaic_type mosaic,
+			ImagePoint offset = ImagePoint());
+	void	setMosaicType(const std::string& mosaic_name,
+			ImagePoint offset = ImagePoint());
 	bool	isMosaic() const;
 	// typecast
 	operator	std::string() const { return type2string(mosaic); }
 	operator	bool() const { return mosaic != NONE; }
-	// methods used for demosaicing: x/y coordinates of colored
-	// pixels
+	// methods used for demosaicing: x/y coordinates of colored pixels
 	ImagePoint	red() const;
 	ImagePoint	blue() const;
 	ImagePoint	greenb() const;
@@ -341,6 +352,8 @@ public:
 	MosaicType	operator()(const ImageRectangle& rectangle) const;
 	// methods used for vertical flipping of the mosaic
 	MosaicType	vflip() const;
+	MosaicType	hflip() const;
+	MosaicType	rotate() const;
 };
 
 /**

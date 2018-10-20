@@ -35,7 +35,6 @@ public:
 	virtual void	startExposure(const Exposure& exposure);
 	virtual CcdState::State	exposureStatus();
 	virtual void	cancelExposure();
-//	virtual bool	wait();
 	void	run();
 
 	// image retrieval
