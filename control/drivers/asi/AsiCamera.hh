@@ -14,7 +14,7 @@ namespace astro {
 namespace camera {
 namespace asi {
 
-#define	Asi_Debug_State		0
+#define	Asi_Debug_State		1
 #define	Asi_Debug_Apicalls	0
 
 typedef enum AsiControlType_ {
