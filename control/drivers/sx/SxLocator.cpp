@@ -244,10 +244,10 @@ std::vector<std::string>	SxCameraLocator::getDevicelist(
 	}
 
 	// list all devices from the context
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "iterating through devices");
 	std::vector<DevicePtr>	d = context.devices((uint16_t)SX_VENDOR_ID);
 	std::vector<DevicePtr>::const_iterator	i;
 	for (i = d.begin(); i != d.end(); i++) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "iterating through devices");
 		// try to open the device. On Mac OS X, opening doesn't fail
 		// ever, but on Linux, we may not have permission to open
 		// all devices. We ignore devices that we cannot open
