@@ -17,7 +17,6 @@ namespace qsi {
 class QsiCcd : public Ccd {
 	QsiCamera&	_camera;
 	std::atomic<CcdState::State>	_last_state;
-	std::atomic<QSICamera::CameraState>	_last_qsistate;
 	// thread waiting for the exposure to complete
 	std::thread		*_thread;
 	std::atomic_bool	_exposure_done;
