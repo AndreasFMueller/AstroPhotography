@@ -26,6 +26,8 @@ Image2Pixmap::Image2Pixmap() {
 		_coloroffsets[i] = 0.;
 	}
 	_crosshairs = false;
+	_vertical_flip = false;
+	_horizontal_flip = false;
 }
 
 Image2Pixmap::~Image2Pixmap() {
@@ -307,8 +309,11 @@ QImage	*Image2Pixmap::convertMono(const ConstImageAdapter<Pixel>& image) {
 	// compute the rectangle 
 	ImageRectangle	r = rectangle(image);
 
+	// create the flip adapter
+	FlipAdapter<Pixel>	flip(image, vertical_flip(), horizontal_flip());
+
 	// create a windowadapter
-	WindowAdapter<Pixel>	windowadapter(image, r);
+	WindowAdapter<Pixel>	windowadapter(flip, r);
 
 	// create a gain adapter
 	GainAdapter<Pixel>	gainadapter(windowadapter, _scale);

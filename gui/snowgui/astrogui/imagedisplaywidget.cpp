@@ -1024,6 +1024,32 @@ void	imagedisplaywidget::toggleCrosshairsVisible() {
 	setCrosshairsVisible(!crosshairs());
 }
 
+bool	imagedisplaywidget::horizontalFlip() {
+	return image2pixmap.horizontal_flip();
+}
+
+void	imagedisplaywidget::setVerticalFlip(bool f) {
+	image2pixmap.vertical_flip(f);
+	repaint();
+}
+
+void	imagedisplaywidget::toggleVerticalFlip() {
+	setVerticalFlip(!verticalFlip());
+}
+
+bool	imagedisplaywidget::verticalFlip() {
+	return image2pixmap.vertical_flip();
+}
+
+void	imagedisplaywidget::setHorizontalFlip(bool f) {
+	image2pixmap.horizontal_flip(f);
+	repaint();
+}
+
+void	imagedisplaywidget::toggleHorizontalFlip() {
+	setHorizontalFlip(!horizontalFlip());
+}
+
 void	imagedisplaywidget::showContextMenu(const QPoint& point) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "show context menu at %d/%d",
 		point.x(), point.y());
@@ -1064,6 +1090,20 @@ void	imagedisplaywidget::showContextMenu(const QPoint& point) {
 	contextMenu.addAction(&actionInfo);
 	connect(&actionInfo, SIGNAL(triggered()),
 		this, SLOT(toggleInfoVisible()));
+
+	QAction actionVerticalFlip(QString("vertical flip"), this);
+	actionVerticalFlip.setCheckable(true);
+	actionVerticalFlip.setChecked(verticalFlip());
+	contextMenu.addAction(&actionVerticalFlip);
+	connect(&actionVerticalFlip, SIGNAL(triggered),
+		this, SLOT(toggleVerticalFlip()));
+
+	QAction actionHorizontalFlip(QString("horizontal flip"), this);
+	actionHorizontalFlip.setCheckable(true);
+	actionHorizontalFlip.setChecked(verticalFlip());
+	contextMenu.addAction(&actionHorizontalFlip);
+	connect(&actionHorizontalFlip, SIGNAL(triggered),
+		this, SLOT(toggleHorizontalFlip()));
 
 	QWidget	*s = dynamic_cast<QWidget*>(sender());
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "s = %p", s);

@@ -64,6 +64,9 @@ public:
 	bool	crosshairs();
 	void	crosshairs(bool);
 
+	bool	horizontalFlip();
+	bool	verticalFlip();
+
 	// control whether the image information at the bottom is visible
 	// The next methods are for controlling the subrectangle display
 	// A subrectangle can be selected even if the subframe controls
@@ -149,6 +152,13 @@ public slots:
 
 	void	setCrosshairsVisible(bool);
 	void	toggleCrosshairsVisible();
+
+	void	setVerticalFlip(bool);
+	void	toggleVerticalFlip();
+
+	void	setHorizontalFlip(bool);
+	void	toggleHorizontalFlip();
+
 	void	showContextMenu(const QPoint& point);
 private:
 	void	closeEvent(QCloseEvent *);

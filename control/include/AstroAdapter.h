@@ -122,6 +122,69 @@ public:
 	}
 };
 
+template<typename Pixel>
+class VerticalFlipAdapter : public ConstImageAdapter<Pixel> {
+	const ConstImageAdapter<Pixel>&	_image;
+	int	_h;
+public:
+	VerticalFlipAdapter(const ConstImageAdapter<Pixel>& image)
+		: ConstImageAdapter<Pixel>(image.getSize()), _image(image),
+		  _h(image.getSize().height()) {
+	}
+	virtual Pixel	pixel(int x, int y) const {
+		return _image.pixel(x, _h - y);
+	}
+};
+
+template<typename Pixel>
+class HorizontalFlipAdapter : public ConstImageAdapter<Pixel> {
+	const ConstImageAdapter<Pixel>&	_image;
+	int	_w;
+public:
+	HorizontalFlipAdapter(const ConstImageAdapter<Pixel>& image)
+		: ConstImageAdapter<Pixel>(image.getSize()), _image(image),
+		  _w(image.getSize().width()) {
+	}
+	virtual Pixel	pixel(int x, int y) const {
+		return _image.pixel(_w - x, y);
+	}
+};
+
+template<typename Pixel>
+class RotateAdapter : public ConstImageAdapter<Pixel> {
+	const ConstImageAdapter<Pixel>&	_image;
+	int	_w;
+	int	_h;
+public:
+	RotateAdapter(const ConstImageAdapter<Pixel>& image)
+		: ConstImageAdapter<Pixel>(image.getSize()), _image(image),
+		  _w(image.getSize().width()), _h(image.getSize().height()) {
+	}
+	virtual Pixel	pixel(int x, int y) const {
+		return _image.pixel(_w - x, _h - y);
+	}
+};
+
+template<typename Pixel>
+class FlipAdapter : public ConstImageAdapter<Pixel> {
+	const ConstImageAdapter<Pixel>&	_image;
+	int	_w;
+	int	_h;
+	bool	_vflip;
+	bool	_hflip;
+public:
+	FlipAdapter(const ConstImageAdapter<Pixel>& image, bool vflip = false,
+		bool hflip = false)
+		: ConstImageAdapter<Pixel>(image.getSize()), _image(image),
+		  _w(image.getSize().width()), _h(image.getSize().height()),
+		  _vflip(vflip), _hflip(hflip) {
+	}
+	virtual Pixel	pixel(int x, int y) const {
+		return _image.pixel((_hflip) ? (_w - x) : x,
+				    (_vflip) ? (_h - y) : y);
+	}
+};
+
 //////////////////////////////////////////////////////////////////////
 // Accessing Subrectangles of an Image
 //////////////////////////////////////////////////////////////////////
