@@ -306,11 +306,14 @@ QImage	*Image2Pixmap::convertMono(const ConstImageAdapter<Pixel>& image) {
 	}
 	_histogram = histo;
 
+	// create the flip adapter
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "vertical flip: %s, horizontal flip: %s",
+		(vertical_flip()) ? "yes" : "no",
+		(horizontal_flip()) ? "yes" : "no");
+	FlipAdapter<Pixel>	flip(image, vertical_flip(), horizontal_flip());
+
 	// compute the rectangle 
 	ImageRectangle	r = rectangle(image);
-
-	// create the flip adapter
-	FlipAdapter<Pixel>	flip(image, vertical_flip(), horizontal_flip());
 
 	// create a windowadapter
 	WindowAdapter<Pixel>	windowadapter(flip, r);

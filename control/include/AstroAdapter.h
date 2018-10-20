@@ -129,7 +129,7 @@ class VerticalFlipAdapter : public ConstImageAdapter<Pixel> {
 public:
 	VerticalFlipAdapter(const ConstImageAdapter<Pixel>& image)
 		: ConstImageAdapter<Pixel>(image.getSize()), _image(image),
-		  _h(image.getSize().height()) {
+		  _h(image.getSize().height() - 1) {
 	}
 	virtual Pixel	pixel(int x, int y) const {
 		return _image.pixel(x, _h - y);
@@ -143,7 +143,7 @@ class HorizontalFlipAdapter : public ConstImageAdapter<Pixel> {
 public:
 	HorizontalFlipAdapter(const ConstImageAdapter<Pixel>& image)
 		: ConstImageAdapter<Pixel>(image.getSize()), _image(image),
-		  _w(image.getSize().width()) {
+		  _w(image.getSize().width() - 1) {
 	}
 	virtual Pixel	pixel(int x, int y) const {
 		return _image.pixel(_w - x, y);
@@ -158,7 +158,8 @@ class RotateAdapter : public ConstImageAdapter<Pixel> {
 public:
 	RotateAdapter(const ConstImageAdapter<Pixel>& image)
 		: ConstImageAdapter<Pixel>(image.getSize()), _image(image),
-		  _w(image.getSize().width()), _h(image.getSize().height()) {
+		  _w(image.getSize().width() - 1),
+		  _h(image.getSize().height() - 1) {
 	}
 	virtual Pixel	pixel(int x, int y) const {
 		return _image.pixel(_w - x, _h - y);
@@ -176,7 +177,8 @@ public:
 	FlipAdapter(const ConstImageAdapter<Pixel>& image, bool vflip = false,
 		bool hflip = false)
 		: ConstImageAdapter<Pixel>(image.getSize()), _image(image),
-		  _w(image.getSize().width()), _h(image.getSize().height()),
+		  _w(image.getSize().width() - 1),
+		  _h(image.getSize().height() - 1),
 		  _vflip(vflip), _hflip(hflip) {
 	}
 	virtual Pixel	pixel(int x, int y) const {
