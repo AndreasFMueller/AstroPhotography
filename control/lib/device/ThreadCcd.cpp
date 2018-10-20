@@ -59,28 +59,13 @@ void	ThreadCcd::run0() {
  * \param exposure	the exposure parameters
  */
 void	ThreadCcd::startExposure(const Exposure& exposure) {
-	// XXX this method should use the startExposure method from the
-	// XXX parent class, because it duplicates e.g. the check whether
-	// XXX the state is OK, and setting the state to exposing.
-	std::unique_lock<std::recursive_mutex>	lock(_mutex);
-	// make sure we are in the right state
-	if (exposureStatus() != CcdState::idle) {
-		std::string	msg("not idle: start exposure in idle state");
-		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
-		throw BadState(msg);
-	}
+	Ccd::startExposure(exposure);
 
 	// find out whether there is a joinable thread. if so, join it so
 	// that we can overwrite the thread with impunity
 	if (_thread.joinable()) {
 		_thread.join();
 	}
-
-	// prepare the exposure structure
-	this->exposure = exposure;
-
-	// start a thread
-	state(CcdState::exposing);
 
 	// remember the thread we have launched
 	_running = true;
@@ -94,7 +79,6 @@ void	ThreadCcd::startExposure(const Exposure& exposure) {
  * not possible, this method must be overridden.
  */
 CcdState::State	ThreadCcd::exposureStatus() {
-	std::unique_lock<std::recursive_mutex>	lock(_mutex);
 	return state();
 }
 
@@ -108,7 +92,6 @@ CcdState::State	ThreadCcd::exposureStatus() {
  * to idle when cancelling is completet.
  */
 void ThreadCcd::cancelExposure() {
-	std::unique_lock<std::recursive_mutex>	lock(_mutex);
 	_running = false;
 }
 
