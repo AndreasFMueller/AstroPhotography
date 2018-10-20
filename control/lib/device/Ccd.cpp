@@ -298,7 +298,9 @@ bool	Ccd::wait() {
 		//debug(LOG_DEBUG, DEBUG_LOG, 0,
 		//	"--> LCK wait complete, state %s",
 		//	CcdState::state2string(state()).c_str());
-		return (CcdState::exposed == this->state());
+		if (CcdState::exposed == this->state()) {
+			return true;
+		}
 	}
 
 	// this really should not happen, it indicates a serious problem
