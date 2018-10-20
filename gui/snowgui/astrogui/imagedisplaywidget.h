@@ -64,8 +64,12 @@ public:
 	bool	crosshairs();
 	void	crosshairs(bool);
 
-	bool	horizontalFlip();
-	bool	verticalFlip();
+	bool	horizontalFlip() const;
+	bool	verticalFlip() const;
+
+	bool	showRed() const;
+	bool	showGreen() const;
+	bool	showBlue() const;
 
 	// control whether the image information at the bottom is visible
 	// The next methods are for controlling the subrectangle display
@@ -158,6 +162,13 @@ public slots:
 
 	void	setHorizontalFlip(bool);
 	void	toggleHorizontalFlip();
+
+	void	setShowRed(bool);
+	void	setShowGreen(bool);
+	void	setShowBlue(bool);
+	void	toggleShowRed();
+	void	toggleShowGreen();
+	void	toggleShowBlue();
 
 	void	showContextMenu(const QPoint& point);
 private:

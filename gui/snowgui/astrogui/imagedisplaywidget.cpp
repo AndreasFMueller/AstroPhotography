@@ -1024,7 +1024,7 @@ void	imagedisplaywidget::toggleCrosshairsVisible() {
 	setCrosshairsVisible(!crosshairs());
 }
 
-bool	imagedisplaywidget::horizontalFlip() {
+bool	imagedisplaywidget::horizontalFlip() const {
 	return image2pixmap.horizontal_flip();
 }
 
@@ -1037,7 +1037,7 @@ void	imagedisplaywidget::toggleVerticalFlip() {
 	setVerticalFlip(!verticalFlip());
 }
 
-bool	imagedisplaywidget::verticalFlip() {
+bool	imagedisplaywidget::verticalFlip() const {
 	return image2pixmap.vertical_flip();
 }
 
@@ -1048,6 +1048,45 @@ void	imagedisplaywidget::setHorizontalFlip(bool f) {
 
 void	imagedisplaywidget::toggleHorizontalFlip() {
 	setHorizontalFlip(!horizontalFlip());
+}
+
+void	imagedisplaywidget::setShowRed(bool s) {
+	image2pixmap.show_red(s);
+	processNewSettings();
+}
+
+bool	imagedisplaywidget::showRed() const {
+	return image2pixmap.show_red();
+}
+
+void	imagedisplaywidget::toggleShowRed() {
+	setShowRed(!showRed());
+}
+
+void	imagedisplaywidget::setShowGreen(bool s) {
+	image2pixmap.show_green(s);
+	processNewSettings();
+}
+
+bool	imagedisplaywidget::showGreen() const {
+	return image2pixmap.show_green();
+}
+
+void	imagedisplaywidget::toggleShowGreen() {
+	setShowGreen(!showGreen());
+}
+
+void	imagedisplaywidget::setShowBlue(bool s) {
+	image2pixmap.show_blue(s);
+	processNewSettings();
+}
+
+bool	imagedisplaywidget::showBlue() const {
+	return image2pixmap.show_blue();
+}
+
+void	imagedisplaywidget::toggleShowBlue() {
+	setShowBlue(!showBlue());
 }
 
 void	imagedisplaywidget::showContextMenu(const QPoint& point) {
@@ -1090,6 +1129,29 @@ void	imagedisplaywidget::showContextMenu(const QPoint& point) {
 	contextMenu.addAction(&actionInfo);
 	connect(&actionInfo, SIGNAL(triggered()),
 		this, SLOT(toggleInfoVisible()));
+
+	contextMenu.addSeparator();
+
+	QAction	actionRed(QString("show red channel"), this);
+	actionRed.setCheckable(true);
+	actionRed.setChecked(showRed());
+	contextMenu.addAction(&actionRed);
+	connect(&actionRed, SIGNAL(triggered()),
+		this, SLOT(toggleShowRed()));
+
+	QAction	actionGreen(QString("show green channel"), this);
+	actionGreen.setCheckable(true);
+	actionGreen.setChecked(showGreen());
+	contextMenu.addAction(&actionGreen);
+	connect(&actionGreen, SIGNAL(triggered()),
+		this, SLOT(toggleShowGreen()));
+
+	QAction	actionBlue(QString("show blue channel"), this);
+	actionBlue.setCheckable(true);
+	actionBlue.setChecked(showBlue());
+	contextMenu.addAction(&actionBlue);
+	connect(&actionBlue, SIGNAL(triggered()),
+		this, SLOT(toggleShowBlue()));
 
 	contextMenu.addSeparator();
 

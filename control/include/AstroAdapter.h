@@ -188,6 +188,29 @@ public:
 };
 
 //////////////////////////////////////////////////////////////////////
+//
+//////////////////////////////////////////////////////////////////////
+template<typename Pixel>
+class ChannelMaskingAdapter : public ConstImageAdapter<RGB<Pixel> > {
+	const ConstImageAdapter<RGB<Pixel> >&	_image;
+	bool	_red;
+	bool	_green;
+	bool	_blue;
+public:
+	ChannelMaskingAdapter(const ConstImageAdapter<RGB<Pixel> >& image,
+		bool red, bool green, bool blue)
+		: ConstImageAdapter<RGB<Pixel> >(image.getSize()),
+		  _image(image), _red(red), _green(green), _blue(blue) {
+	}
+	virtual RGB<Pixel>	pixel(int x, int y) const {
+		RGB<Pixel>	p = _image.pixel(x, y);
+		return RGB<Pixel>((_red) ? p.R : (Pixel)0,
+			(_green) ? p.G : (Pixel)0,
+			(_blue) ? p.B : (Pixel)0);
+	}
+};
+
+//////////////////////////////////////////////////////////////////////
 // Accessing Subrectangles of an Image
 //////////////////////////////////////////////////////////////////////
 
