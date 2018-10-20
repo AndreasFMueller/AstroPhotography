@@ -118,10 +118,10 @@ CcdState::State	Ccd::state() {
  * \brief Set the state, notify threads waiting for a state change
  */
 void	Ccd::state(CcdState::State s) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "LCK changing state to %s state(s)", 
-		CcdState::state2string(s).c_str());
+	//debug(LOG_DEBUG, DEBUG_LOG, 0, "LCK changing state to %s state(s)", 
+	//	CcdState::state2string(s).c_str());
 	std::unique_lock<std::recursive_mutex>	lock(_mutex);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "--> LCK acquired state(s)");
+	//debug(LOG_DEBUG, DEBUG_LOG, 0, "--> LCK acquired state(s)");
 	if (_state != s) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "state change %s -> %s",
 			CcdState::state2string(_state).c_str(),
@@ -130,7 +130,7 @@ void	Ccd::state(CcdState::State s) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "notify all of state change");
 		_condition.notify_all();
 	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "<-- LCK released state(s)");
+	//debug(LOG_DEBUG, DEBUG_LOG, 0, "<-- LCK released state(s)");
 }
 
 /**
