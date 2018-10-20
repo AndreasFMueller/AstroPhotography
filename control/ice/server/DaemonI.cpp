@@ -264,6 +264,8 @@ Ice::Long	DaemonI::getSystemTime(const Ice::Current& /* current */) {
 
 /**
  * \brief set the system time
+ *
+ * \param unixtime	the unix time to set
  */
 void	DaemonI::setSystemTime(Ice::Long unixtime,
 		const Ice::Current& /* current */) {

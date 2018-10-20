@@ -14,6 +14,7 @@ namespace snowstar {
 class FocusingLocator : public Ice::ServantLocator {
 public:
 	FocusingLocator();
+	virtual ~FocusingLocator() { }
 
 	virtual	Ice::ObjectPtr  locate(const Ice::Current& current,
 			Ice::LocalObjectPtr& cookie);

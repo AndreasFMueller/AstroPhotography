@@ -16,6 +16,7 @@ class RepositoryLocator : public Ice::ServantLocator {
 	repositorymap	repositories;
 public:
 	RepositoryLocator();
+	virtual RepositoryLocator() { }
 
 	void	add(const std::string& name, Ice::ObjectPtr repositoryptr);
 

@@ -13,6 +13,7 @@ namespace snowstar {
 class EventServantLocator : public Ice::ServantLocator {
 public:
 	EventServantLocator() { }
+	virtual ~EventServantLocator() { }
 
 	virtual Ice::ObjectPtr	locate(const Ice::Current& current,
 			Ice::LocalObjectPtr& cookie);

@@ -38,7 +38,7 @@ private:
 	ImageLocator&	operator=(const ImageLocator& other);
 public:
 	ImageLocator();
-	~ImageLocator();
+	virtual ~ImageLocator();
 
 	virtual Ice::ObjectPtr	locate(const Ice::Current& current,
 			Ice::LocalObjectPtr& cookie);
