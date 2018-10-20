@@ -148,7 +148,8 @@ void	AsiCcd::startExposure(const Exposure& exposure) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "%s start exposure %s",
 		name().toString().c_str(), exposure.toString().c_str());
 
-	// call the Ccds startExposure method
+	// call the Ccds startExposure method, this ensures we are presently
+	// in the correct state,
 	Ccd::startExposure(exposure);
 	try {
 		setExposure(exposure);
@@ -174,6 +175,12 @@ void	AsiCcd::cancelExposure() {
  */
 CcdState::State	AsiCcd::exposureStatus() {
 	ASI_EXPOSURE_STATUS	status = _camera.getExpStatus();
+	if (ASI_EXP_FAILED == status) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "camera failed, "
+			"try again from state idle");
+		state(CcdState::idle);
+	}
+#if 0
 	switch (status) {
 	case ASI_EXP_IDLE:
 		if (Asi_Debug_State) {
@@ -207,6 +214,8 @@ CcdState::State	AsiCcd::exposureStatus() {
 	std::string	msg = stringprintf("unknown ASI status: %d", status);
 	debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 	throw std::runtime_error(msg);
+#endif
+	return state();
 }
 
 /**

@@ -55,11 +55,12 @@ void	QsiCcd::startExposure(const Exposure& exposure) {
 	std::lock_guard<std::recursive_mutex>	lock(_camera.mutex);
 
 	// set the state to exposure, this also ensures we actually
-	// are in a state where we could start a new exposure
+	// are in a state where we could start a new exposure. The
+	// base class method also sets the state to exposing
 	Ccd::startExposure(exposure);
 
 	// before starting a new exposure, we should clean up the thread
-	// if it is still around
+	// if it is still around. The thread will set the state to exposed.
 	if (_thread) {
 		_thread->join();
 		delete _thread;
@@ -161,36 +162,25 @@ std::string	state2string(QSICamera::CameraState qsistate) {
  * \brief main method for the exposure thread
  */
 void	QsiCcd::run() {
-	while (1) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "get Ccd state");
-		QSICamera::CameraState	qsistate;
-		{
-			std::unique_lock<std::recursive_mutex>	lock(
-				_camera.mutex);
-
-			// get the camera state
-			START_STOPWATCH;
-			_camera.camera().get_CameraState(&qsistate);
-			END_STOPWATCH("get_CameraState()");
-		}
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "qsistate=%d", qsistate);
-		
-		// analyze the state
-		switch (qsistate) {
-		case QSICamera::CameraWaiting:
-		case QSICamera::CameraExposing:
-		case QSICamera::CameraDownload:
-		case QSICamera::CameraError:
-			break;
-		case QSICamera::CameraIdle:
-		case QSICamera::CameraReading:
-			state(CcdState::exposed);
-			return;
-		}
-
-		// sleep a little
+	//debug(LOG_DEBUG, DEBUG_LOG, 0, "get Ccd state");
+	bool	imageReady = false;
+	while (!imageReady) {
 		Timer::sleep(0.1);
+		
+		std::unique_lock<std::recursive_mutex>	lock(
+			_camera.mutex);
+
+		// get the camera state
+		START_STOPWATCH;
+		_camera.camera().get_ImageReady(&imageReady);
+		END_STOPWATCH("get_ImageReady()");
 	}
+	//debug(LOG_DEBUG, DEBUG_LOG, 0, "qsistate=%d", qsistate);
+
+	// now the image is ready and we should indiate that with
+	// the state going to exposed
+	state(CcdState::exposed);
+		
 	_exposure_done = true;
 }
 
@@ -209,7 +199,7 @@ CcdState::State	QsiCcd::exposureStatus() {
 		return _last_state;
 	}
 	// while the exposure thread is running, we don't need to check
-	// the camera status
+	// the camera status, the update thread will do that for us.
 	if (_thread) {
 		if (_exposure_done) {
 			_thread->join();
@@ -219,6 +209,7 @@ CcdState::State	QsiCcd::exposureStatus() {
 		return _last_state = state();
 	}
 
+#if 0
 	// in all other cases, we have to query the camera again
 	try {
 		//debug(LOG_DEBUG, DEBUG_LOG, 0, "checking camera state");
@@ -307,7 +298,8 @@ CcdState::State	QsiCcd::exposureStatus() {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "could not get the state: %s",
 			x.what());
 	}
-	return _last_state;
+#endif
+	return _last_state = state();
 }
 
 /**
@@ -338,6 +330,10 @@ void	QsiCcd::setShutterState(const Shutter::state& /* state */) {
 
 /**
  * \brief Retrieve a raw image from the camera
+ *
+ * We can only get into this method if the state was exposed, i.e. 
+ * the image is ready. This means that the ImageArry method will
+ * work.
  */
 ImagePtr	QsiCcd::getRawImage() {
 	std::lock_guard<std::recursive_mutex>	lock(_camera.mutex);
