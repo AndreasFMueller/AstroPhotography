@@ -681,7 +681,7 @@ void	SkyDisplayWidget::toggleEclipticVisible() {
 void	SkyDisplayWidget::showContextMenu(const QPoint& point) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "show context menu at %d/%d",
 		point.x(), point.y());
-	QMenu contextMenu(tr("Context menu"), this);
+	QMenu contextMenu("Options:", this);
 
 	QAction	actionRaDec(QString("RA/DEC grid"), this);
 	actionRaDec.setCheckable(true);

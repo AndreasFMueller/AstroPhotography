@@ -33,6 +33,7 @@ public:
 	void	testTranslation();
 	void	testSubrectangle();
 	void	testSubrectangleDoesNotFit();
+	void	testFittingSubrectangle();
 	void	testRectangleSpec();
 
 	CPPUNIT_TEST_SUITE(ImageRectangleTest);
@@ -45,6 +46,7 @@ public:
 	CPPUNIT_TEST(testTranslation);
 	CPPUNIT_TEST(testSubrectangle);
 	CPPUNIT_TEST_EXCEPTION(testSubrectangleDoesNotFit, std::range_error);
+	CPPUNIT_TEST(testFittingSubrectangle);
 	CPPUNIT_TEST(testRectangleSpec);
 	CPPUNIT_TEST_SUITE_END();
 };
@@ -161,6 +163,25 @@ void	ImageRectangleTest::testSubrectangleDoesNotFit() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testSubrectangleDoesNotFit() begin");
 	ImageRectangle	r(*r3, *r2);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testSubrectangleDoesNotFit() end");
+}
+
+void	ImageRectangleTest::testFittingSubrectangle() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testFittingSubrectangle() begin");
+	ImageSize	size(47,11);
+	ImagePoint	origin(4,5);
+	ImageRectangle	r1(origin, ImageSize(4,5));
+	CPPUNIT_ASSERT(ImageRectangle(origin, ImageSize(4,5))
+		== size.containing(r1));
+	ImageRectangle	r2(origin, ImageSize(50,5));
+	CPPUNIT_ASSERT(ImageRectangle(origin, ImageSize(43,5))
+		== size.containing(r2));
+	ImageRectangle	r3(origin, ImageSize(4,15));
+	CPPUNIT_ASSERT(ImageRectangle(origin, ImageSize(4,6))
+		== size.containing(r3));
+	ImageRectangle	r4(origin, ImageSize(100,100));
+	CPPUNIT_ASSERT(ImageRectangle(origin, ImageSize(43,6))
+		== size.containing(r4));
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testFittingSubrectangle() end");
 }
 
 void	ImageRectangleTest::testRectangleSpec() {

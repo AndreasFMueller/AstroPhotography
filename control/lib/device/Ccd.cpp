@@ -22,8 +22,12 @@ namespace camera {
 
 DeviceName::device_type	Ccd::devicetype = DeviceName::Ccd;
 
+const static bool	ccd_lck_debug = true;
+
 /**
  * \brief Construct a CCD device
+ *
+ * \param _info		The information about this CCD
  */
 Ccd::Ccd(const CcdInfo& _info)
 	: astro::device::Device(_info.name(), DeviceName::Ccd),
@@ -107,30 +111,49 @@ Ccd::Ccd(const CcdInfo& _info)
  * \brief Get the state
  */
 CcdState::State	Ccd::state() {
-	//debug(LOG_DEBUG, DEBUG_LOG, 0, "LCK state query state()");
+	if (ccd_lck_debug)
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "LCK state query state()");
 	std::unique_lock<std::recursive_mutex>	lock(_mutex);
-	//debug(LOG_DEBUG, DEBUG_LOG, 0, "--> LCK acquired state()");
-	//debug(LOG_DEBUG, DEBUG_LOG, 0, "<-- LCK released state()");
+	if (ccd_lck_debug) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "--> LCK acquired state()");
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "<-- LCK released state()");
+	}
 	return _state;
 }
 
 /**
  * \brief Set the state, notify threads waiting for a state change
+ *
+ * This method changes the state. If the state is really different, then
+ * all the threads waiting for a state change are notified. It is expected
+ * that waiting threads will for themselves check whether the right state
+ * has been reached and will wait again if not.
+ *
+ * \param s	the new state
  */
 void	Ccd::state(CcdState::State s) {
-	//debug(LOG_DEBUG, DEBUG_LOG, 0, "LCK changing state to %s state(s)", 
-	//	CcdState::state2string(s).c_str());
+	if (ccd_lck_debug)
+		debug(LOG_DEBUG, DEBUG_LOG, 0,
+			"LCK changing state to %s state(s)", 
+			CcdState::state2string(s).c_str());
+
+	// acquire a lock to protect the state
 	std::unique_lock<std::recursive_mutex>	lock(_mutex);
-	//debug(LOG_DEBUG, DEBUG_LOG, 0, "--> LCK acquired state(s)");
+	if (ccd_lck_debug)
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "--> LCK acquired state(s)");
+
 	if (_state != s) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "state change %s -> %s",
 			CcdState::state2string(_state).c_str(),
 			CcdState::state2string(s).c_str());
 		_state = s;
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "notify all of state change");
+		// notify waiting threads of the state change
 		_condition.notify_all();
 	}
-	//debug(LOG_DEBUG, DEBUG_LOG, 0, "<-- LCK released state(s)");
+
+	if (ccd_lck_debug)
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "<-- LCK released state(s)");
 }
 
 /**
@@ -173,7 +196,7 @@ void    Ccd::startExposure(const Exposure& _exposure) {
 	// check that the frame to be exposed fits into the CCD
         if (!info.size().bounds(exposure.frame())) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "exposure does not fit in ccd");
-                throw BadParameter("exposure does not fit ccd");
+		exposure.frame(info.size().containing(exposure.frame()));
         }
 
 	// make sure the exposure time is in the interval specified in 

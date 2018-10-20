@@ -16,6 +16,7 @@
 #include <cstdint>
 #include <condition_variable>
 #include <mutex>
+#include <atomic>
 
 namespace astro {
 namespace camera {
@@ -459,14 +460,14 @@ public:
 
 /**
  * \brief CCD class using a thread for the exposure
+ *
+ * This implementation starts a thread that performs the exposure work
+ * in the run() method that a derived class must override.
  */
 class ThreadCcd : public Ccd {
-	// signaling from the 
-	std::recursive_mutex		_mutex;
-	std::condition_variable_any	_condition;
 	std::thread			_thread;
 protected:
-	bool	_running;
+	volatile std::atomic_bool	_running;
 public:
 	ThreadCcd(const CcdInfo& _info);
 	void	run0();
@@ -474,7 +475,6 @@ public:
 	virtual void	startExposure(const Exposure& exposure);
 	virtual CcdState::State	exposureStatus();
 	virtual void	cancelExposure();
-	virtual bool	wait();
 };
 
 /**

@@ -321,6 +321,12 @@ astro::image::ImagePtr	AsiCcd::getRawImage() {
 					= buffer[x + size.width() * y];
 			}
 		}
+		// if this is a color camera, add the mosaic information
+		if (_camera.isColor()) {
+			image->setMosaicType(
+				MosaicType::shift(MosaicType::BAYER_RGGB,
+					origin));
+		}
 		result = ImagePtr(image);
 		}
 		break;
@@ -349,6 +355,12 @@ astro::image::ImagePtr	AsiCcd::getRawImage() {
 				image->pixel(x, h - 1 - y)
 					= sb[x + size.width() * y];
 			}
+		}
+		// if this is a color camera, add the mosaic information
+		if (_camera.isColor()) {
+			image->setMosaicType(
+				MosaicType::shift(MosaicType::BAYER_RGGB,
+					origin));
 		}
 		result = ImagePtr(image);
 		}
@@ -408,29 +420,6 @@ void    AsiCcd::stopStream() {
 bool	AsiCcd::streaming() {
 	return (NULL != stream);
 }
-
-#if 0
-/**
- * \wait for the completion of 
- */
-bool	AsiCcd::wait() {
-	do {
-		CcdState::State	s = exposureStatus();
-		switch (s) {
-		case CcdState::idle:
-		case CcdState::cancelling:
-			return false;
-		case CcdState::exposed:
-			return true;
-		case CcdState::exposing:
-			usleep(100000);
-			break;
-		case CcdState::streaming:
-			return false;
-		}
-	} while (1);
-};
-#endif
 
 } // namespace asi
 } // namespace camera

@@ -50,10 +50,70 @@ std::string	MosaicType::type2string(mosaic_type t) {
 }
 
 /**
+ * \brief Shift a mosaic for an image point offset
+ *
+ * \param mosaic	the unshifted mosic
+ * \param offset	the offset of subframe
+ */
+MosaicType::mosaic_type	MosaicType::shift(MosaicType::mosaic_type mosaic,
+			const ImagePoint& offset) {
+	// if there is no mosaic, there is no need to change anything
+	if (mosaic == NONE) {
+		return NONE;
+	}
+	// only the last bit of the offset actually is important when
+	// performing the shift
+	unsigned char	shift = ((offset.x() & 0x1) |
+					((offset.y() & 0x1) << 1));
+	mosaic_type	newmosaic = (mosaic_type)((int)mosaic ^ shift);
+	return newmosaic;
+}
+
+MosaicType::mosaic_type	MosaicType::vflip(MosaicType::mosaic_type t) {
+	switch (t) {
+	case NONE:		return NONE;
+	case BAYER_RGGB:	return BAYER_GBRG;
+	case BAYER_GRBG:	return BAYER_BGGR;
+	case BAYER_GBRG:	return BAYER_RGGB;
+	case BAYER_BGGR:	return BAYER_GRBG;
+	}
+	throw std::logic_error("internal error, bad mosaic type");
+}
+
+MosaicType::mosaic_type	MosaicType::hflip(MosaicType::mosaic_type t) {
+	switch (t) {
+	case NONE:		return NONE;
+	case BAYER_RGGB:	return BAYER_GRBG;
+	case BAYER_GRBG:	return BAYER_RGGB;
+	case BAYER_GBRG:	return BAYER_BGGR;
+	case BAYER_BGGR:	return BAYER_GBRG;
+	}
+	throw std::logic_error("internal error, bad mosaic type");
+}
+
+MosaicType::mosaic_type	MosaicType::rotate(MosaicType::mosaic_type t) {
+	switch (t) {
+	case NONE:		return NONE;
+	case BAYER_RGGB:	return BAYER_BGGR;
+	case BAYER_GRBG:	return BAYER_GBRG;
+	case BAYER_GBRG:	return BAYER_GRBG;
+	case BAYER_BGGR:	return BAYER_RGGB;
+	}
+	throw std::logic_error("internal error, bad mosaic type");
+}
+
+/**
+ * \brief Construct a MosaicType object from code and offset
+ */
+MosaicType::MosaicType(mosaic_type _mosaic, ImagePoint offset)
+	: mosaic(shift(_mosaic, offset)) {
+}
+
+/**
  * \brief Construct a MosaicType object from the mosaic name
  */
-MosaicType::MosaicType(const std::string& mosaic_name)
-	: mosaic(string2type(mosaic_name)) {
+MosaicType::MosaicType(const std::string& mosaic_name, ImagePoint offset)
+	: mosaic(shift(string2type(mosaic_name), offset)) {
 }
 
 /**
@@ -61,18 +121,22 @@ MosaicType::MosaicType(const std::string& mosaic_name)
  *
  * This method ensures that only valid mosaic type names are used and
  * that the mosaic_type member variable is consistently set.
+ *
  * \param mosaic_name	string representation of color mosaic
+ * \param offset	the optional offset of the mosaic
  */
-void	MosaicType::setMosaicType(const std::string& mosaic_name) {
-	setMosaicType(string2type(mosaic_name));
+void	MosaicType::setMosaicType(const std::string& mosaic_name,
+		ImagePoint offset) {
+	setMosaicType(shift(string2type(mosaic_name), offset));
 }
 
-void	MosaicType::setMosaicType(mosaic_type _mosaic) {
-	mosaic = _mosaic;
+void	MosaicType::setMosaicType(MosaicType::mosaic_type _mosaic,
+		ImagePoint offset) {
+	mosaic = shift(_mosaic, offset);
 }
 
 /**
- * \brief 
+ * \brief Whether or not there is a mosaic at all
  */
 bool	MosaicType::isMosaic() const {
 	return mosaic != NONE;
@@ -141,12 +205,7 @@ ImagePoint	MosaicType::greenb() const {
 }
 
 MosaicType	MosaicType::shifted(const ImagePoint& offset) const {
-	if (mosaic == NONE) {
-		return MosaicType(NONE);
-	}
-	unsigned char	shift = ((offset.x() & 0x1) | ((offset.y() & 0x1) << 1));
-	mosaic_type	newmosaic = (mosaic_type)((int)mosaic ^ shift);
-	return MosaicType(newmosaic);
+	return MosaicType(shift(mosaic, offset));
 }
 
 MosaicType	MosaicType::shifted(const ImageRectangle& rectangle) const {
@@ -162,14 +221,15 @@ MosaicType	MosaicType::operator()(const ImageRectangle& rectangle) const {
 }
 
 MosaicType	MosaicType::vflip() const {
-	switch (mosaic) {
-	case NONE:		return NONE;
-	case BAYER_RGGB:	return BAYER_GBRG;
-	case BAYER_GRBG:	return BAYER_BGGR;
-	case BAYER_GBRG:	return BAYER_RGGB;
-	case BAYER_BGGR:	return BAYER_GRBG;
-	}
-	throw std::logic_error("internal error, bad mosaic type");
+	return MosaicType(vflip(mosaic));
+}
+
+MosaicType	MosaicType::hflip() const {
+	return MosaicType(hflip(mosaic));
+}
+
+MosaicType	MosaicType::rotate() const {
+	return MosaicType(rotate(mosaic));
 }
 
 } // namespace image
