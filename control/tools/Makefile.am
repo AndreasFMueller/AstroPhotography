@@ -4,7 +4,7 @@
 # (c) 2012 Prof Dr Andreas Mueller, Hochschule Rapperswil
 # $Id$
 #
-SUBDIRS = config mount catalog devices image guiding process
+SUBDIRS = config mount catalog devices image guiding process focus
 
 bin_PROGRAMS = astroproject 
 

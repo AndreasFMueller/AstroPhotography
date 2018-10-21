@@ -22,7 +22,7 @@ namespace camera {
 
 DeviceName::device_type	Ccd::devicetype = DeviceName::Ccd;
 
-const static bool	ccd_lck_debug = true;
+const static bool	ccd_lck_debug = false;
 
 /**
  * \brief Construct a CCD device

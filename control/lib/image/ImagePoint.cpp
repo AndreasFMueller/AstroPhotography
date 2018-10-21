@@ -44,6 +44,15 @@ bool	ImagePoint::operator==(const ImagePoint& other) const {
 }
 
 /**
+ * \brief compare points
+ *
+ * points are equal if both coordinates are equal
+ */
+bool	ImagePoint::operator!=(const ImagePoint& other) const {
+	return (_x != other._x) || (_y != other._y);
+}
+
+/**
  * \brief add points
  *
  * addition is just addition of components

@@ -19,6 +19,9 @@ libastrofocusing_la_SOURCES =						\
 	FocusCompute.cpp						\
 	FocusEvaluator.cpp						\
 	FocusEvaluatorFactory.cpp					\
+	FocusInputBase.cpp						\
+	FocusInputImages.cpp						\
+	FocusInput.cpp							\
 	FocusWork.cpp							\
 	Focusing.cpp							\
 	FWHM2Evaluator.cpp						\

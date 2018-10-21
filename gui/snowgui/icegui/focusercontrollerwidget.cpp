@@ -112,6 +112,9 @@ void	focusercontrollerwidget::setupFocuser() {
 	// now we can release the signals again
 	ui->positionButton->blockSignals(false);
 	ui->positionSpinBox->blockSignals(false);
+
+	// emit the focuser
+	emit focuserSelected(_focuser);
 }
 
 /**

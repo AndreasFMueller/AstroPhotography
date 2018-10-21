@@ -17,7 +17,12 @@ exposewindow::exposewindow(QWidget *parent) : InstrumentWidget(parent),
 		SIGNAL(filterwheelSelected(snowstar::FilterWheelPrx)),
 		ui->exposeWidget,
 		SLOT(filterwheelSelected(snowstar::FilterWheelPrx)));
-	connect(ui->ccdcontrollerWidget, SIGNAL(imageproxyReceived(snowstar::ImagePrx)),
+	connect(ui->focusercontrollerWidget,
+		SIGNAL(focuserSelected(snowstar::FocuserPrx)),
+		ui->exposeWidget,
+		SLOT(focuserSelected(snowstar::FocuserPrx)));
+	connect(ui->ccdcontrollerWidget,
+		SIGNAL(imageproxyReceived(snowstar::ImagePrx)),
 		ui->exposeWidget,
 		SLOT(imageproxyReceived(snowstar::ImagePrx)));
 	connect(ui->exposeWidget, SIGNAL(startExposure()),

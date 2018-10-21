@@ -43,6 +43,7 @@ public:
 		: _rectangle(rectangle) {
 		_userectangle = true;
 	}
+	virtual ~FocusableImageConverterImpl() { }
 	FocusableImage	operator()(ImagePtr image);
 };
 

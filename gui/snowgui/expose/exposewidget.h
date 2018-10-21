@@ -41,6 +41,7 @@ private:
 	snowstar::RepositoryPrx	_repository;
 	std::string	_projectname;
 	snowstar::FilterWheelPrx	_filterwheel;
+	snowstar::FocuserPrx		_focuser;
 
 	std::map<RepositoryKey, int>	_repository_index;
 	std::vector<RepositorySection>	_repository_sections;
@@ -62,6 +63,7 @@ public slots:
 	void	startClicked();
 	void	projectChanged(const QString&);
 	void	filterwheelSelected(snowstar::FilterWheelPrx);
+	void	focuserSelected(snowstar::FocuserPrx);
 
 	void	currentImageChanged(QTreeWidgetItem *current, QTreeWidgetItem *previous);
 	void	itemDoubleClicked(QTreeWidgetItem *, int);

@@ -169,7 +169,7 @@ int	time_command(MountPtr mount) {
 }
 
 /**
- * \brief Table of options for the astroinstrument
+ * \brief Table of options for the astromount command
  */
 static struct option    longopts[] = {
 /* name		argument?		int*		int */

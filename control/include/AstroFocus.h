@@ -13,6 +13,49 @@
 namespace astro {
 namespace focusing {
 
+/**
+ * \brief Base class for focus input
+ */
+class FocusInputBase {
+	image::ImageRectangle	_rectangle;
+	std::string		_method;
+	std::string		_solver;
+public:
+	const ImageRectangle&	rectangle() const { return _rectangle; }
+	void	rectangle(const ImageRectangle& r) { _rectangle = r; }
+
+	const std::string	method() const { return _method; }
+	void	method(const std::string& m) { _method = m; }
+
+	const std::string	solver() const { return _solver; }
+	void	solver(const std::string& s) { _solver = s; }
+
+	FocusInputBase();
+};
+
+/**
+ * \brief Input for a focusing process
+ *
+ * This data object contains all the information needed for processing
+ * the image to a focus position
+ */
+class FocusInput
+	: public FocusInputBase, public std::map<unsigned long, std::string> {
+public:
+	FocusInput();
+	std::string     toString() const;
+};
+
+/**
+ * \brief A class to hold focus input images
+ */
+class FocusInputImages
+	: public FocusInputBase, public std::map<unsigned long, ImagePtr> {
+public:
+	FocusInputImages(const FocusInput&);
+	std::string	toString() const;
+};
+
 class FocusableImageConverter;
 typedef std::shared_ptr<FocusableImageConverter> FocusableImageConverterPtr;
 typedef std::shared_ptr<Image<float> >	FocusableImage;

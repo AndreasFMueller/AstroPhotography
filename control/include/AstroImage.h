@@ -47,6 +47,7 @@ public:
 	ImagePoint(double x, double y) : _x(floor(x)), _y(floor(y)) { }
 	ImagePoint(const std::string& pointspec);
 	bool	operator==(const ImagePoint& other) const;
+	bool	operator!=(const ImagePoint& other) const;
 	ImagePoint	operator+(const ImagePoint& other) const;
 	ImagePoint	operator-(const ImagePoint& other) const;
 	bool	operator<(const ImagePoint& point) const;

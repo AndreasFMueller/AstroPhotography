@@ -603,6 +603,14 @@ void	exposewidget::imageproxyReceived(snowstar::ImagePrx imageproxy) {
 		v.value = std::string(ui->purposeBox->currentText().toLatin1().data());
 		metadata.push_back(v);
 	}
+
+	// add focuser position
+	if (_focuser) {
+		snowstar::Metavalue	v;
+		v.keyword = "FOCUSPOS";
+		v.value = astro::stringprintf("%lu", _focuser->current());
+		metadata.push_back(v);
+	}
 	imageproxy->setMetadata(metadata);
 
 	if (_repository) {
@@ -614,6 +622,26 @@ void	exposewidget::imageproxyReceived(snowstar::ImagePrx imageproxy) {
 
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "updating the image list");
 	projectChanged(ui->projectBox->currentText());
+
+	// move the focuser
+	if (_focuser) {
+		int	increment = ui->focuserincrementSpinBox->value();
+		if (increment > 0) {
+			int	newpos = _focuser->current() + increment;
+			_focuser->set(newpos);
+			int	counter = 1000;
+			do {
+				astro::Timer::sleep(0.1);
+				counter--;
+			} while ((_focuser->current() != newpos)
+				&& (counter > 0));
+			if (counter == 0) {
+				std::string	msg = astro::stringprintf(
+					"cannot move to position %d", newpos);
+				debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+			}
+		}
+	}
 
 	// decrement the value in the 
 	int	count = ui->exposuresSpinBox->value();
@@ -693,6 +721,12 @@ void	exposewidget::downloadClicked() {
 	exposedownloaddialog	*edd = new exposedownloaddialog(this);
 	edd->set(_repositories, filelist);
 	edd->exec();
+}
+
+void	exposewidget::focuserSelected(snowstar::FocuserPrx focuser) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "got focuser");
+	_focuser = focuser;
+	updateHeaderlist();
 }
 
 } // namespace snowgui
