@@ -157,6 +157,13 @@ public:
 	const std::string&	bayer() const { return _bayer; }
 	void	bayer(const std::string& b) { _bayer = b; }
 
+	// focus position
+private:
+	long	_focus;
+public:
+	long	focus() const { return _focus; }
+	void	focus(long f) { _focus = f; }
+
 private:
 	time_t	_observation;
 public:

@@ -37,9 +37,9 @@ public:
 private:
 	Ui::exposewidget *ui;
 	snowstar::RepositoriesPrx	_repositories;
-	std::string	_repositoryname;
-	snowstar::RepositoryPrx	_repository;
-	std::string	_projectname;
+	std::string			_repositoryname;
+	snowstar::RepositoryPrx		_repository;
+	std::string			_projectname;
 	snowstar::FilterWheelPrx	_filterwheel;
 	snowstar::FocuserPrx		_focuser;
 

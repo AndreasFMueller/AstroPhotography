@@ -25,6 +25,7 @@ ImageInfo	convert(const astro::project::ImageEnvelope& envelope) {
 	result.purpose = astro::camera::Exposure::purpose2string(envelope.purpose());
 	result.bayer = envelope.bayer();
 	result.filter = envelope.filter();
+	result.focus = envelope.focus();
 	result.observationago = converttime(envelope.observation());
 	return result;
 }
@@ -44,6 +45,7 @@ astro::project::ImageEnvelope	convert(const ImageInfo& info) {
 	envelope.observation(converttime(info.observationago));
 	envelope.bayer(info.bayer);
 	envelope.filter(info.filter);
+	envelope.focus(info.focus);
 	return envelope;
 }
 

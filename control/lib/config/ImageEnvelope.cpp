@@ -21,6 +21,7 @@ ImageEnvelope::ImageEnvelope(long id) : _id(id) {
 	_observation = 0;
 	_exposuretime = 0.;
 	_temperature = 0.;
+	_focus = 0;
 }
 
 /**
@@ -31,6 +32,7 @@ ImageEnvelope::ImageEnvelope(const ImagePtr image) : _size(image->size()) {
 	_observation = 0;
 	_exposuretime = 0.;
 	_temperature = 0.;
+	_focus = 0;
 	copy_metadata(*image, metadata);
 }
 
