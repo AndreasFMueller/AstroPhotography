@@ -29,6 +29,7 @@ void	TasksIndicator::update(snowstar::QueueState state) {
 	_state = state;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "state update: new state=%d", state);
 	repaint();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "repaint() complete");
 }
 
 /**
@@ -93,6 +94,7 @@ void	TasksIndicator::draw() {
 			Qt::AlignCenter, QString("STOPPED"));
 		break;
 	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "draw() complete");
 }
 
 } // namespace snowgui

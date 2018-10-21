@@ -35,6 +35,7 @@ exposewidget::exposewidget(QWidget *parent)
 	ui->purposeBox->addItem(QString("flat"));
 	ui->purposeBox->addItem(QString("bias"));
 	ui->purposeBox->addItem(QString("test"));
+	ui->purposeBox->addItem(QString("focus"));
 
 	// create the columns
 	QStringList	headers;
@@ -614,7 +615,7 @@ void	exposewidget::imageproxyReceived(snowstar::ImagePrx imageproxy) {
 	imageproxy->setMetadata(metadata);
 
 	if (_repository) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "moveing the image to repo %s",
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "moving the image to repo %s",
 			_repositoryname.c_str());
 		imageproxy->toRepository(_repositoryname);
 		imageproxy->remove();

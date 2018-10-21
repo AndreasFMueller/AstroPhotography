@@ -57,8 +57,8 @@ repositorywindow::repositorywindow(QWidget *parent,
 	ui->repositoryTree->header()->resizeSection(8, 100);
 	ui->repositoryTree->header()->resizeSection(9, 100);
 	ui->repositoryTree->header()->resizeSection(10, 80);
-	ui->repositoryTree->header()->resizeSection(11, 50);
-	ui->repositoryTree->header()->resizeSection(12, 180);
+	ui->repositoryTree->header()->resizeSection(11, 80);
+	ui->repositoryTree->header()->resizeSection(12, 190);
 
 	// window title
 	std::string	title = astro::stringprintf("Repository overview on %s",
