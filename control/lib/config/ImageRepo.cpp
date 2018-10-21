@@ -139,6 +139,11 @@ void	ImageRepo::scan_file(const std::string& filename) {
 	} catch (...) { }
 	imageinfo.bayer = "    ";
 	try {
+		imageinfo.bayer
+			= trim((std::string)infile.getMetadata("BAYER"));
+	} catch (...) { }
+	imageinfo.focus = 0;
+	try {
 		imageinfo.focus
 			= (int)infile.getMetadata("FOCUSPOS");
 	} catch (...) { }
@@ -303,6 +308,7 @@ static ImageEnvelope	convert(const ImageRecord& imageinfo,
 	result.filter(imageinfo.filter);
 	result.bayer(imageinfo.bayer);
 	result.observation((time_t)FITSdate(imageinfo.observation));
+	result.focus(imageinfo.focus);
 	result.uuid(UUID(imageinfo.uuid));
 
 	// we are done, return the envelope
@@ -398,6 +404,9 @@ long	ImageRepo::save(ImagePtr image) {
 	try {
 		imageinfo.bayer
 			= trim((std::string)image->getMetadata("BAYER"));
+	} catch (...) { }
+	try {
+		imageinfo.focus = (int)image->getMetadata("FOCUSPOS");
 	} catch (...) { }
 	try {
 		imageinfo.observation
