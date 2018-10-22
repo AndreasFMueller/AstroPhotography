@@ -116,12 +116,12 @@ int	snowstar_main(int argc, char *argv[]) {
 		props->setProperty("Ice.NullHandleAbort", "1");
 		props->setProperty("Ice.ThreadPool.Server.SizeMax", "30");
 		props->setProperty("Ice.ThreadPool.Client.SizeMax", "30");
-#if 0
-		props->setProperty("Ice.ThreadPool.Trace", "1");
-		props->setProperty("Ice.Trace.Network", "3");
-		props->setProperty("Ice.Trace.Locator", "1");
-		props->setProperty("Ice.Trace.Protocol", "1");
-#endif
+		if (getenv("ICEDEBUG")) {
+			props->setProperty("Ice.ThreadPool.Trace", "1");
+			props->setProperty("Ice.Trace.Network", "3");
+			props->setProperty("Ice.Trace.Locator", "1");
+			props->setProperty("Ice.Trace.Protocol", "1");
+		}
 		Ice::InitializationData	id;
 		id.properties = props;
 		ic = Ice::initialize(id);
