@@ -10,6 +10,7 @@
 #include <iostream>
 #include <includes.h>
 #include <AstroDebug.h>
+#include <AstroDiscovery.h>
 #include <DeviceServantLocator.h>
 #include <ImageLocator.h>
 #include <AstroConfig.h>
@@ -299,6 +300,9 @@ int	snowstar_main(int argc, char *argv[]) {
 		}
 		umask(027);
 	}
+
+	// make sure service discover is available
+	astro::discover::ServiceDiscoveryPtr	sd = astro::discover::ServiceDiscovery::get();
 
 	{
 		// by opening a new brace we ensure that the pdifile will
