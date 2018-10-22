@@ -7,6 +7,7 @@
 #include <ProxyCreator.h>
 #include <ImageI.h>
 #include <ImageDirectory.h>
+#include <IceConversions.h>
 
 namespace snowstar {
 
@@ -21,6 +22,7 @@ ImageList	ImagesI::listImages(const Ice::Current& /* current */) {
 	ImageList	result;
 	astro::image::ImageDirectory	imagedirectory;
 	std::list<std::string>	names = imagedirectory.fileList();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "found %d images", names.size());
 	std::copy(names.begin(), names.end(), back_inserter(result));
 	return result;
 }
@@ -91,6 +93,32 @@ ImagePrx	getImage(const std::string& filename,
 
 	// create the proxy
 	return getImage(filename, type, current);
+}
+
+void	ImagesI::remove(const std::string& filename,
+			const Ice::Current& /* current */) {
+	try {
+		astro::image::ImageDirectory	imagedirectory;
+		imagedirectory.remove(filename);
+	} catch (const std::exception& x) {
+		NotFound	notfound;
+		notfound.cause = std::string(x.what());
+		throw notfound;
+	}
+}
+
+std::string	ImagesI::save(const ImageFile& file,
+		const Ice::Current& /* current */) {
+	try {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "saving file");
+		astro::image::ImagePtr	image = convertfile(file);
+		astro::image::ImageDirectory	imagedirectory;
+		return imagedirectory.save(image);
+	} catch (const std::exception& x) {
+		std::string	msg = astro::stringprintf("cannot save image: "
+			"%s", x.what());
+		throw BadParameter(msg);
+	}
 }
 
 } // namespace snowtar

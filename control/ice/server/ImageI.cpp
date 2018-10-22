@@ -223,6 +223,7 @@ ImageFile       ImageI::file(ImageEncoding encoding,
 	unsigned char	*buffer = new unsigned char[sb.st_size];
 	if (sb.st_size != read(fd, buffer, sb.st_size)) {
 		close(fd); // prevent resource leak
+		delete[] buffer;
 		std::string	msg = astro::stringprintf("could not read file %s "
 			"in full length %ld", fullname.c_str(), sb.st_size);
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
@@ -264,11 +265,14 @@ void	ImageI::toRepository(const std::string& reponame,
 
 	// add the image to the repository;
 	repo->save(image());
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "image saved");
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "image %s saved in %s",
+		_filename.c_str(), reponame.c_str());
 }
 
 /**
- * \brief Remove the image from the 
+ * \brief Remove the image from the image directory
+ *
+ * Note that this method does not remove the image itself
  */
 void    ImageI::remove(const Ice::Current& /* current */) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "destroy the image file '%s'",

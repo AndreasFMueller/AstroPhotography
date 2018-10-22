@@ -46,7 +46,7 @@ class mountcontrollerwidget : public InstrumentWidget {
 	snowstar::MountPrx	_mount;
 
 	snowstar::RaDec		_telescope;
-	astro::LongLat	_position;
+	astro::LongLat		_position;
 	SkyDisplayDialog	*_skydisplay;
 	CatalogDialog		*_catalogdialog;
 

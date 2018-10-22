@@ -15,7 +15,7 @@ ICECPPFLAGS = -I$(top_builddir)/ice/include -I$(top_builddir)/ice/slice \
 
 bin_PROGRAMS = snowscan snowimages snowfocus snowmount snowrepo \
 	snowtask snowproject snowinstrument snowao snowservers \
-	snowevent snowconfig snowstream
+	snowevent snowconfig snowstream snowfiles
 noinst_PROGRAMS = snowflake 
 
 snowconfig_SOURCES = snowconfig.cpp
@@ -87,6 +87,11 @@ snowstream_SOURCES = snowstream.cpp
 snowstream_DEPENDENCIES = $(ICEDEPENDENCIES)
 snowstream_LDADD = $(ICELDADD)
 snowstream_CPPFLAGS = $(ICECPPFLAGS)
+
+snowfiles_SOURCES = snowfiles.cpp
+snowfiles_DEPENDENCIES = $(ICEDEPENDENCIES)
+snowfiles_LDADD = $(ICELDADD)
+snowfiles_CPPFLAGS = $(ICECPPFLAGS)
 
 test:	snowflake
 	./snowflake -d -m simulator

@@ -23,6 +23,7 @@ noinst_HEADERS =							\
 	DriverModuleI.h							\
 	DriverModuleLocator.h						\
 	EventHandlerI.h							\
+	EvictorBase.h							\
 	FilterWheelI.h							\
 	FocuserI.h							\
 	FocusingFactoryI.h						\
@@ -71,6 +72,7 @@ snowstar_SOURCES = snowstar.cpp 					\
 	DriverModuleI.cpp						\
 	DriverModuleLocator.cpp						\
 	EventHandlerI.cpp						\
+	EvictorBase.cpp							\
 	FilterWheelI.cpp						\
 	FocuserI.cpp							\
 	FocusingFactoryI.cpp						\

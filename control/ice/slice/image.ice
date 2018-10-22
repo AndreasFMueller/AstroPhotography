@@ -168,6 +168,8 @@ module snowstar {
 		int	imageSize(string name) throws NotFound;
 		int	imageAge(string name) throws NotFound;
 		Image*	getImage(string name) throws NotFound;
+		void	remove(string name) throws NotFound;
+		string	save(ImageFile image);
 	};
 
 	/**
