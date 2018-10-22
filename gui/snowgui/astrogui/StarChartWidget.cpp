@@ -34,6 +34,7 @@ StarChartWidget::StarChartWidget(QWidget *parent) : QWidget(parent),
 	_mouse_pressed = false;
 	_show_crosshairs = false;
 	_show_directions = true;
+	_show_cataloglabels = true;
 	_flip = true; // XXX is this correct?
 	_show_deepsky = true;
 	_show_tooltips = true;
@@ -205,6 +206,9 @@ void	StarChartWidget::drawDeepSkyObject(QPainter& painter,
 	}
 	painter.drawPath(ellipse);
 
+	if (!show_cataloglabels()) {
+		return;
+	}
 	// draw the name of the object
 	painter.drawText(p.x() - 40, p.y() - 10, 80, 20,
 		Qt::AlignCenter,
@@ -744,6 +748,11 @@ void	StarChartWidget::setDeepskyVisible(bool s) {
 	repaint();
 }
 
+void	StarChartWidget::setCataloglabelsVisible(bool s) {
+	show_cataloglabels(s);
+	repaint();
+}
+
 void	StarChartWidget::setTooltipsVisible(bool s) {
 	show_tooltips(s);
 	repaint();
@@ -768,6 +777,10 @@ void	StarChartWidget::toggleDirectionsVisible() {
 
 void	StarChartWidget::toggleDeepskyVisible() {
 	setDeepskyVisible(!show_deepsky());
+}
+
+void	StarChartWidget::toggleCataloglabelsVisible() {
+	setCataloglabelsVisible(!show_cataloglabels());
 }
 
 void	StarChartWidget::toggleTooltipsVisible() {
@@ -810,6 +823,13 @@ void	StarChartWidget::showContextMenu(const QPoint& point) {
 	contextMenu.addAction(&actionDeepsky);
 	connect(&actionDeepsky, SIGNAL(triggered()),
 		this, SLOT(toggleDeepskyVisible()));
+
+	QAction	actionCataloglabels(QString("Catalog labels"), this);
+	actionCataloglabels.setCheckable(true);
+	actionCataloglabels.setChecked(show_cataloglabels());
+	contextMenu.addAction(&actionCataloglabels);
+	connect(&actionCataloglabels, SIGNAL(triggered()),
+		this, SLOT(toggleCataloglabelsVisible()));
 
 	QAction	actionTooltips(QString("Coordinates"), this);
 	actionTooltips.setCheckable(true);

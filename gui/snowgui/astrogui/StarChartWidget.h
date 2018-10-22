@@ -76,6 +76,7 @@ class StarChartWidget : public QWidget {
 	bool	_show_directions;
 	bool	_show_deepsky;
 	bool	_show_tooltips;
+	bool	_show_cataloglabels;
 	bool	_flip;
 
 	bool	_retrieval_necessary;
@@ -108,6 +109,9 @@ public:
 
 	void	show_tooltips(bool d) { _show_tooltips = d; }
 	bool	show_tooltips() const { return _show_tooltips; }
+
+	void	show_cataloglabels(bool d) { _show_cataloglabels = d; }
+	bool	show_cataloglabels() const { return _show_cataloglabels; }
 
 	void	flip(bool f) { _flip = f; }
 	bool	flip() const { return _flip; }
@@ -153,6 +157,7 @@ public slots:
 	void	setCrosshairsVisible(bool);
 	void	setDirectionsVisible(bool);
 	void	setDeepskyVisible(bool);
+	void	setCataloglabelsVisible(bool);
 	void	setTooltipsVisible(bool);
 	void	setNegative(bool);
 	
@@ -160,6 +165,7 @@ public slots:
 	void	toggleCrosshairsVisible();
 	void	toggleDirectionsVisible();
 	void	toggleDeepskyVisible();
+	void	toggleCataloglabelsVisible();
 	void	toggleTooltipsVisible();
 	void	toggleNegative();
 	
