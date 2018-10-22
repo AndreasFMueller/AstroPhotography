@@ -54,10 +54,12 @@ ServicePublisher::ServicePublisher(const std::string& servername, int port)
  */
 ServicePublisher::~ServicePublisher() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "destroy the service publishing object");
+	remove_published(_servername);
 }
 
 void	ServicePublisher::publish() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "publish now");
+	add_published(_servername);
 }
 
 /**
