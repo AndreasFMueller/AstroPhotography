@@ -123,6 +123,8 @@ snowstar::ModulesPrx	NiceLocator::getModules(const std::string& servicename) {
  * \param key	service key for which to find the modules
  */
 snowstar::ModulesPrx	NiceLocator::getModules(const ServiceKey& key) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "getModules(%s)",
+		key.toString().c_str());
 	std::unique_lock<std::recursive_mutex>	lock(modules_mtx);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "lock acquired, key = %s",
 		key.toString().c_str());
