@@ -16,6 +16,7 @@
 #include <NiceAdaptiveOptics.h>
 #include <NiceFilterWheel.h>
 #include <NiceCooler.h>
+#include <NiceMount.h>
 
 namespace astro {
 namespace module {
@@ -325,6 +326,9 @@ std::vector<std::string>	NiceLocator::getDevicelist(
  */
 void	NiceLocator::check(const DeviceName& name,
 		DeviceName::device_type type) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "checking %s is a %s?",
+		name.toString().c_str(),
+		DeviceName::type2string(type).c_str());
 	if (!name.hasType(type)) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "name %s is not a %s",
 			name.toString().c_str(),
@@ -345,6 +349,8 @@ CameraPtr	NiceLocator::getCamera0(const DeviceName& name) {
 	check(name, DeviceName::Camera);
 
 	astro::DeviceName	remotename = name.localdevice();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "remote camera name: %s",
+		remotename.toString().c_str());
 	snowstar::DeviceLocatorPrx	locator = getLocator(name.servicename(),
 						remotename.modulename());
 
@@ -357,6 +363,8 @@ CcdPtr	NiceLocator::getCcd0(const DeviceName& name) {
 	check(name, DeviceName::Ccd);
 
 	astro::DeviceName	remotename = name.localdevice();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "remote ccd name: %s",
+		remotename.toString().c_str());
 	snowstar::DeviceLocatorPrx	locator = getLocator(name.servicename(),
 						remotename.modulename());
 
@@ -371,6 +379,8 @@ GuidePortPtr	NiceLocator::getGuidePort0(const DeviceName& name) {
 		name.toString().c_str());
 
 	astro::DeviceName	remotename = name.localdevice();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "remote guideport name: %s",
+		remotename.toString().c_str());
 	snowstar::DeviceLocatorPrx	locator = getLocator(name.servicename(),
 						remotename.modulename());
 
@@ -383,6 +393,8 @@ FilterWheelPtr	NiceLocator::getFilterWheel0(const DeviceName& name) {
 	check(name, DeviceName::Filterwheel);
 
 	astro::DeviceName	remotename = name.localdevice();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "remote filterwheel name: %s",
+		remotename.toString().c_str());
 	snowstar::DeviceLocatorPrx	locator = getLocator(name.servicename(),
 						remotename.modulename());
 
@@ -395,6 +407,8 @@ CoolerPtr	NiceLocator::getCooler0(const DeviceName& name) {
 	check(name, DeviceName::Cooler);
 
 	astro::DeviceName	remotename = name.localdevice();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "remote cooler name: %s",
+		remotename.toString().c_str());
 	snowstar::DeviceLocatorPrx	locator = getLocator(name.servicename(),
 						remotename.modulename());
 
@@ -407,6 +421,8 @@ FocuserPtr	NiceLocator::getFocuser0(const DeviceName& name) {
 	check(name, DeviceName::Focuser);
 
 	astro::DeviceName	remotename = name.localdevice();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "remote focuser name: %s",
+		remotename.toString().c_str());
 	snowstar::DeviceLocatorPrx	locator = getLocator(name.servicename(),
 						remotename.modulename());
 
@@ -419,12 +435,28 @@ AdaptiveOpticsPtr	NiceLocator::getAdaptiveOptics0(const DeviceName& name) {
 	check(name, DeviceName::AdaptiveOptics);
 
 	astro::DeviceName	remotename = name.localdevice();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "remote adaptive optics name: %s",
+		remotename.toString().c_str());
 	snowstar::DeviceLocatorPrx	locator = getLocator(name.servicename(),
 						remotename.modulename());
 
 	snowstar::AdaptiveOpticsPrx	adaptiveoptics
 		= locator->getAdaptiveOptics(remotename.toString());
 	return AdaptiveOpticsPtr(new NiceAdaptiveOptics(adaptiveoptics, name));
+}
+
+astro::device::MountPtr	NiceLocator::getMount0(const DeviceName& name) {
+	check(name, DeviceName::Mount);
+
+	astro::DeviceName	remotename = name.localdevice();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "remote mount name: %s",
+		remotename.toString().c_str());
+	snowstar::DeviceLocatorPrx	locator = getLocator(name.servicename(),
+						remotename.modulename());
+
+	snowstar::MountPrx	mount
+		= locator->getMount(remotename.toString());
+	return astro::device::MountPtr(new device::nice::NiceMount(mount, name));
 }
 
 } // namespace nice

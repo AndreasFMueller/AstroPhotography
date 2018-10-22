@@ -224,8 +224,8 @@ void	*FITSinfileBase::readdata() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "reading FITS data: pixeltype = %d, "
 		"pixels = %d, planes = %d", pixeltype, size.getPixels(),
 		planes);
-	if (fits_read_pix(fptr, pixeltype, firstpixel, size.getPixels() * planes,
-		NULL, v, NULL, &status)) {
+	if (fits_read_pix(fptr, pixeltype, firstpixel,
+		size.getPixels() * planes, NULL, v, NULL, &status)) {
 		free(v);
 		throw FITSexception(errormsg(status));
 	}

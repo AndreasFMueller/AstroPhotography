@@ -182,8 +182,11 @@ astro::camera::GuidePortPtr	DeviceLocator::getGuidePort0(const DeviceName& name)
 		name.toString().c_str()));
 }
 
-astro::camera::FilterWheelPtr	DeviceLocator::getFilterWheel0(const DeviceName&) {
-	throw std::runtime_error("filterwheel not implemented");
+astro::camera::FilterWheelPtr	DeviceLocator::getFilterWheel0(const DeviceName& name) {
+	std::string	msg = stringprintf("getFilterWheel0(%s) not implemented",
+		name.toString().c_str());
+	debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+	throw std::runtime_error(msg);
 }
 
 /**
@@ -214,15 +217,21 @@ astro::camera::CoolerPtr	DeviceLocator::getCooler0(const DeviceName& name) {
 /**
  * \brief No default method to get a focuser
  */
-astro::camera::FocuserPtr	DeviceLocator::getFocuser0(const DeviceName&) {
-	throw std::runtime_error("focuser not implemented");
+astro::camera::FocuserPtr	DeviceLocator::getFocuser0(const DeviceName& name) {
+	std::string	msg = stringprintf("getFocuser0(%s) not implemented",
+		name.toString().c_str());
+	debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+	throw std::runtime_error(msg);
 }
 
 /**
  * \brief No default method to get a mount
  */
-astro::device::MountPtr	DeviceLocator::getMount0(const DeviceName&) {
-	throw std::runtime_error("mount not implemented");
+astro::device::MountPtr	DeviceLocator::getMount0(const DeviceName& name) {
+	std::string	msg = stringprintf("getMount0(%s) not implemented",
+		name.toString().c_str());
+	debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+	throw std::runtime_error(msg);
 }
 
 /**
