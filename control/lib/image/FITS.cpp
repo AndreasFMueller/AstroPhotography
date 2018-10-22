@@ -214,9 +214,9 @@ void	*FITSinfileBase::readdata() {
 		break;
 	}
 	void	*v = calloc(planes * size.getPixels(), typesize);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "data size: %d items of size %d, "
-		"pixel type %d, %d planes", (size.getPixels() * planes), typesize,
-		pixeltype, planes);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "alloc data size: %d items of size %d, "
+		"pixel type %d, %d planes", (size.getPixels() * planes),
+		typesize, pixeltype, planes);
 	
 	/* now read the data */
 	int	status = 0;
@@ -229,7 +229,7 @@ void	*FITSinfileBase::readdata() {
 		free(v);
 		throw FITSexception(errormsg(status));
 	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "fits data read");
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "fits data read: %p", v);
 	return v;
 }
 
