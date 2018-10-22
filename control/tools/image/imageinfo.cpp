@@ -207,7 +207,6 @@ int	main(int argc, char *argv[]) {
 		if (reponame.size() != 0) {
 			show_imagerepo(argument);
 		} else {
-	sleep(2);
 			show_imagefile(argument);
 		}
 		std::cout << std::endl;
