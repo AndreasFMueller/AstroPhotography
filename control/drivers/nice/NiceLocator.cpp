@@ -306,6 +306,8 @@ std::vector<std::string>	NiceLocator::getDevicelist(
 
 	// getting a list of available severs
 	ServiceDiscovery::ServiceKeySet	services = discovery->list();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "number of services: %d",
+		services.size());
 	ServiceDiscovery::ServiceKeySet::const_iterator	i;
 	for (i = services.begin(); i != services.end(); i++) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "service %s",
