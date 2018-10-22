@@ -238,6 +238,7 @@ void	AvahiPublisher::publish() {
 		avahi_elapse_time(&tv, 0, 100),
 		discover::modify_callback, this);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "publish completed");
+	ServicePublisher::publish();
 }
 
 /**
