@@ -77,6 +77,7 @@ NiceLocator::NiceLocator() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "starting service discovery for nice "
 		"locator");
 	discovery = ServiceDiscovery::get();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "nice locator constructed");
 }
 
 NiceLocator::~NiceLocator() {
@@ -313,8 +314,13 @@ std::vector<std::string>	NiceLocator::getDevicelist(
 
 	// got through the servers and 
 	for (i = services.begin(); i != services.end(); i++) {
-		if (ServicePublisher::ispublished(i->name()))
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "checking services service %s",
+			i->toString().c_str());
+		if (ServicePublisher::ispublished(i->name())) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "skip published '%s'",
+				i->name().c_str());
 			continue;
+		}
 		std::vector<std::string> names = getDevicelist(device, *i);
 		std::copy(names.begin(), names.end(),
 			std::back_inserter<std::vector<std::string> >(result));
