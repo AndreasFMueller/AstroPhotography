@@ -134,11 +134,14 @@ snowstar::ModulesPrx	NiceLocator::getModules(const ServiceKey& key) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "discovery object found");
 
 		// we need a connection 
-		Ice::CommunicatorPtr	ic = snowstar::CommunicatorSingleton::get();
+		Ice::CommunicatorPtr	ic
+			= snowstar::CommunicatorSingleton::get();
 		std::string	connectstring = object.connect("Modules");
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "connect string: '%s'", connectstring.c_str());
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "connect string: '%s'",
+			connectstring.c_str());
 		Ice::ObjectPrx	base = ic->stringToProxy(connectstring);
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "connecting to Modules: %p", base.get());
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "connecting to Modules: %p",
+			base.get());
 		mprx = snowstar::ModulesPrx::checkedCast(base);
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "got modules proxy");
 
@@ -147,7 +150,8 @@ snowstar::ModulesPrx	NiceLocator::getModules(const ServiceKey& key) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "proxy added to map: %s",
 			key.name().c_str());
 	} catch (const std::exception& x) {
-		debug(LOG_ERR, DEBUG_LOG, 0, "cannot get a proxy: %s", x.what());
+		debug(LOG_ERR, DEBUG_LOG, 0, "cannot get a proxy: %s",
+			x.what());
 	}
 	// here we have the new proxy
 	return mprx;
@@ -241,9 +245,12 @@ std::vector<std::string>	NiceLocator::getDevicelist(
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "does not have a a locator");
 		return result;
 	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "get a locator proxy for %s",
+		module->getName().c_str());
 	snowstar::DeviceLocatorPrx locator = module->getDeviceLocator();
 	snowstar::DeviceNameList	names
 		= locator->getDevicelist(snowstar::convert(device));
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "got %d names", names.size());
 	std::copy(names.begin(), names.end(),
 		std::back_inserter<std::vector<std::string> >(result));
 	return result;
@@ -313,8 +320,8 @@ std::vector<std::string>	NiceLocator::getDevicelist(
 
 	// we are done, return the result
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "found %d %s devices",
-		DeviceName::type2string(device).c_str(),
-		result.size());
+		result.size(),
+		DeviceName::type2string(device).c_str());
 	return result;
 }
 
