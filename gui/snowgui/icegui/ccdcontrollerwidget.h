@@ -161,7 +161,7 @@ private:
 	bool	ourexposure;
 
 public slots:
-	// changes taht come from the outside
+	// changes that come from the outside
 	void	setExposure(astro::camera::Exposure);
 	void	setBinning(astro::image::Binning);
 	void	setExposureTime(double);

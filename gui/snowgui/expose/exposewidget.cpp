@@ -29,14 +29,6 @@ exposewidget::exposewidget(QWidget *parent)
 	_imageitem = NULL;
 	_selectedfiles = 0;
 
-	// add purposes to purpose combobox
-	ui->purposeBox->addItem(QString("light"));
-	ui->purposeBox->addItem(QString("dark"));
-	ui->purposeBox->addItem(QString("flat"));
-	ui->purposeBox->addItem(QString("bias"));
-	ui->purposeBox->addItem(QString("test"));
-	ui->purposeBox->addItem(QString("focus"));
-
 	// create the columns
 	QStringList	headers;
 	headers << "No";
@@ -420,6 +412,27 @@ void	exposewidget::updateHeaderlist() {
 		RepositorySection	section(key, index++);
 		_repository_sections.push_back(section);
 	}
+	
+	{
+		RepositoryKey	key(snowstar::ExGUIDE);
+		_repository_index.insert(std::make_pair(key, index));
+		RepositorySection	section(key, index++);
+		_repository_sections.push_back(section);
+	}
+	
+	{
+		RepositoryKey	key(snowstar::ExFOCUS);
+		_repository_index.insert(std::make_pair(key, index));
+		RepositorySection	section(key, index++);
+		_repository_sections.push_back(section);
+	}
+	
+	{
+		RepositoryKey	key(snowstar::ExFLOOD);
+		_repository_index.insert(std::make_pair(key, index));
+		RepositorySection	section(key, index++);
+		_repository_sections.push_back(section);
+	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "got %d sections",
 		_repository_sections.size());
 
@@ -595,13 +608,6 @@ void	exposewidget::imageproxyReceived(snowstar::ImagePrx imageproxy) {
 		snowstar::Metavalue	v;
 		v.keyword = "PROJECT";
 		v.value = std::string(ui->projectBox->currentText().toLatin1().data());
-		metadata.push_back(v);
-	}
-
-	{
-		snowstar::Metavalue	v;
-		v.keyword = "PURPOSE";
-		v.value = std::string(ui->purposeBox->currentText().toLatin1().data());
 		metadata.push_back(v);
 	}
 
