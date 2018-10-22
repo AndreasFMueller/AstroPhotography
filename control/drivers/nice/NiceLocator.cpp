@@ -316,8 +316,9 @@ std::vector<std::string>	NiceLocator::getDevicelist(
 
 	// got through the servers and 
 	for (i = services.begin(); i != services.end(); i++) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "checking services service %s",
-			i->toString().c_str());
+		debug(LOG_DEBUG, DEBUG_LOG, 0,
+			"checking services service %s, name = '%s'",
+			i->toString().c_str(), i->name().c_str());
 		if (ServicePublisher::ispublished(i->name())) {
 			debug(LOG_DEBUG, DEBUG_LOG, 0, "skip published '%s'",
 				i->name().c_str());
