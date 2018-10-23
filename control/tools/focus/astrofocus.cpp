@@ -27,6 +27,7 @@ namespace focus {
 static struct option	longopts[] = {
 { "center",	required_argument,	NULL,		'c' },
 { "debug",	no_argument,		NULL,		'd' },
+{ "help",	no_argument,		NULL,		'h' },
 { "method",	required_argument,	NULL,		'm' },
 { "rectangle",	required_argument,	NULL,		'r' },
 { "solver",	required_argument,	NULL,		's' },
@@ -68,7 +69,37 @@ static void	usage(const std::string& progname) {
  * \brief Method to actually evaluate the image data
  */
 int	evaluate_command(const FocusInput& input) {
-	FocusInputImages	images(input);
+	// construct a processor
+	FocusProcessor	processor(input);
+	processor.keep_images(false);
+
+	// process all the images
+	processor.process(input);
+
+	// retrieve the evaluatation results
+	FocusItems	focusitems = processor.output()->items();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "got %d items", focusitems.size());
+	std::for_each(focusitems.begin(), focusitems.end(),
+		[](const FocusItem& p) {
+			std::cout << p.position() << " " << p.value();
+			std::cout << std::endl;
+		}
+	);
+
+	return EXIT_SUCCESS;
+}
+
+/**
+ * \brief Method to compute solution from a solver
+ *
+ * \param items		focus items to use as absis for the solution
+ */
+int	solve_command(const FocusItems& items, const std::string& solver) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "solving %d items, with %s",
+		items.size(), solver.c_str());
+	FocusSolverPtr	solverptr = FocusSolverFactory::get(solver);
+	int	solution = solverptr->position(items);
+	std::cout << "position: " << solution << std::endl;
 	return EXIT_SUCCESS;
 }
 
@@ -80,17 +111,16 @@ int	evaluate_command(const FocusInput& input) {
  */
 int	main(int argc, char *argv[]) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "focus utility");
-
 	image::ImagePoint	center;
 	image::ImageRectangle	rectangle;
 	image::ImageSize	window;
-	std::string	method("fwhm");
-	std::string	solver("abs");
+	std::string		method("fwhm");
+	std::string		solver("abs");
 
 	int	c;
 	int	longindex;
 	putenv((char *)"POSIXLY_CORRECT=1");    // cast to silence compiler
-	while (EOF != (c = getopt_long(argc, argv, "c:dhm:r:s:w", longopts,
+	while (EOF != (c = getopt_long(argc, argv, "c:dhm:r:s:w?", longopts,
 		&longindex))) {
 		switch (c) {
 		case 'c':
@@ -100,6 +130,7 @@ int	main(int argc, char *argv[]) {
 			debuglevel = LOG_DEBUG;
 			break;
 		case 'h':
+		case '?':
 			usage(argv[0]);
 			return EXIT_SUCCESS;
 		case 'm':
@@ -169,6 +200,23 @@ int	main(int argc, char *argv[]) {
 		std::cout << "Focus processing for files:" << std::endl;
 		std::cout << fi.toString();
 		return evaluate_command(fi);
+	}
+
+
+	// handle the 'evaluate' command
+	if (command == std::string("solve")) {
+		FocusItems	items;
+		while (optind < argc - 1) {
+			int	pos = std::stoi(argv[optind++]);
+			double	val = std::stod(argv[optind++]);
+			items.insert(FocusItem(pos, val));
+		}
+		if (optind < argc) {
+			std::cerr << "incorrect number of arguments";
+			std::cerr << std::endl;
+			return EXIT_FAILURE;
+		}
+		return solve_command(items, solver);
 	}
 
 	// handle unknown commands

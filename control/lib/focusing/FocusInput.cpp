@@ -5,6 +5,7 @@
  */
 #include <AstroFocus.h>
 #include <sstream>
+#include <AstroIO.h>
 
 namespace astro {
 namespace focusing {
@@ -31,6 +32,20 @@ std::string     FocusInput::toString() const {
 		}
 	);
 	return out.str();
+}
+
+/**
+ * \brief Retrieve an image from a position
+ *
+ * \param pos	the position for which the image should be retrieved
+ */
+ImagePtr	FocusInput::image(unsigned long pos) const {
+	auto	i = find(pos);
+	if (i == end()) {
+		throw std::runtime_error("no such position");
+	}
+	std::string	filename = i->second;
+	return FocusInputBase::image(i->second);
 }
 
 } // namespace focusing

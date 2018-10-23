@@ -20,6 +20,8 @@ class FocusInputBase {
 	image::ImageRectangle	_rectangle;
 	std::string		_method;
 	std::string		_solver;
+protected:
+	ImagePtr	image(const std::string& filename) const;
 public:
 	const ImageRectangle&	rectangle() const { return _rectangle; }
 	void	rectangle(const ImageRectangle& r) { _rectangle = r; }
@@ -44,6 +46,7 @@ class FocusInput
 public:
 	FocusInput();
 	std::string     toString() const;
+	ImagePtr	image(unsigned long) const;
 };
 
 /**
@@ -59,6 +62,78 @@ public:
 class FocusableImageConverter;
 typedef std::shared_ptr<FocusableImageConverter> FocusableImageConverterPtr;
 typedef std::shared_ptr<Image<float> >	FocusableImage;
+
+/**
+ * \brief The FocusElement collects all the data that is accumualted in focusing
+ */
+class FocusElement {
+	unsigned long	_pos;
+public:
+	FocusElement(unsigned long pos);
+	unsigned long	pos() const { return _pos; }
+	std::string	filename;
+	ImagePtr	raw_image;
+	ImagePtr	processed_image;
+	double		value;
+	ImagePtr	image() const;
+};
+
+/**
+ * \brief Container class that contains focus position and value
+ *
+ * Any focusing algorithm does this by first measuring the focus
+ * measure for a couple of focus positions and then finds the best
+ * focus position.
+ */
+class FocusItem {
+	int	_position;
+	float	_value;
+public:
+	int	position() const { return _position; }
+	float	value() const { return _value; }
+	FocusItem(int position, float value)
+		: _position(position), _value(value) { }
+	bool	operator<(const FocusItem& other) const {
+		return _position < other.position();
+	}
+	bool	operator==(const FocusItem& other) const {
+		return _position == other.position();
+	}
+	bool	operator!=(const FocusItem& other) const {
+		return _position != other.position();
+	}
+};
+
+typedef std::set<FocusItem>	FocusItems;
+
+/**
+ * \brief Output of the Focus Processor
+ */
+class FocusOutput : public FocusInputBase,
+		public std::map<unsigned long, FocusElement> {
+public:
+	FocusOutput(const FocusInputBase&);
+	FocusOutput(const FocusInput&);
+	FocusOutput(const FocusInputImages&);
+	FocusItems	items() const;
+};
+typedef std::shared_ptr<FocusOutput>	FocusOutputPtr;
+
+/**
+ * \brief Processor class that takes the FocusInput and produces a solution
+ */
+class FocusProcessor {
+	bool		_keep_images;
+	FocusOutputPtr	_output;
+public:
+	bool	keep_images() const { return _keep_images; }
+	void	keep_images(bool k) { _keep_images = k; }
+	FocusOutputPtr	output() const { return _output; }
+	FocusProcessor(const FocusInputBase&);
+	void	process(const FocusElement&);
+	void	process(const FocusInput& input);
+	void	process(const FocusInputImages& input);
+};
 
 /**
  * \brief Extracting images suitable for focusing
@@ -111,35 +186,11 @@ public:
 static FocusEvaluatorPtr	get(FocusEvaluatorType type);
 static FocusEvaluatorPtr	get(FocusEvaluatorType type,
 					const ImageRectangle& roi);
+static FocusEvaluatorPtr	get(const std::string& type);
+static FocusEvaluatorPtr	get(const std::string& type,
+					const ImageRectangle& roi);
+static std::list<std::string>	evaluatornames();
 };
-
-/**
- * \brief Container class that contains focus position and value
- *
- * Any focusing algorithm does this by first measuring the focus
- * measure for a couple of focus positions and then finds the best
- * focus position.
- */
-class FocusItem {
-	int	_position;
-	float	_value;
-public:
-	int	position() const { return _position; }
-	float	value() const { return _value; }
-	FocusItem(int position, float value)
-		: _position(position), _value(value) { }
-	bool	operator<(const FocusItem& other) const {
-		return _position < other.position();
-	}
-	bool	operator==(const FocusItem& other) const {
-		return _position == other.position();
-	}
-	bool	operator!=(const FocusItem& other) const {
-		return _position != other.position();
-	}
-};
-
-typedef std::set<FocusItem>	FocusItems;
 
 /**
  * \brief Solver class to compute the solution of the focusing problem
@@ -186,11 +237,27 @@ public:
 	virtual int	position(const FocusItems& focusitems);
 };
 
+class MinimumSolver : public FocusSolver {
+public:
+	MinimumSolver();
+	virtual ~MinimumSolver() { }
+	virtual int	position(const FocusItems& focusitems);
+};
+
 class BrennerSolver : public MaximumSolver {
 public:
 	BrennerSolver();
 	virtual ~BrennerSolver() { }
 	virtual int	position(const FocusItems& focusitems);
+};
+
+/**
+ * \brief Factory to produce solver classes
+ */
+class FocusSolverFactory {
+public:
+static std::list<std::string>	solvernames();
+static FocusSolverPtr	get(const std::string& solver);
 };
 
 // we need the FocusWork forward declaration in the next class

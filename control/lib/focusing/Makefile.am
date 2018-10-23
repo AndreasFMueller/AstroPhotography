@@ -17,11 +17,15 @@ libastrofocusing_la_SOURCES =						\
 	CentroidSolver.cpp						\
 	FocusableImageConverter.cpp					\
 	FocusCompute.cpp						\
+	FocusElement.cpp						\
 	FocusEvaluator.cpp						\
 	FocusEvaluatorFactory.cpp					\
 	FocusInputBase.cpp						\
 	FocusInputImages.cpp						\
 	FocusInput.cpp							\
+	FocusOutput.cpp							\
+	FocusProcessor.cpp						\
+	FocusSolverFactory.cpp						\
 	FocusWork.cpp							\
 	Focusing.cpp							\
 	FWHM2Evaluator.cpp						\
