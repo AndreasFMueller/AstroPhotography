@@ -10,6 +10,13 @@ namespace astro {
 namespace focusing {
 
 /**
+ * \brief Construct a Focus output given method and solver
+ */
+FocusOutput::FocusOutput(const std::string& method, const std::string& solver)
+	: FocusInputBase(method, solver) {
+}
+
+/**
  * \brief Construct an Output object from base input 
  *
  * This essentially copies the parameters from the input without creating

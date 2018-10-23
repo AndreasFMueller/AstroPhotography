@@ -510,6 +510,52 @@ public:
 	}
 };
 
+/**
+ * \brief A class that implements waiting for a given value of the type
+ *
+ * This can be used for state enumerations
+ */
+template<typename T>
+class Waiter {
+	std::mutex	_mutex;
+	std::condition_variable	_condition;
+	std::atomic<T>	_value;
+public:
+	Waiter<T>&	operator=(const T& other) {
+		std::unique_lock<std::mutex>	lock(_mutex);
+		if (other != _value) {
+			_value = other;
+			_condition.notify_all();
+		}
+		return *this;
+	}
+	void	wait(T value) {
+		std::unique_lock<std::mutex>	lock(_mutex);
+		while (value != _value) {
+			_condition.wait(lock);
+		}
+	}
+	void	wait(std::set<T> values) {
+		std::unique_lock<std::mutex>	lock(_mutex);
+		bool	found = (values.find(_value) == values.end());
+		while (!found) {
+			_condition.wait(lock);
+			found = (values.find(_value) == values.end());
+		}
+	}
+	void	wait_not(std::set<T> values) {
+		std::unique_lock<std::mutex>	lock(_mutex);
+		bool	notfound = (values.find(_value) != values.end());
+		while (!notfound) {
+			_condition.wait(lock);
+			notfound = (values.find(_value) != values.end());
+		}
+	}
+	operator	T() const {
+		return _value;
+	}
+};
+
 } // namespace thread
 
 /**

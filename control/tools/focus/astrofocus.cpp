@@ -26,11 +26,15 @@ namespace focus {
  */
 static struct option	longopts[] = {
 { "center",	required_argument,	NULL,		'c' },
+{ "ccd",	required_argument,	NULL,		'C' },
 { "debug",	no_argument,		NULL,		'd' },
+{ "exopsure",	required_argument,	NULL,		'e' },
+{ "focuser",	required_argument,	NULL,		'F' },
 { "help",	no_argument,		NULL,		'h' },
 { "method",	required_argument,	NULL,		'm' },
 { "rectangle",	required_argument,	NULL,		'r' },
 { "solver",	required_argument,	NULL,		's' },
+{ "steps",	required_argument,	NULL,		'S' },
 { "window",	required_argument,	NULL,		'w' },
 { NULL,		0,			NULL,		 0  }
 };
@@ -42,8 +46,12 @@ static void	usage(const std::string& progname) {
 	std::string	prg = std::string("    ") + Path(progname).basename();
 	std::cout << "Usage:" << std::endl;
 	std::cout << std::endl;
-	std::cout << prg << "[ options ] help" << std::endl;
-	std::cout << prg << "[ options ] evaluate [ position image ... ]";
+	std::cout << prg << " [ options ] help" << std::endl;
+	std::cout << prg << " [ options ] evaluate [ position image ... ]";
+	std::cout << std::endl;
+	std::cout << prg << " [ options ] solve [ position value ...]";
+	std::cout << std::endl;
+	std::cout << prg << " [ options ] focus min max";
 	std::cout << std::endl;
 	std::cout << "Options:" << std::endl;
 	std::cout << " -h,--help            display this help message and exit"
@@ -104,6 +112,44 @@ int	solve_command(const FocusItems& items, const std::string& solver) {
 }
 
 /**
+ * \brief Perform the focus process
+ */
+int	focus_command(unsigned long minposition, unsigned long maxposition,
+		int steps, double exposuretime,
+		const std::string& ccdname, const std::string& focusername,
+		const std::string& method, const std::string& solver) {
+	// get the devices
+	camera::CcdPtr	ccd;
+	camera::FocuserPtr	focuser;
+
+	// Construct a local focus process
+	BasicFocusProcess	process(ccd, focuser);
+
+	// set all the parameters
+	process.minposition(minposition);
+	process.maxposition(maxposition);
+	camera::Exposure	exposure;
+	exposure.exposuretime(exposuretime);
+	process.exposure(exposure);
+	process.steps(steps);
+	process.method(method);
+	process.solver(solver);
+
+	// XXX install a callback for reporting
+
+	// start the process
+	process.start();
+
+	// wait for the process to terminate
+	process.wait();
+
+	// XXX report the results of the process
+
+	// that's it
+	return EXIT_SUCCESS;
+}
+
+/**
  * \brief Main function for the astrofocus program
  *
  * \param argc	number of arguments
@@ -114,20 +160,32 @@ int	main(int argc, char *argv[]) {
 	image::ImagePoint	center;
 	image::ImageRectangle	rectangle;
 	image::ImageSize	window;
-	std::string		method("fwhm");
-	std::string		solver("abs");
-
+	std::string	method("fwhm");
+	std::string	solver("abs");
+	std::string	ccdname;
+	std::string	focusername;
+	double	exposuretime = 1;
+	int	steps = 10;
 	int	c;
 	int	longindex;
 	putenv((char *)"POSIXLY_CORRECT=1");    // cast to silence compiler
 	while (EOF != (c = getopt_long(argc, argv, "c:dhm:r:s:w?", longopts,
 		&longindex))) {
 		switch (c) {
+		case 'C':
+			ccdname = std::string(optarg);
+			break;
 		case 'c':
 			center = image::ImagePoint(optarg);
 			break;
 		case 'd':
 			debuglevel = LOG_DEBUG;
+			break;
+		case 'e':
+			exposuretime = std::stod(optarg);
+			break;
+		case 'F':
+			focusername = std::string(optarg);
 			break;
 		case 'h':
 		case '?':
@@ -141,6 +199,9 @@ int	main(int argc, char *argv[]) {
 			break;
 		case 's':
 			solver = std::string(optarg);
+			break;
+		case 'S':
+			steps = std::stoi(optarg);
 			break;
 		case 'w':
 			window = image::ImageSize(optarg);
@@ -203,7 +264,7 @@ int	main(int argc, char *argv[]) {
 	}
 
 
-	// handle the 'evaluate' command
+	// handle the 'solve' command
 	if (command == std::string("solve")) {
 		FocusItems	items;
 		while (optind < argc - 1) {
@@ -217,6 +278,23 @@ int	main(int argc, char *argv[]) {
 			return EXIT_FAILURE;
 		}
 		return solve_command(items, solver);
+	}
+
+	// handle the 'focus' command
+	if (command == std::string("focus")) {
+		if (argc >= optind) {
+			std::runtime_error("not enough arguments");
+		}
+		unsigned long	minposition = std::stoi(argv[optind++]);
+		if (argc >= optind) {
+			std::runtime_error("not enough arguments");
+		}
+		unsigned long	maxposition = std::stoi(argv[optind++]);
+
+		// get the the devices
+		return focus_command(minposition, maxposition, steps,
+			exposuretime, ccdname, focusername,
+			method, solver);
 	}
 
 	// handle unknown commands

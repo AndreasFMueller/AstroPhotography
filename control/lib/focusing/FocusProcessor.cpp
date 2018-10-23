@@ -16,6 +16,12 @@ FocusProcessor::FocusProcessor(const FocusInputBase& input)
 	: _output(new FocusOutput(input)) {
 }
 
+FocusProcessor::FocusProcessor(const std::string& method,
+	const std::string& solver)
+	: _keep_images(false),
+	  _output(new FocusOutput(FocusInputBase(method, solver))) {
+}
+
 /**
  * \brief Process a focus element
  *

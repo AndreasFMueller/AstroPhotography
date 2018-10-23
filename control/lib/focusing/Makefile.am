@@ -12,6 +12,7 @@ noinst_HEADERS = FocusEvaluator.h BrennerEvaluator.h FWHM2Evaluator.h \
 
 libastrofocusing_la_SOURCES =						\
 	AbsoluteValueSolver.cpp						\
+	BasicFocusProcess.cpp						\
 	BrennerEvaluator.cpp						\
 	BrennerSolver.cpp						\
 	CentroidSolver.cpp						\
@@ -25,6 +26,7 @@ libastrofocusing_la_SOURCES =						\
 	FocusInput.cpp							\
 	FocusOutput.cpp							\
 	FocusProcessor.cpp						\
+	FocusProcess.cpp						\
 	FocusSolverFactory.cpp						\
 	FocusWork.cpp							\
 	Focusing.cpp							\
