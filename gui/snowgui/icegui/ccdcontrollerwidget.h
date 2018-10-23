@@ -47,6 +47,7 @@ public:
 	void	ccdinfo(const snowstar::CcdInfo& i) { _ccdinfo = i; }
 	const snowstar::CcdInfo&	ccdinfo() const { return _ccdinfo; }
 	std::string	toString() const;
+	astro::Angle	resolution() const;
 };
 
 class ccdcontrollerwidget;
@@ -137,6 +138,9 @@ signals:
 	void	ccdprxSelected(snowstar::CcdPrx);
 	void	imageNotReceived(QString);
 	void	streamStart();
+	void	finderResolution(astro::Angle);
+	void	guiderResolution(astro::Angle);
+	void	imagerResolution(astro::Angle);
 
 private:
 	void	setupCcd();

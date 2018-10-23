@@ -575,6 +575,10 @@ void	SkyDisplayWidget::mouseMoveEvent(QMouseEvent *event) {
 		if (_mouse_pressed) {
 			mouseCommon(t);
 		}
+		while (t.ra() < astro::Angle(0)) {
+			t.ra() = t.ra() + astro::Angle(360,
+						astro::Angle::Degrees);
+		}
 		QString tiptext(astro::stringprintf("RA: %s DEC: %s",
 				t.ra().hms(':', -1).c_str(),
 				t.dec().dms(':', -1).c_str()).c_str());
@@ -656,24 +660,31 @@ void    SkyDisplayWidget::setEclipticVisible(bool s) {
 void	SkyDisplayWidget::toggleRaDecGridVisible() {
 	setRaDecGridVisible(!show_radec());
 }
+
 void	SkyDisplayWidget::toggleAltAzmGridVisible() {
 	setAltAzmGridVisible(!show_altaz());
 }
+
 void	SkyDisplayWidget::toggleConstellationsVisible() {
 	setConstellationsVisible(!show_constellations());
 }
+
 void	SkyDisplayWidget::toggleTargetVisible() {
 	setTargetVisible(!show_target());
 }
+
 void	SkyDisplayWidget::toggleTelescopeVisible() {
 	setTelescopeVisible(!show_telescope());
 }
+
 void	SkyDisplayWidget::toggleTooltipVisible() {
 	setTooltipVisible(!show_tooltip());
 }
+
 void	SkyDisplayWidget::toggleLabelsVisible() {
 	setLabelsVisible(!show_labels());
 }
+
 void	SkyDisplayWidget::toggleEclipticVisible() {
 	setEclipticVisible(!show_ecliptic());
 }

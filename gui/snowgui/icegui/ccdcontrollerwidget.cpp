@@ -177,7 +177,7 @@ void	ccdcontrollerwidget::instrumentSetup(
 	int	index = 0;
 	if (!_guiderccdonly) {
 		// add the imaging CCDs
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "adding guider ccds");
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "adding imaging ccds");
 		while (_instrument.has(snowstar::InstrumentCCD, index)) {
 			try {
 				snowstar::CcdPrx	ccd
@@ -195,6 +195,7 @@ void	ccdcontrollerwidget::instrumentSetup(
 					_ccd = ccd;
 					_current_ccddata = d;
 				}
+				emit imagerResolution(d.resolution());
 			} catch (const std::exception& x) {
 				debug(LOG_DEBUG, DEBUG_LOG, 0,
 					"ignoring imaging ccd %d", index);
@@ -222,6 +223,7 @@ void	ccdcontrollerwidget::instrumentSetup(
 					_ccd = ccd;
 					_current_ccddata = d;
 				}
+				emit finderResolution(d.resolution());
 			} catch (const std::exception& x) {
 				debug(LOG_DEBUG, DEBUG_LOG, 0,
 					"ignoring finder ccd %d", index);
@@ -231,7 +233,7 @@ void	ccdcontrollerwidget::instrumentSetup(
 		index = 0;
 	}
 	// add all guider CCDs
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "adding imaging ccds");
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "adding guider ccds");
 	while (_instrument.has(snowstar::InstrumentGuiderCCD, index)) {
 		try {
 			snowstar::CcdPrx	ccd
@@ -250,6 +252,7 @@ void	ccdcontrollerwidget::instrumentSetup(
 				_ccd = ccd;
 				_current_ccddata = d;
 			}
+			emit guiderResolution(d.resolution());
 		} catch (const std::exception& x) {
 			debug(LOG_DEBUG, DEBUG_LOG, 0, "ignoring guider ccd %d",
 				index);

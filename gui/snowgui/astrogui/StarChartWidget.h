@@ -66,6 +66,9 @@ class StarChartWidget : public QWidget {
 	astro::catalog::Catalog::starsetptr	_sky;
 	astro::catalog::DeepSkyCatalog::deepskyobjectsetptr	_deepsky;
 	astro::Angle	_resolution;	// angle per pixel
+	astro::Angle	_imager_resolution;
+	astro::Angle	_finder_resolution;
+	astro::Angle	_guider_resolution;
 	astro::RaDec	_direction;
 	astro::device::Mount::state_type	_state;
 	astro::ImageCoordinates	_converter;
@@ -152,6 +155,10 @@ public slots:
 	void	useSky(astro::catalog::Catalog::starsetptr);
 	void	useDeepSky(astro::catalog::DeepSkyCatalog::deepskyobjectsetptr);
 	void	workerFinished();
+	void	guiderResolution(astro::Angle);
+	void	finderResolution(astro::Angle);
+	void	imagerResolution(astro::Angle);
+	void	resolutionChanged(astro::Angle);
 
 	void	setGridVisible(bool);
 	void	setCrosshairsVisible(bool);
@@ -168,6 +175,11 @@ public slots:
 	void	toggleCataloglabelsVisible();
 	void	toggleTooltipsVisible();
 	void	toggleNegative();
+
+	void	useFinderResolution();
+	void	useGuiderResolution();
+	void	useImagerResolution();
+	void	useStandardResolution();
 	
 	void    showContextMenu(const QPoint& point);
 

@@ -126,6 +126,14 @@ void	mountcontrollerwidget::setupMount() {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "mount location: %s",
 			_position.toString().c_str());
 
+		// make sure the star chart knows the orientation
+		_previouswest = _mount->telescopePositionWest();
+		emit orientationChanged(_previouswest);
+
+		// make sure everybody knows our direction
+		_telescope = _mount->getRaDec();
+		emit telescopeChanged(convert(_telescope));
+
 		// write the position to the position label
 		std::string	pl;
 		pl += astro::stringprintf("%.4f",
@@ -136,10 +144,6 @@ void	mountcontrollerwidget::setupMount() {
 			fabs(_position.latitude().degrees()));
 		pl += (_position.longitude().degrees() < 0) ? "S" : "N";
 		ui->observatoryField->setText(QString(pl.c_str()));
-
-		// make sure the star chart knows the orientation
-		_previouswest = _mount->telescopePositionWest();
-		emit orientationChanged(_previouswest);
 
 		// try to get the time
 		try {

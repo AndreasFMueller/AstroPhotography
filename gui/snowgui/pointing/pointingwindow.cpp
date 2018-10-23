@@ -98,6 +98,14 @@ pointingwindow::pointingwindow(QWidget *parent)
 		SIGNAL(orientationChanged(bool)),
 		this,
 		SLOT(orientationChanged(bool)));
+
+	// handle the resolution signals
+	connect(ui->ccdcontrollerWidget, SIGNAL(imagerResolution(astro::Angle)),
+		ui->chartWidget, SLOT(imagerResolution(astro::Angle)));
+	connect(ui->ccdcontrollerWidget, SIGNAL(finderResolution(astro::Angle)),
+		ui->chartWidget, SLOT(finderResolution(astro::Angle)));
+	connect(ui->ccdcontrollerWidget, SIGNAL(guiderResolution(astro::Angle)),
+		ui->chartWidget, SLOT(guiderResolution(astro::Angle)));
 }
 
 /**

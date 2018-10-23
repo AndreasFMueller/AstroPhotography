@@ -38,9 +38,11 @@ StarChartWidget::StarChartWidget(QWidget *parent) : QWidget(parent),
 	_flip = true; // XXX is this correct?
 	_show_deepsky = true;
 	_show_tooltips = true;
+	_state = astro::device::Mount::TRACKING; // safe assumption
 
 	qRegisterMetaType<astro::catalog::Catalog::starsetptr>("astro::catalog::Catalog::starsetptr");
 	qRegisterMetaType<astro::catalog::DeepSkyCatalog::deepskyobjectsetptr>("astro::catalog::DeepSkyCatalog::deepskyobjectsetptr");
+	qRegisterMetaType<astro::Angle>("astro::Angle");
 
 	setMouseTracking(true);
 
@@ -67,8 +69,8 @@ StarChartWidget::StarChartWidget(QWidget *parent) : QWidget(parent),
 		SIGNAL(deepskyReady(astro::catalog::DeepSkyCatalog::deepskyobjectsetptr)),
 		this,
 		SLOT(useDeepSky(astro::catalog::DeepSkyCatalog::deepskyobjectsetptr)));
-	connect(deepsky_thread, SIGNAL(finished()),
-		this, SLOT(finished()));
+	//connect(deepsky_thread, SIGNAL(finished()),
+	//	this, SLOT(workerFinished()));
 	deepsky_thread->start();
 }
 
@@ -131,7 +133,7 @@ void	StarChartWidget::drawStar(QPainter& painter, const Star& star) {
 	QPointF	starcenter(p);
 
 	// determine the radius
-	float	sr = 5 - star.mag() / 2;
+	float	sr = 6 - star.mag() / 2;
 	if (sr < 0.8) {
 		sr = 0.8;
 	}
@@ -179,13 +181,13 @@ void	StarChartWidget::drawDeepSkyObject(QPainter& painter,
 		return;
 	}
 
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "draw deep sky object %s",
-		deepskyobject.name.c_str());
+	//debug(LOG_DEBUG, DEBUG_LOG, 0, "draw deep sky object %s",
+	//	deepskyobject.name.c_str());
 
 	// get the axes
 	double	a = deepskyobject.size.a1().radians() / _resolution.radians();
 	double	b = deepskyobject.size.a2().radians() / _resolution.radians();
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "axes: %f, %f", a, b);
+	//debug(LOG_DEBUG, DEBUG_LOG, 0, "axes: %f, %f", a, b);
 	a /= 2;
 	b /= 2;
 
@@ -467,7 +469,8 @@ void	StarChartWidget::draw() {
  * is set to remind us of the fact that we should run a new retrieval.
  */
 void	StarChartWidget::startRetrieval() {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "initiate new star retrieval");
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "initiate new star retrieval, "
+		"direction  = %s", _direction.toString().c_str());
 	// compute the width and height of the star chart
 	astro::Angle	rawidth(1.5 * width() * _resolution.radians());
 	astro::Angle	decheight(1.5 * height() * _resolution.radians());
@@ -506,7 +509,7 @@ void	StarChartWidget::startRetrieval() {
  * called a SkyWindow is selected which inclues the image rectangle.
  * Additional stars don't really matter because they can be used to
  * immediately display a complete star chart after slight movements, which
- * imroves resonsiveness of the user interface.
+ * improves responsiveness of the user interface.
  *
  * \param diretion	the direction w
  */
@@ -518,7 +521,7 @@ void	StarChartWidget::directionChanged(astro::RaDec direction) {
 	}
 
 	// update the converter to reflect the new center
-	_converter = astro::ImageCoordinates(_direction, _resolution,
+	_converter = astro::ImageCoordinates(direction, _resolution,
 			astro::Angle(0));
 
 	// decide whether the change is big enough to warrant computing
@@ -539,7 +542,7 @@ void	StarChartWidget::directionChanged(astro::RaDec direction) {
 	_direction = direction;
 
 	// a new retrieval should only be started in tracking mode.
-	// In any other mound we expect the state to change again very
+	// In any other mode we expect the state to change again very
 	// soon
 	if (_state == astro::device::Mount::TRACKING) {
 		// start the retrieval
@@ -554,7 +557,7 @@ void	StarChartWidget::directionChanged(astro::RaDec direction) {
 		_busywidget->setVisible(true);
 	}
 
-	// let the repaint event handle the redrawing. Doing the repaing
+	// let the repaint event handle the redrawing. Doing the repainting
 	// always allows the image to track the movement of the telescope
 	// which should make for a nice animation
 	repaint();
@@ -615,8 +618,12 @@ void	StarChartWidget::mouseMoveEvent(QMouseEvent *event) {
 	// if the button is pressed, we have to handle it like a click
 	if (_mouse_pressed) {
 		mouseCommon(event);
+	}
+
+	if (!_show_tooltips) {
 		return;
 	}
+
 	astro::Point	offset(event->pos().x() - _center.x(),
 				_center.y() - event->pos().y());
 	if (_flip) {
@@ -728,6 +735,21 @@ void	StarChartWidget::orientationChanged(bool west) {
 	repaint();
 }
 
+void	StarChartWidget::imagerResolution(astro::Angle i) {
+	_imager_resolution = i;
+	repaint();
+}
+
+void	StarChartWidget::finderResolution(astro::Angle f) {
+	_finder_resolution = f;
+	repaint();
+}
+
+void	StarChartWidget::guiderResolution(astro::Angle g) {
+	_guider_resolution = g;
+	repaint();
+}
+
 void	StarChartWidget::setGridVisible(bool s) {
 	show_grid(s);
 	repaint();
@@ -791,6 +813,29 @@ void	StarChartWidget::toggleNegative() {
 	setNegative(!negative());
 }
 
+void	StarChartWidget::useFinderResolution() {
+	resolutionChanged(_finder_resolution);
+}
+
+void	StarChartWidget::useGuiderResolution() {
+	resolutionChanged(_guider_resolution);
+}
+
+void	StarChartWidget::useImagerResolution() {
+	resolutionChanged(_imager_resolution);
+}
+
+void	StarChartWidget::useStandardResolution() {
+	resolutionChanged(astro::Angle(1. / 100., astro::Angle::Degrees));
+}
+
+void	StarChartWidget::resolutionChanged(astro::Angle resolution) {
+	_resolution = resolution;
+	_converter = astro::ImageCoordinates(_direction, _resolution,
+                        astro::Angle(0));
+	repaint();
+}
+
 void	StarChartWidget::showContextMenu(const QPoint& point) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "show context menu at %d/%d",
 		point.x(), point.y());
@@ -838,12 +883,48 @@ void	StarChartWidget::showContextMenu(const QPoint& point) {
 	connect(&actionTooltips, SIGNAL(triggered()),
 		this, SLOT(toggleTooltipsVisible()));
 
+	contextMenu.addSeparator();
+
 	QAction	actionNegative(QString("Negative"), this);
 	actionNegative.setCheckable(true);
 	actionNegative.setChecked(negative());
 	contextMenu.addAction(&actionNegative);
 	connect(&actionNegative, SIGNAL(triggered()),
 		this, SLOT(toggleNegative()));
+
+	contextMenu.addSeparator();
+
+	QAction actionFinderResolution(QString("Finder resolution"), this);
+	if (_finder_resolution > 0) {
+		contextMenu.addAction(&actionFinderResolution);
+		connect(&actionFinderResolution, SIGNAL(triggered()),
+			this, SLOT(useFinderResolution()));
+	} else {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "no finder resolution");
+	}
+
+	QAction actionGuiderResolution(QString("Guider resolution"), this);
+	if (_guider_resolution > 0) {
+		contextMenu.addAction(&actionGuiderResolution);
+		connect(&actionGuiderResolution, SIGNAL(triggered()),
+			this, SLOT(useGuiderResolution()));
+	} else {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "no guider resolution");
+	}
+
+	QAction actionImagerResolution(QString("Imager resolution"), this);
+	if (_imager_resolution > 0) {
+		contextMenu.addAction(&actionImagerResolution);
+		connect(&actionImagerResolution, SIGNAL(triggered()),
+			this, SLOT(useImagerResolution()));
+	} else {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "no imager resolution");
+	}
+
+	QAction actionStandardResolution(QString("standard resolution"), this);
+	contextMenu.addAction(&actionStandardResolution);
+	connect(&actionStandardResolution, SIGNAL(triggered()),
+		this, SLOT(useStandardResolution()));
 
 	contextMenu.exec(mapToGlobal(point));
 }
