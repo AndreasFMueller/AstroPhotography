@@ -54,10 +54,12 @@ ServicePublisher::ServicePublisher(const std::string& servername, int port)
  */
 ServicePublisher::~ServicePublisher() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "destroy the service publishing object");
+	remove_published(_servername);
 }
 
 void	ServicePublisher::publish() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "publish now");
+	add_published(_servername);
 }
 
 /**
@@ -91,11 +93,13 @@ static std::set<std::string>	published_services;
 
 void	ServicePublisher::add_published(const std::string& name) {
 	std::unique_lock<std::recursive_mutex>	lock(published_mtx);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "add published name: %s", name.c_str());
 	published_services.insert(name);
 }
 
 void	ServicePublisher::remove_published(const std::string& name) {
 	std::unique_lock<std::recursive_mutex>	lock(published_mtx);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "removing name '%s'", name.c_str());
 	std::set<std::string>::iterator	i = published_services.find(name);
 	if (i != published_services.end()) {
 		published_services.erase(i);
@@ -104,6 +108,8 @@ void	ServicePublisher::remove_published(const std::string& name) {
 
 bool	ServicePublisher::ispublished(const std::string& name) {
 	std::unique_lock<std::recursive_mutex>	lock(published_mtx);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "check whether '%s' is published",
+		name.c_str());
 	std::set<std::string>::iterator	i = published_services.find(name);
 	return (i != published_services.end());
 }

@@ -57,21 +57,21 @@ public:
 
 	// the gain/scale/subframe settings can individually be made visible
 	bool	gainIsVisible();
-	void	setGainVisible(bool);
-
 	bool	scaleIsVisible();
-	void	setScaleVisible(bool);
-
 	bool	subframeIsVisible();
-	void	setSubframeVisible(bool);
+	bool	infoIsVisible();
 
 	bool	crosshairs();
 	void	crosshairs(bool);
 
-	// control whether the image information at the bottom is visible
-	bool	infoIsVisible();
-	void	setInfoVisible(bool);
+	bool	horizontalFlip() const;
+	bool	verticalFlip() const;
 
+	bool	showRed() const;
+	bool	showGreen() const;
+	bool	showBlue() const;
+
+	// control whether the image information at the bottom is visible
 	// The next methods are for controlling the subrectangle display
 	// A subrectangle can be selected even if the subframe controls
 	// are not displayed
@@ -133,6 +133,7 @@ public slots:
 	void	receiveImage(astro::image::ImagePtr);
 	void	bayerChanged(int);
 	void	crosshairsChanged(int);
+	void	crosshairsCenter(astro::image::ImagePoint);
 
 	void	redScaleChanged(double);
 	void	greenScaleChanged(double);
@@ -140,6 +141,36 @@ public slots:
 	void	redOffsetChanged(double);
 	void	greenOffsetChanged(double);
 	void	blueOffsetChanged(double);
+
+	void	setGainVisible(bool);
+	void	toggleGainVisible();
+
+	void	setScaleVisible(bool);
+	void	toggleScaleVisible();
+
+	void	setSubframeVisible(bool);
+	void	toggleSubframeVisible();
+
+	void	setInfoVisible(bool);
+	void	toggleInfoVisible();
+
+	void	setCrosshairsVisible(bool);
+	void	toggleCrosshairsVisible();
+
+	void	setVerticalFlip(bool);
+	void	toggleVerticalFlip();
+
+	void	setHorizontalFlip(bool);
+	void	toggleHorizontalFlip();
+
+	void	setShowRed(bool);
+	void	setShowGreen(bool);
+	void	setShowBlue(bool);
+	void	toggleShowRed();
+	void	toggleShowGreen();
+	void	toggleShowBlue();
+
+	void	showContextMenu(const QPoint& point);
 private:
 	void	closeEvent(QCloseEvent *);
 	void	changeEvent(QEvent *);

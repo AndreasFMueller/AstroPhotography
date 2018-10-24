@@ -10,6 +10,7 @@
 #include <iostream>
 #include <includes.h>
 #include <AstroDebug.h>
+#include <AstroDiscovery.h>
 #include <DeviceServantLocator.h>
 #include <ImageLocator.h>
 #include <AstroConfig.h>
@@ -116,12 +117,12 @@ int	snowstar_main(int argc, char *argv[]) {
 		props->setProperty("Ice.NullHandleAbort", "1");
 		props->setProperty("Ice.ThreadPool.Server.SizeMax", "30");
 		props->setProperty("Ice.ThreadPool.Client.SizeMax", "30");
-#if 0
-		props->setProperty("Ice.ThreadPool.Trace", "1");
-		props->setProperty("Ice.Trace.Network", "3");
-		props->setProperty("Ice.Trace.Locator", "1");
-		props->setProperty("Ice.Trace.Protocol", "1");
-#endif
+		if (getenv("ICEDEBUG")) {
+			props->setProperty("Ice.ThreadPool.Trace", "1");
+			props->setProperty("Ice.Trace.Network", "3");
+			props->setProperty("Ice.Trace.Locator", "1");
+			props->setProperty("Ice.Trace.Protocol", "1");
+		}
 		Ice::InitializationData	id;
 		id.properties = props;
 		ic = Ice::initialize(id);
@@ -299,6 +300,9 @@ int	snowstar_main(int argc, char *argv[]) {
 		}
 		umask(027);
 	}
+
+	// make sure service discover is available
+	astro::discover::ServiceDiscoveryPtr	sd = astro::discover::ServiceDiscovery::get();
 
 	{
 		// by opening a new brace we ensure that the pdifile will

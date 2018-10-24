@@ -47,6 +47,7 @@ public:
 	void	ccdinfo(const snowstar::CcdInfo& i) { _ccdinfo = i; }
 	const snowstar::CcdInfo&	ccdinfo() const { return _ccdinfo; }
 	std::string	toString() const;
+	astro::Angle	resolution() const;
 };
 
 class ccdcontrollerwidget;
@@ -70,13 +71,12 @@ signals:
 class StateMonitoringWork : public QObject {
 	Q_OBJECT
 	ccdcontrollerwidget	*_ccdcontrollerwidget;
-	volatile std::atomic_bool	_running;
-	std::recursive_mutex	_mutex;
+	snowstar::ExposureState	_previousstate;
 public:
 	StateMonitoringWork(ccdcontrollerwidget *c);
 	virtual ~StateMonitoringWork();
+public slots:
 	void	updateStatus();
-	void	stop();
 signals:
 	void	stateChanged(snowstar::ExposureState);
 };
@@ -135,7 +135,12 @@ signals:
 	void	imageproxyReceived(snowstar::ImagePrx image);
 	void	ccdSelected(int);
 	void	ccddataSelected(ccddata);
+	void	ccdprxSelected(snowstar::CcdPrx);
 	void	imageNotReceived(QString);
+	void	streamStart();
+	void	finderResolution(astro::Angle);
+	void	guiderResolution(astro::Angle);
+	void	imagerResolution(astro::Angle);
 
 private:
 	void	setupCcd();
@@ -160,7 +165,7 @@ private:
 	bool	ourexposure;
 
 public slots:
-	// changes taht come from the outside
+	// changes that come from the outside
 	void	setExposure(astro::camera::Exposure);
 	void	setBinning(astro::image::Binning);
 	void	setExposureTime(double);
@@ -180,12 +185,24 @@ public slots:
 	void	hideSubframe(bool);
 	void	hideButtons(bool);
 
+	// start the stream
+	void	startStream();
+
 	// needed internally for status udpates
 	void	statusUpdate(snowstar::ExposureState);
 
 	// needed by the image retrieval thread 
 	void	retrieveImageComplete();
 	void	retrieveImageFailed(QString);
+
+	// slots to change the subframe
+	void	subframeWidth(int);
+	void	subframeHeight(int);
+	void	subframeOriginX(int);
+	void	subframeOriginY(int);
+
+	// test slot
+	void	testSlot();
 
 	// allow the ImageRetrieverThread access to private methods
 	friend class ImageRetrieverThread;

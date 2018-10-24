@@ -75,7 +75,7 @@ void	BonjourPublisher::publish() {
 	} while (!_complete);
 	
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "registration complete");
-	return;
+	ServicePublisher::publish();
 }
 
 } // namespace discover

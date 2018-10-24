@@ -73,6 +73,7 @@ class FocusingCallback : public astro::callback::Callback {
 	FocusingI&	_focusing;
 public:
 	FocusingCallback(FocusingI& focusing) : _focusing(focusing) { }
+	~FocusingCallback() { }
 	virtual astro::callback::CallbackDataPtr	operator()(
 		astro::callback::CallbackDataPtr data);
 };

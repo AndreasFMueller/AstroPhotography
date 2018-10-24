@@ -8,6 +8,7 @@
 
 #include <AstroCamera.h>
 #include <AsiCamera.hh>
+#include <atomic>
 
 namespace astro {
 namespace camera {
@@ -22,6 +23,10 @@ class AsiCcd : public Ccd {
 	AsiCamera&	_camera;
 	bool	_hasCooler;
 	std::string	imgtypename();
+	// the _mutex is necessary to to protect the _thread.
+	std::recursive_mutex	_mutex;
+	std::thread		*_thread;
+	std::atomic_bool	_exposure_done;
 public:
 	static std::string	imgtype2string(int imgtype);
 public:
@@ -32,7 +37,7 @@ public:
 	virtual void	startExposure(const Exposure& exposure);
 	virtual CcdState::State	exposureStatus();
 	virtual void	cancelExposure();
-	virtual bool	wait();
+	void	run();
 
 	// image retrieval
 	virtual astro::image::ImagePtr	getRawImage();

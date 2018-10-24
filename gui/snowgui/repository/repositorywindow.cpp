@@ -42,8 +42,9 @@ repositorywindow::repositorywindow(QWidget *parent,
 	headers << "Size";		// 8
 	headers << "Filter";		// 9
 	headers << "Bayer";		// 10
-	headers << "Filename";		// 11
-	headers << "UUID";		// 12
+	headers << "Focus";		// 11
+	headers << "Filename";		// 12
+	headers << "UUID";		// 13
 	ui->repositoryTree->setHeaderLabels(headers);
 	ui->repositoryTree->header()->resizeSection(0, 80);
 	ui->repositoryTree->header()->resizeSection(1, 100);
@@ -56,7 +57,8 @@ repositorywindow::repositorywindow(QWidget *parent,
 	ui->repositoryTree->header()->resizeSection(8, 100);
 	ui->repositoryTree->header()->resizeSection(9, 100);
 	ui->repositoryTree->header()->resizeSection(10, 80);
-	ui->repositoryTree->header()->resizeSection(11, 180);
+	ui->repositoryTree->header()->resizeSection(11, 80);
+	ui->repositoryTree->header()->resizeSection(12, 190);
 
 	// window title
 	std::string	title = astro::stringprintf("Repository overview on %s",
@@ -172,6 +174,10 @@ void	repositorywindow::addImages(QTreeWidgetItem *top,
 		// bayer pattern
 		list << QString(info.bayer.c_str());
 
+		// focus position
+		s = astro::stringprintf("%ld", info.focus);
+		list << QString(s.c_str());
+
 		// filename
 		list << QString(info.filename.c_str());
 
@@ -185,6 +191,7 @@ void	repositorywindow::addImages(QTreeWidgetItem *top,
 		item->setTextAlignment(6, Qt::AlignRight);
 		item->setTextAlignment(7, Qt::AlignCenter);
 		item->setTextAlignment(8, Qt::AlignCenter);
+		item->setTextAlignment(11, Qt::AlignRight);
 		
                 top->addChild(item);
 	}

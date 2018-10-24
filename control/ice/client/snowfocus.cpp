@@ -67,6 +67,8 @@ static void	short_usage(const char *progname) {
 	std::cout << "Usage:" << std::endl;
 	std::cout << p << " [ options ] help" << std::endl;
 	std::cout << p << " [ options ] <service> <INSTRUMENT> start <min> <max>" << std::endl;
+	std::cout << p << " [ options ] <service> <INSTRUMENT> info"
+		<< std::endl;
 	std::cout << p << " [ options ] <service> <INSTRUMENT> monitor"
 		<< std::endl;
 	std::cout << p << " [ options ] <service> <INSTRUMENT> cancel"
@@ -333,6 +335,17 @@ int	main(int argc, char *argv[]) {
 		default:
 			break;
 		}
+		std::cout << std::endl;
+		return EXIT_SUCCESS;
+	}
+
+	if (command == "info") {
+		std::cout << "position: ";
+		std::cout << focuserprx->current();
+		std::cout << ", range: ";
+		std::cout << focuserprx->min();
+		std::cout << ", ";
+		std::cout << focuserprx->max();
 		std::cout << std::endl;
 		return EXIT_SUCCESS;
 	}

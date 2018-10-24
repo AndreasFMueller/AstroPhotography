@@ -16,12 +16,12 @@ pkglib_LTLIBRARIES = nice.la
 
 noinst_HEADERS = NiceDevice.h NiceLocator.h NiceCamera.h NiceGuidePort.h \
 	NiceFilterWheel.h NiceCcd.h NiceCooler.h NiceAdaptiveOptics.h \
-	NiceFocuser.h
+	NiceFocuser.h NiceMount.h
 
 SRCFILES = NiceDevice.cpp \
 	NiceLocator.cpp NiceCamera.cpp NiceGuidePort.cpp NiceCcd.cpp \
 	NiceFilterWheel.cpp NiceCooler.cpp NiceAdaptiveOptics.cpp \
-	NiceFocuser.cpp
+	NiceFocuser.cpp NiceMount.cpp
 
 if ENABLE_UNITTESTS
 

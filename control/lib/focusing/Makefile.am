@@ -16,9 +16,20 @@ libastrofocusing_la_SOURCES =						\
 	BrennerSolver.cpp						\
 	CentroidSolver.cpp						\
 	FocusableImageConverter.cpp					\
+	FocusCallbackData.cpp						\
 	FocusCompute.cpp						\
+	FocusElement.cpp						\
 	FocusEvaluator.cpp						\
 	FocusEvaluatorFactory.cpp					\
+	FocusInputBase.cpp						\
+	FocusInputImages.cpp						\
+	FocusInput.cpp							\
+	FocusOutput.cpp							\
+	FocusParameters.cpp						\
+	FocusProcessor.cpp						\
+	FocusProcessBase.cpp						\
+	FocusProcess.cpp						\
+	FocusSolverFactory.cpp						\
 	FocusWork.cpp							\
 	Focusing.cpp							\
 	FWHM2Evaluator.cpp						\

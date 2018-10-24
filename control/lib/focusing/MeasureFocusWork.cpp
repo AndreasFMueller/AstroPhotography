@@ -36,11 +36,11 @@ FocusInterval::FocusInterval(const FocusValue& left, const FocusValue& right)
 	}
 }
 
-unsigned short	FocusInterval::length() const {
+unsigned long	FocusInterval::length() const {
 	return second.position - first.position;
 }
 
-unsigned short	FocusInterval::center() const {
+unsigned long	FocusInterval::center() const {
 	return ((long)second.position + (long)first.position) / 2;
 }
 
@@ -95,8 +95,8 @@ FocusInterval	MeasureFocusWork::subdivide(const FocusInterval& interval) {
 /**
  * \brief Perform a measurement at a certain focus position
  */
-FocusValue	MeasureFocusWork::measureat(unsigned short pos) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "measurement at pos = %hu", pos);
+FocusValue	MeasureFocusWork::measureat(unsigned long pos) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "measurement at pos = %lu", pos);
 	// move to the position
 	focusingstatus(Focusing::MOVING);
 	moveto(pos);

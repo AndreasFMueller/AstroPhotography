@@ -15,10 +15,10 @@ class TasksIndicator : public QWidget {
 	Q_OBJECT
 private:
 	snowstar::QueueState	_state;
+	void	draw();
 public:
 	explicit TasksIndicator(QWidget *parent = NULL);
 	~TasksIndicator();
-	void	draw();
 	void	paintEvent(QPaintEvent *event);
 public slots:
 	void	update(snowstar::QueueState);

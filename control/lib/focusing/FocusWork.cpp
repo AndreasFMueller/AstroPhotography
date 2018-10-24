@@ -22,8 +22,8 @@ namespace focusing {
  * \brief Construct a FocusWork controller
  */
 FocusWork::FocusWork(Focusing& focusing) : _focusing(focusing) {
-	_min = std::numeric_limits<unsigned short>::max();
-	_max = std::numeric_limits<unsigned short>::min();
+	_min = std::numeric_limits<unsigned long>::max();
+	_max = std::numeric_limits<unsigned long>::min();
 }
 
 /**
@@ -34,11 +34,11 @@ bool	FocusWork::complete() {
 		debug(LOG_ERR, DEBUG_LOG, 0, "exposure time not set");
 		return false;
 	}
-	if (_min == std::numeric_limits<unsigned short>::max()) {
+	if (_min == std::numeric_limits<unsigned long>::max()) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "minimum not set");
 		return false;
 	}
-	if (_max == std::numeric_limits<unsigned short>::min()) {
+	if (_max == std::numeric_limits<unsigned long>::min()) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "maximum not set");
 		return false;
 	}
@@ -58,6 +58,7 @@ bool	FocusWork::complete() {
 		debug(LOG_ERR, DEBUG_LOG, 0, "focuser not set");
 		return false;
 	}
+#if 0
 	if (!_focusing.evaluator()) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "evaluator not set");
 		return false;
@@ -66,6 +67,7 @@ bool	FocusWork::complete() {
 		debug(LOG_ERR, DEBUG_LOG, 0, "solver not set");
 		return false;
 	}
+#endif
 	return true;
 }
 
@@ -91,6 +93,7 @@ void	FocusWork::callback(Focusing::state_type state) {
 	if (!callback()) {
 		return;
 	}
+#if 0
 	try {
 		astro::callback::CallbackDataPtr	data(
 			new FocusCallbackState(state));
@@ -99,6 +102,7 @@ void	FocusWork::callback(Focusing::state_type state) {
 	} catch (...) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "exception during callback");
 	}
+#endif
 }
 
 /**
@@ -120,7 +124,7 @@ void	FocusWork::main(astro::thread::Thread<FocusWork>& /* thread */) {
 	// prepare 
 	for (int step = 0; step < steps(); step++) {
 		// find position
-		unsigned short	position
+		unsigned long	position
 			= min() + (step * (max() - min())) / (steps() - 1);
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "next position: %hu", position);
 
@@ -137,6 +141,11 @@ void	FocusWork::main(astro::thread::Thread<FocusWork>& /* thread */) {
 			image->size().toString().c_str());
 
 		// evaluate the image
+		if (!evaluator()) {
+			std::string	msg("no evaluator set");
+			debug(LOG_ERR, DEBUG_LOG, 0, "no evaluator set");
+			throw std::runtime_error(msg);
+		}
 		double	value = (*evaluator())(image);
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "evaluated to %f", value);
 
@@ -148,6 +157,11 @@ void	FocusWork::main(astro::thread::Thread<FocusWork>& /* thread */) {
 	}
 
 	// now solve we need a suitable solver for the method
+	if (!solver()) {
+		std::string	msg("no solver set");
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw std::runtime_error(msg);
+	}
 	int	targetposition = solver()->position(focusitems);
 	if ((targetposition < min()) || (targetposition > max())) {
 		std::string	msg = stringprintf(
@@ -156,6 +170,9 @@ void	FocusWork::main(astro::thread::Thread<FocusWork>& /* thread */) {
 		focusingstatus(Focusing::FAILED);
 		return;
 	}
+
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "final focus position: %d",
+		targetposition);
 
 	// move to the final focus position
 	focusingstatus(Focusing::MOVING);
@@ -183,7 +200,7 @@ Image<unsigned char>	*FocusWork::green(ImagePtr image) {
  * the focuser is first moved to the target position minus the backlash
  * amount before being moved to the target position.
  */
-void	FocusWork::moveto(unsigned short position) {
+void	FocusWork::moveto(unsigned long position) {
 	// ensure we are inside the interval
 	if (position < min()) {
 		throw std::runtime_error("internal error: Focuser move below min");
@@ -192,12 +209,19 @@ void	FocusWork::moveto(unsigned short position) {
 		throw std::runtime_error("interval error: focuser move above max()");
 	}
 
+	// if we don't have a focuser, we throw an exception
+	if (!focuser()) {
+		std::string	msg("no focuser set");
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw std::runtime_error(msg);
+	}
+
 	// switch state to moving
 	focusingstatus(Focusing::MOVING);
 
 	// check whether backlash compensation is needed
 	if ((backlash() > 0) && (focuser()->current() > position)) {
-		unsigned short	compensated = position - backlash();
+		unsigned long	compensated = position - backlash();
 		if (position < backlash()) {
 			debug(LOG_WARNING, DEBUG_LOG, 0,
 				"not enough room for backlash: current = %hu, "
@@ -219,7 +243,7 @@ void	FocusWork::moveto(unsigned short position) {
 /**
  * \brief Find backlash amount from Focuser
  */
-unsigned short	FocusWork::backlash() {
+unsigned long	FocusWork::backlash() {
 	return (focuser()) ? focuser()->backlash() : 0;
 }
 

@@ -23,6 +23,7 @@ noinst_HEADERS =							\
 	DriverModuleI.h							\
 	DriverModuleLocator.h						\
 	EventHandlerI.h							\
+	EvictorBase.h							\
 	FilterWheelI.h							\
 	FocuserI.h							\
 	FocusingFactoryI.h						\
@@ -71,6 +72,7 @@ snowstar_SOURCES = snowstar.cpp 					\
 	DriverModuleI.cpp						\
 	DriverModuleLocator.cpp						\
 	EventHandlerI.cpp						\
+	EvictorBase.cpp							\
 	FilterWheelI.cpp						\
 	FocuserI.cpp							\
 	FocusingFactoryI.cpp						\
@@ -125,7 +127,7 @@ test:	snowstar
 	else								\
 		servername=server;					\
 	fi;								\
-	./snowstar $(COMMONFLAGS) 2>&1 | tee test.log
+	ICEDEBUG= ./snowstar $(COMMONFLAGS) 2>&1 | tee test.log
 
 #		--lines=100 --files=10 --logfile=test.log
 

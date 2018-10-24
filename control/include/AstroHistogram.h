@@ -16,6 +16,7 @@ class HistogramScale {
 	unsigned int	_buckets;
 public:
 	HistogramScale(unsigned int buckets);
+	virtual ~HistogramScale() { }
 	unsigned int	buckets() const { return _buckets; }
 	virtual double	left(unsigned int i) const = 0;
 	virtual double	right(unsigned int i) const = 0;
@@ -31,6 +32,7 @@ class HistogramLinearScale : public HistogramScale {
 	double	step;
 public:
 	HistogramLinearScale(double min, double max, unsigned int buckets);
+	virtual ~HistogramLinearScale() { }
 	virtual double	left(unsigned int i) const;
 	virtual double	right(unsigned int i) const;
 	virtual unsigned int	bucket(double v) const;
@@ -57,6 +59,7 @@ protected:
 	unsigned int	*p;
 public:
 	HistogramBase(HistogramScalePtr _scale);
+	virtual ~HistogramBase() { }
 	unsigned int	buckets() const;
 	double	min() const;
 	double	max() const;

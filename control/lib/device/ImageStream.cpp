@@ -32,6 +32,7 @@ ImageStream::~ImageStream() {
 }
 
 void	ImageStream::cleanup() {
+	std::lock_guard<std::recursive_mutex>	lock(_mutex);
 	ImageStreamThread	*t = (ImageStreamThread *)private_data;
 	try {
 		t->stop();
@@ -45,6 +46,7 @@ void	ImageStream::cleanup() {
  * \brief start a stream with a given exposure structure
  */
 void	ImageStream::startStream(const Exposure& exposure) {
+	std::lock_guard<std::recursive_mutex>	lock(_mutex);
 	_streamexposure = exposure;
 	// make sure the stream is not running yet
 	if (private_data) {
@@ -72,6 +74,7 @@ void	ImageStream::startStream(const Exposure& exposure) {
  * \brief Stop the stream
  */
 void	ImageStream::stopStream() {
+	std::lock_guard<std::recursive_mutex>	lock(_mutex);
 	if (private_data) {
 		cleanup();
 	}
@@ -81,13 +84,15 @@ void	ImageStream::stopStream() {
  * \brief change the stream exposure
  */
 void	ImageStream::streamExposure(const Exposure& exposure) {
+	std::lock_guard<std::recursive_mutex>	lock(_mutex);
 	_streamexposure = exposure;
 }
 
 /**
  * \brief get the current exposure settings
  */
-const Exposure&	ImageStream::streamExposure() {
+Exposure	ImageStream::streamExposure() {
+	std::lock_guard<std::recursive_mutex>	lock(_mutex);
 	return _streamexposure;
 }
 
@@ -95,6 +100,7 @@ const Exposure&	ImageStream::streamExposure() {
  * \brief Find out whether stream is still streaming
  */
 bool	ImageStream::streaming() {
+	std::lock_guard<std::recursive_mutex>	lock(_mutex);
 	if (NULL == private_data) {
 		return false;
 	}
@@ -109,6 +115,7 @@ bool	ImageStream::streaming() {
  * if there is a sink, the image is sent there.
  */
 void	ImageStream::operator()(const ImageQueueEntry& entry) {
+	std::lock_guard<std::recursive_mutex>	lock(_mutex);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "new queue entry received");
 	// check whether streaming is already turned off, in which case
 	// we should not process any images (we shouldn't even be called ;-)

@@ -26,6 +26,7 @@ ImageInfo::ImageInfo() {
 	observation = "1970-01-01T00:00:00.000";
 	xbin = 1;
 	ybin = 1;
+	focus = 0;
 }
 
 bool	ImageInfo::operator==(const ImageInfo& other) const {
@@ -46,6 +47,7 @@ bool	ImageInfo::operator==(const ImageInfo& other) const {
 	if (bayer != other.bayer) { return false; }
 	if (observation != other.observation) { return false; }
 	if (uuid != other.uuid) { return false; }
+	if (focus != other.focus) { return false; }
 	return true;
 }
 
@@ -76,6 +78,7 @@ std::string	ImageTableAdapter::createstatement() {
 		"    purpose char(5) not null default 'light',\n"
 		"    filter varchar(128) not null default '',\n"
 		"    bayer char(4) not null default '    ',\n"
+		"    focus int not null default 0,\n"
 		"    observation varchar(25) not null,\n"
 		"    uuid varchar(36) not null,\n"
 		"    primary key(id)\n"
@@ -103,6 +106,7 @@ ImageRecord	ImageTableAdapter::row_to_object(int objectid,
 	record.purpose = row["purpose"]->stringValue();
 	record.filter = row["filter"]->stringValue();
 	record.bayer = row["bayer"]->stringValue();
+	record.focus = row["focus"]->intValue();
 	record.observation = row["observation"]->stringValue();
 	record.uuid = row["uuid"]->stringValue();
 	return record;
@@ -126,6 +130,7 @@ UpdateSpec	ImageTableAdapter::object_to_updatespec(const ImageRecord& imagerec) 
 	spec.insert(Field("purpose", factory.get(imagerec.purpose)));
 	spec.insert(Field("filter", factory.get(imagerec.filter)));
 	spec.insert(Field("bayer", factory.get(imagerec.bayer)));
+	spec.insert(Field("focus", factory.get(imagerec.focus)));
 	spec.insert(Field("observation", factory.get(imagerec.observation)));
 	spec.insert(Field("uuid", factory.get(imagerec.uuid)));
 	return spec;

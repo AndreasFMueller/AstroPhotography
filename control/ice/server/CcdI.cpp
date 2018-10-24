@@ -203,7 +203,7 @@ void	CcdI::registerSink(const Ice::Identity& imagesinkidentity,
 			_sink = NULL;
 		}
 	}
-	CcdSink	*sink = new CcdSink(imagesinkidentity, current);
+	CcdSink	*sink = new CcdSink(_ccd, imagesinkidentity, current);
 	_ccd->imagesink(sink);
 	_sink = CcdSinkPtr(sink);
 }

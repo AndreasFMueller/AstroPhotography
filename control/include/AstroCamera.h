@@ -2,7 +2,6 @@
  * AstroCamera.h -- Astro camera declarations
  *
  * (c) 2012 Prof Dr Andreas Mueller, Hochschule Rapperswil
- * $Id$
  */
 #ifndef _AstroCamera_h
 #define _AstroCamera_h
@@ -61,7 +60,11 @@ std::ostream&	operator<<(std::ostream& out, const BinningSet& binningset);
 class CcdState {
 public:
 	typedef enum state_e {
-		idle = 0, exposing = 1, exposed = 2, cancelling = 3
+		idle = 0,
+		exposing = 1,
+		exposed = 2,
+		cancelling = 3,
+		streaming = 4
 	} State;
 static std::string	state2string(State s);
 static State	string2state(const std::string& s);
@@ -343,6 +346,7 @@ public:
 class ImageStream : public ImageQueue, public ImageSink {
 protected:
 	ImageSink	*_imagesink;
+	std::recursive_mutex	_mutex;
 	Exposure	_streamexposure;
 private:
 	void	*private_data;
@@ -359,7 +363,7 @@ public:
 	virtual void	stopStream();
 	virtual bool	streaming();
 	virtual void	streamExposure(const Exposure& exposure);
-	virtual const Exposure&	streamExposure();
+	virtual Exposure	streamExposure();
 	virtual void	operator()(const ImageQueueEntry& entry);
 };
 
@@ -383,7 +387,7 @@ private:
 	// lock/condition variable to protect the state
 	std::recursive_mutex		_mutex;
 	std::condition_variable_any	_condition;
-	volatile std::atomic<CcdState::State>	_state;
+	volatile CcdState::State	_state;
 protected:
 	CcdState::State	state();
 	void	state(CcdState::State s);
@@ -435,7 +439,7 @@ public:
 	virtual void	startStream(const Exposure& exposure);
 	virtual void	stopStream();
 	virtual void	streamExposure(const Exposure& exposure);
-	virtual const Exposure&	streamExposure();
+	virtual Exposure	streamExposure();
 private:
 	void	checkStreaming();
 	// handling the cooler
@@ -455,14 +459,14 @@ public:
 
 /**
  * \brief CCD class using a thread for the exposure
+ *
+ * This implementation starts a thread that performs the exposure work
+ * in the run() method that a derived class must override.
  */
 class ThreadCcd : public Ccd {
-	// signaling from the 
-	std::recursive_mutex		_mutex;
-	std::condition_variable_any	_condition;
 	std::thread			_thread;
 protected:
-	bool	_running;
+	volatile std::atomic_bool	_running;
 public:
 	ThreadCcd(const CcdInfo& _info);
 	void	run0();
@@ -470,7 +474,6 @@ public:
 	virtual void	startExposure(const Exposure& exposure);
 	virtual CcdState::State	exposureStatus();
 	virtual void	cancelExposure();
-	virtual bool	wait();
 };
 
 /**

@@ -35,6 +35,8 @@ public:
 
 signals:
 	void	targetPositionReached();
+	void	newFocuserPosition(int);
+	void	focuserSelected(snowstar::FocuserPrx);
 
 private:
 	void	setupFocuser();

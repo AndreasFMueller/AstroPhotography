@@ -14,38 +14,6 @@ SkyDisplayDialog::SkyDisplayDialog(QWidget *parent)
 	ui->setupUi(this);
 	setWindowTitle(QString("Current Sky View"));
 
-	// initial state
-	ui->azmaltCheckBox->setCheckState(ui->skydisplayWidget->show_altaz()
-		? Qt::Checked : Qt::Unchecked);
-	ui->radecCheckBox->setCheckState(ui->skydisplayWidget->show_radec()
-		? Qt::Checked : Qt::Unchecked);
-	ui->constellationsCheckBox->setCheckState(
-		ui->skydisplayWidget->show_constellations()
-			? Qt::Checked : Qt::Unchecked);
-	ui->telescopeCheckBox->setCheckState(
-		ui->skydisplayWidget->show_telescope()
-			? Qt::Checked : Qt::Unchecked);
-	ui->targetCheckBox->setCheckState(ui->skydisplayWidget->show_target()
-		? Qt::Checked : Qt::Unchecked);
-	ui->labelsCheckBox->setCheckState(ui->skydisplayWidget->show_labels()
-		? Qt::Checked : Qt::Unchecked);
-
-	// connections
-	connect(ui->azmaltCheckBox, SIGNAL(stateChanged(int)),
-		this, SLOT(altazChanged(int)));
-	connect(ui->radecCheckBox, SIGNAL(stateChanged(int)),
-		this, SLOT(radecChanged(int)));
-	connect(ui->eclipticCheckBox, SIGNAL(stateChanged(int)),
-		this, SLOT(eclipticChanged(int)));
-	connect(ui->constellationsCheckBox, SIGNAL(stateChanged(int)),
-		this, SLOT(constellationsChanged(int)));
-	connect(ui->telescopeCheckBox, SIGNAL(stateChanged(int)),
-		this, SLOT(telescopeChanged(int)));
-	connect(ui->targetCheckBox, SIGNAL(stateChanged(int)),
-		this, SLOT(targetChanged(int)));
-	connect(ui->labelsCheckBox, SIGNAL(stateChanged(int)),
-		this, SLOT(labelsChanged(int)));
-
 	// connect the
 	connect(ui->skydisplayWidget, SIGNAL(pointSelected(astro::RaDec)),
 		this, SLOT(targetSelected(astro::RaDec)));
@@ -95,54 +63,9 @@ void	SkyDisplayDialog::targetSelected(astro::RaDec radec) {
 	emit pointSelected(radec);
 }
 
-void	SkyDisplayDialog::altazChanged(int state) {
-	bool	checked = (state == Qt::Checked);
-	ui->skydisplayWidget->show_altaz(checked);
-	ui->skydisplayWidget->update();
-}
-
-void	SkyDisplayDialog::radecChanged(int state) {
-	bool	checked = (state == Qt::Checked);
-	ui->skydisplayWidget->show_radec(checked);
-	ui->skydisplayWidget->update();
-}
-
-void	SkyDisplayDialog::eclipticChanged(int state) {
-	bool	checked = (state == Qt::Checked);
-	ui->skydisplayWidget->show_ecliptic(checked);
-	ui->skydisplayWidget->update();
-}
-
-void	SkyDisplayDialog::constellationsChanged(int state) {
-	bool	checked = (state == Qt::Checked);
-	ui->skydisplayWidget->show_constellations(checked);
-	ui->skydisplayWidget->update();
-}
-
-void	SkyDisplayDialog::telescopeChanged(int state) {
-	bool	checked = (state == Qt::Checked);
-	ui->skydisplayWidget->show_telescope(checked);
-	ui->skydisplayWidget->update();
-}
-
-void	SkyDisplayDialog::targetChanged(int state) {
-	bool	checked = (state == Qt::Checked);
-	ui->skydisplayWidget->show_target(checked);
-	ui->skydisplayWidget->update();
-}
-
 void	SkyDisplayDialog::targetChanged(astro::RaDec target) {
-	ui->targetCheckBox->blockSignals(true);
-	ui->targetCheckBox->setCheckState(Qt::Checked);
-	ui->targetCheckBox->blockSignals(false);
 	ui->skydisplayWidget->show_target(true);
 	ui->skydisplayWidget->targetChanged(target);
-}
-
-void	SkyDisplayDialog::labelsChanged(int state) {
-	bool	checked = (state == Qt::Checked);
-	ui->skydisplayWidget->show_labels(checked);
-	ui->skydisplayWidget->update();
 }
 
 void	SkyDisplayDialog::update() {

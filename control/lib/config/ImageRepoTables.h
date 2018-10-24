@@ -35,6 +35,7 @@ public:
 	std::string	bayer;
 	std::string	observation;
 	std::string	uuid;
+	int	focus;
 	bool	operator==(const ImageInfo& other) const;
 	ImageInfo();
 };

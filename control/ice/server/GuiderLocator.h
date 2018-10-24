@@ -15,6 +15,7 @@ class GuiderLocator : public Ice::ServantLocator {
 	guidermap	guiders;
 public:
 	GuiderLocator();
+	virtual ~GuiderLocator() { }
 
 	bool	has(const std::string& gn);
 

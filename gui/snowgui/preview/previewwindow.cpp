@@ -132,6 +132,7 @@ void	PreviewWindow::instrumentSetup(ServiceObject serviceobject,
 	connect(statusTimer, SIGNAL(timeout()), this, SLOT(statusUpdate()));
 	statusTimer->setInterval(1000);
 	statusTimer->start();
+
 }
 
 PreviewWindow::~PreviewWindow() {

@@ -195,6 +195,7 @@ public:
 			throw std::logic_error("base image type mismatch");
 		}
 	}
+	virtual ~MonochromeStacker() { }
 	void	add(const ConstImageAdapter<Pixel>& image);
 	void	add(ImagePtr imageptr);
 	ImagePtr	image() {
@@ -263,6 +264,7 @@ public:
 			throw std::runtime_error(cause);
 		}
 	}
+	virtual ~RGBStacker() { }
 
 	void	add(const ConstImageAdapter<RGB<Pixel> >& image);
 

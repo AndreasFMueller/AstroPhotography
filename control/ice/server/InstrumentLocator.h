@@ -17,6 +17,7 @@ class InstrumentLocator : public Ice::ServantLocator {
 	instrumentmap	instruments;
 public:
 	InstrumentLocator();
+	virtual ~InstrumentLocator() { }
 
 	virtual Ice::ObjectPtr	locate(const Ice::Current& current,
 					Ice::LocalObjectPtr& cookie);

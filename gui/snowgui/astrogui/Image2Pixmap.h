@@ -50,6 +50,11 @@ class	Image2Pixmap {
 	astro::image::MosaicType	_mosaic;
 	bool	_crosshairs;
 	astro::image::ImagePoint	_crosshairs_center;
+	bool	_vertical_flip;
+	bool	_horizontal_flip;
+	bool	_show_red;
+	bool	_show_green;
+	bool	_show_blue;
 public:
 	Image2Pixmap();
 	~Image2Pixmap();
@@ -64,6 +69,17 @@ public:
 	void	scale(int s) { _scale = s; }
 	bool	crosshairs() const { return _crosshairs; }
 	void	crosshairs(bool c) { _crosshairs = c; }
+	bool	vertical_flip() const { return _vertical_flip; }
+	void	vertical_flip(bool f) { _vertical_flip = f; }
+	bool	horizontal_flip() const { return _horizontal_flip; }
+	void	horizontal_flip(bool f) { _horizontal_flip = f; }
+	bool	show_red() const { return _show_red; }
+	void	show_red(bool s) { _show_red = s; }
+	bool	show_green() const { return _show_green; }
+	void	show_green(bool s) { _show_green = s; }
+	bool	show_blue() const { return _show_blue; }
+	void	show_blue(bool s) { _show_blue = s; }
+
 	astro::image::ImagePoint	crosshairs_center() const {
 		return _crosshairs_center;
 	}

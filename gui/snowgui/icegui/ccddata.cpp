@@ -17,4 +17,8 @@ std::string     ccddata::toString() const {
 		_index, _focallength, _azimut.degrees(), _name.c_str());
 }
 
+astro::Angle	ccddata::resolution() const {
+	return astro::Angle(_ccdinfo.pixelwidth / _focallength);
+}
+
 } // namespace snowgui

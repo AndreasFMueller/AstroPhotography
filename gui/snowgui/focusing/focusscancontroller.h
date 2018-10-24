@@ -18,6 +18,7 @@ namespace Ui {
 class focusscancontroller : public QWidget {
 	Q_OBJECT
 
+	int	centerposition;
 	int	numberofsteps;
 	int	stepsize;
 	int	currentstep;
@@ -38,6 +39,7 @@ private:
 	void	setScanning(bool);
 
 public slots:
+	void	changeCenter(int);
 	void	startScan();
 	void	stopScan();
 	void	scanClicked();

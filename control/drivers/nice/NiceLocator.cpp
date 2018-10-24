@@ -16,6 +16,7 @@
 #include <NiceAdaptiveOptics.h>
 #include <NiceFilterWheel.h>
 #include <NiceCooler.h>
+#include <NiceMount.h>
 
 namespace astro {
 namespace module {
@@ -76,6 +77,7 @@ NiceLocator::NiceLocator() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "starting service discovery for nice "
 		"locator");
 	discovery = ServiceDiscovery::get();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "nice locator constructed");
 }
 
 NiceLocator::~NiceLocator() {
@@ -122,6 +124,8 @@ snowstar::ModulesPrx	NiceLocator::getModules(const std::string& servicename) {
  * \param key	service key for which to find the modules
  */
 snowstar::ModulesPrx	NiceLocator::getModules(const ServiceKey& key) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "getModules(%s)",
+		key.toString().c_str());
 	std::unique_lock<std::recursive_mutex>	lock(modules_mtx);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "lock acquired, key = %s",
 		key.toString().c_str());
@@ -133,11 +137,14 @@ snowstar::ModulesPrx	NiceLocator::getModules(const ServiceKey& key) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "discovery object found");
 
 		// we need a connection 
-		Ice::CommunicatorPtr	ic = snowstar::CommunicatorSingleton::get();
+		Ice::CommunicatorPtr	ic
+			= snowstar::CommunicatorSingleton::get();
 		std::string	connectstring = object.connect("Modules");
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "connect string: '%s'", connectstring.c_str());
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "connect string: '%s'",
+			connectstring.c_str());
 		Ice::ObjectPrx	base = ic->stringToProxy(connectstring);
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "connecting to Modules: %p", base.get());
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "connecting to Modules: %p",
+			base.get());
 		mprx = snowstar::ModulesPrx::checkedCast(base);
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "got modules proxy");
 
@@ -146,7 +153,8 @@ snowstar::ModulesPrx	NiceLocator::getModules(const ServiceKey& key) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "proxy added to map: %s",
 			key.name().c_str());
 	} catch (const std::exception& x) {
-		debug(LOG_ERR, DEBUG_LOG, 0, "cannot get a proxy: %s", x.what());
+		debug(LOG_ERR, DEBUG_LOG, 0, "cannot get a proxy: %s",
+			x.what());
 	}
 	// here we have the new proxy
 	return mprx;
@@ -240,9 +248,12 @@ std::vector<std::string>	NiceLocator::getDevicelist(
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "does not have a a locator");
 		return result;
 	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "get a locator proxy for %s",
+		module->getName().c_str());
 	snowstar::DeviceLocatorPrx locator = module->getDeviceLocator();
 	snowstar::DeviceNameList	names
 		= locator->getDevicelist(snowstar::convert(device));
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "got %d names", names.size());
 	std::copy(names.begin(), names.end(),
 		std::back_inserter<std::vector<std::string> >(result));
 	return result;
@@ -295,6 +306,8 @@ std::vector<std::string>	NiceLocator::getDevicelist(
 
 	// getting a list of available severs
 	ServiceDiscovery::ServiceKeySet	services = discovery->list();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "number of services: %d",
+		services.size());
 	ServiceDiscovery::ServiceKeySet::const_iterator	i;
 	for (i = services.begin(); i != services.end(); i++) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "service %s",
@@ -303,8 +316,14 @@ std::vector<std::string>	NiceLocator::getDevicelist(
 
 	// got through the servers and 
 	for (i = services.begin(); i != services.end(); i++) {
-		if (ServicePublisher::ispublished(i->name()))
+		debug(LOG_DEBUG, DEBUG_LOG, 0,
+			"checking services service %s, name = '%s'",
+			i->toString().c_str(), i->name().c_str());
+		if (ServicePublisher::ispublished(i->name())) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "skip published '%s'",
+				i->name().c_str());
 			continue;
+		}
 		std::vector<std::string> names = getDevicelist(device, *i);
 		std::copy(names.begin(), names.end(),
 			std::back_inserter<std::vector<std::string> >(result));
@@ -312,8 +331,8 @@ std::vector<std::string>	NiceLocator::getDevicelist(
 
 	// we are done, return the result
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "found %d %s devices",
-		DeviceName::type2string(device).c_str(),
-		result.size());
+		result.size(),
+		DeviceName::type2string(device).c_str());
 	return result;
 }
 
@@ -325,6 +344,9 @@ std::vector<std::string>	NiceLocator::getDevicelist(
  */
 void	NiceLocator::check(const DeviceName& name,
 		DeviceName::device_type type) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "checking %s is a %s?",
+		name.toString().c_str(),
+		DeviceName::type2string(type).c_str());
 	if (!name.hasType(type)) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "name %s is not a %s",
 			name.toString().c_str(),
@@ -345,6 +367,8 @@ CameraPtr	NiceLocator::getCamera0(const DeviceName& name) {
 	check(name, DeviceName::Camera);
 
 	astro::DeviceName	remotename = name.localdevice();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "remote camera name: %s",
+		remotename.toString().c_str());
 	snowstar::DeviceLocatorPrx	locator = getLocator(name.servicename(),
 						remotename.modulename());
 
@@ -357,6 +381,8 @@ CcdPtr	NiceLocator::getCcd0(const DeviceName& name) {
 	check(name, DeviceName::Ccd);
 
 	astro::DeviceName	remotename = name.localdevice();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "remote ccd name: %s",
+		remotename.toString().c_str());
 	snowstar::DeviceLocatorPrx	locator = getLocator(name.servicename(),
 						remotename.modulename());
 
@@ -371,6 +397,8 @@ GuidePortPtr	NiceLocator::getGuidePort0(const DeviceName& name) {
 		name.toString().c_str());
 
 	astro::DeviceName	remotename = name.localdevice();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "remote guideport name: %s",
+		remotename.toString().c_str());
 	snowstar::DeviceLocatorPrx	locator = getLocator(name.servicename(),
 						remotename.modulename());
 
@@ -383,6 +411,8 @@ FilterWheelPtr	NiceLocator::getFilterWheel0(const DeviceName& name) {
 	check(name, DeviceName::Filterwheel);
 
 	astro::DeviceName	remotename = name.localdevice();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "remote filterwheel name: %s",
+		remotename.toString().c_str());
 	snowstar::DeviceLocatorPrx	locator = getLocator(name.servicename(),
 						remotename.modulename());
 
@@ -395,6 +425,8 @@ CoolerPtr	NiceLocator::getCooler0(const DeviceName& name) {
 	check(name, DeviceName::Cooler);
 
 	astro::DeviceName	remotename = name.localdevice();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "remote cooler name: %s",
+		remotename.toString().c_str());
 	snowstar::DeviceLocatorPrx	locator = getLocator(name.servicename(),
 						remotename.modulename());
 
@@ -407,6 +439,8 @@ FocuserPtr	NiceLocator::getFocuser0(const DeviceName& name) {
 	check(name, DeviceName::Focuser);
 
 	astro::DeviceName	remotename = name.localdevice();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "remote focuser name: %s",
+		remotename.toString().c_str());
 	snowstar::DeviceLocatorPrx	locator = getLocator(name.servicename(),
 						remotename.modulename());
 
@@ -419,12 +453,28 @@ AdaptiveOpticsPtr	NiceLocator::getAdaptiveOptics0(const DeviceName& name) {
 	check(name, DeviceName::AdaptiveOptics);
 
 	astro::DeviceName	remotename = name.localdevice();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "remote adaptive optics name: %s",
+		remotename.toString().c_str());
 	snowstar::DeviceLocatorPrx	locator = getLocator(name.servicename(),
 						remotename.modulename());
 
 	snowstar::AdaptiveOpticsPrx	adaptiveoptics
 		= locator->getAdaptiveOptics(remotename.toString());
 	return AdaptiveOpticsPtr(new NiceAdaptiveOptics(adaptiveoptics, name));
+}
+
+astro::device::MountPtr	NiceLocator::getMount0(const DeviceName& name) {
+	check(name, DeviceName::Mount);
+
+	astro::DeviceName	remotename = name.localdevice();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "remote mount name: %s",
+		remotename.toString().c_str());
+	snowstar::DeviceLocatorPrx	locator = getLocator(name.servicename(),
+						remotename.modulename());
+
+	snowstar::MountPrx	mount
+		= locator->getMount(remotename.toString());
+	return astro::device::MountPtr(new device::nice::NiceMount(mount, name));
 }
 
 } // namespace nice

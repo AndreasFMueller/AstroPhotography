@@ -26,6 +26,11 @@ Image2Pixmap::Image2Pixmap() {
 		_coloroffsets[i] = 0.;
 	}
 	_crosshairs = false;
+	_vertical_flip = false;
+	_horizontal_flip = false;
+	_show_red = true;
+	_show_green = true;
+	_show_blue = true;
 }
 
 Image2Pixmap::~Image2Pixmap() {
@@ -304,11 +309,17 @@ QImage	*Image2Pixmap::convertMono(const ConstImageAdapter<Pixel>& image) {
 	}
 	_histogram = histo;
 
+	// create the flip adapter
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "vertical flip: %s, horizontal flip: %s",
+		(vertical_flip()) ? "yes" : "no",
+		(horizontal_flip()) ? "yes" : "no");
+	FlipAdapter<Pixel>	flip(image, vertical_flip(), horizontal_flip());
+
 	// compute the rectangle 
 	ImageRectangle	r = rectangle(image);
 
 	// create a windowadapter
-	WindowAdapter<Pixel>	windowadapter(image, r);
+	WindowAdapter<Pixel>	windowadapter(flip, r);
 
 	// create a gain adapter
 	GainAdapter<Pixel>	gainadapter(windowadapter, _scale);
@@ -456,10 +467,20 @@ QImage	*Image2Pixmap::convertRGB(const ConstImageAdapter<RGB<Pixel> >& image) {
 	}
 	_histogram = histo;
 	
+	// create the flip adapter
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "vertical flip: %s, horizontal flip: %s",
+		(vertical_flip()) ? "yes" : "no",
+		(horizontal_flip()) ? "yes" : "no");
+	FlipAdapter<RGB<Pixel> >	flip(image, vertical_flip(), horizontal_flip());
+
+	// filter the channels
+	ChannelMaskingAdapter<Pixel>	masked(flip, show_red(),
+						show_green(), show_blue());
+
 	// compute the rectangle 
 	ImageRectangle	r = rectangle(image);
 
-	WindowAdapter<RGB<Pixel> >	windowadapter(image, r);
+	WindowAdapter<RGB<Pixel> >	windowadapter(masked, r);
 	GainRGBAdapter<Pixel>	gainadapter(windowadapter, _scale);
 	gainadapter.gain(_gain);
 	gainadapter.brightness(_brightness);

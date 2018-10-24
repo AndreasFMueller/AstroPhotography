@@ -104,6 +104,8 @@ void	copy_metadata(const srctype& src, desttype& dest) {
  * reading or writing.
  */
 class FITSfile {
+	FITSfile(const FITSfile& other) = delete;
+	FITSfile&	operator=(const FITSfile& other) = delete;
 protected:
 	// header stuff
 	typedef	std::list<std::pair<std::string, FITShdu> >	headerlist;
@@ -307,7 +309,10 @@ Image<Pixel>	*FITSinfile<Pixel>::read() {
 		break;
 	}
 
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "reading FITS file completed");
+	// have to release the data
+	free(data);
+
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "reading FITS file completed: %p", data);
 	return image;
 }
 

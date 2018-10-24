@@ -48,7 +48,58 @@
         </property>
        </widget>
       </item>
+      <item row="0" column="1" colspan="2">
+       <widget class="QComboBox" name="projectBox">
+        <property name="editable">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="2">
+       <widget class="QPushButton" name="startButton">
+        <property name="text">
+         <string>Start</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0">
+       <widget class="QLabel" name="focuserincrementLabel">
+        <property name="text">
+         <string>Focuser Increment:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="0">
+       <widget class="QLabel" name="repositoryLabel">
+        <property name="text">
+         <string>Repository:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="1" colspan="2">
+       <widget class="QComboBox" name="repositoryBox"/>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="exposuresLabel">
+        <property name="text">
+         <string>Exposures:</string>
+        </property>
+       </widget>
+      </item>
       <item row="2" column="1">
+       <widget class="QSpinBox" name="focuserincrementSpinBox">
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+        <property name="maximum">
+         <number>10000</number>
+        </property>
+        <property name="singleStep">
+         <number>100</number>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
        <widget class="QSpinBox" name="exposuresSpinBox">
         <property name="alignment">
          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -56,56 +107,8 @@
         <property name="minimum">
          <number>1</number>
         </property>
-       </widget>
-      </item>
-      <item row="4" column="0">
-       <widget class="QLabel" name="repositoryLabel">
-        <property name="text">
-         <string>Repository:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="0">
-       <widget class="QLabel" name="purposeLabel">
-        <property name="text">
-         <string>Purpose:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="0">
-       <widget class="QLabel" name="exposuresLabel">
-        <property name="text">
-         <string>Exposures:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="4" column="1" colspan="2">
-       <widget class="QComboBox" name="repositoryBox"/>
-      </item>
-      <item row="1" column="1">
-       <widget class="QComboBox" name="purposeBox"/>
-      </item>
-      <item row="1" column="2">
-       <widget class="QCheckBox" name="shutterBox">
-        <property name="text">
-         <string>Shutter open</string>
-        </property>
-        <property name="checked">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="2">
-       <widget class="QPushButton" name="startButton">
-        <property name="text">
-         <string>Start</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="1" colspan="2">
-       <widget class="QComboBox" name="projectBox">
-        <property name="editable">
-         <bool>true</bool>
+        <property name="maximum">
+         <number>1001</number>
         </property>
        </widget>
       </item>

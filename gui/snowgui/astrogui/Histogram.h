@@ -45,6 +45,7 @@ private:
 	Histogram<Pixel>&	operator=(const Histogram<Pixel>& other);
 public:
 	Histogram(int size = 256) : HistogramBase(size) { }
+	~Histogram() { }
 	virtual void	add(const Pixel& p);
 	virtual QPixmap	*pixmap(int /* width */, int /* height */) const {
 		return NULL;

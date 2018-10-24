@@ -12,6 +12,7 @@
 #include <mutex>
 #include <thread>
 #include <condition_variable>
+#include <EvictorBase.h>
 
 namespace snowstar {
 
@@ -21,43 +22,21 @@ namespace snowstar {
  * This class es used to locate ImageI objects. Since these objects
  * can consume large amounts of memory, we want to be able to tell them
  * to throw away the image they store. This is no problem because they
- * can reload the image from disk at any time. A separate thread is
- * used to expire images. The ImageI class has an expire() method that
- * causes it to throw away the image if it has not been accessed for some
- * time. This mitigates the impact of servants not beeing cleaned up by
- * clients for some time.
+ * can reload the image from disk at any time.
  */
-class ImageLocator : public Ice::ServantLocator {
-	typedef std::map<std::string, Ice::ObjectPtr>	imagemap;
-	imagemap	_images;
-	std::mutex	_mutex;
-	std::condition_variable	_condition;
-	std::thread	_thread;
+class ImageLocator : public EvictorBase {
 private:
 	ImageLocator(const ImageLocator& other);
 	ImageLocator&	operator=(const ImageLocator& other);
 public:
 	ImageLocator();
-	~ImageLocator();
+	virtual ~ImageLocator();
 
-	virtual Ice::ObjectPtr	locate(const Ice::Current& current,
-			Ice::LocalObjectPtr& cookie);
-
-	virtual void	finished(const Ice::Current& current,
-				const Ice::ObjectPtr& servant,
+protected:
+	virtual Ice::ObjectPtr	add(const Ice::Current& current,
+					Ice::LocalObjectPtr& cookie);
+	virtual void	evict(const Ice::ObjectPtr& object,
 				const Ice::LocalObjectPtr& cookie);
-
-	virtual void	deactivate(const std::string& category);
-
-	// methods related to expiration
-private:
-	bool	_stop;
-public:
-	void	stop();
-	void	expire();
-	void	run();
-private:
-	void	removeoldest();
 };
 
 } // namespace snowstar

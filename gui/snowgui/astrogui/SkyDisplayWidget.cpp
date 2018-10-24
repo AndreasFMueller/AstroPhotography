@@ -9,6 +9,8 @@
 #include <QMouseEvent>
 #include <QTimer>
 #include <QToolTip>
+#include <QAction>
+#include <QMenu>
 
 using namespace astro::catalog;
 
@@ -22,6 +24,42 @@ static std::string	S(const astro::AzmAlt& a) {
 static bool	visible(const astro::AzmAlt& a) {
 	return (a.alt().radians() > 0);
 }
+
+/*
+
+The SkyDisplayWidget should have a custom context menu to turn on/off
+the various features.
+
+https://stackoverflow.com/questions/24254006/rightclick-event-in-qt-to-open-a-context-menu
+
+customContextMenuRequested is emitted when the widget's contextMenuPolicy
+is Qt::CustomContextMenu, and the user has requested a context menu
+on the widget. So in the constructor of your widget you can call
+setContextMenuPolicy and connect customContextMenuRequested to a
+slot to make a custom context menu.
+
+this->setContextMenuPolicy(Qt::CustomContextMenu);
+
+connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), 
+        this, SLOT(ShowContextMenu(const QPoint &)));
+ShowContextMenu slot should be a class member of plotspace like :
+
+void plotspace::ShowContextMenu(const QPoint &pos) 
+{
+   QMenu contextMenu(tr("Context menu"), this);
+
+   QAction action1("Remove Data Point", this);
+   connect(&action1, SIGNAL(triggered()), this, SLOT(removeDataPoint()));
+   contextMenu.addAction(&action1);
+
+   contextMenu.exec(mapToGlobal(pos));
+}
+
+
+http://www.setnode.com/blog/right-click-context-menus-with-qt/
+
+
+*/
 
 /**
  * \brief Construct the SkyDisplay
@@ -42,6 +80,10 @@ SkyDisplayWidget::SkyDisplayWidget(QWidget *parent) : QWidget(parent) {
 	_skystarthread->start();
 	_converter = NULL;
 
+	// context menu
+	setContextMenuPolicy(Qt::CustomContextMenu);
+	connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), 
+		this, SLOT(showContextMenu(const QPoint &)));
 
 	// for the time being, wie fake the logitude an latitude
 	_position.longitude().degrees(8.83);
@@ -533,6 +575,10 @@ void	SkyDisplayWidget::mouseMoveEvent(QMouseEvent *event) {
 		if (_mouse_pressed) {
 			mouseCommon(t);
 		}
+		while (t.ra() < astro::Angle(0)) {
+			t.ra() = t.ra() + astro::Angle(360,
+						astro::Angle::Degrees);
+		}
 		QString tiptext(astro::stringprintf("RA: %s DEC: %s",
 				t.ra().hms(':', -1).c_str(),
 				t.dec().dms(':', -1).c_str()).c_str());
@@ -563,11 +609,143 @@ void	SkyDisplayWidget::useStars(Catalog::starsetptr stars) {
 }
 
 void	SkyDisplayWidget::targetChanged(astro::RaDec target) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "new target: %s",
+		target.toString().c_str());
 	_target = target;
 	if (show_target()) {
 		repaint();
 	}
 }
+
+void    SkyDisplayWidget::setAltAzmGridVisible(bool s) {
+	show_altaz(s);
+	repaint();
+}
+
+void    SkyDisplayWidget::setRaDecGridVisible(bool s) {
+	show_radec(s);
+	repaint();
+}
+
+void    SkyDisplayWidget::setConstellationsVisible(bool s) {
+	show_constellations(s);
+	repaint();
+}
+
+void    SkyDisplayWidget::setTargetVisible(bool s) {
+	show_target(s);
+	repaint();
+}
+
+void    SkyDisplayWidget::setTelescopeVisible(bool s) {
+	show_telescope(s);
+	repaint();
+}
+
+void    SkyDisplayWidget::setTooltipVisible(bool s) {
+	show_tooltip(s);
+	repaint();
+}
+
+void    SkyDisplayWidget::setLabelsVisible(bool s) {
+	show_labels(s);
+	repaint();
+}
+
+void    SkyDisplayWidget::setEclipticVisible(bool s) {
+	show_ecliptic(s);
+	repaint();
+}
+
+void	SkyDisplayWidget::toggleRaDecGridVisible() {
+	setRaDecGridVisible(!show_radec());
+}
+
+void	SkyDisplayWidget::toggleAltAzmGridVisible() {
+	setAltAzmGridVisible(!show_altaz());
+}
+
+void	SkyDisplayWidget::toggleConstellationsVisible() {
+	setConstellationsVisible(!show_constellations());
+}
+
+void	SkyDisplayWidget::toggleTargetVisible() {
+	setTargetVisible(!show_target());
+}
+
+void	SkyDisplayWidget::toggleTelescopeVisible() {
+	setTelescopeVisible(!show_telescope());
+}
+
+void	SkyDisplayWidget::toggleTooltipVisible() {
+	setTooltipVisible(!show_tooltip());
+}
+
+void	SkyDisplayWidget::toggleLabelsVisible() {
+	setLabelsVisible(!show_labels());
+}
+
+void	SkyDisplayWidget::toggleEclipticVisible() {
+	setEclipticVisible(!show_ecliptic());
+}
+
+void	SkyDisplayWidget::showContextMenu(const QPoint& point) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "show context menu at %d/%d",
+		point.x(), point.y());
+	QMenu contextMenu("Options:", this);
+
+	QAction	actionRaDec(QString("RA/DEC grid"), this);
+	actionRaDec.setCheckable(true);
+	actionRaDec.setChecked(show_radec());
+	contextMenu.addAction(&actionRaDec);
+	connect(&actionRaDec, SIGNAL(triggered()),
+		this, SLOT(toggleRaDecGridVisible()));
+
+	QAction	actionAzmAlt(QString("Azm/Alt grid"), this);
+	actionAzmAlt.setCheckable(true);
+	actionAzmAlt.setChecked(show_altaz());
+	contextMenu.addAction(&actionAzmAlt);
+	connect(&actionAzmAlt, SIGNAL(triggered()),
+		this, SLOT(toggleAltAzmGridVisible()));
+
+	QAction	actionEcliptic(QString("Ecliptic"), this);
+	actionEcliptic.setCheckable(true);
+	actionEcliptic.setChecked(show_ecliptic());
+	contextMenu.addAction(&actionEcliptic);
+	connect(&actionEcliptic, SIGNAL(triggered()),
+		this, SLOT(toggleEclipticVisible()));
+
+	QAction	actionConstellations(QString("Constellations"), this);
+	actionConstellations.setCheckable(true);
+	actionConstellations.setChecked(show_constellations());
+	contextMenu.addAction(&actionConstellations);
+	connect(&actionConstellations, SIGNAL(triggered()),
+		this, SLOT(toggleConstellationsVisible()));
+
+	QAction	actionTelescope(QString("Telescope position"), this);
+	actionTelescope.setCheckable(true);
+	actionTelescope.setChecked(show_telescope());
+	contextMenu.addAction(&actionTelescope);
+	connect(&actionTelescope, SIGNAL(triggered()),
+		this, SLOT(toggleTelescopeVisible()));
+
+	QAction	actionTarget(QString("Target"), this);
+	actionTarget.setCheckable(true);
+	actionTarget.setChecked(show_target());
+	contextMenu.addAction(&actionTarget);
+	connect(&actionTarget, SIGNAL(triggered()),
+		this, SLOT(toggleTargetVisible()));
+
+	QAction	actionLabels(QString("Direction labels"), this);
+	actionLabels.setCheckable(true);
+	actionLabels.setChecked(show_labels());
+	contextMenu.addAction(&actionLabels);
+	connect(&actionLabels, SIGNAL(triggered()),
+		this, SLOT(toggleLabelsVisible()));
+
+	contextMenu.exec(mapToGlobal(point));
+}
+
 
 } // namespace snowgui
 

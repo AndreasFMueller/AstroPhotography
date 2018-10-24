@@ -29,13 +29,6 @@ exposewidget::exposewidget(QWidget *parent)
 	_imageitem = NULL;
 	_selectedfiles = 0;
 
-	// add purposes to purpose combobox
-	ui->purposeBox->addItem(QString("light"));
-	ui->purposeBox->addItem(QString("dark"));
-	ui->purposeBox->addItem(QString("flat"));
-	ui->purposeBox->addItem(QString("bias"));
-	ui->purposeBox->addItem(QString("test"));
-
 	// create the columns
 	QStringList	headers;
 	headers << "No";
@@ -419,6 +412,27 @@ void	exposewidget::updateHeaderlist() {
 		RepositorySection	section(key, index++);
 		_repository_sections.push_back(section);
 	}
+	
+	{
+		RepositoryKey	key(snowstar::ExGUIDE);
+		_repository_index.insert(std::make_pair(key, index));
+		RepositorySection	section(key, index++);
+		_repository_sections.push_back(section);
+	}
+	
+	{
+		RepositoryKey	key(snowstar::ExFOCUS);
+		_repository_index.insert(std::make_pair(key, index));
+		RepositorySection	section(key, index++);
+		_repository_sections.push_back(section);
+	}
+	
+	{
+		RepositoryKey	key(snowstar::ExFLOOD);
+		_repository_index.insert(std::make_pair(key, index));
+		RepositorySection	section(key, index++);
+		_repository_sections.push_back(section);
+	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "got %d sections",
 		_repository_sections.size());
 
@@ -597,16 +611,17 @@ void	exposewidget::imageproxyReceived(snowstar::ImagePrx imageproxy) {
 		metadata.push_back(v);
 	}
 
-	{
+	// add focuser position
+	if (_focuser) {
 		snowstar::Metavalue	v;
-		v.keyword = "PURPOSE";
-		v.value = std::string(ui->purposeBox->currentText().toLatin1().data());
+		v.keyword = "FOCUSPOS";
+		v.value = astro::stringprintf("%lu", _focuser->current());
 		metadata.push_back(v);
 	}
 	imageproxy->setMetadata(metadata);
 
 	if (_repository) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "moveing the image to repo %s",
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "moving the image to repo %s",
 			_repositoryname.c_str());
 		imageproxy->toRepository(_repositoryname);
 		imageproxy->remove();
@@ -614,6 +629,26 @@ void	exposewidget::imageproxyReceived(snowstar::ImagePrx imageproxy) {
 
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "updating the image list");
 	projectChanged(ui->projectBox->currentText());
+
+	// move the focuser
+	if (_focuser) {
+		int	increment = ui->focuserincrementSpinBox->value();
+		if (increment > 0) {
+			int	newpos = _focuser->current() + increment;
+			_focuser->set(newpos);
+			int	counter = 1000;
+			do {
+				astro::Timer::sleep(0.1);
+				counter--;
+			} while ((_focuser->current() != newpos)
+				&& (counter > 0));
+			if (counter == 0) {
+				std::string	msg = astro::stringprintf(
+					"cannot move to position %d", newpos);
+				debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+			}
+		}
+	}
 
 	// decrement the value in the 
 	int	count = ui->exposuresSpinBox->value();
@@ -693,6 +728,12 @@ void	exposewidget::downloadClicked() {
 	exposedownloaddialog	*edd = new exposedownloaddialog(this);
 	edd->set(_repositories, filelist);
 	edd->exec();
+}
+
+void	exposewidget::focuserSelected(snowstar::FocuserPrx focuser) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "got focuser");
+	_focuser = focuser;
+	updateHeaderlist();
 }
 
 } // namespace snowgui

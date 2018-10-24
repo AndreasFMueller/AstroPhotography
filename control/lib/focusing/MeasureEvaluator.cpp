@@ -21,6 +21,9 @@ MeasureEvaluator::MeasureEvaluator() {
 MeasureEvaluator::MeasureEvaluator(const ImageRectangle& /* roi */) {
 }
 
+/**
+ * \brief Evaluate an image based on a measure
+ */
 double	MeasureEvaluator::operator()(const ImagePtr image) {
 	// compute the 
 	FocusInfo       fi = astro::image::filter::focus_squaredgradient_extended(image);

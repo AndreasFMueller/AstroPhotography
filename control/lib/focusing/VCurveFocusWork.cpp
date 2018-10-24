@@ -26,8 +26,10 @@ namespace focusing {
 void	VCurveFocusWork::main(astro::thread::Thread<FocusWork>& /* thread */) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "start focusing work");
 	if (!complete()) {
+		std::string	msg("focuser not completely specified");
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "%s", msg.c_str());
 		focusingstatus(Focusing::FAILED);
-		throw std::runtime_error("focuser not completely specified");
+		throw std::runtime_error(msg);
 	}
 
 	FocusCompute	fc;
@@ -35,7 +37,9 @@ void	VCurveFocusWork::main(astro::thread::Thread<FocusWork>& /* thread */) {
 	// determine how many intermediate steps we want to access
 
 	if (min() < focuser()->min()) {
-		throw std::runtime_error("minimum too small");
+		std::string	msg = stringprintf("minimum %d smaller than allowed %d", min(), focuser()->min());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw std::runtime_error(msg);
 	}
 
 	// based on the exposure specification, build an evaluator
@@ -46,7 +50,7 @@ void	VCurveFocusWork::main(astro::thread::Thread<FocusWork>& /* thread */) {
 	unsigned long	delta = max() - min();
 	for (int i = 0; i < steps(); i++) {
 		// compute new position
-		unsigned short	position = min() + (i * delta) / (steps() - 1);
+		unsigned long	position = min() + (i * delta) / (steps() - 1);
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "measuring position %hu",
 			position);
 
@@ -66,7 +70,7 @@ void	VCurveFocusWork::main(astro::thread::Thread<FocusWork>& /* thread */) {
 		double	value = evaluator(image);
 
 		// add the new value 
-		fc.insert(std::pair<unsigned short, double>(position, value));
+		fc.insert(std::pair<unsigned long, double>(position, value));
 
 		// send the callback data
 		callback(evaluator.evaluated_image(), position, value);
@@ -93,7 +97,7 @@ void	VCurveFocusWork::main(astro::thread::Thread<FocusWork>& /* thread */) {
 	}
 
 	// move to the focus position
-	unsigned short	targetposition = focusposition;
+	unsigned long	targetposition = focusposition;
 	moveto(targetposition);
 	focusingstatus(Focusing::FOCUSED);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "target position reached");

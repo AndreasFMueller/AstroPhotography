@@ -52,6 +52,9 @@ focusingwindow::focusingwindow(QWidget *parent)
 		SIGNAL(imageReceived(astro::image::ImagePtr)),
 		ui->scanWidget,
 		SLOT(imageReceived(astro::image::ImagePtr)));
+
+	connect(ui->focusercontrollerWidget, SIGNAL(newFocuserPosition(int)),
+		ui->scanWidget, SLOT(changeCenter(int)));
 }
 
 /**
@@ -84,6 +87,10 @@ void	focusingwindow::instrumentSetup(
 
 void	focusingwindow::setupComplete() {
 	setAppname("Focusing");
+	int	currentposition = 
+		ui->focusercontrollerWidget->getCurrentPosition();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "current position: %d", currentposition);
+	ui->scanWidget->changeCenter(currentposition);
 }
 
 /**

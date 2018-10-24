@@ -32,6 +32,7 @@ public:
 
 signals:
 	void	started();
+	void	updateSignal(snowstar::QueueState);
 
 public slots:
 	void	startClicked();

@@ -169,6 +169,7 @@ static struct option    longopts[] = {
  * \brief main function
  */
 int	main(int argc, char *argv[]) {
+	debug_set_ident("imageinfo");
 	int	c;
 	int	longindex;
 	while (EOF != (c = getopt_long(argc, argv, "dr:", longopts,
@@ -210,6 +211,7 @@ int	main(int argc, char *argv[]) {
 		}
 		std::cout << std::endl;
 	}
+
 
 	return EXIT_SUCCESS;
 }

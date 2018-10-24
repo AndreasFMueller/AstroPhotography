@@ -22,6 +22,7 @@ mountcontrollerwidget::mountcontrollerwidget(QWidget *parent)
 
 	qRegisterMetaType<astro::device::Mount::state_type>(
 		"astro::device::Mount::state_type");
+	qRegisterMetaType<astro::RaDec>("astro::RaDec");
 
 	setTabOrder(ui->targetRaField, ui->targetDecField);
 	setTabOrder(ui->targetDecField, ui->targetRaField);
@@ -36,11 +37,22 @@ mountcontrollerwidget::mountcontrollerwidget(QWidget *parent)
 	connect(ui->catalogButton, SIGNAL(clicked()),
 		this, SLOT(catalogClicked()));
 
+	// create the update thread
+	_updatethread = new QThread(NULL);
+	connect(_updatethread, SIGNAL(finished()),
+		_updatethread, SLOT(deleteLater()));
+	_updatethread->start();
+
+	// create the work class
+	_updatework = new mountupdatework(this);
+	_updatework->moveToThread(_updatethread);
+
+	// initialize the timer
 	_statusTimer.setInterval(1000);
-
 	connect(&_statusTimer, SIGNAL(timeout()),
-		this, SLOT(statusUpdate()));
+		_updatework, SLOT(statusUpdate()));
 
+	// auxiliary window initialization
 	_skydisplay = NULL;
 	_catalogdialog = NULL;
 }
@@ -50,7 +62,7 @@ mountcontrollerwidget::mountcontrollerwidget(QWidget *parent)
  */
 mountcontrollerwidget::~mountcontrollerwidget() {
 	_statusTimer.stop();
-
+	//_updatethread->terminate();
 	if (_skydisplay) {
 		delete _skydisplay;
 	}
@@ -114,6 +126,14 @@ void	mountcontrollerwidget::setupMount() {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "mount location: %s",
 			_position.toString().c_str());
 
+		// make sure the star chart knows the orientation
+		_previouswest = _mount->telescopePositionWest();
+		emit orientationChanged(_previouswest);
+
+		// make sure everybody knows our direction
+		_telescope = _mount->getRaDec();
+		emit telescopeChanged(convert(_telescope));
+
 		// write the position to the position label
 		std::string	pl;
 		pl += astro::stringprintf("%.4f",
@@ -124,10 +144,6 @@ void	mountcontrollerwidget::setupMount() {
 			fabs(_position.latitude().degrees()));
 		pl += (_position.longitude().degrees() < 0) ? "S" : "N";
 		ui->observatoryField->setText(QString(pl.c_str()));
-
-		// make sure the star chart knows the orientation
-		_previouswest = _mount->telescopePositionWest();
-		emit orientationChanged(_previouswest);
 
 		// try to get the time
 		try {
@@ -267,20 +283,15 @@ void	mountcontrollerwidget::statusUpdate() {
 
 	// read the current position from the mount
 	snowstar::RaDec	radec = _mount->getRaDec();
-	double	deltaRa = (_telescope.ra - radec.ra);
-	if (deltaRa > M_PI) { deltaRa -= 2 *M_PI; }
-	if (deltaRa < -M_PI) { deltaRa += 2 * M_PI; }
-	double	deltaDec = (_telescope.dec - radec.dec);
-	double	change = hypot(deltaRa, deltaDec);
-	if (change > 0.01) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "change %.4f detected", change);
-		ui->currentRaField->setText(QString(
-			astro::stringprintf("%.4f", radec.ra).c_str()));
-		ui->currentDecField->setText(QString(
-			astro::stringprintf("%.4f", radec.dec).c_str()));
-		_telescope = radec;
-		emit telescopeChanged(convert(radec));
+	astro::RaDec	rd = convert(radec);
+	if (rd != convert(_telescope)) {
+		emit telescopeChanged(rd);
 	}
+	ui->currentRaField->setText(QString(
+		rd.ra().hms(':',1).c_str()));
+	ui->currentDecField->setText(QString(
+		rd.dec().dms(':',0).c_str()));
+	_telescope = radec;
 
 	// read the current time from the mount
 	time_t	now = _mount->getTime();
@@ -318,14 +329,17 @@ astro::RaDec	mountcontrollerwidget::current() {
 void	mountcontrollerwidget::setTarget(const astro::RaDec& target) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "setting new target: %s",
 		target.toString().c_str());
-	_target.ra = target.ra().hours();
-	while (_target.ra < 0) { _target.ra += 24; }
-	while (_target.ra >= 24) { _target.ra -= 24; }
-	_target.dec = target.dec().degrees();
-	ui->targetRaField->setText(QString(astro::stringprintf("%.4f",
-		_target.ra).c_str()));
-	ui->targetDecField->setText(QString(astro::stringprintf("%.4f",
-		_target.dec).c_str()));
+	astro::Angle	ra = target.ra();
+	while (ra > astro::Angle(24, astro::Angle::Hours)) {
+		ra = ra - astro::Angle(24, astro::Angle::Hours);
+	}
+	while (ra < astro::Angle(0, astro::Angle::Hours)) {
+		ra = ra + astro::Angle(24, astro::Angle::Hours);
+	}
+	astro::Angle	dec = target.dec();
+	ui->targetRaField->setText(QString(ra.hms(':', 1).c_str()));
+	ui->targetDecField->setText(QString(dec.dms(':', 0).c_str()));
+	_target = snowstar::convert(astro::RaDec(ra, dec));
 
 	// if the _skyview is open also change the target there
 	if (_skydisplay) {

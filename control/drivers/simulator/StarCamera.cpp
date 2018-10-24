@@ -303,9 +303,11 @@ void	StarCameraBase::addStarIntensity(Image<double>& image,
 		shift = -shift;
 #endif
 	}
+#if 0
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "add star at c = %s, p = %s, shift = %s",
 		c.toString().c_str(), fstar.position().toString().c_str(),
 		shift.toString().c_str());
+#endif
 
 	// compute the area around the star for which we have to modify
 	// the image to add the diffraction image of the star

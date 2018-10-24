@@ -29,6 +29,9 @@ public:
 				const Ice::Current& current) {
 		return snowstar::getImage(name, current);
 	}
+	void	remove(const std::string& name, const Ice::Current& current);
+	std::string	save(const ImageFile& file,
+				const Ice::Current& current);
 };
 
 } // namespace snowtar

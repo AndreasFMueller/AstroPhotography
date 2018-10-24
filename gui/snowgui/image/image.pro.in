@@ -31,8 +31,10 @@ FORMS    +=								\
 	takeimagewindow.ui
 
 SOURCES += 								\
+	TakeImageSink.cpp						\
 	takeimagewindow.cpp
 
 HEADERS  += 								\
+	TakeImageSink.h							\
 	takeimagewindow.h
 

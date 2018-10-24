@@ -66,6 +66,9 @@ class StarChartWidget : public QWidget {
 	astro::catalog::Catalog::starsetptr	_sky;
 	astro::catalog::DeepSkyCatalog::deepskyobjectsetptr	_deepsky;
 	astro::Angle	_resolution;	// angle per pixel
+	astro::Angle	_imager_resolution;
+	astro::Angle	_finder_resolution;
+	astro::Angle	_guider_resolution;
 	astro::RaDec	_direction;
 	astro::device::Mount::state_type	_state;
 	astro::ImageCoordinates	_converter;
@@ -75,6 +78,8 @@ class StarChartWidget : public QWidget {
 	bool	_show_crosshairs;
 	bool	_show_directions;
 	bool	_show_deepsky;
+	bool	_show_tooltips;
+	bool	_show_cataloglabels;
 	bool	_flip;
 
 	bool	_retrieval_necessary;
@@ -104,6 +109,12 @@ public:
 
 	void	show_deepsky(bool d) { _show_deepsky = d; }
 	bool	show_deepsky() const { return _show_deepsky; }
+
+	void	show_tooltips(bool d) { _show_tooltips = d; }
+	bool	show_tooltips() const { return _show_tooltips; }
+
+	void	show_cataloglabels(bool d) { _show_cataloglabels = d; }
+	bool	show_cataloglabels() const { return _show_cataloglabels; }
 
 	void	flip(bool f) { _flip = f; }
 	bool	flip() const { return _flip; }
@@ -144,6 +155,35 @@ public slots:
 	void	useSky(astro::catalog::Catalog::starsetptr);
 	void	useDeepSky(astro::catalog::DeepSkyCatalog::deepskyobjectsetptr);
 	void	workerFinished();
+	void	guiderResolution(astro::Angle);
+	void	finderResolution(astro::Angle);
+	void	imagerResolution(astro::Angle);
+	void	resolutionChanged(astro::Angle);
+
+	void	setGridVisible(bool);
+	void	setCrosshairsVisible(bool);
+	void	setDirectionsVisible(bool);
+	void	setDeepskyVisible(bool);
+	void	setCataloglabelsVisible(bool);
+	void	setTooltipsVisible(bool);
+	void	setNegative(bool);
+	
+	void	toggleGridVisible();
+	void	toggleCrosshairsVisible();
+	void	toggleDirectionsVisible();
+	void	toggleDeepskyVisible();
+	void	toggleCataloglabelsVisible();
+	void	toggleTooltipsVisible();
+	void	toggleNegative();
+
+	void	useFinderResolution();
+	void	useGuiderResolution();
+	void	useImagerResolution();
+	void	useStandardResolution();
+	
+	void    showContextMenu(const QPoint& point);
+
+	
 };
 
 } // namespace snowgui

@@ -122,6 +122,94 @@ public:
 	}
 };
 
+template<typename Pixel>
+class VerticalFlipAdapter : public ConstImageAdapter<Pixel> {
+	const ConstImageAdapter<Pixel>&	_image;
+	int	_h;
+public:
+	VerticalFlipAdapter(const ConstImageAdapter<Pixel>& image)
+		: ConstImageAdapter<Pixel>(image.getSize()), _image(image),
+		  _h(image.getSize().height() - 1) {
+	}
+	virtual Pixel	pixel(int x, int y) const {
+		return _image.pixel(x, _h - y);
+	}
+};
+
+template<typename Pixel>
+class HorizontalFlipAdapter : public ConstImageAdapter<Pixel> {
+	const ConstImageAdapter<Pixel>&	_image;
+	int	_w;
+public:
+	HorizontalFlipAdapter(const ConstImageAdapter<Pixel>& image)
+		: ConstImageAdapter<Pixel>(image.getSize()), _image(image),
+		  _w(image.getSize().width() - 1) {
+	}
+	virtual Pixel	pixel(int x, int y) const {
+		return _image.pixel(_w - x, y);
+	}
+};
+
+template<typename Pixel>
+class RotateAdapter : public ConstImageAdapter<Pixel> {
+	const ConstImageAdapter<Pixel>&	_image;
+	int	_w;
+	int	_h;
+public:
+	RotateAdapter(const ConstImageAdapter<Pixel>& image)
+		: ConstImageAdapter<Pixel>(image.getSize()), _image(image),
+		  _w(image.getSize().width() - 1),
+		  _h(image.getSize().height() - 1) {
+	}
+	virtual Pixel	pixel(int x, int y) const {
+		return _image.pixel(_w - x, _h - y);
+	}
+};
+
+template<typename Pixel>
+class FlipAdapter : public ConstImageAdapter<Pixel> {
+	const ConstImageAdapter<Pixel>&	_image;
+	int	_w;
+	int	_h;
+	bool	_vflip;
+	bool	_hflip;
+public:
+	FlipAdapter(const ConstImageAdapter<Pixel>& image, bool vflip = false,
+		bool hflip = false)
+		: ConstImageAdapter<Pixel>(image.getSize()), _image(image),
+		  _w(image.getSize().width() - 1),
+		  _h(image.getSize().height() - 1),
+		  _vflip(vflip), _hflip(hflip) {
+	}
+	virtual Pixel	pixel(int x, int y) const {
+		return _image.pixel((_hflip) ? (_w - x) : x,
+				    (_vflip) ? (_h - y) : y);
+	}
+};
+
+//////////////////////////////////////////////////////////////////////
+//
+//////////////////////////////////////////////////////////////////////
+template<typename Pixel>
+class ChannelMaskingAdapter : public ConstImageAdapter<RGB<Pixel> > {
+	const ConstImageAdapter<RGB<Pixel> >&	_image;
+	bool	_red;
+	bool	_green;
+	bool	_blue;
+public:
+	ChannelMaskingAdapter(const ConstImageAdapter<RGB<Pixel> >& image,
+		bool red, bool green, bool blue)
+		: ConstImageAdapter<RGB<Pixel> >(image.getSize()),
+		  _image(image), _red(red), _green(green), _blue(blue) {
+	}
+	virtual RGB<Pixel>	pixel(int x, int y) const {
+		RGB<Pixel>	p = _image.pixel(x, y);
+		return RGB<Pixel>((_red) ? p.R : (Pixel)0,
+			(_green) ? p.G : (Pixel)0,
+			(_blue) ? p.B : (Pixel)0);
+	}
+};
+
 //////////////////////////////////////////////////////////////////////
 // Accessing Subrectangles of an Image
 //////////////////////////////////////////////////////////////////////

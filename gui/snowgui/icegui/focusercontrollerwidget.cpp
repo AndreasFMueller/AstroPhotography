@@ -93,6 +93,7 @@ void	focusercontrollerwidget::setupFocuser() {
 		int	minimum = _focuser->min();
 		int	maximum = _focuser->max();
 		int	current = _focuser->current();
+		emit newFocuserPosition(current);
 		ui->positionSpinBox->setMaximum(maximum);
 		ui->positionSpinBox->setMinimum(minimum);
 		ui->positionSpinBox->setValue(current);
@@ -111,6 +112,9 @@ void	focusercontrollerwidget::setupFocuser() {
 	// now we can release the signals again
 	ui->positionButton->blockSignals(false);
 	ui->positionSpinBox->blockSignals(false);
+
+	// emit the focuser
+	emit focuserSelected(_focuser);
 }
 
 /**

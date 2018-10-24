@@ -22,8 +22,12 @@ namespace camera {
 
 DeviceName::device_type	Ccd::devicetype = DeviceName::Ccd;
 
+const static bool	ccd_lck_debug = false;
+
 /**
  * \brief Construct a CCD device
+ *
+ * \param _info		The information about this CCD
  */
 Ccd::Ccd(const CcdInfo& _info)
 	: astro::device::Device(_info.name(), DeviceName::Ccd),
@@ -43,35 +47,60 @@ Ccd::Ccd(const CcdInfo& _info)
 	// get focal length parameter
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "querying 'focallength' for %s",
 		name().toString().c_str());
-	float   focallength = 0;
+	float   focallength = 1.111;
 	if (hasProperty("focallength")) {
-		focallength = std::stod(getProperty("focallength"));
-	} else {
-		focallength = 1.1111;
+		try {
+			std::string	fl = getProperty("focallength");
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "got focallength: '%s'",
+				fl.c_str());
+			focallength = std::stod(fl);
+		} catch (const std::exception& x) {
+			debug(LOG_ERR, DEBUG_LOG, 0,
+				"cannot get focal length: %s", x.what());
+		}
 	}
-	parameter("focallength", focallength);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "using focallength %.3f[m]",
-		parameterValueFloat("focallength"));
+	try {
+		parameter("focallength", focallength);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "using focallength %.3f[m]",
+			parameterValueFloat("focallength"));
+	} catch (const std::exception& x) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "focal length unusable: %s",
+			x.what());
+	}
 
 	// get the azimuth parameter 
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "querying 'azimuth' for %s",
 		name().toString().c_str());
-	float   azimuth = 0;
+	float   azimuth = 1.111;
 	if (hasProperty("azimuth")) {
-		azimuth = std::stod(getProperty("azimuth"));
-	} else {
-		azimuth = 1.1111;
+		try {
+			std::string	az = getProperty("azimuth");
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "got azimuth: '%s'",
+				az.c_str());
+			azimuth = std::stod(az);
+		} catch (const std::exception& x) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "azimuth unusable: %s",
+				x.what());
+		}
 	}
-	parameter("azimuth", azimuth);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "using azimuth %.3f[degrees]",
-		parameterValueFloat("azimuth"));
+	try {
+		parameter("azimuth", azimuth);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "using azimuth %.3f[m]",
+			parameterValueFloat("azimuth"));
+	} catch (const std::exception& x) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "focal length unusable: %s",
+			x.what());
+	}
 
 	// get limit magnitude parameter
-	float   limit_magnitude = 0;
+	float   limit_magnitude = 11.111;
 	if (hasProperty("limit_magnitude")) {
+		try {
 		limit_magnitude = std::stod(getProperty("limit_magnitude"));
-	} else {
-		limit_magnitude = 11.111;
+		} catch (const std::exception& x) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0,
+				"limit_magnitude unusable: %s", x.what());
+		}
 	}
 	parameter("limit_magnitude", limit_magnitude);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "using limit magnitude %.2f",
@@ -82,15 +111,49 @@ Ccd::Ccd(const CcdInfo& _info)
  * \brief Get the state
  */
 CcdState::State	Ccd::state() {
+	if (ccd_lck_debug)
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "LCK state query state()");
+	std::unique_lock<std::recursive_mutex>	lock(_mutex);
+	if (ccd_lck_debug) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "--> LCK acquired state()");
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "<-- LCK released state()");
+	}
 	return _state;
 }
 
 /**
  * \brief Set the state, notify threads waiting for a state change
+ *
+ * This method changes the state. If the state is really different, then
+ * all the threads waiting for a state change are notified. It is expected
+ * that waiting threads will for themselves check whether the right state
+ * has been reached and will wait again if not.
+ *
+ * \param s	the new state
  */
 void	Ccd::state(CcdState::State s) {
-	_state = s;
-	_condition.notify_all();
+	if (ccd_lck_debug)
+		debug(LOG_DEBUG, DEBUG_LOG, 0,
+			"LCK changing state to %s state(s)", 
+			CcdState::state2string(s).c_str());
+
+	// acquire a lock to protect the state
+	std::unique_lock<std::recursive_mutex>	lock(_mutex);
+	if (ccd_lck_debug)
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "--> LCK acquired state(s)");
+
+	if (_state != s) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "state change %s -> %s",
+			CcdState::state2string(_state).c_str(),
+			CcdState::state2string(s).c_str());
+		_state = s;
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "notify all of state change");
+		// notify waiting threads of the state change
+		_condition.notify_all();
+	}
+
+	if (ccd_lck_debug)
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "<-- LCK released state(s)");
 }
 
 /**
@@ -104,7 +167,10 @@ void	Ccd::state(CcdState::State s) {
  * this method also sets up the infrastructure for the wait method.
  */
 void    Ccd::startExposure(const Exposure& _exposure) {
+	//debug(LOG_DEBUG, DEBUG_LOG, 0, "LCK start exposure %s startExposure()",
+	//	_exposure.toString().c_str());
 	std::unique_lock<std::recursive_mutex>	lock(_mutex);
+	//debug(LOG_DEBUG, DEBUG_LOG, 0, "--> LCK acquired startExposure()");
 	// make sure we are in the right state, and only accept new exposures
 	// in that state. This is important because if we change the
 	// exposure member while an exposure is in progress, we may run into
@@ -130,7 +196,7 @@ void    Ccd::startExposure(const Exposure& _exposure) {
 	// check that the frame to be exposed fits into the CCD
         if (!info.size().bounds(exposure.frame())) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "exposure does not fit in ccd");
-                throw BadParameter("exposure does not fit ccd");
+		exposure.frame(info.size().containing(exposure.frame()));
         }
 
 	// make sure the exposure time is in the interval specified in 
@@ -148,6 +214,7 @@ void    Ccd::startExposure(const Exposure& _exposure) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "exposure started at %d",
 		lastexposurestart);
 	state(CcdState::exposing);
+	//debug(LOG_DEBUG, DEBUG_LOG, 0, "<-- LCK released startExposure()");
 }
 
 /**
@@ -195,17 +262,22 @@ public:
  * available. 
  */
 bool	Ccd::wait() {
+	//debug(LOG_DEBUG, DEBUG_LOG, 0,
+	//	"LCK waiting for image completion wait()");
 	// lock the _mutex, so we are shure the state variable will not
 	// change between checks
 	std::unique_lock<std::recursive_mutex>	lock(_mutex);
+	//debug(LOG_DEBUG, DEBUG_LOG, 0, "--> LCK acquired wait()");
 
 	// now check the state variable, and handle the simple cases
 	CcdState::State	s = exposureStatus();
 	switch (s) {
 		// not exposing, no need to wait, and no image is available
 	case CcdState::idle:
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "<-- LCK released wait()");
 		return false;
 	case CcdState::exposed:
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "<-- LCK released wait()");
 		return true;
 	default:
 		// remainder of cases is handled outside this switch
@@ -236,23 +308,39 @@ bool	Ccd::wait() {
 	// remember the current state
 	CcdStateChange	statechange(this, s);
 
+	// by waiting on the condition variable, the lock is released
+	//debug(LOG_DEBUG, DEBUG_LOG, 0,
+	//	"<-- LCK release lock for waiting wait()");
+
 	// wait for a state change. Whenever the condition variable is
 	// notified, check whether the state has changed, and retry if not
 	while (std::cv_status::no_timeout == _condition.wait_for(lock,
 		std::chrono::seconds(delta))) {
-		if (statechange()) {
-			debug(LOG_DEBUG, DEBUG_LOG, 0, "wait complete %s",
+		// if we get to this point, we know that the state
+		// actually changed, but we don't own the lock
+		if (ccd_lck_debug)
+			debug(LOG_DEBUG, DEBUG_LOG, 0,
+				"--> LCK wait complete, state %s",
 				CcdState::state2string(state()).c_str());
-			return (CcdState::exposed == this->state());
-		} else {
-			debug(LOG_DEBUG, DEBUG_LOG, 0, "state has not changed, "
-				"try again");
+		// if we get the exposed state, we return true
+		if (CcdState::exposed == this->state()) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "state now exposed");
+			return true;
 		}
+		// if we get any other state and not exposing, we return false
+		if (CcdState::exposing != this->state()) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0,
+				"state %s, waiting some more",
+			CcdState::state2string(this->state()).c_str());
+			return false;
+		}
+		// if we are still exposing, we we just continue waiting
 	}
 
 	// this really should not happen, it indicates a serious problem
 	// with the camera. Should we rather throw an exception here?
 	debug(LOG_ERR, DEBUG_LOG, 0, "state change has timed out");
+	//debug(LOG_DEBUG, DEBUG_LOG, 0, "<-- LCK lock released wait()");
 	return false;
 }
 
@@ -271,7 +359,9 @@ astro::image::ImagePtr	Ccd::getRawImage() {
  * the common metadata.
  */
 astro::image::ImagePtr	Ccd::getImage() {
+	//debug(LOG_DEBUG, DEBUG_LOG, 0, "LCK retrieving raw image getImage()");
 	std::unique_lock<std::recursive_mutex>	lock(_mutex);
+	//debug(LOG_DEBUG, DEBUG_LOG, 0, "--> LCK acquired getImage()");
 	// must have an exposed image to call this method
 	if (CcdState::exposed != this->exposureStatus()) {
 		std::string	msg = stringprintf("no exposed image to "
@@ -292,6 +382,9 @@ astro::image::ImagePtr	Ccd::getImage() {
 
 	// set state to idle
 	state(CcdState::idle);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "state changed to idle");
+
+	//debug(LOG_DEBUG, DEBUG_LOG, 0, "<-- LCK release lock getImage()");
 
 	// that's it, return the image
 	return image;
@@ -368,7 +461,7 @@ void	Ccd::streamExposure(const Exposure& exposure) {
 /**
  * \brief get the current stream exposure
  */
-const Exposure& Ccd::streamExposure() {
+Exposure Ccd::streamExposure() {
 	checkStreaming();
 	return ImageStream::streamExposure();
 }

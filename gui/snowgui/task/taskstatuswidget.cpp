@@ -24,6 +24,8 @@ taskstatuswidget::taskstatuswidget(QWidget *parent)
 	// this weird setup is necessary to work around the problem that
 	// the timer can only be started from the main thread
 	connect(this, SIGNAL(started()), this, SLOT(dostart()));
+	connect(this, SIGNAL(updateSignal(snowstar::QueueState)),
+		ui->taskstateWidget, SLOT(update(snowstar::QueueState)));
 }
 
 /**
@@ -55,7 +57,7 @@ void	taskstatuswidget::setServiceObject(
 
 	// get the status
 	snowstar::QueueState	currentstate = _tasks->state();
-	ui->taskstateWidget->update(currentstate);
+	emit updateSignal(currentstate);
 	update(currentstate);
 
 	// start the timer so that we will get updates at regular intervals
@@ -113,7 +115,7 @@ void	taskstatuswidget::startClicked() {
 void	taskstatuswidget::update(snowstar::QueueState state) {
 	_state = state;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "update to new state: %d", (int)_state);
-	ui->taskstateWidget->update(_state);
+	emit updateSignal(_state);
 
 	switch (_state) {
 	case snowstar::QueueIDLE:

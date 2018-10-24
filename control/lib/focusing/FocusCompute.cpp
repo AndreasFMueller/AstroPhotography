@@ -92,7 +92,7 @@ double	FocusCompute::focus() const {
 	// copy the data into arrays
 	double	positions[size()];
 	double	values[size()];
-	std::map<unsigned short, double>::const_iterator	i;
+	std::map<unsigned long, double>::const_iterator	i;
 	int	offset = 0;
 	for (i = begin(); i != end(); i++) {
 		positions[offset] = i->first;

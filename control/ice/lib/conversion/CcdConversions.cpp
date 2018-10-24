@@ -98,6 +98,8 @@ ExposureState	convert(const astro::camera::CcdState::State& s) {
 		return EXPOSING;
 	case astro::camera::CcdState::cancelling:
 		return CANCELLING;
+	case astro::camera::CcdState::streaming:
+		return STREAMING;
 	case astro::camera::CcdState::exposed:
 		return EXPOSED;
 	}
@@ -112,10 +114,10 @@ astro::camera::CcdState::State	convert(const ExposureState& s) {
 		return astro::camera::CcdState::exposing;
 	case CANCELLING:
 		return astro::camera::CcdState::cancelling;
+	case STREAMING:
+		return astro::camera::CcdState::streaming;
 	case EXPOSED:
 		return astro::camera::CcdState::exposed;
-	case STREAMING:
-		return astro::camera::CcdState::exposing;
 	case BROKEN:
 		// there is no corresponding state, so we just return idle
 		return astro::camera::CcdState::idle;

@@ -12,6 +12,8 @@ namespace astro {
 namespace camera {
 namespace qsi {
 
+#if 0
+
 #define	START_STOPWATCH							\
 	{								\
 		astro::Timer stopwatch; 				\
@@ -21,6 +23,13 @@ namespace qsi {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "%s took %.3fs", what, 	\
 			stopwatch.elapsed());				\
 	}
+
+#else
+
+#define	START_STOPWATCH	
+#define	END_STOPWATCH(what)
+
+#endif
 
 } // namespace qsi
 } // namespace camera

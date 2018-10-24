@@ -29,6 +29,7 @@ module snowstar {
 		double	observationago;
 		string	filter;
 		string	bayer;
+		long	focus;
 	};
 
 	sequence<string>	projectnamelist;

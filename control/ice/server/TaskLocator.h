@@ -15,6 +15,7 @@ class TaskLocator : public Ice::ServantLocator {
 	astro::persistence::Database&	database;
 public:
 	TaskLocator(astro::persistence::Database& database);
+	virtual ~TaskLocator() { }
 
 	virtual Ice::ObjectPtr	locate(const Ice::Current& current,
 			Ice::LocalObjectPtr& cookie);

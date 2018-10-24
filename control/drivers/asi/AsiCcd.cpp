@@ -17,10 +17,15 @@ namespace asi {
 
 /**
  * \brief Construct a new CCD object
+ *
+ * \param info		Information about the CCD
+ * \param camera	Camera to which this CCD belongs
  */
 AsiCcd::AsiCcd(const CcdInfo& info, AsiCamera& camera)
 	: Ccd(info), _camera(camera) {
 	stream = NULL;
+	_thread = NULL;
+	_exposure_done = true;
 }
 
 /**
@@ -136,10 +141,21 @@ void	AsiCcd::setExposure(const Exposure& e) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "exposure settings complete");
 }
 
+static void     start_main(AsiCcd *asiccd) {
+        asiccd->run();
+}
+
 /**
  * \brief Start a single exposure
+ *
+ * \param exposure	exposure structure to use for the single exposure
  */
 void	AsiCcd::startExposure(const Exposure& exposure) {
+	// the lock ensures that there can only ever by one thread inside
+	// this method. If the thread has already been started the exposure
+	// status is no longer compatible with starting an exposure and
+	// the second startExposure will fail.
+	std::lock_guard<std::recursive_mutex>	lock(_mutex);
 	if (streaming()) {
 		std::string	msg("camera is currently streaming");
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
@@ -147,7 +163,10 @@ void	AsiCcd::startExposure(const Exposure& exposure) {
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "%s start exposure %s",
 		name().toString().c_str(), exposure.toString().c_str());
-	state(CcdState::exposing);
+
+	// call the Ccds startExposure method, this ensures we are presently
+	// in the correct state,
+	Ccd::startExposure(exposure);
 	try {
 		setExposure(exposure);
 
@@ -155,7 +174,10 @@ void	AsiCcd::startExposure(const Exposure& exposure) {
 		_camera.startExposure(exposure.shutter() == Shutter::OPEN);
 	} catch (...) {
 	}
-	exposureStatus();
+	//exposureStatus();
+
+	_exposure_done = false;
+	_thread = new std::thread(start_main, this);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "exposure started");
 }
 
@@ -168,9 +190,31 @@ void	AsiCcd::cancelExposure() {
 }
 
 /**
+ * \brief Main function of the asi exposure thread
+ */
+void	AsiCcd::run() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "start thread");
+	do {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "tick %d", exposureStatus());
+		Timer::sleep(0.1);
+	} while (CcdState::exposing == exposureStatus());
+	std::lock_guard<std::recursive_mutex>	lock(_mutex);
+	_exposure_done = true;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "exposing finished");
+}
+
+/**
  * \brief Query the exposure status
  */
 CcdState::State	AsiCcd::exposureStatus() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "exposureStatus()");
+	std::lock_guard<std::recursive_mutex>	lock(_mutex);
+	if ((_thread) && (_exposure_done)) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "thread cleanup");
+		_thread->join();
+		delete _thread;
+		_thread = NULL;
+	}
 	ASI_EXPOSURE_STATUS	status = _camera.getExpStatus();
 	switch (status) {
 	case ASI_EXP_IDLE:
@@ -179,32 +223,44 @@ CcdState::State	AsiCcd::exposureStatus() {
 				name().toString().c_str());
 		}
 		state(CcdState::idle);
-		return CcdState::idle;
+		break;
 	case ASI_EXP_WORKING:
 		if (Asi_Debug_State) {
 			debug(LOG_DEBUG, DEBUG_LOG, 0, "%s is WORKING/exposing",
 				name().toString().c_str());
 		}
-		state(CcdState::exposing);
-		return CcdState::exposing;
+		if (state() != CcdState::exposing) {
+			state(CcdState::exposing);
+		}
+		break;
 	case ASI_EXP_SUCCESS:
 		if (Asi_Debug_State) {
 			debug(LOG_DEBUG, DEBUG_LOG, 0, "%s is SUCCESS/exposed",
 				name().toString().c_str());
 		}
-		state(CcdState::exposed);
-		return CcdState::exposed;
+		if (state() != CcdState::exposed) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "changing state to exposed");
+			state(CcdState::exposed);
+		}
+		break;
 	case ASI_EXP_FAILED:
 		if (Asi_Debug_State) {
-			debug(LOG_DEBUG, DEBUG_LOG, 0, "%s is FAILED/exposed",
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "%s is FAILED/idle",
 				name().toString().c_str());
 		}
-		state(CcdState::exposed);
-		return CcdState::exposed;
+		if (CcdState::idle != state()) {
+			state(CcdState::idle);
+		}
+		break;
+	default:
+		{
+		std::string	msg = stringprintf("unknown ASI status: %d",
+			status);
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw std::runtime_error(msg);
+		}
 	}
-	std::string	msg = stringprintf("unknown ASI status: %d", status);
-	debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
-	throw std::runtime_error(msg);
+	return state();
 }
 
 /**
@@ -280,6 +336,12 @@ astro::image::ImagePtr	AsiCcd::getRawImage() {
 					= buffer[x + size.width() * y];
 			}
 		}
+		// if this is a color camera, add the mosaic information
+		if (_camera.isColor()) {
+			image->setMosaicType(
+				MosaicType::shift(MosaicType::BAYER_RGGB,
+					origin));
+		}
 		result = ImagePtr(image);
 		}
 		break;
@@ -308,6 +370,12 @@ astro::image::ImagePtr	AsiCcd::getRawImage() {
 				image->pixel(x, h - 1 - y)
 					= sb[x + size.width() * y];
 			}
+		}
+		// if this is a color camera, add the mosaic information
+		if (_camera.isColor()) {
+			image->setMosaicType(
+				MosaicType::shift(MosaicType::BAYER_RGGB,
+					origin));
 		}
 		result = ImagePtr(image);
 		}
@@ -367,25 +435,6 @@ void    AsiCcd::stopStream() {
 bool	AsiCcd::streaming() {
 	return (NULL != stream);
 }
-
-/**
- * \wait for the completion of 
- */
-bool	AsiCcd::wait() {
-	do {
-		CcdState::State	s = exposureStatus();
-		switch (s) {
-		case CcdState::idle:
-		case CcdState::cancelling:
-			return false;
-		case CcdState::exposed:
-			return true;
-		case CcdState::exposing:
-			usleep(100000);
-			break;
-		}
-	} while (1);
-};
 
 } // namespace asi
 } // namespace camera

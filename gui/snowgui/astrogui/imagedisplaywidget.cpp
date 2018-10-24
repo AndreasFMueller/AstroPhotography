@@ -11,6 +11,8 @@
 #include <AstroFilterfunc.h>
 #include "AutoGain.h"
 #include <QScrollBar>
+#include <QMenu>
+#include <QAction>
 
 using namespace astro::image;
 
@@ -47,6 +49,16 @@ imagedisplaywidget::imagedisplaywidget(QWidget *parent) :
 	// connect the imageUpdated signal with the processNewImage slot
 	connect(this, SIGNAL(imageUpdated()), this,
 		SLOT(processNewImage()), Qt::QueuedConnection);
+
+	// enable context menu
+	// XXX problem: the menu does not show up
+	setContextMenuPolicy(Qt::CustomContextMenu);
+	connect(this, SIGNAL(customContextMenuRequested(const QPoint&)),
+		this, SLOT(showContextMenu(const QPoint&)));
+
+	selectable->setContextMenuPolicy(Qt::CustomContextMenu);
+	connect(selectable, SIGNAL(customContextMenuRequested(const QPoint&)),
+		this, SLOT(showContextMenu(const QPoint&)));
 
 	// make sure the subframe is disabled, it only becomes enabled
 	// when an image is added
@@ -98,6 +110,9 @@ imagedisplaywidget::imagedisplaywidget(QWidget *parent) :
 		this, SLOT(greenOffsetChanged(double)));
 	connect(ui->blueoffsetBox, SIGNAL(valueChanged(double)),
 		this, SLOT(blueOffsetChanged(double)));
+
+	// crosshairs
+	_crosshairs = true;
 }
 
 /**
@@ -174,6 +189,11 @@ void	imagedisplaywidget::setImageRectangle(const ImageRectangle& imagerectangle)
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "emitting rectangledSelected(%s)",
 		imagerectangle.toString().c_str());
 	emit rectangleSelected(imagerectangle);
+
+	// compute the center for the crosshairs relative to this image
+	ImageSize	s = _image->size();
+	int	cx = s.width() / 2 - imagerectangle.size().width();
+	int	cy = s.height() / 2 - imagerectangle.size().height();
 }
 
 /**
@@ -202,7 +222,6 @@ ImagePoint	imagedisplaywidget::convertPoint(int x, int y) {
 
 	// if we are currently displaying a subimage
 	if (imageRectangleEnabled()) {
-		
 		x += _rectangle.origin().x();
 		y += _rectangle.origin().y();
 	}
@@ -603,12 +622,18 @@ void	imagedisplaywidget::processDisplayImage(ImagePtr image) {
 		hpos, vpos, previoussize.width(), previoussize.height());
 
 	// create a new pixmap and install it in the image
-	QPixmap *pixmap = image2pixmap(image);
+	QPixmap *pixmap = NULL;
+	try {
+		pixmap = image2pixmap(image);
+	} catch (const std::exception& x) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "cannot build pixmap: %s",
+			x.what());
+	}
 	if (NULL != pixmap) {
 		selectable->setPixmap(*pixmap);
+		selectable->setFixedSize(pixmap->width(), pixmap->height());
+		selectable->setMinimumSize(pixmap->width(), pixmap->height());
 	}
-	selectable->setFixedSize(pixmap->width(), pixmap->height());
-	selectable->setMinimumSize(pixmap->width(), pixmap->height());
 #if 0
 	connect(selectable, SIGNAL(rectangleSelected(QRect)),
 		this, SLOT(selectRectangle(QRect)));
@@ -965,9 +990,195 @@ void	imagedisplaywidget::changeEvent(QEvent *event) {
 	QWidget::changeEvent(event);
 }
 
+void	imagedisplaywidget::toggleSubframeVisible() {
+	setSubframeVisible(!subframeIsVisible());
+}
+
+void	imagedisplaywidget::toggleGainVisible() {
+	setGainVisible(!gainIsVisible());
+}
+
+void	imagedisplaywidget::toggleScaleVisible() {
+	setScaleVisible(!scaleIsVisible());
+}
+
+void	imagedisplaywidget::toggleInfoVisible() {
+	setInfoVisible(!infoIsVisible());
+}
+
 void	imagedisplaywidget::crosshairsChanged(int c) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "crosshair mode changed");
 	crosshairs((c > 0));
+}
+
+void	imagedisplaywidget::crosshairsCenter(astro::image::ImagePoint c) {
+	image2pixmap.crosshairs_center(c);
+}
+
+void	imagedisplaywidget::setCrosshairsVisible(bool c) {
+	crosshairs(c);
+	repaint();
+}
+
+void	imagedisplaywidget::toggleCrosshairsVisible() {
+	setCrosshairsVisible(!crosshairs());
+}
+
+bool	imagedisplaywidget::horizontalFlip() const {
+	return image2pixmap.horizontal_flip();
+}
+
+void	imagedisplaywidget::setVerticalFlip(bool f) {
+	image2pixmap.vertical_flip(f);
+	processNewSettings();
+}
+
+void	imagedisplaywidget::toggleVerticalFlip() {
+	setVerticalFlip(!verticalFlip());
+}
+
+bool	imagedisplaywidget::verticalFlip() const {
+	return image2pixmap.vertical_flip();
+}
+
+void	imagedisplaywidget::setHorizontalFlip(bool f) {
+	image2pixmap.horizontal_flip(f);
+	processNewSettings();
+}
+
+void	imagedisplaywidget::toggleHorizontalFlip() {
+	setHorizontalFlip(!horizontalFlip());
+}
+
+void	imagedisplaywidget::setShowRed(bool s) {
+	image2pixmap.show_red(s);
+	processNewSettings();
+}
+
+bool	imagedisplaywidget::showRed() const {
+	return image2pixmap.show_red();
+}
+
+void	imagedisplaywidget::toggleShowRed() {
+	setShowRed(!showRed());
+}
+
+void	imagedisplaywidget::setShowGreen(bool s) {
+	image2pixmap.show_green(s);
+	processNewSettings();
+}
+
+bool	imagedisplaywidget::showGreen() const {
+	return image2pixmap.show_green();
+}
+
+void	imagedisplaywidget::toggleShowGreen() {
+	setShowGreen(!showGreen());
+}
+
+void	imagedisplaywidget::setShowBlue(bool s) {
+	image2pixmap.show_blue(s);
+	processNewSettings();
+}
+
+bool	imagedisplaywidget::showBlue() const {
+	return image2pixmap.show_blue();
+}
+
+void	imagedisplaywidget::toggleShowBlue() {
+	setShowBlue(!showBlue());
+}
+
+void	imagedisplaywidget::showContextMenu(const QPoint& point) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "show context menu at %d/%d",
+		point.x(), point.y());
+
+	QMenu	contextMenu("Options", this);
+
+	QAction	actionGain(QString("Gain"), this);
+	actionGain.setCheckable(true);
+	actionGain.setChecked(gainIsVisible());
+	contextMenu.addAction(&actionGain);
+	connect(&actionGain, SIGNAL(triggered()),
+		this, SLOT(toggleGainVisible()));
+
+	QAction	actionScale(QString("Scale"), this);
+	actionScale.setCheckable(true);
+	actionScale.setChecked(scaleIsVisible());
+	contextMenu.addAction(&actionScale);
+	connect(&actionScale, SIGNAL(triggered()),
+		this, SLOT(toggleScaleVisible()));
+
+	QAction	actionSubframe(QString("Subframe"), this);
+	actionSubframe.setCheckable(true);
+	actionSubframe.setChecked(subframeIsVisible());
+	contextMenu.addAction(&actionSubframe);
+	connect(&actionSubframe, SIGNAL(triggered()),
+		this, SLOT(toggleSubframeVisible()));
+
+	QAction	actionCrosshairs(QString("Crosshairs"), this);
+	actionCrosshairs.setCheckable(true);
+	actionCrosshairs.setChecked(crosshairs());
+	contextMenu.addAction(&actionCrosshairs);
+	connect(&actionCrosshairs, SIGNAL(triggered()),
+		this, SLOT(toggleCrosshairsVisible()));
+
+	QAction	actionInfo(QString("Image info"), this);
+	actionInfo.setCheckable(true);
+	actionInfo.setChecked(infoIsVisible());
+	contextMenu.addAction(&actionInfo);
+	connect(&actionInfo, SIGNAL(triggered()),
+		this, SLOT(toggleInfoVisible()));
+
+	contextMenu.addSeparator();
+
+	QAction	actionRed(QString("show red channel"), this);
+	actionRed.setCheckable(true);
+	actionRed.setChecked(showRed());
+	contextMenu.addAction(&actionRed);
+	connect(&actionRed, SIGNAL(triggered()),
+		this, SLOT(toggleShowRed()));
+
+	QAction	actionGreen(QString("show green channel"), this);
+	actionGreen.setCheckable(true);
+	actionGreen.setChecked(showGreen());
+	contextMenu.addAction(&actionGreen);
+	connect(&actionGreen, SIGNAL(triggered()),
+		this, SLOT(toggleShowGreen()));
+
+	QAction	actionBlue(QString("show blue channel"), this);
+	actionBlue.setCheckable(true);
+	actionBlue.setChecked(showBlue());
+	contextMenu.addAction(&actionBlue);
+	connect(&actionBlue, SIGNAL(triggered()),
+		this, SLOT(toggleShowBlue()));
+
+	contextMenu.addSeparator();
+
+	QAction actionVerticalFlip(QString("flip vertically"), this);
+	actionVerticalFlip.setCheckable(true);
+	actionVerticalFlip.setChecked(verticalFlip());
+	contextMenu.addAction(&actionVerticalFlip);
+	connect(&actionVerticalFlip, SIGNAL(triggered()),
+		this, SLOT(toggleVerticalFlip()));
+
+	QAction actionHorizontalFlip(QString("flip horizontally"), this);
+	actionHorizontalFlip.setCheckable(true);
+	actionHorizontalFlip.setChecked(horizontalFlip());
+	contextMenu.addAction(&actionHorizontalFlip);
+	connect(&actionHorizontalFlip, SIGNAL(triggered()),
+		this, SLOT(toggleHorizontalFlip()));
+
+	QWidget	*s = dynamic_cast<QWidget*>(sender());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "s = %p", s);
+	if (NULL != s) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "found sender widget: %p", s);
+		contextMenu.exec(s->mapToGlobal(point));
+	} else {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "sender not a widget: %p",
+			sender());
+		contextMenu.exec(mapToGlobal(point));
+	}
 }
 
 } // namespace snowgui

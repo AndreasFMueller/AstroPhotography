@@ -73,6 +73,9 @@ int	help_command() {
 	std::cout << "wait MOUNT" << std::endl;
 	std::cout << "    Wait completion of a GOTO or cancel command."
 		<< std::endl;
+	std::cout << "time MOUNT" << std::endl;
+	std::cout << "    Get the (GPS) time from the mount."
+		<< std::endl;
 	return EXIT_SUCCESS;
 }
 
@@ -157,7 +160,16 @@ int	set_command(MountPtr mount, const RaDec& radec) {
 }
 
 /**
- * \brief Table of options for the astroinstrument
+ * \brief Implementation of the time command
+ */
+int	time_command(MountPtr mount) {
+	time_t	t = mount->time();
+	std::cout << stringprintf("%s", ctime(&t));
+	return EXIT_SUCCESS;
+}
+
+/**
+ * \brief Table of options for the astromount command
  */
 static struct option    longopts[] = {
 /* name		argument?		int*		int */
@@ -180,6 +192,7 @@ static void	usage(const std::string& progname) {
 	std::cout << prg << "[ options ] set MOUNT ra dec" << std::endl;
 	std::cout << prg << "[ options ] cancel MOUNT" << std::endl;
 	std::cout << prg << "[ options ] wait MOUNT" << std::endl;
+	std::cout << prg << "[ options ] time MOUNT" << std::endl;
 	std::cout << std::endl;
 	std::cout << "list mounts, get or set RA and DEC of a mount";
 	std::cout << std::endl;
@@ -285,6 +298,9 @@ int main(int argc, char *argv[]) {
 		radec.ra() = Angle::hms_to_angle(argv[optind++]);
 		radec.dec() = Angle::dms_to_angle(argv[optind++]);
 		return set_command(mount, radec);
+	}
+	if (command == "time") {
+		return time_command(mount);
 	}
 
 	throw std::runtime_error("unknown command");

@@ -108,33 +108,45 @@ void	ImageRepo::scan_file(const std::string& filename) {
 	try {
 		imageinfo.camera
 			= (std::string)infile.getMetadata("INSTRUME");
-	} catch(...) { }
+	} catch (...) { }
 	imageinfo.width = infile.getSize().width();
 	imageinfo.height = infile.getSize().height();
 	imageinfo.xbin = 1;
 	try {
 		imageinfo.xbin
 			= (int)infile.getMetadata("XBINNING");
-	} catch(...) { }
+	} catch (...) { }
 	imageinfo.ybin = 1;
 	try {
 		imageinfo.ybin
 			= (int)infile.getMetadata("YBINNING");
-	} catch(...) { }
+	} catch (...) { }
 	imageinfo.depth = infile.getPlanes();
 	imageinfo.pixeltype = infile.getPixeltype();
 	imageinfo.exposuretime = 0;
 	try {
 		imageinfo.exposuretime
 			= (double)infile.getMetadata("EXPTIME");
-	} catch(...) { }
+	} catch (...) { }
 	imageinfo.temperature = 0;
 	try {
 		imageinfo.temperature
 			= (double)infile.getMetadata("CCD-TEMP");
-	} catch(...) { }
+	} catch (...) { }
 	imageinfo.purpose = "light";
+	try {
+		imageinfo.purpose = (std::string)infile.getMetadata("PURPOSE");
+	} catch (...) { }
 	imageinfo.bayer = "    ";
+	try {
+		imageinfo.bayer
+			= trim((std::string)infile.getMetadata("BAYER"));
+	} catch (...) { }
+	imageinfo.focus = 0;
+	try {
+		imageinfo.focus
+			= (int)infile.getMetadata("FOCUSPOS");
+	} catch (...) { }
 	imageinfo.observation = "1970-01-01T00:00:00.000";
 	imageinfo.uuid = "";
 	try {
@@ -296,6 +308,7 @@ static ImageEnvelope	convert(const ImageRecord& imageinfo,
 	result.filter(imageinfo.filter);
 	result.bayer(imageinfo.bayer);
 	result.observation((time_t)FITSdate(imageinfo.observation));
+	result.focus(imageinfo.focus);
 	result.uuid(UUID(imageinfo.uuid));
 
 	// we are done, return the envelope
@@ -391,6 +404,9 @@ long	ImageRepo::save(ImagePtr image) {
 	try {
 		imageinfo.bayer
 			= trim((std::string)image->getMetadata("BAYER"));
+	} catch (...) { }
+	try {
+		imageinfo.focus = (int)image->getMetadata("FOCUSPOS");
 	} catch (...) { }
 	try {
 		imageinfo.observation
