@@ -2,7 +2,6 @@
  * AstroCamera.h -- Astro camera declarations
  *
  * (c) 2012 Prof Dr Andreas Mueller, Hochschule Rapperswil
- * $Id$
  */
 #ifndef _AstroCamera_h
 #define _AstroCamera_h
