@@ -16,6 +16,7 @@
 #include <cstdint>
 #include <condition_variable>
 #include <mutex>
+#include <atomic>
 
 namespace astro {
 namespace camera {
