@@ -212,17 +212,11 @@ astro::image::Metavalue	convert(const Metavalue& metavalue);
 Metavalue	convert(const astro::image::Metavalue& metavalue);
 
 // Focusing
-FocusState	convert(astro::focusing::Focusing::state_type s);
-astro::focusing::Focusing::state_type	convert(FocusState s);
+FocusState	convert(astro::focusing::Focus::state_type s);
+astro::focusing::Focus::state_type	convert(FocusState s);
 
 std::string	focusingstate2string(FocusState s);
 FocusState	focusingstring2state(const std::string& s);
-
-FocusMethod	convert(astro::focusing::Focusing::method_type m);
-astro::focusing::Focusing::method_type	convert(FocusMethod m);
-
-std::string	focusingmethod2string(FocusMethod m);
-FocusMethod	focusingstring2method(const std::string& m);
 
 // Repository related conversions
 ImageInfo	convert(const astro::project::ImageEnvelope& envelope);

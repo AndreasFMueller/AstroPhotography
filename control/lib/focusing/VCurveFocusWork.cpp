@@ -28,7 +28,7 @@ void	VCurveFocusWork::main(astro::thread::Thread<FocusWork>& /* thread */) {
 	if (!complete()) {
 		std::string	msg("focuser not completely specified");
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "%s", msg.c_str());
-		focusingstatus(Focusing::FAILED);
+		focusingstatus(Focus::FAILED);
 		throw std::runtime_error(msg);
 	}
 
@@ -58,7 +58,7 @@ void	VCurveFocusWork::main(astro::thread::Thread<FocusWork>& /* thread */) {
 		moveto(position);
 		
 		// get an image from the Ccd
-		focusingstatus(Focusing::MEASURING);
+		focusingstatus(Focus::MEASURING);
 		ccd()->startExposure(exposure());
 		usleep(1000000 * exposure().exposuretime());
 		ccd()->wait();
@@ -83,7 +83,7 @@ void	VCurveFocusWork::main(astro::thread::Thread<FocusWork>& /* thread */) {
 	} catch (std::exception& x) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "no optimal focus position: %s",
 			x.what());
-		focusingstatus(Focusing::FAILED);
+		focusingstatus(Focus::FAILED);
 		return;
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "optimal focus position: %f",
@@ -91,7 +91,7 @@ void	VCurveFocusWork::main(astro::thread::Thread<FocusWork>& /* thread */) {
 
 	// plausibility check for the position
 	if (!((focusposition >= min()) && (focusposition <= max()))) {
-		focusingstatus(Focusing::FAILED);
+		focusingstatus(Focus::FAILED);
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "focusing failed");
 		return;
 	}
@@ -99,7 +99,7 @@ void	VCurveFocusWork::main(astro::thread::Thread<FocusWork>& /* thread */) {
 	// move to the focus position
 	unsigned long	targetposition = focusposition;
 	moveto(targetposition);
-	focusingstatus(Focusing::FOCUSED);
+	focusingstatus(Focus::FOCUSED);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "target position reached");
 }
 

@@ -4,6 +4,7 @@
  * (c) 2016 Prof Dr Andreas Müller, Hochschule Rapperswil
  */
 #include <AstroFocus.h>
+#include "FocusSolvers.h"
 #include <lapack.h>
 
 namespace astro {

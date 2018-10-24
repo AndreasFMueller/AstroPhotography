@@ -7,6 +7,7 @@
 #include <AstroDebug.h>
 #include <AstroConfig.h>
 #include <AstroFormat.h>
+#include <AstroIO.h>
 #include <iostream>
 #include <sstream>
 #include <getopt.h>
@@ -28,7 +29,7 @@ static struct option	longopts[] = {
 { "center",	required_argument,	NULL,		'c' },
 { "ccd",	required_argument,	NULL,		'C' },
 { "debug",	no_argument,		NULL,		'd' },
-{ "exopsure",	required_argument,	NULL,		'e' },
+{ "exposure",	required_argument,	NULL,		'e' },
 { "focuser",	required_argument,	NULL,		'F' },
 { "help",	no_argument,		NULL,		'h' },
 { "method",	required_argument,	NULL,		'm' },
@@ -58,9 +59,14 @@ static void	usage(const std::string& progname) {
 		<< std::endl;
 	std::cout << " -c,--center=<c>      restrict to a window around the point <c>"
 		<< std::endl;
+	std::cout << " -C,--ccd=<ccd>       use CCD named <ccd>" << std::endl;
+	std::cout << " -e,--exposure=<t>    use exposure time <t>" << std::endl;
+	std::cout << " -F,--focuser=<f>     use focuser name <f>" << std::endl;
 	std::cout << " -m,--method=<m>      use <m> evaulation method"
 		<< std::endl;
 	std::cout << " -s,--solve=<s>       use <s> solution method"
+		<< std::endl;
+	std::cout << " -S,--steps=<s>       divide the interval into <s> steps"
 		<< std::endl;
 	std::cout << " -r,--rectangle<r>    only take contents of rectangle <r>"
 		" into acount."
@@ -71,6 +77,44 @@ static void	usage(const std::string& progname) {
 		<< std::endl;
 	std::cout << " -w,--window=<w>      window dimensions widthxheight"
 		<< std::endl;
+}
+
+/**
+ * \brief Method
+ */
+int	image_command(const std::string& filename, const std::string&method,
+		const std::string& processedfile) {
+	// read the image
+	io::FITSin	in(filename);
+	ImagePtr	image = in.read();
+
+	// apply the evaluator
+	FocusEvaluatorPtr	evaluator = FocusEvaluatorFactory::get(method);
+	double	val = (*evaluator)(image);
+
+	// display the results
+	std::cout << "value: " << val << std::endl;
+
+	// write the processed image
+	if (processedfile.size() > 0) {
+		io::FITSout	out(processedfile);
+		out.setPrecious(false);
+		out.write(evaluator->evaluated_image());
+	}
+}
+
+/**
+ * \brief Method to compute solution from a solver
+ *
+ * \param items		focus items to use as absis for the solution
+ */
+int	solve_command(const FocusItems& items, const std::string& solver) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "solving %d items, with %s",
+		items.size(), solver.c_str());
+	FocusSolverPtr	solverptr = FocusSolverFactory::get(solver);
+	int	solution = solverptr->position(items);
+	std::cout << "position: " << solution << std::endl;
+	return EXIT_SUCCESS;
 }
 
 /**
@@ -94,53 +138,40 @@ int	evaluate_command(const FocusInput& input) {
 		}
 	);
 
-	return EXIT_SUCCESS;
-}
-
-/**
- * \brief Method to compute solution from a solver
- *
- * \param items		focus items to use as absis for the solution
- */
-int	solve_command(const FocusItems& items, const std::string& solver) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "solving %d items, with %s",
-		items.size(), solver.c_str());
-	FocusSolverPtr	solverptr = FocusSolverFactory::get(solver);
-	int	solution = solverptr->position(items);
-	std::cout << "position: " << solution << std::endl;
-	return EXIT_SUCCESS;
+	// now call the solver
+	return solve_command(focusitems, input.solver());
 }
 
 /**
  * \brief Perform the focus process
  */
-int	focus_command(unsigned long minposition, unsigned long maxposition,
-		int steps, double exposuretime,
-		const std::string& ccdname, const std::string& focusername,
-		const std::string& method, const std::string& solver) {
+int	focus_command(const FocusParameters& parameters,
+		const std::string& ccdname, const std::string& focusername) {
 	// get the devices
 	camera::CcdPtr	ccd;
 	camera::FocuserPtr	focuser;
+	try {
+		module::Devices	_devices(module::getModuleRepository());
+                ccd = _devices.getCcd(ccdname);
+		focuser = _devices.getFocuser(focusername);
+	} catch (const std::exception& x) {
+		std::cerr << "cannot get devices: " << x.what() << std::endl;
+		return EXIT_FAILURE;
+	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "got devices");
 
 	// Construct a local focus process
-	BasicFocusProcess	process(ccd, focuser);
-
-	// set all the parameters
-	process.minposition(minposition);
-	process.maxposition(maxposition);
-	camera::Exposure	exposure;
-	exposure.exposuretime(exposuretime);
-	process.exposure(exposure);
-	process.steps(steps);
-	process.method(method);
-	process.solver(solver);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "preparing process");
+	FocusProcess	process(parameters, ccd, focuser);
 
 	// XXX install a callback for reporting
 
 	// start the process
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "start process");
 	process.start();
 
 	// wait for the process to terminate
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "wait for process");
 	process.wait();
 
 	// XXX report the results of the process
@@ -156,6 +187,8 @@ int	focus_command(unsigned long minposition, unsigned long maxposition,
  * \param argv	vector of arguments
  */
 int	main(int argc, char *argv[]) {
+	debug_set_ident("astrofocus");
+	debugthreads = 1;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "focus utility");
 	image::ImagePoint	center;
 	image::ImageRectangle	rectangle;
@@ -238,6 +271,21 @@ int	main(int argc, char *argv[]) {
 		return EXIT_SUCCESS;
 	}
 
+	// handle the 'image' command
+	if (command == std::string("image")) {
+		// next argument must be the filename
+		if (optind >= argc) {
+			std::cerr << "image file name missing" << std::endl;
+			return EXIT_FAILURE;
+		}
+		std::string	imagename(argv[optind++]);
+		std::string	processedfile;
+		if (optind < argc) {
+			processedfile = std::string(argv[optind++]);
+		}
+		return image_command(imagename, method, processedfile);
+	}
+
 	// handle the 'evaluate' command
 	if (command == std::string("evaluate")) {
 		FocusInput	fi;
@@ -291,10 +339,18 @@ int	main(int argc, char *argv[]) {
 		}
 		unsigned long	maxposition = std::stoi(argv[optind++]);
 
+		// prepare the parameters
+		FocusParameters	fp(minposition, maxposition);
+		fp.steps(steps);
+		camera::Exposure	exposure;
+		exposure.exposuretime(exposuretime);
+		exposure.purpose(camera::Exposure::focus);
+		fp.exposure(exposure);
+		fp.method(method);
+		fp.solver(solver);
+
 		// get the the devices
-		return focus_command(minposition, maxposition, steps,
-			exposuretime, ccdname, focusername,
-			method, solver);
+		return focus_command(fp, ccdname, focusername);
 	}
 
 	// handle unknown commands

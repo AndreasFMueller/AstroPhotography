@@ -48,8 +48,7 @@ void	FocusEvaluatorTest::testBasic() {
 	ImagePtr	imgptr(image);
 	
 	FocusEvaluatorPtr	evaluator
-		= FocusEvaluatorFactory::get(
-			FocusEvaluatorFactory::BrennerHorizontal);
+		= FocusEvaluatorFactory::get("BrennerHorizontal");
 	double	value = (*evaluator)(imgptr);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "value = %f", value);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testBasic() end");

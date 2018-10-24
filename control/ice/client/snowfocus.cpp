@@ -180,8 +180,7 @@ int	main(int argc, char *argv[]) {
 	std::string	binning;
 	std::string	frame;
 	std::string	filtername;
-	astro::focusing::Focusing::method_type	method
-		= astro::focusing::Focusing::BRENNER;
+	std::string	method("BrennerOmni");
 
 	int	c;
 	int	longindex;
@@ -207,7 +206,7 @@ int	main(int argc, char *argv[]) {
 			usage(argv[0]);
 			return EXIT_SUCCESS;
 		case 'm':
-			method = astro::focusing::Focusing::string2method(optarg);
+			method = std::string(optarg);
 			break;
 		case 'r':
 			frame = optarg;
@@ -441,11 +440,10 @@ int	main(int argc, char *argv[]) {
 
 	// set up the focusing
 	focusing->setSteps(steps);
-	focusing->setMethod(convert(method));
+	focusing->setMethod(method);
 	focusing->setExposure(convert(exposure));
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "focusing set up %d steps, method %s",
-		steps,
-		astro::focusing::Focusing::method2string(method).c_str());
+		steps, method.c_str());
 
 	// start the focusing process
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "starting between %d and %d", min, max);

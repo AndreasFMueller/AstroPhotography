@@ -14,7 +14,15 @@ namespace focusing {
 FocusProcessBase::FocusProcessBase(unsigned long minposition,
 	unsigned long maxposition)
 	: FocusParameters(minposition, maxposition) {
-	status(IDLE);
+	status(Focus::IDLE);
+}
+
+/**
+ * \brief Construct a focus process from a parameter object
+ */
+FocusProcessBase::FocusProcessBase(const FocusParameters& parameters)
+	: FocusParameters(parameters) {
+	status(Focus::IDLE);
 }
 
 /**
@@ -76,7 +84,7 @@ bool	FocusProcessBase::run0() {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "focusing step %d", step);
 
 		// move to the next position
-		status(MOVING);
+		status(Focus::MOVING);
 		reportState();
 		unsigned long	pos = minposition() + step * delta / steps();
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "step %d, position %lu",
@@ -84,13 +92,13 @@ bool	FocusProcessBase::run0() {
 		moveto(pos);
 
 		if (!_running) {
-			status(FAILED);
+			status(Focus::FAILED);
 			reportState();
 			return false;
 		}
 
 		// take an image
-		status(MEASURING);
+		status(Focus::MEASURING);
 		reportState();
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "taking an image");
 		ImagePtr	image = get();
@@ -107,7 +115,7 @@ bool	FocusProcessBase::run0() {
 		reportFocusElement(fe);
 
 		if (!_running) {
-			status(FAILED);
+			status(Focus::FAILED);
 			reportState();
 			return false;
 		}
@@ -142,7 +150,7 @@ bool	FocusProcessBase::run0() {
 	moveto(position);
 
 	// now you can declare the 
-	status(FOCUSED);
+	status(Focus::FOCUSED);
 	reportState();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "focusing complete");
 	return true;
@@ -164,7 +172,7 @@ void	FocusProcessBase::run() {
 		std::string	msg = stringprintf("cannot focus: %s",
 			x.what());
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
-		status(FAILED);
+		status(Focus::FAILED);
 	}
 }
 
@@ -180,14 +188,16 @@ static void	launch(FocusProcessBase *process) {
  */
 void	FocusProcessBase::start() {
 	// make sure the current state is IDLE
-	if (IDLE != status()) {
+	if (Focus::IDLE != status()) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "process not idle");
 		throw std::runtime_error("FocusProcess not IDLE");
 	}
 	_running = true;
 
 	// start the thread
-	status(MOVING);
+	status(Focus::MOVING);
 	_thread = std::thread(launch, this);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "focus process thread started");
 }
 
 /**
@@ -204,15 +214,18 @@ void	FocusProcessBase::stop() {
  * wait returns when state FOCUSED or FAILED are reached.
  */
 void	FocusProcessBase::wait() {
-	std::set<state_type>	states;
-	states.insert(FOCUSED);
-	states.insert(FAILED);
-	state_type	finalstate = _status.wait(states);
-	if (FAILED == finalstate) {
+	std::set<Focus::state_type>	states;
+	states.insert(Focus::FOCUSED);
+	states.insert(Focus::FAILED);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "waiting for %d states", states.size());
+	Focus::state_type	finalstate = _status.wait(states);
+	if (Focus::FAILED == finalstate) {
 		std::string	msg = stringprintf("focus process failed");
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "%s", msg.c_str());
 		throw std::runtime_error(msg);
 	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "state %s reached",
+		Focus::state2string(finalstate).c_str());
 }
 
 } // namespace focusing

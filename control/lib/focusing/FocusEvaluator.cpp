@@ -26,4 +26,3 @@ FocusableImage	FocusEvaluatorImplementation::extractimage(const ImagePtr image) 
 
 } // namespace focusing
 } // namespace astro
-

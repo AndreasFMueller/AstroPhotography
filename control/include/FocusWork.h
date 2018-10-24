@@ -52,12 +52,12 @@ public:
 		return _focusing.callback();
 	}
 	void	callback(ImagePtr image, int position, double value);
-	void	callback(Focusing::state_type state);
+	void	callback(Focus::state_type state);
 protected:
 	bool	complete();
 	Focusing&	_focusing;
-	Focusing::state_type	focusingstatus();
-	void	focusingstatus(Focusing::state_type s);
+	Focus::state_type	focusingstatus();
+	void	focusingstatus(Focus::state_type s);
 public:
 	FocusWork(Focusing& focusing);
 	virtual ~FocusWork() { }

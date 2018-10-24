@@ -14,49 +14,6 @@ namespace astro {
 namespace focusing {
 
 /**
- * \brief Get an Evaluator by type
- *
- * \param type		evaluator type
- */
-FocusEvaluatorPtr	FocusEvaluatorFactory::get(FocusEvaluatorType type) {
-	ImageRectangle	rectangle;
-	return get(type, rectangle);
-}
-
-/**
- * \brief Get an Evaluator by type
- *
- * \param type		evaluator type
- * \param rectangle	rectangle of interest
- */
-FocusEvaluatorPtr	FocusEvaluatorFactory::get(FocusEvaluatorType type,
-				const ImageRectangle& rectangle) {
-	FocusEvaluator	*evaluator = NULL;
-	switch (type) {
-	case BrennerHorizontal:
-		evaluator = new BrennerHorizontalEvaluator(rectangle);
-		break;
-	case BrennerVertical:
-		evaluator = new BrennerVerticalEvaluator(rectangle);
-		break;
-	case BrennerOmni:
-		evaluator = new BrennerOmniEvaluator(rectangle);
-		break;
-	case FWHM:
-		evaluator = new FWHM2Evaluator(rectangle);
-		break;
-	case MEASURE:
-		evaluator = new MeasureEvaluator(rectangle);
-		break;
-	}
-	if (NULL == evaluator) {
-		debug(LOG_ERR, DEBUG_LOG, 0, "unknown evaluator type %d", type);
-		throw std::runtime_error("unknown evaluator type");
-	}
-	return FocusEvaluatorPtr(evaluator);
-}
-
-/**
  * \brief Get an evaluator specified by name
  *
  * Valid names are returned by the evaluatornames method

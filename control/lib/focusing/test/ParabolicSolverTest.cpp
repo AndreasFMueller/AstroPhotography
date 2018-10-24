@@ -10,6 +10,7 @@
 #include <AstroDebug.h>
 #include <AstroFocus.h>
 #include <cstdlib>
+#include "../FocusSolvers.h"
 
 using namespace astro::focusing;
 

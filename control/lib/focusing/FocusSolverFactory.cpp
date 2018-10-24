@@ -5,6 +5,7 @@
  */
 #include <AstroFocus.h>
 #include <AstroUtils.h>
+#include "FocusSolvers.h"
 
 namespace astro {
 namespace focusing {

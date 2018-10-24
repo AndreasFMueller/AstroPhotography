@@ -538,19 +538,19 @@ public:
 	}
 	T	wait(std::set<T> values) {
 		std::unique_lock<std::mutex>	lock(_mutex);
-		bool	found = (values.find(_value) == values.end());
-		while (!found) {
+		bool	notfound = (values.find(_value) == values.end());
+		while (notfound) {
 			_condition.wait(lock);
-			found = (values.find(_value) == values.end());
+			notfound = (values.find(_value) == values.end());
 		}
 		return _value;
 	}
 	T	wait_not(std::set<T> values) {
 		std::unique_lock<std::mutex>	lock(_mutex);
-		bool	notfound = (values.find(_value) != values.end());
-		while (!notfound) {
+		bool	found = (values.find(_value) != values.end());
+		while (found) {
 			_condition.wait(lock);
-			notfound = (values.find(_value) != values.end());
+			found = (values.find(_value) != values.end());
 		}
 		return _value;
 	}
