@@ -31,14 +31,14 @@ FocusProcessor::FocusProcessor(const std::string& method,
  *
  * \param element	the element to be processed
  */
-void	FocusProcessor::process(const FocusElement& element) {
-	FocusElement	result = element;
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "processing position %lu", result.pos());
+void	FocusProcessor::process(FocusElement& element) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "processing position %lu",
+		element.pos());
 
 	// first make sure we have the input image, open it if we
 	// don't have it.
 	if (!element.raw_image) {
-		result.raw_image = element.image();
+		element.raw_image = element.image();
 	}
 
 	// now process the image:
@@ -49,20 +49,19 @@ void	FocusProcessor::process(const FocusElement& element) {
 
 	// 2. run the image through the evaluator, adding the info to the
 	//    element
-	result.value = (*evaluator)(result.raw_image);
-	result.processed_image = evaluator->evaluated_image();
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "%lu -> %f", result.pos(), result.value);
-
-	// 3. send a callback message XXX
+	element.value = (*evaluator)(element.raw_image);
+	element.processed_image = evaluator->evaluated_image();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "%lu -> %f", element.pos(),
+		element.value);
 
 	// if we are not to keep the images, throw them away now
 	if (!_keep_images) {
-		result.raw_image.reset();
-		result.processed_image.reset();
+		element.raw_image.reset();
+		element.processed_image.reset();
 	}
 
 	// add the element to the output
-	_output->insert(std::make_pair(result.pos(), result));
+	_output->insert(std::make_pair(element.pos(), element));
 }
 
 /**

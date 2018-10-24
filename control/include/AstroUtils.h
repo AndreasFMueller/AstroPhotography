@@ -529,27 +529,30 @@ public:
 		}
 		return *this;
 	}
-	void	wait(T value) {
+	T	wait(T value) {
 		std::unique_lock<std::mutex>	lock(_mutex);
 		while (value != _value) {
 			_condition.wait(lock);
 		}
+		return _value;
 	}
-	void	wait(std::set<T> values) {
+	T	wait(std::set<T> values) {
 		std::unique_lock<std::mutex>	lock(_mutex);
 		bool	found = (values.find(_value) == values.end());
 		while (!found) {
 			_condition.wait(lock);
 			found = (values.find(_value) == values.end());
 		}
+		return _value;
 	}
-	void	wait_not(std::set<T> values) {
+	T	wait_not(std::set<T> values) {
 		std::unique_lock<std::mutex>	lock(_mutex);
 		bool	notfound = (values.find(_value) != values.end());
 		while (!notfound) {
 			_condition.wait(lock);
 			notfound = (values.find(_value) != values.end());
 		}
+		return _value;
 	}
 	operator	T() const {
 		return _value;

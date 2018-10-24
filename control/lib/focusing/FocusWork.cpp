@@ -93,6 +93,7 @@ void	FocusWork::callback(Focusing::state_type state) {
 	if (!callback()) {
 		return;
 	}
+#if 0
 	try {
 		astro::callback::CallbackDataPtr	data(
 			new FocusCallbackState(state));
@@ -101,6 +102,7 @@ void	FocusWork::callback(Focusing::state_type state) {
 	} catch (...) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "exception during callback");
 	}
+#endif
 }
 
 /**

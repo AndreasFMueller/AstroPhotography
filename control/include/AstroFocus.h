@@ -133,7 +133,7 @@ public:
 	FocusOutputPtr	output() const { return _output; }
 	FocusProcessor(const FocusInputBase&);
 	FocusProcessor(const std::string& method, const std::string& solver);
-	void	process(const FocusElement&);
+	void	process(FocusElement&);
 	void	process(const FocusInput& input);
 	void	process(const FocusInputImages& input);
 };
@@ -264,23 +264,18 @@ static FocusSolverPtr	get(const std::string& solver);
 };
 
 /**
- * \brief The base class for focusing processes
+ * \brief Parameters for the focusing process
+ *
+ * Setting up the focusing process needs a lot of parameters which are
+ * collected in this class. The construtors are designed in such a
+ * way that a constructed instance of this class is always consistent.
  */
-class FocusProcess {
-	// the main methods needed to implement the focusing process
-public:
-	virtual void		moveto(unsigned long position) = 0;
-	virtual ImagePtr	get(const camera::Exposure& exposure) = 0;
+class FocusParameters {
 public:
 	// focusing status (what is it doing right now?)
 	typedef enum { IDLE, MOVING, MEASURING, FOCUSED, FAILED } state_type;
 static std::string	state2string(state_type);
 static state_type	string2state(const std::string& s);
-private:
-	thread::Waiter<state_type>	_status;
-	void	status(state_type s) { _status = s; }
-public:
-	state_type	status() const { return _status; }
 
 	// focus position interval to scan
 private:
@@ -288,23 +283,52 @@ private:
 	unsigned long	_maxposition;
 public:
 	unsigned long	minposition() const { return _minposition; }
-	void	minposition(unsigned long m) { _minposition = m; }
 	unsigned long	maxposition() const { return _maxposition; }
-	void	maxposition(unsigned long m) { _maxposition = m; }
 
 	// subdivision steps for the interval
 private:
 	int	_steps;
 public:
 	int	steps() const { return _steps; }
-	void	steps(int s) { _steps = s; }
+	void	steps(int s);
 
 	// the exposure
 private:
 	camera::Exposure	_exposure;
 public:
 	const camera::Exposure	exposure() const { return _exposure; }
-	void	exposure(const camera::Exposure& e) { _exposure = e; }
+	void	exposure(const camera::Exposure& e);
+
+private:
+	std::string	_method;
+	std::string	_solver;
+public:
+	const std::string&	method() const { return _method; }
+	const std::string&	solver() const { return _solver; }
+	void	method(const std::string& m);
+	void	solver(const std::string& s);
+
+	FocusParameters(unsigned long minposition, unsigned long maxposition);
+};
+
+
+/**
+ * \brief The base class for focusing processes
+ *
+ * This class implements the general logic of the focusing process, without
+ * the nitty gritt ydetails of how to moving the focus position and getting
+ * images
+ */
+class FocusProcessBase : public FocusParameters {
+	// the main methods needed to implement the focusing process
+public:
+	virtual void		moveto(unsigned long position) = 0;
+	virtual ImagePtr	get() = 0;
+private:
+	thread::Waiter<state_type>	_status;
+	void	status(state_type s) { _status = s; }
+public:
+	state_type	status() const { return _status; }
 
 	// callback
 private:
@@ -313,18 +337,14 @@ public:
 	callback::CallbackPtr	callback() const { return _callback; }
 	void	callbacu(callback::CallbackPtr c) { _callback = c; }
 
-private:
-	std::string	_method;
-	std::string	_solver;
-public:
-	const std::string&	method() const { return _method; }
-	const std::string&	solver() const { return _solver; }
-	void	method(const std::string& m) { _method = m; }
-	void	solver(const std::string& s) { _solver = s; }
-	
 	// constructors
-	FocusProcess();
-	virtual ~FocusProcess();
+	FocusProcessBase(unsigned long minposition, unsigned long maxposition);
+	virtual ~FocusProcessBase();
+
+private:
+	void	reportState();
+	void	reportImage(image::ImagePtr);
+	void	reportFocusElement(const FocusElement&);
 
 private:
 	std::atomic_bool	_running;
@@ -336,19 +356,20 @@ public:
 	void	wait();
 	void	run();
 private:
-	void	run0();
+	bool	run0();
 };
 
 /**
- * \brief Focus Process using a CCd and a focuser directly
+ * \brief Focus Process using a CCD and a focuser directly
  */
-class BasicFocusProcess : public FocusProcess {
+class FocusProcess : public FocusProcessBase {
 	camera::CcdPtr		_ccd;
 	camera::FocuserPtr	_focuser;
 public:
-	BasicFocusProcess(camera::CcdPtr ccd, camera::FocuserPtr focuser);
+	FocusProcess(unsigned long minposition, unsigned long maxposition,
+		camera::CcdPtr ccd, camera::FocuserPtr focuser);
 	virtual void	moveto(unsigned long);
-	virtual ImagePtr	get(const camera::Exposure& exposure);
+	virtual ImagePtr	get();
 };
 
 // we need the FocusWork forward declaration in the next class
@@ -459,19 +480,18 @@ public:
 	int	position() const { return _position; }
 	double	value() const { return _value; }
 	FocusCallbackData(astro::image::ImagePtr image,
-		int position, double value)
-		: ImageCallbackData(image), _position(position), _value(value) {
-	}
+		int position, double value);
+	FocusCallbackData(const FocusElement& fe);
 };
 
 /**
  * \brief Callback data object to inform about a state change
  */
 class FocusCallbackState : public astro::callback::CallbackData {
-	Focusing::state_type	_state;
+	FocusProcess::state_type	_state;
 public:
-	Focusing::state_type	state() const { return _state; }
-	FocusCallbackState(Focusing::state_type state) : _state(state) { }
+	FocusProcess::state_type	state() const { return _state; }
+	FocusCallbackState(FocusProcess::state_type state) : _state(state) { }
 };
 
 } // namespace focusing
