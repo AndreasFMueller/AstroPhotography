@@ -7,6 +7,7 @@
 #include <FocusWork.h>
 #include "MeasureEvaluator.h"
 #include "FWHM2Evaluator.h"
+#include "FocusSolvers.h"
 
 using namespace astro::camera;
 
@@ -18,8 +19,8 @@ namespace focusing {
  */
 Focusing::Focusing(CcdPtr ccd, FocuserPtr focuser)
 	: _ccd(ccd), _focuser(focuser) {
-	_method = FWHM;
-	_status = IDLE;
+	_method = std::string("fwhm");
+	_status = Focus::IDLE;
 	work = NULL;
 	_steps = 3;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "create Focusing @ %p", this);
@@ -53,33 +54,30 @@ void	Focusing::start(int min, int max) {
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "start focus search between %d and %d",
 		min, max);
-	_status = IDLE;
+	_status = Focus::IDLE;
 
 	// create the focus work
 	FocusWork	*work = NULL;
-	switch (method()) {
-	case Focusing::BRENNER:
+	if (method() == "BrennerOmni") {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "initialize Brenner");
-		evaluator(FocusEvaluatorFactory::get(
-			FocusEvaluatorFactory::BrennerOmni));
+		evaluator(FocusEvaluatorFactory::get(std::string("BrennerOmni")));
 		solver(FocusSolverPtr(new BrennerSolver()));
 		work = new FocusWork(*this);
-		break;
-	case Focusing::FWHM:
+	}
+	if (method() == "fwhm") {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "initialize FWHM");
 		// these fields are handled in the VCurveFocusWork
 		//evaluator(FocusEvaluatorFactory::get(
 		//	FocusEvaluatorFactory::FWHM));
 		//solver(FocusSolverPtr(new AbsoluteValueSolver()));
 		work = new VCurveFocusWork(*this);
-		break;
-	case Focusing::MEASURE:
+	}
+	if (method() == "measure") {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "initialize Measure");
 		//evaluator(FocusEvaluatorFactory::get(
 		//	FocusEvaluatorFactory::Measure));
 		//solver(FocusSolverPtr(new AbsoluteValueSolver()));
 		work = new MeasureFocusWork(*this);
-		break;
 	}
 	work->min(min);
 	work->max(max);
@@ -104,75 +102,6 @@ void	Focusing::cancel() {
 	if (thread) {
 		thread->stop();
 	}
-}
-
-std::string	Focusing::method2string(method_type m) {
-	switch (m) {
-	case BRENNER:
-		return std::string("brenner");
-	case FWHM:
-		return std::string("fwhm");
-	case MEASURE:
-		return std::string("measure");
-	}
-	throw std::runtime_error("bad focus method");
-}
-
-std::string	Focusing::state2string(state_type s) {
-	switch (s) {
-	case IDLE:
-		return std::string("idle");
-		break;
-	case MOVING:
-		return std::string("moving");
-		break;
-	case MEASURING:
-		return std::string("measuring");
-		break;
-	case FOCUSED:
-		return std::string("focused");
-		break;
-	case FAILED:
-		return std::string("failed");
-		break;
-	}
-	throw std::runtime_error("bad focus status");
-}
-
-Focusing::state_type	Focusing::string2state(const std::string& s) {
-	if (s == "idle") {
-		return Focusing::IDLE;
-	}
-	if (s == "moving") {
-		return Focusing::MOVING;
-	}
-	if (s == "measuring") {
-		return Focusing::MEASURING;
-	}
-	if (s == "focused") {
-		return Focusing::FOCUSED;
-	}
-	if (s == "failed") {
-		return Focusing::FAILED;
-	}
-	throw std::runtime_error("bad focus status");
-}
-
-Focusing::method_type	Focusing::string2method(const std::string& name) {
-	int	l = name.size();
-	if (l == 0) {
-		throw std::runtime_error("unknown method");
-	}
-	if (name == std::string("brenner").substr(0, l)) {
-		return Focusing::BRENNER;
-	}
-	if (name == std::string("fwhm").substr(0, l)) {
-		return Focusing::FWHM;
-	}
-	if (name == std::string("measure").substr(0, l)) {
-		return Focusing::MEASURE;
-	}
-	throw std::runtime_error("unknown method");
 }
 
 } // namespace focusing

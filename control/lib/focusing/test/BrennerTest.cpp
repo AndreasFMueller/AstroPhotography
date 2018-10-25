@@ -14,6 +14,7 @@
 #include <cstdlib>
 #include <limits>
 #include <includes.h>
+#include "../FocusSolvers.h"
 
 using namespace astro::focusing;
 
@@ -155,7 +156,7 @@ void	BrennerTest::testCommon(FocusEvaluatorPtr evaluator,
 void	BrennerTest::testHorizontal() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testHorizontal() begin");
 	FocusEvaluatorPtr	evaluator = FocusEvaluatorFactory::get(
-				FocusEvaluatorFactory::BrennerHorizontal);
+					"BrennerHorizontal");
 	testCommon(evaluator, "horizontal");
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testHorizontal() end");
 }
@@ -163,7 +164,7 @@ void	BrennerTest::testHorizontal() {
 void	BrennerTest::testVertical() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testVertical() begin");
 	FocusEvaluatorPtr	evaluator = FocusEvaluatorFactory::get(
-				FocusEvaluatorFactory::BrennerVertical);
+					"BrennerVertical");
 	testCommon(evaluator, "vertical");
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testVertical() end");
 }
@@ -171,7 +172,7 @@ void	BrennerTest::testVertical() {
 void	BrennerTest::testOmni() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testOmni() begin");
 	FocusEvaluatorPtr	evaluator = FocusEvaluatorFactory::get(
-				FocusEvaluatorFactory::BrennerOmni);
+					"BrennerOmni");
 	testCommon(evaluator, "omni");
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testOmni() end");
 }

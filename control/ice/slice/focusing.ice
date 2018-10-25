@@ -28,18 +28,6 @@ enum FocusState {
 };
 
 /**
- * \brief Focus measuing method
- */
-enum FocusMethod {
-	// use Brenner focus measure
-	FocusBrenner,
-	// use FWHM as the method to estimate how far away from focus we are
-	FocusFWHM,
-	// use a special measure based on the laplacian to estimate 
-	FocusMEASURE
-};
-
-/**
  * \brief structures for the focusing history
  */
 struct FocusPoint {
@@ -67,12 +55,12 @@ interface Focusing {
 	/**
 	 * \brief Get the method used to quantify focus quality
 	 */
-	FocusMethod	method();
+	string	method();
 
 	/**
 	 * \brief Set the focus quantification method
 	 */
-	void	setMethod(FocusMethod m);
+	void	setMethod(string m);
 
 	/**
 	 * \brief get the exposure setting  used to find the focus

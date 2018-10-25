@@ -50,16 +50,15 @@ FocusState	FocusingI::status(const Ice::Current& /* current */) {
 	return convert(_focusingptr->status());
 }
 
-FocusMethod	FocusingI::method(const Ice::Current& /* current */) {
-	return convert(_focusingptr->method());
+std::string	FocusingI::method(const Ice::Current& /* current */) {
+	return _focusingptr->method();
 }
 
-void	FocusingI::setMethod(FocusMethod method,
+void	FocusingI::setMethod(const std::string& method,
 		const Ice::Current& /* current */) {
-	astro::focusing::Focusing::method_type	m = convert(method);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "set the method to %s",
-		astro::focusing::Focusing::method2string(m).c_str());
-	_focusingptr->method(m);
+		method.c_str());
+	_focusingptr->method(method);
 }
 
 
@@ -88,8 +87,8 @@ void	FocusingI::start(int min, int max, const Ice::Current& /* current */) {
 		min, max);
 	// ensure we are in the right state
 	switch (_focusingptr->status()) {
-	case astro::focusing::Focusing::MOVING:
-	case astro::focusing::Focusing::MEASURING:
+	case astro::focusing::Focus::MOVING:
+	case astro::focusing::Focus::MEASURING:
 		throw BadState(std::string("currently focusing"));
 	default:
 		break;

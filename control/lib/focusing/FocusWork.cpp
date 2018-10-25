@@ -89,7 +89,7 @@ void	FocusWork::callback(ImagePtr image, int position, double value) {
 	}
 }
 
-void	FocusWork::callback(Focusing::state_type state) {
+void	FocusWork::callback(Focus::state_type state) {
 	if (!callback()) {
 		return;
 	}
@@ -112,7 +112,7 @@ void	FocusWork::main(astro::thread::Thread<FocusWork>& /* thread */) {
 	if (!complete()) {
 		debug(LOG_ERR, DEBUG_LOG, 0,
 			"FocusWork is not completely configured");
-		focusingstatus(Focusing::FAILED);
+		focusingstatus(Focus::FAILED);
 		return;
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "starting focus process in [%d,%d]",
@@ -132,7 +132,7 @@ void	FocusWork::main(astro::thread::Thread<FocusWork>& /* thread */) {
 		moveto(position);
 
 		// get an image
-		focusingstatus(Focusing::MEASURING);
+		focusingstatus(Focus::MEASURING);
 		ccd()->startExposure(exposure());
 		usleep(1000000 * exposure().exposuretime());
 		ccd()->wait();
@@ -167,7 +167,7 @@ void	FocusWork::main(astro::thread::Thread<FocusWork>& /* thread */) {
 		std::string	msg = stringprintf(
 			"could not find a focus position: %d", targetposition);
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
-		focusingstatus(Focusing::FAILED);
+		focusingstatus(Focus::FAILED);
 		return;
 	}
 
@@ -175,9 +175,9 @@ void	FocusWork::main(astro::thread::Thread<FocusWork>& /* thread */) {
 		targetposition);
 
 	// move to the final focus position
-	focusingstatus(Focusing::MOVING);
+	focusingstatus(Focus::MOVING);
 	moveto(targetposition);
-	focusingstatus(Focusing::FOCUSED);
+	focusingstatus(Focus::FOCUSED);
 }
 
 /**
@@ -217,7 +217,7 @@ void	FocusWork::moveto(unsigned long position) {
 	}
 
 	// switch state to moving
-	focusingstatus(Focusing::MOVING);
+	focusingstatus(Focus::MOVING);
 
 	// check whether backlash compensation is needed
 	if ((backlash() > 0) && (focuser()->current() > position)) {
@@ -250,14 +250,14 @@ unsigned long	FocusWork::backlash() {
 /**
  * \brief get Focusing status
  */
-Focusing::state_type	FocusWork::focusingstatus() {
+Focus::state_type	FocusWork::focusingstatus() {
 	return _focusing.status();
 }
 
 /**
  * \brief set the focusing status
  */
-void	FocusWork::focusingstatus(Focusing::state_type s) {
+void	FocusWork::focusingstatus(Focus::state_type s) {
 	callback(s);
 	_focusing.status(s);
 }

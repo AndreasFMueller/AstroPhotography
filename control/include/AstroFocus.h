@@ -15,6 +15,9 @@ namespace focusing {
 
 /**
  * \brief Base class for focus input
+ *
+ * This method contains just parameters needed to evaluate all the images 
+ * of a sequence to find the focus
  */
 class FocusInputBase {
 	image::ImageRectangle	_rectangle;
@@ -40,7 +43,8 @@ public:
  * \brief Input for a focusing process
  *
  * This data object contains all the information needed for processing
- * the image to a focus position
+ * the image to a focus position, including an image file name for each
+ * focus position.
  */
 class FocusInput
 	: public FocusInputBase, public std::map<unsigned long, std::string> {
@@ -52,6 +56,8 @@ public:
 
 /**
  * \brief A class to hold focus input images
+ *
+ * This object contains actual input images for the focus evaluation
  */
 class FocusInputImages
 	: public FocusInputBase, public std::map<unsigned long, ImagePtr> {
@@ -183,12 +189,6 @@ typedef std::shared_ptr<FocusEvaluator>	FocusEvaluatorPtr;
  */
 class FocusEvaluatorFactory {
 public:
-	typedef enum {
-		BrennerHorizontal, BrennerVertical, BrennerOmni, FWHM, MEASURE
-	} FocusEvaluatorType;
-static FocusEvaluatorPtr	get(FocusEvaluatorType type);
-static FocusEvaluatorPtr	get(FocusEvaluatorType type,
-					const ImageRectangle& roi);
 static FocusEvaluatorPtr	get(const std::string& type);
 static FocusEvaluatorPtr	get(const std::string& type,
 					const ImageRectangle& roi);
@@ -208,52 +208,6 @@ public:
 
 typedef std::shared_ptr<FocusSolver>	FocusSolverPtr;
 
-class CentroidSolver : public FocusSolver {
-public:
-	CentroidSolver();
-	virtual ~CentroidSolver() { }
-	virtual int	position(const FocusItems& focusitems);
-};
-
-class ParabolicSolver : public FocusSolver {
-public:
-	ParabolicSolver();
-	virtual ~ParabolicSolver() { }
-	virtual int	position(const FocusItems& focusitems);
-};
-
-class AbsoluteValueSolver : public ParabolicSolver {
-public:
-	AbsoluteValueSolver();
-	virtual ~AbsoluteValueSolver() { }
-	virtual int	position(const FocusItems& focusitems);
-};
-
-class MaximumSolver : public FocusSolver {
-protected:
-	float	maximum;
-	float	minimum;
-	int	maximumposition;
-public:
-	MaximumSolver();
-	virtual ~MaximumSolver() { }
-	virtual int	position(const FocusItems& focusitems);
-};
-
-class MinimumSolver : public FocusSolver {
-public:
-	MinimumSolver();
-	virtual ~MinimumSolver() { }
-	virtual int	position(const FocusItems& focusitems);
-};
-
-class BrennerSolver : public MaximumSolver {
-public:
-	BrennerSolver();
-	virtual ~BrennerSolver() { }
-	virtual int	position(const FocusItems& focusitems);
-};
-
 /**
  * \brief Factory to produce solver classes
  */
@@ -264,6 +218,17 @@ static FocusSolverPtr	get(const std::string& solver);
 };
 
 /**
+ * \brief Focus namespace for common stuff
+ */
+class Focus {
+public:
+	// focusing status (what is it doing right now?)
+	typedef enum { IDLE, MOVING, MEASURING, FOCUSED, FAILED } state_type;
+static std::string	state2string(state_type);
+static state_type	string2state(const std::string& s);
+};
+
+/**
  * \brief Parameters for the focusing process
  *
  * Setting up the focusing process needs a lot of parameters which are
@@ -271,11 +236,6 @@ static FocusSolverPtr	get(const std::string& solver);
  * way that a constructed instance of this class is always consistent.
  */
 class FocusParameters {
-public:
-	// focusing status (what is it doing right now?)
-	typedef enum { IDLE, MOVING, MEASURING, FOCUSED, FAILED } state_type;
-static std::string	state2string(state_type);
-static state_type	string2state(const std::string& s);
 
 	// focus position interval to scan
 private:
@@ -309,6 +269,7 @@ public:
 	void	solver(const std::string& s);
 
 	FocusParameters(unsigned long minposition, unsigned long maxposition);
+	FocusParameters(const FocusParameters& parameters);
 };
 
 
@@ -325,10 +286,10 @@ public:
 	virtual void		moveto(unsigned long position) = 0;
 	virtual ImagePtr	get() = 0;
 private:
-	thread::Waiter<state_type>	_status;
-	void	status(state_type s) { _status = s; }
+	thread::Waiter<Focus::state_type>	_status;
+	void	status(Focus::state_type s) { _status = s; }
 public:
-	state_type	status() const { return _status; }
+	Focus::state_type	status() const { return _status; }
 
 	// callback
 private:
@@ -339,6 +300,7 @@ public:
 
 	// constructors
 	FocusProcessBase(unsigned long minposition, unsigned long maxposition);
+	FocusProcessBase(const FocusParameters& parameters);
 	virtual ~FocusProcessBase();
 
 private:
@@ -366,6 +328,8 @@ class FocusProcess : public FocusProcessBase {
 	camera::CcdPtr		_ccd;
 	camera::FocuserPtr	_focuser;
 public:
+	FocusProcess(const FocusParameters& parameters,
+		camera::CcdPtr ccd, camera::FocuserPtr focuser);
 	FocusProcess(unsigned long minposition, unsigned long maxposition,
 		camera::CcdPtr ccd, camera::FocuserPtr focuser);
 	virtual void	moveto(unsigned long);
@@ -391,24 +355,18 @@ public:
 	void	callback(astro::callback::CallbackPtr c) { _callback = c; }
 
 	// focusing status (what is it doing right now?)
-	typedef enum { IDLE, MOVING, MEASURING, FOCUSED, FAILED } state_type;
-static std::string	state2string(state_type);
-static state_type	string2state(const std::string& s);
 private:
-	volatile state_type	_status;
-	void	status(state_type s) { _status = s; }
+	volatile Focus::state_type	_status;
+	void	status(Focus::state_type s) { _status = s; }
 public:
-	state_type	status() const { return _status; }
+	Focus::state_type	status() const { return _status; }
 
 	// method for focusing
-	typedef enum { BRENNER, FWHM, MEASURE } method_type;
-static std::string	method2string(method_type);
-static method_type	string2method(const std::string& name);
 private:
-	method_type	_method;
+	std::string	_method;
 public:
-	method_type	method() const { return _method; }
-	void	method(method_type m) { _method = m; }
+	std::string	method() const { return _method; }
+	void	method(const std::string& m) { _method = m; }
 
 	// matching the method, we have an evaluator
 private:
@@ -451,7 +409,7 @@ public:
 	void	exposure(astro::camera::Exposure e) { _exposure = e; }
 
 	bool	completed() const {
-		return (_status == FOCUSED) || (_status == FAILED);
+		return (_status == Focus::FOCUSED) || (_status == Focus::FAILED);
 	}
 private:
 	Focusing(const Focusing& other);
@@ -488,10 +446,10 @@ public:
  * \brief Callback data object to inform about a state change
  */
 class FocusCallbackState : public astro::callback::CallbackData {
-	FocusProcess::state_type	_state;
+	Focus::state_type	_state;
 public:
-	FocusProcess::state_type	state() const { return _state; }
-	FocusCallbackState(FocusProcess::state_type state) : _state(state) { }
+	Focus::state_type	state() const { return _state; }
+	FocusCallbackState(Focus::state_type state) : _state(state) { }
 };
 
 } // namespace focusing

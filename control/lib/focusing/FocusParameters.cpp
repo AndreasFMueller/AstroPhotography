@@ -24,6 +24,18 @@ FocusParameters::FocusParameters(unsigned long minposition,
 }
 
 /**
+ * \brief Copy constructor
+ */
+FocusParameters::FocusParameters(const FocusParameters& parameters) 
+	: _minposition(parameters._minposition),
+	  _maxposition(parameters._maxposition),
+	  _steps(parameters._steps),
+	  _exposure(parameters._exposure),
+	  _method(parameters._method),
+	  _solver(parameters._solver) {
+}
+
+/**
  * \brief Set the number of steps
  *
  * This method ensures that the number of steps is reasonable
@@ -79,52 +91,6 @@ void	FocusParameters::solver(const std::string& s) {
 		throw std::runtime_error(msg);
 	}
 	_solver = s;
-}
-
-/**
- * \brief String to state conversion
- */
-FocusParameters::state_type FocusParameters::string2state(const std::string& s) {
-	if (s == "idle") {
-		return FocusProcess::IDLE;
-	}
-	if (s == "moving") {
-		return FocusProcess::MOVING;
-	}
-	if (s == "measuring") {
-		return FocusProcess::MEASURING;
-	}
-	if (s == "focused") {
-		return FocusProcess::FOCUSED;
-	}
-	if (s == "failed") {
-		return FocusProcess::FAILED;
-	}
-	throw std::runtime_error("bad focus status");
-}
-
-/**
- * \brief State to string conversion
- */
-std::string	FocusParameters::state2string(state_type s) {
-	switch (s) {
-	case IDLE:
-		return std::string("idle");
-		break;
-	case MOVING:
-		return std::string("moving");
-		break;
-	case MEASURING:
-		return std::string("measuring");
-		break;
-	case FOCUSED:
-		return std::string("focused");
-		break;
-	case FAILED:
-		return std::string("failed");
-		break;
-	}
-	throw std::runtime_error("bad focus status");
 }
 
 } // namespace focusing

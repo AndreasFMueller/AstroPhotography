@@ -8,13 +8,14 @@ SUBDIRS = . test
 noinst_LTLIBRARIES = libastrofocusing.la
 
 noinst_HEADERS = FocusEvaluator.h BrennerEvaluator.h FWHM2Evaluator.h \
-	MeasureEvaluator.h SymmetricSolver.h
+	MeasureEvaluator.h SymmetricSolver.h FocusSolvers.h
 
 libastrofocusing_la_SOURCES =						\
 	AbsoluteValueSolver.cpp						\
 	BrennerEvaluator.cpp						\
 	BrennerSolver.cpp						\
 	CentroidSolver.cpp						\
+	Focus.cpp							\
 	FocusableImageConverter.cpp					\
 	FocusCallbackData.cpp						\
 	FocusCompute.cpp						\

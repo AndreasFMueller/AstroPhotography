@@ -42,7 +42,8 @@ public:
 			return data;
 		}
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "got an ImageCallbackData");
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "image size: %s", i->image()->size().toString().c_str());
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "image size: %s",
+			i->image()->size().toString().c_str());
 		std::string	filename
 			= _prefix + stringprintf("-%d.fits", counter++);
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "file name: %s",
@@ -108,7 +109,7 @@ int	main(int argc, char *argv[]) {
 	int	y = -1;
 	int	width = -1;
 	int	height = -1;
-	Focusing::method_type	method = Focusing::FWHM;
+	std::string	method("fwhm");
 	while (EOF != (c = getopt_long(argc, argv, "dm:M:C:F:s:e:x:y:w:h:a:",
 		longopts, &longindex)))
 		switch (c) {
@@ -147,7 +148,7 @@ int	main(int argc, char *argv[]) {
 			height = atoi(optarg);
 			break;
 		case 'a':
-			method = Focusing::string2method(optarg);
+			method = std::string(optarg);
 			break;
 		case '?':
 			usage(argv[0]);
@@ -213,16 +214,16 @@ int	main(int argc, char *argv[]) {
 	// wait until focusing is complete
 	while (!focusing.completed()) {
 		std::string	statusname
-			= Focusing::state2string(focusing.status());
+			= Focus::state2string(focusing.status());
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "focusing status: %s",
 			statusname.c_str());
 		sleep(1);
 	}
 
-	Focusing::state_type	state = focusing.status();
+	Focus::state_type	state = focusing.status();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "focusing process complete: %s",
-		Focusing::state2string(state).c_str());
-	return (Focusing::FOCUSED == state) ? EXIT_SUCCESS : EXIT_FAILURE;
+		Focus::state2string(state).c_str());
+	return (Focus::FOCUSED == state) ? EXIT_SUCCESS : EXIT_FAILURE;
 }
 
 } // namespace focusing

@@ -16,8 +16,12 @@ maketestimages_SOURCES = maketestimages.cpp
 maketestimages_DEPENDENCIES = $(top_builddir)/lib/libastro.la
 maketestimages_LDADD = -L$(top_builddir)/lib -lastro
 
+image:	astrofocus
+	./astrofocus --debug --method=fwhm image testdata/test-002.fits \
+		testdata/eval-002.fits
+
 test:	astrofocus
-	./astrofocus --debug --method=fwhm --solver=max			\
+	./astrofocus --debug --method=fwhm --solver=abs			\
 		--center='(1364,1540)' --window=100x100 		\
 		evaluate						\
 		8319000 testdata/image-20181018-00001.fits 		\
@@ -34,7 +38,7 @@ test:	astrofocus
 		2>&1 | tee test.log
 
 test2:	astrofocus
-	./astrofocus --debug --method=fwhm --solver=max			\
+	./astrofocus --debug --method=fwhm --solver=abs			\
 		evaluate						\
 		0 testdata/test-000.fits				\
 		1 testdata/test-001.fits				\
@@ -69,3 +73,9 @@ solve:	astrofocus
 		54000      10.032					\
 		55000       11.99
 
+process:	astrofocus
+	./astrofocus --debug --method=fwhm --solve=abs --steps=10	\
+		--exposure=10						\
+		--ccd=ccd:simulator/camera/ccd				\
+		--focuser=focuser:simulator/focuser			\
+		focus 45000 55000

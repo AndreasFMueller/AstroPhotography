@@ -10,76 +10,44 @@
 
 namespace snowstar {
 
-FocusState	convert(astro::focusing::Focusing::state_type s) {
+FocusState	convert(astro::focusing::Focus::state_type s) {
 	switch (s) {
-	case astro::focusing::Focusing::IDLE:
+	case astro::focusing::Focus::IDLE:
 		return FocusIDLE;
-	case astro::focusing::Focusing::MOVING:
+	case astro::focusing::Focus::MOVING:
 		return FocusMOVING;
-	case astro::focusing::Focusing::MEASURING:
+	case astro::focusing::Focus::MEASURING:
 		return FocusMEASURING;
-	case astro::focusing::Focusing::FOCUSED:
+	case astro::focusing::Focus::FOCUSED:
 		return FocusFOCUSED;
-	case astro::focusing::Focusing::FAILED:
+	case astro::focusing::Focus::FAILED:
 		return FocusFAILED;
 	}
 	throw std::runtime_error("unknown focus state");
 }
 
-astro::focusing::Focusing::state_type	convert(FocusState s) {
+astro::focusing::Focus::state_type	convert(FocusState s) {
 	switch (s) {
 	case FocusIDLE:
-		return astro::focusing::Focusing::IDLE;
+		return astro::focusing::Focus::IDLE;
 	case FocusMOVING:
-		return astro::focusing::Focusing::MOVING;
+		return astro::focusing::Focus::MOVING;
 	case FocusMEASURING:
-		return astro::focusing::Focusing::MEASURING;
+		return astro::focusing::Focus::MEASURING;
 	case FocusFOCUSED:
-		return astro::focusing::Focusing::FOCUSED;
+		return astro::focusing::Focus::FOCUSED;
 	case FocusFAILED:
-		return astro::focusing::Focusing::FAILED;
+		return astro::focusing::Focus::FAILED;
 	}
 	throw std::runtime_error("unknown focus state");
 }
 
 std::string	focusingstate2string(FocusState s) {
-	return astro::focusing::Focusing::state2string(convert(s));
+	return astro::focusing::Focus::state2string(convert(s));
 }
 
 FocusState	focusingstring2state(const std::string& s) {
-	return convert(astro::focusing::Focusing::string2state(s));
-}
-
-FocusMethod	convert(astro::focusing::Focusing::method_type m) {
-	switch (m) {
-	case astro::focusing::Focusing::BRENNER:
-		return FocusBrenner;
-	case astro::focusing::Focusing::FWHM:
-		return FocusFWHM;
-	case astro::focusing::Focusing::MEASURE:
-		return FocusMEASURE;
-	}
-	throw std::runtime_error("unknown focus method");
-}
-
-astro::focusing::Focusing::method_type	convert(FocusMethod m) {
-	switch (m) {
-	case FocusBrenner:
-		return astro::focusing::Focusing::BRENNER;
-	case FocusFWHM:
-		return astro::focusing::Focusing::FWHM;
-	case FocusMEASURE:
-		return astro::focusing::Focusing::MEASURE;
-	}
-	throw std::runtime_error("unknown focus method");
-}
-
-std::string     focusingmethod2string(FocusMethod m) {
-	return astro::focusing::Focusing::method2string(convert(m));
-}
-
-FocusMethod     focusingstring2method(const std::string& m) {
-	return convert(astro::focusing::Focusing::string2method(m));
+	return convert(astro::focusing::Focus::string2state(s));
 }
 
 } // namespace snowstar

@@ -98,11 +98,11 @@ FocusInterval	MeasureFocusWork::subdivide(const FocusInterval& interval) {
 FocusValue	MeasureFocusWork::measureat(unsigned long pos) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "measurement at pos = %lu", pos);
 	// move to the position
-	focusingstatus(Focusing::MOVING);
+	focusingstatus(Focus::MOVING);
 	moveto(pos);
 
 	// get an image
-	focusingstatus(Focusing::MEASURING);
+	focusingstatus(Focus::MEASURING);
 	ccd()->startExposure(exposure());
 	ccd()->wait();
 	ImagePtr	image = ccd()->getImage();
@@ -127,7 +127,7 @@ FocusValue	MeasureFocusWork::measureat(unsigned long pos) {
 void	MeasureFocusWork::main(astro::thread::Thread<FocusWork>& /* thread */) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "start focusing work");
 	if (!complete()) {
-		focusingstatus(Focusing::FAILED);
+		focusingstatus(Focus::FAILED);
 		throw std::runtime_error("focuser not completely specified");
 	}
 	counter = 0;
@@ -161,13 +161,13 @@ void	MeasureFocusWork::main(astro::thread::Thread<FocusWork>& /* thread */) {
 			debug(LOG_DEBUG, DEBUG_LOG, 0, "new interval: %s",
 				interval.toString().c_str());
 		}
-		focusingstatus(Focusing::FOCUSED);
+		focusingstatus(Focus::FOCUSED);
 	} catch (std::exception& x) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "focus failed: %s", x.what());
-		focusingstatus(Focusing::FAILED);
+		focusingstatus(Focus::FAILED);
 	} catch (...) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "unknown exception during focus");
-		focusingstatus(Focusing::FAILED);
+		focusingstatus(Focus::FAILED);
 	}
 }
 

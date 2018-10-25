@@ -4,6 +4,7 @@
  * (c) 2016 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
 #include <AstroFocus.h>
+#include "FocusSolvers.h"
 
 namespace astro {
 namespace focusing {

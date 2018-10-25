@@ -6,6 +6,7 @@
 #include <AstroFocus.h>
 #include <AstroDebug.h>
 #include <AstroFormat.h>
+#include "FocusSolvers.h"
 #include <lapack.h>
 
 namespace astro {
