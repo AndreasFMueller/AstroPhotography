@@ -283,7 +283,6 @@ astro::image::ImagePtr	AsiCcd::getRawImage() {
 		pixelsize = 3;
 		break;
 	case ASI_IMG_RAW16:
-	case ASI_IMG_Y8:
 		pixelsize = 2;
 		break;
 	default:
@@ -327,7 +326,8 @@ astro::image::ImagePtr	AsiCcd::getRawImage() {
 	ImagePtr	result;
 	switch (imgtype) {
 	case ASI_IMG_RAW8: // convert 8bit mono image to Image<unsigned char>
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "get RAW8 image");
+	case ASI_IMG_Y8: // convert 8bit mono image to Image<unsigned char>
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "get Y8/RAW8 image");
 		{
 		Image<unsigned char>	*image = new Image<unsigned char>(size);
 		for (int x = 0; x < size.width(); x++) {
@@ -336,8 +336,9 @@ astro::image::ImagePtr	AsiCcd::getRawImage() {
 					= buffer[x + size.width() * y];
 			}
 		}
-		// if this is a color camera, add the mosaic information
-		if (_camera.isColor()) {
+		// if this is a color camera, add the mosaic information,
+		// at least for the raw camera
+		if ((_camera.isColor()) && (imgtype == ASI_IMG_RAW8)) {
 			image->setMosaicType(
 				MosaicType::shift(MosaicType::BAYER_RGGB,
 					origin));
@@ -380,9 +381,6 @@ astro::image::ImagePtr	AsiCcd::getRawImage() {
 		result = ImagePtr(image);
 		}
 		break;
-	case ASI_IMG_Y8: // convert 8bit YUYV image to Image<YUYV<unsigned char> >
-		debug(LOG_ERR, DEBUG_LOG, 0, "Y8 format not implemented");
-		throw std::runtime_error("Y8 format not implemented");
 	default: {
 		std::string	msg = stringprintf("%s: unknown type %d",
 			name().toString().c_str(), imgtype);
