@@ -121,6 +121,23 @@ AsiCamera::AsiCamera(AsiCameraLocator& locator, int index)
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "have now %d infos",
 			ccdinfo.size());
 	}
+
+	// read the bandwith limit property and set the control accordingly
+	Properties	properties(name());
+	if (properties.hasProperty(std::string("bandwidth"))) {
+		long	bandwidth = std::stol(
+			properties.getProperty(std::string("bandwidth")));
+		if ((bandwidth <= 100) && (bandwidth > 0)) {
+			rc = ASISetControlValue(_id, ASI_BANDWIDTHOVERLOAD,
+				bandwidth, ASI_FALSE);
+			if (rc != ASI_SUCCESS) {
+				debug(LOG_ERR, DEBUG_LOG, 0, "could not set "
+					"bandwidth limit %ld: %d",
+					bandwidth, rc); 
+			}
+		}
+	}
+	
 }
 
 /**
