@@ -32,6 +32,8 @@ FocusEvaluatorPtr	FocusEvaluatorFactory::get(const std::string& type) {
  */
 FocusEvaluatorPtr	FocusEvaluatorFactory::get(const std::string& type,
 				const ImageRectangle& rectangle) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "get evaluator %s in rectangle %s",
+		type.c_str(), rectangle.toString().c_str());
 	FocusEvaluator	*evaluator = NULL;
 	if (type == "BrennerHorizontal") {
 		evaluator = new BrennerHorizontalEvaluator(rectangle);

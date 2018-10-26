@@ -9,10 +9,12 @@
 #include <AstroTypes.h>
 #include <AstroFocus.h>
 #include <AstroDebug.h>
-#include "FocusEvaluator.h"
+#include "FocusEvaluatorImplementation.h"
 
 namespace astro {
 namespace focusing {
+
+#define DEFAULT_EXPONENT	2
 
 /**
  * \brief Base class for Brenner type focus image adapters
@@ -23,7 +25,8 @@ protected:
 	int	_exponent;
 	float	p(float x) const;
 public:
-	BrennerAdapter(FocusableImage fim, int exponent = 2);
+	BrennerAdapter(FocusableImage fim,
+		int exponent = DEFAULT_EXPONENT);
 };
 
 typedef std::shared_ptr<BrennerAdapter>	BrennerAdapterPtr;
@@ -33,7 +36,8 @@ typedef std::shared_ptr<BrennerAdapter>	BrennerAdapterPtr;
  */
 class BrennerHorizontalAdapter : public BrennerAdapter {
 public:
-	BrennerHorizontalAdapter(FocusableImage fim, int exponent = 2);
+	BrennerHorizontalAdapter(FocusableImage fim,
+		int exponent = DEFAULT_EXPONENT);
 	virtual float	pixel(int x, int y) const;
 };
 
@@ -42,7 +46,8 @@ public:
  */
 class BrennerVerticalAdapter : public BrennerAdapter {
 public:
-	BrennerVerticalAdapter(FocusableImage fim, int exponent = 2);
+	BrennerVerticalAdapter(FocusableImage fim,
+		int exponent = DEFAULT_EXPONENT);
 	virtual float	pixel(int x, int y) const;
 };
 
@@ -51,7 +56,8 @@ public:
  */
 class BrennerOmniAdapter : public BrennerAdapter {
 public:
-	BrennerOmniAdapter(FocusableImage fim, int exponent = 2);
+	BrennerOmniAdapter(FocusableImage fim,
+		int exponent = DEFAULT_EXPONENT);
 	virtual float	pixel(int x, int y) const;
 };
 
@@ -70,7 +76,8 @@ private:
 	int	_exponent;
 public:
 	BrennerEvaluatorBase(const ImageRectangle& rectangle, int exponent);
-	virtual double	operator()(const ImagePtr image);
+protected:
+	virtual double	evaluate(FocusableImage image);
 }; 
 
 /**
@@ -80,7 +87,7 @@ template<typename Adapter>
 class BrennerEvaluator : public BrennerEvaluatorBase {
 protected:
 	virtual BrennerAdapterPtr	adapter(FocusableImage fim,
-		int exponent);
+						int exponent);
 public:
 	BrennerEvaluator(const ImageRectangle& rectangle, int exponent = 2)
 		: BrennerEvaluatorBase(rectangle, exponent) { }

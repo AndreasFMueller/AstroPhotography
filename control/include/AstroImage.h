@@ -87,6 +87,8 @@ public:
 	ImageSize(unsigned int width, unsigned int height);
 	ImageSize(const std::string& sizespec);
 	ImageSize(unsigned int width_and_height = 0);
+	ImageSize(const ImageSize& other);
+	ImageSize&	operator=(const ImageSize& other);
 	virtual ~ImageSize();
 	// comparision
 	bool	operator==(const ImageSize& other) const;
@@ -705,9 +707,9 @@ public:
 		  ImageAdapter<Pixel>(adapter.getSize()) {
 		long	number_of_pixels = frame.size().getPixels();
 		pixels = new Pixel[number_of_pixels];
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "copy %s alloc %d pixels at %p",
-			frame.size().toString().c_str(),
-			frame.size().getPixels(), pixels);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "copy %s alloc %ld pixels at %p",
+			frame.size().toString().c_str(), number_of_pixels,
+			pixels);
 #		pragma omp parallel for
 		for (int x = 0; x < frame.size().width(); x++) {
 			for (int y = 0; y < frame.size().height(); y++) {
