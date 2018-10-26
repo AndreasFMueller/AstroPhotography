@@ -13,6 +13,7 @@ noinst_HEADERS =							\
 	FocusSolvers.h							\
 	FocusableImageConverterImpl.h					\
 	FWHM2Evaluator.h						\
+	FWHMEvaluator.h							\
 	MeasureEvaluator.h						\
 	SymmetricSolver.h
 
@@ -41,6 +42,7 @@ libastrofocusing_la_SOURCES =						\
 	FocusWork.cpp							\
 	Focusing.cpp							\
 	FWHM2Evaluator.cpp						\
+	FWHMEvaluator.cpp						\
 	MaximumSolver.cpp						\
 	MinimumSolver.cpp						\
 	MeasureEvaluator.cpp						\
