@@ -66,9 +66,14 @@ public:
 	std::string	toString() const;
 };
 
+// focusable images are always float images, this allows us to simplify
+// the algorithms somewhat, because we know that they are float images
+typedef std::shared_ptr<Image<float> >	FocusableImage;
+
+// The FocusableImageConverter is used to convert the input image into
+// a focusable image. In this step we also extract the rectangle.
 class FocusableImageConverter;
 typedef std::shared_ptr<FocusableImageConverter> FocusableImageConverterPtr;
-typedef std::shared_ptr<Image<float> >	FocusableImage;
 
 /**
  * \brief The FocusElement collects all the data that is accumualted in focusing
@@ -131,17 +136,20 @@ typedef std::shared_ptr<FocusOutput>	FocusOutputPtr;
  * \brief Processor class that takes the FocusInput and produces a solution
  */
 class FocusProcessor {
-	bool		_keep_images;
-	FocusOutputPtr	_output;
+	bool			_keep_images;
+	FocusOutputPtr		_output;
+	image::ImageRectangle	_rectangle;
 public:
 	bool	keep_images() const { return _keep_images; }
 	void	keep_images(bool k) { _keep_images = k; }
+	const image::ImageRectangle&	rectangle() const { return _rectangle; }
+	void	rectangle(const image::ImageRectangle& r) { _rectangle = r; }
 	FocusOutputPtr	output() const { return _output; }
 	FocusProcessor(const FocusInputBase&);
 	FocusProcessor(const std::string& method, const std::string& solver);
 	void	process(FocusElement&);
-	void	process(const FocusInput& input);
-	void	process(const FocusInputImages& input);
+	void	process(FocusInput& input);
+	void	process(FocusInputImages& input);
 };
 
 /**
@@ -152,6 +160,9 @@ public:
  * interfere with properly judging the focus quality. Images may also
  * have different pixel types, so this class serves to extract the version
  * of an image most suitable for focusing.
+ *
+ * This class is also a factory class that produces instances of the
+ * converter class.
  */
 class FocusableImageConverter {
 public:

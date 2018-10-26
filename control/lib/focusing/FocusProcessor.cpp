@@ -13,7 +13,7 @@ namespace focusing {
  * \brief Construct a processor
  */
 FocusProcessor::FocusProcessor(const FocusInputBase& input)
-	: _output(new FocusOutput(input)) {
+	: _output(new FocusOutput(input)), _rectangle(input.rectangle()) {
 }
 
 FocusProcessor::FocusProcessor(const std::string& method,
@@ -45,7 +45,13 @@ void	FocusProcessor::process(FocusElement& element) {
 	// 1. get an evaluator for this type of image
 	FocusEvaluatorFactory	evaluatorfactory;
 	FocusEvaluatorPtr	evaluator
-		= evaluatorfactory.get(_output->method());
+		= evaluatorfactory.get(_output->method(), rectangle());
+	if (!evaluator) {
+		std::string	msg = stringprintf("evaluator %s not found",
+			_output->method().c_str());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw std::runtime_error(msg);
+	}
 
 	// 2. run the image through the evaluator, adding the info to the
 	//    element
@@ -72,7 +78,10 @@ void	FocusProcessor::process(FocusElement& element) {
  *
  * \param input		input to process
  */
-void	FocusProcessor::process(const FocusInput& input) {
+void	FocusProcessor::process(FocusInput& input) {
+	if (image::ImageRectangle() == rectangle()) {
+		rectangle(input.rectangle());
+	}
 	FocusProcessor	*fp = this;
 	std::for_each(input.begin(), input.end(),
 		[fp,input](const std::pair<unsigned int, std::string>& p)
@@ -92,7 +101,10 @@ void	FocusProcessor::process(const FocusInput& input) {
  *
  * \param input		input images to process
  */
-void	FocusProcessor::process(const FocusInputImages& input) {
+void	FocusProcessor::process(FocusInputImages& input) {
+	if (image::ImageRectangle() == rectangle()) {
+		rectangle(input.rectangle());
+	}
 	FocusProcessor	*fp = this;
 	std::for_each(input.begin(), input.end(),
 		[fp,input](const std::pair<unsigned int, ImagePtr>& p)

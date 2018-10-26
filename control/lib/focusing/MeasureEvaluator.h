@@ -6,14 +6,18 @@
 #ifndef _MeasureEvaluator_h
 #define _MeasureEvaluator_h
 
+#include <AstroFocus.h>
+#include "FocusEvaluatorImplementation.h"
+
 namespace astro {
 namespace focusing {
 
-class MeasureEvaluator : public FocusEvaluator {
+class MeasureEvaluator : public FocusEvaluatorImplementation {
 public:
 	MeasureEvaluator();
 	MeasureEvaluator(const ImageRectangle& rectangle);
-	virtual double	operator()(const ImagePtr image);
+protected:
+	virtual double	evaluate(FocusableImage image);
 };
 
 } // namespace focusing

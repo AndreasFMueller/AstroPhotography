@@ -7,18 +7,20 @@
 #define _FWHM2Evaluator_h
 
 #include <AstroFocus.h>
+#include "FocusEvaluatorImplementation.h"
 
 namespace astro {
 namespace focusing {
 
-class FWHM2Evaluator : public FocusEvaluator {
+class FWHM2Evaluator : public FocusEvaluatorImplementation {
 	ImagePoint	_center;
 	double	_radius;
 public:
 	FWHM2Evaluator(const ImagePoint& center, double radius = 20);
 	FWHM2Evaluator();
 	FWHM2Evaluator(const ImageRectangle& rectangle);
-	virtual double	operator()(const ImagePtr image);
+protected:
+	virtual double	evaluate(FocusableImage image);
 };
 
 } // namespace focusing

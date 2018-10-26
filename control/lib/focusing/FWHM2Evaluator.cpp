@@ -28,7 +28,7 @@ FWHM2Evaluator::FWHM2Evaluator(const ImageRectangle& rectangle)
 	  _radius(rectangle.size().smallerSide() / 2) {
 }
 
-double	FWHM2Evaluator::operator()(const ImagePtr image) {
+double	FWHM2Evaluator::evaluate(FocusableImage image) {
 	double	fwhm = 0;
 	ImagePoint	c = _center;
 	double	r = _radius;

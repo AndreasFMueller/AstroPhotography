@@ -78,14 +78,12 @@ BrennerEvaluatorBase::BrennerEvaluatorBase(const ImageRectangle& rectangle,
 			_exponent(exponent) {
 }
 
-double	BrennerEvaluatorBase::BrennerEvaluatorBase::operator()(
-	const ImagePtr image) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "evaluating an image of size %s",
-		image->size().toString().c_str());
-	FocusableImage	fim = extractimage(image);
+double	BrennerEvaluatorBase::BrennerEvaluatorBase::evaluate(
+		FocusableImage fim) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "found image of size %s",
 		fim->size().toString().c_str());
 	BrennerAdapterPtr	a = this->adapter(fim, _exponent);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "adapter found");
 	if (!a) {
 		throw std::runtime_error("cannot get an adapter");
 	}
@@ -106,14 +104,14 @@ double	BrennerEvaluatorBase::BrennerEvaluatorBase::operator()(
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "maximum value found: %f", max);
 
 	// combine images into a loggable image
-	Image<unsigned char>	*green = UnsignedCharImage(image);
+	Image<unsigned char>	*green = UnsignedCharImage(fim);
 	Image<unsigned char>	*red = new Image<unsigned char>(*a, 255. / max);
 	adapter::CombinationAdapterPtr<unsigned char>	ca(red, green, NULL);
 	_evaluated_image = ImagePtr(new Image<RGB<unsigned char> >(ca));
 
 	// add metadata to the image
 	ImageMetadata::const_iterator	i;
-	for (i = image->begin(); i != image->end(); i++) {
+	for (i = fim->begin(); i != fim->end(); i++) {
 		_evaluated_image->setMetadata(i->second);
 	}
 	

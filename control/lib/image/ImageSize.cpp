@@ -39,6 +39,7 @@ ImageSize::ImageSize(const std::string& sizespec) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "negative image dimensions");
 		throw std::runtime_error("negative image dimensions");
 	}
+	pixels = _width * _height;
 }
 
 /**
@@ -47,6 +48,18 @@ ImageSize::ImageSize(const std::string& sizespec) {
 ImageSize::ImageSize(unsigned int width_and_height)
 	: _width(width_and_height), _height(width_and_height),
 	  pixels(width_and_height * width_and_height) {
+}
+
+ImageSize::ImageSize(const ImageSize& other)
+	: _width(other._width), _height(other._height) {
+	pixels = _width * _height;
+}
+
+ImageSize&	ImageSize::operator=(const ImageSize&other) {
+	_width = other._width;
+	_height = other._height;
+	pixels = _width * _height;
+	return *this;
 }
 
 /**

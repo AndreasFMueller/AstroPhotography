@@ -18,13 +18,14 @@ namespace focusing {
 MeasureEvaluator::MeasureEvaluator() {
 }
 
-MeasureEvaluator::MeasureEvaluator(const ImageRectangle& /* roi */) {
+MeasureEvaluator::MeasureEvaluator(const ImageRectangle& roi)
+	: FocusEvaluatorImplementation(roi) {
 }
 
 /**
  * \brief Evaluate an image based on a measure
  */
-double	MeasureEvaluator::operator()(const ImagePtr image) {
+double	MeasureEvaluator::evaluate(FocusableImage image) {
 	// compute the 
 	FocusInfo       fi = astro::image::filter::focus_squaredgradient_extended(image);
 

@@ -21,8 +21,9 @@ image:	astrofocus
 		testdata/eval-002.fits
 
 test:	astrofocus
-	./astrofocus --debug --method=fwhm --solver=abs			\
-		--center='(1364,1540)' --window=100x100 		\
+	./astrofocus --debug --method=BrennerOmni --solver=		\
+		--center='(1410,584)' --window=100x100 			\
+		--prefix=tmp/test					\
 		evaluate						\
 		8319000 testdata/image-20181018-00001.fits 		\
 		8319200 testdata/image-20181018-00002.fits 		\

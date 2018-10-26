@@ -33,6 +33,7 @@ static struct option	longopts[] = {
 { "focuser",	required_argument,	NULL,		'F' },
 { "help",	no_argument,		NULL,		'h' },
 { "method",	required_argument,	NULL,		'm' },
+{ "prefix",	required_argument,	NULL,		'p' },
 { "rectangle",	required_argument,	NULL,		'r' },
 { "solver",	required_argument,	NULL,		's' },
 { "steps",	required_argument,	NULL,		'S' },
@@ -62,6 +63,8 @@ static void	usage(const std::string& progname) {
 	std::cout << " -C,--ccd=<ccd>       use CCD named <ccd>" << std::endl;
 	std::cout << " -e,--exposure=<t>    use exposure time <t>" << std::endl;
 	std::cout << " -F,--focuser=<f>     use focuser name <f>" << std::endl;
+	std::cout << " -p,--prefix=<p>      prefix for processed files"
+		<< std::endl;
 	std::cout << " -m,--method=<m>      use <m> evaulation method"
 		<< std::endl;
 	std::cout << " -s,--solve=<s>       use <s> solution method"
@@ -101,6 +104,7 @@ int	image_command(const std::string& filename, const std::string&method,
 		out.setPrecious(false);
 		out.write(evaluator->evaluated_image());
 	}
+	return EXIT_SUCCESS;
 }
 
 /**
@@ -120,16 +124,19 @@ int	solve_command(const FocusItems& items, const std::string& solver) {
 /**
  * \brief Method to actually evaluate the image data
  */
-int	evaluate_command(const FocusInput& input) {
+int	evaluate_command(FocusInput& input, const std::string& prefix) {
 	// construct a processor
 	FocusProcessor	processor(input);
-	processor.keep_images(false);
+	processor.keep_images(prefix != std::string());
 
 	// process all the images
 	processor.process(input);
 
+	// get the output
+	FocusOutputPtr	output = processor.output();
+
 	// retrieve the evaluatation results
-	FocusItems	focusitems = processor.output()->items();
+	FocusItems	focusitems = output->items();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "got %d items", focusitems.size());
 	std::for_each(focusitems.begin(), focusitems.end(),
 		[](const FocusItem& p) {
@@ -138,7 +145,28 @@ int	evaluate_command(const FocusInput& input) {
 		}
 	);
 
-	// now call the solver
+	// export all the processed images if we have a prefix
+	if (prefix != std::string()) {
+		std::for_each(output->begin(), output->end(),
+			[prefix](const std::pair<unsigned long, FocusElement>& i) mutable {
+				std::string	filename = stringprintf(
+					"%s-%08d.fits", prefix.c_str(),
+					i.second.pos());
+				if (i.second.processed_image) {
+					io::FITSout	out(filename);
+					out.setPrecious(false);
+					out.write(i.second.processed_image);
+				}
+			}
+		);
+	}
+
+	// Do we have a solver?
+	if (input.solver().size() == 0) {
+		return EXIT_SUCCESS;
+	}
+
+	// proceed to perform the solution
 	return solve_command(focusitems, input.solver());
 }
 
@@ -197,12 +225,13 @@ int	main(int argc, char *argv[]) {
 	std::string	solver("abs");
 	std::string	ccdname;
 	std::string	focusername;
+	std::string	prefix;
 	double	exposuretime = 1;
 	int	steps = 10;
 	int	c;
 	int	longindex;
 	putenv((char *)"POSIXLY_CORRECT=1");    // cast to silence compiler
-	while (EOF != (c = getopt_long(argc, argv, "c:dhm:r:s:w?", longopts,
+	while (EOF != (c = getopt_long(argc, argv, "c:dhm:p:r:s:w?", longopts,
 		&longindex))) {
 		switch (c) {
 		case 'C':
@@ -226,6 +255,9 @@ int	main(int argc, char *argv[]) {
 			return EXIT_SUCCESS;
 		case 'm':
 			method = std::string(optarg);
+			break;
+		case 'p':
+			prefix = std::string(optarg);
 			break;
 		case 'r':
 			rectangle = image::ImageRectangle(optarg);
@@ -292,6 +324,8 @@ int	main(int argc, char *argv[]) {
 		fi.method(method);
 		fi.solver(solver);
 		if (rectangle != image::ImageRectangle()) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "use rectangle %s",
+				rectangle.toString().c_str());
 			fi.rectangle(rectangle);
 		}
 		// convert into a list of position and file names
@@ -308,7 +342,7 @@ int	main(int argc, char *argv[]) {
 		}
 		std::cout << "Focus processing for files:" << std::endl;
 		std::cout << fi.toString();
-		return evaluate_command(fi);
+		return evaluate_command(fi, prefix);
 	}
 
 
