@@ -44,6 +44,10 @@ public:
 };
 
 class MinimumSolver : public FocusSolver {
+protected:
+	float	maximum;
+	float	minimum;
+	int	minimumposition;
 public:
 	MinimumSolver();
 	virtual ~MinimumSolver() { }
