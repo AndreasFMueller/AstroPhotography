@@ -17,15 +17,15 @@ int	MinimumSolver::position(const FocusItems& focusitems) {
 	FocusItems::const_iterator	i;
 	minimumposition = -1;
 	minimum = 0;
-	minimum = std::numeric_limits<float>::max();
+	maximum = std::numeric_limits<float>::max();
 	for (i = focusitems.begin(); i != focusitems.end(); i++) {
 		float	value = i->value();
 		if (value < minimum) {
 			minimumposition = i->position();
 			minimum = i->value();
 		}
-		if (value > minimum) {
-			minimum = value;
+		if (value > maximum) {
+			maximum = value;
 		}
 	}
 	if (minimumposition < 0) {
