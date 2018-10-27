@@ -185,6 +185,8 @@ Ubuntu:
         libfftw3-dev
 	libavahi-client-dev
 	libxml2-dev
+	libjpeg-dev
+	libpng-dev
    Optional:
 	zeroc-ice35
 	libunicap2-dev
