@@ -6,6 +6,7 @@
 #include <AstroImage.h>
 #include <png.h>
 #include <sys/stat.h>
+#include <includes.h>
 
 namespace astro {
 namespace image {
