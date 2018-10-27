@@ -8,7 +8,6 @@
 #include <AstroIO.h>
 #include <getopt.h>
 #include <AstroDebug.h>
-#include <AstroPNG.h>
 #include <png.h>
 
 namespace astro {
