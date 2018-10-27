@@ -104,6 +104,7 @@ libastroimage_la_SOURCES = 						\
 	PhaseCorrelator.cpp						\
 	PeakFinder.cpp							\
 	Pixel.cpp							\
+	PNG.cpp								\
 	Projection.cpp							\
 	ProjectionCorrector.cpp						\
 	Radon.cpp							\

@@ -15,7 +15,6 @@
 #include <AstroFocus.h>
 #include <string>
 #include <list>
-#include <JPEG.h>
 
 using namespace astro::focusing;
 
@@ -24,6 +23,7 @@ namespace app {
 namespace focus {
 
 bool	jpeg = false;
+bool	png = false;
 
 /**
  * \brief Table of options for the astrofocus program
@@ -36,6 +36,7 @@ static struct option	longopts[] = {
 { "focuser",	required_argument,	NULL,		'F' },
 { "help",	no_argument,		NULL,		'h' },
 { "jpeg",	no_argument,		NULL,		'j' },
+{ "png",	no_argument,		NULL,		'P' },
 { "method",	required_argument,	NULL,		'm' },
 { "prefix",	required_argument,	NULL,		'p' },
 { "rectangle",	required_argument,	NULL,		'r' },
@@ -70,6 +71,8 @@ static void	usage(const std::string& progname) {
 	std::cout << " -j,--jpeg            write output images as JPEG"
 		<< std::endl;
 	std::cout << " -m,--method=<m>      use <m> evaulation method"
+		<< std::endl;
+	std::cout << " -P,--png             write output images as PNG"
 		<< std::endl;
 	std::cout << " -p,--prefix=<p>      prefix for processed files"
 		<< std::endl;
@@ -111,6 +114,10 @@ int	image_command(const std::string& filename, const std::string&method,
 		if (JPEG::isjpegfilename(processedfile)) {
 			JPEG	jpeg;
 			jpeg.writeJPEG(evaluator->evaluated_image(),
+				processedfile);
+		} else if (PNG::ispngfilename(processedfile)) {
+			PNG	png;
+			png.writePNG(evaluator->evaluated_image(),
 				processedfile);
 		} else {
 			io::FITSout	out(processedfile);
@@ -163,15 +170,22 @@ int	evaluate_command(FocusInput& input, const std::string& prefix) {
 	if (prefix != std::string()) {
 		std::for_each(output->begin(), output->end(),
 			[=](const std::pair<unsigned long, FocusElement>& i) {
+				std::string	extension("fits");
+				if (jpeg) { extension = "jpg"; }
+				if (png) { extension = "png"; }
 				std::string	filename = stringprintf(
 					"%s-%08d.%s", prefix.c_str(),
-					i.second.pos(), jpeg ? "jpg" : "fits");
-				if ((i.second.processed_image) && (jpeg)) {
+					i.first, extension.c_str());
+				if (!i.second.processed_image) return;
+				if (jpeg) {
 					JPEG	jpeg;
 					jpeg.writeJPEG(i.second.processed_image,
 						filename);
-				}
-				if ((i.second.processed_image) && (!jpeg)) {
+				} else if (png) {
+					PNG	png;
+					png.writePNG(i.second.processed_image,
+						filename);
+				} else {
 					io::FITSout	out(filename);
 					out.setPrecious(false);
 					out.write(i.second.processed_image);
@@ -250,7 +264,7 @@ int	main(int argc, char *argv[]) {
 	int	c;
 	int	longindex;
 	putenv((char *)"POSIXLY_CORRECT=1");    // cast to silence compiler
-	while (EOF != (c = getopt_long(argc, argv, "c:dhjm:p:r:s:w?", longopts,
+	while (EOF != (c = getopt_long(argc, argv, "c:dhjm:Pp:r:s:w?", longopts,
 		&longindex))) {
 		switch (c) {
 		case 'C':
@@ -274,9 +288,14 @@ int	main(int argc, char *argv[]) {
 			return EXIT_SUCCESS;
 		case 'j':
 			jpeg = true;
+			png = false;
 			break;
 		case 'm':
 			method = std::string(optarg);
+			break;
+		case 'P':
+			png = true;
+			jpeg = false;
 			break;
 		case 'p':
 			prefix = std::string(optarg);

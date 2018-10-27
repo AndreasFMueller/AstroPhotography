@@ -24,12 +24,12 @@ image2:	astrofocus
 	./astrofocus --debug --method=fwhm				\
 		--center='(1410,584)' --window=200x200 			\
 		image testdata/image-20181018-00007.fits		\
-		tmp/image-20181018-00007.jpg 2>&1 | tee test.log
+		tmp/image-20181018-00007.png 2>&1 | tee test.log
 
 test:	astrofocus
 	./astrofocus --debug --method=fwhm --solver=			\
 		--center='(1410,584)' --window=400x400 			\
-		--prefix=tmp/test --jpeg				\
+		--prefix=tmp/test --png					\
 		evaluate						\
 		8319000 testdata/image-20181018-00001.fits 		\
 		8319200 testdata/image-20181018-00002.fits 		\

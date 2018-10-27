@@ -9,7 +9,7 @@ bin_PROGRAMS = imageinfo makedark makeflat calibrate \
 	transform clamp logscale stack fitsheader imagerepo rescale \
 	gammacorrect convolve background crop radon backprojection \
 	colorbalance stars findtransform luminance unsharp color \
-	colorclamp hdr destar jpg2fits
+	colorclamp hdr destar jpg2fits png2fits
 
 color_SOURCES = color.cpp
 color_DEPENDENCIES = $(top_builddir)/lib/libastro.la
@@ -119,6 +119,10 @@ jpg2fits_SOURCES = jpg2fits.cpp
 jpg2fits_DEPENDENCIES = $(top_builddir)/lib/libastro.la
 jpg2fits_LDADD = -L$(top_builddir)/lib -lastro
 
+png2fits_SOURCES = png2fits.cpp
+png2fits_DEPENDENCIES = $(top_builddir)/lib/libastro.la
+png2fits_LDADD = -L$(top_builddir)/lib -lastro
+
 fitsheadertest:	fitsheader
 	cp andromeda-chart.fits headertest.fits
 	./fitsheader -d add headertest.fits \
@@ -138,6 +142,6 @@ orion:
 	./stack --debug --output=orion.fits orion/orion*.fits 2>&1 | tee stack.log
 #	./stack --debug --output=orion.fits orion/orion1.fits orion/orion2.fits 2>&1 | tee stack.log
 
-test:	jpg2fits
-	rm -f IMG_1822.fits
-	./jpg2fits --debug ~/IMG_1822.jpg IMG_1822.fits
+test:	png2fits
+	rm -f t.fits
+	./png2fits --debug ~/t.png t.fits

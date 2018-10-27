@@ -11,6 +11,9 @@
 namespace astro {
 namespace image {
 
+/**
+ * \brief Auxiliary class to read and write JPEG images
+ */
 class JPEG {
 	int	_quality;
 public:
@@ -28,22 +31,6 @@ public:
 			void **buffer, size_t *buffersize);
 	size_t	writeJPEG(const ConstImageAdapter<unsigned char>& monoimage,
 			const std::string& filename);
-
-#if 0
-	// write operations for larger pixels
-	template<typename Pixel>
-	size_t	writeJPEG(const ConstImageAdapter<RGB<Pixel> >& colorimage,
-			void **buffer, size_t *buffersize);
-	template<typename Pixel>
-	size_t	writeJPEG(const ConstImageAdapter<RGB<Pixel> >& colorimage,
-			const std::string& filename);
-	template<typename Pixel>
-	size_t	writeJPEG(const ConstImageAdapter<Pixel>& monoimage,
-			void **buffer, size_t *buffersize);
-	template<typename Pixel>
-	size_t	writeJPEG(const ConstImageAdapter<Pixel>& monoimage,
-			const std::string& filename);
-#endif
 
 	// write generic image
 	size_t	writeJPEG(const ImagePtr image,
