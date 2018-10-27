@@ -14,7 +14,7 @@ namespace focusing {
 
 class FWHMEvaluator : public FocusEvaluatorImplementation {
 protected:
-	virtual double	evaluate(FocusableImageimage);
+	virtual double	evaluate(FocusableImage image);
 public:
 	FWHMEvaluator(const ImageRectangle& rectangle);
 };

@@ -43,6 +43,12 @@ extern void	stderr_stacktrace(int sig);
 namespace astro {
 
 /**
+ * \brief Square function
+ */
+template<typename T>
+T	sqr(T t) { return t * t; }
+
+/**
  * \brief Timer class
  *
  * Some processes, in particular the SX driver, need to know exactly how long

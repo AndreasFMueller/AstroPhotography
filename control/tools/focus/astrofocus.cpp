@@ -15,12 +15,15 @@
 #include <AstroFocus.h>
 #include <string>
 #include <list>
+#include <JPEG.h>
 
 using namespace astro::focusing;
 
 namespace astro {
 namespace app {
 namespace focus {
+
+bool	jpeg = false;
 
 /**
  * \brief Table of options for the astrofocus program
@@ -32,6 +35,7 @@ static struct option	longopts[] = {
 { "exposure",	required_argument,	NULL,		'e' },
 { "focuser",	required_argument,	NULL,		'F' },
 { "help",	no_argument,		NULL,		'h' },
+{ "jpeg",	no_argument,		NULL,		'j' },
 { "method",	required_argument,	NULL,		'm' },
 { "prefix",	required_argument,	NULL,		'p' },
 { "rectangle",	required_argument,	NULL,		'r' },
@@ -63,9 +67,11 @@ static void	usage(const std::string& progname) {
 	std::cout << " -C,--ccd=<ccd>       use CCD named <ccd>" << std::endl;
 	std::cout << " -e,--exposure=<t>    use exposure time <t>" << std::endl;
 	std::cout << " -F,--focuser=<f>     use focuser name <f>" << std::endl;
-	std::cout << " -p,--prefix=<p>      prefix for processed files"
+	std::cout << " -j,--jpeg            write output images as JPEG"
 		<< std::endl;
 	std::cout << " -m,--method=<m>      use <m> evaulation method"
+		<< std::endl;
+	std::cout << " -p,--prefix=<p>      prefix for processed files"
 		<< std::endl;
 	std::cout << " -s,--solve=<s>       use <s> solution method"
 		<< std::endl;
@@ -86,13 +92,15 @@ static void	usage(const std::string& progname) {
  * \brief Method
  */
 int	image_command(const std::string& filename, const std::string&method,
+		const ImageRectangle& rectangle,
 		const std::string& processedfile) {
 	// read the image
 	io::FITSin	in(filename);
 	ImagePtr	image = in.read();
 
 	// apply the evaluator
-	FocusEvaluatorPtr	evaluator = FocusEvaluatorFactory::get(method);
+	FocusEvaluatorPtr	evaluator = FocusEvaluatorFactory::get(method,
+						rectangle);
 	double	val = (*evaluator)(image);
 
 	// display the results
@@ -100,9 +108,15 @@ int	image_command(const std::string& filename, const std::string&method,
 
 	// write the processed image
 	if (processedfile.size() > 0) {
-		io::FITSout	out(processedfile);
-		out.setPrecious(false);
-		out.write(evaluator->evaluated_image());
+		if (JPEG::isjpegfilename(processedfile)) {
+			JPEG	jpeg;
+			jpeg.writeJPEG(evaluator->evaluated_image(),
+				processedfile);
+		} else {
+			io::FITSout	out(processedfile);
+			out.setPrecious(false);
+			out.write(evaluator->evaluated_image());
+		}
 	}
 	return EXIT_SUCCESS;
 }
@@ -148,11 +162,16 @@ int	evaluate_command(FocusInput& input, const std::string& prefix) {
 	// export all the processed images if we have a prefix
 	if (prefix != std::string()) {
 		std::for_each(output->begin(), output->end(),
-			[prefix](const std::pair<unsigned long, FocusElement>& i) mutable {
+			[=](const std::pair<unsigned long, FocusElement>& i) {
 				std::string	filename = stringprintf(
-					"%s-%08d.fits", prefix.c_str(),
-					i.second.pos());
-				if (i.second.processed_image) {
+					"%s-%08d.%s", prefix.c_str(),
+					i.second.pos(), jpeg ? "jpg" : "fits");
+				if ((i.second.processed_image) && (jpeg)) {
+					JPEG	jpeg;
+					jpeg.writeJPEG(i.second.processed_image,
+						filename);
+				}
+				if ((i.second.processed_image) && (!jpeg)) {
 					io::FITSout	out(filename);
 					out.setPrecious(false);
 					out.write(i.second.processed_image);
@@ -231,7 +250,7 @@ int	main(int argc, char *argv[]) {
 	int	c;
 	int	longindex;
 	putenv((char *)"POSIXLY_CORRECT=1");    // cast to silence compiler
-	while (EOF != (c = getopt_long(argc, argv, "c:dhm:p:r:s:w?", longopts,
+	while (EOF != (c = getopt_long(argc, argv, "c:dhjm:p:r:s:w?", longopts,
 		&longindex))) {
 		switch (c) {
 		case 'C':
@@ -253,6 +272,9 @@ int	main(int argc, char *argv[]) {
 		case '?':
 			usage(argv[0]);
 			return EXIT_SUCCESS;
+		case 'j':
+			jpeg = true;
+			break;
 		case 'm':
 			method = std::string(optarg);
 			break;
@@ -315,7 +337,7 @@ int	main(int argc, char *argv[]) {
 		if (optind < argc) {
 			processedfile = std::string(argv[optind++]);
 		}
-		return image_command(imagename, method, processedfile);
+		return image_command(imagename, method, rectangle, processedfile);
 	}
 
 	// handle the 'evaluate' command

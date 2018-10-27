@@ -7,6 +7,7 @@
 #include <AstroFocus.h>
 #include <AstroDebug.h>
 #include "FWHM2Evaluator.h"
+#include "FWHMEvaluator.h"
 #include "MeasureEvaluator.h"
 #include "BrennerEvaluator.h"
 
@@ -45,6 +46,9 @@ FocusEvaluatorPtr	FocusEvaluatorFactory::get(const std::string& type,
 		evaluator = new BrennerOmniEvaluator(rectangle);
 	}
 	if (type == "fwhm") {
+		evaluator = new FWHMEvaluator(rectangle);
+	}
+	if (type == "fwhm2") {
 		evaluator = new FWHM2Evaluator(rectangle);
 	}
 	if (type == "measure") {
@@ -61,9 +65,10 @@ FocusEvaluatorPtr	FocusEvaluatorFactory::get(const std::string& type,
 std::list<std::string>	FocusEvaluatorFactory::evaluatornames() {
 	std::list<std::string>	names;
 	names.push_back(std::string("BrennerHorizontal"));
-	names.push_back(std::string("BrennerVertical"));
 	names.push_back(std::string("BrennerOmni"));
+	names.push_back(std::string("BrennerVertical"));
 	names.push_back(std::string("fwhm"));
+	names.push_back(std::string("fwhm2"));
 	names.push_back(std::string("measure"));
 	return names;
 }
