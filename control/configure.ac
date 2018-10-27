@@ -69,6 +69,26 @@ else
 AC_CHECK_LIB([cfitsio], [ftffrw_])
 fi
 
+## LIBJPEG ###########################################################
+# if libjpeg is installed with pkginfo, we use that
+if pkg-config --exists libjpeg
+then
+	LIBS="${LIBS} `pkg-config --libs libjpeg`"
+	CXXFLAGS="${CXXFLAGS} `pkg-config --cflags libjpeg`"
+else
+AC_CHECK_LIB([jpeg], [jpeg_abort])
+fi
+
+## LIBPNG ############################################################
+# if libjpeg is installed with pkginfo, we use that
+if pkg-config --exists libpng
+then
+	LIBS="${LIBS} `pkg-config --libs libpng`"
+	CXXFLAGS="${CXXFLAGS} `pkg-config --cflags libpng`"
+else
+AC_CHECK_LIB([png], [png_free])
+fi
+
 ## UUID ##############################################################
 # if uuid is configured with pkg-config
 if pkg-config --exists uuid

@@ -17,13 +17,36 @@ maketestimages_DEPENDENCIES = $(top_builddir)/lib/libastro.la
 maketestimages_LDADD = -L$(top_builddir)/lib -lastro
 
 image:	astrofocus
-	./astrofocus --debug --method=fwhm image testdata/test-002.fits \
-		testdata/eval-002.fits
+	./astrofocus --debug --method=fwhm				\
+		image testdata/test-002.fits tmp/eval-002.fits
+
+image2:	astrofocus
+	./astrofocus --debug --method=fwhm				\
+		--center='(1410,584)' --window=200x200 			\
+		image testdata/image-20181018-00007.fits		\
+		tmp/image-20181018-00007.png 2>&1 | tee test.log
 
 test:	astrofocus
-	./astrofocus --debug --method=BrennerOmni --solver=		\
-		--center='(1410,584)' --window=100x100 			\
-		--prefix=tmp/test					\
+	./astrofocus --debug --method=fwhm --solver=			\
+		--center='(1410,584)' --window=400x400 			\
+		--prefix=tmp/test --png					\
+		evaluate						\
+		8319000 testdata/image-20181018-00001.fits 		\
+		8319200 testdata/image-20181018-00002.fits 		\
+		8319400 testdata/image-20181018-00003.fits 		\
+		8319600 testdata/image-20181018-00004.fits 		\
+		8319800 testdata/image-20181018-00005.fits 		\
+		8320000 testdata/image-20181018-00006.fits 		\
+		8320200 testdata/image-20181018-00007.fits 		\
+		8320400 testdata/image-20181018-00008.fits 		\
+		8320600 testdata/image-20181018-00009.fits 		\
+		8320800 testdata/image-20181018-00010.fits 		\
+		8321000 testdata/image-20181018-00011.fits		\
+		2>&1 | tee test.log
+
+full:	astrofocus
+	./astrofocus --debug --method=fwhm --solver=			\
+		--prefix=tmp/full --jpeg				\
 		evaluate						\
 		8319000 testdata/image-20181018-00001.fits 		\
 		8319200 testdata/image-20181018-00002.fits 		\
@@ -40,6 +63,7 @@ test:	astrofocus
 
 test2:	astrofocus
 	./astrofocus --debug --method=fwhm --solver=abs			\
+		--jpeg --prefix=tmp/eval				\
 		evaluate						\
 		0 testdata/test-000.fits				\
 		1 testdata/test-001.fits				\

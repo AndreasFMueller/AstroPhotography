@@ -19,6 +19,8 @@ std::string	CcdState::state2string(State s) {
 		return std::string("exposed");
 	case cancelling:
 		return std::string("cancelling");
+	case streaming:
+		return std::string("streaming");
 	}
 	std::string	msg = stringprintf("bad exposure state: %d", (int)s);
 	debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
@@ -37,6 +39,9 @@ CcdState::State	CcdState::string2state(const std::string& s) {
 	}
 	if (s == "cancelling") {
 		return cancelling;
+	}
+	if (s == "streaming") {
+		return streaming;
 	}
 	std::string	msg = stringprintf("unknown exposure state '%s'",
 		s.c_str());

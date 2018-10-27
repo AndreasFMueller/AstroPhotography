@@ -1388,6 +1388,66 @@ public:
  */
 std::list<ImagePoint>	Maxima(ImagePtr image, unsigned long limit = 10);
 
+/**
+ * \brief Auxiliary class to read and write JPEG images
+ */
+class JPEG {
+	int	_quality;
+public:
+	static bool	isjpegfilename(const std::string& filename);
+	JPEG();
+	int	quality() const { return _quality; }
+	void	quality(int q) { _quality = q; }
+
+	// basic write operations with 8bit pixel sizes
+	size_t	writeJPEG(const ConstImageAdapter<RGB<unsigned char> >& colorimage,
+			void **buffer, size_t *buffersize);
+	size_t	writeJPEG(const ConstImageAdapter<RGB<unsigned char> >& colorimage,
+			const std::string& filename);
+	size_t	writeJPEG(const ConstImageAdapter<unsigned char>& monoimage,
+			void **buffer, size_t *buffersize);
+	size_t	writeJPEG(const ConstImageAdapter<unsigned char>& monoimage,
+			const std::string& filename);
+
+	// write generic image
+	size_t	writeJPEG(const ImagePtr image,
+			void **buffer, size_t *buffersize);
+	size_t	writeJPEG(const ImagePtr image, const std::string& filename);
+
+	// read JPEG images
+	ImagePtr	readJPEG(const std::string& filename);
+	ImagePtr	readJPEG(void *buffer, size_t buffersize);
+};
+
+/**
+ * \brief Auxiliary class to read and write PNG images
+ */
+class PNG {
+public:
+	static bool	ispngfilename(const std::string& filename);
+
+	PNG();
+
+	// basic write operations with 8bit pixel sizes
+	size_t	writePNG(const ConstImageAdapter<RGB<unsigned char> >& colorimage,
+			void **buffer, size_t *buffersize);
+	size_t	writePNG(const ConstImageAdapter<RGB<unsigned char> >& colorimage,
+			const std::string& filename);
+	size_t	writePNG(const ConstImageAdapter<unsigned char>& monoimage,
+			void **buffer, size_t *buffersize);
+	size_t	writePNG(const ConstImageAdapter<unsigned char>& monoimage,
+			const std::string& filename);
+
+	// write generic image
+	size_t	writePNG(ImagePtr image,
+			void **buffer, size_t *buffersize);
+	size_t	writePNG(ImagePtr image, const std::string& filename);
+
+	// read PNG images
+	ImagePtr	readPNG(const std::string& filename);
+	ImagePtr	readPNG(void *buffer, size_t buffersize);
+};
+
 } // namespace image
 } // namespace astro
 

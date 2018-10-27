@@ -82,13 +82,11 @@ void	FocusProcessor::process(FocusInput& input) {
 	if (image::ImageRectangle() == rectangle()) {
 		rectangle(input.rectangle());
 	}
-	FocusProcessor	*fp = this;
 	std::for_each(input.begin(), input.end(),
-		[fp,input](const std::pair<unsigned int, std::string>& p)
-			mutable {
+		[&](const std::pair<unsigned int, std::string>& p) {
 			FocusElement	fe(p.first);
 			fe.filename = p.second;
-			fp->process(fe);
+			process(fe);
 		}
 	);
 }
@@ -105,13 +103,11 @@ void	FocusProcessor::process(FocusInputImages& input) {
 	if (image::ImageRectangle() == rectangle()) {
 		rectangle(input.rectangle());
 	}
-	FocusProcessor	*fp = this;
 	std::for_each(input.begin(), input.end(),
-		[fp,input](const std::pair<unsigned int, ImagePtr>& p)
-			mutable {
+		[&](const std::pair<unsigned int, ImagePtr>& p) {
 			FocusElement	fe(p.first);
 			fe.raw_image = p.second;
-			fp->process(fe);
+			process(fe);
 		}
 	);
 }

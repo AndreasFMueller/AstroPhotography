@@ -18,12 +18,10 @@ namespace focusing {
 FocusInputImages::FocusInputImages(const FocusInput& input)
 	: FocusInputBase(input) {
 	// open all the images
-	FocusInputImages	*fi = this;
 	std::for_each(input.begin(), input.end(),
-		[fi,input](const std::pair<unsigned long,
-			std::string>& p) mutable {
+		[&](const std::pair<unsigned long, std::string>& p) {
 			ImagePtr	image = input.image(p.first);
-			fi->insert(std::make_pair(p.first, image));
+			insert(std::make_pair(p.first, image));
 		}
 	);
 }

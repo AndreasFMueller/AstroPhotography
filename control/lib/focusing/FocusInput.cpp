@@ -25,8 +25,7 @@ std::string     FocusInput::toString() const {
 		out << std::endl;
 	}
 	std::for_each(begin(), end(),
-		[&out](const std::pair<unsigned long, std::string>& i)
-			mutable {
+		[&](const std::pair<unsigned long, std::string>& i) {
 			out << i.first << " " << i.second;
 			out << std::endl;
 		}

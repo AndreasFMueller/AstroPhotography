@@ -36,6 +36,7 @@ libastroimage_la_SOURCES = 						\
 	ColorBalance.cpp						\
 	ColorTransform.cpp						\
 	ColorScaling.cpp						\
+	ComponentBase.cpp						\
 	ConnectedComponent.cpp						\
 	ConvolutionOperator.cpp						\
 	ConvolutionResult.cpp						\
@@ -85,6 +86,7 @@ libastroimage_la_SOURCES = 						\
 	ImageRectangle.cpp						\
 	ImageSize.cpp							\
 	Interpolation.cpp						\
+	JPEG.cpp							\
 	Layer.cpp							\
 	LevelExtractor.cpp						\
 	LevelMaskExtractor.cpp						\
@@ -102,6 +104,7 @@ libastroimage_la_SOURCES = 						\
 	PhaseCorrelator.cpp						\
 	PeakFinder.cpp							\
 	Pixel.cpp							\
+	PNG.cpp								\
 	Projection.cpp							\
 	ProjectionCorrector.cpp						\
 	Radon.cpp							\

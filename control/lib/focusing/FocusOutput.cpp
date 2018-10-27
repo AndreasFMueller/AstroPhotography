@@ -37,12 +37,11 @@ FocusOutput::FocusOutput(const FocusInputBase& input) : FocusInputBase(input) {
  */
 FocusOutput::FocusOutput(const FocusInput& input) : FocusInputBase(input) {
 	// copy the file names
-	FocusOutput	*fo = this;
 	std::for_each(input.begin(), input.end(),
-		[fo](const std::pair<unsigned long, std::string>& p) mutable {
+		[&](const std::pair<unsigned long, std::string>& p) {
 			FocusElement	fe(p.first);
 			fe.filename = p.second;
-			fo->insert(std::make_pair(fe.pos(), fe));
+			insert(std::make_pair(fe.pos(), fe));
 		}
 	);
 }
@@ -57,12 +56,11 @@ FocusOutput::FocusOutput(const FocusInput& input) : FocusInputBase(input) {
  */
 FocusOutput::FocusOutput(const FocusInputImages& input)
 	: FocusInputBase(input) {
-	FocusOutput	*fo = this;
 	std::for_each(input.begin(), input.end(),
-		[fo](const std::pair<unsigned long, ImagePtr>& p) mutable {
+		[&](const std::pair<unsigned long, ImagePtr>& p) {
 			FocusElement	fe(p.first);
 			fe.raw_image = p.second;
-			fo->insert(std::make_pair(fe.pos(), fe));
+			insert(std::make_pair(fe.pos(), fe));
 		}
 	);
 }
@@ -77,8 +75,7 @@ FocusOutput::FocusOutput(const FocusInputImages& input)
 FocusItems	FocusOutput::items() const {
 	FocusItems	result;
 	std::for_each(begin(), end(),
-		[&result](const std::pair<unsigned long, FocusElement>& p)
-			mutable {
+		[&](const std::pair<unsigned long, FocusElement>& p) {
 			FocusItem	fi(p.first, p.second.value);
 			result.insert(fi);
 		}
