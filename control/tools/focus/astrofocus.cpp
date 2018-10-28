@@ -13,6 +13,7 @@
 #include <getopt.h>
 #include <AstroImage.h>
 #include <AstroFocus.h>
+#include <ImageWriter.h>
 #include <string>
 #include <list>
 
@@ -22,8 +23,79 @@ namespace astro {
 namespace app {
 namespace focus {
 
-bool	jpeg = false;
-bool	png = false;
+static ImageWriter::format_t	format = ImageWriter::FITS;
+
+static std::string	prefix;
+
+/**
+ * \brief Auxiliary function to construct a file name
+ */
+std::string	build_filename(unsigned long position) {
+	std::string	extension("fits");
+	switch (format) {
+	case ImageWriter::FITS:
+		extension = std::string("fits");
+	case ImageWriter::JPEG:
+		extension = std::string("jpg");
+	case ImageWriter::PNG:
+		extension = std::string("png");
+	}
+	return stringprintf("%s-%08lu.%s", prefix.c_str(), position,
+		extension.c_str());
+}
+
+/**
+ * \brief Decide what format to use based on the file name
+ */
+void	set_format_from_filename(const std::string& filename) {
+	if (JPEG::isjpegfilename(filename)) {
+		format = ImageWriter::JPEG;
+	} else if (PNG::ispngfilename(filename)) {
+		format = ImageWriter::PNG;
+	} else {
+		format = ImageWriter::FITS;
+	}
+}
+
+/**
+ * \brief Write an image with the right type
+ */
+void	save_image(ImagePtr image, const std::string& filename) {
+	try {
+		switch (format) {
+		case ImageWriter::FITS:
+			{
+				io::FITSout	out(filename);
+				out.setPrecious(false);
+				out.write(image);
+			}
+			break;
+		case ImageWriter::JPEG:
+			{
+				image::JPEG	jpeg;
+				jpeg.writeJPEG(image, filename);
+			}
+			break;
+		case ImageWriter::PNG:
+			{
+				image::PNG	png;
+				png.writePNG(image, filename);
+			}
+			break;
+		}
+	} catch (const std::exception& x) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "cannot write %s: %s",
+			filename.c_str(), x.what());
+	}
+}
+
+/**
+ * \brief Auxiliary function to write a processed image
+ */
+void	save_image(ImagePtr image, unsigned long position) {
+	std::string	filename = build_filename(position);
+	save_image(image, filename);
+}
 
 /**
  * \brief Table of options for the astrofocus program
@@ -34,9 +106,8 @@ static struct option	longopts[] = {
 { "debug",	no_argument,		NULL,		'd' },
 { "exposure",	required_argument,	NULL,		'e' },
 { "focuser",	required_argument,	NULL,		'F' },
+{ "format",	required_argument,	NULL,		'f' },
 { "help",	no_argument,		NULL,		'h' },
-{ "jpeg",	no_argument,		NULL,		'j' },
-{ "png",	no_argument,		NULL,		'P' },
 { "method",	required_argument,	NULL,		'm' },
 { "prefix",	required_argument,	NULL,		'p' },
 { "rectangle",	required_argument,	NULL,		'r' },
@@ -68,11 +139,9 @@ static void	usage(const std::string& progname) {
 	std::cout << " -C,--ccd=<ccd>       use CCD named <ccd>" << std::endl;
 	std::cout << " -e,--exposure=<t>    use exposure time <t>" << std::endl;
 	std::cout << " -F,--focuser=<f>     use focuser name <f>" << std::endl;
-	std::cout << " -j,--jpeg            write output images as JPEG"
-		<< std::endl;
+	std::cout << " -f,--format=<fmt>    produce processed images in format <fmt>, where <fmt>" << std::endl;
+	std::cout << "                      can be fits, jpg or png" << std::endl;
 	std::cout << " -m,--method=<m>      use <m> evaulation method"
-		<< std::endl;
-	std::cout << " -P,--png             write output images as PNG"
 		<< std::endl;
 	std::cout << " -p,--prefix=<p>      prefix for processed files"
 		<< std::endl;
@@ -111,19 +180,8 @@ int	image_command(const std::string& filename, const std::string&method,
 
 	// write the processed image
 	if (processedfile.size() > 0) {
-		if (JPEG::isjpegfilename(processedfile)) {
-			JPEG	jpeg;
-			jpeg.writeJPEG(evaluator->evaluated_image(),
-				processedfile);
-		} else if (PNG::ispngfilename(processedfile)) {
-			PNG	png;
-			png.writePNG(evaluator->evaluated_image(),
-				processedfile);
-		} else {
-			io::FITSout	out(processedfile);
-			out.setPrecious(false);
-			out.write(evaluator->evaluated_image());
-		}
+		set_format_from_filename(processedfile);
+		save_image(evaluator->evaluated_image(), processedfile);
 	}
 	return EXIT_SUCCESS;
 }
@@ -170,26 +228,8 @@ int	evaluate_command(FocusInput& input, const std::string& prefix) {
 	if (prefix != std::string()) {
 		std::for_each(output->begin(), output->end(),
 			[=](const std::pair<unsigned long, FocusElement>& i) {
-				std::string	extension("fits");
-				if (jpeg) { extension = "jpg"; }
-				if (png) { extension = "png"; }
-				std::string	filename = stringprintf(
-					"%s-%08d.%s", prefix.c_str(),
-					i.first, extension.c_str());
 				if (!i.second.processed_image) return;
-				if (jpeg) {
-					JPEG	jpeg;
-					jpeg.writeJPEG(i.second.processed_image,
-						filename);
-				} else if (png) {
-					PNG	png;
-					png.writePNG(i.second.processed_image,
-						filename);
-				} else {
-					io::FITSout	out(filename);
-					out.setPrecious(false);
-					out.write(i.second.processed_image);
-				}
+				save_image(i.second.processed_image, i.first);
 			}
 		);
 	}
@@ -225,7 +265,12 @@ int	focus_command(const FocusParameters& parameters,
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "preparing process");
 	FocusProcess	process(parameters, ccd, focuser);
 
-	// XXX install a callback for reporting
+	// construct the callback and install it
+	if (prefix.size() > 0) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "installing callback");
+		callback::CallbackPtr	callback(new ImageWriter(prefix, format));
+		process.callback(callback);
+	}
 
 	// start the process
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "start process");
@@ -258,13 +303,13 @@ int	main(int argc, char *argv[]) {
 	std::string	solver("abs");
 	std::string	ccdname;
 	std::string	focusername;
-	std::string	prefix;
 	double	exposuretime = 1;
 	int	steps = 10;
 	int	c;
 	int	longindex;
 	putenv((char *)"POSIXLY_CORRECT=1");    // cast to silence compiler
-	while (EOF != (c = getopt_long(argc, argv, "c:dhjm:Pp:r:s:w?", longopts,
+	while (EOF != (c = getopt_long(argc, argv,
+			"C:c:df:F:hm:p:r:s:w?", longopts,
 		&longindex))) {
 		switch (c) {
 		case 'C':
@@ -279,6 +324,18 @@ int	main(int argc, char *argv[]) {
 		case 'e':
 			exposuretime = std::stod(optarg);
 			break;
+		case 'f':
+			if (std::string("fits") == std::string(optarg)) {
+				format = ImageWriter::FITS;
+			}
+			if ((std::string("jpeg") == std::string(optarg)) ||
+				(std::string("jpg") == std::string(optarg))) {
+				format = ImageWriter::JPEG;
+			}
+			if (std::string("png") == std::string(optarg)) {
+				format = ImageWriter::PNG;
+			}
+			break;
 		case 'F':
 			focusername = std::string(optarg);
 			break;
@@ -286,16 +343,8 @@ int	main(int argc, char *argv[]) {
 		case '?':
 			usage(argv[0]);
 			return EXIT_SUCCESS;
-		case 'j':
-			jpeg = true;
-			png = false;
-			break;
 		case 'm':
 			method = std::string(optarg);
-			break;
-		case 'P':
-			png = true;
-			jpeg = false;
 			break;
 		case 'p':
 			prefix = std::string(optarg);
@@ -420,6 +469,7 @@ int	main(int argc, char *argv[]) {
 		camera::Exposure	exposure;
 		exposure.exposuretime(exposuretime);
 		exposure.purpose(camera::Exposure::focus);
+		exposure.frame(rectangle);
 		fp.exposure(exposure);
 		fp.method(method);
 		fp.solver(solver);

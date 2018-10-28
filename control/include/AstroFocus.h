@@ -9,6 +9,7 @@
 #include <AstroCamera.h>
 #include <AstroCallback.h>
 #include <AstroUtils.h>
+#include <queue>
 
 namespace astro {
 namespace focusing {
@@ -85,9 +86,65 @@ public:
 	unsigned long	pos() const { return _pos; }
 	std::string	filename;
 	ImagePtr	raw_image;
+	std::string	method;
 	ImagePtr	processed_image;
 	double		value;
 	ImagePtr	image() const;
+	std::string	toString() const;
+};
+typedef std::shared_ptr<FocusElement>	FocusElementPtr;
+
+/**
+ * \brief A queue used to forward focus elements between threads
+ */
+class FocusElementQueue : std::queue<FocusElementPtr> {
+	std::mutex	_mutex;
+	std::condition_variable	_condition;
+	bool	_terminated;
+public:
+	bool	terminated() const { return _terminated; }
+	FocusElementQueue();
+	void	put(FocusElementPtr feptr);
+	void	terminate();
+	FocusElementPtr	get();
+};
+typedef std::shared_ptr<FocusElementQueue>	FocusElementQueuePtr;
+
+/**
+ * \brief Callback data to report focus computation progress
+ */
+class FocusElementCallbackData : public callback::CallbackData {
+	unsigned long		_position;
+	astro::image::ImagePtr	_raw_image;
+	std::string		_method;
+	astro::image::ImagePtr	_processed_image;
+	double			_value;
+public:
+	unsigned long	position() const { return _position; }
+	astro::image::ImagePtr	raw_image() const { return _raw_image; }
+	std::string	method() const { return _method; }
+	astro::image::ImagePtr	processed_image() const { return _processed_image; }
+	double	value() const { return _value; }
+
+	FocusElementCallbackData(const FocusElement& e);
+};
+
+/**
+ * \brief Base class for focs callbacks
+ *
+ * This callback simplifies sending callback information because it
+ * takes a FocusElement, converts it into FocusCallbackData and
+ * sends this through the usual channel.
+ */
+class FocusElementCallback : public callback::Callback {
+protected:
+	FocusElementCallbackData	*unpacked(callback::CallbackDataPtr cbd);
+public:
+	FocusElementCallback();
+	virtual ~FocusElementCallback();
+	virtual void	handle(FocusElementCallbackData& fe) const = 0;
+	virtual callback::CallbackDataPtr operator()(callback::CallbackDataPtr cbd);
+	void	send(const FocusElement& element);
 };
 
 /**
@@ -234,7 +291,7 @@ static FocusSolverPtr	get(const std::string& solver);
 class Focus {
 public:
 	// focusing status (what is it doing right now?)
-	typedef enum { IDLE, MOVING, MEASURING, FOCUSED, FAILED } state_type;
+	typedef enum { IDLE, MOVING, MEASURING, MEASURED, FOCUSED, FAILED } state_type;
 static std::string	state2string(state_type);
 static state_type	string2state(const std::string& s);
 };
@@ -307,7 +364,7 @@ private:
 	callback::CallbackPtr	_callback;
 public:
 	callback::CallbackPtr	callback() const { return _callback; }
-	void	callbacu(callback::CallbackPtr c) { _callback = c; }
+	void	callback(callback::CallbackPtr c) { _callback = c; }
 
 	// constructors
 	FocusProcessBase(unsigned long minposition, unsigned long maxposition);
@@ -321,15 +378,20 @@ private:
 
 private:
 	std::atomic_bool	_running;
-	std::thread	_thread;
+	std::thread	_measure_thread;
+	std::thread	_evaluate_thread;
 public:
 	// start the process
 	void	start();
 	void	stop();
 	void	wait();
-	void	run();
+	// thread main functions
+	void	measure();
+	void	evaluate();
 private:
-	bool	run0();
+	FocusElementQueuePtr	_focus_elements;
+	bool	measure0();
+	bool	evaluate0();
 };
 
 /**

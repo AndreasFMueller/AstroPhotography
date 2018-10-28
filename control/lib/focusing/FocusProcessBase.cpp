@@ -45,6 +45,8 @@ void	FocusProcessBase::reportState() {
 		FocusCallbackState	*f = new FocusCallbackState(status());
 		callback::CallbackDataPtr	cd(f);
 		(*_callback)(cd);
+	} else {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "no callback to report state");
 	}
 }
 
@@ -52,9 +54,14 @@ void	FocusProcessBase::reportState() {
  * \brief Report a FocusElement to the installed callback
  */
 void	FocusProcessBase::reportFocusElement(const FocusElement& fe) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "reporting %s", fe.toString().c_str());
 	if (_callback) {
-		callback::CallbackDataPtr	fcd(new FocusCallbackData(fe));
+		callback::CallbackDataPtr fecd(new FocusElementCallbackData(fe));
+		(*_callback)(fecd);
+		callback::CallbackDataPtr fcd(new FocusCallbackData(fe));
 		(*_callback)(fcd);
+	} else {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "no callback installed");
 	}
 }
 
@@ -65,18 +72,16 @@ void	FocusProcessBase::reportImage(ImagePtr image) {
 	if (_callback) {
 		callback::CallbackDataPtr cd(new callback::ImageCallbackData(image));
 		(*_callback)(cd);
+	} else {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "no callback to report image");
 	}
 }
 
 /**
- * \brief The run method for the focus process
+ * \brief The measure part of the focus process
  */
-bool	FocusProcessBase::run0() {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "focus process run0() starts");
-
-	// prepare a Processor
-	FocusProcessor	processor(method(), solver());
-	processor.keep_images(true); // we want to get rid of the ourselves
+bool	FocusProcessBase::measure0() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "focus process measure0() starts");
 
 	// collect the data
 	unsigned long	delta = maxposition() - minposition();
@@ -92,9 +97,7 @@ bool	FocusProcessBase::run0() {
 		moveto(pos);
 
 		if (!_running) {
-			status(Focus::FAILED);
-			reportState();
-			return false;
+			goto failed;
 		}
 
 		// take an image
@@ -106,19 +109,66 @@ bool	FocusProcessBase::run0() {
 		reportImage(image);
 
 		// add the image and the position to the 
-		FocusElement	fe(pos);
-		fe.raw_image = image;
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "processing the image");
-		processor.process(fe);
-
-		// report the element
-		reportFocusElement(fe);
+		FocusElementPtr	fe(new FocusElement(pos));
+		fe->raw_image = image;
+		_focus_elements->put(fe);
 
 		if (!_running) {
-			status(Focus::FAILED);
-			reportState();
+			goto failed;
+		}
+	}
+	status(Focus::MEASURED);
+	reportState();
+	_focus_elements->terminate();
+	return true;
+
+failed:
+	status(Focus::FAILED);
+	_focus_elements->terminate();
+	reportState();
+	return false;
+}
+
+/**
+ * \brief The evaluate part of the focus process
+ */
+bool	FocusProcessBase::evaluate0() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "focus process evaluate0() starts");
+
+	// prepare a Processor
+	FocusProcessor	processor(method(), solver());
+	processor.keep_images(true);	// we want to get rid of the images
+					// ourselves
+
+	FocusElementPtr	fe;
+	do {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "waiting for next FE");
+		fe = _focus_elements->get();
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "got an element %p", &*fe);
+
+		if (!_running) {
 			return false;
 		}
+
+		if (fe) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0,
+				"processing new element %s",
+				fe->toString().c_str());
+
+			// process the element
+			processor.process(*fe);
+
+			// report the element
+			reportFocusElement(*fe);
+		} else {
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "queue terminated");
+		}
+	} while (fe);
+
+	// if we are not running, we should stop evaluating
+	if (!_running) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "evaluation cancelled");
+		return false;
 	}
 
 	// get the input date for the solver
@@ -157,13 +207,14 @@ bool	FocusProcessBase::run0() {
 }
 
 /**
- * \brief The run method wrapper
+ * \brief The measure method wrapper
  *
  * This method takes care of catching exceptions during the focusing process
  */
-void	FocusProcessBase::run() {
+void	FocusProcessBase::measure() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "start measure thread");
 	try {
-		bool	completed = run0();
+		bool	completed = measure0();
 		if (!completed) {
 			debug(LOG_DEBUG, DEBUG_LOG, 0,
 				"focus process was terminated");
@@ -174,13 +225,43 @@ void	FocusProcessBase::run() {
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 		status(Focus::FAILED);
 	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "measure thread terminates");
 }
 
 /**
- * \brief Trampoline function to launch into the run method of the proces
+ * \brief The evaluate() wrapper method
  */
-static void	launch(FocusProcessBase *process) {
-	process->run();
+void	FocusProcessBase::evaluate() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "start evaluate thread");
+	try {
+		bool	completed = evaluate0();
+		if (!completed) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0,
+				"evaluate process was terminated");
+		}
+	} catch (const std::exception& x) {
+		std::string	msg = stringprintf("cannot evaluate: %s",
+			x.what());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		status(Focus::FAILED);
+	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "evaluate thread terminates");
+}
+
+/**
+ * \brief Trampoline function to launch into the measure thread of the proces
+ */
+static void	measure_launch(FocusProcessBase *process) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "measure thread launched");
+	process->measure();
+}
+
+/**
+ * \brief Trampoline function to launch into the evaluate thread of the proces
+ */
+static void	evaluate_launch(FocusProcessBase *process) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "evaluate thread launched");
+	process->evaluate();
 }
 
 /**
@@ -194,10 +275,17 @@ void	FocusProcessBase::start() {
 	}
 	_running = true;
 
-	// start the thread
+	// prepare a queue 
+	_focus_elements = FocusElementQueuePtr(new FocusElementQueue());
+
+	// start the evaluate thread
+	_evaluate_thread = std::thread(evaluate_launch, this);
+
+	// start the measure thread
 	status(Focus::MOVING);
-	_thread = std::thread(launch, this);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "focus process thread started");
+	_measure_thread = std::thread(measure_launch, this);
+
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "focus process threads started");
 }
 
 /**
@@ -215,6 +303,7 @@ void	FocusProcessBase::stop() {
  */
 void	FocusProcessBase::wait() {
 	std::set<Focus::state_type>	states;
+	states.insert(Focus::MEASURED);
 	states.insert(Focus::FOCUSED);
 	states.insert(Focus::FAILED);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "waiting for %d states", states.size());
@@ -222,10 +311,20 @@ void	FocusProcessBase::wait() {
 	if (Focus::FAILED == finalstate) {
 		std::string	msg = stringprintf("focus process failed");
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "%s", msg.c_str());
+		// XXX there is a leak here: we should wait for the threads 
+		// XXX to join even if we want to throw an exception
 		throw std::runtime_error(msg);
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "state %s reached",
 		Focus::state2string(finalstate).c_str());
+	if (_measure_thread.joinable()) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "joining measure thread");
+		_measure_thread.join();
+	}
+	if (_evaluate_thread.joinable()) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "joining evaluate thread");
+		_evaluate_thread.join();
+	}
 }
 
 } // namespace focusing

@@ -28,6 +28,9 @@ libastrofocusing_la_SOURCES =						\
 	FocusCallbackData.cpp						\
 	FocusCompute.cpp						\
 	FocusElement.cpp						\
+	FocusElementCallback.cpp					\
+	FocusElementCallbackData.cpp					\
+	FocusElementQueue.cpp						\
 	FocusEvaluatorImplementation.cpp				\
 	FocusEvaluatorFactory.cpp					\
 	FocusInputBase.cpp						\

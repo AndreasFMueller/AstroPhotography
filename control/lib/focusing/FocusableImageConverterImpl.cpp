@@ -39,7 +39,7 @@ ImageRectangle	FocusableImageConverterImpl::rectangle_to_use(ImagePtr image) {
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "using full frame %s",
 		image->getFrame().toString().c_str());
-	return image->getFrame();
+	return ImageRectangle(image->size());
 }
 
 #define	raw_to_focusable(image, pixel)					\

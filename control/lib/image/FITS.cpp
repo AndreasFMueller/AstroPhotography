@@ -15,6 +15,7 @@ using namespace astro::image;
 namespace astro {
 namespace io {
 
+#if 0
 /**
  * \brief remove quotation marks from a string if present
  */
@@ -676,6 +677,8 @@ FITS_OUT_CONSTRUCTOR_MULTI(double, TDOUBLE, 4, DOUBLE_IMG)
 FITS_OUT_CONSTRUCTOR_MULTI(double, TDOUBLE, 5, DOUBLE_IMG)
 FITS_OUT_CONSTRUCTOR_MULTI(double, TDOUBLE, 6, DOUBLE_IMG)
 FITS_OUT_CONSTRUCTOR_MULTI(double, TDOUBLE, 7, DOUBLE_IMG)
+
+#endif
 
 } // namespace io
 } // namespace astro

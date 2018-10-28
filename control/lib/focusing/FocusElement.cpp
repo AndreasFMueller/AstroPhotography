@@ -6,6 +6,8 @@
 #include <AstroFocus.h>
 #include <AstroIO.h>
 
+#include <sstream>
+
 namespace astro {
 namespace focusing {
 
@@ -13,6 +15,7 @@ namespace focusing {
  * \brief Construct a focus element
  */
 FocusElement::FocusElement(unsigned long pos) : _pos(pos) {
+	value = 0;
 }
 
 /**
@@ -24,6 +27,27 @@ ImagePtr	FocusElement::image() const {
 	}
 	io::FITSin	in(filename);
 	return in.read();
+}
+
+/**
+ * \brief Get a string representation
+ */
+std::string	FocusElement::toString() const {
+	std::ostringstream	out;
+	out << "position=" << pos();
+	if (filename.size() > 0) {
+		out << ", filename=" << filename;
+	}
+	if (raw_image) {
+		out << ", raw image=" << raw_image->info();
+	}
+	if (processed_image) {
+		out << ", processed image=" << processed_image->info();
+	}
+	if (value > 0) {
+		out << ", value=" << value;
+	}
+	return out.str();
 }
 
 } // namespace focusing

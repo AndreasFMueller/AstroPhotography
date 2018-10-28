@@ -21,6 +21,9 @@ Focus::state_type Focus::string2state(const std::string& s) {
 	if (s == "measuring") {
 		return Focus::MEASURING;
 	}
+	if (s == "measured") {
+		return Focus::MEASURED;
+	}
 	if (s == "focused") {
 		return Focus::FOCUSED;
 	}
@@ -43,6 +46,9 @@ std::string	Focus::state2string(state_type s) {
 		break;
 	case MEASURING:
 		return std::string("measuring");
+		break;
+	case MEASURED:
+		return std::string("measured");
 		break;
 	case FOCUSED:
 		return std::string("focused");

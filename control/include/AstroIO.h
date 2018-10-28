@@ -107,6 +107,7 @@ class FITSfile {
 	FITSfile(const FITSfile& other) = delete;
 	FITSfile&	operator=(const FITSfile& other) = delete;
 protected:
+	static bool	isname(const std::string& filename);
 	// header stuff
 	typedef	std::list<std::pair<std::string, FITShdu> >	headerlist;
 	headerlist	headers;

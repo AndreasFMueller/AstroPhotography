@@ -191,7 +191,9 @@ void	ImageBase::dump_metadata() const {
 
 
 std::string	ImageBase::info() const {
-	return stringprintf("%s image", size().toString().c_str());
+	return stringprintf("%s image size=%s",
+		demangle(typeid(*this).name()).c_str(),
+		size().toString().c_str());
 }
 
 } // namespace image

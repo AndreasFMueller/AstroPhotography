@@ -6,9 +6,11 @@
 
 bin_PROGRAMS = astrofocus 
 
+noinst_HEADERS = ImageWriter.h
+
 noinst_PROGRAMS = maketestimages
 
-astrofocus_SOURCES = astrofocus.cpp
+astrofocus_SOURCES = ImageWriter.cpp astrofocus.cpp
 astrofocus_DEPENDENCIES = $(top_builddir)/lib/libastro.la
 astrofocus_LDADD = -L$(top_builddir)/lib -lastro
 
@@ -18,7 +20,7 @@ maketestimages_LDADD = -L$(top_builddir)/lib -lastro
 
 image:	astrofocus
 	./astrofocus --debug --method=fwhm				\
-		image testdata/test-002.fits tmp/eval-002.fits
+		image testdata/test-002.fits tmp/eval-002.jpg
 
 image2:	astrofocus
 	./astrofocus --debug --method=fwhm				\
@@ -29,7 +31,7 @@ image2:	astrofocus
 test:	astrofocus
 	./astrofocus --debug --method=fwhm --solver=			\
 		--center='(1410,584)' --window=400x400 			\
-		--prefix=tmp/test --png					\
+		--prefix=tmp/test --format=png				\
 		evaluate						\
 		8319000 testdata/image-20181018-00001.fits 		\
 		8319200 testdata/image-20181018-00002.fits 		\
@@ -46,7 +48,7 @@ test:	astrofocus
 
 full:	astrofocus
 	./astrofocus --debug --method=fwhm --solver=			\
-		--prefix=tmp/full --jpeg				\
+		--prefix=tmp/full --format=png				\
 		evaluate						\
 		8319000 testdata/image-20181018-00001.fits 		\
 		8319200 testdata/image-20181018-00002.fits 		\
@@ -63,7 +65,7 @@ full:	astrofocus
 
 test2:	astrofocus
 	./astrofocus --debug --method=fwhm --solver=abs			\
-		--jpeg --prefix=tmp/eval				\
+		--format=jpeg --prefix=tmp/eval				\
 		evaluate						\
 		0 testdata/test-000.fits				\
 		1 testdata/test-001.fits				\
@@ -100,7 +102,17 @@ solve:	astrofocus
 
 process:	astrofocus
 	./astrofocus --debug --method=fwhm --solve=abs --steps=10	\
-		--exposure=10						\
+		--exposure=10 --format=png --prefix=tmp/focus		\
+		--center='(1410,584)' --window=400x400 			\
 		--ccd=ccd:simulator/camera/ccd				\
 		--focuser=focuser:simulator/focuser			\
-		focus 45000 55000
+		focus 45000 55000 2>&1 | tee test.log
+
+process2:	astrofocus
+	./astrofocus --debug --method=fwhm --solve=abs --steps=100	\
+		--exposure=10 --format=png --prefix=tmp/focus2		\
+		--center='(960,540)' --window=800x600 			\
+		--ccd=ccd:simulator/camera/ccd				\
+		--focuser=focuser:simulator/focuser			\
+		focus 45000 55000 2>&1 | tee test.log
+

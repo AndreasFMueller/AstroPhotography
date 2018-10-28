@@ -54,12 +54,16 @@ libastroimage_la_SOURCES = 						\
 	EuclideanDisplacement.cpp					\
 	EuclideanDisplacementConvolve.cpp				\
 	FITS.cpp							\
+	FITShdu.cpp							\
 	FITSKeywords.cpp						\
 	FITSdate.cpp							\
 	FITSdirectory.cpp						\
+	FITSfile.cpp							\
 	FITSexception.cpp						\
 	FITSin.cpp							\
+	FITSinfile.cpp							\
 	FITSout.cpp							\
+	FITSoutfile.cpp							\
 	Filters.cpp							\
 	FlatCorrector.cpp						\
 	Flip.cpp							\
