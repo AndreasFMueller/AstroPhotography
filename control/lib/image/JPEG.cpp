@@ -54,6 +54,7 @@ bool	JPEG::isjpegfilename(const std::string& filename) {
  */
 size_t  JPEG::writeJPEG(const ConstImageAdapter<RGB<unsigned char> >& colorimage,
 		void **buffer, size_t *buffersize) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "write RGB image to buffer");
 	buffer = NULL;
 	buffersize = 0;
 
@@ -72,7 +73,8 @@ size_t  JPEG::writeJPEG(const ConstImageAdapter<RGB<unsigned char> >& colorimage
 
 	// set the output buffer
 	unsigned char	*jbuffer = NULL;
-	unsigned long	jbuffersize;
+	unsigned long	jbuffersize = 0;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "setting up buffer");
 	jpeg_mem_dest(&cinfo, &jbuffer, &jbuffersize);
 
 	// prepare the defaults
@@ -86,9 +88,11 @@ size_t  JPEG::writeJPEG(const ConstImageAdapter<RGB<unsigned char> >& colorimage
 
 	// set quality
 	jpeg_set_quality(&cinfo, _quality, TRUE);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "quality set to %d", _quality);
 
 	// start the compression
 	jpeg_start_compress(&cinfo, TRUE);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "compress started");
 	while (cinfo.next_scanline < cinfo.image_height) {
 		int	y = h - 1 - cinfo.next_scanline;
 		for (int x = 0; x < w; x++) {
@@ -99,6 +103,7 @@ size_t  JPEG::writeJPEG(const ConstImageAdapter<RGB<unsigned char> >& colorimage
 		}
 		jpeg_write_scanlines(&cinfo, row_pointer, 1);
 	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "all data written");
 
 	// close the compression
 	jpeg_finish_compress(&cinfo);
@@ -371,6 +376,22 @@ size_t	JPEG::writeJPEG(ImagePtr image, const std::string& filename) {
 			return writeJPEG(*img, filename);
 		}
 	}
+	{
+		FormatReduction	*img = FormatReduction::get(image);
+		if (NULL != img) {
+			size_t	s = writeJPEG(*img, filename);
+			delete img;
+			return s;
+		}
+	}
+	{
+		FormatReductionRGB	*img = FormatReductionRGB::get(image);
+		if (NULL != img) {
+			size_t	s = writeJPEG(*img, filename);
+			delete img;
+			return s;
+		}
+	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "no matching pixel type");
 	return 0;
 }
@@ -395,6 +416,22 @@ size_t	JPEG::writeJPEG(ImagePtr image, void **buffer, size_t *buffersize) {
 			= dynamic_cast<Image<RGB<unsigned char > >*>(&*image);
 		if (NULL != img) {
 			return writeJPEG(*img, buffer, buffersize);
+		}
+	}
+	{
+		FormatReduction	*img = FormatReduction::get(image);
+		if (NULL != img) {
+			size_t	s = writeJPEG(*img, buffer, buffersize);
+			delete img;
+			return s;
+		}
+	}
+	{
+		FormatReductionRGB	*img = FormatReductionRGB::get(image);
+		if (NULL != img) {
+			size_t	s = writeJPEG(*img, buffer, buffersize);
+			delete img;
+			return s;
 		}
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "no matching pixel type");

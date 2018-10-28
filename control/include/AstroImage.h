@@ -1389,9 +1389,76 @@ public:
 std::list<ImagePoint>	Maxima(ImagePtr image, unsigned long limit = 10);
 
 /**
- * \brief Auxiliary class to read and write JPEG images
+ * \brief Format reduction to 8 bits so that images can be saved as PNG or JPEG
  */
-class JPEG {
+class FormatReductionBase {
+protected:
+	double	_min;
+	double	_max;
+	unsigned char	clamp(double v) const;
+public:
+	FormatReductionBase(double min, double max);
+};
+
+class FormatReduction : public FormatReductionBase,
+			public ConstImageAdapter<unsigned char> {
+public:
+	FormatReduction(const ImageSize& size, double min, double max);
+	static FormatReduction	*get(ImagePtr image);
+	static FormatReduction	*get(ImagePtr image, double min, double max);
+	static FormatReduction	*get(ImagePtr image,
+					std::pair<double, double>& minmax);
+	static std::pair<double, double>	range(ImagePtr image);
+	static std::pair<double, double>	mrange(ImagePtr image);
+};
+
+class FormatReductionRGB : public FormatReductionBase,
+			public ConstImageAdapter<RGB<unsigned char> > {
+public:
+	FormatReductionRGB(const ImageSize& size, double min, double max);
+	static FormatReductionRGB	*get(ImagePtr image);
+	static FormatReductionRGB	*get(ImagePtr image,
+					double min, double max);
+	static FormatReductionRGB	*get(ImagePtr image,
+					std::pair<double, double>& minmax);
+	static std::pair<double, double>	range(ImagePtr image);
+};
+
+/**
+ * \brief Format class as the base class for all special formats
+ */
+class Format {
+public:
+	typedef enum type_e { FITS, JPEG, PNG } type_t;
+protected:
+	type_t	_type;
+public:
+	type_t	type() const { return _type; }
+	Format(type_t type = FITS) : _type(type) { }
+};
+
+/**
+ * \brief Axiliary class to read/write images from/to files and memory buffers
+ */
+class FITS : public Format {
+	size_t	write(ImagePtr image, const std::string& filename);
+public:
+	static bool	isfitsfilename(const std::string& filename);
+	FITS();
+
+	// write images
+	size_t	writeFITS(ImagePtr image, const std::string& filename);
+	size_t	writeFITS(ImagePtr image, void **buffer, size_t *buffersize);
+
+	// read images
+	ImagePtr	readFITS(const std::string& filename);
+	ImagePtr	readFITS(void *buffer, size_t buffersize);
+};
+
+/**
+ * \brief Auxiliary class to read and write JPEG images from/to files/memory
+ */
+class JPEG : public Format {
 	int	_quality;
 public:
 	static bool	isjpegfilename(const std::string& filename);
@@ -1420,9 +1487,9 @@ public:
 };
 
 /**
- * \brief Auxiliary class to read and write PNG images
+ * \brief Auxiliary class to read and write PNG images from/to files/memory
  */
-class PNG {
+class PNG : public Format {
 public:
 	static bool	ispngfilename(const std::string& filename);
 
@@ -1448,6 +1515,28 @@ public:
 	ImagePtr	readPNG(void *buffer, size_t buffersize);
 };
 
+/**
+ * \brief Container class for images as memory buffers
+ */
+class ImageBuffer : public Format {
+	ImageBuffer(const ImageBuffer& other) = delete;
+	ImageBuffer&	operator=(const ImageBuffer& other) = delete;
+	void	*_buffer;
+	size_t	_buffersize;
+	ImageBuffer(type_t type, void *buffer, size_t buffersize);
+public:
+	size_t	buffersize() const { return _buffersize; }
+
+	void	type(type_t t) { _type = t; }
+
+	ImageBuffer(ImagePtr image);
+	ImageBuffer(ImagePtr image, type_t type);
+	ImageBuffer(const std::string& filename);
+	~ImageBuffer();
+	ImagePtr	image() const;
+	void	write(const std::string& filename) const;
+	ImageBuffer	*convert(type_t type) const;
+};
 } // namespace image
 } // namespace astro
 

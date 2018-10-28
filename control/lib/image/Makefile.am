@@ -68,6 +68,9 @@ libastroimage_la_SOURCES = 						\
 	FlatCorrector.cpp						\
 	Flip.cpp							\
 	FocusFilterfunc.cpp						\
+	FormatReductionBase.cpp						\
+	FormatReduction.cpp						\
+	FormatReductionRGB.cpp						\
 	FourierImage.cpp						\
 	Functions.cpp							\
 	FWHM.cpp							\
@@ -78,6 +81,7 @@ libastroimage_la_SOURCES = 						\
 	HSLBase.cpp							\
 	Image.cpp							\
 	ImageBase.cpp							\
+	ImageBuffer.cpp							\
 	ImageDatabaseDirectory.cpp					\
 	ImageDirectory.cpp						\
 	ImageIteratorBase.cpp						\

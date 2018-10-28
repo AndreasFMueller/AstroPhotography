@@ -74,7 +74,7 @@ size_t	PNG::writePNG(const ConstImageAdapter<RGB<unsigned char> >& colorimage,
 
 	PngWriteBuffer	writebuffer;
 
-	png_set_read_fn(png, &writebuffer, WriteDataToBuffer);
+	png_set_write_fn(png, &writebuffer, WriteDataToBuffer, NULL);
 
 	png_set_IHDR(png, info, width, height, 8, PNG_COLOR_TYPE_RGB,
 		PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_DEFAULT,
@@ -318,6 +318,39 @@ size_t	PNG::writePNG(const ConstImageAdapter<unsigned char>& monoimage,
  */
 size_t	PNG::writePNG(ImagePtr image,
 		void **buffer, size_t *buffersize) {
+	{
+		Image<unsigned char>    *img
+			= dynamic_cast<Image<unsigned char> *>(&*image);
+		if (NULL != img) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "mono image png");
+			return writePNG(*img, buffer, buffersize);
+		}
+	}
+	{
+		Image<RGB<unsigned char> >      *img
+			= dynamic_cast<Image<RGB<unsigned char> >*>(&*image);
+		if (NULL != img) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "color image png");
+			return writePNG(*img, buffer, buffersize);
+		}
+	}
+	{
+		FormatReduction	*img = FormatReduction::get(image);
+		if (NULL != img) {
+			size_t	s = writePNG(*img, buffer, buffersize);
+			delete img;
+			return s;
+		}
+	}
+	{
+		FormatReductionRGB	*img = FormatReductionRGB::get(image);
+		if (NULL != img) {
+			size_t	s = writePNG(*img, buffer, buffersize);
+			delete img;
+			return s;
+		}
+	}
+        debug(LOG_DEBUG, DEBUG_LOG, 0, "no matching pixel type");
 	return 0;
 }
 
@@ -342,6 +375,22 @@ size_t  PNG::writePNG(ImagePtr image, const std::string& filename) {
 		if (NULL != img) {
 			debug(LOG_DEBUG, DEBUG_LOG, 0, "color image png");
 			return writePNG(*img, filename);
+		}
+	}
+	{
+		FormatReduction	*img = FormatReduction::get(image);
+		if (NULL != img) {
+			size_t	s = writePNG(*img, filename);
+			delete img;
+			return s;
+		}
+	}
+	{
+		FormatReductionRGB	*img = FormatReductionRGB::get(image);
+		if (NULL != img) {
+			size_t	s = writePNG(*img, filename);
+			delete img;
+			return s;
 		}
 	}
         debug(LOG_DEBUG, DEBUG_LOG, 0, "no matching pixel type");

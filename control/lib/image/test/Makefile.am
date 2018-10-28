@@ -19,7 +19,7 @@ noinst_PROGRAMS = tests singletest
 
 # single test
 singletest_SOURCES = singletest.cpp \
-	ImageRectangleTest.cpp					
+	ImageBufferTest.cpp					
 #	DebayerTest.cpp
 #	FWHMTest.cpp
 #	EuclideanDisplacementTest.cpp
@@ -54,6 +54,7 @@ tests_SOURCES = tests.cpp 						\
 	FWHMTest.cpp							\
 	HSLTest.cpp							\
 	ImageBaseTest.cpp						\
+	ImageBufferTest.cpp						\
 	ImageIteratorBaseTest.cpp					\
 	ImageLineTest.cpp						\
 	ImagePointTest.cpp						\
