@@ -341,4 +341,37 @@ astro::image::Metavalue	convert(const Metavalue& metavalue) {
 		metavalue.comment);
 }
 
+astro::image::Format::type_t    convert(ImageEncoding e) {
+	switch (e) {
+	case ImageEncodingFITS:	return astro::image::Format::FITS;
+	case ImageEncodingJPEG:	return astro::image::Format::JPEG;
+	case ImageEncodingPNG:	return astro::image::Format::PNG;
+	}
+}
+
+ImageEncoding   convert(astro::image::Format::type_t t) {
+	switch (t) {
+	case astro::image::Format::FITS:	return ImageEncodingFITS;
+	case astro::image::Format::JPEG:	return ImageEncodingJPEG;
+	case astro::image::Format::PNG:		return ImageEncodingPNG;
+	}
+}
+
+astro::image::ImageBufferPtr	convert(const ImageBuffer& imagebuffer) {
+	unsigned char	*b = (unsigned char *)malloc(imagebuffer.data.size());
+	memcpy(b, imagebuffer.data.data(), imagebuffer.data.size());
+	astro::image::ImageBuffer	*result
+		= new astro::image::ImageBuffer(convert(imagebuffer.encoding),
+			b, imagebuffer.data.size());
+	return astro::image::ImageBufferPtr(result);
+}
+
+ImageBufferPtr	convert(const astro::image::ImageBuffer& imagebuffer) {
+	ImageBuffer	*result = new ImageBuffer();
+	result->encoding = convert(imagebuffer.type());
+	Ice::Byte	*bp = (Ice::Byte *)imagebuffer.data();
+	result->data = std::vector<Ice::Byte>(bp, bp + imagebuffer.size());
+	return ImageBufferPtr(result);
+}
+
 } // namespace snowstar

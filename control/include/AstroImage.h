@@ -1435,6 +1435,11 @@ protected:
 public:
 	type_t	type() const { return _type; }
 	Format(type_t type = FITS) : _type(type) { }
+
+	size_t	write(ImagePtr image, const std::string& filename);
+	size_t	write(ImagePtr image, type_t type,
+			void **buffer, size_t *buffersize);
+	ImagePtr	read(type_t type, void *buffer, size_t buffersize);
 };
 
 /**
@@ -1523,20 +1528,25 @@ class ImageBuffer : public Format {
 	ImageBuffer&	operator=(const ImageBuffer& other) = delete;
 	void	*_buffer;
 	size_t	_buffersize;
-	ImageBuffer(type_t type, void *buffer, size_t buffersize);
 public:
 	size_t	buffersize() const { return _buffersize; }
-
-	void	type(type_t t) { _type = t; }
 
 	ImageBuffer(ImagePtr image);
 	ImageBuffer(ImagePtr image, type_t type);
 	ImageBuffer(const std::string& filename);
+	ImageBuffer(type_t type, void *buffer, size_t buffersize);
 	~ImageBuffer();
+
 	ImagePtr	image() const;
 	void	write(const std::string& filename) const;
+	void	write(void **buffer, size_t *buffersize);
 	ImageBuffer	*convert(type_t type) const;
+	void	*data() const { return _buffer; }
+	size_t	size() const { return _buffersize; }
 };
+
+typedef std::shared_ptr<ImageBuffer>	ImageBufferPtr;
+
 } // namespace image
 } // namespace astro
 

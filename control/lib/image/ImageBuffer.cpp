@@ -98,7 +98,7 @@ ImageBuffer::ImageBuffer(const std::string& filename) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "%s", msg.c_str());
 		throw std::runtime_error(msg);
 	}
-	if (_buffersize != read(fd, _buffer, _buffersize)) {
+	if (_buffersize != ::read(fd, _buffer, _buffersize)) {
 		free(_buffer);
 		close(fd);
 		std::string	msg = stringprintf("cannot read %s: %s",
@@ -218,6 +218,19 @@ ImageBuffer	*ImageBuffer::convert(type_t type) const {
 		break;
 	}
 	return NULL;
+}
+
+/**
+ * \brief Write the buffer contents to a memory buffer
+ *
+ * \param buffer	the pointer to the newly allocated buffer
+ * \param buffersize	size of the buffer
+ */
+void	ImageBuffer::write(void **buffer, size_t *buffersize) {
+	void	*b = malloc(_buffersize);
+	memcpy(b, _buffer, _buffersize);
+	*buffer = b;
+	*buffersize = _buffersize;
 }
 
 } // namespace image

@@ -77,6 +77,7 @@ snowstar_SOURCES = snowstar.cpp 					\
 	FocuserI.cpp							\
 	FocusingFactoryI.cpp						\
 	FocusingI.cpp							\
+	FocusingCallback.cpp						\
 	FocusingLocator.cpp						\
 	GuidePortI.cpp							\
 	GuiderFactoryI.cpp						\

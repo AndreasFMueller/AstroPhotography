@@ -86,7 +86,7 @@ size_t	FITS::writeFITS(ImagePtr image, void **buffer, size_t *buffersize) {
 		throw std::runtime_error(msg);
 	}
 	int	fd = open(filename, O_RDONLY);
-	if (s != read(fd, b, s)) {
+	if (s != ::read(fd, b, s)) {
 		
 	}
 	close(fd);

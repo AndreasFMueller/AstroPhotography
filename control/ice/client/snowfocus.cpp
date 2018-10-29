@@ -59,6 +59,12 @@ public:
 		std::cout << focusingstate2string(state);
 		std::cout << std::endl;
 	}
+
+	void	addFocusElement(const FocusElement& element,
+			const Ice::Current& /* current */) {
+		std::cout << timeformat("%H:%M:%S ", time(NULL));
+		std::cout << std::endl;
+	}
 };
 
 static void	short_usage(const char *progname) {

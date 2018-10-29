@@ -211,12 +211,27 @@ ImageFile	convertfile(astro::image::ImagePtr imageptr);
 astro::image::Metavalue	convert(const Metavalue& metavalue);
 Metavalue	convert(const astro::image::Metavalue& metavalue);
 
+astro::image::Format::type_t	convert(ImageEncoding e);
+ImageEncoding	convert(astro::image::Format::type_t t);
+
+astro::image::ImageBufferPtr	convert(const ImageBuffer& imagebuffer);
+typedef std::shared_ptr<ImageBuffer>	ImageBufferPtr;
+ImageBufferPtr	convert(const astro::image::ImageBuffer& imagebuffer);
+
 // Focusing
 FocusState	convert(astro::focusing::Focus::state_type s);
 astro::focusing::Focus::state_type	convert(FocusState s);
 
 std::string	focusingstate2string(FocusState s);
 FocusState	focusingstring2state(const std::string& s);
+
+FocusPoint	convert(const astro::focusing::FocusItem& fi);
+astro::focusing::FocusItem	convert(const FocusPoint& fp);
+
+typedef std::shared_ptr<FocusElement>	FocusElementPtr;
+FocusElementPtr	convert(const astro::focusing::FocusElement& fe,
+			astro::image::Format::type_t type);
+astro::focusing::FocusElementPtr	convert(const FocusElement& fe);
 
 // Repository related conversions
 ImageInfo	convert(const astro::project::ImageEnvelope& envelope);

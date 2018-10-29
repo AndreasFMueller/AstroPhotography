@@ -21,6 +21,11 @@ module snowstar {
 	};
 
 	sequence<byte>	ImageFile;
+
+	struct ImageBuffer {
+		ImageEncoding	encoding;
+		ImageFile	data;
+	};
 	/**
  	 * \brief Image base interface
 	 *

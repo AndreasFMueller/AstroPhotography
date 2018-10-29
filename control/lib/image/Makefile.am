@@ -68,6 +68,7 @@ libastroimage_la_SOURCES = 						\
 	FlatCorrector.cpp						\
 	Flip.cpp							\
 	FocusFilterfunc.cpp						\
+	Format.cpp							\
 	FormatReductionBase.cpp						\
 	FormatReduction.cpp						\
 	FormatReductionRGB.cpp						\

@@ -20,6 +20,9 @@ enum FocusState {
 	FocusMOVING,
 	// the camera is exposing, i.e. 
 	FocusMEASURING,
+	// the measurements have completed, we are waiting for the computation
+	// of the focus point and the focuser moving there
+	FocusMEASURED,
 	// the focusing process completed, i.e. an optimal focus position was
 	// found and the focuser has been moved to that position
 	FocusFOCUSED,
@@ -36,7 +39,16 @@ struct FocusPoint {
 };
 sequence<FocusPoint>	FocusHistory;
 
+struct FocusElement {
+	int	position;
+	double	value;
+	string	method;
+	ImageBuffer	raw;
+	ImageBuffer	evaluated;
+}
+
 interface FocusCallback {
+	void	addFocusElement(FocusElement element);
 	void	addPoint(FocusPoint point);
 	void	changeState(FocusState state);
 };
