@@ -10,6 +10,7 @@
 #include <iostream>
 #include <AstroDebug.h>
 #include <math.h>
+#include <sys/stat.h>
 
 using namespace astro::image;
 
@@ -42,9 +43,12 @@ void	ImageBufferTest::tearDown() {
 
 void	ImageBufferTest::testJPEG() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testJPEG() begin");
+	std::string	filename("m57ok.jpg");
+	struct stat	sb;
+	stat(filename.c_str(), &sb);
 	JPEG	jpeg;
-	ImageBuffer	imagejpg("m57ok.jpg");
-	CPPUNIT_ASSERT(imagejpg.buffersize() == 1201);
+	ImageBuffer	imagejpg(filename);
+	CPPUNIT_ASSERT(imagejpg.buffersize() == sb.st_size);
 	ImageBuffer	*imagepng = imagejpg.convert(Format::PNG);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "png size: %d", imagepng->buffersize());
 	imagepng->write("m57ok.png");
@@ -69,9 +73,12 @@ void	ImageBufferTest::testJPEGmono() {
 
 void	ImageBufferTest::testPNG() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testPNG() begin");
+	std::string	filename("t.png");
+	struct stat	sb;
+	stat(filename.c_str(), &sb);
 	PNG	png;
-	ImageBuffer	imagepng("t.png");
-	CPPUNIT_ASSERT(imagepng.buffersize() == 1838260);
+	ImageBuffer	imagepng(filename);
+	CPPUNIT_ASSERT(imagepng.buffersize() == sb.st_size);
 	ImageBuffer	*imagejpg = imagepng.convert(Format::JPEG);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "png size: %d", imagejpg->buffersize());
 	imagejpg->write("t.jpg");
