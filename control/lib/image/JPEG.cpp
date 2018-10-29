@@ -72,19 +72,23 @@ size_t  JPEG::writeJPEG(const ConstImageAdapter<RGB<unsigned char> >& colorimage
 	jpeg_create_compress(&cinfo);
 
 	// set the output buffer
-	unsigned char	*jbuffer = NULL;
-	unsigned long	jbuffersize = 0;
+	unsigned char	*jbuffer = (unsigned char *)malloc(1000);
+	unsigned long	jbuffersize = 1000;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "setting up buffer");
 	jpeg_mem_dest(&cinfo, &jbuffer, &jbuffersize);
 
 	// prepare the defaults
 	cinfo.image_width = colorimage.getSize().width();
 	cinfo.image_height = colorimage.getSize().height();
-	cinfo.num_components = 3;
+	cinfo.input_components = 3;
 	cinfo.in_color_space = JCS_RGB;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "image size: %d x %d",
+		cinfo.image_width, cinfo.image_height);
 
 	// set default parameters
 	jpeg_set_defaults(&cinfo);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "image size: %d x %d",
+		cinfo.image_width, cinfo.image_height);
 
 	// set quality
 	jpeg_set_quality(&cinfo, _quality, TRUE);
@@ -237,7 +241,7 @@ size_t	JPEG::writeJPEG(const ConstImageAdapter<unsigned char>& monoimage,
 	// prepare the defaults
 	cinfo.image_width = monoimage.getSize().width();
 	cinfo.image_height = monoimage.getSize().height();
-	cinfo.num_components = 1;
+	cinfo.input_components = 1;
 	cinfo.in_color_space = JCS_GRAYSCALE;
 
 	// set default parameters
