@@ -248,6 +248,10 @@ void	FocusProcessBase::evaluate() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "evaluate thread terminates");
 }
 
+bool	FocusProcessBase::completed() const {
+	return (_status == Focus::FOCUSED) || (_status == Focus::FAILED);
+}
+
 /**
  * \brief Trampoline function to launch into the measure thread of the proces
  */

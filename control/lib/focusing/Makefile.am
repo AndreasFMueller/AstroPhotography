@@ -42,18 +42,16 @@ libastrofocusing_la_SOURCES =						\
 	FocusProcessBase.cpp						\
 	FocusProcess.cpp						\
 	FocusSolverFactory.cpp						\
-	FocusWork.cpp							\
 	Focusing.cpp							\
 	FWHM2Evaluator.cpp						\
 	FWHMEvaluator.cpp						\
 	MaximumSolver.cpp						\
 	MinimumSolver.cpp						\
 	MeasureEvaluator.cpp						\
-	MeasureFocusWork.cpp						\
 	ParabolicFocusSolver.cpp					\
 	SymmetricSolver.cpp						\
-	UnsignedCharImage.cpp						\
-	VCurveFocusWork.cpp
+	UnsignedCharImage.cpp	
+
 
 libastrofocusing_la_CPPFLAGS = -DPKGLIBDIR=\"$(pkglibdir)\" 
 	-DDEVICEPROPERTIES=\"@DEVICEPROPERTIES@\"

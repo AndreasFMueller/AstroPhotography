@@ -32,7 +32,17 @@ namespace snowfocus {
  * This callback simply displays the callback information received
  */
 class FocusCallbackI : public FocusCallback {
+	std::string	_raw_prefix;
+	std::string	_evaluated_prefix;
 public:
+	void	raw_prefix(const std::string raw_prefix) {
+		_raw_prefix = raw_prefix;
+	}
+
+	void	evaluated_prefix(const std::string& evaluated_prefix) {
+		_evaluated_prefix = evaluated_prefix;
+	}
+
 	/**
 	 * \brief Create a callback object
 	 */
@@ -60,9 +70,43 @@ public:
 		std::cout << std::endl;
 	}
 
+	/**
+	 * \brief write the focus element
+	 */
 	void	addFocusElement(const FocusElement& element,
 			const Ice::Current& /* current */) {
 		std::cout << timeformat("%H:%M:%S ", time(NULL));
+		astro::focusing::FocusElementPtr	fe = convert(element);
+
+		std::cout << "raw: " << fe->raw_image->info() << ", ";
+		std::cout << "evaluated: " << fe->processed_image->info();
+
+		if (_raw_prefix.size() > 0) {
+			std::string	filename = stringprintf("%s-%d.jpg",
+				_raw_prefix.c_str(), fe->pos());
+			try {
+				JPEG	jpeg;
+				jpeg.writeJPEG(fe->raw_image, filename);
+			} catch (const std::exception& x) {
+				debug(LOG_ERR, DEBUG_LOG, 0,
+					"cannot write %s: %s", filename.c_str(),
+					x.what());
+			}
+		}
+		
+		if (_evaluated_prefix.size() > 0) {
+			std::string	filename = stringprintf("%s-%d.png",
+				_evaluated_prefix.c_str(), fe->pos());
+			try {
+				PNG	png;
+				png.writePNG(fe->processed_image, filename);
+			} catch (const std::exception& x) {
+				debug(LOG_ERR, DEBUG_LOG, 0,
+					"cannot write %s: %s", filename.c_str(),
+					x.what());
+			}
+		}
+		
 		std::cout << std::endl;
 	}
 };
@@ -147,10 +191,11 @@ static struct option	longopts[] = {
 { "filter",		required_argument,	NULL,	'f' }, /*  4 */
 { "help",		no_argument,		NULL,	'h' }, /*  5 */
 { "method",		required_argument,	NULL,	'm' }, /*  6 */
-{ "rectangle",		required_argument,	NULL,	'r' }, /*  7 */
-{ "remote",		no_argument,		NULL,	'R' }, /*  5 */
-{ "steps",		required_argument,	NULL,	's' }, /*  8 */
-{ "temperature",	required_argument,	NULL,	't' }, /*  9 */
+{ "prefix",		required_argument,	NULL,	'p' }, /*  7 */
+{ "rectangle",		required_argument,	NULL,	'r' }, /*  8 */
+{ "remote",		no_argument,		NULL,	'R' }, /*  9 */
+{ "steps",		required_argument,	NULL,	's' }, /* 10 */
+{ "temperature",	required_argument,	NULL,	't' }, /* 11 */
 { NULL,			0,			NULL,    0  }
 };
 
@@ -187,10 +232,11 @@ int	main(int argc, char *argv[]) {
 	std::string	frame;
 	std::string	filtername;
 	std::string	method("BrennerOmni");
+	std::string	prefix;
 
 	int	c;
 	int	longindex;
-	while (EOF != (c = getopt_long(argc, argv, "b:c:de:f:hi:m:r:Rt:",
+	while (EOF != (c = getopt_long(argc, argv, "b:c:de:f:hi:m:p:r:Rt:",
 		longopts, &longindex)))
 		switch (c) {
 		case 'b':
@@ -213,6 +259,9 @@ int	main(int argc, char *argv[]) {
 			return EXIT_SUCCESS;
 		case 'm':
 			method = std::string(optarg);
+			break;
+		case 'p':
+			prefix = std::string(optarg);
 			break;
 		case 'r':
 			frame = optarg;
@@ -316,7 +365,12 @@ int	main(int argc, char *argv[]) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "got a focusing proxy");
 
 	// creating a callback
-	Ice::ObjectPtr	callback = new FocusCallbackI();
+	FocusCallbackI	*focuscallbacki = new FocusCallbackI();
+	if (prefix.size()) {
+		focuscallbacki->raw_prefix(prefix + "/raw");
+		focuscallbacki->evaluated_prefix(prefix + "/eval");
+	}
+	Ice::ObjectPtr	callback = focuscallbacki;
 	CallbackAdapter	adapter(ic);
 	Ice::Identity	ident = adapter.add(callback);
 	focusing->ice_getConnection()->setAdapter(adapter.adapter());
@@ -466,6 +520,7 @@ int	main(int argc, char *argv[]) {
         	case FocusIDLE:
         	case FocusMOVING:
         	case FocusMEASURING:
+        	case FocusMEASURED:
 			break;
         	case FocusFOCUSED:
         	case FocusFAILED:

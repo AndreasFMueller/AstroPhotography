@@ -1435,6 +1435,7 @@ protected:
 public:
 	type_t	type() const { return _type; }
 	Format(type_t type = FITS) : _type(type) { }
+	std::string	typeString() const;
 
 	size_t	write(ImagePtr image, const std::string& filename);
 	size_t	write(ImagePtr image, type_t type,

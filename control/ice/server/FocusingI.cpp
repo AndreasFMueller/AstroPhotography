@@ -11,9 +11,6 @@
 
 namespace snowstar {
 
-//////////////////////////////////////////////////////////////////////
-// focusing servant implementation
-//////////////////////////////////////////////////////////////////////
 FocusingI::FocusingI(astro::focusing::FocusingPtr focusingptr) {
 	_focusingptr = focusingptr;
 	astro::callback::CallbackPtr	cb
@@ -67,6 +64,7 @@ void	FocusingI::start(int min, int max, const Ice::Current& /* current */) {
 	switch (_focusingptr->status()) {
 	case astro::focusing::Focus::MOVING:
 	case astro::focusing::Focus::MEASURING:
+	case astro::focusing::Focus::MEASURED:
 		throw BadState(std::string("currently focusing"));
 	default:
 		break;

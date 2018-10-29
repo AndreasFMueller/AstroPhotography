@@ -309,6 +309,9 @@ class FocusParameters {
 private:
 	unsigned long	_minposition;
 	unsigned long	_maxposition;
+protected:
+	void	minposition(unsigned long m) { _minposition = m; }
+	void	maxposition(unsigned long m) { _maxposition = m; }
 public:
 	unsigned long	minposition() const { return _minposition; }
 	unsigned long	maxposition() const { return _maxposition; }
@@ -381,6 +384,7 @@ private:
 	std::thread	_measure_thread;
 	std::thread	_evaluate_thread;
 public:
+	bool	completed() const;
 	// start the process
 	void	start();
 	void	stop();
@@ -401,6 +405,9 @@ class FocusProcess : public FocusProcessBase {
 	camera::CcdPtr		_ccd;
 	camera::FocuserPtr	_focuser;
 public:
+	camera::CcdPtr		ccd() const { return _ccd; }
+	camera::FocuserPtr	focuser() const { return _focuser; }
+	
 	FocusProcess(const FocusParameters& parameters,
 		camera::CcdPtr ccd, camera::FocuserPtr focuser);
 	FocusProcess(unsigned long minposition, unsigned long maxposition,
@@ -408,9 +415,6 @@ public:
 	virtual void	moveto(unsigned long);
 	virtual ImagePtr	get();
 };
-
-// we need the FocusWork forward declaration in the next class
-class FocusWork;
 
 /**
  * \brief Class encapsulating the automatic focusing process
@@ -420,83 +424,15 @@ class FocusWork;
  * according to some focus figure of merit. This figure of merit is then
  * used to compute the best focus position, which is then set.
  */
-class Focusing {
-	// callback for images
-	astro::callback::CallbackPtr	_callback;
-public:
-	astro::callback::CallbackPtr	callback() { return _callback; }
-	void	callback(astro::callback::CallbackPtr c) { _callback = c; }
-
-	// focusing status (what is it doing right now?)
-private:
-	volatile Focus::state_type	_status;
-	void	status(Focus::state_type s) { _status = s; }
-public:
-	Focus::state_type	status() const { return _status; }
-
-	// method for focusing
-private:
-	std::string	_method;
-public:
-	std::string	method() const { return _method; }
-	void	method(const std::string& m) { _method = m; }
-
-	// matching the method, we have an evaluator
-private:
-	FocusEvaluatorPtr	_evaluator;
-public:
-	FocusEvaluatorPtr	evaluator() const { return _evaluator; }
-	void	evaluator(FocusEvaluatorPtr e) { _evaluator = e; }
-
-	// matching focus solver that works with the evaluator
-private:
-	FocusSolverPtr	_solver;
-public:
-	FocusSolverPtr	solver() const { return _solver; }
-	void	solver(FocusSolverPtr s) { _solver = s; }
-
-	// CCD to be used to get images
-private:
-	astro::camera::CcdPtr	_ccd;
-public:
-	astro::camera::CcdPtr	ccd() { return _ccd; }
-
-	// focuser to use to change focus
-private:
-	astro::camera::FocuserPtr	_focuser;
-public:
-	astro::camera::FocuserPtr	focuser() { return _focuser; }
-
-	// subdivision steps for the interval
-private:
-	int	_steps;
-public:
-	int	steps() const { return _steps; }
-	void	steps(int s) { _steps = s; }
-
-	// exposure specification for images
-private:
-	astro::camera::Exposure	_exposure;
-public:
-	astro::camera::Exposure	exposure() { return _exposure; }
-	void	exposure(astro::camera::Exposure e) { _exposure = e; }
-
-	bool	completed() const {
-		return (_status == Focus::FOCUSED) || (_status == Focus::FAILED);
-	}
-private:
-	Focusing(const Focusing& other);
-	Focusing&	operator=(const Focusing& other);
+class Focusing : public FocusProcess {
+	Focusing(const Focusing& other) = delete;
+	Focusing&	operator=(const Focusing& other) = delete;
 public:
 	Focusing(astro::camera::CcdPtr ccd,
 		astro::camera::FocuserPtr focuser);
 	virtual ~Focusing();
 	void	start(int min, int max);
 	void	cancel();
-public:
-	astro::thread::ThreadPtr	thread;
-	FocusWork	*work;
-	friend class FocusWork;	// allow the FocusWork class update the status
 };
 
 typedef std::shared_ptr<Focusing>	FocusingPtr;

@@ -93,6 +93,34 @@ FocusElementPtr	convert(const astro::focusing::FocusElement& fe,
 	return FocusElementPtr(result);
 }
 
+FocusElementPtr convert(const astro::focusing::FocusElementCallbackData& fe,
+                        astro::image::Format::type_t type) {
+	FocusElement	*result = new FocusElement();
+	result->position = fe.position();
+	result->value = fe.value();
+	result->method = fe.method();
+
+	// copy the raw image
+	result->raw.encoding = convert(type);
+	unsigned char	*b = NULL;
+	size_t		bs = 0;
+	Format	f;
+	f.write(fe.raw_image(), type, (void **)&b, &bs);
+	std::copy(b, b + bs, result->raw.data.begin());
+	free(b);
+
+	// copy the processed image
+	result->evaluated.encoding = convert(type);
+	b = NULL;
+	bs = 0;
+	f.write(fe.processed_image(), type, (void **)&b, &bs);
+	std::copy(b, b + bs, result->evaluated.data.begin());
+	free(b);
+
+	return FocusElementPtr(result);
+}
+
+
 astro::focusing::FocusElementPtr	convert(const FocusElement& fe) {
 	astro::focusing::FocusElement	*result
 		= new astro::focusing::FocusElement(fe.position);

@@ -8,6 +8,14 @@
 namespace astro {
 namespace image {
 
+std::string	Format::typeString() const {
+	switch (_type) {
+	case Format::FITS:	return std::string("fits");
+	case Format::JPEG:	return std::string("jpeg");
+	case Format::PNG:	return std::string("png");
+	}
+}
+
 size_t	Format::write(ImagePtr image, const std::string& filename) {
 	if (FITS::isfitsfilename(filename)) {
 		image::FITS	fits;

@@ -231,7 +231,10 @@ astro::focusing::FocusItem	convert(const FocusPoint& fp);
 typedef std::shared_ptr<FocusElement>	FocusElementPtr;
 FocusElementPtr	convert(const astro::focusing::FocusElement& fe,
 			astro::image::Format::type_t type);
+FocusElementPtr	convert(const astro::focusing::FocusElementCallbackData& fe,
+			astro::image::Format::type_t type);
 astro::focusing::FocusElementPtr	convert(const FocusElement& fe);
+
 
 // Repository related conversions
 ImageInfo	convert(const astro::project::ImageEnvelope& envelope);

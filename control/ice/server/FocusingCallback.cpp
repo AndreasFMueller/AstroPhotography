@@ -17,7 +17,14 @@ namespace snowstar {
 template<>
 void	callback_adapter<FocusCallbackPrx>(FocusCallbackPrx& prx,
 		const astro::callback::CallbackDataPtr data) {
-	// XXX Handle FocusElementCallbackData
+	// Handle FocusElementCallbackData
+	astro::focusing::FocusElementCallbackData	*fedata
+		= dynamic_cast<astro::focusing::FocusElementCallbackData *>(&*data);
+	if (NULL != fedata) {
+		FocusElementPtr	feptr = convert(*fedata,
+						astro::image::Format::PNG);
+		prx->addFocusElement(*feptr);
+	}
 
 	// Handle FocusCallbackData
 	astro::focusing::FocusCallbackData	*focusdata
@@ -28,6 +35,7 @@ void	callback_adapter<FocusCallbackPrx>(FocusCallbackPrx& prx,
 		p.value = focusdata->value();
 		prx->addPoint(p);
 	}
+
 	// Handle FocusCallbackState
 	astro::focusing::FocusCallbackState	*focusstate
 		= dynamic_cast<astro::focusing::FocusCallbackState *>(&*data);
