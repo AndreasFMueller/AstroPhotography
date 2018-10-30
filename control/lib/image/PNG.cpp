@@ -30,9 +30,15 @@ bool	PNG::ispngfilename(const std::string& filename) {
 	return false;
 }
 
+/**
+ * \brief Construct a PNG object
+ */
 PNG::PNG() {
 }
 
+/**
+ * \brief Auxiliary class to write data to a buffer
+ */
 class PngWriteBuffer {
 public:
 	unsigned char	*_buffer;
@@ -55,6 +61,45 @@ static void	WriteDataToBuffer(png_structp png, png_bytep data,
 }
 
 /**
+ * \brief Common write operation
+ */
+void	do_write(png_structp *png, png_infop *info,
+		const ConstImageAdapter<RGB<unsigned char> >& colorimage) {
+	int	width = colorimage.getSize().width();
+	int	height = colorimage.getSize().height();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "writing %dx%d image", width, height);
+
+	png_set_IHDR(*png, *info, width, height, 8, PNG_COLOR_TYPE_RGB,
+		PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_DEFAULT,
+		PNG_FILTER_TYPE_DEFAULT);
+	png_write_info(*png, *info);
+
+	png_bytep	row_pointers[height];
+	for (int y = 0; y < height; y++) {
+		int	Y = height - 1 - y;
+		row_pointers[y] = (png_bytep)malloc(png_get_rowbytes(*png,
+					*info));
+		for (int x = 0; x < width; x++) {
+			RGB<unsigned char>	p = colorimage.pixel(x, Y);
+			row_pointers[y][3 * x    ] = p.R;
+			row_pointers[y][3 * x + 1] = p.G;
+			row_pointers[y][3 * x + 2] = p.B;
+		}
+	}
+
+	png_write_image(*png, row_pointers);
+	png_write_end(*png, NULL);
+
+	for (int y = 0; y < height; y++) {
+		free(row_pointers[y]);
+	}
+
+	if (*png && *info) {
+		png_destroy_write_struct(png, info);
+	}
+}
+
+/**
  * \brief Write a color image to a PNG buffer
  *
  * \param colorimage
@@ -63,9 +108,6 @@ static void	WriteDataToBuffer(png_structp png, png_bytep data,
  */
 size_t	PNG::writePNG(const ConstImageAdapter<RGB<unsigned char> >& colorimage,
 		void **buffer, size_t *buffersize) {
-	int	width = colorimage.getSize().width();
-	int	height = colorimage.getSize().height();
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "writing %dx%d image", width, height);
 
 	png_structp	png = png_create_write_struct(PNG_LIBPNG_VER_STRING,
 				NULL, NULL, NULL);
@@ -76,34 +118,7 @@ size_t	PNG::writePNG(const ConstImageAdapter<RGB<unsigned char> >& colorimage,
 
 	png_set_write_fn(png, &writebuffer, WriteDataToBuffer, NULL);
 
-	png_set_IHDR(png, info, width, height, 8, PNG_COLOR_TYPE_RGB,
-		PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_DEFAULT,
-		PNG_FILTER_TYPE_DEFAULT);
-	png_write_info(png, info);
-
-	png_bytep	row_pointers[height];
-	for (int y = 0; y < height; y++) {
-		int	Y = height - 1 - y;
-		row_pointers[y] = (png_bytep)malloc(png_get_rowbytes(png,
-					info));
-		for (int x = 0; x < width; x++) {
-			RGB<unsigned char>	p = colorimage.pixel(x, Y);
-			row_pointers[y][3 * x    ] = p.R;
-			row_pointers[y][3 * x + 1] = p.G;
-			row_pointers[y][3 * x + 2] = p.B;
-		}
-	}
-
-	png_write_image(png, row_pointers);
-	png_write_end(png, NULL);
-
-	for (int y = 0; y < height; y++) {
-		free(row_pointers[y]);
-	}
-
-	if (png && info) {
-		png_destroy_write_struct(&png, &info);
-	}
+	do_write(&png, &info, colorimage);
 
 	// write the result
 	*buffer = writebuffer._buffer;
@@ -140,34 +155,7 @@ size_t	PNG::writePNG(const ConstImageAdapter<RGB<unsigned char> >& colorimage,
 
 	png_init_io(png, outfile);
 
-	png_set_IHDR(png, info, width, height, 8, PNG_COLOR_TYPE_RGB,
-		PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_DEFAULT,
-		PNG_FILTER_TYPE_DEFAULT);
-	png_write_info(png, info);
-
-	png_bytep	row_pointers[height];
-	for (int y = 0; y < height; y++) {
-		int	Y = height - 1 - y;
-		row_pointers[y] = (png_bytep)malloc(png_get_rowbytes(png,
-					info));
-		for (int x = 0; x < width; x++) {
-			RGB<unsigned char>	p = colorimage.pixel(x, Y);
-			row_pointers[y][3 * x    ] = p.R;
-			row_pointers[y][3 * x + 1] = p.G;
-			row_pointers[y][3 * x + 2] = p.B;
-		}
-	}
-
-	png_write_image(png, row_pointers);
-	png_write_end(png, NULL);
-
-	for (int y = 0; y < height; y++) {
-		free(row_pointers[y]);
-	}
-
-	if (png && info) {
-		png_destroy_write_struct(&png, &info);
-	}
+	do_write(&png, &info, colorimage);
 
 	fclose(outfile);
 	
@@ -184,6 +172,43 @@ size_t	PNG::writePNG(const ConstImageAdapter<RGB<unsigned char> >& colorimage,
 }
 
 /**
+ * \brief Common write operation for monochrome images
+ */
+void	do_write(png_structp *png, png_infop *info,
+		const ConstImageAdapter<unsigned char>& monoimage) {
+	int	width = monoimage.getSize().width();
+	int	height = monoimage.getSize().height();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "writing %dx%d image", width, height);
+
+	png_set_IHDR(*png, *info, width, height, 8, PNG_COLOR_TYPE_GRAY,
+		PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_DEFAULT,
+		PNG_FILTER_TYPE_DEFAULT);
+	png_write_info(*png, *info);
+
+	png_bytep	row_pointers[height];
+	for (int y = 0; y < height; y++) {
+		int	Y = height - 1 - y;
+		row_pointers[y] = (png_bytep)malloc(png_get_rowbytes(*png,
+					*info));
+		for (int x = 0; x < width; x++) {
+			unsigned char	p = monoimage.pixel(x, Y);
+			row_pointers[y][x] = p;
+		}
+	}
+
+	png_write_image(*png, row_pointers);
+	png_write_end(*png, NULL);
+
+	for (int y = 0; y < height; y++) {
+		free(row_pointers[y]);
+	}
+
+	if (*png && *info) {
+		png_destroy_write_struct(png, info);
+	}
+}
+
+/**
  * \brief Write a monochrome image to a PNG buffer
  *
  * \param monoimage
@@ -192,10 +217,6 @@ size_t	PNG::writePNG(const ConstImageAdapter<RGB<unsigned char> >& colorimage,
  */
 size_t	PNG::writePNG(const ConstImageAdapter<unsigned char>& monoimage,
 		void **buffer, size_t *buffersize) {
-	int	width = monoimage.getSize().width();
-	int	height = monoimage.getSize().height();
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "writing %dx%d image", width, height);
-
 	png_structp	png = png_create_write_struct(PNG_LIBPNG_VER_STRING,
 				NULL, NULL, NULL);
 	png_infop	info = png_create_info_struct(png);
@@ -205,32 +226,7 @@ size_t	PNG::writePNG(const ConstImageAdapter<unsigned char>& monoimage,
 
 	png_set_write_fn(png, &writebuffer, WriteDataToBuffer, NULL);
 
-	png_set_IHDR(png, info, width, height, 8, PNG_COLOR_TYPE_GRAY,
-		PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_DEFAULT,
-		PNG_FILTER_TYPE_DEFAULT);
-	png_write_info(png, info);
-
-	png_bytep	row_pointers[height];
-	for (int y = 0; y < height; y++) {
-		int	Y = height - 1 - y;
-		row_pointers[y] = (png_bytep)malloc(png_get_rowbytes(png,
-					info));
-		for (int x = 0; x < width; x++) {
-			unsigned char	p = monoimage.pixel(x, Y);
-			row_pointers[y][x] = p;
-		}
-	}
-
-	png_write_image(png, row_pointers);
-	png_write_end(png, NULL);
-
-	for (int y = 0; y < height; y++) {
-		free(row_pointers[y]);
-	}
-
-	if (png && info) {
-		png_destroy_write_struct(&png, &info);
-	}
+	do_write(&png, &info, monoimage);
 
 	// write the result
 	*buffer = writebuffer._buffer;
@@ -268,32 +264,7 @@ size_t	PNG::writePNG(const ConstImageAdapter<unsigned char>& monoimage,
 
 	png_init_io(png, outfile);
 
-	png_set_IHDR(png, info, width, height, 8, PNG_COLOR_TYPE_GRAY,
-		PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_DEFAULT,
-		PNG_FILTER_TYPE_DEFAULT);
-	png_write_info(png, info);
-
-	png_bytep	row_pointers[height];
-	for (int y = 0; y < height; y++) {
-		int	Y = height - 1 - y;
-		row_pointers[y] = (png_bytep)malloc(png_get_rowbytes(png,
-					info));
-		for (int x = 0; x < width; x++) {
-			unsigned char	p = monoimage.pixel(x, Y);
-			row_pointers[y][x] = p;
-		}
-	}
-
-	png_write_image(png, row_pointers);
-	png_write_end(png, NULL);
-
-	for (int y = 0; y < height; y++) {
-		free(row_pointers[y]);
-	}
-
-	if (png && info) {
-		png_destroy_write_struct(&png, &info);
-	}
+	do_write(&png, &info, monoimage);
 
 	fclose(outfile);
 	
@@ -398,6 +369,107 @@ size_t  PNG::writePNG(ImagePtr image, const std::string& filename) {
 	return 0;
 }
 
+/**
+ * \brief Common read operation
+ */
+static ImagePtr	do_read(png_structp *png, png_infop *info) {
+	png_read_info(*png, *info);
+
+	// get information about the image
+	int	width = png_get_image_width(*png, *info);
+	int	height = png_get_image_height(*png, *info);
+	ImageSize	size(width, height);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "reading %s image",
+		size.toString().c_str());
+
+	png_byte	color_type = png_get_color_type(*png, *info);
+	png_byte	bit_depth = png_get_bit_depth(*png, *info);
+	if (bit_depth > 8) {
+		std::string	msg = stringprintf("don't know how to handle "
+			"%d-bit images", bit_depth);
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw std::runtime_error(msg);
+	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "color_type=%d, bit_depth=%d",
+		color_type, bit_depth);
+
+	if (color_type == PNG_COLOR_TYPE_PALETTE) {
+		png_set_palette_to_rgb(*png);
+	}
+	if ((color_type == PNG_COLOR_TYPE_GRAY) && (bit_depth < 8)) {
+		png_set_expand_gray_1_2_4_to_8(*png);
+	}
+	if ((color_type == PNG_COLOR_TYPE_RGB) ||
+		(color_type = PNG_COLOR_TYPE_GRAY) ||
+		(color_type = PNG_COLOR_TYPE_PALETTE)) {
+		png_set_filler(*png, 0xFF, PNG_FILLER_AFTER);
+	}
+
+	if ((color_type == PNG_COLOR_TYPE_GRAY) ||
+		(color_type == PNG_COLOR_TYPE_GRAY_ALPHA)) {
+		png_set_gray_to_rgb(*png);
+	}
+
+	png_read_update_info(*png, *info);
+
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "open %s image %d bits",
+		size.toString().c_str(), bit_depth);
+
+	png_bytep row_pointers[height];
+	for (int y = 0; y < height; y++) {
+		row_pointers[y] = (png_byte *)malloc(
+			png_get_rowbytes(*png, *info));
+	}
+
+	png_read_image(*png, row_pointers);
+
+	ImagePtr	result;
+	int	channels = png_get_channels(*png, *info);
+	switch (channels) {
+	case 1:
+	case 2:
+		{
+		Image<unsigned char>	*image
+			= new Image<unsigned char>(size);
+		result = ImagePtr(image);
+		for (int y = 0; y < height; y++) {
+			int	Y = height - 1 - y;
+			for (int x = 0; x < width; x++) {
+				png_bytep	row = row_pointers[y];
+				unsigned char	p = row[channels * x];
+				image->pixel(x, Y) = p;
+			}
+			free(row_pointers[y]);
+		}
+		}
+		break;
+	case 3:
+	case 4:
+		{
+		Image<RGB<unsigned char> >	*image
+			= new Image<RGB<unsigned char> >(size);
+		result = ImagePtr(image);
+		for (int y = 0; y < height; y++) {
+			int	Y = height - 1 - y;
+			for (int x = 0; x < width; x++) {
+				png_bytep	row = row_pointers[y];
+				unsigned char	R = row[channels * x    ];
+				unsigned char	G = row[channels * x + 1];
+				unsigned char	B = row[channels * x + 2];
+				RGB<unsigned char>	p(R, G, B);
+				image->pixel(x, Y) = p;
+			}
+			free(row_pointers[y]);
+		}
+		}
+		break;
+	}
+
+	png_destroy_read_struct(png, info, NULL);
+
+	return result;
+}
+
 // read PNG images
 /**
  * \brief Read a PNG image
@@ -412,86 +484,10 @@ ImagePtr	PNG::readPNG(const std::string& filename) {
 	png_infop	info = png_create_info_struct(png);
 
 	png_init_io(png, infile);
-	png_read_info(png, info);
-
-	// get information about the image
-	int	width = png_get_image_width(png, info);
-	int	height = png_get_image_height(png, info);
-	ImageSize	size(width, height);
-	png_byte	color_type = png_get_color_type(png, info);
-	png_byte	bit_depth = png_get_bit_depth(png, info);
-	if (bit_depth > 8) {
-		std::string	msg = stringprintf("don't know how to handle "
-			"%d-bit images", bit_depth);
-		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
-		throw std::runtime_error(msg);
-	}
-
-	if (color_type == PNG_COLOR_TYPE_PALETTE) {
-		png_set_palette_to_rgb(png);
-	}
-	if ((color_type == PNG_COLOR_TYPE_GRAY) && (bit_depth < 8)) {
-		png_set_expand_gray_1_2_4_to_8(png);
-	}
-	if ((color_type == PNG_COLOR_TYPE_RGB) ||
-		(color_type = PNG_COLOR_TYPE_GRAY) ||
-		(color_type = PNG_COLOR_TYPE_PALETTE)) {
-		png_set_filler(png, 0xFF, PNG_FILLER_AFTER);
-	}
-
-	if ((color_type == PNG_COLOR_TYPE_GRAY) ||
-		(color_type == PNG_COLOR_TYPE_GRAY_ALPHA)) {
-		png_set_gray_to_rgb(png);
-	}
-
-	png_read_update_info(png, info);
-
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "open %s image %d bits",
-		size.toString().c_str(), bit_depth);
-
-	png_bytep row_pointers[height];
-	int	l = png_get_rowbytes(png, info);
-	for (int y = 0; y < height; y++) {
-		row_pointers[y] = (png_byte *)malloc(l);
-	}
-
-	png_read_image(png, row_pointers);
-
-	ImagePtr	result;
-	if (l == 2 * width) {
-		Image<unsigned char>	*image
-			= new Image<unsigned char>(size);
-		result = ImagePtr(image);
-		for (int y = 0; y < height; y++) {
-			int	Y = height - 1 - y;
-			for (int x = 0; x < width; x++) {
-				unsigned char	p = row_pointers[y][2 * x];
-				image->pixel(x, Y) = p;
-			}
-			free(row_pointers[y]);
-		}
-	} else {
-		Image<RGB<unsigned char> >	*image
-			= new Image<RGB<unsigned char> >(size);
-		result = ImagePtr(image);
-		for (int y = 0; y < height; y++) {
-			int	Y = height - 1 - y;
-			for (int x = 0; x < width; x++) {
-				unsigned char	R = row_pointers[y][4 * x    ];
-				unsigned char	G = row_pointers[y][4 * x + 1];
-				unsigned char	B = row_pointers[y][4 * x + 2];
-				RGB<unsigned char>	p(R, G, B);
-				image->pixel(x, Y) = p;
-			}
-			free(row_pointers[y]);
-		}
-	}
-
-	png_destroy_read_struct(&png, &info, NULL);
-
+	ImagePtr	image = do_read(&png, &info);
 	fclose(infile);
 
-	return ImagePtr(result);
+	return image;
 }
 
 /**
@@ -528,8 +524,11 @@ static void	ReadDataFromInputStream(png_structp png, png_bytep outBytes,
  * http://pulsarengine.com/2009/01/reading-png-images-from-memory/
  */
 ImagePtr	PNG::readPNG(void *buffer, size_t buffersize) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "reading %d bytes from %p",
+		buffersize, buffer);
 	// open the input file
 	PngReadBuffer	readbuffer((unsigned char *)buffer, buffersize);
+
 
 	// create the PNG structure
 	png_structp	png = png_create_read_struct(PNG_LIBPNG_VER_STRING,
@@ -538,92 +537,7 @@ ImagePtr	PNG::readPNG(void *buffer, size_t buffersize) {
 
 	png_set_read_fn(png, &readbuffer, ReadDataFromInputStream);
 
-	png_read_info(png, info);
-
-	// get information about the image
-	int	width = png_get_image_width(png, info);
-	int	height = png_get_image_height(png, info);
-	ImageSize	size(width, height);
-	png_byte	color_type = png_get_color_type(png, info);
-	png_byte	bit_depth = png_get_bit_depth(png, info);
-	if (bit_depth > 8) {
-		std::string	msg = stringprintf("don't know how to handle "
-			"%d-bit images", bit_depth);
-		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
-		throw std::runtime_error(msg);
-	}
-
-	if (color_type == PNG_COLOR_TYPE_PALETTE) {
-		png_set_palette_to_rgb(png);
-	}
-	if ((color_type == PNG_COLOR_TYPE_GRAY) && (bit_depth < 8)) {
-		png_set_expand_gray_1_2_4_to_8(png);
-	}
-	if ((color_type == PNG_COLOR_TYPE_RGB) ||
-		(color_type = PNG_COLOR_TYPE_GRAY) ||
-		(color_type = PNG_COLOR_TYPE_PALETTE)) {
-		png_set_filler(png, 0xFF, PNG_FILLER_AFTER);
-	}
-
-	if ((color_type == PNG_COLOR_TYPE_GRAY) ||
-		(color_type == PNG_COLOR_TYPE_GRAY_ALPHA)) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "decoding gray image");
-		png_set_gray_to_rgb(png);
-	}
-
-	png_read_update_info(png, info);
-
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "open %s image %d bits",
-		size.toString().c_str(), bit_depth);
-
-	png_bytep row_pointers[height];
-	int	l = png_get_rowbytes(png, info);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "rows have length %lu", l);
-	for (int y = 0; y < height; y++) {
-		row_pointers[y] = (png_bytep)malloc(l);
-		memset(row_pointers[y], 0, l);
-	}
-
-	png_read_image(png, row_pointers);
-
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "bytes read: %d",
-		readbuffer.bytes_read());
-
-	ImagePtr	result;
-	if (l == 2 * width) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "gray image");
-		Image<unsigned char>	*image
-			= new Image<unsigned char>(size);
-		result = ImagePtr(image);
-		for (int y = 0; y < height; y++) {
-			int	Y = height - 1 - y;
-			for (int x = 0; x < width; x++) {
-				png_bytep	row = row_pointers[y];
-				unsigned char	p = row[2 * x];
-				image->pixel(x, Y) = p;
-			}
-			free(row_pointers[y]);
-		}
-	} else {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "color image");
-		Image<RGB<unsigned char> >	*image
-			= new Image<RGB<unsigned char> >(size);
-		result = ImagePtr(image);
-		for (int y = 0; y < height; y++) {
-			int	Y = height - 1 - y;
-			for (int x = 0; x < width; x++) {
-				png_bytep	row = row_pointers[y];
-				unsigned char	R = row[4 * x    ];
-				unsigned char	G = row[4 * x + 1];
-				unsigned char	B = row[4 * x + 2];
-				RGB<unsigned char>	p(R, G, B);
-				image->pixel(x, Y) = p;
-			}
-			free(row_pointers[y]);
-		}
-	}
-
-	png_destroy_read_struct(&png, &info, NULL);
+	ImagePtr	result = do_read(&png, &info);
 
 	return result;
 }
