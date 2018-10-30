@@ -25,11 +25,13 @@ public:
 	void	testJPEG();
 	void	testJPEGmono();
 	void	testPNG();
+	void	testPNG16();
 
 	CPPUNIT_TEST_SUITE(ImageBufferTest);
 	CPPUNIT_TEST(testJPEG);
 	CPPUNIT_TEST(testJPEGmono);
 	CPPUNIT_TEST(testPNG);
+	CPPUNIT_TEST(testPNG16);
 	CPPUNIT_TEST_SUITE_END();
 };
 
@@ -62,7 +64,7 @@ void	ImageBufferTest::testJPEGmono() {
 	for (int x = 0; x < 640; x++) {
 		for (int y = 0; y < 480; y++) {
 			int	m = x * y;
-			unsigned char	p = round(127. + 127. * sin(m / 2000.));
+			unsigned char	p = round(127. * (1 + sin(m / 2000.)));
 			image.pixel(x, y) = p;
 		}
 	}
@@ -79,11 +81,33 @@ void	ImageBufferTest::testPNG() {
 	PNG	png;
 	ImageBuffer	imagepng(filename);
 	CPPUNIT_ASSERT(imagepng.buffersize() == sb.st_size);
+	ImagePtr	fitsimage = imagepng.image();
+	JPEG	jpeg;
+	jpeg.write(fitsimage, std::string("t0.jpg"));
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "convert to JPEG");
 	ImageBuffer	*imagejpg = imagepng.convert(Format::JPEG);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "png size: %d", imagejpg->buffersize());
 	imagejpg->write("t.jpg");
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testPNG() end");
 }
+
+void	ImageBufferTest::testPNG16() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testPNG16() begin");
+	Image<unsigned short>	*image = new Image<unsigned short>(640, 480);
+	image->fill(2047);
+	for (int x = 0; x < 640; x++) {
+		for (int y = 0; y < 480; y++) {
+			int	m = x * y;
+			unsigned char	p = round(2047. * (1 + sin(m / 2000.)));
+			image->pixel(x, y) = p;
+		}
+	}
+	PNG	png;
+	ImagePtr	imageptr(image);
+	png.writePNG(imageptr, "color16.png");
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testPNG16() end");
+}
+
 
 } // namespace test
 } // namespace astro

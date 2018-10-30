@@ -135,6 +135,7 @@ void	FocusingI::unregisterCallback(const Ice::Identity& callbackidentity,
  * \brief Update fromthe callback
  */
 void	FocusingI::updateFocusing(astro::callback::CallbackDataPtr data) {
+	// FocusCallbackData
 	astro::focusing::FocusCallbackData	*focusdata
 		= dynamic_cast<astro::focusing::FocusCallbackData *>(&*data);
 	if (NULL != focusdata) {
@@ -146,6 +147,17 @@ void	FocusingI::updateFocusing(astro::callback::CallbackDataPtr data) {
 			imagerepo()->save(focusdata->image());
 		}
 	}
+
+	// ImageCallback
+	astro::callback::ImageCallbackData	*imagedata
+		= dynamic_cast<astro::callback::ImageCallbackData *>(&*data);
+	if (NULL != imagedata) {
+		if (imagerepo()) {
+			imagerepo()->save(imagedata->image());
+		}
+	}
+
+	// other callbacks
 	callbacks(data);
 }
 

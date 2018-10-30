@@ -13,5 +13,11 @@ FocusElementCallbackData::FocusElementCallbackData(const FocusElement& e)
 	  _processed_image(e.processed_image), _value(e.value) {
 }
 
+std::string	FocusElementCallbackData::toString() const {
+	return stringprintf("pos=%d raw=%s %s evaluated=%s value=%f",
+		position(), raw_image()->info().c_str(), method().c_str(),
+		processed_image()->info().c_str(), value());
+}
+
 } // namespace focusing
 } // namespace astro

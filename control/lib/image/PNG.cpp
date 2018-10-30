@@ -203,7 +203,7 @@ size_t	PNG::writePNG(const ConstImageAdapter<unsigned char>& monoimage,
 
 	PngWriteBuffer	writebuffer;
 
-	png_set_read_fn(png, &writebuffer, WriteDataToBuffer);
+	png_set_write_fn(png, &writebuffer, WriteDataToBuffer, NULL);
 
 	png_set_IHDR(png, info, width, height, 8, PNG_COLOR_TYPE_GRAY,
 		PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_DEFAULT,

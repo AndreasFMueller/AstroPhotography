@@ -79,7 +79,7 @@ FocusElementPtr	convert(const astro::focusing::FocusElement& fe,
 	size_t		bs = 0;
 	Format	f;
 	f.write(fe.raw_image, type, (void **)&b, &bs);
-	std::copy(b, b + bs, result->raw.data.begin());
+	std::copy(b, b + bs, std::back_inserter(result->raw.data));
 	free(b);
 
 	// copy the processed image
@@ -87,7 +87,7 @@ FocusElementPtr	convert(const astro::focusing::FocusElement& fe,
 	b = NULL;
 	bs = 0;
 	f.write(fe.processed_image, type, (void **)&b, &bs);
-	std::copy(b, b + bs, result->evaluated.data.begin());
+	std::copy(b, b + bs, std::back_inserter(result->evaluated.data));
 	free(b);
 
 	return FocusElementPtr(result);
@@ -95,6 +95,7 @@ FocusElementPtr	convert(const astro::focusing::FocusElement& fe,
 
 FocusElementPtr convert(const astro::focusing::FocusElementCallbackData& fe,
                         astro::image::Format::type_t type) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "convert %s", fe.toString().c_str());
 	FocusElement	*result = new FocusElement();
 	result->position = fe.position();
 	result->value = fe.value();
@@ -106,7 +107,9 @@ FocusElementPtr convert(const astro::focusing::FocusElementCallbackData& fe,
 	size_t		bs = 0;
 	Format	f;
 	f.write(fe.raw_image(), type, (void **)&b, &bs);
-	std::copy(b, b + bs, result->raw.data.begin());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "%s: buffer=%p, size=%d",
+		fe.raw_image()->info().c_str(),  b, bs);
+	std::copy(b, b + bs, std::back_inserter(result->raw.data));
 	free(b);
 
 	// copy the processed image
@@ -114,7 +117,9 @@ FocusElementPtr convert(const astro::focusing::FocusElementCallbackData& fe,
 	b = NULL;
 	bs = 0;
 	f.write(fe.processed_image(), type, (void **)&b, &bs);
-	std::copy(b, b + bs, result->evaluated.data.begin());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "%s: buffer=%p, size=%d",
+		fe.processed_image()->info().c_str(),  b, bs);
+	std::copy(b, b + bs, std::back_inserter(result->evaluated.data));
 	free(b);
 
 	return FocusElementPtr(result);

@@ -127,6 +127,8 @@ public:
 	double	value() const { return _value; }
 
 	FocusElementCallbackData(const FocusElement& e);
+
+	std::string	toString() const;
 };
 
 /**

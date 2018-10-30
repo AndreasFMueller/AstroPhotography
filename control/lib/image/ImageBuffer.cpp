@@ -200,8 +200,8 @@ ImageBuffer	*ImageBuffer::convert(type_t type) const {
 		{
 			debug(LOG_DEBUG, DEBUG_LOG, 0, "converting to JPEG");
 			image::JPEG	jpeg;
-			void		*b;
-			size_t		bs;
+			void		*b = NULL;
+			size_t		bs = 0;
 			jpeg.writeJPEG(img, &b, &bs);
 			return new ImageBuffer(Format::JPEG, b, bs);
 		}
@@ -210,8 +210,8 @@ ImageBuffer	*ImageBuffer::convert(type_t type) const {
 		{
 			debug(LOG_DEBUG, DEBUG_LOG, 0, "converting to PNG");
 			image::PNG	png;
-			void	 	*b;
-			size_t		bs;
+			void	 	*b = NULL;
+			size_t		bs = 0;
 			png.writePNG(img, &b, &bs);
 			return new ImageBuffer(Format::PNG, b, bs);
 		}

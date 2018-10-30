@@ -295,7 +295,7 @@ int	main(int argc, char *argv[]) {
 		throw std::runtime_error("missing instrument name argument");
 	}
 
-	// make sure the server offers instruments and guiding
+	// make sure the server offers instruments and focusing
 	if (!remote) {
 		astro::discover::ServiceDiscoveryPtr     sd
 			= astro::discover::ServiceDiscovery::get();
@@ -496,6 +496,21 @@ int	main(int argc, char *argv[]) {
 	exposure.shutter(astro::camera::Shutter::OPEN);
 	if (frame.size() > 0) {
 		exposure.frame(astro::image::ImageRectangle(frame));
+	}
+	exposure.purpose(astro::camera::Exposure::focus);
+
+	// define the rectangle (default should not be the complete image
+	// because that is too large and to time consuming to analyze
+	if (exposure.frame() == astro::image::ImageRectangle()) {
+		CcdInfo	info = focusing->getCcd()->getInfo();
+		int	w = (info.size.width <= 800) ? info.size.width : 800;
+		int	h = (info.size.height <= 600) ? info.size.height : 600;
+		int	x = (info.size.width - w) / 2;
+		int	y = (info.size.height - h) / 2;
+		exposure.frame(astro::image::ImageRectangle(
+			astro::image::ImagePoint(x, y),
+			astro::image::ImageSize(w, h))
+		);
 	}
 
 	// set up the focusing

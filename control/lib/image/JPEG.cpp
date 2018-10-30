@@ -72,8 +72,8 @@ size_t  JPEG::writeJPEG(const ConstImageAdapter<RGB<unsigned char> >& colorimage
 	jpeg_create_compress(&cinfo);
 
 	// set the output buffer
-	unsigned char	*jbuffer = (unsigned char *)malloc(1000);
-	unsigned long	jbuffersize = 1000;
+	unsigned char	*jbuffer = NULL;
+	unsigned long	jbuffersize = 0;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "setting up buffer");
 	jpeg_mem_dest(&cinfo, &jbuffer, &jbuffersize);
 
@@ -96,18 +96,21 @@ size_t  JPEG::writeJPEG(const ConstImageAdapter<RGB<unsigned char> >& colorimage
 
 	// start the compression
 	jpeg_start_compress(&cinfo, TRUE);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "compress started");
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "compress started, %d lines",
+		cinfo.image_height);
 	while (cinfo.next_scanline < cinfo.image_height) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "line %d", cinfo.next_scanline);
 		int	y = h - 1 - cinfo.next_scanline;
 		for (int x = 0; x < w; x++) {
-			RGB<unsigned char>	p = colorimage.pixel(x, y);
-			pixelline[3 * x    ] = p.R;
-			pixelline[3 * x + 1] = p.G;
-			pixelline[3 * x + 2] = p.B;
+//			RGB<unsigned char>	p = colorimage.pixel(x, y);
+//			pixelline[3 * x    ] = p.R;
+//			pixelline[3 * x + 1] = p.G;
+//			pixelline[3 * x + 2] = p.B;
 		}
 		jpeg_write_scanlines(&cinfo, row_pointer, 1);
 	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "all data written");
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "all data written: %d bytes",
+		jbuffersize);
 
 	// close the compression
 	jpeg_finish_compress(&cinfo);
