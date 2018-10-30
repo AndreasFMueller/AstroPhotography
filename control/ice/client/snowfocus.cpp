@@ -17,6 +17,7 @@
 #include <AstroFormat.h>
 #include <CommonClientTasks.h>
 #include <IceUtil/UUID.h>
+#include <FocusCallbackI.h>
 
 using namespace astro::config;
 using namespace astro;
@@ -26,6 +27,7 @@ namespace snowstar {
 namespace app {
 namespace snowfocus {
 
+#if 0
 /**
  * \brief Callback class for the snowfocus program
  *
@@ -110,6 +112,8 @@ public:
 		std::cout << std::endl;
 	}
 };
+
+#endif
 
 static void	short_usage(const char *progname) {
 	astro::Path	path(progname);

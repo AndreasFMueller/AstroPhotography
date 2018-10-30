@@ -21,8 +21,10 @@ void	callback_adapter<FocusCallbackPrx>(FocusCallbackPrx& prx,
 	astro::focusing::FocusElementCallbackData	*fedata
 		= dynamic_cast<astro::focusing::FocusElementCallbackData *>(&*data);
 	if (NULL != fedata) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "converting FocusElement");
 		FocusElementPtr	feptr = convert(*fedata,
 						astro::image::Format::PNG);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "conversion complete");
 		prx->addFocusElement(*feptr);
 	}
 

@@ -11,6 +11,11 @@
 
 namespace snowstar {
 
+/**
+ * \brief Create a Focusing object
+ *
+ * \param focusingptr	the Focusing process to base this servant on
+ */
 FocusingI::FocusingI(astro::focusing::FocusingPtr focusingptr) {
 	_focusingptr = focusingptr;
 	astro::callback::CallbackPtr	cb
@@ -18,17 +23,29 @@ FocusingI::FocusingI(astro::focusing::FocusingPtr focusingptr) {
 	_focusingptr->callback(cb);
 }
 
+/**
+ * \brief Destroy the Focusing
+ */
 FocusingI::~FocusingI() {
 }
 
+/**
+ * \brief Get the current status
+ */
 FocusState	FocusingI::status(const Ice::Current& /* current */) {
 	return convert(_focusingptr->status());
 }
 
+/**
+ * \brief provide the Method
+ */
 std::string	FocusingI::method(const Ice::Current& /* current */) {
 	return _focusingptr->method();
 }
 
+/**
+ * \brief Set the method
+ */
 void	FocusingI::setMethod(const std::string& method,
 		const Ice::Current& /* current */) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "set the method to %s",
@@ -36,27 +53,57 @@ void	FocusingI::setMethod(const std::string& method,
 	_focusingptr->method(method);
 }
 
+/**
+ * \brief provide the Solver
+ */
+std::string	FocusingI::solver(const Ice::Current& /* current */) {
+	return _focusingptr->solver();
+}
 
+/**
+ * \brief Set the solver
+ */
+void	FocusingI::setSolver(const std::string& solver,
+		const Ice::Current& /* current */) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "set the solver to %s",
+		solver.c_str());
+	_focusingptr->solver(solver);
+}
+
+/**
+ * \brief provide the information about the exposure
+ */
 Exposure	FocusingI::getExposure(const Ice::Current& /* current */) {
 	return convert(_focusingptr->exposure());
 }
 
+/**
+ * \brief Set the exposure for the focusing process
+ */
 void	FocusingI::setExposure(const Exposure& exposure,
 		const Ice::Current& /* current */) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "set exposure");
 	_focusingptr->exposure(convert(exposure));
 }
 
-
+/**
+ * \brief provide the number of steps
+ */
 int	FocusingI::steps(const Ice::Current& /* current */) {
 	return _focusingptr->steps();
 }
 
+/**
+ * \brief Set the number of steps
+ */
 void	FocusingI::setSteps(int steps, const Ice::Current& /* current */) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "set steps to %d", steps);
 	_focusingptr->steps(steps);
 }
 
+/**
+ * \brief Start the focusing process
+ */
 void	FocusingI::start(int min, int max, const Ice::Current& /* current */) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "start focusing in interval [%d,%d]",
 		min, max);
@@ -82,25 +129,35 @@ void	FocusingI::start(int min, int max, const Ice::Current& /* current */) {
 	}
 }
 
+/**
+ * \brief Cancel the focusing process in progress
+ */
 void	FocusingI::cancel(const Ice::Current& /* current */) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "cancelling the focusing");
 	_focusingptr->cancel();
 }
 
-
+/**
+ * \brief Provide a CCD proxy
+ */
 CcdPrx	FocusingI::getCcd(const Ice::Current& current) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "creating the CCD proxy");
 	std::string	name = _focusingptr->ccd()->name();
 	return createProxy<CcdPrx>(name, current);
 }
 
+/**
+ * \brief Provide a Focuser proxy
+ */
 FocuserPrx	FocusingI::getFocuser(const Ice::Current& current) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "creating the focuser proxy");
 	std::string	name = _focusingptr->focuser()->name();
 	return createProxy<FocuserPrx>(name, current);
 }
 
-
+/**
+ * \brief retrieve the focus history
+ */
 FocusHistory	FocusingI::history(const Ice::Current& /* current */) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieve the history");
 	return _history;
@@ -142,9 +199,17 @@ void	FocusingI::updateFocusing(astro::callback::CallbackDataPtr data) {
 		FocusPoint	p;
 		p.position = focusdata->position();
 		p.value = focusdata->value();
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "callback position=%d value=%f",
+			p.position, p.value);
 		addPoint(p);
 		if (focusdata->image() && imagerepo()) {
-			imagerepo()->save(focusdata->image());
+			try {
+				imagerepo()->save(focusdata->image());
+			} catch (const std::exception& ex) {
+				debug(LOG_ERR, DEBUG_LOG, 0, "cannot save "
+					"processed image to repo: %s",
+					ex.what());
+			}
 		}
 	}
 
@@ -152,8 +217,15 @@ void	FocusingI::updateFocusing(astro::callback::CallbackDataPtr data) {
 	astro::callback::ImageCallbackData	*imagedata
 		= dynamic_cast<astro::callback::ImageCallbackData *>(&*data);
 	if (NULL != imagedata) {
-		if (imagerepo()) {
-			imagerepo()->save(imagedata->image());
+		if ((imagedata->image()) && (imagerepo())) {
+			try {
+				debug(LOG_DEBUG, DEBUG_LOG, 0, "got %s",
+					imagedata->image()->info().c_str());
+				imagerepo()->save(imagedata->image());
+			} catch (const std::exception& ex) {
+				debug(LOG_ERR, DEBUG_LOG, 0, "cannot save"
+					" raw image to repo: %s", ex.what());
+			}
 		}
 	}
 

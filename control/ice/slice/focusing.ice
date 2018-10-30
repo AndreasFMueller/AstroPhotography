@@ -53,6 +53,9 @@ interface FocusCallback {
 	void	changeState(FocusState state);
 };
 
+sequence<string>	FocusMethods;
+sequence<string>	FocusSolvers;
+
 /**
  * \brief Focusing interface
  *
@@ -73,6 +76,9 @@ interface Focusing {
 	 * \brief Set the focus quantification method
 	 */
 	void	setMethod(string m);
+
+	string	solver();
+	void	setSolver(string s);
 
 	/**
 	 * \brief get the exposure setting  used to find the focus
@@ -150,6 +156,9 @@ interface Focusing {
  */
 interface FocusingFactory {
 	Focusing*	get(string ccd, string focuser);
+	FocusMethods	getMethods();
+	FocusSolvers	getSolvers();
+
 };
 
 };

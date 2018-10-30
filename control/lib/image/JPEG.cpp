@@ -55,8 +55,8 @@ bool	JPEG::isjpegfilename(const std::string& filename) {
 size_t  JPEG::writeJPEG(const ConstImageAdapter<RGB<unsigned char> >& colorimage,
 		void **buffer, size_t *buffersize) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "write RGB image to buffer");
-	buffer = NULL;
-	buffersize = 0;
+	*buffer = NULL;
+	*buffersize = 0;
 
 	// prepare a pixel buffer
 	int	w = colorimage.getSize().width();
@@ -220,8 +220,8 @@ size_t  JPEG::writeJPEG(const ConstImageAdapter<RGB<unsigned char> >& colorimage
  */
 size_t	JPEG::writeJPEG(const ConstImageAdapter<unsigned char>& monoimage,
 		void **buffer, size_t *buffersize) {
-	buffer = NULL;
-	buffersize = 0;
+	*buffer = NULL;
+	*buffersize = 0;
 
 	// prepare a pixel buffer
 	int	w = monoimage.getSize().width();

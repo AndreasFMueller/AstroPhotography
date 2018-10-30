@@ -366,11 +366,30 @@ astro::image::ImageBufferPtr	convert(const ImageBuffer& imagebuffer) {
 	return astro::image::ImageBufferPtr(result);
 }
 
+static int	imagebuffer_counter = 0;
+
 ImageBufferPtr	convert(const astro::image::ImageBuffer& imagebuffer) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "convert %d@%p", imagebuffer.size(),
+		imagebuffer.data());
+	std::string	fn = astro::stringprintf("c-%d.png",
+				imagebuffer_counter++);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "write to %s", fn.c_str());
+	imagebuffer.write(fn);
+
 	ImageBuffer	*result = new ImageBuffer();
 	result->encoding = convert(imagebuffer.type());
+
+	Ice::Byte	*data = (Ice::Byte *)imagebuffer.data();
+	std::copy(data, data + imagebuffer.size(), std::back_inserter(result->data));
+
+	
+#if 0
+	
+
 	Ice::Byte	*bp = (Ice::Byte *)imagebuffer.data();
 	result->data = std::vector<Ice::Byte>(bp, bp + imagebuffer.size());
+#endif
+
 	return ImageBufferPtr(result);
 }
 

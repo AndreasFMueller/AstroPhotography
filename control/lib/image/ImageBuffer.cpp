@@ -10,6 +10,15 @@ namespace astro {
 namespace image {
 
 /**
+ * \brief Create an ImageBuffer from some other
+ */
+ImageBuffer::ImageBuffer(const ImageBuffer& other) : Format(other.type()) {
+	_buffersize = other._buffersize;
+	_buffer = (unsigned char *)malloc(_buffersize);
+	memcpy(_buffer, other._buffer, _buffersize);
+}
+
+/**
  * \brief Create an ImageBuffer from a memory buffer
  *
  * Note that this constructor takes ownership of the the buffer
@@ -39,18 +48,21 @@ ImageBuffer::ImageBuffer(ImagePtr image, type_t type)
 	switch (type) {
 	case FITS:
 		{
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "writing FITS buffer");
 			image::FITS	fits;
 			fits.writeFITS(image, &_buffer, &_buffersize);
 		}
 		break;
 	case JPEG:
 		{
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "writing JPEG buffer");
 			image::JPEG	jpeg;
 			jpeg.writeJPEG(image, &_buffer, &_buffersize);
 		}
 		break;
 	case PNG:
 		{
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "writing PNG buffer");
 			image::PNG	png;
 			png.writePNG(image, &_buffer, &_buffersize);
 		}

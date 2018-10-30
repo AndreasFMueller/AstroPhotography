@@ -11,6 +11,8 @@
 #include <AstroDebug.h>
 #include <math.h>
 #include <sys/stat.h>
+#include <unistd.h>
+#include <fcntl.h>
 
 using namespace astro::image;
 
@@ -26,12 +28,14 @@ public:
 	void	testJPEGmono();
 	void	testPNG();
 	void	testPNG16();
+	void	testPNGbuffer();
 
 	CPPUNIT_TEST_SUITE(ImageBufferTest);
 	CPPUNIT_TEST(testJPEG);
 	CPPUNIT_TEST(testJPEGmono);
 	CPPUNIT_TEST(testPNG);
 	CPPUNIT_TEST(testPNG16);
+	CPPUNIT_TEST(testPNGbuffer);
 	CPPUNIT_TEST_SUITE_END();
 };
 
@@ -106,6 +110,21 @@ void	ImageBufferTest::testPNG16() {
 	ImagePtr	imageptr(image);
 	png.writePNG(imageptr, "color16.png");
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testPNG16() end");
+}
+
+void	ImageBufferTest::testPNGbuffer() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testPNGbuffer() begin");
+	struct stat	sb;
+	stat("t.png", &sb);
+	unsigned long	buffersize = sb.st_size;
+	unsigned char	*buffer = (unsigned char *)malloc(buffersize);
+	int	fd = open("t.png", O_RDONLY);
+	read(fd, buffer, buffersize);
+	PNG	png;
+	ImagePtr	image = png.readPNG(buffer, buffersize);
+	FITS	fits;
+	fits.writeFITS(image, std::string("t.fits"));
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testPNGbuffer() end");
 }
 
 

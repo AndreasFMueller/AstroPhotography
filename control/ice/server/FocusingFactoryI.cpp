@@ -112,6 +112,28 @@ FocusingPrx	FocusingFactoryI::get(const std::string& ccd,
 	return createProxy<FocusingPrx>(focusingname, current, false);
 }
 
+/**
+ * \brief Get a list of methods
+ */
+FocusMethods	FocusingFactoryI::getMethods(const Ice::Current& /* current */) {
+	std::list<std::string>	methods
+		= astro::focusing::FocusEvaluatorFactory::evaluatornames();
+	FocusMethods	result;
+	std::copy(methods.begin(), methods.end(), std::back_inserter(result));
+	return result;
+}
+
+/**
+ * \brief Get a list of solvers
+ */
+FocusSolvers	FocusingFactoryI::getSolvers(const Ice::Current& /* current */) {
+	std::list<std::string>	solvers
+		= astro::focusing::FocusSolverFactory::solvernames();
+	FocusSolvers	result;
+	std::copy(solvers.begin(), solvers.end(), std::back_inserter(result));
+	return result;
+}
+
 FocusingFactoryI::FocusingFactoryI() {
 }
 

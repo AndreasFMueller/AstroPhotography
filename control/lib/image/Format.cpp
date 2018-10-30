@@ -61,28 +61,36 @@ size_t	Format::write(ImagePtr image, Format::type_t type,
 	return 0;
 }
 
+static int	format_counter = 0;
+
 ImagePtr	Format::read(Format::type_t type,
 			void *buffer, size_t buffersize) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "%d bytes, type %d", buffersize,
+		type);
+	ImagePtr	result;
 	switch (type) {
 	case Format::FITS:
 		{
 			image::FITS	fits;
-			return fits.readFITS(buffer, buffersize);
+			result = fits.readFITS(buffer, buffersize);
 		}
 		break;
 	case Format::JPEG:
 		{
 			image::JPEG	jpeg;
-			return jpeg.readJPEG(buffer, buffersize);
+			result = jpeg.readJPEG(buffer, buffersize);
 		}
 		break;
 	case Format::PNG:
 		{
 			image::PNG	png;
-			return png.readPNG(buffer, buffersize);
+			result = png.readPNG(buffer, buffersize);
 		}
 		break;
 	}
+	image::FITS	fits;
+	fits.writeFITS(result, stringprintf("test-%d.fits", format_counter++));
+	return result;
 }
 
 } // namespace image

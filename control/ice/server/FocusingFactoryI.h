@@ -68,6 +68,8 @@ public:
 	virtual ~FocusingFactoryI();
 	FocusingPrx	get(const std::string& ccd, const std::string& focuser,
 				const Ice::Current& current);
+	FocusMethods	getMethods(const Ice::Current& current);
+	FocusSolvers	getSolvers(const Ice::Current& current);
 };
 
 } // namespace snowstar

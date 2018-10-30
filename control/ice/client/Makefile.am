@@ -18,6 +18,8 @@ bin_PROGRAMS = snowscan snowimages snowfocus snowmount snowrepo \
 	snowevent snowconfig snowstream snowfiles
 noinst_PROGRAMS = snowflake 
 
+noinst_HEADERS = FocusCallbackI.h
+
 snowconfig_SOURCES = snowconfig.cpp
 snowconfig_DEPENDENCIES = $(ICEDEPENDENCIES)
 snowconfig_LDADD = $(ICELDADD)
@@ -38,7 +40,7 @@ snowimages_DEPENDENCIES = $(ICEDEPENDENCIES)
 snowimages_LDADD = $(ICELDADD)
 snowimages_CPPFLAGS = $(ICECPPFLAGS)
 
-snowfocus_SOURCES = snowfocus.cpp
+snowfocus_SOURCES = FocusCallbackI.cpp snowfocus.cpp
 snowfocus_DEPENDENCIES = $(ICEDEPENDENCIES)
 snowfocus_LDADD = $(ICELDADD)
 snowfocus_CPPFLAGS = $(ICECPPFLAGS)

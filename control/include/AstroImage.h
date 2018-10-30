@@ -1525,7 +1525,6 @@ public:
  * \brief Container class for images as memory buffers
  */
 class ImageBuffer : public Format {
-	ImageBuffer(const ImageBuffer& other) = delete;
 	ImageBuffer&	operator=(const ImageBuffer& other) = delete;
 	void	*_buffer;
 	size_t	_buffersize;
@@ -1536,6 +1535,7 @@ public:
 	ImageBuffer(ImagePtr image, type_t type);
 	ImageBuffer(const std::string& filename);
 	ImageBuffer(type_t type, void *buffer, size_t buffersize);
+	ImageBuffer(const ImageBuffer& other);
 	~ImageBuffer();
 
 	ImagePtr	image() const;

@@ -235,6 +235,7 @@ size_t	PNG::writePNG(const ConstImageAdapter<unsigned char>& monoimage,
 	// write the result
 	*buffer = writebuffer._buffer;
 	*buffersize = writebuffer._buffersize;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "%d bytes written", *buffersize);
 
 	return *buffersize;
 }
@@ -449,31 +450,48 @@ ImagePtr	PNG::readPNG(const std::string& filename) {
 		size.toString().c_str(), bit_depth);
 
 	png_bytep row_pointers[height];
+	int	l = png_get_rowbytes(png, info);
 	for (int y = 0; y < height; y++) {
-		row_pointers[y] = (png_byte *)malloc(png_get_rowbytes(png, info));
+		row_pointers[y] = (png_byte *)malloc(l);
 	}
 
 	png_read_image(png, row_pointers);
 
-	Image<RGB<unsigned char> >	*image
-		= new Image<RGB<unsigned char> >(size);
-	for (int y = 0; y < height; y++) {
-		int	Y = height - 1 - y;
-		for (int x = 0; x < width; x++) {
-			unsigned char	R = row_pointers[y][4 * x    ];
-			unsigned char	G = row_pointers[y][4 * x + 1];
-			unsigned char	B = row_pointers[y][4 * x + 2];
-			RGB<unsigned char>	p(R, G, B);
-			image->pixel(x, Y) = p;
+	ImagePtr	result;
+	if (l == 2 * width) {
+		Image<unsigned char>	*image
+			= new Image<unsigned char>(size);
+		result = ImagePtr(image);
+		for (int y = 0; y < height; y++) {
+			int	Y = height - 1 - y;
+			for (int x = 0; x < width; x++) {
+				unsigned char	p = row_pointers[y][2 * x];
+				image->pixel(x, Y) = p;
+			}
+			free(row_pointers[y]);
 		}
-		free(row_pointers[y]);
+	} else {
+		Image<RGB<unsigned char> >	*image
+			= new Image<RGB<unsigned char> >(size);
+		result = ImagePtr(image);
+		for (int y = 0; y < height; y++) {
+			int	Y = height - 1 - y;
+			for (int x = 0; x < width; x++) {
+				unsigned char	R = row_pointers[y][4 * x    ];
+				unsigned char	G = row_pointers[y][4 * x + 1];
+				unsigned char	B = row_pointers[y][4 * x + 2];
+				RGB<unsigned char>	p(R, G, B);
+				image->pixel(x, Y) = p;
+			}
+			free(row_pointers[y]);
+		}
 	}
 
 	png_destroy_read_struct(&png, &info, NULL);
 
 	fclose(infile);
 
-	return ImagePtr(image);
+	return ImagePtr(result);
 }
 
 /**
@@ -489,9 +507,12 @@ public:
 		_offset = 0;
 	}
 	void	read(png_bytep outBytes, png_size_t byteCountToRead) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "read %d bytes @ %p[%d]",
+			byteCountToRead, _buffer, _offset);
 		memcpy(outBytes, _buffer + _offset, byteCountToRead);
 		_offset += byteCountToRead;
 	}
+	size_t	bytes_read() const { return _offset; }
 };
 
 static void	ReadDataFromInputStream(png_structp png, png_bytep outBytes,
@@ -546,6 +567,7 @@ ImagePtr	PNG::readPNG(void *buffer, size_t buffersize) {
 
 	if ((color_type == PNG_COLOR_TYPE_GRAY) ||
 		(color_type == PNG_COLOR_TYPE_GRAY_ALPHA)) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "decoding gray image");
 		png_set_gray_to_rgb(png);
 	}
 
@@ -555,30 +577,55 @@ ImagePtr	PNG::readPNG(void *buffer, size_t buffersize) {
 		size.toString().c_str(), bit_depth);
 
 	png_bytep row_pointers[height];
+	int	l = png_get_rowbytes(png, info);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "rows have length %lu", l);
 	for (int y = 0; y < height; y++) {
-		row_pointers[y] = (png_byte *)malloc(png_get_rowbytes(png,
-					info));
+		row_pointers[y] = (png_bytep)malloc(l);
+		memset(row_pointers[y], 0, l);
 	}
 
 	png_read_image(png, row_pointers);
 
-	Image<RGB<unsigned char> >	*image
-		= new Image<RGB<unsigned char> >(size);
-	for (int y = 0; y < height; y++) {
-		int	Y = height - 1 - y;
-		for (int x = 0; x < width; x++) {
-			unsigned char	R = row_pointers[y][4 * x    ];
-			unsigned char	G = row_pointers[y][4 * x + 1];
-			unsigned char	B = row_pointers[y][4 * x + 2];
-			RGB<unsigned char>	p(R, G, B);
-			image->pixel(x, Y) = p;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "bytes read: %d",
+		readbuffer.bytes_read());
+
+	ImagePtr	result;
+	if (l == 2 * width) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "gray image");
+		Image<unsigned char>	*image
+			= new Image<unsigned char>(size);
+		result = ImagePtr(image);
+		for (int y = 0; y < height; y++) {
+			int	Y = height - 1 - y;
+			for (int x = 0; x < width; x++) {
+				png_bytep	row = row_pointers[y];
+				unsigned char	p = row[2 * x];
+				image->pixel(x, Y) = p;
+			}
+			free(row_pointers[y]);
 		}
-		free(row_pointers[y]);
+	} else {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "color image");
+		Image<RGB<unsigned char> >	*image
+			= new Image<RGB<unsigned char> >(size);
+		result = ImagePtr(image);
+		for (int y = 0; y < height; y++) {
+			int	Y = height - 1 - y;
+			for (int x = 0; x < width; x++) {
+				png_bytep	row = row_pointers[y];
+				unsigned char	R = row[4 * x    ];
+				unsigned char	G = row[4 * x + 1];
+				unsigned char	B = row[4 * x + 2];
+				RGB<unsigned char>	p(R, G, B);
+				image->pixel(x, Y) = p;
+			}
+			free(row_pointers[y]);
+		}
 	}
 
 	png_destroy_read_struct(&png, &info, NULL);
 
-	return ImagePtr(image);
+	return result;
 }
 
 } // namespace image
