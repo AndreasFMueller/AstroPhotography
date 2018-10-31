@@ -13,6 +13,7 @@ FocusingCallbackI::FocusingCallbackI() : QObject(NULL) {
 
 	qRegisterMetaType<snowstar::FocusElement>("snowstar::FocusElement");
 	qRegisterMetaType<snowstar::FocusPoint>("snowstar::FocusPoint");
+	qRegisterMetaType<snowstar::FocusState>("snowstar::FocusState");
 }
 
 FocusingCallbackI::~FocusingCallbackI() {

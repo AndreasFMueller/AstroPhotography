@@ -43,6 +43,12 @@
       </property>
       <item>
        <widget class="QWidget" name="focusingWidget" native="true">
+        <property name="maximumSize">
+         <size>
+          <width>16777215</width>
+          <height>250</height>
+         </size>
+        </property>
         <layout class="QHBoxLayout" name="horizontalLayout_3">
          <property name="leftMargin">
           <number>0</number>
@@ -60,7 +66,7 @@
           <widget class="snowgui::focusingcontrollerwidget" name="focusingcontrollerWidget" native="true"/>
          </item>
          <item>
-          <widget class="QWidget" name="focusingHistory" native="true"/>
+          <widget class="snowgui::FocusingProgressWidget" name="focusingHistory" native="true"/>
          </item>
          <item>
           <widget class="snowgui::FocusElementView" name="focusingMonitor" native="true"/>
@@ -76,90 +82,6 @@
           <height>16777215</height>
          </size>
         </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QWidget" name="focusinfoWidget" native="true">
-        <property name="minimumSize">
-         <size>
-          <width>0</width>
-          <height>291</height>
-         </size>
-        </property>
-        <property name="maximumSize">
-         <size>
-          <width>16777215</width>
-          <height>291</height>
-         </size>
-        </property>
-        <layout class="QHBoxLayout" name="horizontalLayout_2">
-         <property name="leftMargin">
-          <number>0</number>
-         </property>
-         <property name="topMargin">
-          <number>0</number>
-         </property>
-         <property name="rightMargin">
-          <number>0</number>
-         </property>
-         <property name="bottomMargin">
-          <number>0</number>
-         </property>
-         <item>
-          <widget class="snowgui::focusinghistorywidget" name="focusinghistoryWidget" native="true">
-           <property name="minimumSize">
-            <size>
-             <width>360</width>
-             <height>291</height>
-            </size>
-           </property>
-           <property name="maximumSize">
-            <size>
-             <width>1000000</width>
-             <height>291</height>
-            </size>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="Line" name="line">
-           <property name="orientation">
-            <enum>Qt::Vertical</enum>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QStackedWidget" name="stackedWidget">
-           <property name="minimumSize">
-            <size>
-             <width>320</width>
-             <height>291</height>
-            </size>
-           </property>
-           <property name="maximumSize">
-            <size>
-             <width>325</width>
-             <height>291</height>
-            </size>
-           </property>
-           <widget class="snowgui::focusscancontroller" name="scanWidget">
-            <property name="minimumSize">
-             <size>
-              <width>320</width>
-              <height>0</height>
-             </size>
-            </property>
-            <property name="maximumSize">
-             <size>
-              <width>320</width>
-              <height>204</height>
-             </size>
-            </property>
-           </widget>
-           <widget class="QWidget" name="autoWidget"/>
-          </widget>
-         </item>
-        </layout>
        </widget>
       </item>
      </layout>
@@ -367,18 +289,6 @@
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>snowgui::focusscancontroller</class>
-   <extends>QWidget</extends>
-   <header>focusscancontroller.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>snowgui::focusinghistorywidget</class>
-   <extends>QWidget</extends>
-   <header>focusinghistorywidget.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
    <class>snowgui::focusingcontrollerwidget</class>
    <extends>QWidget</extends>
    <header location="global">focusingcontrollerwidget.h</header>
@@ -388,6 +298,12 @@
    <class>snowgui::FocusElementView</class>
    <extends>QWidget</extends>
    <header location="global">focuselementview.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>snowgui::FocusingProgressWidget</class>
+   <extends>QWidget</extends>
+   <header location="global">focusingprogresswidget.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

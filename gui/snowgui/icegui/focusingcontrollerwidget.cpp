@@ -35,6 +35,8 @@ focusingcontrollerwidget::focusingcontrollerwidget(QWidget *parent) :
 		this, SLOT(stepsizeChanged(int)));
 	connect(ui->centerSpinBox, SIGNAL(valueChanged(int)),
 		this, SLOT(centerChanged(int)));
+	connect(ui->repositoryBox, SIGNAL(currentTextChanged(const QString&)),
+		this, SLOT(repositoryChanged(const QString&)));
 
 	connect(&_timer, SIGNAL(timeout()),
 		this, SLOT(statusUpdate()));
@@ -71,6 +73,9 @@ focusingcontrollerwidget::~focusingcontrollerwidget() {
 
 /**
  * \brief Instrument setup
+ *
+ * \param serviceobject
+ * \param instrument
  */
 void	focusingcontrollerwidget::instrumentSetup(
 		astro::discover::ServiceObject serviceobject,
@@ -112,6 +117,11 @@ void	focusingcontrollerwidget::instrumentSetup(
         _focusing->ice_getConnection()->setAdapter(_adapter->adapter());
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "registering %s", _ident.name.c_str());
 	_focusing->registerCallback(_ident);
+
+	// get the repositories proxy
+	Ice::ObjectPrx	rbase = ic->stringToProxy(
+					servername.connect("Repositories"));
+	_repositories = snowstar::RepositoriesPrx::checkedCast(rbase);
 }
 
 /**
@@ -127,6 +137,7 @@ void	focusingcontrollerwidget::setupComplete() {
 			ui->evaluationBox->addItem(QString(method.c_str()));
 		}
 	);
+	ui->evaluationBox->setCurrentIndex(3);
 	ui->evaluationBox->blockSignals(false);
 
 	// set the solvers for the menu
@@ -138,10 +149,48 @@ void	focusingcontrollerwidget::setupComplete() {
 			ui->solverBox->addItem(QString(solver.c_str()));
 		}
 	);
+	ui->solverBox->setCurrentIndex(2);
 	ui->solverBox->blockSignals(false);
+
+	// get the currently active repository 
+	_repository = _focusing->getRepositoryName();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "repository: %s", _repository.c_str());
+
+	// get the repository names
+	ui->repositoryBox->blockSignals(true);
+	ui->repositoryBox->addItem(QString());
+	snowstar::reponamelist	reponames = _repositories->list();
+	int	repoindex = 0;
+	std::for_each(reponames.begin(), reponames.end(),
+		[&](const std::string& name) {
+			ui->repositoryBox->addItem(QString(name.c_str()));
+			if (name == _repository) {
+				repoindex = ui->repositoryBox->count();
+			}
+		}
+	);
+	ui->repositoryBox->setCurrentIndex(repoindex);
+	ui->repositoryBox->blockSignals(false);
 
 	// get the current focuser
 	ui->centerSpinBox->setValue(_focuser->current());
+
+	// emit the current state of the focusing process
+	emit stateReceived(_focusing->status());
+
+	// focuser
+	ui->centerSpinBox->setMinimum(_focuser->min());
+	ui->centerSpinBox->setMaximum(_focuser->max());
+
+	// retrieve the focusing history
+	if (_focusing->status() == snowstar::FocusFOCUSED) {
+		snowstar::FocusHistory	history = _focusing->history();
+		std::for_each(history.begin(), history.end(),
+			[&](const snowstar::FocusPoint& p) {
+				emit receivePoint(p);
+			}
+		);
+	}
 
 	// start the timer
 	_timer.start();
@@ -194,6 +243,9 @@ void	focusingcontrollerwidget::start() {
 		ui->solverBox->currentText().toLatin1().data()));
 	_focusing->setExposure(snowstar::convert(_exposure));
 	_focusing->setSteps(steps);
+	if (_repository.size() > 0) {
+		_focusing->setRepositoryName(_repository);
+	}
 	_focusing->start(start, end);
 }
 
@@ -207,14 +259,23 @@ void	focusingcontrollerwidget::exposureChanged(
 	_exposure = exposure;
 }
 
+/**
+ * \brief Slot called when the stepsize is changed
+ */
 void	focusingcontrollerwidget::stepsizeChanged(int s) {
 	_stepsize = s;
 }
 
+/**
+ * \brief Slot called when the number of steps is changed
+ */
 void	focusingcontrollerwidget::stepsChanged(int s) {
 	_steps = s;
 }
 
+/**
+ * \brief Slot called when the center position is changed
+ */
 void	focusingcontrollerwidget::centerChanged(int s) {
 	_center = s;
 }
@@ -262,6 +323,10 @@ void    focusingcontrollerwidget::receiveState(snowstar::FocusState state) {
 
 void    focusingcontrollerwidget::receiveFocusElement(snowstar::FocusElement element) {
 	emit focuselementReceived(element);
+}
+
+void	focusingcontrollerwidget::repositoryChanged(const QString& text) {
+	_repository = std::string(text.toLatin1().data());
 }
 
 } // namespace snowgui

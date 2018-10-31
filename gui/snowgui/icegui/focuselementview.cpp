@@ -8,6 +8,7 @@
 #include <AstroDebug.h>
 #include <QLabel>
 #include <QPixmap>
+#include <QScrollBar>
 
 namespace snowgui {
 

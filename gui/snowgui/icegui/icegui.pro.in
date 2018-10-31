@@ -46,6 +46,7 @@ FORMS    +=								\
 	focusercontrollerwidget.ui					\
 	focuselementview.ui						\
 	focusingcontrollerwidget.ui					\
+	focusingprogresswidget.ui					\
 	guideportcontrollerwidget.ui					\
 	guidercontrollerwidget.ui					\
 	imagercontrollerwidget.ui					\
@@ -72,6 +73,7 @@ WIDGETSOURCES =								\
 	focusercontrollerwidget.cpp					\
 	focuselementview.cpp						\
 	focusingcontrollerwidget.cpp					\
+	focusingprogresswidget.cpp					\
 	guideportcontrollerwidget.cpp					\
 	guidercontrollerwidget.cpp					\
 	imagercontrollerwidget.cpp					\
@@ -98,6 +100,7 @@ WIDGETHEADERS =								\
 	focusercontrollerwidget.h					\
 	focuselementview.h						\
 	focusingcontrollerwidget.h					\
+	focusingprogresswidget.h					\
 	guideportcontrollerwidget.h					\
 	guidercontrollerwidget.h					\
 	imagercontrollerwidget.h					\

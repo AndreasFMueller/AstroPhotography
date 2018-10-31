@@ -8,6 +8,7 @@
 
 #include <InstrumentWidget.h>
 #include <focusing.h>
+#include <repository.h>
 #include <AstroImage.h>
 #include <QTimer>
 #include <QWidget>
@@ -29,12 +30,15 @@ class focusingcontrollerwidget : public InstrumentWidget {
 	snowstar::CcdPrx		_ccd;
 	snowstar::FocuserPrx		_focuser;
 
+	snowstar::RepositoriesPrx	_repositories;
+
 	std::string	_ccdname;
 	std::string	_focusername;
 
 	int	_center;
 	int	_stepsize;
 	int	_steps;
+	std::string	_repository;
 
 	astro::camera::Exposure		_exposure;
 
@@ -73,6 +77,7 @@ public slots:
 	void	stepsizeChanged(int);
 	void	centerChanged(int);
 	void	exposureChanged(astro::camera::Exposure);
+	void	repositoryChanged(const QString& text);
 
 	void	receivePoint(snowstar::FocusPoint);
 	void	receiveState(snowstar::FocusState);

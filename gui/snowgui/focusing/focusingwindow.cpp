@@ -36,30 +36,19 @@ focusingwindow::focusingwindow(QWidget *parent)
 		this,
 		SLOT(rectangleSelected(astro::image::ImageRectangle)));
 
-	// when the focusinghistory widget selects a position, we want
-	// the focusercontroller to learn about it
-	connect(ui->focusinghistoryWidget, SIGNAL(positionSelected(int)),
-		ui->focusercontrollerWidget, SLOT(setTarget(int)));
-
-	// wiring up the scan controller
-	connect(ui->scanWidget, SIGNAL(movetoPosition(int)),
-		ui->focusercontrollerWidget, SLOT(movetoPosition(int)));
-	connect(ui->focusercontrollerWidget, SIGNAL(targetPositionReached()),
-		ui->scanWidget, SLOT(positionReached()));
-	connect(ui->scanWidget, SIGNAL(performCapture()),
-		ui->ccdcontrollerWidget, SLOT(captureClicked()));
-	connect(ui->ccdcontrollerWidget,
-		SIGNAL(imageReceived(astro::image::ImagePtr)),
-		ui->scanWidget,
-		SLOT(imageReceived(astro::image::ImagePtr)));
-
-	connect(ui->focusercontrollerWidget, SIGNAL(newFocuserPosition(int)),
-		ui->scanWidget, SLOT(changeCenter(int)));
-
+	// send FocusElements to the monitor
 	connect(ui->focusingcontrollerWidget,
 		SIGNAL(focuselementReceived(snowstar::FocusElement)),
 		ui->focusingMonitor,
 		SLOT(setFocusElement(snowstar::FocusElement)));
+	connect(ui->focusingcontrollerWidget,
+		SIGNAL(pointReceived(snowstar::FocusPoint)),
+		ui->focusingHistory,
+		SLOT(receivePoint(snowstar::FocusPoint)));
+	connect(ui->focusingcontrollerWidget,
+		SIGNAL(stateReceived(snowstar::FocusState)),
+		ui->focusingHistory,
+		SLOT(receiveState(snowstar::FocusState)));
 
 	// exposure changes
 	connect(ui->ccdcontrollerWidget,
@@ -103,7 +92,6 @@ void	focusingwindow::setupComplete() {
 	int	currentposition = 
 		ui->focusercontrollerWidget->getCurrentPosition();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "current position: %d", currentposition);
-	ui->scanWidget->changeCenter(currentposition);
 }
 
 /**
@@ -127,10 +115,6 @@ void	focusingwindow::receiveImage(ImagePtr _image) {
 	Exposure	imageexposure
 		= ui->ccdcontrollerWidget->imageexposure();
 	ui->ccdcontrollerWidget->setExposure(imageexposure);
-
-	// add the point to the focuspointwidgeth
-	int	pos = ui->focusercontrollerWidget->getCurrentPosition();
-	ui->focusinghistoryWidget->add(_image, pos);
 
 	// emit a signal for saving
 	if (_image) {

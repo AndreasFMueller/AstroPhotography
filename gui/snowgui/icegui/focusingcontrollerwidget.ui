@@ -112,7 +112,7 @@
       <number>214748367</number>
      </property>
      <property name="singleStep">
-      <number>0</number>
+      <number>1000</number>
      </property>
      <property name="value">
       <number>8000000</number>
