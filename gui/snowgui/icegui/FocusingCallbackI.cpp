@@ -10,6 +10,9 @@ namespace snowgui {
 
 FocusingCallbackI::FocusingCallbackI() : QObject(NULL) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "callback created");
+
+	qRegisterMetaType<snowstar::FocusElement>("snowstar::FocusElement");
+	qRegisterMetaType<snowstar::FocusPoint>("snowstar::FocusPoint");
 }
 
 FocusingCallbackI::~FocusingCallbackI() {

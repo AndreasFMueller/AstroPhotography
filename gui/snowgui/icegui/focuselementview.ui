@@ -19,7 +19,10 @@
      <property name="widgetResizable">
       <bool>true</bool>
      </property>
-     <widget class="QWidget" name="scrollAreaWidgetContents">
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
+     <widget class="QWidget" name="rawWidgetContents">
       <property name="geometry">
        <rect>
         <x>0</x>
@@ -36,7 +39,10 @@
      <property name="widgetResizable">
       <bool>true</bool>
      </property>
-     <widget class="QWidget" name="scrollAreaWidgetContents_2">
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
+     <widget class="QWidget" name="evaluatedWidgetContents">
       <property name="geometry">
        <rect>
         <x>0</x>
