@@ -200,8 +200,8 @@ std::list<std::string>	ServiceSubset::txtparse(const std::string& txt) {
 		int     l = txtRecord[i];
 		if (l > 0) {
 			std::string     name((char *)txtRecord + i + 1, l);
-			debug(LOG_DEBUG, DEBUG_LOG, 0, "txt[%d](%d) = '%s'",
-				i, l, name.c_str());
+			//debug(LOG_DEBUG, DEBUG_LOG, 0, "txt[%d](%d) = '%s'",
+			//	i, l, name.c_str());
 			result.push_back(name);
 		}
 		i += l + 1;

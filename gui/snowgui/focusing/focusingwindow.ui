@@ -42,6 +42,21 @@
        <number>0</number>
       </property>
       <item>
+       <widget class="QWidget" name="focusingWidget" native="true">
+        <layout class="QHBoxLayout" name="horizontalLayout_3">
+         <item>
+          <widget class="snowgui::focusingcontrollerwidget" name="focusingcontrollerWidget" native="true"/>
+         </item>
+         <item>
+          <widget class="QWidget" name="focusingHistory" native="true"/>
+         </item>
+         <item>
+          <widget class="QWidget" name="focusingMonitor" native="true"/>
+         </item>
+        </layout>
+       </widget>
+      </item>
+      <item>
        <widget class="snowgui::imagedisplaywidget" name="imageWidget" native="true">
         <property name="maximumSize">
          <size>
@@ -231,7 +246,7 @@
            <x>0</x>
            <y>0</y>
            <width>325</width>
-           <height>527</height>
+           <height>551</height>
           </rect>
          </property>
          <attribute name="label">
@@ -244,7 +259,7 @@
            <x>0</x>
            <y>0</y>
            <width>325</width>
-           <height>527</height>
+           <height>551</height>
           </rect>
          </property>
          <attribute name="label">
@@ -257,7 +272,7 @@
            <x>0</x>
            <y>0</y>
            <width>325</width>
-           <height>527</height>
+           <height>551</height>
           </rect>
          </property>
          <attribute name="label">
@@ -270,7 +285,7 @@
            <x>0</x>
            <y>0</y>
            <width>325</width>
-           <height>527</height>
+           <height>551</height>
           </rect>
          </property>
          <attribute name="label">
@@ -349,6 +364,12 @@
    <class>snowgui::focusinghistorywidget</class>
    <extends>QWidget</extends>
    <header>focusinghistorywidget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>snowgui::focusingcontrollerwidget</class>
+   <extends>QWidget</extends>
+   <header location="global">focusingcontrollerwidget.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

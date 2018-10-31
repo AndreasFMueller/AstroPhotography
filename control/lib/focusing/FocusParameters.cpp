@@ -68,6 +68,8 @@ void	FocusParameters::exposure(const camera::Exposure& e) {
  */
 void	FocusParameters::method(const std::string& m) {
 	std::list<std::string>	methods = FocusEvaluatorFactory::evaluatornames();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "known evaluators: %s",
+		unsplit(methods, ", ").c_str());
 	if (methods.end() == std::find(methods.begin(), methods.end(), m)) {
 		std::string	msg = stringprintf("method '%s' not known",
 			m.c_str());
@@ -75,6 +77,7 @@ void	FocusParameters::method(const std::string& m) {
 		throw std::runtime_error(msg);
 	}
 	_method = m;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "found method: %s", _method.c_str());
 }
 
 /**
@@ -84,6 +87,8 @@ void	FocusParameters::method(const std::string& m) {
  */
 void	FocusParameters::solver(const std::string& s) {
 	std::list<std::string>	solvers = FocusSolverFactory::solvernames();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "known solvers: %s",
+		unsplit(solvers, ", ").c_str());
 	if (solvers.end() == std::find(solvers.begin(), solvers.end(), s)) {
 		std::string	msg = stringprintf("solver '%s' not known",
 			s.c_str());
@@ -91,6 +96,7 @@ void	FocusParameters::solver(const std::string& s) {
 		throw std::runtime_error(msg);
 	}
 	_solver = s;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "found solver: %s", _solver.c_str());
 }
 
 } // namespace focusing

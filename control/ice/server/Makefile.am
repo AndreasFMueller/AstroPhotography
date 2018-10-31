@@ -128,7 +128,7 @@ test:	snowstar
 	else								\
 		servername=server;					\
 	fi;								\
-	ICEDEBUG= ./snowstar $(COMMONFLAGS) 2>&1 | tee test.log
+	./snowstar $(COMMONFLAGS) 2>&1 | tee test.log
 
 #		--lines=100 --files=10 --logfile=test.log
 

@@ -55,6 +55,12 @@ focusingwindow::focusingwindow(QWidget *parent)
 
 	connect(ui->focusercontrollerWidget, SIGNAL(newFocuserPosition(int)),
 		ui->scanWidget, SLOT(changeCenter(int)));
+
+	// exposure changes
+	connect(ui->ccdcontrollerWidget,
+		SIGNAL(exposureChanged(astro::camera::Exposure)),
+		ui->focusingcontrollerWidget,
+		SLOT(exposureChanged(astro::camera::Exposure)));
 }
 
 /**
@@ -82,6 +88,8 @@ void	focusingwindow::instrumentSetup(
 	ui->adaptiveopticscontrollerWidget->launchInstrumentSetup(serviceobject,
 		instrument);
 	ui->mountcontrollerWidget->launchInstrumentSetup(serviceobject,
+		instrument);
+	ui->focusingcontrollerWidget->launchInstrumentSetup(serviceobject,
 		instrument);
 }
 

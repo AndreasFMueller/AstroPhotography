@@ -44,6 +44,7 @@ FORMS    +=								\
 	filterwheelcontrollerwidget.ui					\
 	flatwidget.ui							\
 	focusercontrollerwidget.ui					\
+	focusingcontrollerwidget.ui					\
 	guideportcontrollerwidget.ui					\
 	guidercontrollerwidget.ui					\
 	imagercontrollerwidget.ui					\
@@ -68,6 +69,7 @@ WIDGETSOURCES =								\
 	filterwheelcontrollerwidget.cpp					\
 	flatwidget.cpp							\
 	focusercontrollerwidget.cpp					\
+	focusingcontrollerwidget.cpp					\
 	guideportcontrollerwidget.cpp					\
 	guidercontrollerwidget.cpp					\
 	imagercontrollerwidget.cpp					\
@@ -92,6 +94,7 @@ WIDGETHEADERS =								\
 	filterwheelcontrollerwidget.h					\
 	flatwidget.h							\
 	focusercontrollerwidget.h					\
+	focusingcontrollerwidget.h					\
 	guideportcontrollerwidget.h					\
 	guidercontrollerwidget.h					\
 	imagercontrollerwidget.h					\
