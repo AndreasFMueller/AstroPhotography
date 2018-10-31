@@ -93,8 +93,6 @@ FocusElementPtr	convert(const astro::focusing::FocusElement& fe,
 	return FocusElementPtr(result);
 }
 
-static int	conversion_counter = 0;
-
 FocusElementPtr convert(const astro::focusing::FocusElementCallbackData& fe,
                         astro::image::Format::type_t type) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "convert %s", fe.toString().c_str());
@@ -108,21 +106,26 @@ FocusElementPtr convert(const astro::focusing::FocusElementCallbackData& fe,
 	unsigned char	*b = NULL;
 	size_t		bs = 0;
 	Format	f;
-	f.write(fe.raw_image(), type, (void **)&b, &bs);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "%s: buffer=%p, size=%d",
-		fe.raw_image()->info().c_str(),  b, bs);
-	std::copy(b, b + bs, std::back_inserter(result->raw.data));
-	free(b);
+	if (fe.raw_image()) {
+		f.write(fe.raw_image(), type, (void **)&b, &bs);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "%s: buffer=%p, size=%d",
+			fe.raw_image()->info().c_str(),  b, bs);
+		std::copy(b, b + bs, std::back_inserter(result->raw.data));
+		free(b);
+	}
 
 	// copy the processed image
 	result->evaluated.encoding = convert(type);
 	b = NULL;
 	bs = 0;
-	f.write(fe.processed_image(), type, (void **)&b, &bs);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "%s: buffer=%p, size=%d",
-		fe.processed_image()->info().c_str(),  b, bs);
-	std::copy(b, b + bs, std::back_inserter(result->evaluated.data));
-	free(b);
+	if (fe.processed_image()) {
+		f.write(fe.processed_image(), type, (void **)&b, &bs);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "%s: buffer=%p, size=%d",
+			fe.processed_image()->info().c_str(),  b, bs);
+		std::copy(b, b + bs,
+			std::back_inserter(result->evaluated.data));
+		free(b);
+	}
 
 	debug(LOG_DEBUG, DEBUG_LOG, 0,
 		"raw.data.size()=%d, evaluated.data.size()=%d",
@@ -140,12 +143,18 @@ astro::focusing::FocusElementPtr	convert(const FocusElement& fe) {
 
 	// raw image
 	Format	f;
-	result->raw_image = f.read(convert(fe.raw.encoding),
-		(void *)fe.raw.data.data(), fe.raw.data.size());
+	if (fe.raw.data.size()) {
+		result->raw_image = f.read(convert(fe.raw.encoding),
+			(void *)fe.raw.data.data(), fe.raw.data.size());
+	}
 
 	// evaluated image
-	result->processed_image = f.read(convert(fe.evaluated.encoding),
-		(void *)fe.evaluated.data.data(), fe.evaluated.data.size());
+	if (fe.evaluated.data.size()) {
+		result->processed_image
+			= f.read(convert(fe.evaluated.encoding),
+				(void *)fe.evaluated.data.data(),
+				fe.evaluated.data.size());
+	}
 
 	return astro::focusing::FocusElementPtr(result);
 }

@@ -4,6 +4,7 @@
  * (c) 2018 Prof Dr Andreas Müller, Hochschule Rapperswil
  */
 #include <AstroFocus.h>
+#include <sstream>
 
 namespace astro {
 namespace focusing {
@@ -14,9 +15,21 @@ FocusElementCallbackData::FocusElementCallbackData(const FocusElement& e)
 }
 
 std::string	FocusElementCallbackData::toString() const {
-	return stringprintf("pos=%d raw=%s %s evaluated=%s value=%f",
-		position(), raw_image()->info().c_str(), method().c_str(),
-		processed_image()->info().c_str(), value());
+	std::ostringstream	str;
+	str << stringprintf("pos=%d raw=", position());
+	if (raw_image()) {
+		str << raw_image()->info();
+	} else {
+		str << "(nil)";
+	}
+	str << " method=" << method() << " evaluated=";
+	if (processed_image()) {
+		str << processed_image()->info();
+	} else {
+		str << "(nil)";
+	}
+	str << " value=" << value();
+	return str.str();
 }
 
 } // namespace focusing

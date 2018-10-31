@@ -34,6 +34,9 @@ ImageBuffer::ImageBuffer(type_t type, void *buffer, size_t buffersize)
  */
 ImageBuffer::ImageBuffer(ImagePtr image) : _buffer(NULL), _buffersize(0) {
 	image::FITS	fits;
+	if (!image) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "no image");
+	}
 	fits.writeFITS(image, &_buffer, &_buffersize);
 }
 
@@ -45,6 +48,10 @@ ImageBuffer::ImageBuffer(ImagePtr image) : _buffer(NULL), _buffersize(0) {
  */
 ImageBuffer::ImageBuffer(ImagePtr image, type_t type)
 	: Format(type), _buffer(NULL), _buffersize(0) {
+	if (!image) {
+		// leave buffer empty
+		return;
+	}
 	switch (type) {
 	case FITS:
 		{

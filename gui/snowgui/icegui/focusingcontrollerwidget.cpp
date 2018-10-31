@@ -106,7 +106,10 @@ void	focusingcontrollerwidget::instrumentSetup(
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "registering the callback");
 
 	// setting up the callback
-	_ident = snowstar::CommunicatorSingleton::add(callback);
+        _adapter = snowstar::CallbackAdapterPtr(
+                        new snowstar::CallbackAdapter(ic));
+        _ident = _adapter->add(callback);
+        _focusing->ice_getConnection()->setAdapter(_adapter->adapter());
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "registering %s", _ident.name.c_str());
 	_focusing->registerCallback(_ident);
 }

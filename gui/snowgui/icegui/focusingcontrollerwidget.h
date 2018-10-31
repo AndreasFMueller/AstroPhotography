@@ -12,6 +12,7 @@
 #include <QTimer>
 #include <QWidget>
 #include <FocusingCallbackI.h>
+#include <CommonClientTasks.h>
 
 namespace snowgui {
 
@@ -44,6 +45,7 @@ class focusingcontrollerwidget : public InstrumentWidget {
 	FocusingCallbackI	*_callback;
 	Ice::ObjectPtr	callback;
 	Ice::Identity   _ident;
+	snowstar::CallbackAdapterPtr    _adapter;
 
 public:
 	explicit focusingcontrollerwidget(QWidget *parent = 0);
