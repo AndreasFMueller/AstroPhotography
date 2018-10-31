@@ -6,6 +6,7 @@
 #include <includes.h>
 #include <AstroDiscovery.h>
 #include <AstroDebug.h>
+#include <AstroUtils.h>
 #include <sstream>
 
 namespace astro {
@@ -13,7 +14,7 @@ namespace discover {
 
 ServiceSubset::service_type	ServiceSubset::string2type(
 					const std::string& name) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "decode: '%s'", name.c_str());
+//	debug(LOG_DEBUG, DEBUG_LOG, 0, "decode: '%s'", name.c_str());
 	if (name == "instruments") return INSTRUMENTS;
 	if (name == "tasks")       return TASKS;
 	if (name == "devices")	   return DEVICES;
@@ -63,9 +64,10 @@ void	ServiceSubset::set(const std::list<std::string>& names) {
 	std::list<std::string>::const_iterator	i;
 	for (i = names.begin(); i != names.end(); i++) {
 		std::string	s = *i;
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "set: %s", s.c_str());
+//		debug(LOG_DEBUG, DEBUG_LOG, 0, "set: %s", s.c_str());
 		set(string2type(s));
 	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "set: %s", unsplit(names, ",").c_str());
 }
 
 void	ServiceSubset::unset(const std::list<std::string>& names) {
@@ -204,6 +206,8 @@ std::list<std::string>	ServiceSubset::txtparse(const std::string& txt) {
 		}
 		i += l + 1;
 	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "txt: %s",
+		unsplit(result, ", ").c_str());
 	return result;
 }
 

@@ -45,7 +45,7 @@ struct FocusElement {
 	string	method;
 	ImageBuffer	raw;
 	ImageBuffer	evaluated;
-}
+};
 
 interface FocusCallback {
 	void	addFocusElement(FocusElement element);

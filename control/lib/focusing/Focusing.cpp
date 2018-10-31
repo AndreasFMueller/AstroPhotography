@@ -35,7 +35,7 @@ void	Focusing::start(int min, int max) {
 	minposition(min);
 	maxposition(max);
 
-	FocusProcess::start();
+	FocusProcessBase::start();
 }
 
 /**

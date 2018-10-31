@@ -178,7 +178,8 @@ void	do_write(png_structp *png, png_infop *info,
 		const ConstImageAdapter<unsigned char>& monoimage) {
 	int	width = monoimage.getSize().width();
 	int	height = monoimage.getSize().height();
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "writing %dx%d image", width, height);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "writing %dx%d mono image",
+		width, height);
 
 	png_set_IHDR(*png, *info, width, height, 8, PNG_COLOR_TYPE_GRAY,
 		PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_DEFAULT,
@@ -373,6 +374,7 @@ size_t  PNG::writePNG(ImagePtr image, const std::string& filename) {
  * \brief Common read operation
  */
 static ImagePtr	do_read(png_structp *png, png_infop *info) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "read common PNG image");
 	png_read_info(*png, *info);
 
 	// get information about the image
@@ -399,6 +401,8 @@ static ImagePtr	do_read(png_structp *png, png_infop *info) {
 	if ((color_type == PNG_COLOR_TYPE_GRAY) && (bit_depth < 8)) {
 		png_set_expand_gray_1_2_4_to_8(*png);
 	}
+
+#if 0
 	if ((color_type == PNG_COLOR_TYPE_RGB) ||
 		(color_type = PNG_COLOR_TYPE_GRAY) ||
 		(color_type = PNG_COLOR_TYPE_PALETTE)) {
@@ -409,6 +413,7 @@ static ImagePtr	do_read(png_structp *png, png_infop *info) {
 		(color_type == PNG_COLOR_TYPE_GRAY_ALPHA)) {
 		png_set_gray_to_rgb(*png);
 	}
+#endif
 
 	png_read_update_info(*png, *info);
 
@@ -416,9 +421,9 @@ static ImagePtr	do_read(png_structp *png, png_infop *info) {
 		size.toString().c_str(), bit_depth);
 
 	png_bytep row_pointers[height];
+	unsigned long	rowbytes = png_get_rowbytes(*png, *info);
 	for (int y = 0; y < height; y++) {
-		row_pointers[y] = (png_byte *)malloc(
-			png_get_rowbytes(*png, *info));
+		row_pointers[y] = (png_byte *)malloc(rowbytes);
 	}
 
 	png_read_image(*png, row_pointers);
@@ -428,6 +433,8 @@ static ImagePtr	do_read(png_structp *png, png_infop *info) {
 	switch (channels) {
 	case 1:
 	case 2:
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "read mono image, %d channels",
+			channels);
 		{
 		Image<unsigned char>	*image
 			= new Image<unsigned char>(size);
@@ -445,6 +452,8 @@ static ImagePtr	do_read(png_structp *png, png_infop *info) {
 		break;
 	case 3:
 	case 4:
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "read color image, %d channels",
+			channels);
 		{
 		Image<RGB<unsigned char> >	*image
 			= new Image<RGB<unsigned char> >(size);
@@ -479,6 +488,11 @@ static ImagePtr	do_read(png_structp *png, png_infop *info) {
 ImagePtr	PNG::readPNG(const std::string& filename) {
 	// open the input file
 	FILE	*infile = fopen(filename.c_str(), "rb");
+	if (NULL == infile) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "cannot open file '%s': %s",
+			filename.c_str(), strerror(errno));
+		return ImagePtr();
+	}
 	png_structp	png = png_create_read_struct(PNG_LIBPNG_VER_STRING,
 				NULL, NULL, NULL);
 	png_infop	info = png_create_info_struct(png);
@@ -503,12 +517,13 @@ public:
 		_offset = 0;
 	}
 	void	read(png_bytep outBytes, png_size_t byteCountToRead) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "read %d bytes @ %p[%d]",
-			byteCountToRead, _buffer, _offset);
+//		debug(LOG_DEBUG, DEBUG_LOG, 0, "read %d bytes @ %p[%d]",
+//			byteCountToRead, _buffer, _offset);
 		memcpy(outBytes, _buffer + _offset, byteCountToRead);
 		_offset += byteCountToRead;
 	}
 	size_t	bytes_read() const { return _offset; }
+	size_t	buffersize() const { return _buffersize; }
 };
 
 static void	ReadDataFromInputStream(png_structp png, png_bytep outBytes,
@@ -528,7 +543,6 @@ ImagePtr	PNG::readPNG(void *buffer, size_t buffersize) {
 		buffersize, buffer);
 	// open the input file
 	PngReadBuffer	readbuffer((unsigned char *)buffer, buffersize);
-
 
 	// create the PNG structure
 	png_structp	png = png_create_read_struct(PNG_LIBPNG_VER_STRING,

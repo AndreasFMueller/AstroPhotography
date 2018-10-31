@@ -112,24 +112,6 @@ FocusElementPtr convert(const astro::focusing::FocusElementCallbackData& fe,
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "%s: buffer=%p, size=%d",
 		fe.raw_image()->info().c_str(),  b, bs);
 	std::copy(b, b + bs, std::back_inserter(result->raw.data));
-#if 0
-	{
-		int	fd = open(astro::stringprintf("conv-%d.png",
-				conversion_counter++).c_str(),
-				O_CREAT | O_TRUNC | O_WRONLY, 0666);
-		if (fd < 0) {
-			debug(LOG_DEBUG, DEBUG_LOG, 0, "cannot open: %s",
-				strerror(errno));
-		}
-		ssize_t	l = ::write(fd, b, bs);
-		if (l < 0) {
-			debug(LOG_DEBUG, DEBUG_LOG, 0, "cannot write: %s",
-				strerror(errno));
-		}
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "%d bytes written", l);
-		close(fd);
-	}
-#endif
 	free(b);
 
 	// copy the processed image
@@ -155,14 +137,6 @@ astro::focusing::FocusElementPtr	convert(const FocusElement& fe) {
 		= new astro::focusing::FocusElement(fe.position);
 	result->value = fe.value;
 	result->method = fe.method;
-
-	{
-		int fd = open(astro::stringprintf("e-%d.png",
-				conversion_counter++).c_str(),
-				O_CREAT | O_TRUNC | O_WRONLY, 0666);;
-		::write(fd, (void *)fe.raw.data.data(), fe.raw.data.size());
-		close(fd);
-	}
 
 	// raw image
 	Format	f;

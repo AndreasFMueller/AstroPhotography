@@ -57,8 +57,6 @@ void	FocusCallbackI::changeState(FocusState state,
 	std::cout << std::endl;
 }
 
-static int focus_counter = 0;
-
 /**
  * \brief write the focus element
  */
@@ -67,12 +65,6 @@ void	FocusCallbackI::addFocusElement(const FocusElement& element,
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "raw size=%d, evaluated size=%d",
 		element.raw.data.size(), element.evaluated.data.size());
 
-{
-	int	fd = open(stringprintf("d-%d.png", focus_counter++).c_str(),
-			O_CREAT | O_TRUNC | O_WRONLY);
-	::write(fd, element.raw.data.data(), element.raw.data.size());
-	close(fd);
-}
 	std::cout << timeformat("%H:%M:%S ", time(NULL));
 	astro::focusing::FocusElementPtr	fe = convert(element);
 

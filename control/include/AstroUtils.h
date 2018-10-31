@@ -148,6 +148,23 @@ container&	split(const std::string& data, const std::string& separator,
 }
 
 /**
+ * \brief Unspliter algorithm
+ */
+template<typename container>
+std::string	unsplit(const container& cont, const std::string& separator) {
+	std::string	result;
+	std::for_each(cont.begin(), cont.end(), 
+		[&](const std::string& v) {
+			if (result.size() > 0) {
+				result.append(separator);
+			}
+			result.append(v);
+		}
+	);
+	return result;
+}
+
+/**
  * \brief Method to absorb characters from a stream
  *
  * This method is very often used when parsing.

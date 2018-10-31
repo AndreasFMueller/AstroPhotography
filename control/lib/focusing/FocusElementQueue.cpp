@@ -12,6 +12,7 @@ namespace focusing {
  * \brief Create a new focus element queue
  */
 FocusElementQueue::FocusElementQueue() : _terminated(false) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "create a new queue");
 }
 
 /**

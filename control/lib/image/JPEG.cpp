@@ -99,13 +99,12 @@ size_t  JPEG::writeJPEG(const ConstImageAdapter<RGB<unsigned char> >& colorimage
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "compress started, %d lines",
 		cinfo.image_height);
 	while (cinfo.next_scanline < cinfo.image_height) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "line %d", cinfo.next_scanline);
 		int	y = h - 1 - cinfo.next_scanline;
 		for (int x = 0; x < w; x++) {
-//			RGB<unsigned char>	p = colorimage.pixel(x, y);
-//			pixelline[3 * x    ] = p.R;
-//			pixelline[3 * x + 1] = p.G;
-//			pixelline[3 * x + 2] = p.B;
+			RGB<unsigned char>	p = colorimage.pixel(x, y);
+			pixelline[3 * x    ] = p.R;
+			pixelline[3 * x + 1] = p.G;
+			pixelline[3 * x + 2] = p.B;
 		}
 		jpeg_write_scanlines(&cinfo, row_pointer, 1);
 	}

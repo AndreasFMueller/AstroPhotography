@@ -118,6 +118,7 @@ void	FocusingI::start(int min, int max, const Ice::Current& /* current */) {
 	}
 	try {
 		// clear the history
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "clear history");
 		_history.clear();
 		// start the focusing
 		_focusingptr->start(min, max);
