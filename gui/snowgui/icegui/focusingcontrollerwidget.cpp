@@ -45,6 +45,7 @@ focusingcontrollerwidget::focusingcontrollerwidget(QWidget *parent) :
 	// create a new callback
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "setting up the callback");
 	_callback = new FocusingCallbackI();
+	callback = Ice::ObjectPtr(_callback);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "callback installed");
 
 	// connect the callback to the gui
@@ -105,7 +106,6 @@ void	focusingcontrollerwidget::instrumentSetup(
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "registering the callback");
 
 	// setting up the callback
-	Ice::ObjectPtr  callback(_callback);
 	_ident = snowstar::CommunicatorSingleton::add(callback);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "registering %s", _ident.name.c_str());
 	_focusing->registerCallback(_ident);

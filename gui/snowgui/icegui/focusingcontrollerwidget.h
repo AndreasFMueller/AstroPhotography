@@ -42,6 +42,7 @@ class focusingcontrollerwidget : public InstrumentWidget {
 	QTimer	_timer;
 
 	FocusingCallbackI	*_callback;
+	Ice::ObjectPtr	callback;
 	Ice::Identity   _ident;
 
 public:
