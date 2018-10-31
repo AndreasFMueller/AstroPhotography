@@ -44,6 +44,18 @@
       <item>
        <widget class="QWidget" name="focusingWidget" native="true">
         <layout class="QHBoxLayout" name="horizontalLayout_3">
+         <property name="leftMargin">
+          <number>0</number>
+         </property>
+         <property name="topMargin">
+          <number>0</number>
+         </property>
+         <property name="rightMargin">
+          <number>0</number>
+         </property>
+         <property name="bottomMargin">
+          <number>0</number>
+         </property>
          <item>
           <widget class="snowgui::focusingcontrollerwidget" name="focusingcontrollerWidget" native="true"/>
          </item>
@@ -51,7 +63,7 @@
           <widget class="QWidget" name="focusingHistory" native="true"/>
          </item>
          <item>
-          <widget class="QWidget" name="focusingMonitor" native="true"/>
+          <widget class="snowgui::FocusElementView" name="focusingMonitor" native="true"/>
          </item>
         </layout>
        </widget>
@@ -370,6 +382,12 @@
    <class>snowgui::focusingcontrollerwidget</class>
    <extends>QWidget</extends>
    <header location="global">focusingcontrollerwidget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>snowgui::FocusElementView</class>
+   <extends>QWidget</extends>
+   <header location="global">focuselementview.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

@@ -178,7 +178,14 @@ void	FocusingI::addPoint(const FocusPoint& point) {
  */
 void	FocusingI::registerCallback(const Ice::Identity& callbackidentity,
 		const Ice::Current& current) {
-	callbacks.registerCallback(callbackidentity, current);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "registering callback: %s",
+		callbackidentity.name.c_str());
+	try {
+		callbacks.registerCallback(callbackidentity, current);
+	} catch (const std::exception& x) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "callback not installed: %s",
+			x.what());
+	}
 }
 
 /**

@@ -10,8 +10,8 @@
 #include <focusing.h>
 #include <AstroImage.h>
 #include <QTimer>
-
 #include <QWidget>
+#include <FocusingCallbackI.h>
 
 namespace snowgui {
 
@@ -41,6 +41,9 @@ class focusingcontrollerwidget : public InstrumentWidget {
 
 	QTimer	_timer;
 
+	FocusingCallbackI	*_callback;
+	Ice::Identity   _ident;
+
 public:
 	explicit focusingcontrollerwidget(QWidget *parent = 0);
 	virtual void	instrumentSetup(
@@ -48,6 +51,11 @@ public:
 		snowstar::RemoteInstrument instrument);
 	virtual void	setupComplete();
 	~focusingcontrollerwidget();
+
+signals:
+	void    pointReceived(snowstar::FocusPoint);
+        void    stateReceived(snowstar::FocusState);
+        void    focuselementReceived(snowstar::FocusElement);
 
 private:
 	Ui::focusingcontrollerwidget *ui;
@@ -62,6 +70,10 @@ public slots:
 	void	stepsizeChanged(int);
 	void	centerChanged(int);
 	void	exposureChanged(astro::camera::Exposure);
+
+	void	receivePoint(snowstar::FocusPoint);
+	void	receiveState(snowstar::FocusState);
+	void	receiveFocusElement(snowstar::FocusElement);
 };
 
 

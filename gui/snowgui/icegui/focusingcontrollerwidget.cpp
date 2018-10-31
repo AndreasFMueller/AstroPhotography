@@ -10,6 +10,7 @@
 #include <focusing.h>
 #include <IceConversions.h>
 #include <CommunicatorSingleton.h>
+#include <CommonClientTasks.h>
 
 namespace snowgui {
 
@@ -40,12 +41,30 @@ focusingcontrollerwidget::focusingcontrollerwidget(QWidget *parent) :
 
 	// initialize the timer
 	_timer.setInterval(1000);
+
+	// create a new callback
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "setting up the callback");
+	_callback = new FocusingCallbackI();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "callback installed");
+
+	// connect the callback to the gui
+	connect(_callback, SIGNAL(pointReceived(snowstar::FocusPoint)),
+		this, SLOT(receivePoint(snowstar::FocusPoint)));
+	connect(_callback, SIGNAL(stateReceived(snowstar::FocusState)),
+		this, SLOT(receiveState(snowstar::FocusState)));
+	connect(_callback,
+		SIGNAL(focuselementReceived(snowstar::FocusElement)),
+		this,
+		SLOT(receiveFocusElement(snowstar::FocusElement)));
 }
 
 /**
  * \brief Destroy the focusingcontrollerwidget
  */
 focusingcontrollerwidget::~focusingcontrollerwidget() {
+	_timer.stop();
+	_focusing->unregisterCallback(_ident);
+	// we should also remove it from the adapter
 	delete ui;
 }
 
@@ -83,6 +102,13 @@ void	focusingcontrollerwidget::instrumentSetup(
 
 	// get the focusing object
 	_focusing = _focusingfactory->get(_ccdname, _focusername);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "registering the callback");
+
+	// setting up the callback
+	Ice::ObjectPtr  callback(_callback);
+	_ident = snowstar::CommunicatorSingleton::add(callback);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "registering %s", _ident.name.c_str());
+	_focusing->registerCallback(_ident);
 }
 
 /**
@@ -221,6 +247,18 @@ void	focusingcontrollerwidget::statusUpdate() {
 		break;
 	}
 	_previousstate = newstate;
+}
+
+void    focusingcontrollerwidget::receivePoint(snowstar::FocusPoint point) {
+	emit pointReceived(point);
+}
+
+void    focusingcontrollerwidget::receiveState(snowstar::FocusState state) {
+	emit stateReceived(state);
+}
+
+void    focusingcontrollerwidget::receiveFocusElement(snowstar::FocusElement element) {
+	emit focuselementReceived(element);
 }
 
 } // namespace snowgui

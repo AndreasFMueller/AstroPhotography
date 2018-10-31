@@ -56,6 +56,11 @@ focusingwindow::focusingwindow(QWidget *parent)
 	connect(ui->focusercontrollerWidget, SIGNAL(newFocuserPosition(int)),
 		ui->scanWidget, SLOT(changeCenter(int)));
 
+	connect(ui->focusingcontrollerWidget,
+		SIGNAL(focuselementReceived(snowstar::FocusElement)),
+		ui->focusingMonitor,
+		SLOT(setFocusElement(snowstar::FocusElement)));
+
 	// exposure changes
 	connect(ui->ccdcontrollerWidget,
 		SIGNAL(exposureChanged(astro::camera::Exposure)),

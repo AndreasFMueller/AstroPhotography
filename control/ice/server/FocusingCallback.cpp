@@ -32,6 +32,7 @@ void	callback_adapter<FocusCallbackPrx>(FocusCallbackPrx& prx,
 	astro::focusing::FocusCallbackData	*focusdata
 		= dynamic_cast<astro::focusing::FocusCallbackData *>(&*data);
 	if (NULL != focusdata) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "FocusPoint callback called");
 		FocusPoint	p;
 		p.position = focusdata->position();
 		p.value = focusdata->value();
@@ -42,6 +43,7 @@ void	callback_adapter<FocusCallbackPrx>(FocusCallbackPrx& prx,
 	astro::focusing::FocusCallbackState	*focusstate
 		= dynamic_cast<astro::focusing::FocusCallbackState *>(&*data);
 	if (NULL != focusstate) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "FocusState callback called");
 		prx->changeState(convert(focusstate->state()));
 	}
 }
@@ -51,6 +53,7 @@ void	callback_adapter<FocusCallbackPrx>(FocusCallbackPrx& prx,
 //////////////////////////////////////////////////////////////////////
 astro::callback::CallbackDataPtr	FocusingCallback::operator()(
 	astro::callback::CallbackDataPtr data) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "FocusCallback::operator()");
 	_focusing.updateFocusing(data);
 	return data;
 }
