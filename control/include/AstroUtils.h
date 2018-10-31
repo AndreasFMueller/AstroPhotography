@@ -24,6 +24,7 @@
 #include <thread>
 #include <mutex>
 #include <condition_variable>
+#include <algorithm>
 
 #if  0
 #include <includes.h>
