@@ -31,6 +31,7 @@ signals:
 	void	offerImage(astro::image::ImagePtr, std::string);
 
 public slots:
+	void	previewImage();
 	void	loadImage();
 	void	deleteImage();
 	void	saveImage();

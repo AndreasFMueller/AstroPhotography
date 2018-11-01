@@ -50,7 +50,12 @@ public:
 				const Ice::Current& current);
 	virtual void	setMetadata(const Metadata& metadata,
 				const Ice::Current& current);
-	virtual ImageFile	file(ImageEncoding encoding,
+private:
+	ImageBuffer	fileFITS();
+	ImageBuffer	fileJPEG();
+	ImageBuffer	filePNG();
+public:
+	virtual ImageBuffer	file(ImageEncoding encoding,
 				const Ice::Current& current);
 	virtual int	filesize(const Ice::Current& current);
 	virtual void	toRepository(const std::string& reponame,

@@ -137,10 +137,10 @@ int	command_image(const astro::project::Project& project,
 
 	// get an interface for that particular image
 	ImagePrx        image = images->getImage(info.filename);
-	ImageFile       imagefile = image->file(ImageEncodingFITS);
+	ImageBuffer       imagefile = image->file(ImageEncodingFITS);
 
 	// convert the image file to an ImagePtr
-	astro::image::ImagePtr  imageptr = convertfile(imagefile);
+	astro::image::ImagePtr  imageptr = convertimage(imagefile);
 
 	// add the project name to the metadata of the image
 	imageptr->setMetadata(astro::io::FITSKeywords::meta("PROJECT",

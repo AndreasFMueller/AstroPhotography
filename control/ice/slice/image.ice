@@ -92,7 +92,7 @@ module snowstar {
 		 * This method returns the contents of the FITS file the server
 		 * collected.
 		 */
-		ImageFile	file(ImageEncoding encoding) throws NotImplemented;
+		ImageBuffer	file(ImageEncoding encoding) throws NotImplemented;
 
 		/**
 		 * \brief get the file size

@@ -63,6 +63,8 @@ exposewidget::exposewidget(QWidget *parent)
 		this, SLOT(saveClicked()));
 	connect(ui->openButton, SIGNAL(clicked()),
 		this, SLOT(openClicked()));
+	connect(ui->previewButton, SIGNAL(clicked()),
+		this, SLOT(previewClicked()));
 	connect(ui->deleteButton, SIGNAL(clicked()),
 		this, SLOT(deleteClicked()));
 	connect(ui->downloadButton, SIGNAL(clicked()),
@@ -557,6 +559,7 @@ void    exposewidget::currentImageChanged(QTreeWidgetItem *current,
 		_imageid = -1;
 		_imageitem = NULL;
 		ui->saveButton->setEnabled(false);
+		ui->previewButton->setEnabled(false);
 		ui->openButton->setEnabled(false);
 		ui->deleteButton->setEnabled(false);
 		return;
@@ -567,6 +570,7 @@ void    exposewidget::currentImageChanged(QTreeWidgetItem *current,
 		_imageid = -1;
 		_imageitem = NULL;
 		ui->saveButton->setEnabled(false);
+		ui->previewButton->setEnabled(false);
 		ui->openButton->setEnabled(false);
 		ui->deleteButton->setEnabled(false);
 		return;
@@ -575,6 +579,7 @@ void    exposewidget::currentImageChanged(QTreeWidgetItem *current,
 	_imageitem = current;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "current: image = %d", _imageid);
 	ui->saveButton->setEnabled(true);
+	ui->previewButton->setEnabled(true);
 	ui->openButton->setEnabled(true);
 	ui->deleteButton->setEnabled(true);
 }

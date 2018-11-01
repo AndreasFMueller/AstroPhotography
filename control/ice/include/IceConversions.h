@@ -218,6 +218,8 @@ astro::image::ImageBufferPtr	convert(const ImageBuffer& imagebuffer);
 typedef std::shared_ptr<ImageBuffer>	ImageBufferPtr;
 ImageBufferPtr	convert(const astro::image::ImageBuffer& imagebuffer);
 
+astro::image::ImagePtr	convertimage(const ImageBuffer& imagebuffer);
+
 // Focusing
 FocusState	convert(astro::focusing::Focus::state_type s);
 astro::focusing::Focus::state_type	convert(FocusState s);

@@ -71,6 +71,7 @@ public slots:
 	void	deleteClicked();
 	void	saveClicked();
 	void	openClicked();
+	void	previewClicked();
 	void	downloadClicked();
 
 	void	imageproxyReceived(snowstar::ImagePrx);

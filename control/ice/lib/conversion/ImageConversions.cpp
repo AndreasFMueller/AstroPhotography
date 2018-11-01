@@ -18,8 +18,8 @@ namespace snowstar {
  */
 astro::image::ImagePtr	convert(ImagePrx image) {
 	// get the image data from the server
-	ImageFile	file = image->file(ImageEncodingFITS);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "got image of size %d", file.size());
+	ImageBuffer	file = image->file(ImageEncodingFITS);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "got image of size %d", file.data.size());
 
 	// construct a temporary file name
 	char	buffer[1024];
@@ -38,8 +38,8 @@ astro::image::ImagePtr	convert(ImagePrx image) {
 	std::string	filename(buffer);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "temporary image file: %s", buffer);
 
-	int	s = file.size();
-	if (s != write(fd, file.data(), s)) {
+	int	s = file.data.size();
+	if (s != write(fd, file.data.data(), s)) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "writing temp file failed: %s",
 			strerror(errno));
 		close(fd);
@@ -375,6 +375,11 @@ ImageBufferPtr	convert(const astro::image::ImageBuffer& imagebuffer) {
 		std::back_inserter(result->data));
 	
 	return ImageBufferPtr(result);
+}
+
+astro::image::ImagePtr  convertimage(const ImageBuffer& imagebuffer) {
+	astro::image::ImageBufferPtr	ib = convert(imagebuffer);
+	return ib->image();
 }
 
 } // namespace snowstar

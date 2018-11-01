@@ -23,6 +23,8 @@ imagedetailwidget::imagedetailwidget(QWidget *parent)
 	ui->setupUi(this);
 
 	// connections
+	connect(ui->previewButton, SIGNAL(clicked()),
+		this, SLOT(previewImage()));
 	connect(ui->loadButton, SIGNAL(clicked()),
 		this, SLOT(loadImage()));
 	connect(ui->saveButton, SIGNAL(clicked()),
@@ -88,7 +90,22 @@ void	imagedetailwidget::setImage(snowstar::ImagePrx image) {
 	ui->bytespervalueField->setText(QString::number(_image->bytesPerPixel()));
 
 	ui->loadButton->setEnabled(true);
+	ui->previewButton->setEnabled(true);
 	ui->deleteButton->setEnabled(true);
+}
+
+/**
+ * \brief preview the image (JPEG transfer instead of FITS)
+ */
+void	imagedetailwidget::previewImage() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "preview image %s", _image->name().c_str());
+	snowstar::ImageBuffer	file = _image->file(snowstar::ImageEncodingJPEG);
+	_imageptr = snowstar::convertimage(file);
+	if (_imageptr) {
+		ui->saveButton->setEnabled(false);
+		emit offerImage(_imageptr, std::string());
+	}
+	emit imageReceived(_imageptr);
 }
 
 /**
@@ -96,8 +113,8 @@ void	imagedetailwidget::setImage(snowstar::ImagePrx image) {
  */
 void	imagedetailwidget::loadImage() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "load image %s", _image->name().c_str());
-	snowstar::ImageFile	file = _image->file(snowstar::ImageEncodingFITS);
-	_imageptr = snowstar::convertfile(file);
+	snowstar::ImageBuffer	file = _image->file(snowstar::ImageEncodingFITS);
+	_imageptr = snowstar::convertimage(file);
 	if (_imageptr) {
 		ui->saveButton->setEnabled(true);
 		emit offerImage(_imageptr, std::string());
@@ -118,6 +135,7 @@ void	imagedetailwidget::deleteImage() {
 	ui->originField->setText(QString(""));
 	ui->planesField->setText(QString(""));
 	ui->bytespervalueField->setText(QString(""));
+	ui->previewButton->setEnabled(false);
 	ui->loadButton->setEnabled(false);
 	ui->saveButton->setEnabled(false);
 	ui->deleteButton->setEnabled(false);

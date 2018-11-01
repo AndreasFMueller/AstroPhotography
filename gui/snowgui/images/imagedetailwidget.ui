@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>347</width>
+    <width>352</width>
     <height>154</height>
    </rect>
   </property>
@@ -154,12 +154,22 @@
        <number>0</number>
       </property>
       <item>
+       <widget class="QPushButton" name="previewButton">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="text">
+         <string>Preview</string>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QPushButton" name="loadButton">
         <property name="enabled">
          <bool>false</bool>
         </property>
         <property name="text">
-         <string>Load Image</string>
+         <string>Load</string>
         </property>
        </widget>
       </item>
@@ -169,7 +179,7 @@
          <bool>false</bool>
         </property>
         <property name="text">
-         <string>Save Image</string>
+         <string>Save</string>
         </property>
        </widget>
       </item>
@@ -179,7 +189,7 @@
          <bool>false</bool>
         </property>
         <property name="text">
-         <string>Delete Image</string>
+         <string>Delete</string>
         </property>
        </widget>
       </item>

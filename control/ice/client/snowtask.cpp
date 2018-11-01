@@ -416,15 +416,15 @@ int	command_image(TaskQueuePrx tasks, int id, const std::string& filename) {
 
 	// get an interface for that particular image
 	ImagePrx	image = images->getImage(info.filename);
-	ImageFile	imagefile = image->file(ImageEncodingFITS);
+	ImageBuffer	imagefile = image->file(ImageEncodingFITS);
 
 	// write the image data into a file
 	int fd = open(filename.c_str(), O_CREAT | O_TRUNC | O_WRONLY, 0666);
 	if (fd < 0) {
 		throw std::runtime_error("cannot create file");
 	}
-	size_t	bytes = write(fd, imagefile.data(), imagefile.size());
-	if (imagefile.size() != bytes) {
+	size_t	bytes = write(fd, imagefile.data.data(), imagefile.data.size());
+	if (imagefile.data.size() != bytes) {
 		std::string	msg = astro::stringprintf(
 			"cannot write data: %s", strerror(errno));
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "cannot write data");
@@ -464,10 +464,10 @@ int	command_repository(TaskQueuePrx tasks, int id,
 
 	// get an interface for that particular image
 	ImagePrx	image = images->getImage(info.filename);
-	ImageFile	imagefile = image->file(ImageEncodingFITS);
+	ImageBuffer	imagefile = image->file(ImageEncodingFITS);
 
 	// convert the image file to an ImagePtr
-	astro::image::ImagePtr	imageptr = convertfile(imagefile);
+	astro::image::ImagePtr	imageptr = convertimage(imagefile);
 
 	// get the image repository
 	astro::config::ConfigurationPtr	config

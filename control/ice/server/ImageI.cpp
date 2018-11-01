@@ -177,11 +177,82 @@ astro::image::ImagePtr	ImageI::image() {
 	return _image;
 }
 
+ImageBuffer	ImageI::fileFITS() {
+	ImageBuffer	result;
+	result.encoding = ImageEncodingFITS;
+
+	// get the file
+	astro::image::ImageDirectory	_imagedirectory;
+	std::string	fullname = _imagedirectory.fullname(_filename);
+
+	// find the size of the file
+	struct stat	sb;
+	int	rc = stat(fullname.c_str(), &sb);
+	if (rc < 0) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "cannot stat image file '%s':  %s",
+			fullname.c_str(), strerror(errno));
+		throw NotFound("cannot stat image file");
+	}
+
+	// if the image has size 0, we return an empty byte sequence
+	if (0 == sb.st_size) {
+		return result;
+	}
+
+	// open the file to ensure that we can really read it
+	int	fd = open(fullname.c_str(), O_RDONLY);
+	if (fd < 0) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "cannot open %s: %s",
+			fullname.c_str(), strerror(errno));
+		throw NotFound("cannot open image file");
+	}
+
+	// read the data
+	unsigned char	*buffer = new unsigned char[sb.st_size];
+	if (sb.st_size != read(fd, buffer, sb.st_size)) {
+		close(fd); // prevent resource leak
+		delete[] buffer;
+		std::string	msg = astro::stringprintf("could not read file %s "
+			"in full length %ld", fullname.c_str(), sb.st_size);
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw BadParameter(msg);
+	}
+	close(fd);
+
+	// copy data from the buffer into the result
+	std::copy(buffer, buffer + sb.st_size, back_inserter(result.data));
+	delete[] buffer;
+
+	// return the result
+	return result;
+}
+
+ImageBuffer	ImageI::fileJPEG() {
+	astro::image::ImageBuffer	buffer(image(), Format::JPEG);
+	ImageBuffer	result = *convert(buffer);
+	return result;
+}
+
+ImageBuffer	ImageI::filePNG() {
+	astro::image::ImageBuffer	buffer(image(), Format::PNG);
+	ImageBuffer	result = *convert(buffer);
+	return result;
+}
+
 /**
  * \brief Retrieve the content of the FITS file
  */
-ImageFile       ImageI::file(ImageEncoding encoding,
+ImageBuffer       ImageI::file(ImageEncoding encoding,
 			const Ice::Current& /* current */) {
+	switch (encoding) {
+	case ImageEncodingFITS:
+		return fileFITS();
+	case ImageEncodingJPEG:
+		return fileJPEG();
+	case ImageEncodingPNG:
+		return filePNG();
+	}
+#if 0
 	// currently the JPEG and PNG encodings are not supported, so we throw
 	// a not found exception
 	if (encoding == ImageEncodingJPEG) {
@@ -237,6 +308,7 @@ ImageFile       ImageI::file(ImageEncoding encoding,
 
 	// return the result
 	return result;
+#endif
 }
 
 /**
