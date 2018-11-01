@@ -902,14 +902,20 @@ void	ccdcontrollerwidget::retrieveImageWork() {
 			return;
 		}
 
+		// get the exposure information
+		_imageexposure = snowstar::convert(_ccd->getExposure());
+		snowstar::ImageEncoding	encoding = 
+			(_imageexposure.purpose() == Exposure::preview)
+				? snowstar::ImageEncodingJPEG
+				: snowstar::ImageEncodingFITS;
+
 		// at this point we actually download the image
-		snowstar::ImageBuffer	buffer = _imageproxy->file(snowstar::ImageEncodingFITS);
+		snowstar::ImageBuffer	buffer = _imageproxy->file(encoding);
 		ImagePtr	image = snowstar::convertimage(buffer);
 
 		_image = image;
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "image frame: %s",
 			image->getFrame().toString().c_str());
-		_imageexposure = snowstar::convert(_ccd->getExposure());
 		_imageproxy->remove();
 
 		// if the image size does not match the size requested, get the

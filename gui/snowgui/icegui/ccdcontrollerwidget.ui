@@ -137,6 +137,15 @@
       </item>
       <item row="4" column="3">
        <widget class="QComboBox" name="purposeBox">
+        <property name="currentText">
+         <string>light</string>
+        </property>
+        <property name="currentIndex">
+         <number>0</number>
+        </property>
+        <property name="maxVisibleItems">
+         <number>11</number>
+        </property>
         <item>
          <property name="text">
           <string>light</string>
@@ -175,6 +184,11 @@
         <item>
          <property name="text">
           <string>flood</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>preview</string>
          </property>
         </item>
        </widget>
