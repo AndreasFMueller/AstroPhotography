@@ -65,7 +65,7 @@ int    RepositoryI::getId(const std::string& uuid,
 	return _repo.getId(astro::UUID(uuid));
 }
 
-ImageFile       RepositoryI::getImage(int id,
+ImageBuffer       RepositoryI::getImage(int id, ImageEncoding encoding,
 		const Ice::Current& /* current */) {
 	if (!_repo.has(id)) {
 		std::string	msg = astro::stringprintf("repo does not have "
@@ -75,7 +75,9 @@ ImageFile       RepositoryI::getImage(int id,
 	astro::image::ImagePtr	imageptr = _repo.getImage(id);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "found image %d: %d x %d", id,
 		imageptr->size().width(), imageptr->size().height());
-	return convertfile(imageptr);
+	astro::image::ImageBuffer	buffer(imageptr, convert(encoding));
+	ImageBufferPtr	imagebuffer = convert(buffer);
+	return *imagebuffer;
 }
 
 ImageInfo	RepositoryI::getInfo(int id,

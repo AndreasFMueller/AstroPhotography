@@ -52,7 +52,9 @@ private:
 	void	updateHeaderlist();
 	void	updateImagelist();
 
-	astro::image::ImagePtr	currentImage();
+	astro::image::ImagePtr	currentImage(snowstar::ImageEncoding encoding);
+
+	void	viewImage(ImagePtr);
 
 signals:
 	void	startExposure();

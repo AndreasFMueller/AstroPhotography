@@ -29,7 +29,8 @@ public:
 				const Ice::Current& current);
 	virtual int	getId(const std::string& uuid,
 				const Ice::Current& current);
-	virtual ImageFile	getImage(int id, const Ice::Current& current);
+	virtual ImageBuffer	getImage(int id, ImageEncoding encoding,
+				const Ice::Current& current);
 	virtual ImageInfo	getInfo(int id, const Ice::Current& current);
 	virtual int	save(const ImageFile& image,
 				const Ice::Current& current);

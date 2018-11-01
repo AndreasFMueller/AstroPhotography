@@ -20,7 +20,8 @@ module snowstar {
 		ExTEST,
 		ExGUIDE,
 		ExFOCUS,
-		ExFLOOD
+		ExFLOOD,
+		ExPREVIEW
 	};
 
 	/**

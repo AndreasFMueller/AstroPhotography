@@ -189,8 +189,9 @@ void	LocalRepoReplicator::pull(int id) {
 		std::cout << "pulling " << id << std::endl;
 	}
 	if (!dryrun()) {
-		ImageFile imagefile = remoterepository->getImage(id);
-		localrepository->save(convertfile(imagefile));
+		ImageBuffer imagefile = remoterepository->getImage(id,
+			ImageEncodingFITS);
+		localrepository->save(convertimage(imagefile));
 	}
 }
 
@@ -230,8 +231,9 @@ void	RemoteRepoReplicator::push(int id) {
 		std::cout << "pushing " << id << std::endl;
 	}
 	if (!dryrun()) {
-		ImageFile imagefile = localrepository->getImage(id);
-		remoterepository->save(imagefile);
+		ImageBuffer imagefile = localrepository->getImage(id,
+			ImageEncodingFITS);
+		remoterepository->save(imagefile.data);
 	}
 }
 
@@ -241,8 +243,9 @@ void	RemoteRepoReplicator::pull(int id) {
 		std::cout << "pulling " << id << std::endl;
 	}
 	if (!dryrun()) {
-		ImageFile imagefile = remoterepository->getImage(id);
-		localrepository->save(imagefile);
+		ImageBuffer imagefile = remoterepository->getImage(id,
+			ImageEncodingFITS);
+		localrepository->save(imagefile.data);
 	}
 }
 

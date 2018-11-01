@@ -131,7 +131,7 @@ public:
 	// fields related tot he exposure purpose
 	typedef	enum {
 		light = 0, dark = 1, flat = 2, bias = 3, test = 4, guide = 5,
-		focus = 6, flood = 7
+		focus = 6, flood = 7, preview = 8
 	} purpose_t;
 private:
 	purpose_t	_purpose;

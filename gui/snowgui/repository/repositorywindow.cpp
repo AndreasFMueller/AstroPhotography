@@ -83,6 +83,8 @@ repositorywindow::repositorywindow(QWidget *parent,
 		this, SLOT(saveClicked()));
 	connect(ui->openButton, SIGNAL(clicked()),
 		this, SLOT(openClicked()));
+	connect(ui->previewButton, SIGNAL(clicked()),
+		this, SLOT(previewClicked()));
 	connect(ui->deleteButton, SIGNAL(clicked()),
 		this, SLOT(deleteClicked()));
 	connect(ui->repositoryTree,
@@ -233,10 +235,10 @@ void	repositorywindow::closeEvent(QCloseEvent * /* event */) {
 /**
  * \brief Auxiliary function to retrieve the current image from the repository
  */
-astro::image::ImagePtr	repositorywindow::currentImage() {
+astro::image::ImagePtr	repositorywindow::currentImage(snowstar::ImageEncoding encoding) {
 	snowstar::RepositoryPrx	repository = _repositories->get(_reponame);
-	snowstar::ImageFile	image = repository->getImage(_imageid);
-	ImagePtr	imageptr = snowstar::convertfile(image);
+	snowstar::ImageBuffer	image = repository->getImage(_imageid, encoding);
+	ImagePtr	imageptr = snowstar::convertimage(image);
 	return imageptr;
 }
 
@@ -257,7 +259,7 @@ void	repositorywindow::saveClicked() {
 	}
 
 	// save an individual image to a file
-	ImagePtr	imageptr = currentImage();
+	ImagePtr	imageptr = currentImage(snowstar::ImageEncodingFITS);
 	QFileDialog	filedialog(this);
 	filedialog.setAcceptMode(QFileDialog::AcceptSave);
 	filedialog.setFileMode(QFileDialog::AnyFile);
@@ -324,15 +326,7 @@ void	repositorywindow::saveMulti(QList<QTreeWidgetItem*>& items) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "save dialog returned");
 }
 
-/**
- * \brief Open the current image from the repository
- */
-void	repositorywindow::openClicked() {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "openClicked()");
-	if (_reponame.size() == 0) {
-		return;
-	}
-	ImagePtr	imageptr = currentImage();
+void	repositorywindow::showImage(astro::image::ImagePtr imageptr) {
 	imagedisplaywidget	*idw = new imagedisplaywidget(NULL);
 	connect(idw, SIGNAL(rectangleSelected(astro::image::ImageRectangle)),
         	idw, SLOT(selectRectangle(QRect)));
@@ -343,6 +337,30 @@ void	repositorywindow::openClicked() {
 			_imageid, _reponame.c_str());
 	idw->setWindowTitle(QString(title.c_str()));
 	idw->show();
+}
+
+/**
+ * \brief Open the current image from the repository
+ */
+void	repositorywindow::openClicked() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "openClicked()");
+	if (_reponame.size() == 0) {
+		return;
+	}
+	ImagePtr	imageptr = currentImage(snowstar::ImageEncodingFITS);
+	showImage(imageptr);
+}
+
+/**
+ * \brief Open the current image from the repository
+ */
+void	repositorywindow::previewClicked() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "openClicked()");
+	if (_reponame.size() == 0) {
+		return;
+	}
+	ImagePtr	imageptr = currentImage(snowstar::ImageEncodingJPEG);
+	showImage(imageptr);
 }
 
 

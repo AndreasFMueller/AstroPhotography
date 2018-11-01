@@ -110,6 +110,8 @@ taskqueuemanagerwidget::taskqueuemanagerwidget(QWidget *parent)
 		this, SLOT(cancelClicked()));
 	connect(ui->imageButton, SIGNAL(clicked()),
 		this, SLOT(imageClicked()));
+	connect(ui->previewButton, SIGNAL(clicked()),
+		this, SLOT(previewClicked()));
 	connect(ui->downloadButton, SIGNAL(clicked()),
 		this, SLOT(downloadClicked()));
 	connect(ui->deleteButton, SIGNAL(clicked()),
@@ -434,11 +436,7 @@ void	taskqueuemanagerwidget::cancelClicked() {
 	}
 }
 
-/**
- * \brief slot to display the image
- */
-void	taskqueuemanagerwidget::imageClicked() {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "imageClicked()");
+void	taskqueuemanagerwidget::showImage(snowstar::ImageEncoding encoding) {
 	QList<QTreeWidgetItem*>	selected = ui->taskTree->selectedItems();
 	if (selected.size() != 1) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "more than one object selected");
@@ -464,14 +462,17 @@ void	taskqueuemanagerwidget::imageClicked() {
 			if (!repository->has(imageid)) {
 				return;
 			}
-			imageptr = snowstar::convertfile(
-				repository->getImage(imageid));
+			imageptr = snowstar::convertimage(
+				repository->getImage(imageid, encoding));
 		} else {
+			// XXX encoding...
 			debug(LOG_DEBUG, DEBUG_LOG, 0, "get image %s from dir",
 				info.filename.c_str());
 			snowstar::ImagePrx	imageprx
 				= _images->getImage(info.filename);
-			imageptr = snowstar::convert(imageprx);
+			snowstar::ImageBuffer	buffer
+				= imageprx->file(encoding);
+			imageptr = snowstar::convertimage(buffer);
 		}
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "emitting imageReceived()");
 		emit imageReceived(imageptr);
@@ -479,6 +480,19 @@ void	taskqueuemanagerwidget::imageClicked() {
 		// XXX show error message
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "error: %s", x.what());
 	}
+}
+
+/**
+ * \brief slot to display the image
+ */
+void	taskqueuemanagerwidget::imageClicked() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "imageClicked()");
+	showImage(snowstar::ImageEncodingFITS);
+}
+
+void	taskqueuemanagerwidget::previewClicked() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "previewClicked()");
+	showImage(snowstar::ImageEncodingJPEG);
 }
 
 /**

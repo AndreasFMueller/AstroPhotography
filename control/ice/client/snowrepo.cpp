@@ -306,9 +306,9 @@ int	command_get(const astro::ServerName& servername,
 	// get the repo
 	RepositoryPrx	repository = getRemoteRepo(servername, reponame);
 
-	ImageFile	image = repository->getImage(id);
+	ImageBuffer	image = repository->getImage(id, ImageEncodingFITS);
 	astro::io::FITSout	out(filename);
-	out.write(convertfile(image));
+	out.write(convertimage(image));
 	return EXIT_SUCCESS;
 }
 

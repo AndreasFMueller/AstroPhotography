@@ -62,9 +62,10 @@ void	downloadthread::run() {
 			item.imageid(), item.reponame().c_str());
 		snowstar::RepositoryPrx	repository
 			= _repositories->get(item.reponame());
-		snowstar::ImageFile	image
-			= repository->getImage(item.imageid());
-		astro::image::ImagePtr	imageptr = snowstar::convertfile(image);
+		snowstar::ImageBuffer	image
+			= repository->getImage(item.imageid(),
+				snowstar::ImageEncodingFITS);
+		astro::image::ImagePtr	imageptr = snowstar::convertimage(image);
 
 		// get the file name
 		std::string	filename = astro::stringprintf("%s/%s",

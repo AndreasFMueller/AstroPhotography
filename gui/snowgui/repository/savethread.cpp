@@ -42,8 +42,9 @@ void	savethread::run() {
 		snowstar::ImageInfo	info = repository->getInfo(imageid);
 		std::string	filename = astro::stringprintf("%s/%s",
 			_directory.c_str(), info.filename.c_str());
-		snowstar::ImageFile	image = repository->getImage(imageid);
-		astro::image::ImagePtr	imageptr = snowstar::convertfile(image);
+		snowstar::ImageBuffer	image = repository->getImage(imageid,
+						snowstar::ImageEncodingFITS);
+		astro::image::ImagePtr	imageptr = snowstar::convertimage(image);
 
 		// get the file name from the image
 	

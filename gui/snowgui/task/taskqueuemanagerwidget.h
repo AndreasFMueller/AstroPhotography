@@ -44,6 +44,7 @@ public slots:
 	void	infoClicked();
 	void	cancelClicked();
 	void	imageClicked();
+	void	previewClicked();
 	void	downloadClicked();
 	void	deleteClicked();
 	void	resubmitClicked();
@@ -57,6 +58,7 @@ public slots:
 private:
 	Ui::taskqueuemanagerwidget *ui;
 
+	void	showImage(snowstar::ImageEncoding);
 	
 	void    addTasks(QTreeWidgetItem *parent,
 			snowstar::TaskState state);

@@ -179,6 +179,9 @@
       </property>
       <item>
        <widget class="QPushButton" name="previewButton">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
         <property name="text">
          <string>Preview</string>
         </property>

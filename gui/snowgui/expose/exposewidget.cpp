@@ -240,7 +240,7 @@ void	exposewidget::saveClicked() {
 	if (_repositoryname.size() == 0) {
 		return;
 	}
-	ImagePtr        imageptr = currentImage();
+	ImagePtr        imageptr = currentImage(snowstar::ImageEncodingFITS);
 	QFileDialog     filedialog(this);
 	filedialog.setAcceptMode(QFileDialog::AcceptSave);
 	filedialog.setFileMode(QFileDialog::AnyFile);
@@ -285,7 +285,7 @@ void	exposewidget::saveClicked() {
 /**
  * \brief auxiliary function to get the current Image 
  */
-astro::image::ImagePtr	exposewidget::currentImage() {
+astro::image::ImagePtr	exposewidget::currentImage(snowstar::ImageEncoding encoding) {
 	if (_imageid < 0) {
 		return	ImagePtr();
 	}
@@ -293,18 +293,15 @@ astro::image::ImagePtr	exposewidget::currentImage() {
 		return ImagePtr();
 	}
 	try {
-		snowstar::ImageFile	imagefile = _repository->getImage(_imageid);
-		return snowstar::convertfile(imagefile);
+		snowstar::ImageBuffer	imagebuffer = _repository->getImage(
+						_imageid, encoding);
+		return snowstar::convertimage(imagebuffer);
 	} catch (const std::exception& x) {
 	}
 	return	ImagePtr();
 }
 
-/**
- * \brief Slot called when an image is to be opened
- */
-void	exposewidget::openClicked() {
-        ImagePtr        imageptr = currentImage();
+void	exposewidget::viewImage(ImagePtr imageptr) {
 	if (!imageptr) {
 		return;
 	}
@@ -321,6 +318,19 @@ void	exposewidget::openClicked() {
 		_imageid, _repositoryname.c_str());
 	idw->setWindowTitle(QString(title.c_str()));
         idw->show();
+}
+
+/**
+ * \brief Slot called when an image is to be opened
+ */
+void	exposewidget::openClicked() {
+        ImagePtr        imageptr = currentImage(snowstar::ImageEncodingFITS);
+	viewImage(imageptr);
+}
+
+void	exposewidget::previewClicked() {
+        ImagePtr        imageptr = currentImage(snowstar::ImageEncodingJPEG);
+	viewImage(imageptr);
 }
 
 /**

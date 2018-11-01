@@ -1,5 +1,5 @@
 //
-// repo.ice -- interface definition for repository replication
+// repository.ice -- interface definition for repository replication
 //
 // (c) 2014 Prof Dr Andreas Mueller, Hochschule Rapperswil
 //
@@ -50,7 +50,8 @@ module snowstar {
 		bool		has(int id);
 		bool		hasUUID(string uuid);
 		int		getId(string uuid) throws NotFound;
-		ImageFile	getImage(int id) throws NotFound;
+		ImageBuffer	getImage(int id, ImageEncoding encoding)
+					throws NotFound;
 		ImageInfo	getInfo(int id) throws NotFound;
 		int	save(ImageFile image) throws Exists;
 		int	count();

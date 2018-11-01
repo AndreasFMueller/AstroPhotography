@@ -575,6 +575,7 @@ Exposure::purpose_t	ccdcontrollerwidget::getPurpose(int index) {
 	case 5:	return Exposure::guide;
 	case 6:	return Exposure::focus;
 	case 7:	return Exposure::flood;
+	case 8:	return Exposure::preview;
 	default:
 		break;
 	}
@@ -902,7 +903,8 @@ void	ccdcontrollerwidget::retrieveImageWork() {
 		}
 
 		// at this point we actually download the image
-		ImagePtr	image = snowstar::convert(_imageproxy);
+		snowstar::ImageBuffer	buffer = _imageproxy->file(snowstar::ImageEncodingFITS);
+		ImagePtr	image = snowstar::convertimage(buffer);
 
 		_image = image;
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "image frame: %s",

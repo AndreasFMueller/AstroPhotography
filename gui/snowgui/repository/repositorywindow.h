@@ -37,13 +37,16 @@ private:
 	void	addImages(QTreeWidgetItem *top, const std::string& reponame);
 	void	addAllImages();
 
-	ImagePtr	currentImage();
+	ImagePtr	currentImage(snowstar::ImageEncoding);
 
 	void	deleteMulti(QList<QTreeWidgetItem*>&);
 	void	saveMulti(QList<QTreeWidgetItem*>&);
 
+	void	showImage(astro::image::ImagePtr);
+
 public slots:
 	void	refreshClicked();
+	void	previewClicked();
 	void	openClicked();
 	void	saveClicked();
 	void	deleteClicked();

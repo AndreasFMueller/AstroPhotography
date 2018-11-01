@@ -83,6 +83,7 @@ bool	Exposure::needsshutteropen() const {
 	case test:
 	case guide:
 	case focus:
+	case preview:
 		return true;
 	case dark:
 	case bias:
@@ -110,6 +111,8 @@ std::string	Exposure::purpose2string(purpose_t p) {
 		return std::string("focus");
 	case flood:
 		return std::string("flood");
+	case preview:
+		return std::string("preview");
 	}
 	std::string	msg = stringprintf("unknown purpose %d", p);
 	throw std::runtime_error(msg);
@@ -137,8 +140,8 @@ Exposure::purpose_t	Exposure::string2purpose(const std::string& p) {
 	if (p == "focus") {
 		return focus;
 	}
-	if (p == "flood") {
-		return flood;
+	if (p == "preview") {
+		return preview;
 	}
 	std::string	msg = stringprintf("unknown purpose %s", p.c_str());
 	throw std::runtime_error(msg);
