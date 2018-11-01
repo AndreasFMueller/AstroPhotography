@@ -374,7 +374,8 @@ CameraPtr	NiceLocator::getCamera0(const DeviceName& name) {
 
 	snowstar::CameraPrx	camera
 		= locator->getCamera(remotename.toString());
-	return CameraPtr(new NiceCamera(camera, name));
+	CameraPtr	result(new NiceCamera(camera, name));
+	return result;
 }
 
 CcdPtr	NiceLocator::getCcd0(const DeviceName& name) {
@@ -388,10 +389,12 @@ CcdPtr	NiceLocator::getCcd0(const DeviceName& name) {
 
 	snowstar::CcdPrx	ccd
 		= locator->getCcd(remotename.toString());
-	return CcdPtr(new NiceCcd(ccd, name));
+	CcdPtr	result(new NiceCcd(ccd, name));
+	return result;
 }
 
 GuidePortPtr	NiceLocator::getGuidePort0(const DeviceName& name) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "request for guide port");
 	check(name, DeviceName::Guideport);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieving nice guideport %s",
 		name.toString().c_str());
@@ -404,7 +407,8 @@ GuidePortPtr	NiceLocator::getGuidePort0(const DeviceName& name) {
 
 	snowstar::GuidePortPrx	guideport
 		= locator->getGuidePort(remotename.toString());
-	return GuidePortPtr(new NiceGuidePort(guideport, name));
+	GuidePortPtr	result(new NiceGuidePort(guideport, name));
+	return result;
 }
 
 FilterWheelPtr	NiceLocator::getFilterWheel0(const DeviceName& name) {
@@ -418,7 +422,8 @@ FilterWheelPtr	NiceLocator::getFilterWheel0(const DeviceName& name) {
 
 	snowstar::FilterWheelPrx	filterwheel
 		= locator->getFilterWheel(remotename.toString());
-	return FilterWheelPtr(new NiceFilterWheel(filterwheel, name));
+	FilterWheelPtr	result(new NiceFilterWheel(filterwheel, name));
+	return result;
 }
 
 CoolerPtr	NiceLocator::getCooler0(const DeviceName& name) {
@@ -432,7 +437,8 @@ CoolerPtr	NiceLocator::getCooler0(const DeviceName& name) {
 
 	snowstar::CoolerPrx	cooler
 		= locator->getCooler(remotename.toString());
-	return CoolerPtr(new NiceCooler(cooler, name));
+	CoolerPtr	result(new NiceCooler(cooler, name));
+	return result;
 }
 
 FocuserPtr	NiceLocator::getFocuser0(const DeviceName& name) {
@@ -446,7 +452,8 @@ FocuserPtr	NiceLocator::getFocuser0(const DeviceName& name) {
 
 	snowstar::FocuserPrx	focuser
 		= locator->getFocuser(remotename.toString());
-	return FocuserPtr(new NiceFocuser(focuser, name));
+	FocuserPtr	result(new NiceFocuser(focuser, name));
+	return result;
 }
 
 AdaptiveOpticsPtr	NiceLocator::getAdaptiveOptics0(const DeviceName& name) {
@@ -460,7 +467,8 @@ AdaptiveOpticsPtr	NiceLocator::getAdaptiveOptics0(const DeviceName& name) {
 
 	snowstar::AdaptiveOpticsPrx	adaptiveoptics
 		= locator->getAdaptiveOptics(remotename.toString());
-	return AdaptiveOpticsPtr(new NiceAdaptiveOptics(adaptiveoptics, name));
+	AdaptiveOpticsPtr	result(new NiceAdaptiveOptics(adaptiveoptics, name));
+	return result;
 }
 
 astro::device::MountPtr	NiceLocator::getMount0(const DeviceName& name) {
@@ -474,7 +482,8 @@ astro::device::MountPtr	NiceLocator::getMount0(const DeviceName& name) {
 
 	snowstar::MountPrx	mount
 		= locator->getMount(remotename.toString());
-	return astro::device::MountPtr(new device::nice::NiceMount(mount, name));
+	astro::device::MountPtr	result(new device::nice::NiceMount(mount, name));
+	return result;
 }
 
 } // namespace nice

@@ -13,18 +13,22 @@ NiceGuidePort::NiceGuidePort(snowstar::GuidePortPrx guideport,
 	const DeviceName& devicename)
 	: GuidePort(devicename), NiceDevice(devicename),
 	  _guideport(guideport) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "niceguideport constructed");
 }
 
 NiceGuidePort::~NiceGuidePort() {
 }
 
 uint8_t	NiceGuidePort::active() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "requesting active pins");
 	return _guideport->active();
 }
 
 void	NiceGuidePort::activate(float raplus, float raminus,
 		float decplus, float decminus) {
-	return _guideport->activate(raplus - raminus, decplus - decminus);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "activating %f %f",
+			raplus - raminus, decplus - decminus);
+	_guideport->activate(raplus - raminus, decplus - decminus);
 }
 
 } // namespace nice
