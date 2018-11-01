@@ -79,7 +79,7 @@ void	QsiCcd::startExposure(const Exposure& exposure) {
 		END_STOPWATCH("put_BinY()");
 
 		// flip the origin
-		int	height = Ccd::exposure.frame().size().height();
+		int	height = getInfo().size().height();
 		ImagePoint	origin = Ccd::exposure.frame().origin();
 		ImageSize	size = Ccd::exposure.frame().size();
 		origin.y(height - (origin.y() + size.height()));
