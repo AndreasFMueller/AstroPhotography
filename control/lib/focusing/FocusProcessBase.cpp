@@ -167,6 +167,8 @@ bool	FocusProcessBase::evaluate0() {
 
 	// if we are not running, we should stop evaluating
 	if (!_running) {
+		status(Focus::FAILED);
+		reportState();
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "evaluation cancelled");
 		return false;
 	}
@@ -182,12 +184,16 @@ bool	FocusProcessBase::evaluate0() {
 
 	// make sure the position is in the interval
 	if (position < minposition()) {
+		status(Focus::FAILED);
+		reportState();
 		std::string	msg = stringprintf("position %lu < %lu "
 			"outside interval", position, minposition());
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "%s", msg.c_str());
 		throw std::runtime_error(msg);
 	}
 	if (position > maxposition()) {
+		status(Focus::FAILED);
+		reportState();
 		std::string	msg = stringprintf("position %lu > %lu "
 			"outside interval", position, maxposition());
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "%s", msg.c_str());
