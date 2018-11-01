@@ -273,9 +273,10 @@ static void	evaluate_launch(FocusProcessBase *process) {
  */
 void	FocusProcessBase::start() {
 	// make sure the current state is IDLE
-	if ((Focus::IDLE != status()) && (Focus::FOCUSED != status())) {
+	if ((Focus::IDLE != status()) && (Focus::FOCUSED != status())
+		&& (Focus::FAILED)) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "process not idle");
-		throw std::runtime_error("FocusProcess not IDLE");
+		throw std::runtime_error("FocusProcess not IDLE/FOCUSED/FAILED");
 	}
 	_running = true;
 
