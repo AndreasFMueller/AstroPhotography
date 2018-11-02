@@ -30,11 +30,12 @@ public:
 	FocusState	status(const Ice::Current& current);
 
 	std::string	method(const Ice::Current& current);
-	void	setMethod(const std::string& method, const Ice::Current& current);
+	void	setMethod(const std::string& method,
+			const Ice::Current& current);
 
 	std::string	solver(const Ice::Current& current);
-	void	setSolver(const std::string& solver, const Ice::Current& current);
-
+	void	setSolver(const std::string& solver,
+			const Ice::Current& current);
 
 	Exposure	getExposure(const Ice::Current& current);
 	void	setExposure(const Exposure& exposure,

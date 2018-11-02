@@ -387,6 +387,9 @@ double	FWHMEvaluator::evaluate(FocusableImage image) {
 
 	_evaluated_image = ImagePtr(new Image<RGB<unsigned char> >(combine));
 
+	// copy meta data from the original image
+	_evaluated_image->metadata(image->metadata());
+
 	// return the average diameter as the result
 	return medianradius;
 }

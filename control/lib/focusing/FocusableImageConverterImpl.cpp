@@ -138,47 +138,57 @@ FocusableImage	FocusableImageConverterImpl::operator()(const ImagePtr image) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "apply %s->operator to %s image",
 		_rectangle.toString().c_str(),
 		image->getFrame().toString().c_str());
+	FocusableImage	result;
+
 	// handle Bayer images
 	try {
-		FocusableImage	result = get_bayer(image);
+		result = get_bayer(image);
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "found bayer image %s",
 			result->getFrame().toString().c_str());
-		return result;
+		goto meta;
 	} catch (const WrongImageType& x) {
 	}
 
 	// handle raw images
 	try {
-		FocusableImage	result = get_raw(image);
+		result = get_raw(image);
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "found raw image %s",
 			result->getFrame().toString().c_str());
-		return result;
+		goto meta;
 	} catch (const WrongImageType& x) {
 	}
 
 	// handle YUV images
 	try {
-		FocusableImage	result = get_yuv(image);
+		result = get_yuv(image);
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "found yuv image %s",
 			result->getFrame().toString().c_str());
-		return result;
+		goto meta;
 	} catch (const WrongImageType& x) {
 	}
 
 	// handle RGB images
 	try {
-		FocusableImage	result = get_rgb(image);
+		result = get_rgb(image);
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "found rgb image %s",
 			result->getFrame().toString().c_str());
-		return result;
+		goto meta;
 	} catch (const WrongImageType& x) {
 	}
 
 	// unknown image type
+	{
 	std::string	imagetype = demangle(typeid(*image).name());
 	std::string	msg = stringprintf("cannot extract focusable image "
 		"from %s", imagetype.c_str());
 	throw std::runtime_error(msg);
+	}
+
+meta:
+	// copy the metadata
+	result->metadata(image->metadata());
+
+	return result;
 }
 
 } // namespace focusing

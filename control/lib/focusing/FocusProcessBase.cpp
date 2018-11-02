@@ -4,6 +4,7 @@
  * (c) 2018 Prof Dr Andreas Müller, Hochschule Rapperswil
  */
 #include <AstroFocus.h>
+#include <AstroIO.h>
 
 namespace astro {
 namespace focusing {
@@ -30,9 +31,7 @@ FocusProcessBase::FocusProcessBase(const FocusParameters& parameters)
  */
 FocusProcessBase::~FocusProcessBase() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "stopping the focus thread");
-	if (_running) {
-		stop();
-	}
+	_running = false;
 	wait();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "focus thread completed");
 }
@@ -106,6 +105,10 @@ bool	FocusProcessBase::measure0() {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "taking an image");
 		ImagePtr	image = get();
 
+		// add Focusposition metadata
+		image->setMetadata(io::FITSKeywords::meta(std::string("FOCUSPOS"), (long)pos));
+
+		// send the image to the callback
 		reportImage(image);
 
 		// add the image and the position to the 
@@ -123,6 +126,7 @@ bool	FocusProcessBase::measure0() {
 	return true;
 
 failed:
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "process cancelled");
 	status(Focus::FAILED);
 	_focus_elements->terminate();
 	reportState();
@@ -280,10 +284,21 @@ static void	evaluate_launch(FocusProcessBase *process) {
 void	FocusProcessBase::start() {
 	// make sure the current state is IDLE
 	if ((Focus::IDLE != status()) && (Focus::FOCUSED != status())
-		&& (Focus::FAILED)) {
+		&& (Focus::FAILED != status())) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "process not idle");
 		throw std::runtime_error("FocusProcess not IDLE/FOCUSED/FAILED");
 	}
+
+	// if we are in status FOCUSED or FAILED, we first have to wait
+	// wo clean up the previous run
+	if ((Focus::FOCUSED == status()) || (Focus::FAILED == status())) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "wait for threads to complete");
+		try {
+			wait();
+		} catch (...) { }
+	}
+
+	// (re)start the process
 	_running = true;
 
 	// prepare a queue 
@@ -313,21 +328,13 @@ void	FocusProcessBase::stop() {
  * wait returns when state FOCUSED or FAILED are reached.
  */
 void	FocusProcessBase::wait() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "waiting for threads to complete");
 	std::set<Focus::state_type>	states;
 	states.insert(Focus::MEASURED);
 	states.insert(Focus::FOCUSED);
 	states.insert(Focus::FAILED);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "waiting for %d states", states.size());
 	Focus::state_type	finalstate = _status.wait(states);
-	if (Focus::FAILED == finalstate) {
-		std::string	msg = stringprintf("focus process failed");
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "%s", msg.c_str());
-		// XXX there is a leak here: we should wait for the threads 
-		// XXX to join even if we want to throw an exception
-		throw std::runtime_error(msg);
-	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "state %s reached",
-		Focus::state2string(finalstate).c_str());
 	if (_measure_thread.joinable()) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "joining measure thread");
 		_measure_thread.join();
@@ -335,6 +342,13 @@ void	FocusProcessBase::wait() {
 	if (_evaluate_thread.joinable()) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "joining evaluate thread");
 		_evaluate_thread.join();
+	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "state %s reached",
+		Focus::state2string(finalstate).c_str());
+	if (Focus::FAILED == finalstate) {
+		std::string	msg = stringprintf("focus process failed");
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw std::runtime_error(msg);
 	}
 }
 
