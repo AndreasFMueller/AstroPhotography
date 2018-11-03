@@ -145,6 +145,9 @@ void	mountcontrollerwidget::setupMount() {
 		pl += (_position.longitude().degrees() < 0) ? "S" : "N";
 		ui->observatoryField->setText(QString(pl.c_str()));
 
+		// write the position to the LMST widget
+		ui->siderealTime->position(_position);
+
 		// try to get the time
 		try {
 			debug(LOG_DEBUG, DEBUG_LOG, 0, "trying to get time");

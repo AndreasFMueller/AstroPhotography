@@ -596,7 +596,7 @@ AC_CONFIG_FILES([Makefile include/Makefile
 	tools/Makefile tools/config/Makefile tools/mount/Makefile
 	tools/devices/Makefile tools/image/Makefile tools/guiding/Makefile
 	tools/catalog/Makefile tools/process/Makefile tools/process/process.xml
-	tools/focus/Makefile
+	tools/focus/Makefile tools/utils/Makefile
 	drivers/Makefile drivers/mock1/Makefile drivers/mock2/Makefile
 	drivers/simulator/Makefile drivers/net/Makefile
 	drivers/sx/Makefile drivers/sbig/Makefile drivers/othello/Makefile

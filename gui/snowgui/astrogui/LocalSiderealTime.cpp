@@ -68,4 +68,12 @@ void	LocalSiderealTime::update(time_t now) {
 	updateCommon(now);
 }
 
+/**
+ * \brief Set the position
+ */
+void    LocalSiderealTime::position(const astro::LongLat& p) {
+	_position = p;
+	update();
+}
+
 } // namespace snowgui
