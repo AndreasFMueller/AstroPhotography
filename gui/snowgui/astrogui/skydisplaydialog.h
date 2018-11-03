@@ -36,6 +36,7 @@ private:
 
 protected:
 	void	closeEvent(QCloseEvent *e);
+	void	keyPressEvent(QKeyEvent *d);
 
 public slots:
 	void	telescopeChanged(astro::RaDec);

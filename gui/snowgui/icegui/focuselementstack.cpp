@@ -57,9 +57,14 @@ void	FocusElementStack::receiveFocusElement(snowstar::FocusElement element) {
  * \param state		new state
  */
 void	FocusElementStack::receiveState(snowstar::FocusState state) {
-	if (state == snowstar::FocusFOCUSED)  {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "focused state reached");
+	switch (state) {
+	case snowstar::FocusFOCUSED:
+	case snowstar::FocusFAILED:
+	case snowstar::FocusIDLE:
 		_restart = true;
+		break;
+	default:
+		break;
 	}
 }
 

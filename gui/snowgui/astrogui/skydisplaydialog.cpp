@@ -6,6 +6,7 @@
 #include "skydisplaydialog.h"
 #include "ui_skydisplaydialog.h"
 #include "SkyDisplayWidget.h"
+#include <QKeyEvent>
 
 namespace snowgui {
 
@@ -49,6 +50,13 @@ const astro::LongLat&	SkyDisplayDialog::position() const {
 
 void	SkyDisplayDialog::closeEvent(QCloseEvent * /* event */) {
 	deleteLater();
+}
+
+void    SkyDisplayDialog::keyPressEvent(QKeyEvent *e) {
+        if (e->key() == Qt::Key_Escape) {
+                return;
+        }
+        QWidget::keyPressEvent(e);
 }
 
 void	SkyDisplayDialog::telescopeChanged(astro::RaDec radec) {
