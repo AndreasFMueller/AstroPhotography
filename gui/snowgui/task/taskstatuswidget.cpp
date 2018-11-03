@@ -21,6 +21,10 @@ taskstatuswidget::taskstatuswidget(QWidget *parent)
 	_statusTimer.setInterval(100);
 	connect(&_statusTimer, SIGNAL(timeout()), this, SLOT(statusUpdate()));
 
+	_state = snowstar::QueueIDLE;
+
+	qRegisterMetaType<snowstar::QueueState>("snowstar::QueueState");
+
 	// this weird setup is necessary to work around the problem that
 	// the timer can only be started from the main thread
 	connect(this, SIGNAL(started()), this, SLOT(dostart()));
