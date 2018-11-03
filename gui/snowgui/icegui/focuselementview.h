@@ -29,6 +29,8 @@ private:
 
 public slots:
 	void	setFocusElement(snowstar::FocusElement);
+
+	void	sliderChanged(int);
 };
 
 } // namespace snowgui

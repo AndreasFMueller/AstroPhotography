@@ -6,6 +6,7 @@
 #include "FWHMEvaluator.h"
 #include <AstroFilter.h>
 #include <ConnectedComponent.h>
+#include "BackgroundAdapter.h"
 
 namespace astro {
 namespace focusing {
@@ -16,25 +17,6 @@ namespace focusing {
 FWHMEvaluator::FWHMEvaluator(const ImageRectangle& rectangle)
 	: FocusEvaluatorImplementation(rectangle) {
 }
-
-/**
- * \brief A class designed to find an approximation for the background
- */
-class BackgroundAdapter : public ConstImageAdapter<float> {
-	const ConstImageAdapter<float>&	_image;
-	float	_limit;
-public:
-	float	limit() const { return _limit; }
-	void	limit(float l) { _limit = l; }
-	BackgroundAdapter(const ConstImageAdapter<float>& image, float l)
-		: ConstImageAdapter<float>(image.getSize()), _image(image),
-		  _limit(l) {
-	}
-	float	pixel(int x, int y) const {
-		float	v = _image.pixel(x,y);
-		return (v < _limit) ? v : _limit;
-	}
-};
 
 /**
  * \brief A class designed to detect peaks in an image
@@ -128,6 +110,30 @@ public:
 			}
 		);
 	}
+	float	mean() const {
+		int	counter = 0;
+		float	sum;
+		std::for_each(begin(), end(),
+			[&](const BrightPoint& p) {
+				sum += p.value();
+				counter++;
+			}
+		);
+		return sum / counter;
+	}
+	float	quantile(float q) const {
+		std::multiset<float>	values;
+		std::for_each(begin(), end(),
+			[&](const BrightPoint& p) {
+				values.insert(p.value());
+			}
+		);
+		int	i = round((values.size() - 1) * q);
+		auto	j = begin();
+		while (i--) j++;
+		return j->value();
+	}
+	float	median() const { return quantile(0.5); }
 };
 
 /**
@@ -304,26 +310,13 @@ public:
  * \brief evaluate an image
  */
 double	FWHMEvaluator::evaluate(FocusableImage image) {
-	// find maximum value
-	image::filter::Max<float, float>	max;
-	float	mx = max.filter(*image);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "maximum: %f", mx);
 
-	// find noise background
-	image::filter::Mean<float, float>	mean;
-	float	mn = mean(*image);
-	float	limit = mn;
-	BackgroundAdapter	ba(*image, limit);
-	for (int i = 0; i < 3; i++) {
-		image::filter::Mean<float, float>	mean;
-		limit = mean(ba);
-		ba.limit(limit);
-	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "limit: %f", limit);
+	FocusImagePreconditioner	precond(image);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "value range: [%f, %f]",
+		precond.noisefloor(), precond.mean() + 2 * precond.stddev());
 
 	// find nonisolated maxima
-	mn = 3 * (mn - limit) + limit;
-	BrightPoints	bp(*image, mn);
+	BrightPoints	bp(*image, precond.mean() + 2 * precond.stddev());
 
 	// prepare an image that we can use to report all the connected
 	// components
@@ -343,7 +336,7 @@ double	FWHMEvaluator::evaluate(FocusableImage image) {
 		ComponentInfo	ci(*i);
 
 		// find the component
-		float	s = (i->value() + limit) / 2;
+		float	s = (i->value() + precond.noisefloor()) / 2;
 		image::Component<float>	comp(*image, s, i->point());
 
 		// throw away small components
@@ -389,6 +382,22 @@ double	FWHMEvaluator::evaluate(FocusableImage image) {
 
 	// copy meta data from the original image
 	_evaluated_image->metadata(image->metadata());
+
+	// modify the image based on the preconditioner
+	precond.top(precond.noisefloor() + precond.stddev());
+	int	w = image->getSize().width();
+	int	h = image->getSize().height();
+	for (int x = 0; x < w; x++) {
+		for (int y = 0; y < h; y++) {
+#if 0
+			double	v = precond.pixel(x, y);
+			double	w = image->pixel(x, y);
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "change[%d,%d] %f -> %f",
+				x, y, w, v);
+#endif
+			image->pixel(x, y) = precond.pixel(x, y);
+		}
+	}
 
 	// return the average diameter as the result
 	return medianradius;

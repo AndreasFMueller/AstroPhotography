@@ -27,6 +27,7 @@ extern double	min_RGB(const ImagePtr image);
 extern double	minrel(const ImagePtr image);
 
 extern double	mean(const ImagePtr image);
+extern double	mean2(const ImagePtr image);
 extern double	mean_luminance(const ImagePtr image);
 extern double	meanrel(const ImagePtr image);
 extern RGB<double>	mean_color(ImagePtr image);

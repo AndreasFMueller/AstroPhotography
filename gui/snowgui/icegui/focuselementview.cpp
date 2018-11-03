@@ -15,6 +15,23 @@ namespace snowgui {
 FocusElementView::FocusElementView(QWidget *parent)
 	: QWidget(parent), ui(new Ui::FocusElementView) {
 	ui->setupUi(this);
+
+	connect(ui->rawimageArea->horizontalScrollBar(),
+		SIGNAL(valueChanged(int)),
+		this,
+		SLOT(sliderChanged(int)));
+	connect(ui->rawimageArea->verticalScrollBar(),
+		SIGNAL(valueChanged(int)),
+		this,
+		SLOT(sliderChanged(int)));
+	connect(ui->evaluatedimageArea->horizontalScrollBar(),
+		SIGNAL(valueChanged(int)),
+		this,
+		SLOT(sliderChanged(int)));
+	connect(ui->evaluatedimageArea->verticalScrollBar(),
+		SIGNAL(valueChanged(int)),
+		this,
+		SLOT(sliderChanged(int)));
 }
 
 FocusElementView::~FocusElementView() {
@@ -48,6 +65,22 @@ void	FocusElementView::setFocusElement(snowstar::FocusElement element) {
 	evaluatedlabel->setMinimumSize(evaluatedpixmap->width(),
 		evaluatedpixmap->height());
 	ui->evaluatedimageArea->setWidget(evaluatedlabel);
+}
+
+void	FocusElementView::sliderChanged(int v) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "slider changed: %d", v);
+	if(sender() == ui->rawimageArea->horizontalScrollBar()) {
+		ui->evaluatedimageArea->horizontalScrollBar()->setValue(v);
+	}
+	if(sender() == ui->rawimageArea->verticalScrollBar()) {
+		ui->evaluatedimageArea->verticalScrollBar()->setValue(v);
+	}
+	if(sender() == ui->evaluatedimageArea->horizontalScrollBar()) {
+		ui->rawimageArea->horizontalScrollBar()->setValue(v);
+	}
+	if(sender() == ui->evaluatedimageArea->verticalScrollBar()) {
+		ui->rawimageArea->verticalScrollBar()->setValue(v);
+	}
 }
 
 } // namespace snowgui

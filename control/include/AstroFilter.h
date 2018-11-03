@@ -179,6 +179,43 @@ T	Mean<T, S>::operator()(const ConstImageAdapter<T>& image) {
 }
 
 /**
+ * \brief Filter that finds the mean of an image
+ */
+template<typename T, typename S>
+class Mean2 : public PixelTypeFilter<T, S> {
+	bool	relative;
+public:
+	Mean2(bool _relative = false) : relative(_relative) {
+	}
+	virtual S	filter(const ConstImageAdapter<T>& image);
+	virtual T	operator()(const ConstImageAdapter<T>& image);
+};
+
+template<typename T, typename S>
+S	Mean2<T, S>::filter(const ConstImageAdapter<T>& image) {
+	ImageSize	size = image.getSize();
+	S	sum = 0;
+	size_t	counter = 0;
+	bool	check_nan = std::numeric_limits<T>::has_quiet_NaN;
+	for (int x = 0; x < size.width(); x++) {
+		for (int y = 0; y < size.height(); y++) {
+			T	v = image.pixel(x, y);
+			if ((check_nan) && (v != v))
+				continue;
+			sum += v * v;
+			counter++;
+		}
+	}
+	S	result = sum / counter;
+	return result;
+}
+
+template<typename T, typename S>
+T	Mean2<T, S>::operator()(const ConstImageAdapter<T>& image) {
+	return (T)filter(image);
+}
+
+/**
  * \brief Filter that finds the variance of an image
  */
 template<typename T, typename S>

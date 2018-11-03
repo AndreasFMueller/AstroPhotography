@@ -71,6 +71,25 @@ public:
 // the algorithms somewhat, because we know that they are float images
 typedef std::shared_ptr<Image<float> >	FocusableImage;
 
+class FocusImagePreconditioner : public ConstImageAdapter<float> {
+	const ConstImageAdapter<float>&	_image;
+	FocusableImage	_imageptr;
+	float	_noisefloor;
+	float	_mean;
+	float	_max;
+	float	_top;
+	float	_stddev;
+public:
+	float	noisefloor() const { return _noisefloor; }
+	float	mean() const { return _mean; }
+	float	max() const { return _max; }
+	float	top() const { return _top; }
+	void	top(float t) { _top = t; }
+	float	stddev() const { return _stddev; }
+	FocusImagePreconditioner(FocusableImage image);
+	virtual float	pixel(int x, int y) const;
+};
+
 // The FocusableImageConverter is used to convert the input image into
 // a focusable image. In this step we also extract the rectangle.
 class FocusableImageConverter;
