@@ -4,12 +4,18 @@
  * (c) 2018 Prof Dr Andreas Müller, Hochschule Rapperswil
  */
 #include <AstroFocus.h>
-#include <BackgroundAdapter.h>
+#include "BackgroundAdapter.h"
+#include "TopAdapter.h"
 #include <AstroFilter.h>
 
 namespace astro {
 namespace focusing {
 
+/**
+ * \brief Construct a preconditioner
+ *
+ * \param imageptr	a focusable image for focus evaluation
+ */
 FocusImagePreconditioner::FocusImagePreconditioner(FocusableImage imageptr)
 	: ConstImageAdapter<float>(imageptr->getSize()), _image(*imageptr),
 	  _imageptr(imageptr) {
@@ -33,20 +39,30 @@ FocusImagePreconditioner::FocusImagePreconditioner(FocusableImage imageptr)
 	_noisefloor = limit;
 
 	// compute a reasonable top value
-	image::filter::Mean2<float, float>	mean2;
-	float	m2 = mean2(*_imageptr);
-	_stddev = sqrt(m2 - _mean * _mean);
-	_top = _mean + 3 * _stddev;
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "E(x^2)=%f, stddev=%f, top=%f",
-		m2, _stddev, _top);
+	TopAdapter	topadapter(imageptr, _max);
+	_top = _noisefloor + 3 * (_mean - _noisefloor);
+	
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "top=%f", _top);
 }
 
+/**
+ * \brief Pixel access
+ *
+ * \param x	x-coordinate of pixel
+ * \param y	y-coordinate of pixel
+ */
 float	FocusImagePreconditioner::pixel(int x, int y) const {
-	float	v = (_image.pixel(x, y) - _noisefloor) / (_top - _noisefloor);
-	if (v < 0.) {
+	// set nan-Pixels to 0
+	float	v = _image.pixel(x, y);
+	if (v != v) {
+		return 0;
+	}
+	// rescale pixels
+	v = (v - _noisefloor) / (_top - _noisefloor);
+	if (v <= 0.) {
 		return 0.;
 	}
-	if (v > 1.) {
+	if (v >= 1.) {
 		return 1.;
 	}
 	return v;

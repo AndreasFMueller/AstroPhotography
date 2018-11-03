@@ -16,7 +16,8 @@ noinst_HEADERS =							\
 	FWHM2Evaluator.h						\
 	FWHMEvaluator.h							\
 	MeasureEvaluator.h						\
-	SymmetricSolver.h
+	SymmetricSolver.h						\
+	TopAdapter.h
 
 libastrofocusing_la_SOURCES =						\
 	AbsoluteValueSolver.cpp						\
@@ -53,6 +54,7 @@ libastrofocusing_la_SOURCES =						\
 	MeasureEvaluator.cpp						\
 	ParabolicFocusSolver.cpp					\
 	SymmetricSolver.cpp						\
+	TopAdapter.cpp							\
 	UnsignedCharImage.cpp	
 
 

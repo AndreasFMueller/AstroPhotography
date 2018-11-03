@@ -13,10 +13,11 @@ FormatReductionBase::FormatReductionBase(double min, double max)
 }
 
 unsigned char	FormatReductionBase::clamp(double v) const {
-	if (v < _min) { return (unsigned char)0; }
-	if (v > _max) { return (unsigned char)255; }
-	unsigned char	w = 255 * (v - _min) / (_max - _min);
-	return w;
+	double	w = trunc(255 * (v - _min) / (_max - _min));
+	if (w <= _min) { return (unsigned char)0; }
+	if (w >= _max) { return (unsigned char)255; }
+	unsigned char	result = w;
+	return result;
 }
 
 } // namespace image

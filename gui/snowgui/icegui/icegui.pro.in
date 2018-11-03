@@ -123,6 +123,7 @@ SOURCES += 								\
 	FilterWheelBusy.cpp						\
 	filterwheelupdatework.cpp					\
 	FocusButton.cpp							\
+	focuselementstack.cpp						\
 	FocusingCallbackI.cpp						\
 	GuiderButton.cpp						\
 	ImageForwarder.cpp						\
@@ -146,6 +147,7 @@ HEADERS  += 								\
 	EventMonitor.h							\
 	FilterWheelBusy.h						\
 	FocusButton.h							\
+	focuselementstack.h						\
 	FocusingCallbackI.h						\
 	GuiderButton.h							\
 	ImageForwarder.h						\

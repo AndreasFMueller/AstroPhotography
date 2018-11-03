@@ -68,7 +68,6 @@ void	FocusElementView::setFocusElement(snowstar::FocusElement element) {
 }
 
 void	FocusElementView::sliderChanged(int v) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "slider changed: %d", v);
 	if(sender() == ui->rawimageArea->horizontalScrollBar()) {
 		ui->evaluatedimageArea->horizontalScrollBar()->setValue(v);
 	}

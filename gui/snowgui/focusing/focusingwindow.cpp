@@ -40,7 +40,7 @@ focusingwindow::focusingwindow(QWidget *parent)
 	connect(ui->focusingcontrollerWidget,
 		SIGNAL(focuselementReceived(snowstar::FocusElement)),
 		ui->focusingMonitor,
-		SLOT(setFocusElement(snowstar::FocusElement)));
+		SLOT(receiveFocusElement(snowstar::FocusElement)));
 	connect(ui->focusingcontrollerWidget,
 		SIGNAL(pointReceived(snowstar::FocusPoint)),
 		ui->focusingHistory,
@@ -49,6 +49,16 @@ focusingwindow::focusingwindow(QWidget *parent)
 		SIGNAL(stateReceived(snowstar::FocusState)),
 		ui->focusingHistory,
 		SLOT(receiveState(snowstar::FocusState)));
+	connect(ui->focusingcontrollerWidget,
+		SIGNAL(stateReceived(snowstar::FocusState)),
+		ui->focusingMonitor,
+		SLOT(receiveState(snowstar::FocusState)));
+
+	// selections in the focusing progress
+	connect(ui->focusingHistory,
+		SIGNAL(rowSelected(int)),
+		ui->focusingMonitor,
+		SLOT(setCurrentIndex(int)));
 
 	// exposure changes
 	connect(ui->ccdcontrollerWidget,

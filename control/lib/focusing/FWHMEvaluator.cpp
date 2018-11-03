@@ -316,7 +316,7 @@ double	FWHMEvaluator::evaluate(FocusableImage image) {
 		precond.noisefloor(), precond.mean() + 2 * precond.stddev());
 
 	// find nonisolated maxima
-	BrightPoints	bp(*image, precond.mean() + 2 * precond.stddev());
+	BrightPoints	bp(*image, precond.top());
 
 	// prepare an image that we can use to report all the connected
 	// components
@@ -389,11 +389,11 @@ double	FWHMEvaluator::evaluate(FocusableImage image) {
 	int	h = image->getSize().height();
 	for (int x = 0; x < w; x++) {
 		for (int y = 0; y < h; y++) {
-#if 0
-			double	v = precond.pixel(x, y);
-			double	w = image->pixel(x, y);
-			debug(LOG_DEBUG, DEBUG_LOG, 0, "change[%d,%d] %f -> %f",
-				x, y, w, v);
+#if 1
+			//double	v = precond.pixel(x, y);
+			//double	w = image->pixel(x, y);
+			//debug(LOG_DEBUG, DEBUG_LOG, 0, "change[%d,%d] %f -> %f",
+			//	x, y, w, v);
 #endif
 			image->pixel(x, y) = precond.pixel(x, y);
 		}

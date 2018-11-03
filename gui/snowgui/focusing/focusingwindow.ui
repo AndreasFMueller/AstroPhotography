@@ -69,7 +69,9 @@
           <widget class="snowgui::FocusingProgressWidget" name="focusingHistory" native="true"/>
          </item>
          <item>
-          <widget class="snowgui::FocusElementView" name="focusingMonitor" native="true"/>
+          <widget class="snowgui::FocusElementStack" name="focusingMonitor">
+           <widget class="QWidget" name="focusingMonitorPage1" native="true"/>
+          </widget>
          </item>
         </layout>
        </widget>
@@ -295,15 +297,15 @@
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>snowgui::FocusElementView</class>
-   <extends>QWidget</extends>
-   <header location="global">focuselementview.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
    <class>snowgui::FocusingProgressWidget</class>
    <extends>QWidget</extends>
    <header location="global">focusingprogresswidget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>snowgui::FocusElementStack</class>
+   <extends>QStackedWidget</extends>
+   <header location="global">focuselementstack.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

@@ -20,6 +20,12 @@ FocusingProgressWidget::FocusingProgressWidget(QWidget *parent)
 	ui->pointTable->setColumnCount(2);
 	ui->pointTable->setRowCount(0);
 
+	ui->pointTable->setColumnWidth(0, 70);
+	ui->pointTable->setColumnWidth(1, 70);
+
+	connect(ui->pointTable, SIGNAL(cellClicked(int, int)),
+		this, SLOT(cellActivated(int, int)));
+
 	// set up the table view
 	QStringList	headers;
 	headers << "Position";
@@ -78,6 +84,11 @@ void	FocusingProgressWidget::receiveState(snowstar::FocusState state) {
 		ui->stateField->setText(QString("FAILED"));
 		break;
 	}
+}
+
+void	FocusingProgressWidget::cellActivated(int row, int column) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "row selected: %d", row);
+	emit rowSelected(row);
 }
 
 } // namespace snowgui

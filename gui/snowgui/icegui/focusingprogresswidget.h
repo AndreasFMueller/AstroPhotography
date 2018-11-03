@@ -24,12 +24,16 @@ public:
 	explicit FocusingProgressWidget(QWidget *parent = 0);
 	~FocusingProgressWidget();
 
+signals:
+	void	rowSelected(int);
+
 private:
 	Ui::FocusingProgressWidget *ui;
 
 public slots:
 	void	receivePoint(snowstar::FocusPoint);
 	void	receiveState(snowstar::FocusState);
+	void	cellActivated(int row, int column);
 };
 
 } // namespace snowgui
