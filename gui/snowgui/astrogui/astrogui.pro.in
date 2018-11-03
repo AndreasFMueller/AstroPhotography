@@ -58,6 +58,7 @@ SOURCES += 								\
 	HourAngleWidget.cpp						\
 	Image2Pixmap.cpp						\
 	LocalSiderealTime.cpp						\
+	LocalTimeWidget.cpp						\
 	LogSpinBox.cpp							\
 	Scaler.cpp							\
 	SelectableImage.cpp						\
@@ -84,6 +85,7 @@ HEADERS  += 								\
 	HourAngleWidget.h						\
 	Image2Pixmap.h							\
 	LocalSiderealTime.h						\
+	LocalTimeWidget.h						\
 	LogSpinBox.h							\
 	Scaler.h							\
 	SelectableImage.h						\
