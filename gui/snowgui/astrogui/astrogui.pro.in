@@ -55,6 +55,7 @@ SOURCES += 								\
 	HideProgress.cpp						\
 	HideWidget.cpp							\
 	Histogram.cpp							\
+	HourAngleWidget.cpp						\
 	Image2Pixmap.cpp						\
 	LocalSiderealTime.cpp						\
 	LogSpinBox.cpp							\
@@ -80,6 +81,7 @@ HEADERS  += 								\
 	HideProgress.h							\
 	HideWidget.h							\
 	Histogram.h							\
+	HourAngleWidget.h						\
 	Image2Pixmap.h							\
 	LocalSiderealTime.h						\
 	LogSpinBox.h							\

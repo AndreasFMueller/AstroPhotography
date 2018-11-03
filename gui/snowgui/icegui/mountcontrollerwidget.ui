@@ -73,7 +73,7 @@
        </widget>
       </item>
       <item row="5" column="3">
-       <widget class="snowgui::ClockWidget" name="utcTime">
+       <widget class="snowgui::HourAngleWidget" name="hourangleWidget">
         <property name="maximumSize">
          <size>
           <width>70</width>
@@ -237,9 +237,9 @@
        </widget>
       </item>
       <item row="5" column="1" colspan="2">
-       <widget class="QLabel" name="utcLabel">
+       <widget class="QLabel" name="hourangleLabel">
         <property name="text">
-         <string>UTC:</string>
+         <string>Hour angle:</string>
         </property>
        </widget>
       </item>
@@ -285,9 +285,9 @@
    <header location="global">LocalSiderealTime.h</header>
   </customwidget>
   <customwidget>
-   <class>snowgui::ClockWidget</class>
+   <class>snowgui::HourAngleWidget</class>
    <extends>QLabel</extends>
-   <header location="global">ClockWidget.h</header>
+   <header location="global">HourAngleWidget.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

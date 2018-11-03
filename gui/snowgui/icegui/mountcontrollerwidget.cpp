@@ -136,17 +136,26 @@ void	mountcontrollerwidget::setupMount() {
 
 		// write the position to the position label
 		std::string	pl;
+#if 0
 		pl += astro::stringprintf("%.4f",
 			fabs(_position.longitude().degrees()));
+#else
+		pl += _position.longitude().dms(':', 0).substr(1);
+#endif
 		pl += (_position.longitude().degrees() < 0) ? "W" : "E";
 		pl += " ";
+#if 0
 		pl += astro::stringprintf("%.4f",
 			fabs(_position.latitude().degrees()));
+#else
+		pl += _position.latitude().dms(':', 0).substr(1);
+#endif
 		pl += (_position.longitude().degrees() < 0) ? "S" : "N";
 		ui->observatoryField->setText(QString(pl.c_str()));
 
 		// write the position to the LMST widget
 		ui->siderealTime->position(_position);
+		ui->hourangleWidget->position(_position);
 
 		// try to get the time
 		try {
@@ -295,6 +304,7 @@ void	mountcontrollerwidget::statusUpdate() {
 	ui->currentDecField->setText(QString(
 		rd.dec().dms(':',0).c_str()));
 	_telescope = radec;
+	ui->hourangleWidget->ra(rd.ra());
 
 	// read the current time from the mount
 	time_t	now = _mount->getTime();
