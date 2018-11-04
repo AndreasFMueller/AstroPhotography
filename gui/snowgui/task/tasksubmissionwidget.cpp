@@ -8,6 +8,7 @@
 #include <CommunicatorSingleton.h>
 #include <IceConversions.h>
 #include <tasks.h>
+#include <AstroUtils.h>
 
 namespace snowgui {
 
@@ -24,9 +25,14 @@ tasksubmissionwidget::tasksubmissionwidget(QWidget *parent)
 	_filterwheelindex = -1;
 	_mountindex = -1;
 
+	ui->submitButton->setEnabled(false);
+
 	// connect submit button
 	connect(ui->submitButton, SIGNAL(clicked()),
 		this, SLOT(submitClicked()));
+	connect(ui->projectField, SIGNAL(textChanged(const QString&)),
+		this, SLOT(projectChanged(const QString&)));
+
 }
 
 /**
@@ -267,6 +273,13 @@ void	tasksubmissionwidget::filterwheelSelected(int filterwheelindex) {
 void	tasksubmissionwidget::mountSelected(int mountindex) {
 	_mountindex = mountindex;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "Mount index: %d", _mountindex);
+}
+
+void	tasksubmissionwidget::projectChanged(const QString& p) {
+	_projectname = p;
+	std::string	s(_projectname.toLatin1().data());
+	s = astro::trim(s);
+	ui->submitButton->setEnabled(s.size() > 0);
 }
 
 } // namespace snowgui

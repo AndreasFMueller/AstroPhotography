@@ -29,6 +29,7 @@ class tasksubmissionwidget : public InstrumentWidget {
 	int	_coolerindex;
 	int	_filterwheelindex;
 	int	_mountindex;
+	QString	_projectname;
 	std::vector<std::string>	_camera_names;
 
 public:
@@ -49,6 +50,7 @@ public slots:
 	void	coolerSelected(int);
 	void	filterwheelSelected(int);
 	void	mountSelected(int);
+	void	projectChanged(const QString&);
 
 private:
 	Ui::tasksubmissionwidget *ui;

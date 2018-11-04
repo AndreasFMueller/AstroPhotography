@@ -34,8 +34,6 @@ trackingmonitorwindow:
       - different colors for curves that display pixel offsets or arc second
 	offsets
       - Legend: which color is RA, which one is DEC
-      - How do we now wether we see pixel offsets in the CCD coordinate
-	system, or arc second offsets in sky coordinates?
       - Using the calibration, we should be able to see the arc seconds
 	offets in the sky coordinate system, not the CCD coordinate system
       - make time axis scalable for long tracking histories
@@ -69,22 +67,6 @@ exposewidget:
 imagecontrollerwidget
       -	controls to turn on/off use of dark, interpolation
       - ability to retrieve dark image and to view it
-
-taskswindow:
-      - make sure tasks are not submitted without a project name
-      - add button to reload tasks (in case they have changed while
-	the client was not able to process changes)
-
-
-QPainter::begin: A paint device can only be painted by one painter at a time.
-QPainter::setCompositionMode: Painter not active
-QWidget::repaint: Recursive repaint detected
-Okt 15 00:15:36 snowgui[10836/4] TasksIndicator.cpp:045: draw the current state
-stacktrace caused by signal 11
-QWidget::repaint: Recursive repaint detected
-Okt 15 00:15:36 snowgui[10836/1] TasksIndicator.cpp:045: draw the current state
-
-
 
 
 Okt 15 00:44:39 snowgui[11133/16] TrackingMonitorController.cpp:063: new tracking point received (timeago = 0.0)
