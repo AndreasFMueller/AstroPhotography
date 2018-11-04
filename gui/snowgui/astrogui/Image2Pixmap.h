@@ -46,6 +46,7 @@ class	Image2Pixmap {
 	double	_gain;
 	bool	_logarithmic;
 	int	_scale;
+	astro::image::ImageSize		_frame;
 	astro::image::ImageRectangle	_rectangle;
 	astro::image::MosaicType	_mosaic;
 	bool	_crosshairs;
@@ -79,6 +80,9 @@ public:
 	void	show_green(bool s) { _show_green = s; }
 	bool	show_blue() const { return _show_blue; }
 	void	show_blue(bool s) { _show_blue = s; }
+
+	void	frame(const astro::image::ImageSize& f) { _frame = f; }
+	const astro::image::ImageSize&	frame() const { return _frame; }
 
 	astro::image::ImagePoint	crosshairs_center() const {
 		return _crosshairs_center;

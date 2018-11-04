@@ -112,7 +112,7 @@ imagedisplaywidget::imagedisplaywidget(QWidget *parent) :
 		this, SLOT(blueOffsetChanged(double)));
 
 	// crosshairs
-	_crosshairs = true;
+	_crosshairs = false;
 }
 
 /**
@@ -191,9 +191,7 @@ void	imagedisplaywidget::setImageRectangle(const ImageRectangle& imagerectangle)
 	emit rectangleSelected(imagerectangle);
 
 	// compute the center for the crosshairs relative to this image
-	ImageSize	s = _image->size();
-	int	cx = s.width() / 2 - imagerectangle.size().width();
-	int	cy = s.height() / 2 - imagerectangle.size().height();
+	image2pixmap.crosshairs_center(imagerectangle.centerWithinFrame(_image->size()));
 }
 
 /**
@@ -1012,15 +1010,23 @@ void	imagedisplaywidget::crosshairsChanged(int c) {
 }
 
 void	imagedisplaywidget::crosshairsCenter(astro::image::ImagePoint c) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "setting crosshairs center to %s",
+		c.toString().c_str());
 	image2pixmap.crosshairs_center(c);
 }
 
 void	imagedisplaywidget::setCrosshairsVisible(bool c) {
 	crosshairs(c);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "crosshairs now %s",
+		(crosshairs()) ? "on" : "off");
+	image2pixmap.crosshairs(crosshairs());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "crosshairs now %s",
+		(image2pixmap.crosshairs()) ? "on" : "off");
 	repaint();
 }
 
 void	imagedisplaywidget::toggleCrosshairsVisible() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "toggleCrosshairsVisible()");
 	setCrosshairsVisible(!crosshairs());
 }
 

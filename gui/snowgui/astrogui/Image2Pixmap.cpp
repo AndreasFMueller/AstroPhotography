@@ -586,6 +586,10 @@ QPixmap	*Image2Pixmap::operator()(ImagePtr image) {
 	// draw the crosshairs if necessary
 	if (_crosshairs) {
 		drawCrosshairs(result);
+	} else {
+		debug(LOG_DEBUG, DEBUG_LOG, 0,
+			"crosshairs not drawn (would be at %s)",
+			_crosshairs_center.toString().c_str());
 	}
 
 	return result;;
@@ -595,14 +599,32 @@ QPixmap	*Image2Pixmap::operator()(ImagePtr image) {
  * \brief Draw the crosshairs to a QPixmap
  */
 void	Image2Pixmap::drawCrosshairs(QPixmap *pixmap) {
+	// if the crosshairs center is not set, use the center of the
+	// image
+	astro::image::ImagePoint	center = _crosshairs_center;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "crosshair center %s == %s",
+		_crosshairs_center.toString().c_str(),
+		ImagePoint().toString().c_str());
+	if (_crosshairs_center == ImagePoint()) {
+		if (_rectangle != ImageRectangle()) {
+			center = _rectangle.size().center();
+		} else if (_frame != ImageSize()) {
+			center = _frame.center();
+		}
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "center of %s: %s",
+			_rectangle.toString().c_str(),
+			center.toString().c_str());
+	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "drawing crosshairs at %s",
+		center.toString().c_str());
 	QPainter	painter(pixmap);
 	QPen	pen(Qt::SolidLine);
 	pen.setColor(Qt::red);
 	painter.setPen(pen);
 	int	w = pixmap->size().width();
 	int	h = pixmap->size().height();
-	int	y = h - _crosshairs_center.y();
-	int	x = _crosshairs_center.x();
+	int	y = h - 1 - center.y();
+	int	x = center.x();
         painter.drawLine(QPoint(0, y), QPoint(x - 5, y));
 	painter.drawLine(QPoint(x + 5, y), QPoint(w - 1, y));
 	painter.drawLine(QPoint(x, 0), QPoint(x, y - 5));

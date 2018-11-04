@@ -234,6 +234,10 @@ int	ImageRectangle::borderDistance(const ImagePoint& point) const {
 	return m;
 }
 
+ImagePoint	ImageRectangle::centerWithinFrame(const ImageSize& frame) const {
+	ImagePoint	p = frame.center() - origin();
+	return p;
+}
 
 } // namespace image
 } // namespace astro

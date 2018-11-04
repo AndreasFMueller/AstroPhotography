@@ -15,31 +15,31 @@
   </property>
   <layout class="QHBoxLayout" name="horizontalLayout">
    <property name="leftMargin">
-    <number>5</number>
+    <number>6</number>
    </property>
    <property name="topMargin">
-    <number>5</number>
+    <number>6</number>
    </property>
    <property name="rightMargin">
-    <number>5</number>
+    <number>6</number>
    </property>
    <property name="bottomMargin">
-    <number>5</number>
+    <number>6</number>
    </property>
    <item>
     <widget class="QWidget" name="leftWidget" native="true">
      <layout class="QVBoxLayout" name="verticalLayout_2">
       <property name="leftMargin">
-       <number>0</number>
+       <number>6</number>
       </property>
       <property name="topMargin">
-       <number>0</number>
+       <number>6</number>
       </property>
       <property name="rightMargin">
-       <number>0</number>
+       <number>6</number>
       </property>
       <property name="bottomMargin">
-       <number>0</number>
+       <number>6</number>
       </property>
       <item>
        <widget class="snowgui::guidercontrollerwidget" name="guidercontrollerWidget" native="true">
@@ -73,16 +73,16 @@
      </property>
      <layout class="QVBoxLayout" name="verticalLayout">
       <property name="leftMargin">
-       <number>0</number>
+       <number>6</number>
       </property>
       <property name="topMargin">
-       <number>0</number>
+       <number>6</number>
       </property>
       <property name="rightMargin">
-       <number>0</number>
+       <number>6</number>
       </property>
       <property name="bottomMargin">
-       <number>0</number>
+       <number>6</number>
       </property>
       <item>
        <widget class="snowgui::imagercontrollerwidget" name="imagercontrollerWidget" native="true"/>
@@ -97,8 +97,8 @@
           <rect>
            <x>0</x>
            <y>0</y>
-           <width>350</width>
-           <height>403</height>
+           <width>338</width>
+           <height>389</height>
           </rect>
          </property>
          <attribute name="label">
@@ -183,6 +183,9 @@
    <extends>QWidget</extends>
    <header location="global">imagedisplaywidget.h</header>
    <container>1</container>
+   <slots>
+    <slot>rectangleSelected(astro::image::ImageRectangle)</slot>
+   </slots>
   </customwidget>
   <customwidget>
    <class>snowgui::guideportcontrollerwidget</class>
@@ -209,12 +212,6 @@
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>snowgui::guidercontrollerwidget</class>
-   <extends>QWidget</extends>
-   <header location="global">guidercontrollerwidget.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
    <class>snowgui::adaptiveopticscontrollerwidget</class>
    <extends>QWidget</extends>
    <header location="global">adaptiveopticscontrollerwidget.h</header>
@@ -224,6 +221,12 @@
    <class>snowgui::mountcontrollerwidget</class>
    <extends>QWidget</extends>
    <header location="global">mountcontrollerwidget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>snowgui::guidercontrollerwidget</class>
+   <extends>QWidget</extends>
+   <header location="global">guidercontrollerwidget.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>

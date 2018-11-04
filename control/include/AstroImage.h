@@ -112,6 +112,7 @@ public:
 	ImagePoint	lowerleft() const;
 	ImagePoint	lowerright() const;
 	ImagePoint	center() const;
+	ImagePoint	centerWithinRectangle(const ImageSize& frame) const;
 	// scaling
 	ImageSize	operator*(const double l) const;
 	// reduction 
@@ -177,6 +178,7 @@ public:
 	ImagePoint	lowerright() const;
 	// center
 	ImagePoint	center() const;
+	ImagePoint	centerWithinFrame(const ImageSize& frame) const;
 	// find out whether the rectangle is uninitialized
 	bool	isEmpty() const { return _size.isEmpty(); }
 	// subimage
