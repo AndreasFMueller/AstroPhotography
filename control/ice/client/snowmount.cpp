@@ -260,5 +260,8 @@ int	main(int argc, char *argv[]) {
 } // namespace snowstar
 
 int	main(int argc, char *argv[]) {
-	return astro::main_function<snowstar::app::snowmount::main>(argc, argv);
+	int	rc = astro::main_function<snowstar::app::snowmount::main>(argc,
+			argv);
+	CommunicatorSingleton::release();
+	return rc;
 }

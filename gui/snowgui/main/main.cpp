@@ -134,5 +134,7 @@ int main(int argc, char *argv[]) {
 
 // wrapper used to catch and log any exceptions
 int	main(int argc, char *argv[]) {
-	return astro::main_function<snowgui::main>(argc, argv);
+	int	rc = astro::main_function<snowgui::main>(argc, argv);
+	snowstar::CommunicatorSingleton::release();
+	return rc;
 }

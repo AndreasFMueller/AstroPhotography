@@ -22,6 +22,7 @@ public:
 
 	// get the communicator
 	static Ice::CommunicatorPtr	get();
+	static void	release();
 
 	// maintaining the adapter and adding/removing servants 
 	static Ice::ObjectAdapterPtr	getAdapter();

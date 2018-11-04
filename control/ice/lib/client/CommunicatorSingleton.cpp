@@ -62,6 +62,10 @@ Ice::CommunicatorPtr	CommunicatorSingleton::get() {
 	return _communicator;
 }
 
+void	CommunicatorSingleton::release() {
+	_communicator->destroy();
+}
+
 /**
  * \brief Static singleton object adapter
  */

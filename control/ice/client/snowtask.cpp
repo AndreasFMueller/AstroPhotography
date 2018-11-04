@@ -728,5 +728,8 @@ int	main(int argc, char *argv[]) {
 } // namespace snowtar
 
 int	main(int argc, char *argv[]) {
-	return astro::main_function<snowstar::app::snowtask::main>(argc, argv);
+	int	rc = astro::main_function<snowstar::app::snowtask::main>(argc,
+			argv);
+	snowstar::CommunicatorSingleton::release();
+	return rc;
 }

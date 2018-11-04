@@ -141,6 +141,10 @@ int	command_scan(snowstar::ModulesPrx& modules,
 	return EXIT_SUCCESS;
 }
 
+int	cleanup(int rc) {
+	return rc;
+}
+
 /**
  * \brief Main function for the snowcan program
  */
@@ -219,5 +223,8 @@ int	main(int argc, char *argv[]) {
 } // namespace snowstar
 
 int main(int argc, char *argv[]) {
-	return astro::main_function<snowstar::app::snowscan::main>(argc, argv);
+	int	rc =  astro::main_function<snowstar::app::snowscan::main>(argc,
+			argv);
+	CommunicatorSingleton::release();
+	return rc;
 }

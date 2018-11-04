@@ -135,6 +135,9 @@ int	main(int argc, char *argv[]) {
 } // namespace snowstar
 
 int	main(int argc, char *argv[]) {
-	return astro::main_function<snowstar::app::servers::main>(argc, argv);
+	int	rc = astro::main_function<snowstar::app::servers::main>(argc,
+			argv);
+	return rc;
 }
+
 
