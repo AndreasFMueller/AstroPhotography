@@ -10,6 +10,7 @@
 #include <AstroDiscovery.h>
 #include <QLabel>
 #include <AstroImage.h>
+#include "WindowsMenu.h"
 
 namespace snowgui {
 
@@ -61,6 +62,11 @@ private:
 
 	QAction	*saveAction;
 	void	saveImage();
+
+	WindowsMenu	*windowsMenu;
+
+	QAction	*raiseAction;
+	void	raiseMainwindow();
 
 	void	createActions();
 	void	createMenus();

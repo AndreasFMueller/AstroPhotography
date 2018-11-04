@@ -54,7 +54,8 @@ ASTROGUISOURCES = 							\
 	serverselectiondialog.cpp 					\
 	repositoryconfigurationwidget.cpp				\
 	repoenablebox.cpp						\
-	instrumentselectiondialog.cpp
+	instrumentselectiondialog.cpp					\
+	WindowsMenu.cpp
 
 ASTROGUIHEADERS =							\
 	Application.h							\
@@ -64,7 +65,8 @@ ASTROGUIHEADERS =							\
 	serverselectiondialog.h						\
 	repositoryconfigurationwidget.h					\
 	repoenablebox.h							\
-	instrumentselectiondialog.h
+	instrumentselectiondialog.h					\
+	WindowsMenu.h
 
 FORMS    +=								\
 	mainwindow.ui							\

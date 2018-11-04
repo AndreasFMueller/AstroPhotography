@@ -35,6 +35,7 @@ public:
 	void	addPastEvents();
 	void	clearEvents();
 	void	insertEvent(int row, const snowstar::Event& event);
+	void	closeEvent(QCloseEvent *);
 
 public slots:
 	void	filterEdited(const QString&);

@@ -8,6 +8,7 @@
 #include <CommunicatorSingleton.h>
 #include "mainwindow.h"
 #include "../icegui/InstrumentWidget.h"
+#include "WindowsMenu.h"
 
 using namespace astro::discover;
 
@@ -63,7 +64,6 @@ void	InstrumentSelectionDialog::accept() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "accept instrument %s",
 		instrumentname.c_str());
 	this->launch(instrumentname);
-	close();
 }
 
 /**
@@ -81,6 +81,9 @@ void	InstrumentSelectionDialog::launch(const std::string& instrumentname,
 	// to the imageForSaving option
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "connect offerImage()");
 
+	// add the application to the menu
+	//WindowsMenu::get()->add(a, "new Application");
+
 	// start the instrument setup thread
 	a->launchInstrumentSetup(_serviceobject, ri);
 
@@ -88,6 +91,17 @@ void	InstrumentSelectionDialog::launch(const std::string& instrumentname,
 	a->show();
 	QApplication::setActiveWindow(a);
 	a->raise();
+
+	// add the application to the menu
+	try {
+		WindowsMenu::get()->add(a, QString(instrumentname.c_str()));
+	} catch (const std::exception& x) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "cannot add menu: %s", x.what());
+	}
+
+	// now close the selection dialog
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "close the selection dialog");
+	close();
 }
 
 } // namespace snowgui

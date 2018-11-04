@@ -215,6 +215,7 @@ void	MainWindow::launchInstruments() {
 		instrumentswindow	*iw = new instrumentswindow(NULL,
 			_serviceobject);
 		iw->show();
+		windowsMenu->add(iw, QString("Instruments"));
 	} catch (const std::exception& x) {
 		QMessageBox	*message = new QMessageBox(this);
 		message->setText(QString("Connection failure"));
@@ -239,6 +240,7 @@ void	MainWindow::launchConfiguration() {
 		configurationdialog	*config = new configurationdialog(NULL,
 			_serviceobject);
 		config->show();
+		windowsMenu->add(config, QString("Configuration"));
 	} catch (const std::exception& x) {
 		QMessageBox	*message = new QMessageBox(this);
 		message->setText(QString("Connection failure"));
@@ -262,6 +264,7 @@ void	MainWindow::launchImages() {
 		imageswindow	*images = new imageswindow(NULL,
 			_serviceobject);
 		images->show();
+		windowsMenu->add(images, QString("Images"));
 	} catch (const std::exception& x) {
 		QMessageBox	*message = new QMessageBox(this);
 		message->setText(QString("Connection failure"));
@@ -285,6 +288,7 @@ void	MainWindow::launchRepository() {
 		repositorywindow	*rw = new repositorywindow(NULL,
 			_serviceobject);
 		rw->show();
+		windowsMenu->add(rw, QString("Repositories"));
 	} catch (const std::exception& x) {
 		QMessageBox	*message = new QMessageBox(this);
 		message->setText(QString("Connection failure"));
@@ -434,6 +438,10 @@ void	MainWindow::saveImage() {
 	out.write(_image);
 }
 
+void	MainWindow::raiseMainwindow() {
+	this->raise();
+}
+
 /**
  * \brief Create the actions in the menu
  */
@@ -454,6 +462,10 @@ void	MainWindow::createActions() {
 	saveAction->setEnabled(false);
 	connect(saveAction, &QAction::triggered, this,
 		&MainWindow::saveImage);
+
+	raiseAction = new QAction(QString("Main Window"));
+	connect(raiseAction, &QAction::triggered, this,
+		&MainWindow::raiseMainwindow);
 }
 
 /**
@@ -465,6 +477,9 @@ void	MainWindow::createMenus() {
 	fileMenu->addAction(openAction);
 	fileMenu->addAction(browseAction);
 	fileMenu->addAction(saveAction);
+	QMenu	*_windowsmenu = menuBar()->addMenu(QString("Windows"));
+	_windowsmenu->addAction(raiseAction);
+	windowsMenu = new WindowsMenu(_windowsmenu);
 }
 
 /**
@@ -534,6 +549,7 @@ void	MainWindow::launchEvents() {
 		EventDisplayWidget	*edw = new EventDisplayWidget(NULL,
 						_serviceobject);
 		edw->show();
+		windowsMenu->add(edw, QString("Events"));
 	} catch (const std::exception& x) {
 		QMessageBox	*message = new QMessageBox(this);
 		message->setText(QString("Connection failure"));

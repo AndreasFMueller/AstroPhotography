@@ -284,4 +284,11 @@ void	EventDisplayWidget::eventDoubleClicked(QTableWidgetItem *item) {
 	_detailwidget->show();
 }
 
+/**
+ * \brief Handle the close event for the window
+ */
+void    EventDisplayWidget::closeEvent(QCloseEvent * /* event */) {
+	deleteLater();
+}
+
 } // namespace snowgui
