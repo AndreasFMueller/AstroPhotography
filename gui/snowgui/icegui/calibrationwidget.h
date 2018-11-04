@@ -9,6 +9,7 @@
 #include <QWidget>
 #include <guider.h>
 #include <QTimer>
+#include <AstroCoordinates.h>
 
 namespace snowgui {
 
@@ -57,6 +58,17 @@ public slots:
 	void	detailClicked();
 	void	setCalibration(snowstar::Calibration);
 	void	statusUpdate();
+
+	void	setTelescope(astro::RaDec);
+	void	setOrientation(bool);
+
+private:
+	astro::RaDec	_radec;
+	bool		_west;
+
+signals:
+	void	telescopeChanged(astro::RaDec);
+	void	orientationChanged(bool);
 };
 
 } // namespace snowgui

@@ -244,7 +244,30 @@ void	calibrationwidget::calculateClicked() {
 	calibrationcalculatordialog	*ccd
 		= new calibrationcalculatordialog(_guider, _guiderfactory,
 			_controltype, this, this);
-	ccd->show();
+	// get the data that we alread have
+	ccd->setTelescope(_radec);
+	connect(this, SIGNAL(telescopeChanged(astro::RaDec)),
+		ccd, SLOT(setTelescope(astro::RaDec)));
+
+	ccd->setOrientation(_west);
+	connect(this, SIGNAL(orientationChanged(bool)),
+		ccd, SLOT(setOrientation(bool)));
+
+	ccd->exec();
+}
+
+void    calibrationwidget::setTelescope(astro::RaDec radec) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "new telescope: %s",
+		radec.toString().c_str());
+	_radec = radec;
+	emit telescopeChanged(_radec);
+}
+
+void	calibrationwidget::setOrientation(bool west) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "new orientation: %s",
+		(west) ? "west" : "east");
+	_west = west;
+	emit orientationChanged(_west);
 }
 
 } // namespace snowgui

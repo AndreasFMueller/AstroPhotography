@@ -9,6 +9,7 @@
 #include <QDialog>
 #include <guider.h>
 #include "calibrationwidget.h"
+#include <AstroCoordinates.h>
 
 namespace snowgui {
 
@@ -22,13 +23,13 @@ class calibrationcalculatordialog : public QDialog {
 	snowstar::GuiderPrx		_guider;
 	snowstar::GuiderFactoryPrx	_guiderfactory;
 
-	double	_focallength;
-	double	_pixelsize;
-	int	_angle;
-	double	_guiderate;
-	int	_declination;
-	bool	_rainvert;
-	bool	_decinvert;
+	double	_focallength;	// focal length in [m]
+	double	_pixelsize;	// pixel size in [m]
+	double	_angle;		// rotation angle in [degrees]
+	double	_guiderate;	// guider rate, default 0.5
+	double	_declination;	// declination in [degrees]
+	bool	_telescopewest;	// wether or not the telescope was on the west
+	bool	_decinvert;	// do the optics vertically flip the image?
 
 	snowstar::Calibration	_cal;
 
@@ -40,6 +41,22 @@ public:
 		QWidget *parent = 0);
 	~calibrationcalculatordialog();
 
+	double	focallength() const { return _focallength; }
+	double	pixelsize() const { return _pixelsize; }
+	double	angle() const { return _angle; }
+	double	guiderate() const { return _guiderate; }
+	double	declination() const { return _declination; }
+	bool	telescopewest() const { return _telescopewest; }
+	bool	decinvert() const { return _decinvert; }
+
+	void	focallength(double f);
+	void	pixelsize(double s);
+	void	angle(double a);
+	void	guiderate(double a);
+	void	declination(double d);
+	void	telescopewest(bool w);
+	void	decinvert(bool i);
+
 private:
 	Ui::calibrationcalculatordialog *ui;
 
@@ -49,12 +66,17 @@ signals:
 	void	newCalibration(snowstar::Calibration);
 
 public slots:
-	void	angleChanged(int);
-	void	declinationChanged(int);
-	void	rainvertChanged(int);
+	void	angleChanged(double);
+	void	declinationChanged(double);
+
 	void	decinvertChanged(int);
+
 	void	acceptCalibration();
 	void	rejectCalibration();
+
+	void	setTelescope(astro::RaDec radec);
+	void	setOrientation(bool);
+	void	orientationChanged(int);
 };
 
 } // namespace snowgui

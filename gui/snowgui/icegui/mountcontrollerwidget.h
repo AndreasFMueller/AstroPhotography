@@ -63,6 +63,8 @@ public:
 	astro::RaDec	current();
 	void	setTarget(const astro::RaDec& target);
 
+	bool	orientation();
+
 signals:
 	void	mountSelected(int);
 	void	stateChanged(astro::device::Mount::state_type);

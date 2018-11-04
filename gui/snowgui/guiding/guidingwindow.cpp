@@ -44,6 +44,32 @@ guidingwindow::guidingwindow(QWidget *parent) : InstrumentWidget(parent),
 	connect(ui->imagercontrollerWidget,
 		SIGNAL(imageReceived(astro::image::ImagePtr)),
 		this, SLOT(newImage(astro::image::ImagePtr)));
+
+	// connections for the calibration calculator
+	connect(ui->mountcontrollerWidget,
+		SIGNAL(telescopeChanged(astro::RaDec)),
+		ui->guidercontrollerWidget,
+		SLOT(setTelescope(astro::RaDec)));
+	connect(ui->mountcontrollerWidget,
+		SIGNAL(orientationChanged(bool)),
+		ui->guidercontrollerWidget,
+		SLOT(setOrientation(bool)));
+
+	// read the data from the mount controller
+	try {
+		ui->guidercontrollerWidget->setOrientation(
+			ui->mountcontrollerWidget->orientation());
+	} catch (const std::exception& x) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "cannot set orientation: %s",
+			x.what());
+	}
+	try {
+		ui->guidercontrollerWidget->setTelescope(
+			ui->mountcontrollerWidget->current());
+	} catch (const std::exception& x) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "cannot set position: %s",
+			x.what());
+	}
 }
 
 guidingwindow::~guidingwindow() {

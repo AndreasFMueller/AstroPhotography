@@ -126,6 +126,17 @@ guidercontrollerwidget::guidercontrollerwidget(QWidget *parent)
 	connect(ui->yGainDial, SIGNAL(valueChanged(int)),
 		this, SLOT(yGainChanged(int)));
 
+	// connections for the calculator
+	connect(this, SIGNAL(telescopeChanged(astro::RaDec)),
+		ui->gpcalibrationWidget, SLOT(setTelescope(astro::RaDec)));
+	connect(this, SIGNAL(telescopeChanged(astro::RaDec)),
+		ui->aocalibrationWidget, SLOT(setTelescope(astro::RaDec)));
+
+	connect(this, SIGNAL(orientationChanged(bool)),
+		ui->gpcalibrationWidget, SLOT(setOrientation(bool)));
+	connect(this, SIGNAL(orientationChanged(bool)),
+		ui->aocalibrationWidget, SLOT(setOrientation(bool)));
+
 	// create the tracking monitor
 	_trackingmonitordialog = NULL;
 	_trackingmonitor = NULL;
@@ -804,6 +815,18 @@ void	guidercontrollerwidget::yGainChanged(int value) {
 	if (_guider) {
 		_guider->setFilterParameter(1, fvalue);
 	}
+}
+
+void	guidercontrollerwidget::setTelescope(astro::RaDec radec) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "got new telescope: %s",
+		radec.toString().c_str());
+	emit telescopeChanged(radec);
+}
+
+void	guidercontrollerwidget::setOrientation(bool west) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "got new orientation: %s",
+		(west) ? "west" : "east");
+	emit orientationChanged(west);
 }
 
 } // namespade snowgui

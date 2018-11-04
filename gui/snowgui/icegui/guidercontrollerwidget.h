@@ -65,6 +65,9 @@ public:
 signals:
 	void	exposureChanged(astro::camera::Exposure);
 
+	void	telescopeChanged(astro::RaDec);
+	void	orientationChanged(bool west);
+
 private:
 	Ui::guidercontrollerwidget *ui;
 
@@ -100,6 +103,9 @@ public slots:
 
 	void	xGainChanged(int);
 	void	yGainChanged(int);
+
+	void	setTelescope(astro::RaDec);
+	void	setOrientation(bool);
 };
 
 } // namespace snowgui

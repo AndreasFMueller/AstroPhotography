@@ -225,6 +225,11 @@ void	CalibrationDisplayWidget::drawCommon(QPainter& painter,
 	// we are going to draw a few things, we need a pen for that
 	QPen	pen(Qt::SolidLine);
 
+	// make font small
+	QFont	labelfont;
+	labelfont.setPointSize(12);
+	painter.setFont(labelfont);
+
 	// draw the coordinate grid (10 pixel lines)
 	int	wm = floor(((width() / 2.) / scalex) / 10);
 	int	hm = floor(((height() / 2.) / scaley) / 10);
@@ -235,10 +240,22 @@ void	CalibrationDisplayWidget::drawCommon(QPainter& painter,
 	for (int xi = -wm; xi <= wm; xi++) {
 		double	x = cx + 10 * xi * scalex;
 		painter.drawLine(x, 0, x, height());
+		if (height() > 100) {
+			char	l[10];
+			snprintf(l, sizeof(l), "%dpx", 10 * xi);
+			painter.drawText(x - 20, height() - 18,
+				40, 18, Qt::AlignCenter, QString(l));
+		}
 	}
 	for (int yi = -hm; yi <= hm; yi++) {
 		double	y = cy + 10 * yi * scaley;
 		painter.drawLine(0, y, width(), y);
+		if (width() > 100) {
+			char	l[10];
+			snprintf(l, sizeof(l), "%dpx", -10 * yi);
+			painter.drawText(width() - 42, y - 8,
+				40, 18, Qt::AlignRight, QString(l));
+		}
 	}
 
 	// draw the points
@@ -263,9 +280,6 @@ void	CalibrationDisplayWidget::drawCommon(QPainter& painter,
 			painter.fillPath(path, QBrush((red * 0.3).qcolor()));
 		}
 	}
-	QFont	labelfont;
-	labelfont.setPointSize(12);
-	painter.setFont(labelfont);
 	for (unsigned long i = 0; i < _calibration.points.size(); i++) {
 		// actual point
 		pen.setColor(pencolor);

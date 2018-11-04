@@ -425,7 +425,6 @@
          <attribute name="title">
           <string>Guide Port</string>
          </attribute>
-         <zorder>guidingWidget</zorder>
         </widget>
         <widget class="snowgui::calibrationwidget" name="aocalibrationWidget">
          <attribute name="title">

@@ -8,6 +8,7 @@
 #include <cmath>
 #include <AstroFormat.h>
 #include <AstroDebug.h>
+#include <QTableWidgetItem>
 
 namespace snowgui {
 
@@ -24,22 +25,28 @@ calibrationcalculatordialog::calibrationcalculatordialog(
 	  ui(new Ui::calibrationcalculatordialog) {
 	ui->setupUi(this);
 
+	ui->pixelsizeUnit->setText(QString("µm"));
+	ui->angleUnit->setText(QString("º"));
+	ui->declinationUnit->setText(QString("º"));
+
 	// get information from the guider
 	_focallength = _guider->getFocallength();
-	ui->focallengthField->setText(QString(astro::stringprintf("%.3f", _focallength).c_str()));
+	ui->focallengthField->setText(QString(astro::stringprintf("%.3f",
+		_focallength).c_str()));
 
 	snowstar::CcdInfo	info = _guider->getCcd()->getInfo();
 	_pixelsize = (info.pixelwidth + info.pixelheight) / 2;
-	ui->pixelsizeField->setText(QString(astro::stringprintf("%.1f", _pixelsize * 1e6).c_str()));
+	ui->pixelsizeField->setText(QString(astro::stringprintf("%.1f",
+		_pixelsize * 1e6).c_str()));
 
 	_angle = ui->angleSpinBox->value();
 
 	_guiderate = _guider->getGuiderate();
-	ui->guiderateField->setText(QString(astro::stringprintf("%.3f", _guiderate).c_str()));
+	ui->guiderateField->setText(QString(astro::stringprintf("%.3f",
+		_guiderate).c_str()));
 
 	_declination = ui->declinationSpinBox->value();
 
-	_rainvert = ui->rainvertCheckBox->isChecked();
 	_decinvert = ui->decinvertCheckBox->isChecked();
 	
 	// initialize the calibration
@@ -64,14 +71,14 @@ calibrationcalculatordialog::calibrationcalculatordialog(
 	_cal.flipped = false;
 
 	// connect elements
-	connect(ui->angleSpinBox, SIGNAL(valueChanged(int)),
-		this, SLOT(angleChanged(int)));
-	connect(ui->declinationSpinBox, SIGNAL(valueChanged(int)),
-		this, SLOT(declinationChanged(int)));
-	connect(ui->rainvertCheckBox, SIGNAL(stateChanged(int)),
-		this, SLOT(rainvertChanged(int)));
+	connect(ui->angleSpinBox, SIGNAL(valueChanged(double)),
+		this, SLOT(angleChanged(double)));
+	connect(ui->declinationSpinBox, SIGNAL(valueChanged(double)),
+		this, SLOT(declinationChanged(double)));
 	connect(ui->decinvertCheckBox, SIGNAL(stateChanged(int)),
 		this, SLOT(decinvertChanged(int)));
+	connect(ui->westCheckBox, SIGNAL(stateChanged(int)),
+		this, SLOT(orientationChanged(int)));
 
 	connect(ui->buttonBox, SIGNAL(accepted()),
 		this, SLOT(acceptCalibration()));
@@ -82,6 +89,19 @@ calibrationcalculatordialog::calibrationcalculatordialog(
 
 	connect(this, SIGNAL(newCalibration(snowstar::Calibration)),
 		calwidget, SLOT(setCalibration(snowstar::Calibration)));
+
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "setting up coefficient table");
+	for (int column = 0; column < 3; column++) {
+		ui->coefficienttableWidget->setColumnWidth(column, 60);
+		for (int row = 0; row < 2; row++) {
+			QTableWidgetItem	*item = 
+				new QTableWidgetItem(QString("0.00"));
+			item->setTextAlignment(Qt::AlignRight);
+			ui->coefficienttableWidget->setItem(row, column, item);
+		}
+	}
+	ui->coefficienttableWidget->setRowHeight(0, 18);
+	ui->coefficienttableWidget->setRowHeight(1, 18);
 
 	// update the calibration
 	updateCalibration();
@@ -100,28 +120,42 @@ void	calibrationcalculatordialog::updateCalibration() {
 	double	pixelspeed = speed / _pixelsize;
 	double	a = _angle * M_PI / 180;
 	int	decsign = (_decinvert) ? -1 : 1;
-	_cal.coefficients[1] = -decsign * pixelspeed * sin(a);
-	_cal.coefficients[4] =  decsign * pixelspeed * cos(a);
-	int	rasign = (_rainvert) ? -1 : 1;
-	pixelspeed = pixelspeed * cos(_declination * M_PI / 180);
-	_cal.coefficients[0] =  rasign * pixelspeed * cos(a);
-	_cal.coefficients[3] =  rasign * pixelspeed * sin(a);
+	int	westsign = (_telescopewest) ? 1 : -1;
+	_cal.coefficients[1] =  decsign * westsign * pixelspeed * sin(a);
+	_cal.coefficients[4] = -decsign * westsign * pixelspeed * cos(a);
+	pixelspeed = 2 * pixelspeed * cos(_declination * M_PI / 180);
+	_cal.coefficients[0] = pixelspeed * westsign * cos(a);
+	_cal.coefficients[3] = pixelspeed * westsign * sin(a);
+
+	ui->coefficienttableWidget->item(0,0)->setText(
+		QString(astro::stringprintf("%.2f",
+			_cal.coefficients[0]).c_str()));
+	ui->coefficienttableWidget->item(0,1)->setText(
+		QString(astro::stringprintf("%.2f",
+			_cal.coefficients[1]).c_str()));
+	ui->coefficienttableWidget->item(0,2)->setText(
+		QString(astro::stringprintf("%.2f",
+			_cal.coefficients[2]).c_str()));
+	ui->coefficienttableWidget->item(1,0)->setText(
+		QString(astro::stringprintf("%.2f",
+			_cal.coefficients[3]).c_str()));
+	ui->coefficienttableWidget->item(1,1)->setText(
+		QString(astro::stringprintf("%.2f",
+			_cal.coefficients[4]).c_str()));
+	ui->coefficienttableWidget->item(1,2)->setText(
+		QString(astro::stringprintf("%.2f",
+			_cal.coefficients[5]).c_str()));
 
 	ui->calibrationDisplayWidget->setCalibration(_cal);
 }
 
-void	calibrationcalculatordialog::angleChanged(int angle) {
+void	calibrationcalculatordialog::angleChanged(double angle) {
 	_angle = angle;
 	updateCalibration();
 }
 
-void	calibrationcalculatordialog::declinationChanged(int declination) {
+void	calibrationcalculatordialog::declinationChanged(double declination) {
 	_declination = declination;
-	updateCalibration();
-}
-
-void	calibrationcalculatordialog::rainvertChanged(int i) {
-	_rainvert = (i) ? true : false;
 	updateCalibration();
 }
 
@@ -141,7 +175,23 @@ void	calibrationcalculatordialog::acceptCalibration() {
 
 void	calibrationcalculatordialog::rejectCalibration() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "calibration rejected");
-	reject();
+	close();
+}
+
+void	calibrationcalculatordialog::setTelescope(astro::RaDec radec) {
+	_declination = radec.dec().degrees();
+	ui->declinationSpinBox->setValue(_declination);
+	updateCalibration();
+}
+
+void	calibrationcalculatordialog::setOrientation(bool west) {
+	_telescopewest = west;
+	ui->westCheckBox->setChecked(_telescopewest);
+	updateCalibration();
+}
+
+void	calibrationcalculatordialog::orientationChanged(int x) {
+	setOrientation(x > 0);
 }
 
 } // namespace snowgui

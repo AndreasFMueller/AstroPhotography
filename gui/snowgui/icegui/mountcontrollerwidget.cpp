@@ -128,28 +128,22 @@ void	mountcontrollerwidget::setupMount() {
 
 		// make sure the star chart knows the orientation
 		_previouswest = _mount->telescopePositionWest();
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "sending orientation: %s",
+			(_previouswest) ? "west" : "east");
 		emit orientationChanged(_previouswest);
 
 		// make sure everybody knows our direction
 		_telescope = _mount->getRaDec();
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "sending telescope: %s",
+			convert(_telescope).toString().c_str());
 		emit telescopeChanged(convert(_telescope));
 
 		// write the position to the position label
 		std::string	pl;
-#if 0
-		pl += astro::stringprintf("%.4f",
-			fabs(_position.longitude().degrees()));
-#else
 		pl += _position.longitude().dms(':', 0).substr(1);
-#endif
 		pl += (_position.longitude().degrees() < 0) ? "W" : "E";
 		pl += " ";
-#if 0
-		pl += astro::stringprintf("%.4f",
-			fabs(_position.latitude().degrees()));
-#else
 		pl += _position.latitude().dms(':', 0).substr(1);
-#endif
 		pl += (_position.longitude().degrees() < 0) ? "S" : "N";
 		ui->observatoryField->setText(QString(pl.c_str()));
 
@@ -297,6 +291,8 @@ void	mountcontrollerwidget::statusUpdate() {
 	snowstar::RaDec	radec = _mount->getRaDec();
 	astro::RaDec	rd = convert(radec);
 	if (rd != convert(_telescope)) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "emit telescope(%s)",
+			rd.toString().c_str());
 		emit telescopeChanged(rd);
 	}
 	ui->currentRaField->setText(QString(
@@ -328,6 +324,16 @@ astro::RaDec	mountcontrollerwidget::current() {
 	if (_mount) {
 		snowstar::RaDec	radec = _mount->getRaDec();
 		return convert(radec);
+	} else {
+		throw std::runtime_error("cannot get current position without "
+			"a mount");
+	}
+}
+
+bool	mountcontrollerwidget::orientation() {
+	if (_mount) {
+		bool	west = _mount->telescopePositionWest();
+		return west;
 	} else {
 		throw std::runtime_error("cannot get current position without "
 			"a mount");
