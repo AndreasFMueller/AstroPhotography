@@ -41,6 +41,7 @@ public:
 		snowstar::RemoteInstrument instrument);
 	virtual void	setupComplete();
 	void	setRepositories(snowstar::RepositoriesPrx repositories);
+	int	warnParameters(const std::string& m);
 
 public slots:
 	void	filterwheelSelected(snowstar::FilterWheelPrx);

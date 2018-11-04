@@ -9,6 +9,7 @@
 #include <IceConversions.h>
 #include <tasks.h>
 #include <AstroUtils.h>
+#include <QMessageBox>
 
 namespace snowgui {
 
@@ -178,6 +179,27 @@ void	tasksubmissionwidget::filterwheelSelected(
 	ui->filterBox->blockSignals(false);
 }
 
+int	tasksubmissionwidget::warnParameters(const std::string& m) {
+	QMessageBox	message;
+	message.setText(QString("Warning"));
+	std::ostringstream	out;
+	out << "Parameter warning: " << m;
+	out << " Do you really want to submit these tasks?";
+	message.setInformativeText(QString(out.str().c_str()));
+	message.setStandardButtons(QMessageBox::Cancel | QMessageBox::Ok);
+	message.setDefaultButton(QMessageBox::Cancel);
+	int	rc = message.exec();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "message rc=%d", rc);
+	switch (rc) {
+	case QMessageBox::Cancel:
+		return 1;
+		break;
+	case QMessageBox::Ok:
+		return 0;
+		break;
+	}
+}
+
 /**
  * \brief Slot activated when the submit button is clicked
  */
@@ -204,6 +226,14 @@ void	tasksubmissionwidget::submitClicked() {
 	// get all the information about the exposure from the
 	// ccdcontrollerwidget
 	parameters.exp = snowstar::convert(_exposure);
+	if (_exposure.exposuretime() < 5) {
+		std::string	m = astro::stringprintf("The exposure time of "
+			"%.3fs you have chosen seems rather short.",
+			_exposure.exposuretime());
+		if (warnParameters(m)) {
+			return;
+		}
+	}
 
 	// set the ccd temperature
 	parameters.ccdtemperature = ui->temperatureBox->value() + 273.15;
