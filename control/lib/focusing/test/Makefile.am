@@ -7,6 +7,7 @@ noinst_HEADERS =
 
 focusing_ldadd = -lcppunit 						\
 	-L$(top_builddir)/lib/focusing -lastrofocusing 			\
+	-L$(top_builddir)/lib/event -lastroevent 			\
 	-L$(top_builddir)/lib/device -lastrodevice 			\
 	-L$(top_builddir)/lib/image -lastroimage 			\
 	-L$(top_builddir)/lib/discovery -lastrodiscovery 		\
@@ -18,6 +19,7 @@ focusing_dependencies = 						\
 	$(top_builddir)/lib/discovery/libastrodiscovery.la 		\
 	$(top_builddir)/lib/image/libastroimage.la  			\
 	$(top_builddir)/lib/device/libastrodevice.la  			\
+	$(top_builddir)/lib/event/libastroevent.la  			\
 	$(top_builddir)/lib/focusing/libastrofocusing.la 
 
 if ENABLE_UNITTESTS

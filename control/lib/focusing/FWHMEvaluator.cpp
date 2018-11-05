@@ -382,6 +382,9 @@ double	FWHMEvaluator::evaluate(FocusableImage image) {
 
 	// copy meta data from the original image
 	_evaluated_image->metadata(image->metadata());
+	if (_evaluated_image->hasMetadata(std::string("UUID"))) {
+		_evaluated_image->removeMetadata(std::string("UUID"));
+	}
 
 	// modify the image based on the preconditioner
 	precond.top(precond.noisefloor() + precond.stddev());

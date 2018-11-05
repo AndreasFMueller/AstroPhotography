@@ -10,6 +10,7 @@
 #include <fstream>
 #include <AstroDebug.h>
 #include <AstroFormat.h>
+#include <AstroEvent.h>
 
 using namespace astro::device;
 
@@ -161,9 +162,13 @@ void	Module::open() {
 	if (NULL == handle) {
 		std::string	msg = stringprintf("cannot load %s: %s",
 			dlname.c_str(), dlerror());
+		event(EVENT_CLASS, astro::events::CRIT,
+			astro::events::Event::DEVICE, msg);
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 		throw std::runtime_error(msg);
 	}
+	event(EVENT_CLASS, astro::events::NOTICE, astro::events::Event::DEVICE,
+		stringprintf("module '%s' loaded", dlname.c_str()));
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "library opened: handle = %p", handle);
 }
 

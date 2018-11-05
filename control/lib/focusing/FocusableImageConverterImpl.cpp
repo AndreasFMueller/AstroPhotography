@@ -185,8 +185,11 @@ FocusableImage	FocusableImageConverterImpl::operator()(const ImagePtr image) {
 	}
 
 meta:
-	// copy the metadata
+	// copy the metadata except for the uuid
 	result->metadata(image->metadata());
+	if (result->hasMetadata(std::string("UUID"))) {
+		result->removeMetadata(std::string("UUID"));
+	}
 
 	return result;
 }

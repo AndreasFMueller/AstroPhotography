@@ -490,17 +490,18 @@ static void	usage(const char *progname) {
 	std::cout << "usage:" << std::endl;
 	std::cout << std::endl;
 	std::cout << p << " [ options ] help" << std::endl;
-	std::cout << p << " [ options ] monitor" << std::endl;
-	std::cout << p << " [ options ] list [ state ]" << std::endl;
-	std::cout << p << " [ options ] start" << std::endl;
-	std::cout << p << " [ options ] stop" << std::endl;
-	std::cout << p << " [ options ] state" << std::endl;
-	std::cout << p << " [ options ] cancel <id> ..." << std::endl;
-	std::cout << p << " [ options ] remove <id> ..." << std::endl;
-	std::cout << p << " [ options ] submit" << std::endl;
-	std::cout << p << " [ options ] project <projectname> <partno>" << std::endl;
-	std::cout << p << " [ options ] image <id> <filename>" << std::endl;
-	std::cout << p << " [ options ] remote <id> <imagerepo>" << std::endl;
+	std::cout << p << " [ options ] <service> help" << std::endl;
+	std::cout << p << " [ options ] <service> monitor" << std::endl;
+	std::cout << p << " [ options ] <service> list [ state ]" << std::endl;
+	std::cout << p << " [ options ] <service> start" << std::endl;
+	std::cout << p << " [ options ] <service> stop" << std::endl;
+	std::cout << p << " [ options ] <service> state" << std::endl;
+	std::cout << p << " [ options ] <service> cancel <id> ..." << std::endl;
+	std::cout << p << " [ options ] <service> remove <id> ..." << std::endl;
+	std::cout << p << " [ options ] <service> submit" << std::endl;
+	std::cout << p << " [ options ] <service> project <projectname> <partno>" << std::endl;
+	std::cout << p << " [ options ] <service> image <id> <filename>" << std::endl;
+	std::cout << p << " [ options ] <service> remote <id> <imagerepo>" << std::endl;
 	std::cout << std::endl;
 	std::cout << "possible task states:" << std::endl;
 	std::cout << "    pending    " << std::endl;
@@ -555,7 +556,6 @@ static struct option	longopts[] = {
 { "purpose",	required_argument,	NULL,		'p' }, /*  9 */
 { "project",	required_argument,	NULL,		'P' }, /* 10 */
 { "repeat",	required_argument,	NULL,		'r' }, /* 11 */
-{ "server",	required_argument,	NULL,		's' }, /* 12 */
 { "temperature",required_argument,	NULL,		't' }, /* 13 */
 { "verbose",	no_argument,		NULL,		'v' }, /* 14 */
 { NULL,		0,			NULL,		0   }
@@ -573,7 +573,7 @@ int	main(int argc, char *argv[]) {
 	// parse command line options
 	int	c;
 	int	longindex;
-	while (EOF != (c = getopt_long(argc, argv, "b:c:de:F:f:h?i:p:P:r:s:t:v",
+	while (EOF != (c = getopt_long(argc, argv, "b:c:de:F:f:h?i:p:P:r:t:v",
 			longopts, &longindex)))
 		switch (c) {
 		case 'b':
@@ -620,9 +620,6 @@ int	main(int argc, char *argv[]) {
 		case 'r':
 			repeats = std::stoi(optarg);
 			break;
-		case 's':
-			servername = astro::ServerName(optarg);
-			break;
 		case 't':
 			temperature = 273.15 + std::stod(optarg);
 			break;
@@ -635,11 +632,22 @@ int	main(int argc, char *argv[]) {
 
 	// get the command name
 	if (argc <= optind) {
-		throw std::runtime_error("command name missing");
+		throw std::runtime_error("server or command name missing");
 	}
 	std::string	command = argv[optind++];
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "working on command %s",
 		command.c_str());
+	if (command == "help") {
+		return command_help(argv[0]);
+	}
+
+	// if this is not the help command, then the first string is the
+	// server name
+	servername = astro::ServerName(command);
+	if (argc <= optind) {
+		throw std::runtime_error("command missing");
+	}
+	command = argv[optind++];
 	if (command == "help") {
 		return command_help(argv[0]);
 	}
