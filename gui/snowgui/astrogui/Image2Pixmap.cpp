@@ -31,6 +31,7 @@ Image2Pixmap::Image2Pixmap() {
 	_show_red = true;
 	_show_green = true;
 	_show_blue = true;
+	_negative = false;
 }
 
 Image2Pixmap::~Image2Pixmap() {
@@ -340,6 +341,9 @@ QImage	*Image2Pixmap::convertMono(const ConstImageAdapter<Pixel>& image) {
 	for (int x = 0; x < w; x++) {
 		for (int y = 0; y < h; y++) {
 			unsigned char	v = gainadapter.pixel(x, y);
+			if (negative()) {
+				v = 255 - v;
+			}
 			histo->add((double)v);
 			unsigned long	value = convert(v);
 			qimage->setPixel(x, h - 1 - y, value);
@@ -499,6 +503,9 @@ QImage	*Image2Pixmap::convertRGB(const ConstImageAdapter<RGB<Pixel> >& image) {
 	for (int x = 0; x < w; x++) {
 		for (int y = 0; y < h; y++) {
 			RGB<unsigned char>	p = gainadapter.pixel(x, y);
+			if (negative()) {
+				p = RGB<unsigned char>((unsigned char)255) - p;
+			}
 			histo->add(RGB<double>(p));
 			unsigned long	value = convert(p);
 			qimage->setPixel(x, h - 1 - y, value);

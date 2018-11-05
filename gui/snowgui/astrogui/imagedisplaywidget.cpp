@@ -1034,6 +1034,10 @@ bool	imagedisplaywidget::horizontalFlip() const {
 	return image2pixmap.horizontal_flip();
 }
 
+bool	imagedisplaywidget::negative() const {
+	return image2pixmap.negative();
+}
+
 void	imagedisplaywidget::setVerticalFlip(bool f) {
 	image2pixmap.vertical_flip(f);
 	processNewSettings();
@@ -1054,6 +1058,17 @@ void	imagedisplaywidget::setHorizontalFlip(bool f) {
 
 void	imagedisplaywidget::toggleHorizontalFlip() {
 	setHorizontalFlip(!horizontalFlip());
+}
+
+void	imagedisplaywidget::setNegative(bool n) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "setting negative: %s",
+		(n) ? "true" : "false");
+	image2pixmap.negative(n);
+	processNewSettings();
+}
+
+void	imagedisplaywidget::toggleNegative() {
+	setNegative(!negative());
 }
 
 void	imagedisplaywidget::setShowRed(bool s) {
@@ -1137,6 +1152,13 @@ void	imagedisplaywidget::showContextMenu(const QPoint& point) {
 		this, SLOT(toggleInfoVisible()));
 
 	contextMenu.addSeparator();
+
+	QAction	actionNegative(QString("negative"), this);
+	actionNegative.setCheckable(true);
+	actionNegative.setChecked(negative());
+	contextMenu.addAction(&actionNegative);
+	connect(&actionNegative, SIGNAL(triggered()),
+		this, SLOT(toggleNegative()));
 
 	QAction	actionRed(QString("show red channel"), this);
 	actionRed.setCheckable(true);

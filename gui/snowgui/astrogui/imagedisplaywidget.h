@@ -67,6 +67,8 @@ public:
 	bool	horizontalFlip() const;
 	bool	verticalFlip() const;
 
+	bool	negative() const;
+
 	bool	showRed() const;
 	bool	showGreen() const;
 	bool	showBlue() const;
@@ -162,6 +164,9 @@ public slots:
 
 	void	setHorizontalFlip(bool);
 	void	toggleHorizontalFlip();
+
+	void	setNegative(bool);
+	void	toggleNegative();
 
 	void	setShowRed(bool);
 	void	setShowGreen(bool);

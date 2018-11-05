@@ -56,6 +56,7 @@ class	Image2Pixmap {
 	bool	_show_red;
 	bool	_show_green;
 	bool	_show_blue;
+	bool	_negative;
 public:
 	Image2Pixmap();
 	~Image2Pixmap();
@@ -80,6 +81,8 @@ public:
 	void	show_green(bool s) { _show_green = s; }
 	bool	show_blue() const { return _show_blue; }
 	void	show_blue(bool s) { _show_blue = s; }
+	bool	negative() const { return _negative; }
+	void	negative(bool n) { _negative = n; }
 
 	void	frame(const astro::image::ImageSize& f) { _frame = f; }
 	const astro::image::ImageSize&	frame() const { return _frame; }
