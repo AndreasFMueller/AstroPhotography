@@ -15,7 +15,6 @@ SkyDisplayDialog::SkyDisplayDialog(QWidget *parent)
 	ui->setupUi(this);
 	setWindowTitle(QString("Current Sky View"));
 
-	// connect the
 	connect(ui->skydisplayWidget, SIGNAL(pointSelected(astro::RaDec)),
 		this, SLOT(targetSelected(astro::RaDec)));
 }

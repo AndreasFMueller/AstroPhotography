@@ -19,6 +19,10 @@ focusercontrollerwidget::focusercontrollerwidget(QWidget *parent)
 	ui->positionSpinBox->setEnabled(false);
 	ui->positionButton->setEnabled(false);
 
+	_backlash_enabled = true;
+	ui->backlashCheckBox->setCheckState(Qt::Checked);
+	_backlash = 0;
+
 	// GUI element connections
 	connect(ui->focuserSelectionBox, SIGNAL(currentIndexChanged(int)),
 		this, SLOT(focuserChanged(int)));
@@ -29,6 +33,9 @@ focusercontrollerwidget::focusercontrollerwidget(QWidget *parent)
 		this, SLOT(guiChanged()));
 	connect(ui->positionSpinBox, SIGNAL(editingFinished()),
 		this, SLOT(editingFinished()));
+
+	connect(ui->backlashCheckBox, SIGNAL(stateChanged(int)),
+		this, SLOT(backlashChanged(int)));
 
 	// initialize the timer
 	connect(&statusTimer, SIGNAL(timeout()), this, SLOT(statusUpdate()));
@@ -94,6 +101,20 @@ void	focusercontrollerwidget::setupFocuser() {
 		int	maximum = _focuser->max();
 		int	current = _focuser->current();
 		emit newFocuserPosition(current);
+		_backlash = _focuser->backlash();
+		if (_backlash == 0) {
+			_backlash_enabled = false;
+			ui->backlashCheckBox->setCheckState(Qt::Unchecked);
+			ui->backlashCheckBox->setEnabled(false);
+			ui->backlashField->setText(QString());
+			ui->backlashField->setEnabled(false);
+		} else {
+			_backlash_enabled = true;
+			ui->backlashCheckBox->setCheckState(Qt::Checked);
+			ui->backlashCheckBox->setEnabled(true);
+			ui->backlashField->setText(QString::number(_backlash));
+			ui->backlashField->setEnabled(true);
+		}
 		ui->positionSpinBox->setMaximum(maximum);
 		ui->positionSpinBox->setMinimum(minimum);
 		ui->positionSpinBox->setValue(current);
@@ -190,6 +211,12 @@ void	focusercontrollerwidget::startMoving(int target) {
 	// we use the delta variable to find out whether we should
 	// emit the targetReached signal (later in the statusUpdate slot)
 	delta = _focuser->current() - target;
+	if ((delta > 0) && (_backlash_enabled)) {
+		_backlashing = true;
+		target = target - _backlash;
+	} else {
+		_backlashing = false;
+	}
 	_focuser->set(target);
 }
 
@@ -234,10 +261,15 @@ void	focusercontrollerwidget::statusUpdate() {
 		ui->positionButton->update(f);
 		_previousposition = current;
 	}
-	int	target = ui->positionSpinBox->value();
-	bool	targetreached = current == target;
-	ui->positionButton->setEnabled(!targetreached);
 	displayCurrent(current);
+	int	target = ui->positionSpinBox->value();
+	bool	targetreached
+		= (current == target - ((_backlashing) ? _backlash : 0));
+	if ((targetreached) && (_backlashing)) {
+		startMoving(target);
+		return;
+	}
+	ui->positionButton->setEnabled(!targetreached);
 	if ((targetreached) && (delta != 0)) {
 		emit targetPositionReached();
 	}
@@ -251,6 +283,10 @@ void	focusercontrollerwidget::focuserChanged(int index) {
 	statusTimer.stop();
 	_focuser = _instrument.focuser(index);
 	setupFocuser();
+}
+
+void	focusercontrollerwidget::backlashChanged(int c) {
+	_backlash_enabled = (c > 0);
 }
 
 } // namespace snowgui

@@ -23,6 +23,9 @@ class focusercontrollerwidget : public InstrumentWidget {
 	Q_OBJECT
 
 	snowstar::FocuserPrx	_focuser;
+	bool	_backlash_enabled;
+	bool	_backlashing;
+	int	_backlash;
 public:
 	explicit focusercontrollerwidget(QWidget *parent = NULL);
 	~focusercontrollerwidget();
@@ -58,6 +61,7 @@ public slots:
 	void	focuserChanged(int);
 	void	editingFinished();
 	void	guiChanged();
+	void	backlashChanged(int);
 };
 
 } // namespace snowgui

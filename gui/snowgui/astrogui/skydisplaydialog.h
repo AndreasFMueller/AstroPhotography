@@ -30,7 +30,6 @@ public:
 	void	position(const astro::LongLat& p);
 	const astro::LongLat&	position() const;
 
-
 private:
 	Ui::SkyDisplayDialog *ui;
 
