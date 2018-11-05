@@ -17,6 +17,9 @@ FocusingProgressWidget::FocusingProgressWidget(QWidget *parent)
 	: QWidget(parent), ui(new Ui::FocusingProgressWidget) {
 	ui->setupUi(this);
 
+	ui->pointTable->setSelectionBehavior(QAbstractItemView::SelectItems);
+	ui->pointTable->setSelectionMode(QAbstractItemView::SingleSelection);
+
 	ui->pointTable->setColumnCount(2);
 	ui->pointTable->setRowCount(0);
 
@@ -25,6 +28,8 @@ FocusingProgressWidget::FocusingProgressWidget(QWidget *parent)
 
 	connect(ui->pointTable, SIGNAL(cellClicked(int, int)),
 		this, SLOT(cellActivated(int, int)));
+	connect(ui->pointTable, SIGNAL(currentCellChanged(int, int, int, int)),
+		this, SLOT(cellChanged(int, int, int, int)));
 
 	// set up the table view
 	QStringList	headers;
@@ -86,7 +91,13 @@ void	FocusingProgressWidget::receiveState(snowstar::FocusState state) {
 	}
 }
 
-void	FocusingProgressWidget::cellActivated(int row, int column) {
+void	FocusingProgressWidget::cellActivated(int row, int /* column */) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "row selected: %d", row);
+	emit rowSelected(row);
+}
+
+void	FocusingProgressWidget::cellChanged(int row, int /* column */,
+		int /* previousrow */, int /* previouscolumn */) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "row selected: %d", row);
 	emit rowSelected(row);
 }

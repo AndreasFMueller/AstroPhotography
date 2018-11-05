@@ -34,6 +34,8 @@ public slots:
 	void	receivePoint(snowstar::FocusPoint);
 	void	receiveState(snowstar::FocusState);
 	void	cellActivated(int row, int column);
+	void	cellChanged(int row, int column,
+			int previousrow, int previouscolumn);
 };
 
 } // namespace snowgui
