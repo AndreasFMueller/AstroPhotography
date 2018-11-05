@@ -62,6 +62,9 @@ Ice::CommunicatorPtr	CommunicatorSingleton::get() {
 	return _communicator;
 }
 
+/**
+ * \brief Destroy the communicator
+ */
 void	CommunicatorSingleton::release() {
 	_communicator->destroy();
 }
