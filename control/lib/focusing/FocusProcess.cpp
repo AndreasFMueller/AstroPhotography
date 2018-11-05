@@ -41,6 +41,19 @@ FocusProcess::FocusProcess(const FocusParameters& parameters,
  * \param pos	focuser position to move to
  */
 void	FocusProcess::moveto(unsigned long pos) {
+	// backlash compensation
+	long	bl = _focuser->backlash();
+	if (bl != 0) {
+		long	cur = _focuser->current();
+		if (cur > pos) {
+			long	backpos = pos - bl;
+			_focuser->set(backpos);
+			do {
+				Timer::sleep(0.1);
+			} while (_focuser->current() != backpos);
+		}
+	}
+	// now move to the target position
 	_focuser->moveto(pos);
 	do {
 		Timer::sleep(0.1);
