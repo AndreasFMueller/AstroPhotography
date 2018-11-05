@@ -62,6 +62,7 @@ void	FocusProcessBase::reportFocusElement(const FocusElement& fe) {
 	} else {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "no callback installed");
 	}
+	event(EVENT_CLASS, events::INFO, events:FOCUS, fe.toString());
 }
 
 /**
@@ -213,6 +214,8 @@ bool	FocusProcessBase::evaluate0() {
 	status(Focus::FOCUSED);
 	reportState();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "focusing complete");
+	event(EVENT_CLASS, astro::events::NOTICE, astro::events::FOCUS,
+		stringprintf("focused at pos=%lu", position));
 	return true;
 }
 
@@ -226,6 +229,9 @@ void	FocusProcessBase::measure() {
 	try {
 		bool	completed = measure0();
 		if (!completed) {
+			event(EVENT_CLASS, astro::events::NOTICE,
+				astro::events::FOCUS,
+				std::string("measure thread cancelled"));
 			debug(LOG_DEBUG, DEBUG_LOG, 0,
 				"focus process was terminated");
 		}
@@ -233,6 +239,9 @@ void	FocusProcessBase::measure() {
 		std::string	msg = stringprintf("cannot focus: %s",
 			x.what());
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		event(EVENT_CLASS, astro::events::CRIT,
+			astro::events::FOCUS,
+			stringprintf("measure thread crashed: %s", x.what()));
 		status(Focus::FAILED);
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "measure thread terminates");
@@ -246,6 +255,9 @@ void	FocusProcessBase::evaluate() {
 	try {
 		bool	completed = evaluate0();
 		if (!completed) {
+			event(EVENT_CLASS, astro::events::NOTICE,
+				astro::events::FOCUS,
+				std::string("evaluation thread cancelled"));
 			debug(LOG_DEBUG, DEBUG_LOG, 0,
 				"evaluate process was terminated");
 		}
@@ -253,6 +265,9 @@ void	FocusProcessBase::evaluate() {
 		std::string	msg = stringprintf("cannot evaluate: %s",
 			x.what());
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		event(EVENT_CLASS, astro::events::CRIT,
+			astro::events::FOCUS,
+			stringprintf("evaluate thread crashed: %s", x.what()));
 		status(Focus::FAILED);
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "evaluate thread terminates");
@@ -303,6 +318,10 @@ void	FocusProcessBase::start() {
 
 	// prepare a queue 
 	_focus_elements = FocusElementQueuePtr(new FocusElementQueue());
+
+	// report start evenet
+	event(EVENT_CLASS, astro::events::NOTICE, astro::events::FOCUS,
+		std::string("focusing started"));
 
 	// start the evaluate thread
 	_evaluate_thread = std::thread(evaluate_launch, this);
