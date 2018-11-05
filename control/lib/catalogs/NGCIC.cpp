@@ -44,19 +44,19 @@ static DeepSkyObject	Object_from_Record(const std::string& record) {
 
 	// classification
 	std::string	key = record.substr(6, 3);
-	if (key == "Gx ") {
+	if (key == " Gx") {
 		result.classification = DeepSkyObject::Galaxy;
 	}
-	if (key == "OC ") {
+	if (key == " OC") {
 		result.classification = DeepSkyObject::OpenCluster;
 	}
-	if (key == "Gb ") {
+	if (key == " Gb") {
 		result.classification = DeepSkyObject::GlobularCluster;
 	}
-	if (key == "Nb ") {
+	if (key == " Nb") {
 		result.classification = DeepSkyObject::BrightNebula;
 	}
-	if (key == "Pl ") {
+	if (key == " Pl") {
 		result.classification = DeepSkyObject::PlanetaryNebula;
 	}
 	if (key == "C+N") {
@@ -65,28 +65,28 @@ static DeepSkyObject	Object_from_Record(const std::string& record) {
 	if (key == "Ast") {
 		result.classification = DeepSkyObject::Asterism;
 	}
-	if (key == "Kt ") {
+	if (key == " Kt") {
 		result.classification = DeepSkyObject::Knot;
 	}
 	if (key == "***") {
 		result.classification = DeepSkyObject::TripleStar;
 	}
-	if (key == "D* ") {
+	if (key == " D*") {
 		result.classification = DeepSkyObject::DoubleStar;
 	}
-	if (key == "*  ") {
+	if (key == "  *") {
 		result.classification = DeepSkyObject::SingleStar;
 	}
-	if (key == "?  ") {
+	if (key == "  ?") {
 		result.classification = DeepSkyObject::Uncertain;
 	}
 	if (key == "   ") {
 		result.classification = DeepSkyObject::Unidentified;
 	}
-	if (key == "-  ") {
+	if (key == "  -") {
 		result.classification = DeepSkyObject::Nonexistent;
 	}
-	if (key == "PD ") {
+	if (key == " PD") {
 		result.classification = DeepSkyObject::PlateDefect;
 	}
 

@@ -124,6 +124,8 @@ public:
 			Knot, TripleStar, DoubleStar, SingleStar, Uncertain,
 			Unidentified, Nonexistent, PlateDefect } object_class;
 	object_class	classification;
+	static std::string	classification2string(object_class);
+	static object_class	string2classification(const std::string&);
 	TwoAngles	size;
 	Angle		azimuth;
 	std::string	toString() const;

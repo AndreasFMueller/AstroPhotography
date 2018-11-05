@@ -198,6 +198,7 @@ int	tasksubmissionwidget::warnParameters(const std::string& m) {
 		return 0;
 		break;
 	}
+	return 1;
 }
 
 /**

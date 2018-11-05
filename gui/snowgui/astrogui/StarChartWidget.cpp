@@ -133,7 +133,7 @@ void	StarChartWidget::drawStar(QPainter& painter, const Star& star) {
 	QPointF	starcenter(p);
 
 	// determine the radius
-	float	sr = 6 - star.mag() / 2;
+	float	sr = 8 - star.mag() / 1.4;
 	if (sr < 0.8) {
 		sr = 0.8;
 	}
@@ -167,7 +167,27 @@ void	StarChartWidget::drawDeepSkyObject(QPainter& painter,
 	const DeepSkyObject& deepskyobject) {
 	// make sure we draw in red
 	QPen	pen(Qt::SolidLine);
-	pen.setColor(Qt::red);
+	switch (deepskyobject.classification) {
+	case astro::catalog::DeepSkyObject::Galaxy:
+		pen.setColor(Qt::red);
+		break;
+	case astro::catalog::DeepSkyObject::BrightNebula:
+	case astro::catalog::DeepSkyObject::ClusterNebulosity:
+		pen.setColor(Qt::green);
+		break;
+	case astro::catalog::DeepSkyObject::PlanetaryNebula:
+		pen.setColor(Qt::magenta);
+		break;
+	case astro::catalog::DeepSkyObject::GlobularCluster:
+		pen.setColor(Qt::yellow);
+		break;
+	case astro::catalog::DeepSkyObject::OpenCluster:
+		pen.setColor(Qt::cyan);
+		break;
+	default:
+		pen.setColor(Qt::gray);
+		break;
+	}
 	pen.setWidth(1);
 	painter.setPen(pen);
 
@@ -580,7 +600,9 @@ void	StarChartWidget::mouseCommon(QMouseEvent *event) {
 	astro::RaDec	radec = _converter(offset);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "RA/DEC of point: %s",
 		radec.toString().c_str());
-	emit pointSelected(radec);
+	if (_mouse_pressed) {
+		emit pointSelected(radec);
+	}
 }
 
 /**

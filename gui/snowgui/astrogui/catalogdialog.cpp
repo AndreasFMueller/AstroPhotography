@@ -6,6 +6,8 @@
 #include "catalogdialog.h"
 #include "ui_catalogdialog.h"
 #include <AstroDebug.h>
+#include <AstroFormat.h>
+#include <QFontDatabase>
 
 using namespace astro::catalog;
 
@@ -21,6 +23,10 @@ CatalogDialog::CatalogDialog(QWidget *parent)
 	ui->setupUi(this);
 
 	setWindowTitle(QString("Search deep sky catalog"));
+
+	QFont	font("Microsoft Sans Serif");
+	font.setStyleHint(QFont::TypeWriter);
+	ui->listWidget->setFont(font);
 
 	connect(ui->searchButton, SIGNAL(clicked()),
 		this, SLOT(searchClicked()));
@@ -102,9 +108,21 @@ void	CatalogDialog::textEdited(const QString& newtext) {
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "search for prefix %s", prefix.c_str());
 	ui->listWidget->clear();
+	QFont	font = QFontDatabase::systemFont(QFontDatabase::FixedFont);
+	ui->listWidget->setFont(font);
 	std::set<std::string>	names = _catalog->findLike(prefix);
 	for (auto i = names.begin(); i != names.end(); i++) {
-		ui->listWidget->addItem(QString(i->c_str()));
+		DeepSkyObject	dso = _catalog->find(*i);
+		astro::RaDec	rd = dso.position(2000);
+		std::string	l = astro::stringprintf("%-20.20s|  %s %s  |  %s",
+			i->c_str(),
+			rd.ra().hms(':', 1).substr(1).c_str(),
+			rd.dec().dms(':', 0).c_str(),
+			DeepSkyObject::classification2string(dso.classification).c_str());
+
+		QListWidgetItem	*item = new QListWidgetItem(QString(l.c_str()));
+		item->setFont(font);
+		ui->listWidget->addItem(item);
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "found %d matching names", names.size());
 }
@@ -119,7 +137,10 @@ void	CatalogDialog::textEdited(const QString& newtext) {
  */
 void	CatalogDialog::nameActivated(QListWidgetItem *item) {
 	// get the name from thje widget and use the searchChanged slot
-	searchChanged(item->text());
+	std::string	s(item->text().toLatin1().data());
+	s = s.substr(0, s.find('|'));
+	s = astro::trim(s);
+	searchChanged(QString(s.c_str()));
 }
 
 /**
