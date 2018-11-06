@@ -399,8 +399,8 @@ InstrumentComponent	InstrumentBackendImpl::get(const std::string& name,
 	long	i;
 	try {
 		i = idfromkey(name, type, index);
-	} catch (...) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "exception");
+	} catch (const std::exception& x) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "exception: %s", x.what());
 		throw;
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "id = %d", i);

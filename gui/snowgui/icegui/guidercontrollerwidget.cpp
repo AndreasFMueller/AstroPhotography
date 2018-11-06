@@ -207,6 +207,8 @@ void	guidercontrollerwidget::instrumentSetup(
 	_guiderdescriptor.ccdIndex = 0;
 	_guiderdescriptor.guideportIndex = 0;
 	_guiderdescriptor.adaptiveopticsIndex = 0;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "guiderdescriptor: '%s'",
+		convert(_guiderdescriptor).toString().c_str());
 }
 
 /**
@@ -261,6 +263,18 @@ void	guidercontrollerwidget::setupGuider() {
 		out << std::endl;
 		message.setInformativeText(QString(out.str().c_str()));
 		message.exec();
+	}
+
+	// also propagate the information to the calibration widgets
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "setting guider '%s' in calwidgets",
+		convert(_guiderdescriptor).toString().c_str());
+	ui->gpcalibrationWidget->setGuider(snowstar::ControlGuidePort,
+		_guiderdescriptor, _guider, _guiderfactory, this);
+	ui->aocalibrationWidget->setGuider(snowstar::ControlAdaptiveOptics,
+		_guiderdescriptor, _guider, _guiderfactory, this);
+
+	// we cannot do much more without a guider
+	if (!_guider) {
 		return;
 	}
 
@@ -278,12 +292,6 @@ void	guidercontrollerwidget::setupGuider() {
 	} catch (snowstar::BadState& x) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "bad state: %s", x.what());
 	}
-
-	// also propagate the information to the calibration widgets
-	ui->gpcalibrationWidget->setGuider(snowstar::ControlGuidePort,
-		_guiderdescriptor, _guider, _guiderfactory, this);
-	ui->aocalibrationWidget->setGuider(snowstar::ControlAdaptiveOptics,
-		_guiderdescriptor, _guider, _guiderfactory, this);
 
 	// get the information from the guider
 	ui->trackingMethodBox->blockSignals(true);

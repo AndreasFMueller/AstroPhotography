@@ -12,6 +12,7 @@
 #include <calibrationdetaildialog.h>
 #include <calibrationcalculatordialog.h>
 #include <QTimer>
+#include <IceConversions.h>
 
 namespace snowgui {
 
@@ -77,8 +78,10 @@ void	calibrationwidget::setGuider(snowstar::ControlType controltype,
 		_calibration = _guider->getCalibration(_controltype);
 		ui->calibrationdisplayWidget->setCalibration(_calibration);
 		displayCalibration();
-	} catch (...) {
-
+	} catch (const std::exception& x) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "cannot get calibration: %s",
+			x.what());
+		return;
 	}
 
 	// now that everything is configured, we start the timer
@@ -95,7 +98,8 @@ void	calibrationwidget::databaseClicked() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "create a calibration selection");
 	calibrationselectiondialog	*selection
 		= new calibrationselectiondialog(this);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "set up the guider in the selection");
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "set guider '%s' in the cal selection",
+		convert(_guiderdescriptor).toString().c_str());
 	selection->setGuider(_controltype, _guiderdescriptor, _guiderfactory);
 	connect(selection, SIGNAL(calibrationSelected(snowstar::Calibration)),
 		this, SLOT(setCalibration(snowstar::Calibration)));
