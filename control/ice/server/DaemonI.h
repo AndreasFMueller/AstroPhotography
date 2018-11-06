@@ -18,6 +18,7 @@ public:
 	virtual ~DaemonI() { }
 	void	reloadRepositories(const Ice::Current& current);
 	void	shutdownServer(Ice::Float delay, const Ice::Current& current);
+	void	shutdownSystem(Ice::Float delay, const Ice::Current& current);
 	void	restartServer(Ice::Float delay, const Ice::Current& current);
 	FileInfo	statFile(const std::string& filename,
 					const Ice::Current& current);

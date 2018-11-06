@@ -140,6 +140,7 @@ module snowstar {
 		void	reloadRepositories();
 		void	shutdownServer(float delay);
 		void	restartServer(float delay);
+		void	shutdownSystem(float delay);
 		FileInfo	statFile(string filename)
 					throws NotFound, IOException;
 		DirectoryInfo	statDirectory(string dirname)

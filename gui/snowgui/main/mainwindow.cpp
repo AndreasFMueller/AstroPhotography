@@ -27,6 +27,7 @@
 #include <browserwindow.h>
 #include <ImageForwarder.h>
 #include <eventdisplaywidget.h>
+#include <CommunicatorSingleton.h>
 
 using namespace astro::discover;
 
@@ -112,6 +113,9 @@ MainWindow::MainWindow(QWidget *parent,
 	// add menu
 	createActions();
 	createMenus();
+
+	// create a 
+	QTimer::singleShot(1000, this, SLOT(timecheck()));
 }
 
 /**
@@ -563,6 +567,37 @@ void	MainWindow::launchEvents() {
 		message->exec();
 		delete message;
 	}
+}
+
+/**
+ * \brief Test the time 
+ */
+void	MainWindow::timecheck() {
+	Ice::CommunicatorPtr	ic = snowstar::CommunicatorSingleton::get();
+	Ice::ObjectPrx	base = ic->stringToProxy(
+		_serviceobject.connect("Daemon"));
+	snowstar::DaemonPrx	daemon
+		= snowstar::DaemonPrx::checkedCast(base);
+	time_t	servertime = daemon->getSystemTime();
+	time_t	now;
+	time(&now);
+	int	delta = now - servertime;
+#if 0
+	if (abs(delta) < 300) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "time difference %d", delta);
+		return;
+	}
+#endif
+
+	QMessageBox	message;
+	message.setText("Time Problem");
+	std::ostringstream	out;
+	out << "There is a large time difference of " << abs(delta);
+	out << " seconds between the client ";
+	out << "and the server machine. Use the Configuration app to ";
+	out << "sync the time.";
+	message.setInformativeText(QString(out.str().c_str()));
+	message.exec();
 }
 
 } // namespace snowgui

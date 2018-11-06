@@ -43,6 +43,23 @@ void    DaemonI::shutdownServer(Ice::Float delay,
 	std::thread	*t = new std::thread(do_shutdown, delay, current);
 }
 
+static void	do_shutdownsystem(float delay, const Ice::Current& /* current */) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "shutting down systen in %f", delay);
+	useconds_t	udelay = 1000000 * delay;
+	usleep(udelay);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "shutting down system now");
+	system("echo sudo shutdown -h now");
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "shutdown command sent");
+}
+
+/**
+ * \brief Initiate shutdown of the system
+ */
+void	DaemonI::shutdownSystem(Ice::Float delay, const Ice::Current& current) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "shutdown request");
+	std::thread	*t = new std::thread(do_shutdownsystem, delay, current);
+}
+
 /**
  * \brief Initiate restart of the server
  */
@@ -271,6 +288,19 @@ void	DaemonI::setSystemTime(Ice::Long unixtime,
 		const Ice::Current& /* current */) {
 	time_t	t = unixtime;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "setting system time to %s", ctime(&t));
+
+	int	rc;
+#if 0
+	rc = stime(&t);
+	if (rc == 0) {
+		return;
+	}
+	if (EPERM != errno) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "cannot set time: %s",
+			strerror(errno));
+	}
+#endif
+
 	// construct the command
 	struct tm	*tp = localtime(&t);
 	char	buffer[30];
@@ -279,7 +309,7 @@ void	DaemonI::setSystemTime(Ice::Long unixtime,
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "time set command: %s", cmd.c_str());
 
 	// execute the command
-	int	rc = system(cmd.c_str());
+	rc = system(cmd.c_str());
 	if (rc) {
 		// throw an exception
 		OperationFailed	f;

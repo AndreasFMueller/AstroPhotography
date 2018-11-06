@@ -45,6 +45,7 @@ public slots:
 	void	launchExpose();
 	void	launchEvents();
 	void	imageForSaving(astro::image::ImagePtr image, std::string);
+	void	timecheck();
 
 private:
 	Ui::MainWindow *ui;

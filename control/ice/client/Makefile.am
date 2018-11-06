@@ -15,7 +15,7 @@ ICECPPFLAGS = -I$(top_builddir)/ice/include -I$(top_builddir)/ice/slice \
 
 bin_PROGRAMS = snowscan snowimages snowfocus snowmount snowrepo \
 	snowtask snowproject snowinstrument snowao snowservers \
-	snowevent snowconfig snowstream snowfiles
+	snowevent snowconfig snowstream snowfiles snowdaemon
 noinst_PROGRAMS = snowflake 
 
 noinst_HEADERS = FocusCallbackI.h
@@ -94,6 +94,11 @@ snowfiles_SOURCES = snowfiles.cpp
 snowfiles_DEPENDENCIES = $(ICEDEPENDENCIES)
 snowfiles_LDADD = $(ICELDADD)
 snowfiles_CPPFLAGS = $(ICECPPFLAGS)
+
+snowdaemon_SOURCES = snowdaemon.cpp
+snowdaemon_DEPENDENCIES = $(ICEDEPENDENCIES)
+snowdaemon_LDADD = $(ICELDADD)
+snowdaemon_CPPFLAGS = $(ICECPPFLAGS)
 
 test:	snowflake
 	./snowflake -d -m simulator

@@ -293,8 +293,8 @@ GuiderPrx	RemoteInstrument::guider(unsigned int ccdindex,
 	try {
 		guider = guiderfactory->get(guiderdescriptor);
 	} catch (const std::exception& x) {
-		std::string	msg = stringprintf("cannot get guider: %s",
-			x.what());
+		std::string	msg = astro::stringprintf(
+			"cannot get guider: %s", x.what());
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 		throw std::runtime_error(msg);
 	}
