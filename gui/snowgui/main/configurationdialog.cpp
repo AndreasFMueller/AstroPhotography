@@ -104,6 +104,12 @@ configurationdialog::configurationdialog(QWidget *parent,
 	connect(&_statusTimer, SIGNAL(timeout()), this, SLOT(timeUpdate()));
 	_statusTimer.setInterval(1000);
 
+	// connect the shutdown buttons
+	connect(ui->serverButton, SIGNAL(clicked()),
+		this, SLOT(shutdownClicked()));
+	connect(ui->systemButton, SIGNAL(clicked()),
+		this, SLOT(systemClicked()));
+
 	// title
 	setWindowTitle(QString("Configuration"));
 	std::string	title = astro::stringprintf("Remote configuration on %s", _serviceobject.toString().c_str());
@@ -566,6 +572,40 @@ void	configurationdialog::timesourceSelected(int index) {
 	ui->sourceTimeField->setEnabled(true);
 	ui->sourceTimeLabel->setEnabled(true);
 	_statusTimer.start();
+}
+
+void	configurationdialog::shutdownClicked() {
+	if (!_daemon) { return; }
+	QMessageBox	message;
+	message.setText(QString("Server process shutdown"));
+	message.setInformativeText(QString("Do you really want to shut down the server process?"));
+	message.setStandardButtons(QMessageBox::Cancel | QMessageBox::Ok);
+message.setDefaultButton(QMessageBox::Cancel);
+	int     rc = message.exec();
+	switch (rc) {
+	case QMessageBox::Cancel:
+		break;
+	case QMessageBox::Ok:
+		_daemon->shutdownSystem(0);
+		break;
+	}
+}
+
+void	configurationdialog::systemClicked() {
+	if (!_daemon) { return; }
+	QMessageBox	message;
+	message.setText(QString("Server OS shutdown"));
+	message.setInformativeText(QString("Do you really want to shut down the server operating system?"));
+	message.setStandardButtons(QMessageBox::Cancel | QMessageBox::Ok);
+message.setDefaultButton(QMessageBox::Cancel);
+	int     rc = message.exec();
+	switch (rc) {
+	case QMessageBox::Cancel:
+		break;
+	case QMessageBox::Ok:
+		_daemon->shutdownSystem(0);
+		break;
+	}
 }
 
 } // namespace snowgui

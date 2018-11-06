@@ -73,6 +73,10 @@ public slots:
 	void	setfromsourceClicked();
 	void	timeUpdate();
 	void	timesourceSelected(int);
+
+	// shutdown
+	void	shutdownClicked();
+	void	systemClicked();
 private:
 	Ui::configurationdialog *ui;
 	astro::discover::ServiceObject	_serviceobject;
