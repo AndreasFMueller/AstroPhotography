@@ -582,13 +582,10 @@ void	MainWindow::timecheck() {
 	time_t	now;
 	time(&now);
 	int	delta = now - servertime;
-#if 0
-	if (abs(delta) < 300) {
+	if (abs(delta) < 60) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "time difference %d", delta);
 		return;
 	}
-#endif
-
 	QMessageBox	message;
 	message.setText("Time Problem");
 	std::ostringstream	out;

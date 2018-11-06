@@ -586,7 +586,7 @@ message.setDefaultButton(QMessageBox::Cancel);
 	case QMessageBox::Cancel:
 		break;
 	case QMessageBox::Ok:
-		_daemon->shutdownSystem(0);
+		_daemon->shutdownServer(0);
 		break;
 	}
 }
