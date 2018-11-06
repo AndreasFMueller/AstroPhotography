@@ -20,6 +20,7 @@ guideportcontrollerwidget::guideportcontrollerwidget(QWidget *parent)
 	ui->setupUi(this);
 	ui->guideWidget->setEnabled(false);
 	ui->activationWidget->setEnabled(false);
+	ui->proposalWidget->setEnabled(false);
 
 	// guiderate
 	_guiderate = 0.5;
@@ -104,12 +105,22 @@ void	guideportcontrollerwidget::setupComplete() {
 void	guideportcontrollerwidget::setupGuideport() {
 	_statusTimer.stop();
 	if (_guideport) {
+		try {
+			// try to 
+			_guideport->active();
+			_statusTimer.start();
+		} catch (const std::exception& x) {
+			std::string	msg = astro::stringprintf("cannot "
+				"connect to '%s'", instrumentname().c_str());
+			return;
+		}
 		ui->guideWidget->setEnabled(true);
 		ui->activationWidget->setEnabled(true);
-		_statusTimer.start();
+		ui->proposalWidget->setEnabled(true);
 	} else {
 		ui->guideWidget->setEnabled(false);
 		ui->activationWidget->setEnabled(false);
+		ui->proposalWidget->setEnabled(false);
 	}
 }
 

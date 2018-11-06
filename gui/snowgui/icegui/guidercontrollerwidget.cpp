@@ -6,10 +6,12 @@
 #include "guidercontrollerwidget.h"
 #include "ui_guidercontrollerwidget.h"
 #include <QTimer>
+#include <QMessageBox>
 #include <CommunicatorSingleton.h>
 #include <IceConversions.h>
 #include <AstroCamera.h>
 #include <AstroUtils.h>
+#include <AstroFormat.h>
 #include <algorithm>
 #include "trackselectiondialog.h"
 #include "trackviewdialog.h"
@@ -193,7 +195,12 @@ void	guidercontrollerwidget::instrumentSetup(
 	astro::ServerName	servername(serviceobject.name());
 	Ice::ObjectPrx  gbase
 		= ic->stringToProxy(servername.connect("Guiders"));
-	_guiderfactory = snowstar::GuiderFactoryPrx::checkedCast(gbase);
+	try {
+		_guiderfactory = snowstar::GuiderFactoryPrx::checkedCast(gbase);
+	} catch (const std::exception& x) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "cannot get a guider factory: %s",
+			x.what());
+	}
 
 	// now build a GuiderDescriptor for the guider
 	_guiderdescriptor.instrumentname = _instrument.name();
@@ -214,14 +221,48 @@ void	guidercontrollerwidget::setupComplete() {
  * \brief Setup a guider
  */
 void	guidercontrollerwidget::setupGuider() {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "setting up the guider %s|%d|%d|%d",
+	std::string	guidername = astro::stringprintf("%s|%d|%d|%d",
 		_guiderdescriptor.instrumentname.c_str(),
 		_guiderdescriptor.ccdIndex, _guiderdescriptor.guideportIndex,
 		_guiderdescriptor.adaptiveopticsIndex);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "setting up the guider %s",
+		guidername.c_str());
 	statusTimer.stop();
 
+	// we cannot do anything if we don't have a guiderfactory
+	if (!_guiderfactory) {
+		QMessageBox	message;
+		message.setText(QString("No guider factory"));
+		std::ostringstream	out;
+		out << "A connection to the guider factory to retrieve the ";
+		out << "guider " << guidername << "failed. The guider could";
+		out << "not be set upt." << std::endl;
+		message.setInformativeText(QString(out.str().c_str()));
+		message.exec();
+		return;
+	}
+
 	// get the guider based on the descriptor
-	_guider = _guiderfactory->get(_guiderdescriptor);
+	try {
+		_guider = _guiderfactory->get(_guiderdescriptor);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "got the guider %s",
+			guidername.c_str());
+	} catch (const std::exception& x) {
+		QMessageBox	message;
+		std::string	title
+			= astro::stringprintf("Cannot connect to %s",
+			guidername.c_str());
+		message.setText(QString(title.c_str()));
+		std::ostringstream	out;
+		out << "The connection to ";
+		out << guidername;
+		out << " was not possible: ";
+		out << x.what();
+		out << std::endl;
+		message.setInformativeText(QString(out.str().c_str()));
+		message.exec();
+		return;
+	}
 
 	// get the calibration star
 	try {
@@ -235,6 +276,7 @@ void	guidercontrollerwidget::setupGuider() {
 				astro::stringprintf("%d", y).c_str()));
 		}
 	} catch (snowstar::BadState& x) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "bad state: %s", x.what());
 	}
 
 	// also propagate the information to the calibration widgets

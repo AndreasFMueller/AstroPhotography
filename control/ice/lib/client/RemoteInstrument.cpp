@@ -259,6 +259,9 @@ GuiderPrx	RemoteInstrument::guider(unsigned int ccdindex,
 		= ic->stringToProxy(servername.connect("Guiders"));
 	GuiderFactoryPrx	guiderfactory
 		= GuiderFactoryPrx::checkedCast(gbase);
+	if (!guiderfactory) {
+		throw std::runtime_error("guider factory not available");
+	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "got a guider factory");
 
 	// now build the descriptor
@@ -286,11 +289,17 @@ GuiderPrx	RemoteInstrument::guider(unsigned int ccdindex,
 		guiderdescriptor.adaptiveopticsIndex);
 
 	// retrieve the guider factory
-	GuiderPrx	guider = guiderfactory->get(guiderdescriptor);
-	if (guider) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "got guider with ccd %s",
-			convert(guider->getCcd()->getInfo()).toString().c_str());
+	GuiderPrx	guider;
+	try {
+		guider = guiderfactory->get(guiderdescriptor);
+	} catch (const std::exception& x) {
+		std::string	msg = stringprintf("cannot get guider: %s",
+			x.what());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw std::runtime_error(msg);
 	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "got guider with ccd %s",
+		convert(guider->getCcd()->getInfo()).toString().c_str());
 	return guider;
 }
 

@@ -35,10 +35,15 @@ InstrumentSetupThread::~InstrumentSetupThread() {
  */
 void	InstrumentSetupThread::run() {
 	std::string	t = astro::demangle(typeid(*_instrumentwidget).name());
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "start the work on %s setup", t.c_str());
-	_instrumentwidget->instrumentSetup(_serviceobject, _remoteinstrument);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "emit signal for %s", t.c_str());
-	emit setupCompletion();
+	try {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "start the work on %s setup", t.c_str());
+		_instrumentwidget->instrumentSetup(_serviceobject, _remoteinstrument);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "emit signal for %s", t.c_str());
+		emit setupCompletion();
+	} catch (const std::exception& x) {
+		std::string	msg("cannot setup instrument");
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "work on %s setup complete", t.c_str());
 }
 

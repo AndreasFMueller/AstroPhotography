@@ -67,6 +67,11 @@ void	calibrationwidget::setGuider(snowstar::ControlType controltype,
 	_guiderfactory = guiderfactory;
 	_guidercontroller = guidercontroller;
 
+	if ((!_guiderfactory) || (!_guider)) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "no guider (factory)");
+		return;
+	}
+
 	// find out whether the guider is currently calibrated
 	try {
 		_calibration = _guider->getCalibration(_controltype);
@@ -105,7 +110,9 @@ void	calibrationwidget::setCalibration(snowstar::Calibration cal) {
 	_calibration = cal;
 	ui->calibrationdisplayWidget->setCalibration(cal);
 	displayCalibration();
-	_guider->useCalibration(cal.id, false);
+	if (_guider) {
+		_guider->useCalibration(cal.id, false);
+	}
 }
 
 /**
@@ -137,6 +144,10 @@ void	calibrationwidget::displayCalibration() {
  */
 void	calibrationwidget::calibrateClicked() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "start calibration for GuidePort");
+	if (!_guider) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "no guider present");
+		return;
+	}
 	// make sure we have the most recent information on the
 	// state
 	setupState();
@@ -195,7 +206,16 @@ void	calibrationwidget::statusUpdate() {
  * \brief Check whether the state has changed
  */
 void	calibrationwidget::setupState() {
-	snowstar::GuiderState	state = _guider->getState();
+	if (!_guider) {
+		return;
+	}
+	snowstar::GuiderState	state;
+	try {
+		state = _guider->getState();
+	} catch (const std::exception& x) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "cannot get guider state: %s",
+			x.what());
+	}
 	if (state == _state) {
 		return;
 	}

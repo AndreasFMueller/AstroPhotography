@@ -30,20 +30,27 @@ calibrationcalculatordialog::calibrationcalculatordialog(
 	ui->declinationUnit->setText(QString("º"));
 
 	// get information from the guider
-	_focallength = _guider->getFocallength();
-	ui->focallengthField->setText(QString(astro::stringprintf("%.3f",
-		_focallength).c_str()));
+	if (_guider) {
+		_focallength = _guider->getFocallength();
+		ui->focallengthField->setText(QString(
+			astro::stringprintf("%.3f", _focallength).c_str()));
 
-	snowstar::CcdInfo	info = _guider->getCcd()->getInfo();
-	_pixelsize = (info.pixelwidth + info.pixelheight) / 2;
-	ui->pixelsizeField->setText(QString(astro::stringprintf("%.1f",
-		_pixelsize * 1e6).c_str()));
+		snowstar::CcdInfo	info = _guider->getCcd()->getInfo();
+		_pixelsize = (info.pixelwidth + info.pixelheight) / 2;
+		ui->pixelsizeField->setText(QString(astro::stringprintf("%.1f",
+			_pixelsize * 1e6).c_str()));
 
-	_angle = ui->angleSpinBox->value();
+		_angle = ui->angleSpinBox->value();
 
-	_guiderate = _guider->getGuiderate();
-	ui->guiderateField->setText(QString(astro::stringprintf("%.3f",
-		_guiderate).c_str()));
+		_guiderate = _guider->getGuiderate();
+		ui->guiderateField->setText(QString(astro::stringprintf("%.3f",
+			_guiderate).c_str()));
+	} else {
+		_focallength = 1;
+		_pixelsize = 0.005;
+		_angle = 0;
+		_guiderate = 0.5;
+	}
 
 	_declination = ui->declinationSpinBox->value();
 
@@ -52,7 +59,9 @@ calibrationcalculatordialog::calibrationcalculatordialog(
 	// initialize the calibration
 	_cal.id = 0;
 	_cal.timeago = 0;
-	_cal.guider = _guider->getDescriptor();
+	if (_guider) {
+		_cal.guider = _guider->getDescriptor();
+	}
 	_cal.coefficients = std::vector<float>(6);
 	_cal.coefficients[0] = 1;
 	_cal.coefficients[1] = 0;
@@ -168,7 +177,9 @@ void	calibrationcalculatordialog::acceptCalibration() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "calibration accepted");
 	_cal.id = _guiderfactory->addCalibration(_cal);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "calibration stored as %d", _cal.id);
-	_guider->useCalibration(_cal.id, false);
+	if (_guider) {
+		_guider->useCalibration(_cal.id, false);
+	}
 	emit newCalibration(_cal);
 	accept();
 }
