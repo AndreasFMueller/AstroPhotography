@@ -130,8 +130,8 @@ void	calibrationcalculatordialog::updateCalibration() {
 	double	a = _angle * M_PI / 180;
 	int	decsign = (_decinvert) ? -1 : 1;
 	int	westsign = (_telescopewest) ? 1 : -1;
-	_cal.coefficients[1] =  decsign * westsign * pixelspeed * sin(a);
-	_cal.coefficients[4] = -decsign * westsign * pixelspeed * cos(a);
+	_cal.coefficients[1] = -decsign * westsign * pixelspeed * sin(a);
+	_cal.coefficients[4] =  decsign * westsign * pixelspeed * cos(a);
 	pixelspeed = 2 * pixelspeed * cos(_declination * M_PI / 180);
 	_cal.coefficients[0] = pixelspeed * westsign * cos(a);
 	_cal.coefficients[3] = pixelspeed * westsign * sin(a);
