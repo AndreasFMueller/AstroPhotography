@@ -15,6 +15,7 @@
 #include <AstroCoordinates.h>
 #include <QThread>
 #include <QTimer>
+#include <SkyDrawing.h>
 
 namespace snowgui {
 
@@ -36,9 +37,10 @@ signals:
 /**
  * \brief Widget to display the sky with stars and telescope marker
  */
-class SkyDisplayWidget : public QWidget {
+class SkyDisplayWidget : public QWidget, public SkyDrawing {
 	Q_OBJECT
 	QTimer	_timer;
+#if 0
 	astro::catalog::Catalog::starsetptr	_stars;
 
 	astro::AzmAltConverter	*_converter;
@@ -53,8 +55,10 @@ class SkyDisplayWidget : public QWidget {
 	bool	_show_telescope;
 	bool	_show_target;
 	bool	_show_labels;
+#endif
 	bool	_show_tooltip;
 public:
+#if 0
 	bool	show_altaz() const { return _show_altaz; }
 	void	show_altaz(bool a) { _show_altaz = a; }
 	bool	show_radec() const { return _show_radec; }
@@ -69,9 +73,11 @@ public:
 	void	show_target(bool c) { _show_target = c; }
 	bool	show_labels() const { return _show_labels; }
 	void	show_labels(bool l) { _show_labels = l; }
+#endif
 	bool	show_tooltip() const { return _show_tooltip; }
 	void	show_tooltip(bool l) { _show_tooltip = l; }
 
+#if 0
 	// telescope direction in right ascension and declination
 private:
 	astro::RaDec	_telescope;
@@ -88,9 +94,11 @@ private:
 public:
 	void	position(const astro::LongLat& p) { _position = p; }
 	const astro::LongLat&	position() const { return _position; }
+#endif
 
 	// some private drawing functions
 private:
+#if 0
 	void	drawLine(QPainter& painter, const astro::RaDec& from,
 			const astro::RaDec& to);
 	void	drawStar(QPainter& painter, const astro::catalog::Star& star);
@@ -103,6 +111,7 @@ private:
 	void	drawLabels(QPainter& painter);
 	void	draw();
 	QPointF	convert(const astro::AzmAlt& azmalt);
+#endif
 	astro::RaDec	convert(QMouseEvent *event);
 
 	bool	_mouse_pressed;
@@ -119,6 +128,7 @@ public:
 	virtual ~SkyDisplayWidget();
 
 	void	paintEvent(QPaintEvent *event);
+	virtual void	redraw();
 
 public slots:
 	void	telescopeChanged(astro::RaDec);

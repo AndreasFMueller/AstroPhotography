@@ -63,6 +63,7 @@ SOURCES += 								\
 	Scaler.cpp							\
 	SelectableImage.cpp						\
 	SkyDisplayWidget.cpp						\
+	SkyDrawing.cpp							\
 	SkyStarThread.cpp						\
 	StarChartRetriever.cpp						\
 	StarChartWidget.cpp						\
@@ -90,6 +91,7 @@ HEADERS  += 								\
 	Scaler.h							\
 	SelectableImage.h						\
 	SkyDisplayWidget.h						\
+	SkyDrawing.h							\
 	StarChartWidget.h						\
 	$${WIDGETHEADERS}
 

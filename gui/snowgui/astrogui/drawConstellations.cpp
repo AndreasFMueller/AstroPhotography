@@ -3,7 +3,7 @@
  *
  * (c) 2018 Prof Dr Andreas Müller, Hochschule Rapperswil
  */
-#include "SkyDisplayWidget.h"
+#include "SkyDrawing.h"
 #include <AstroCoordinates.h>
 #include <AstroDebug.h>
 
@@ -14,7 +14,7 @@ namespace snowgui {
 /**
  * \brief Draw constellation lines
  */
-void	SkyDisplayWidget::drawConstellations(QPainter& painter) {
+void	SkyDrawing::drawConstellations(QPainter& painter) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "draw constellation lines");
 	// set up the pen 
 	QPen	pen(Qt::SolidLine);
@@ -40,6 +40,5 @@ void	SkyDisplayWidget::drawConstellations(QPainter& painter) {
 		drawLine(painter, from, to);
 	}
 }
-
 
 } // namespace snowgui
