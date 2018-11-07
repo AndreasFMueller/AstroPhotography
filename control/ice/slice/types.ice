@@ -247,4 +247,22 @@ module snowstar {
 		void	registerMonitor(Ice::Identity eventmonitor);
                 void	unregisterMonitor(Ice::Identity eventmonitor);
 	};
+
+	/**
+	 * \brief Gateway for status information
+ 	 */
+	struct StatusUpdate {
+		float	avgguideerror;
+		float	ccdtemp;
+		float	lastimagestart;
+		int	currentaskid;
+		int	pendingtasks;
+		float	ra;
+		float	dec;
+		float	hourangle;
+	}
+
+	interface Gateway {
+		void	send(StatusUpdate update);
+	};
 };

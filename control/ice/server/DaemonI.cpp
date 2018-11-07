@@ -48,7 +48,7 @@ static void	do_shutdownsystem(float delay, const Ice::Current& /* current */) {
 	useconds_t	udelay = 1000000 * delay;
 	usleep(udelay);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "shutting down system now");
-	system("echo sudo shutdown -h now");
+	system("sudo shutdown -h now");
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "shutdown command sent");
 }
 
