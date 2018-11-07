@@ -40,78 +40,13 @@ signals:
 class SkyDisplayWidget : public QWidget, public SkyDrawing {
 	Q_OBJECT
 	QTimer	_timer;
-#if 0
-	astro::catalog::Catalog::starsetptr	_stars;
-
-	astro::AzmAltConverter	*_converter;
-	astro::AzmAlt	convert(const astro::RaDec& radec);
-	QPointF	_center;
-	float	_radius;
-	// whether or not to show the altaz grid lines
-	bool	_show_altaz;
-	bool	_show_radec;
-	bool	_show_ecliptic;
-	bool	_show_constellations;
-	bool	_show_telescope;
-	bool	_show_target;
-	bool	_show_labels;
-#endif
 	bool	_show_tooltip;
 public:
-#if 0
-	bool	show_altaz() const { return _show_altaz; }
-	void	show_altaz(bool a) { _show_altaz = a; }
-	bool	show_radec() const { return _show_radec; }
-	void	show_radec(bool r) { _show_radec = r; }
-	bool	show_ecliptic() const { return _show_ecliptic; }
-	void	show_ecliptic(bool r) { _show_ecliptic = r; }
-	bool	show_constellations() const { return _show_constellations; }
-	void	show_constellations(bool c) { _show_constellations = c; }
-	bool	show_telescope() const { return _show_telescope; }
-	void	show_telescope(bool c) { _show_telescope = c; }
-	bool	show_target() const { return _show_target; }
-	void	show_target(bool c) { _show_target = c; }
-	bool	show_labels() const { return _show_labels; }
-	void	show_labels(bool l) { _show_labels = l; }
-#endif
 	bool	show_tooltip() const { return _show_tooltip; }
 	void	show_tooltip(bool l) { _show_tooltip = l; }
 
-#if 0
-	// telescope direction in right ascension and declination
-private:
-	astro::RaDec	_telescope;
-	astro::RaDec	_target;
-public:
-	void	telescope(const astro::RaDec& t) { _telescope = t; }
-	const astro::RaDec&	telescope() const { return _telescope; }
-	void	target(const astro::RaDec& t) { _target = t; }
-	const astro::RaDec&	target() const { return _target; }
-
-	// position on earth of the observatory
-private:
-	astro::LongLat	_position;
-public:
-	void	position(const astro::LongLat& p) { _position = p; }
-	const astro::LongLat&	position() const { return _position; }
-#endif
-
 	// some private drawing functions
 private:
-#if 0
-	void	drawLine(QPainter& painter, const astro::RaDec& from,
-			const astro::RaDec& to);
-	void	drawStar(QPainter& painter, const astro::catalog::Star& star);
-	void	drawTelescope(QPainter& painter);
-	void	drawAltaz(QPainter& painter);
-	void	drawRadec(QPainter& painter);
-	void	drawEcliptic(QPainter& painter);
-	void	drawTarget(QPainter& painter);
-	void	drawConstellations(QPainter& painter);
-	void	drawLabels(QPainter& painter);
-	void	draw();
-	QPointF	convert(const astro::AzmAlt& azmalt);
-#endif
 	astro::RaDec	convert(QMouseEvent *event);
 
 	bool	_mouse_pressed;

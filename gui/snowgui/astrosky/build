@@ -3,7 +3,7 @@
 # 
 make -j 8
 
-options="--debug --size=800 --longitude=9.75 --latitude=46.9167 --declination=56.57 --rightascension=0.87361 test.png"
+options="--debug --cardinal --size=800 --longitude=9.75 --latitude=46.9167 --declination=56.57 --rightascension=0.87361 test.png"
 
 if [ -d astrosky.app ]
 then

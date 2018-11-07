@@ -20,8 +20,18 @@ void	usage(char *progname) {
 	std::cout << "Usage:" << std::endl;
 	std::cout << "    " << path.basename() << " [ options ]" << std::endl;
 	std::cout << "Options:" << std::endl;
-	std::cout << "  -d,--debug          increase debug level" << std::endl;
-	std::cout << "  -h,-?,--help        show this help message and exit";
+	std::cout << "  -a,--altaz                  toggle display of altitude and azimut" << std::endl;
+	std::cout << "  -c,--constellations         toggle the display of constellations" << std::endl;
+	std::cout << "  -C,--cardinal               toggle labels for cardinal directions" << std::endl;
+	std::cout << "  -d,--debug                  increase debug level" << std::endl;
+	std::cout << "  -D,--declination=<dec>      DEC of the telescope marker" << std::endl;
+	std::cout << "  -e,--ecliptic               toggle display of the ecliptic" << std::endl;
+	std::cout << "  -g,--grid                   toggle the RA/DEC grid" << std::endl;
+	std::cout << "  -h,-?,--help                show this help message and exit";
+	std::cout << "  -L,--longitude<long>        longitude of the observatory" << std::endl;
+	std::cout << "  -l,--latitude<lat>          latitude of the observatory" << std::endl;
+	std::cout << "  -R,--rightascension=<ra>    RA of the telescope marker" << std::endl;
+	std::cout << "  -s,--size=<s>               generate a <s>x<s> image, default is 1024" << std::endl;
 	std::cout << std::endl;
 }
 
@@ -49,7 +59,6 @@ int	main(int argc, char *argv[]) {
 	astro::RaDec	telescope;
 	SkyDrawing	skydrawing;
 
-	QApplication	a(argc, argv);
 
 	int	c;
 	int	longindex;
@@ -109,6 +118,11 @@ int	main(int argc, char *argv[]) {
 			s = std::stoi(optarg);
 			break;
 		}
+
+	QApplicaton	*app = NULL;
+	if (skydrawing.show_labels()) {
+		app = new QApplication(argc, argv);
+	}
 
 	// next argument must be a filename
 	if (optind >= argc) {
