@@ -38,6 +38,22 @@ FocusProcessBase::~FocusProcessBase() {
 }
 
 /**
+ * \brief Auxiliary function to replace the UUID in an image
+ */
+void	FocusProcessBase::replaceUuid(ImageBase& image) {
+	std::string	olduuid("(none)");
+	if (image.hasMetadata(std::string("UUID"))) {
+		olduuid = (std::string)image.getMetadata(std::string("UUID"));
+		image.removeMetadata(std::string("UUID"));
+	}
+	std::string	newuuid = UUID();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "remove uuid %s, replace by %s",
+		olduuid.c_str(), newuuid.c_str());
+	image.setMetadata(io::FITSKeywords::meta(std::string("UUID"),
+			newuuid));
+}
+
+/**
  * \brief Report the state to the callback
  */
 void	FocusProcessBase::reportState() {
@@ -56,8 +72,10 @@ void	FocusProcessBase::reportState() {
 void	FocusProcessBase::reportFocusElement(const FocusElement& fe) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "reporting %s", fe.toString().c_str());
 	if (_callback) {
+		// report the images
 		callback::CallbackDataPtr fecd(new FocusElementCallbackData(fe));
 		(*_callback)(fecd);
+		// report the data only
 		callback::CallbackDataPtr fcd(new FocusCallbackData(fe));
 		(*_callback)(fcd);
 	} else {
@@ -71,6 +89,7 @@ void	FocusProcessBase::reportFocusElement(const FocusElement& fe) {
  */
 void	FocusProcessBase::reportImage(ImagePtr image) {
 	if (_callback) {
+		// report the raw image
 		callback::CallbackDataPtr cd(new callback::ImageCallbackData(image));
 		(*_callback)(cd);
 	} else {
@@ -116,16 +135,15 @@ bool	FocusProcessBase::measure0() {
 		// add the image and the position to the 
 		FocusElementPtr	fe(new FocusElement(pos));
 		fe->raw_image = image;
-		_focus_elements->put(fe);
 
-		// make sure this raw image has a unique 
-		if (fe->raw_image->hasMetadata(std::string("UUID"))) {
-			std::string     v = fe->raw_image->getMetadata(std::string("UUID"));
-			std::string	newuuid = UUID();
-			debug(LOG_DEBUG, DEBUG_LOG, 0, "remove uuid %s, replace by %s", v.c_str(), newuuid.c_str());
-			fe->raw_image->removeMetadata(std::string("UUID"));
-			fe->raw_image->setMetadata(io::FITSKeywords::meta(std::string("UUID"), newuuid));
+		// make sure this raw image has a unique id before placing it
+		// into the queue
+		if (fe->raw_image) {
+			replaceUuid(*fe->raw_image);
 		}
+
+		// now put it in the queue
+		_focus_elements->put(fe);
 
 		if (!_running) {
 			goto failed;
@@ -174,12 +192,8 @@ bool	FocusProcessBase::evaluate0() {
 			processor.process(*fe);
 
 			// make sure this raw image has a unique 
-			if ((fe->processed_image) && (fe->processed_image->hasMetadata(std::string("UUID")))) {
-				std::string     v = fe->processed_image->getMetadata(std::string("UUID"));
-				std::string	newuuid = UUID();
-				debug(LOG_DEBUG, DEBUG_LOG, 0, "remove uuid %s, replace by %s", v.c_str(), newuuid.c_str());
-				fe->processed_image->removeMetadata(std::string("UUID"));
-				fe->processed_image->setMetadata(io::FITSKeywords::meta(std::string("UUID"), newuuid));
+			if (fe->processed_image) {
+				replaceUuid(*fe->processed_image);
 			}
 
 			// report the element

@@ -399,7 +399,7 @@ private:
 	void	reportState();
 	void	reportImage(image::ImagePtr);
 	void	reportFocusElement(const FocusElement&);
-
+	void	replaceUuid(image::ImageBase&);
 private:
 	std::atomic_bool	_running;
 	std::thread	_measure_thread;

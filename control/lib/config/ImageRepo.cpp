@@ -152,9 +152,13 @@ void	ImageRepo::scan_file(const std::string& filename) {
 	try {
 		imageinfo.uuid = (std::string)(infile.getMetadata("UUID"));
 	} catch (...) { }
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "adding image %s, uuid=%s",
+		imageinfo.filename.c_str(), imageinfo.uuid.c_str());
 
 	// add the entry to the table
 	long	imageid = images.add(imageinfo);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "image %s, uuid=%s gets id %ld",
+		imageinfo.filename.c_str(), imageinfo.uuid.c_str(), imageid);
 
 	// in the part below we need the metatdata table
 	MetadataTable	metadatatable(_database);

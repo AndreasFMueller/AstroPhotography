@@ -41,8 +41,6 @@ void	FocusProcessor::process(FocusElement& element) {
 		element.raw_image = element.image();
 	}
 
-	// remove the UUID and create a new one
-
 	// now process the image:
 	// 1. get an evaluator for this type of image
 	FocusEvaluatorFactory	evaluatorfactory;
