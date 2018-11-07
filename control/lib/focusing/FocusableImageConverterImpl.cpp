@@ -190,9 +190,12 @@ meta:
 	result->metadata(image->metadata());
 	if (result->hasMetadata(std::string("UUID"))) {
 		std::string	v = result->getMetadata(std::string("UUID"));
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "remove uuid %s", v.c_str());
+		std::string	newuuid = UUID();
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "remove uuid %s, replace by %s",
+			v.c_str(), newuuid.c_str());
 		result->removeMetadata(std::string("UUID"));
-		result->setMetadata(io::FITSKeywords::meta(std::string("UUID"), UUID()));
+		result->setMetadata(io::FITSKeywords::meta(std::string("UUID"),
+			newuuid));
 	}
 
 	return result;
