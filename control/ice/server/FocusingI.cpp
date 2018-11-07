@@ -222,9 +222,12 @@ void	FocusingI::updateFocusing(astro::callback::CallbackDataPtr data) {
 	}
 
 	// ImageCallback
+	// in this case we have to test for focusdata first, because focusdata
+	// also is image data, which would result in us trying to save an
+	// image twice
 	astro::callback::ImageCallbackData	*imagedata
 		= dynamic_cast<astro::callback::ImageCallbackData *>(&*data);
-	if (NULL != imagedata) {
+	if ((focusdata == NULL) && (NULL != imagedata)) {
 		if ((imagedata->image()) && (imagerepo())) {
 			try {
 				debug(LOG_DEBUG, DEBUG_LOG, 0, "got %s",
