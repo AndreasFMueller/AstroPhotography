@@ -118,6 +118,15 @@ bool	FocusProcessBase::measure0() {
 		fe->raw_image = image;
 		_focus_elements->put(fe);
 
+		// make sure this raw image has a unique 
+		if (fe->raw_image->hasMetadata(std::string("UUID"))) {
+			std::string     v = fe->raw_image->getMetadata(std::string("UUID"));
+			std::string	newuuid = UUID();
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "remove uuid %s, replace by %s", v.c_str(), newuuid.c_str());
+			fe->raw_image->removeMetadata(std::string("UUID"));
+			fe->raw_image->setMetadata(io::FITSKeywords::meta(std::string("UUID"), newuuid));
+		}
+
 		if (!_running) {
 			goto failed;
 		}
@@ -163,6 +172,15 @@ bool	FocusProcessBase::evaluate0() {
 
 			// process the element
 			processor.process(*fe);
+
+			// make sure this raw image has a unique 
+			if ((fe->processed_image) && (fe->processed_image->hasMetadata(std::string("UUID")))) {
+				std::string     v = fe->processed_image->getMetadata(std::string("UUID"));
+				std::string	newuuid = UUID();
+				debug(LOG_DEBUG, DEBUG_LOG, 0, "remove uuid %s, replace by %s", v.c_str(), newuuid.c_str());
+				fe->processed_image->removeMetadata(std::string("UUID"));
+				fe->processed_image->setMetadata(io::FITSKeywords::meta(std::string("UUID"), newuuid));
+			}
 
 			// report the element
 			reportFocusElement(*fe);

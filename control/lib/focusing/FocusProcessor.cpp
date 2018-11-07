@@ -41,6 +41,8 @@ void	FocusProcessor::process(FocusElement& element) {
 		element.raw_image = element.image();
 	}
 
+	// remove the UUID and create a new one
+
 	// now process the image:
 	// 1. get an evaluator for this type of image
 	FocusEvaluatorFactory	evaluatorfactory;
@@ -52,6 +54,9 @@ void	FocusProcessor::process(FocusElement& element) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 		throw std::runtime_error(msg);
 	}
+
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "processing image %s",
+		element.raw_image->info().c_str());
 
 	// 2. run the image through the evaluator, adding the info to the
 	//    element

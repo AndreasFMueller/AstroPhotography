@@ -7,6 +7,7 @@
 #include <AstroFocus.h>
 #include <AstroAdapter.h>
 #include <AstroUtils.h>
+#include <AstroIO.h>
 #include "FocusableImageConverterImpl.h"
 
 namespace astro {
@@ -188,7 +189,10 @@ meta:
 	// copy the metadata except for the uuid
 	result->metadata(image->metadata());
 	if (result->hasMetadata(std::string("UUID"))) {
+		std::string	v = result->getMetadata(std::string("UUID"));
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "remove uuid %s", v.c_str());
 		result->removeMetadata(std::string("UUID"));
+		result->setMetadata(io::FITSKeywords::meta(std::string("UUID"), UUID()));
 	}
 
 	return result;
