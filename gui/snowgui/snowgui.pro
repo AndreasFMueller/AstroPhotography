@@ -11,6 +11,7 @@ SUBDIRS = astrogui icegui image preview test focusing guiding pointing
 SUBDIRS += instruments
 SUBDIRS += images repository expose task browser main
 SUBDIRS += astrobrowser astroviewer snowlife
+SUBDIRS += astrosky
 CONFIG += ordered
 
 snowgui.depends = astrogui icegui image focusing guiding pointing \

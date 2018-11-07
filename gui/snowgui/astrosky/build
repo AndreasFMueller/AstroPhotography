@@ -1,0 +1,13 @@
+#! /bin/bash
+#
+# 
+make -j 8
+
+options="--debug --size=800 --longitude=9.75 --latitude=46.9167 --declination=56.57 --rightascension=0.87361 test.png"
+
+if [ -d astrosky.app ]
+then
+	astrosky.app/Contents/MacOS/astrosky ${options} 2>&1 | tee build.log
+else
+	./astrosky ${options} 2>&1 | tee build.log
+fi

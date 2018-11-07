@@ -14,6 +14,7 @@
 #include <imagedisplaywidget.h>
 
 namespace snowgui {
+namespace viewer {
 
 /**
  * \brief Usage function for the snowgui program
@@ -53,7 +54,8 @@ int main(int argc, char *argv[]) {
 		switch (c) {
 		case 'd':
 			debuglevel = LOG_DEBUG;
-			break; case 'h':
+			break;
+		case 'h':
 		case '?':
 			usage(argv[0]);
 			return EXIT_SUCCESS;
@@ -103,9 +105,10 @@ int main(int argc, char *argv[]) {
 	return a.exec();
 }
 
+} // namespace viewer
 } // namespace snowgui
 
 // wrapper used to catch and log any exceptions
 int	main(int argc, char *argv[]) {
-	return astro::main_function<snowgui::main>(argc, argv);
+	return astro::main_function<snowgui::viewer::main>(argc, argv);
 }
