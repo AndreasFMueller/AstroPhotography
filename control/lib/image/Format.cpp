@@ -14,6 +14,7 @@ std::string	Format::typeString() const {
 	case Format::JPEG:	return std::string("jpeg");
 	case Format::PNG:	return std::string("png");
 	}
+	throw std::runtime_error("unknown format type");
 }
 
 size_t	Format::write(ImagePtr image, const std::string& filename) {
