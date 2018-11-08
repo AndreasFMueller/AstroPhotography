@@ -23,10 +23,31 @@ void	callback_adapter<StatusUpdateMonitorPrx>(StatusUpdateMonitorPrx& p,
 	p->update(convert(sap->data()));
 }
 
+class TaskUpdateForwarder : public astro::callback::Callback {
+	GatewayI	*_gateway;
+public:
+	TaskUpdateForwarder(GatewayI *gateway) : _gateway(gateway) { }
+	CallbackDataPtr	operator()(CallbackDataPtr data) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "forwarding %s",
+			astro::demangle(typeid(*data).name()).c_str());
+		astro::task::TaskUpdateCallbackData	*tucd
+			= dynamic_cast<astro::task::TaskUpdateCallbackData*>(&*data);
+		if (NULL != tucd) {
+			_gateway->update(convert(tucd->data()));
+		}
+		return data;
+	}
+	void	stop() const { }
+};
+
 GatewayI::GatewayI() {
+	astro::callback::CallbackPtr	callback(new TaskUpdateForwarder(this));
+	astro::task::Gateway::setCallback(callback);
 }
 
 GatewayI::~GatewayI() {
+	astro::callback::CallbackPtr	callback;
+	astro::task::Gateway::setCallback(callback);
 }
 
 void	GatewayI::send(const StatusUpdate& statusupdate,

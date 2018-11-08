@@ -2,7 +2,6 @@
 # build the basic library
 #
 # (c) 2012 Prof Dr Andreas Mueller, Hochschule Rapperswil
-# $Id$
 #
 SUBDIRS = . test
 
@@ -12,6 +11,7 @@ libastrotask_la_SOURCES = 						\
 	CancellableWork.cpp						\
 	ExposureTimer.cpp						\
 	ExposureWork.cpp						\
+	Gateway.cpp							\
 	Loop.cpp							\
 	TaskExecutor.cpp						\
 	TaskInfo.cpp							\

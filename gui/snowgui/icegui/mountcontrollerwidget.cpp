@@ -95,6 +95,7 @@ void	mountcontrollerwidget::instrumentSetup(
 		if (!_mount) {
 			debug(LOG_DEBUG, DEBUG_LOG, 0, "found a mount");
 			_mount = mount;
+			emit mountSelected(index);
 		}
 		std::string	sn = _instrument.displayname(
 					snowstar::InstrumentMount, index,

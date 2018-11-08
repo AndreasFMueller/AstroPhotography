@@ -19,6 +19,7 @@ namespace app {
 namespace gateway {
 
 bool	completed = false;
+std::string	urlstring;
 
 void	signal_handler(int /* sig */) {
 	completed = true;
@@ -34,6 +35,11 @@ public:
 			const Ice::Current& /* current */) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "update received: %s",
 			convert(statusupdate).toString().c_str());
+		if (urlstring.size() > 0) {
+			astro::URL	url(urlstring);
+			astro::PostData	pd = convert(statusupdate);
+			url.post(pd);
+		}
 	}
 	virtual void	stop(const Ice::Current& /* current */) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "stop received");
@@ -86,7 +92,6 @@ int	command_send(GatewayPrx gateway) {
 	update.updatetimeago = 3600 + 86400;
 	update.avgguideerror = 1.1;
 	update.currenttaskid = 4711;
-	update.pendingtasks = 47;
 	update.exposuretime = 12.91;
 	update.filter = 3;
 	gateway->send(update);
@@ -97,6 +102,7 @@ int	command_send(GatewayPrx gateway) {
 static struct option	longopts[] = {
 { "debug",		no_argument,		NULL,		'd' },
 { "help",		no_argument,		NULL,		'h' },
+{ "post",		required_argument,	NULL,		'p' },
 { NULL,			0,			NULL,		 0  }
 };
 
@@ -107,7 +113,7 @@ int	main(int argc, char *argv[]) {
 
 	int	c;
 	int	longindex;
-	while (EOF != (c = getopt_long(argc, argv, "dh?",
+	while (EOF != (c = getopt_long(argc, argv, "dh?p:",
 		longopts, &longindex)))
 		switch (c) {
 		case 'd':
@@ -117,6 +123,9 @@ int	main(int argc, char *argv[]) {
 		case '?':
 			usage(argv[0]);
 			return EXIT_SUCCESS;
+			break;
+		case 'p':
+			urlstring = std::string(optarg);
 			break;
 		}
 

@@ -421,22 +421,63 @@ public:
  * \brief Task update data structure to be sent to external monitors
  */
 class TaskUpdate {
+	std::string	_instrument;
 public:
+	const std::string& 	instrument() const { return _instrument; }
+	TaskUpdate(const std::string& instrument);
+	TaskUpdate(const TaskUpdate& other);
+	TaskUpdate&	operator=(const TaskUpdate& other);
 	time_t	updatetime;
 	float	avgguideerror;
+	// cooler
 	float	ccdtemperature;
 	time_t	lastimagestart;
+	// exposure
 	float	exposuretime;
+	// taskqueue
 	int	currenttaskid;
-	int	pendingtasks;
+	// mount
 	RaDec	telescope;
-	Angle	hourangle;
+	bool	west;
+	// filterwheel
 	int	filter;
 	LongLat	observatory;
 	std::string	toString(std::string separator = std::string(" ")) const;
+	operator	PostData() const;
 };
+typedef std::shared_ptr<TaskUpdate>	TaskUpdatePtr;
 
 typedef callback::CallbackDataEnvelope<TaskUpdate> TaskUpdateCallbackData;
+
+/**
+ * \brief Gateway functions
+ *
+ * These static functions allow to collect information about the system
+ * which can then be sent to a callback with the send function
+ */
+class Gateway {
+	typedef std::map<std::string, TaskUpdatePtr>	gatewaymap_t;
+	static gatewaymap_t	_taskupdates;
+	static callback::CallbackPtr	_callback;
+public:
+	static void	setCallback(callback::CallbackPtr callback);
+	static bool	has(const std::string& instrument);
+	static TaskUpdatePtr	get(const std::string& instrument);
+	static void	update(const std::string& instrument,
+				device::MountPtr mount);
+	static void	update(const std::string& instrument,
+				camera::CoolerPtr cooler);
+	static void	update(const std::string& instrument,
+				camera::FilterWheelPtr filterwheel);
+	static void	update(const std::string& instrument,
+				const camera::Exposure& exposure);
+	static void	update(const std::string& instrument,
+				float avgguideerror);
+	static void	update(const std::string& instrument,
+				int currenttaskid);
+	static void	updateImageStart(const std::string& instrument);
+	static void	send(const std::string& instrument);
+};
 
 } // namespace task
 } // namespace astro
