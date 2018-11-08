@@ -169,33 +169,46 @@ astro::task::TaskMonitorInfo    convert(const TaskMonitorInfo& monitorinfo) {
 
 astro::task::TaskUpdate convert(const StatusUpdate& statusupdate) {
 	astro::task::TaskUpdate	result;
+	result.updatetime = converttime(statusupdate.updatetimeago);
         result.avgguideerror = statusupdate.avgguideerror;
-        result.ccdtemperature = statusupdate.ccdtemperature;
+        result.ccdtemperature = statusupdate.ccdtemperature + 273.15;
         result.lastimagestart = converttime(statusupdate.lastimagestartago);
         result.exposuretime = statusupdate.exposuretime;
         result.currenttaskid = statusupdate.currenttaskid;
         result.pendingtasks = statusupdate.pendingtasks;
         result.telescope = astro::RaDec(
-			astro::Angle(statusupdate.ra, astro::Angle::Hours),
-			astro::Angle(statusupdate.dec, astro::Angle::Degrees));
+		astro::Angle(statusupdate.telescope.ra,
+			astro::Angle::Hours),
+		astro::Angle(statusupdate.telescope.dec,
+			astro::Angle::Degrees));
         result.hourangle = astro::Angle(statusupdate.hourangle,
 			astro::Angle::Hours);
+	result.observatory = astro::LongLat(
+		astro::Angle(statusupdate.observatory.longitude,
+			astro::Angle::Degrees),
+		astro::Angle(statusupdate.observatory.latitude,
+			astro::Angle::Degrees));
         result.filter = statusupdate.filter;
 	return result;
 }
 
 StatusUpdate    convert(const astro::task::TaskUpdate& taskupdate) {
 	StatusUpdate	result;
+	result.updatetimeago = converttime(taskupdate.updatetime);
 	result.avgguideerror = taskupdate.avgguideerror;
-	result.ccdtemperature = taskupdate.ccdtemperature;
+	result.ccdtemperature = taskupdate.ccdtemperature - 273.15;
 	result.lastimagestartago = converttime(taskupdate.lastimagestart);
 	result.exposuretime = taskupdate.exposuretime;
 	result.currenttaskid = taskupdate.currenttaskid;
 	result.pendingtasks = taskupdate.pendingtasks;
-	result.ra = taskupdate.telescope.ra().hours();
-	result.dec = taskupdate.telescope.dec().degrees();
+	result.telescope.ra = taskupdate.telescope.ra().hours();
+	result.telescope.dec = taskupdate.telescope.dec().degrees();
 	result.hourangle = taskupdate.hourangle.hours();
 	result.filter = taskupdate.filter;
+	result.observatory.longitude
+		= taskupdate.observatory.longitude().degrees();
+	result.observatory.latitude
+		= taskupdate.observatory.latitude().degrees();
 	return result;
 }
 

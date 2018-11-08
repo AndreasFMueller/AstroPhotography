@@ -22,10 +22,8 @@ CommunicatorSingleton::CommunicatorSingleton(int& argc, char *argv[]) {
 	// extract properties from the command line
 	Ice::PropertiesPtr props = Ice::createProperties(argc, argv);
 
-	// set property to turn off ACM, because it will be useless in
-	// all the programs that use fixed proxies and callbacks
-	// XXX temporarily turned off
-	//props->setProperty("Ice.ACM.Client", "0");
+	// dont' ever close connections
+	props->setProperty("Ice.ACM.Close", "0");
 
 	// the large message size is required because we have cases
 	// where we transfer entire images as messages

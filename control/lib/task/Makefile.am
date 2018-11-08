@@ -18,7 +18,8 @@ libastrotask_la_SOURCES = 						\
 	TaskParameters.cpp						\
 	TaskQueue.cpp							\
 	TaskQueueEntry.cpp						\
-	TaskTable.cpp
+	TaskTable.cpp							\
+	TaskUpdate.cpp
 
 libastrotask_la_CPPFLAGS = -DPKGLIBDIR=\"$(pkglibdir)\" 		\
 	-DDEVICEPROPERTIES=\"@DEVICEPROPERTIES@\"

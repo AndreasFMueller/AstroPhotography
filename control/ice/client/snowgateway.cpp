@@ -28,11 +28,14 @@ class StatusUpdateMonitorI : public StatusUpdateMonitor {
 public:
 	StatusUpdateMonitorI() {
 	}
-	void	update(const StatusUpdate& statusupdate,
-			const Ice::Current& /* current */) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "update received");
+	virtual ~StatusUpdateMonitorI() {
 	}
-	void	stop(const Ice::Current& /* current */) {
+	virtual void	update(const StatusUpdate& statusupdate,
+			const Ice::Current& /* current */) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "update received: %s",
+			convert(statusupdate).toString().c_str());
+	}
+	virtual void	stop(const Ice::Current& /* current */) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "stop received");
 		completed = true;
 	}
@@ -49,7 +52,8 @@ void	usage(const char *progname) {
 	std::cout << p << " [ options ] <service> monitor" << std::endl;
 	std::cout << "options:" << std::endl;
 	std::cout << "  -d,--debug          increase debug level" << std::endl;
-	std::cout << "  -h,-?,--help        display this help message and exit" << std::endl;
+	std::cout << "  -h,-?,--help        display this help message and exit";
+	std::cout << std::endl;
 }
 
 int	command_help(const char *progname) {
@@ -58,11 +62,14 @@ int	command_help(const char *progname) {
 }
 
 int	command_monitor(GatewayPrx gateway) {
+	// set up the monitor
 	Ice::ObjectPtr	monitor = new StatusUpdateMonitorI();
 	Ice::CommunicatorPtr	ic = CommunicatorSingleton::get();
-	CallbackAdapter	adapter(ic);
-	Ice::Identity	ident = adapter.add(monitor);
-	gateway->ice_getConnection()->setAdapter(adapter.adapter());
+	CallbackAdapter	*_adapter = new CallbackAdapter(ic);
+	Ice::Identity	ident = _adapter->add(monitor);
+	gateway->ice_getConnection()->setAdapter(_adapter->adapter());
+
+	// register the monitor
 	gateway->registerMonitor(ident);
 
 	signal(SIGINT, signal_handler);
@@ -76,6 +83,12 @@ int	command_monitor(GatewayPrx gateway) {
 
 int	command_send(GatewayPrx gateway) {
 	snowstar::StatusUpdate	update;
+	update.updatetimeago = 3600 + 86400;
+	update.avgguideerror = 1.1;
+	update.currenttaskid = 4711;
+	update.pendingtasks = 47;
+	update.exposuretime = 12.91;
+	update.filter = 3;
 	gateway->send(update);
 	return EXIT_SUCCESS;
 }

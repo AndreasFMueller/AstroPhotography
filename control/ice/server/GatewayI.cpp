@@ -12,11 +12,15 @@ namespace snowstar {
 template<>
 void	callback_adapter<StatusUpdateMonitorPrx>(StatusUpdateMonitorPrx& p,
 		const astro::callback::CallbackDataPtr data) {
-	StatusUpdate	*sap = dynamic_cast<StatusUpdate*>(&*data);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "message type: %s",
+		astro::demangle(typeid(*data).name()).c_str());
+	astro::task::TaskUpdateCallbackData	*sap
+		= dynamic_cast<astro::task::TaskUpdateCallbackData*>(&*data);
 	if (NULL == sap) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "this is not a status update");
 		return;
 	}
-	p->update(*sap);
+	p->update(convert(sap->data()));
 }
 
 GatewayI::GatewayI() {
@@ -42,7 +46,9 @@ void    GatewayI::unregisterMonitor(const Ice::Identity& statusupdatemonitor,
 }
 
 void	GatewayI::update(const StatusUpdate& su) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "sending status update to registered monitors");
+	astro::task::TaskUpdate	tu = convert(su);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "sending status update %s",
+		tu.toString(std::string("\n")).c_str());
 	astro::task::TaskUpdateCallbackData	*cbd
 		= new astro::task::TaskUpdateCallbackData(convert(su));
 	astro::callback::CallbackDataPtr	data(cbd);

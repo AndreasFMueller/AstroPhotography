@@ -26,6 +26,7 @@ void	callback_adapter<FocusCallbackPrx>(FocusCallbackPrx& prx,
 						astro::image::Format::PNG);
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "conversion complete");
 		prx->addFocusElement(*feptr);
+		return;
 	}
 
 	// Handle FocusCallbackData
@@ -37,6 +38,7 @@ void	callback_adapter<FocusCallbackPrx>(FocusCallbackPrx& prx,
 		p.position = focusdata->position();
 		p.value = focusdata->value();
 		prx->addPoint(p);
+		return;
 	}
 
 	// Handle FocusCallbackState
@@ -45,7 +47,11 @@ void	callback_adapter<FocusCallbackPrx>(FocusCallbackPrx& prx,
 	if (NULL != focusstate) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "FocusState callback called");
 		prx->changeState(convert(focusstate->state()));
+		return;
 	}
+
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "not a known type: %s",
+		astro::demangle(typeid(*data).name()).c_str());
 }
 
 //////////////////////////////////////////////////////////////////////

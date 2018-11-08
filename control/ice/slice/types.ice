@@ -252,16 +252,17 @@ module snowstar {
 	 * \brief Gateway for status information
  	 */
 	struct StatusUpdate {
+		double	updatetimeago;
 		float	avgguideerror;
 		float	ccdtemperature;
 		double	lastimagestartago;
 		float	exposuretime;
 		int	currenttaskid;
 		int	pendingtasks;
-		float	ra;
-		float	dec;
+		RaDec	telescope;
 		float	hourangle;
 		int	filter;
+		LongLat	observatory;
 	};
 
 	interface StatusUpdateMonitor extends Callback {

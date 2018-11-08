@@ -70,8 +70,9 @@ void	SnowCallback<proxy>::registerCallback(const Ice::Identity& identity,
 		= current.con->createProxy(identity)->ice_oneway();
 	proxy	callback = proxy::uncheckedCast(oneway);
 	callbacks.insert(std::make_pair(identity, callback));
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "%s callback installed, %d clients", 
-		astro::demangle(typeid(proxy).name()).c_str(), callbacks.size());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "%s callback %s installed, %d clients", 
+		astro::demangle(typeid(proxy).name()).c_str(),
+		identity.name.c_str(), callbacks.size());
 }
 
 /**

@@ -422,6 +422,7 @@ public:
  */
 class TaskUpdate {
 public:
+	time_t	updatetime;
 	float	avgguideerror;
 	float	ccdtemperature;
 	time_t	lastimagestart;
@@ -431,6 +432,8 @@ public:
 	RaDec	telescope;
 	Angle	hourangle;
 	int	filter;
+	LongLat	observatory;
+	std::string	toString(std::string separator = std::string(" ")) const;
 };
 
 typedef callback::CallbackDataEnvelope<TaskUpdate> TaskUpdateCallbackData;
