@@ -315,6 +315,11 @@ Server::Server(Ice::CommunicatorPtr _ic, const std::string& dbfilename)
 		add_instruments_servant();
 	}
 
+	// add a servant for Gateway
+	if (sp->has(astro::discover::ServiceSubset::GATEWAY)) {
+		add_gateway_servant();
+	}
+
 	// activate the adapter
 	adapter->activate();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "adapter activated");

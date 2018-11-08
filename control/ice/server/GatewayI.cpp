@@ -27,6 +27,7 @@ GatewayI::~GatewayI() {
 
 void	GatewayI::send(const StatusUpdate& statusupdate,
 			const Ice::Current& /* current */) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "got a status udpate");
 	update(statusupdate);
 }
 
@@ -41,6 +42,7 @@ void    GatewayI::unregisterMonitor(const Ice::Identity& statusupdatemonitor,
 }
 
 void	GatewayI::update(const StatusUpdate& su) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "sending status update to registered monitors");
 	astro::task::TaskUpdateCallbackData	*cbd
 		= new astro::task::TaskUpdateCallbackData(convert(su));
 	astro::callback::CallbackDataPtr	data(cbd);
