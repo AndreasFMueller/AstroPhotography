@@ -29,6 +29,7 @@ noinst_HEADERS =							\
 	FocusingFactoryI.h						\
 	FocusingI.h							\
 	FocusingLocator.h						\
+	GatewayI.h							\
 	GuidePortI.h							\
 	GuiderFactoryI.h						\
 	GuiderI.h							\
@@ -79,6 +80,7 @@ snowstar_SOURCES = snowstar.cpp 					\
 	FocusingI.cpp							\
 	FocusingCallback.cpp						\
 	FocusingLocator.cpp						\
+	GatewayI.cpp							\
 	GuidePortI.cpp							\
 	GuiderFactoryI.cpp						\
 	GuiderIBacklash.cpp						\

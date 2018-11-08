@@ -80,6 +80,7 @@ MainWindow::MainWindow(QWidget *parent,
 	setServiceLabelEnabled(ServiceSubset::FOCUSING);
 	setServiceLabelEnabled(ServiceSubset::IMAGES);
 	setServiceLabelEnabled(ServiceSubset::REPOSITORY);
+	setServiceLabelEnabled(ServiceSubset::GATEWAY);
 
 	// decide which services to enable
 	if (_serviceobject.has(ServiceSubset::INSTRUMENTS)) {
@@ -517,6 +518,8 @@ QLabel	*MainWindow::serviceLabel(ServiceSubset::service_type t) {
 		return ui->imagesLabel;
 	case ServiceSubset::REPOSITORY:
 		return ui->repositoryLabel;
+	case ServiceSubset::GATEWAY:
+		return ui->gatewayLabel;
 	}
 	return NULL;
 }

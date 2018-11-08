@@ -36,6 +36,9 @@ AvahiStringList	*AvahiServiceSubset::stringlist(const ServiceSubset& s) {
 	if (s.has(ServiceSubset::REPOSITORY)) {
 		strlist = avahi_string_list_add(strlist, "repository");
 	}
+	if (s.has(ServiceSubset::GATEWAY)) {
+		strlist = avahi_string_list_add(strlist, "gateway");
+	}
 	return strlist;
 }
 

@@ -253,16 +253,24 @@ module snowstar {
  	 */
 	struct StatusUpdate {
 		float	avgguideerror;
-		float	ccdtemp;
-		float	lastimagestart;
-		int	currentaskid;
+		float	ccdtemperature;
+		double	lastimagestartago;
+		float	exposuretime;
+		int	currenttaskid;
 		int	pendingtasks;
 		float	ra;
 		float	dec;
 		float	hourangle;
-	}
+		int	filter;
+	};
+
+	interface StatusUpdateMonitor extends Callback {
+		void	update(StatusUpdate status);
+	};
 
 	interface Gateway {
 		void	send(StatusUpdate update);
+		void	registerMonitor(Ice::Identity statusupdatemonitor);
+                void	unregisterMonitor(Ice::Identity statusupdatemonitor);
 	};
 };

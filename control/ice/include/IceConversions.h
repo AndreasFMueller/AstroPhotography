@@ -192,6 +192,9 @@ astro::task::TaskMonitorInfo	convert(const TaskMonitorInfo& monitorinfo);
 
 std::string	state2string(QueueState s);
 
+astro::task::TaskUpdate	convert(const StatusUpdate& statusupdate);
+StatusUpdate	convert(const astro::task::TaskUpdate& taskupdate);
+
 // Mount
 mountstate	convert(astro::device::Mount::state_type s);
 astro::device::Mount::state_type	convert(mountstate s);

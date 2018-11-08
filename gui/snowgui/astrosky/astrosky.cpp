@@ -119,7 +119,7 @@ int	main(int argc, char *argv[]) {
 			break;
 		}
 
-	QApplicaton	*app = NULL;
+	QApplication	*app = NULL;
 	if (skydrawing.show_labels()) {
 		app = new QApplication(argc, argv);
 	}

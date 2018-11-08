@@ -40,6 +40,7 @@ class Server {
 
 	void	add_devices_servant();
 	void	add_event_servant();
+	void	add_gateway_servant();
 	void	add_configuration_servant();
 	void	add_daemon_servant();
 	void	add_images_servant();

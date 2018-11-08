@@ -167,4 +167,36 @@ astro::task::TaskMonitorInfo    convert(const TaskMonitorInfo& monitorinfo) {
 	return result;
 }
 
+astro::task::TaskUpdate convert(const StatusUpdate& statusupdate) {
+	astro::task::TaskUpdate	result;
+        result.avgguideerror = statusupdate.avgguideerror;
+        result.ccdtemperature = statusupdate.ccdtemperature;
+        result.lastimagestart = converttime(statusupdate.lastimagestartago);
+        result.exposuretime = statusupdate.exposuretime;
+        result.currenttaskid = statusupdate.currenttaskid;
+        result.pendingtasks = statusupdate.pendingtasks;
+        result.telescope = astro::RaDec(
+			astro::Angle(statusupdate.ra, astro::Angle::Hours),
+			astro::Angle(statusupdate.dec, astro::Angle::Degrees));
+        result.hourangle = astro::Angle(statusupdate.hourangle,
+			astro::Angle::Hours);
+        result.filter = statusupdate.filter;
+	return result;
+}
+
+StatusUpdate    convert(const astro::task::TaskUpdate& taskupdate) {
+	StatusUpdate	result;
+	result.avgguideerror = taskupdate.avgguideerror;
+	result.ccdtemperature = taskupdate.ccdtemperature;
+	result.lastimagestartago = converttime(taskupdate.lastimagestart);
+	result.exposuretime = taskupdate.exposuretime;
+	result.currenttaskid = taskupdate.currenttaskid;
+	result.pendingtasks = taskupdate.pendingtasks;
+	result.ra = taskupdate.telescope.ra().hours();
+	result.dec = taskupdate.telescope.dec().degrees();
+	result.hourangle = taskupdate.hourangle.hours();
+	result.filter = taskupdate.filter;
+	return result;
+}
+
 } // namespace snowstar

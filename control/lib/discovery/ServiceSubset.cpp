@@ -22,6 +22,7 @@ ServiceSubset::service_type	ServiceSubset::string2type(
 	if (name == "focusing")    return FOCUSING;
 	if (name == "images")      return IMAGES;
 	if (name == "repository")  return REPOSITORY;
+	if (name == "gateway")     return GATEWAY;
 	std::string	msg = stringprintf("invalid service name: %s",
 		name.c_str());
 	debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
@@ -37,6 +38,7 @@ std::string	ServiceSubset::type2string(service_type type) {
 	case FOCUSING:		return std::string("focusing");
 	case IMAGES:		return std::string("images");
 	case REPOSITORY:	return std::string("repository");
+	case GATEWAY:		return std::string("gateway");
 	default:
 		std::string	msg = stringprintf("invalid service code: %d",
 			(int)type);
@@ -99,6 +101,7 @@ bool	ServiceSubset::validtype(service_type s) const {
 	if (FOCUSING    == s) return true;
 	if (IMAGES      == s) return true;
 	if (REPOSITORY  == s) return true;
+	if (GATEWAY     == s) return true;
 	return false;
 }
 
@@ -111,7 +114,7 @@ std::list<std::string>	ServiceSubset::types() const {
 	if (has(GUIDING)    ) result.push_back(std::string("guiding"));
 	if (has(FOCUSING)   ) result.push_back(std::string("focusing"));
 	if (has(IMAGES)     ) result.push_back(std::string("images"));
-	if (has(REPOSITORY) ) result.push_back(std::string("repository"));
+	if (has(GATEWAY)    ) result.push_back(std::string("gateway"));
 	return result;
 }
 
@@ -186,6 +189,9 @@ std::string	ServiceSubset::txtrecord() const {
 	}
 	if (has(ServiceSubset::REPOSITORY)) {
 		append_to_txt_record(buffer, l, "repository");
+	}
+	if (has(ServiceSubset::GATEWAY)) {
+		append_to_txt_record(buffer, l, "gateway");
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "txt record has length %d", l);
 	return std::string(buffer, l);

@@ -57,6 +57,7 @@ public slots:
 	void	focusingToggled(bool);
 	void	repositoriesToggled(bool);
 	void	tasksToggled(bool);
+	void	gatewayToggled(bool);
 	void	restartClicked();
 
 	// repository management

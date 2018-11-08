@@ -38,6 +38,7 @@
 #include <EventServantLocator.h>
 #include <ConfigurationI.h>
 #include <DaemonI.h>
+#include <GatewayI.h>
 
 namespace snowstar {
 
@@ -70,6 +71,9 @@ void	Server::get_configured_services(astro::discover::ServicePublisherPtr sp) {
 	}
 	if (configuration->get("snowstar", "service", "repository", "no") == "yes") {
 		sp->set(astro::discover::ServiceSubset::REPOSITORY);
+	}
+	if (configuration->get("snowstar", "service", "gateway", "no") == "yes") {
+		sp->set(astro::discover::ServiceSubset::GATEWAY);
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "configured services: %s",
 		sp->toString().c_str());
@@ -120,6 +124,14 @@ void	Server::add_event_servant() {
 	astro::event(EVENT_GLOBAL, astro::events::INFO,
 		astro::events::Event::DEBUG,
 		"Event server added");
+}
+
+void	Server::add_gateway_servant() {
+	Ice::ObjectPtr	object = new GatewayI();
+	adapter->add(object, STRING_TO_IDENTITY("Gateway"));
+	astro::event(EVENT_GLOBAL, astro::events::INFO,
+		astro::events::Event::DEBUG,
+		"Gateway server added");
 }
 
 void	Server::add_configuration_servant() {

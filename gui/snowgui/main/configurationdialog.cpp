@@ -77,6 +77,8 @@ configurationdialog::configurationdialog(QWidget *parent,
 		this, SLOT(repositoriesToggled(bool)));
 	connect(ui->tasksCheckBox, SIGNAL(toggled(bool)),
 		this, SLOT(tasksToggled(bool)));
+	connect(ui->gatewayCheckBox, SIGNAL(toggled(bool)),
+		this, SLOT(gatewayToggled(bool)));
 
 	connect(ui->restartButton, SIGNAL(clicked()),
 		this, SLOT(restartClicked()));
@@ -177,6 +179,7 @@ void	configurationdialog::setConfiguration(snowstar::ConfigurationPrx configurat
 	whileBlocking(ui->focusingCheckBox)->setChecked(getService("focusing"));
 	whileBlocking(ui->repositoriesCheckBox)->setChecked(getService("repository"));
 	whileBlocking(ui->tasksCheckBox)->setChecked(getService("tasks"));
+	whileBlocking(ui->gatewayCheckBox)->setChecked(getService("gateway"));
 
 	// read the directory path
 	snowstar::ConfigurationKey	key;
@@ -310,6 +313,10 @@ void	configurationdialog::repositoriesToggled(bool newvalue) {
 
 void	configurationdialog::tasksToggled(bool newvalue) {
 	changevalue("tasks", false, newvalue);
+}
+
+void	configurationdialog::gatewayToggled(bool newvalue) {
+	changevalue("gateway", false, newvalue);
 }
 
 void	configurationdialog::restartClicked() {

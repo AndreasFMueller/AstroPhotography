@@ -163,6 +163,16 @@
          </property>
         </widget>
        </item>
+       <item>
+        <widget class="QLabel" name="gatewayLabel">
+         <property name="text">
+          <string>Gateway</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+        </widget>
+       </item>
       </layout>
      </widget>
     </item>

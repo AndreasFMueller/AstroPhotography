@@ -417,6 +417,24 @@ public:
 	friend class TaskQueue;
 };
 
+/**
+ * \brief Task update data structure to be sent to external monitors
+ */
+class TaskUpdate {
+public:
+	float	avgguideerror;
+	float	ccdtemperature;
+	time_t	lastimagestart;
+	float	exposuretime;
+	int	currenttaskid;
+	int	pendingtasks;
+	RaDec	telescope;
+	Angle	hourangle;
+	int	filter;
+};
+
+typedef callback::CallbackDataEnvelope<TaskUpdate> TaskUpdateCallbackData;
+
 } // namespace task
 } // namespace astro
 

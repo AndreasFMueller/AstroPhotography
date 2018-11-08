@@ -125,7 +125,12 @@ public:
 		 * the repository service provides a project oriented database
 		 * of images on the server
 		 */
-		REPOSITORY = 1 << 6
+		REPOSITORY = 1 << 6,
+		/**
+		 * the gateway service is used to notify external servers
+		 * of interesting state changes
+		 */
+		GATEWAY = 1 << 7
 	} service_type;
 private:
 	int	_services;
