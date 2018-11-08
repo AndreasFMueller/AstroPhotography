@@ -38,6 +38,7 @@ libastrodiscovery_la_SOURCES = 						\
 	InstrumentComponentTable.cpp					\
 	InstrumentProperty.cpp						\
 	InstrumentPropertyTable.cpp					\
+	PostData.cpp							\
 	ServerName.cpp							\
 	ServiceDiscovery.cpp						\
 	ServiceKey.cpp							\

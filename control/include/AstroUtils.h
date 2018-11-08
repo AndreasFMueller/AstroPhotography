@@ -342,6 +342,16 @@ public:
 };
 
 /**
+ * \brief URL encoding of post data
+ */
+class PostData : public std::map<std::string, std::string> {
+public:
+	PostData();
+	~PostData();
+	std::string	urlEncode() const;
+};
+
+/**
  * \brief URL related stuff
  */
 class URL : public ServerName, public Path {
@@ -354,8 +364,8 @@ public:
 	static std::string	encode(const std::string& in);
 	static std::string	decode(const std::string& in);
 	std::string	path() const;
+	int	post(const PostData& data);
 };
-
 
 /**
  * \brief A template to unify what we do in the main function of all programs

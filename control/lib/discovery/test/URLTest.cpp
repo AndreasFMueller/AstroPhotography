@@ -22,12 +22,14 @@ public:
 	void	testCast();
 	void	testEncode();
 	void	testDecode();
+	void	testPost();
 
 	CPPUNIT_TEST_SUITE(URLTest);
 	CPPUNIT_TEST(testConstructor);
 	CPPUNIT_TEST(testCast);
 	CPPUNIT_TEST(testEncode);
 	CPPUNIT_TEST(testDecode);
+	CPPUNIT_TEST(testPost);
 	CPPUNIT_TEST_SUITE_END();
 };
 
@@ -41,11 +43,12 @@ void	URLTest::tearDown() {
 
 void	URLTest::testConstructor() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testConstructor() begin");
-	URL	url1("method://host:4711/path1/path2/path3");
+	URL	url1("method://host.ch:4711/path1/path2/path3.php");
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "URL constructed");
 	std::string	s1 = (std::string)url1;
 	CPPUNIT_ASSERT(url1.method() == "method");
 	CPPUNIT_ASSERT(url1.port() == 4711);
-	CPPUNIT_ASSERT(url1.host() == "host");
+	CPPUNIT_ASSERT(url1.host() == "host.ch");
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "url1: %s", s1.c_str());
 	URL	url2("method:bla1/bla2/bla3");
 	std::string	s2(url2);
@@ -82,6 +85,18 @@ void	URLTest::testDecode() {
 	std::string	d = URL::decode(encoded);
 	CPPUNIT_ASSERT(d == plain);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testDecode() end");
+}
+
+void	URLTest::testPost() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testPost() begin");
+	URL	url("http://cesario.othello.ch/test/test.php");
+	PostData	postdata;
+	postdata.insert(std::make_pair(std::string("var1"),
+		std::string("1291")));
+	postdata.insert(std::make_pair(std::string("var2"),
+		std::string("2018")));
+	int	rc = url.post(postdata);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testPost() end");
 }
 
 } // namespace test
