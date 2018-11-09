@@ -37,3 +37,7 @@ SOURCES += astroviewer.cpp $${ASTROGUISOURCES}
 
 HEADERS  += $${ASTROGUIHEADERS}
 
+target.path = $${ASTROPATH}/bin
+
+INSTALLS += target
+

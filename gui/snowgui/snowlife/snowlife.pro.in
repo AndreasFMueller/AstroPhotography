@@ -46,3 +46,7 @@ SOURCES += snowlife.cpp $${SNOWLIFESOURCES}
 
 HEADERS  += $${SNOWLIFEHEADERS}
 
+target.path = $${ASTROPATH}/bin
+
+INSTALLS += target
+

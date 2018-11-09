@@ -37,3 +37,6 @@ SOURCES += astrosky.cpp $${ASTROGUISOURCES}
 
 HEADERS  += $${ASTROGUIHEADERS}
 
+target.path = $${ASTROPATH}/bin
+
+INSTALL += target

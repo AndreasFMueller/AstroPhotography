@@ -16,3 +16,9 @@ CONFIG += ordered
 
 snowgui.depends = astrogui icegui image focusing guiding pointing \
 	instruments images repository expose task browser main
+
+ASTROPATH = /usr/local/astro
+
+snowgui.path = $${ASTROPATH}/bin
+
+INSTALLS += snowgui

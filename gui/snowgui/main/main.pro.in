@@ -81,3 +81,7 @@ SOURCES += main.cpp $${ASTROGUISOURCES} 				\
 HEADERS  += $${ASTROGUIHEADERS}						\
 
 RESOURCES += main.qrc
+
+target.path = $${ASTROPATH}/bin
+
+INSTALLS += target
