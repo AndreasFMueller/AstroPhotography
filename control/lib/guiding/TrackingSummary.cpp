@@ -29,6 +29,7 @@ TrackingSummary::TrackingSummary(const std::string& name,
 
 void	TrackingSummary::addPoint(const Point& offset) {
 	BasicSummary::addPoint(offset);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "adding offset to taskupate");
 	gateway::Gateway::update(descriptor.instrument(), offset);
 }
 

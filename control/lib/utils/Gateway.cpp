@@ -119,10 +119,10 @@ void	Gateway::update(const std::string& instrument,
 void	Gateway::update(const std::string& instrument,
 		const Point& offset) {
 	if (instrument.size() == 0) { return; }
+	TaskUpdatePtr	taskupdate = get(instrument);
 	ExponentialMovingAveragePtr	average
 		= _averages.find(instrument)->second;
 	average->add(offset.abs());
-	TaskUpdatePtr	taskupdate = get(instrument);
 	taskupdate->avgguideerror = average->avg();
 }
 
