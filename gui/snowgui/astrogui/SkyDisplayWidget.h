@@ -41,9 +41,13 @@ class SkyDisplayWidget : public QWidget, public SkyDrawing {
 	Q_OBJECT
 	QTimer	_timer;
 	bool	_show_tooltip;
+	bool	_target_enabled;
 public:
 	bool	show_tooltip() const { return _show_tooltip; }
 	void	show_tooltip(bool l) { _show_tooltip = l; }
+
+	bool	target_enabled() const { return _target_enabled; }
+	void	target_enabled(bool t) { _target_enabled = t; }
 
 	// some private drawing functions
 private:

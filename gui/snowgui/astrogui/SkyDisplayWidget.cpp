@@ -21,42 +21,6 @@ static std::string	S(const astro::AzmAlt& a) {
 		a.alt().degrees());
 }
 
-/*
-
-The SkyDisplayWidget should have a custom context menu to turn on/off
-the various features.
-
-https://stackoverflow.com/questions/24254006/rightclick-event-in-qt-to-open-a-context-menu
-
-customContextMenuRequested is emitted when the widget's contextMenuPolicy
-is Qt::CustomContextMenu, and the user has requested a context menu
-on the widget. So in the constructor of your widget you can call
-setContextMenuPolicy and connect customContextMenuRequested to a
-slot to make a custom context menu.
-
-this->setContextMenuPolicy(Qt::CustomContextMenu);
-
-connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), 
-        this, SLOT(ShowContextMenu(const QPoint &)));
-ShowContextMenu slot should be a class member of plotspace like :
-
-void plotspace::ShowContextMenu(const QPoint &pos) 
-{
-   QMenu contextMenu(tr("Context menu"), this);
-
-   QAction action1("Remove Data Point", this);
-   connect(&action1, SIGNAL(triggered()), this, SLOT(removeDataPoint()));
-   contextMenu.addAction(&action1);
-
-   contextMenu.exec(mapToGlobal(pos));
-}
-
-
-http://www.setnode.com/blog/right-click-context-menus-with-qt/
-
-
-*/
-
 /**
  * \brief Construct the SkyDisplay
  *
@@ -82,6 +46,7 @@ SkyDisplayWidget::SkyDisplayWidget(QWidget *parent) : QWidget(parent) {
 
 	_show_tooltip = true;
 	_mouse_pressed = false;
+	_target_enabled = false;
 
 	// start the update timer
 	_timer.setInterval(60000);
@@ -142,6 +107,11 @@ void	SkyDisplayWidget::redraw() {
  * \param e	the mouse event to process
  */
 void	SkyDisplayWidget::mouseCommon(const astro::RaDec& _target) {
+	if (!_target_enabled) {
+		return;
+	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "set new target: %s",
+		_target.toString().c_str());
 	target(_target);
 
 	// emit the position
@@ -159,8 +129,9 @@ void	SkyDisplayWidget::mouseCommon(const astro::RaDec& _target) {
  * with the signal pointSelected(astro::RaDec)
  */
 void	SkyDisplayWidget::mousePressEvent(QMouseEvent *e) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "mousePressEvent %d,%d",
-		e->pos().x(), e->pos().y());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "mousePressEvent %d,%d, %08x",
+		e->pos().x(), e->pos().y(), e->flags());
+	_mouse_pressed = true;
 	try {
 		astro::RaDec	t = convert(e);
 		mouseCommon(t);
@@ -214,6 +185,7 @@ void	SkyDisplayWidget::update() {
 }
 
 void	SkyDisplayWidget::useStars(Catalog::starsetptr stars) {
+	show_telescope(true);
 	SkyDrawing::useStars(stars);
 }
 
@@ -222,6 +194,7 @@ void	SkyDisplayWidget::telescopeChanged(astro::RaDec radec) {
 }
 
 void	SkyDisplayWidget::targetChanged(astro::RaDec radec) {
+	show_target(true);
 	SkyDrawing::targetChanged(radec);
 }
 
@@ -302,6 +275,7 @@ void	SkyDisplayWidget::toggleEclipticVisible() {
 }
 
 void	SkyDisplayWidget::showContextMenu(const QPoint& point) {
+	_mouse_pressed = false;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "show context menu at %d/%d",
 		point.x(), point.y());
 	QMenu contextMenu("Options:", this);

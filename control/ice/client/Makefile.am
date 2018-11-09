@@ -111,3 +111,17 @@ test:	snowflake
 
 teststream:
 	./snowstream --debug --exposure=1 server SIM 
+
+send-test:
+	./snowgateway --debug --instrument=TEST				\
+		--rightascension=20.69053 --declination=45.28.034	\
+		--longitude=8.83 --latitude=47.1925			\
+		server send
+
+monitor-test:
+	./snowgateway --debug --foreground --exec=./buildimage.sh 	\
+		--post=http://cesario.othello.ch/telescope/update.php	\
+		server monitor
+
+
+
