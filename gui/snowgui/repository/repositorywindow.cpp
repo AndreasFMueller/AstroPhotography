@@ -328,7 +328,7 @@ void	repositorywindow::saveMulti(QList<QTreeWidgetItem*>& items) {
 
 void	repositorywindow::showImage(astro::image::ImagePtr imageptr) {
 	imagedisplaywidget	*idw = new imagedisplaywidget(NULL);
-	connect(idw, SIGNAL(rectangleSelected(astro::image::ImageRectangle)),
+	connect(idw, SIGNAL(rectangleSelected(QRect)),
         	idw, SLOT(selectRectangle(QRect)));
 	idw->setRectangleSelectionEnabled(true);
 	idw->setImage(imageptr);

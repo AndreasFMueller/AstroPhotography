@@ -123,6 +123,7 @@ private:
 signals:
 	void	imageUpdated();
 	void	rectangleSelected(astro::image::ImageRectangle);
+	void	rectangleSelected(QRect);
 	void	pointSelected(astro::image::ImagePoint);
 	void	offerImage(astro::image::ImagePtr, std::string);
 

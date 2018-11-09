@@ -190,6 +190,14 @@ void	imagedisplaywidget::setImageRectangle(const ImageRectangle& imagerectangle)
 		imagerectangle.toString().c_str());
 	emit rectangleSelected(imagerectangle);
 
+	// convert the image rectangle into a QRect
+	int	h = _image->size().height();
+	QRect	qrect(imagerectangle.origin().x(),
+			h - 1 - imagerectangle.origin().y(),
+			imagerectangle.size().width(),
+			imagerectangle.size().height());
+	emit rectangleSelected(qrect);
+
 	// compute the center for the crosshairs relative to this image
 	image2pixmap.crosshairs_center(imagerectangle.centerWithinFrame(_image->size()));
 }
