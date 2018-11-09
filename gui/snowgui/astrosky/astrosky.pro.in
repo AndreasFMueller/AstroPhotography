@@ -39,4 +39,4 @@ HEADERS  += $${ASTROGUIHEADERS}
 
 target.path = $${ASTROPATH}/bin
 
-INSTALL += target
+INSTALLS += target
