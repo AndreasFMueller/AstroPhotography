@@ -45,8 +45,14 @@
 /* Define to 1 if you have the <libintl.h> header file. */
 #undef HAVE_LIBINTL_H
 
+/* Define to 1 if you have the `jpeg' library (-ljpeg). */
+#undef HAVE_LIBJPEG
+
 /* Define to 1 if you have the `m' library (-lm). */
 #undef HAVE_LIBM
+
+/* Define to 1 if you have the `png' library (-lpng). */
+#undef HAVE_LIBPNG
 
 /* Define to 1 if you have the `pthread' library (-lpthread). */
 #undef HAVE_LIBPTHREAD

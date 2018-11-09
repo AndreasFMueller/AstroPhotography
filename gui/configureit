@@ -13,18 +13,29 @@ CFLAGS="-Wall -Wextra -g -O2"
 CXXFLAGS="-fuse-cxa-atexit ${CFLAGS}"
 export CFLAGS CXXFLAGS
 
-# the next few sections are about whether or not to build the ICE components
-# add ICE PATH for Mac OS X
-if [ -d /Library/Developer/Ice-3.5.1 ]
-then
-	ICEDIR=/Library/Developer/Ice-3.5.1
-fi
+# first find out what type of system we are
+systemtype=`uname`
+case ${systemtype} in
+Darwin)	echo "configuring for Mac OS X"
+	;;
+Linux)	if [ -r /etc/debian_version ]
+	then
+		echo "configuring for Debian"
+		systemtype=Debian
+		multiarch=`dpkg-architecgure -qDEB_HOST_MULTIARCH`
+	else
+		if [ -r /etc/SuSE-release ]
+		then
+			echo "configuring for SuSE"
+			systemtype=SuSE
+		else
+			echo "configuring for unspecified Linux (cross your fingers)"
+		fi
+	fi
+	;;
+esac
 
 # add ICE PATH for an ICE that we compiled ourselves
-if [ -d /opt/Ice-3.5.1 ]
-then
-	ICEDIR=/opt/Ice-3.5.1
-fi
 if [ -d /usr/local/Ice ]
 then
 	ICEDIR=/usr/local/Ice
@@ -39,27 +50,6 @@ then
 	fi
 	commonflags="${commonflags} --with-ice=${ICEDIR}"
 fi
-
-# first find out what type of system we are
-systemtype=`uname`
-case ${systemtype} in
-Darwin)	echo "configuring for Mac OS X"
-	;;
-Linux)	if [ -r /etc/debian_version ]
-	then
-		echo "configuring for Debian"
-		systemtype=Debian
-	else
-		if [ -r /etc/SuSE-release ]
-		then
-			echo "configuring for SuSE"
-			systemtype=SuSE
-		else
-			echo "configuring for unspecified Linux (cross your fingers)"
-		fi
-	fi
-	;;
-esac
 
 set -x
 
@@ -79,13 +69,13 @@ EXTRA_LDFLAGS="-Wl,-rpath -Wl,${ASTROPREFIX}/lib"
 case ${systemtype} in
 Linux)
 	CXXFLAGS="${CFLAGS} --std=c++11 -fopenmp"
-	EXTRA_CXXFLAGS="-fopenmp"
+	EXTRA_CXXFLAGS="--std=c++11 -fopenmp"
 	EXTRA_LDFLAGS="-fopenmp"
 	;;
 Debian)
 	CXXFLAGS="${CXXFLAGS} --std=c++11 -fopenmp"
 	LDFLAGS="${LDFLAGS} -Wl,-rpath -Wl,/usr/local/lib"
-	EXTRA_CXXFLAGS="-fopenmp"
+	EXTRA_CXXFLAGS="--std=c++11 -fopenmp"
 	EXTRA_LIBS="-lgomp"
 	;;
 SuSE)

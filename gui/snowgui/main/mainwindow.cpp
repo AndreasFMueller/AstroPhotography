@@ -20,6 +20,7 @@
 #include <taskwindow.h>
 #include <QMessageBox>
 #include <QFileDialog>
+#include <QAction>
 #include <sstream>
 #include <exposewindow.h>
 #include <AstroIO.h>
@@ -468,7 +469,7 @@ void	MainWindow::createActions() {
 	connect(saveAction, &QAction::triggered, this,
 		&MainWindow::saveImage);
 
-	raiseAction = new QAction(QString("Main Window"));
+	raiseAction = new QAction(QString("Main Window"), this);
 	connect(raiseAction, &QAction::triggered, this,
 		&MainWindow::raiseMainwindow);
 }

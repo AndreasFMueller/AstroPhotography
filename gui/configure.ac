@@ -32,6 +32,12 @@ AC_CHECK_LIB([pthread], [pthread_create])
 AC_CHECK_LIB([glpk], [glp_create_prob])
 AC_CHECK_LIB([sqlite3], [sqlite3_initialize])
 
+## Multiarch support in debian #######################################
+if test -r /etc/debian_version
+then
+	multiarch=`dpkg-architecture -qDEB_HOST_MULTIARCH`
+fi
+
 ## CFITS #############################################################
 # if cfits is installed with pkginfo, we use that
 if pkg-config --exists cfitsio
@@ -115,15 +121,21 @@ AC_ARG_WITH([ice],
 		else
 			ICELIBS="-L${ICEDIR}/lib64 -Wl,-rpath,${ICEDIR}/lib64"
 		fi
-	else
-		if test -d ${ICEDIR}/lib
+	elif test -d ${ICEDIR}/lib/${multiarch}
+	then
+		if test -d ${ICEDIR}/lib/${multiarch}/c++11
 		then
-			if test -d ${ICEDIR}/lib/c++11
-			then
-				ICELIBS="-L${ICEDIR}/lib/c++11 -Wl,-rpath,${ICEDIR}/lib/c++11"
-			else
-				ICELIBS="-L${ICEDIR}/lib -Wl,-rpath,${ICEDIR}/lib"
-			fi
+			ICELIBS="-L${ICEDIR}/lib/${multiarch}/c++11 -Wl,-rpath,${ICEDIR}/lib/${multiarch}/c++11"
+		else
+			ICELIBS="-L${ICEDIR}/lib/${multiarch} -Wl,-rpath,${ICEDIR}/lib/${multiarch}"
+		fi
+	elif test -d ${ICEDIR}/lib
+	then
+		if test -d ${ICEDIR}/lib/c++11
+		then
+			ICELIBS="-L${ICEDIR}/lib/c++11 -Wl,-rpath,${ICEDIR}/lib/c++11"
+		else
+			ICELIBS="-L${ICEDIR}/lib -Wl,-rpath,${ICEDIR}/lib"
 		fi
 	fi
 
