@@ -18,6 +18,7 @@
 #include <errno.h>
 #include <string.h>
 #include <AstroIO.h>
+#include <AstroGateway.h>
 #include <ExposureWork.h>
 
 using namespace astro::persistence;
@@ -226,19 +227,19 @@ void	ExposureWork::run() {
 	}
 
 	// record the current task id
-	Gateway::update(instrument, (int)_task.id());	// currenttaskid
-	Gateway::update(instrument, _task.exposure());	// exosuretime
-	Gateway::update(instrument, filterwheel);	// filter
-	Gateway::update(instrument, cooler);		// ccdtemperature
-	Gateway::update(instrument, mount);		// position
-	Gateway::updateImageStart(instrument);		// lastimagestart
+	gateway::Gateway::update(instrument, (int)_task.id());	// currenttaskid
+	gateway::Gateway::update(instrument, _task.exposure());	// exosuretime
+	gateway::Gateway::update(instrument, filterwheel);	// filter
+	gateway::Gateway::update(instrument, cooler);		// ccdtemperature
+	gateway::Gateway::update(instrument, mount);		// position
+	gateway::Gateway::updateImageStart(instrument);		// lastimagestart
 
 	// start exposure
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "start exposure: time=%f",
 		_task.exposure().exposuretime());
 	ccd->startExposure(_task.exposure());
 
-	Gateway::send(instrument);
+	gateway::Gateway::send(instrument);
 
 	// wait for completion of exposure
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "waiting for %.3f seconds",

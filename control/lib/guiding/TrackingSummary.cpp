@@ -5,6 +5,7 @@
  */
 #include <AstroGuiding.h>
 #include <time.h>
+#include <AstroGateway.h>
 
 namespace astro {
 namespace guiding {
@@ -24,6 +25,11 @@ TrackingSummary::TrackingSummary(const std::string& name,
 		const std::string& instrument, const std::string& ccd)
 	: descriptor(name, instrument, ccd, std::string(""), std::string("")) {
 	trackingid = -1;
+}
+
+void	TrackingSummary::addPoint(const Point& offset) {
+	BasicSummary::addPoint(offset);
+	gateway::Gateway::update(descriptor.instrument(), offset);
 }
 
 } // namespace guiding

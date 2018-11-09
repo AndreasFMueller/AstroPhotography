@@ -417,6 +417,7 @@ public:
 	friend class TaskQueue;
 };
 
+#if 0
 /**
  * \brief Task update data structure to be sent to external monitors
  */
@@ -475,9 +476,12 @@ public:
 				float avgguideerror);
 	static void	update(const std::string& instrument,
 				int currenttaskid);
+	static void	update(const std::string& instrument,
+				const astro::Point& offset);
 	static void	updateImageStart(const std::string& instrument);
 	static void	send(const std::string& instrument);
 };
+#endif
 
 } // namespace task
 } // namespace astro

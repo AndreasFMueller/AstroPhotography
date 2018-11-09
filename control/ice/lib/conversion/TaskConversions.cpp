@@ -167,8 +167,8 @@ astro::task::TaskMonitorInfo    convert(const TaskMonitorInfo& monitorinfo) {
 	return result;
 }
 
-astro::task::TaskUpdate convert(const StatusUpdate& statusupdate) {
-	astro::task::TaskUpdate	result(statusupdate.instrument);
+astro::gateway::TaskUpdate convert(const StatusUpdate& statusupdate) {
+	astro::gateway::TaskUpdate	result(statusupdate.instrument);
 	result.updatetime = converttime(statusupdate.updatetimeago);
         result.avgguideerror = statusupdate.avgguideerror;
         result.ccdtemperature = statusupdate.ccdtemperature + 273.15;
@@ -190,7 +190,7 @@ astro::task::TaskUpdate convert(const StatusUpdate& statusupdate) {
 	return result;
 }
 
-StatusUpdate    convert(const astro::task::TaskUpdate& taskupdate) {
+StatusUpdate    convert(const astro::gateway::TaskUpdate& taskupdate) {
 	StatusUpdate	result;
 	result.instrument = taskupdate.instrument();
 	result.updatetimeago = converttime(taskupdate.updatetime);

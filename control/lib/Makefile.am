@@ -2,7 +2,6 @@
 # build the basic library
 #
 # (c) 2012 Prof Dr Andreas Mueller, Hochschule Rapperswil
-# $Id$
 #
 SUBDIRS = utils persistence event discovery image processing device config \
 	catalogs task guiding focusing usb unicap . test

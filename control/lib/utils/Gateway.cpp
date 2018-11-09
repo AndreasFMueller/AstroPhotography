@@ -3,14 +3,32 @@
  *
  * (c) 2018 Prof Dr Andreas Müller, Hochschule Rapperswil
  */
-#include <AstroTask.h>
+#include <AstroGateway.h>
 #include <AstroCallback.h>
 
 namespace astro {
-namespace task {
+namespace gateway {
 
-Gateway::gatewaymap_t	Gateway::_taskupdates;
-callback::CallbackPtr	Gateway::_callback;
+class ExponentialMovingAverage {
+	float	_alpha;
+	float	_avg;
+public:
+	float	avg() const { return _avg; }
+	float	alpha() const { return _alpha; }
+	ExponentialMovingAverage(float alpha = 0.9) : _alpha(alpha), _avg(0) { }
+	void	add(float s) {
+		_avg = _alpha * s + (1 - _alpha) * _avg;
+	}
+};
+
+typedef std::shared_ptr<ExponentialMovingAverage> ExponentialMovingAveragePtr;
+typedef std::map<std::string, ExponentialMovingAveragePtr>	averagemap_t;
+static averagemap_t	_averages;
+
+typedef std::map<std::string, TaskUpdatePtr>	taskupdatemap_t;
+static taskupdatemap_t	_taskupdates;
+
+static callback::CallbackPtr	_callback;
 
 void	Gateway::setCallback(callback::CallbackPtr callback) {
 	_callback = callback;
@@ -27,6 +45,10 @@ TaskUpdatePtr	Gateway::get(const std::string& instrument) {
 		TaskUpdate	*taskupdate = new TaskUpdate(instrument);
 		_taskupdates.insert(std::make_pair(instrument,
 			TaskUpdatePtr(taskupdate)));
+		ExponentialMovingAverage	*average
+			= new ExponentialMovingAverage();
+		_averages.insert(std::make_pair(instrument,
+			ExponentialMovingAveragePtr(average)));
 	}
 	return _taskupdates.find(instrument)->second;
 }
@@ -94,10 +116,22 @@ void	Gateway::update(const std::string& instrument,
 	taskupdate->currenttaskid = currenttaskid;
 }
 
+void	Gateway::update(const std::string& instrument,
+		const Point& offset) {
+	if (instrument.size() == 0) { return; }
+	ExponentialMovingAveragePtr	average
+		= _averages.find(instrument)->second;
+	average->add(offset.abs());
+	TaskUpdatePtr	taskupdate = get(instrument);
+	taskupdate->avgguideerror = average->avg();
+}
+
 void	Gateway::updateImageStart(const std::string& instrument) {
 	if (instrument.size() == 0) { return; }
 	TaskUpdatePtr	taskupdate = get(instrument);
-	time(&taskupdate->lastimagestart);
+	time_t	now;
+	time(&now);
+	taskupdate->lastimagestart = now;
 }
 
 void	Gateway::send(const std::string& instrument) {
@@ -119,5 +153,5 @@ void	Gateway::send(const std::string& instrument) {
 	}
 }
 
-} // namespace task
+} // namespace gateway
 } // namespace astro

@@ -26,6 +26,7 @@ include_HEADERS =							\
 	AstroFilterfunc.h						\
 	AstroFocus.h							\
 	AstroFormat.h							\
+	AstroGateway.h							\
 	AstroGuiding.h							\
 	AstroIO.h							\
 	AstroImage.h							\

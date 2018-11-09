@@ -588,7 +588,7 @@ public:
 	int	count() const { return _count; }
 	void	count(int count) { _count = count; }
 	BasicSummary(double alpha = 0.1);
-	void	addPoint(const Point& offset);
+	virtual void	addPoint(const Point& offset);
 };
 
 /**
@@ -605,6 +605,7 @@ public:
 		const std::string& adaptiveoptics);
 	TrackingSummary(const std::string& name, const std::string& instrument,
 		const std::string& ccd);
+	virtual void	addPoint(const Point& offset);
 };
 
 // we will need the GuiderProcess class, but as we want to keep the 

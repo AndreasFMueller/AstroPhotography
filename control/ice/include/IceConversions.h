@@ -15,6 +15,7 @@
 #include <AstroEvent.h>
 #include <AstroConfig.h>
 #include <AstroDiscovery.h>
+#include <AstroGateway.h>
 #include <types.h>
 #include <device.h>
 #include <camera.h>
@@ -192,8 +193,8 @@ astro::task::TaskMonitorInfo	convert(const TaskMonitorInfo& monitorinfo);
 
 std::string	state2string(QueueState s);
 
-astro::task::TaskUpdate	convert(const StatusUpdate& statusupdate);
-StatusUpdate	convert(const astro::task::TaskUpdate& taskupdate);
+astro::gateway::TaskUpdate	convert(const StatusUpdate& statusupdate);
+StatusUpdate	convert(const astro::gateway::TaskUpdate& taskupdate);
 
 // Mount
 mountstate	convert(astro::device::Mount::state_type s);

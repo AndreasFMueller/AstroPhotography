@@ -3,11 +3,11 @@
  *
  * (c) 2018 Prof Dr Andreas Müller, Hochschule Rapperswil
  */
-#include <AstroTask.h>
+#include <AstroGateway.h>
 #include <sstream>
 
 namespace astro {
-namespace task {
+namespace gateway {
 
 TaskUpdate::TaskUpdate(const std::string& instrument)
 	: _instrument(instrument) {
@@ -102,7 +102,7 @@ TaskUpdate::operator	PostData() const {
 		stringprintf("%.3f", avgguideerror)));
 	result.insert(std::make_pair(std::string("ccdtemperature"), 
 		stringprintf("%.1f", ccdtemperature - 273.15)));
-	tmp = localtime(&updatetime);
+	tmp = localtime(&lastimagestart);
 	strftime(buffer, sizeof(buffer), "%F %T", tmp);
 	result.insert(std::make_pair(std::string("lastimagestart"), 
 		std::string(buffer)));
@@ -125,5 +125,5 @@ TaskUpdate::operator	PostData() const {
 	return result;
 }
 
-} // namespace task
+} // namespace gateway
 } // namespace astro

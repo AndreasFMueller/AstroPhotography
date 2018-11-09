@@ -11,15 +11,13 @@ libastrotask_la_SOURCES = 						\
 	CancellableWork.cpp						\
 	ExposureTimer.cpp						\
 	ExposureWork.cpp						\
-	Gateway.cpp							\
 	Loop.cpp							\
 	TaskExecutor.cpp						\
 	TaskInfo.cpp							\
 	TaskParameters.cpp						\
 	TaskQueue.cpp							\
 	TaskQueueEntry.cpp						\
-	TaskTable.cpp							\
-	TaskUpdate.cpp
+	TaskTable.cpp
 
 libastrotask_la_CPPFLAGS = -DPKGLIBDIR=\"$(pkglibdir)\" 		\
 	-DDEVICEPROPERTIES=\"@DEVICEPROPERTIES@\"

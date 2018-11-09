@@ -21,6 +21,7 @@ libastroutils_la_SOURCES = 						\
 	Ecliptic.cpp							\
 	Exceptions.cpp							\
 	Format.cpp							\
+	Gateway.cpp							\
 	ImageCoordinates.cpp						\
 	JulianDate.cpp							\
 	LongLat.cpp							\
@@ -35,6 +36,7 @@ libastroutils_la_SOURCES = 						\
 	Size.cpp							\
 	SphericalCoordinates.cpp					\
 	Sun.cpp								\
+	TaskUpdate.cpp							\
 	Timer.cpp							\
 	timeformat.cpp							\
 	ThreadBase.cpp							\
