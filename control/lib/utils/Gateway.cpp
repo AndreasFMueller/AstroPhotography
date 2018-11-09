@@ -134,6 +134,13 @@ void	Gateway::updateImageStart(const std::string& instrument) {
 	taskupdate->lastimagestart = now;
 }
 
+void	Gateway::update(const std::string& instrument,
+		const std::string& project) {
+	if (instrument.size() == 0) { return; }
+	TaskUpdatePtr	taskupdate = get(instrument);
+	taskupdate->project = project;
+}
+
 void	Gateway::send(const std::string& instrument) {
 	if (!_callback) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "no callback installed");

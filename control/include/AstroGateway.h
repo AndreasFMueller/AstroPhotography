@@ -39,6 +39,7 @@ public:
 	// filterwheel
 	int	filter;
 	LongLat	observatory;
+	std::string	project;
 	std::string	toString(std::string separator = std::string(" ")) const;
 	operator	PostData() const;
 };
@@ -73,6 +74,8 @@ public:
 	static void	update(const std::string& instrument,
 				const astro::Point& offset);
 	static void	updateImageStart(const std::string& instrument);
+	static void	update(const std::string& instrument,
+				const std::string& project);
 	static void	send(const std::string& instrument);
 };
 

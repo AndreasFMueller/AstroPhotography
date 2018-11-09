@@ -33,6 +33,7 @@ TaskUpdate::TaskUpdate(const TaskUpdate& other)
 	west = other.west;
 	filter = other.filter;
 	observatory = other.observatory;
+	project = other.project;
 }
 
 TaskUpdate&	TaskUpdate::operator=(const TaskUpdate& other) {
@@ -47,6 +48,7 @@ TaskUpdate&	TaskUpdate::operator=(const TaskUpdate& other) {
 	west = other.west;
 	filter = other.filter;
 	observatory = other.observatory;
+	project = other.project;
 	return *this;
 }
 
@@ -93,6 +95,9 @@ std::string	TaskUpdate::toString(std::string separator) const {
 
 	out << "observatory=" << observatory.longitude().degrees();
 	out << " " << observatory.latitude().degrees();
+	out << separator;
+
+	out << "project=" << project;
 
 	return out.str();
 }
@@ -129,6 +134,7 @@ TaskUpdate::operator	PostData() const {
 		stringprintf("%.5f", observatory.longitude().degrees())));
 	result.insert(std::make_pair(std::string("observatoryLAT"), 
 		stringprintf("%.5f", observatory.latitude().degrees())));
+	result.insert(std::make_pair(std::string("project"), project));
 	return result;
 }
 

@@ -187,6 +187,7 @@ astro::gateway::TaskUpdate convert(const StatusUpdate& statusupdate) {
 			astro::Angle::Degrees),
 		astro::Angle(statusupdate.observatory.latitude,
 			astro::Angle::Degrees));
+	result.project = statusupdate.project;
 	return result;
 }
 
@@ -207,6 +208,7 @@ StatusUpdate    convert(const astro::gateway::TaskUpdate& taskupdate) {
 		= taskupdate.observatory.longitude().degrees();
 	result.observatory.latitude
 		= taskupdate.observatory.latitude().degrees();
+	result.project = taskupdate.project;
 	return result;
 }
 
