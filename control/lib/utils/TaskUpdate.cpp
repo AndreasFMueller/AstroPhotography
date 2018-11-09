@@ -12,6 +12,13 @@ namespace gateway {
 TaskUpdate::TaskUpdate(const std::string& instrument)
 	: _instrument(instrument) {
 	time(&updatetime);
+	avgguideerror = 0;
+	ccdtemperature = 0;
+	lastimagestart = 0;
+	exposuretime = -1;
+	currenttaskid = 0;
+	west = true;
+	filter = -1;
 }
 
 TaskUpdate::TaskUpdate(const TaskUpdate& other)
