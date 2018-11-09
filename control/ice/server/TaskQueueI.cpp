@@ -106,6 +106,11 @@ int TaskQueueI::submit(const TaskParameters& parameters,
 	// add the repository path information
 	tp.repodb = ImageRepo::configdb();
 
+	// somehow we have to detect that the mount is not local, but for
+	// this we must be able to distinguish between local and remote
+	// hosts. We do this by assuming that the camera is local
+	std::string	localservice;
+
 	// get information about the parameters
 	astro::discover::InstrumentPtr  instrument
                 = astro::discover::InstrumentBackend::get(tp.instrument);
@@ -113,9 +118,9 @@ int TaskQueueI::submit(const TaskParameters& parameters,
 	if ((instrument->nComponentsOfType(
 		astro::discover::InstrumentComponentKey::Camera) > 0)
 		&& (tp.cameraIndex >= 0)) {
-		astro::discover::InstrumentComponent	camera = instrument->get(
-			astro::discover::InstrumentComponentKey::Camera,
-				tp.cameraIndex);
+		astro::discover::InstrumentComponent	camera
+			= instrument->getCamera(tp.cameraIndex);
+		localservice = camera.servicename();
 		info.camera(camera.deviceurl());
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "found camera %s",
 			info.camera().c_str());
@@ -126,9 +131,8 @@ int TaskQueueI::submit(const TaskParameters& parameters,
 	if ((instrument->nComponentsOfType(
 		astro::discover::InstrumentComponentKey::CCD) > 0)
 		&& (tp.ccdIndex >= 0)) {
-		astro::discover::InstrumentComponent	ccd = instrument->get(
-			astro::discover::InstrumentComponentKey::CCD,
-				tp.ccdIndex);
+		astro::discover::InstrumentComponent	ccd
+			= instrument->getCcd(tp.ccdIndex);
 		info.ccd(ccd.deviceurl());
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "found ccd %s",
 			info.ccd().c_str());
@@ -139,9 +143,8 @@ int TaskQueueI::submit(const TaskParameters& parameters,
 	if ((instrument->nComponentsOfType(
 		astro::discover::InstrumentComponentKey::Cooler) > 0)
 		&& (tp.coolerIndex >= 0)) {
-		astro::discover::InstrumentComponent	cooler = instrument->get(
-			astro::discover::InstrumentComponentKey::Cooler,
-				tp.coolerIndex);
+		astro::discover::InstrumentComponent	cooler
+			= instrument->getCooler(tp.coolerIndex);
 		info.cooler(cooler.deviceurl());
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "found cooler %s",
 			info.cooler().c_str());
@@ -152,9 +155,8 @@ int TaskQueueI::submit(const TaskParameters& parameters,
 	if ((instrument->nComponentsOfType(
 		astro::discover::InstrumentComponentKey::FilterWheel) > 0)
 		&& (tp.filterwheelIndex >= 0)) {
-		astro::discover::InstrumentComponent	filterwheel = instrument->get(
-			astro::discover::InstrumentComponentKey::FilterWheel,
-				tp.filterwheelIndex);
+		astro::discover::InstrumentComponent	filterwheel
+			= instrument->getFilterWheel(tp.filterwheelIndex);
 		info.filterwheel(filterwheel.deviceurl());
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "found filterwheel %s",
 			info.filterwheel().c_str());
@@ -165,10 +167,13 @@ int TaskQueueI::submit(const TaskParameters& parameters,
 	if ((instrument->nComponentsOfType(
 		astro::discover::InstrumentComponentKey::Mount) > 0)
 		&& (tp.mountIndex >= 0)) {
-		astro::discover::InstrumentComponent	mount = instrument->get(
-			astro::discover::InstrumentComponentKey::Mount,
-				tp.mountIndex);
-		info.mount(mount.deviceurl());
+		astro::discover::InstrumentComponent	mount
+			= instrument->getMount(tp.mountIndex);
+		if (localservice == mount.servicename()) {
+			info.mount(mount.deviceurl());
+		} else {
+			info.mount(mount.remoteName().toString());
+		}
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "found mount %s",
 			info.mount().c_str());
 	} else {
