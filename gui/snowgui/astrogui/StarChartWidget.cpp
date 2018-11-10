@@ -28,6 +28,7 @@ StarChartWidget::StarChartWidget(QWidget *parent) : QWidget(parent),
 	_resolution.degrees(1 / 100.); // 1 deg/100 pixels
 	_limit_magnitude = 10;
 	_negative = false;
+	_show_stars = true;
 	_show_grid = true;
 	_retriever = NULL;
 	_retrieval_necessary = true;
@@ -39,6 +40,7 @@ StarChartWidget::StarChartWidget(QWidget *parent) : QWidget(parent),
 	_show_deepsky = true;
 	_show_tooltips = true;
 	_state = astro::device::Mount::TRACKING; // safe assumption
+	_legend = NULL;
 
 	qRegisterMetaType<astro::catalog::Catalog::starsetptr>("astro::catalog::Catalog::starsetptr");
 	qRegisterMetaType<astro::catalog::DeepSkyCatalog::deepskyobjectsetptr>("astro::catalog::DeepSkyCatalog::deepskyobjectsetptr");
@@ -410,6 +412,23 @@ void	StarChartWidget::drawDirections(QPainter& painter) {
 }
 
 /**
+ * \brief Method to draw the stars
+ *
+ * \param painter	painter to draw the stars on
+ */
+void	StarChartWidget::drawStars(QPainter& painter) {
+	if (_stars) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "%d stars to draw",
+			_stars->size());
+		for (auto i = _stars->begin(); i != _stars->end(); i++) {
+			drawStar(painter, *i);
+		}
+	} else {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "no stars");
+	}
+}
+
+/**
  * \brief Redraw the star chart
  */
 void	StarChartWidget::draw() {
@@ -450,15 +469,8 @@ void	StarChartWidget::draw() {
 	}
 
 	// draw the stars
-	Catalog::starset::const_iterator        i;
-	if (_stars) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "%d stars to draw",
-			_stars->size());
-		for (i = _stars->begin(); i != _stars->end(); i++) {
-			drawStar(painter, *i);
-		}
-	} else {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "no stars");
+	if (show_stars()) {
+		drawStars(painter);
 	}
 
 	// draw the deep sky objects
@@ -472,7 +484,7 @@ void	StarChartWidget::draw() {
 	// if the telescope is moving, we also display the sky stars
 	if ((_state == astro::device::Mount::GOTO) && (_sky)) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "adding sky stars");
-		for (i = _sky->begin(); i != _sky->end(); i++) {
+		for (auto i = _sky->begin(); i != _sky->end(); i++) {
 			drawStar(painter, *i);
 		}
 	}
@@ -772,6 +784,11 @@ void	StarChartWidget::guiderResolution(astro::Angle g) {
 	repaint();
 }
 
+void	StarChartWidget::setStarsVisible(bool s) {
+	show_stars(s);
+	repaint();
+}
+
 void	StarChartWidget::setGridVisible(bool s) {
 	show_grid(s);
 	repaint();
@@ -805,6 +822,10 @@ void	StarChartWidget::setTooltipsVisible(bool s) {
 void	StarChartWidget::setNegative(bool s) {
 	negative(s);
 	repaint();
+}
+
+void	StarChartWidget::toggleStarsVisible() {
+	setStarsVisible(!show_stars());
 }
 
 void	StarChartWidget::toggleGridVisible() {
@@ -862,6 +883,13 @@ void	StarChartWidget::showContextMenu(const QPoint& point) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "show context menu at %d/%d",
 		point.x(), point.y());
 	QMenu	contextMenu(QString("Display options"), this);
+
+	QAction	actionStars(QString("Stars"), this);
+	actionStars.setCheckable(true);
+	actionStars.setChecked(show_stars());
+	contextMenu.addAction(&actionStars);
+	connect(&actionStars, SIGNAL(triggered()),
+		this, SLOT(toggleStarsVisible()));
 
 	QAction	actionGrid(QString("Grid"), this);
 	actionGrid.setCheckable(true);
@@ -948,7 +976,28 @@ void	StarChartWidget::showContextMenu(const QPoint& point) {
 	connect(&actionStandardResolution, SIGNAL(triggered()),
 		this, SLOT(useStandardResolution()));
 
+	contextMenu.addSeparator();
+
+	QAction	actionLegend(QString("Legend"), this);
+	contextMenu.addAction(&actionLegend);
+	connect(&actionLegend, SIGNAL(triggered()),
+		this, SLOT(showLegend()));
+
 	contextMenu.exec(mapToGlobal(point));
+}
+
+void	StarChartWidget::showLegend() {
+	if (NULL == _legend) {
+		_legend = new StarChartLegend();
+		connect(_legend, SIGNAL(destroyed()),
+			this, SLOT(removeLegend()));
+		_legend->show();
+	}
+	_legend->raise();
+}
+
+void	StarChartWidget::removeLegend() {
+	_legend = NULL;
 }
 
 } // namespace snowgui

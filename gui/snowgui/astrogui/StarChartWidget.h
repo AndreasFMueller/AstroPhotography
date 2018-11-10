@@ -12,6 +12,7 @@
 #include <AstroCatalog.h>
 #include <AstroDevice.h>
 #include <BusyWidget.h>
+#include <StarChartLegend.h>
 
 namespace snowgui {
 
@@ -74,6 +75,7 @@ class StarChartWidget : public QWidget {
 	astro::ImageCoordinates	_converter;
 	float	_limit_magnitude;
 	bool	_negative;
+	bool	_show_stars;
 	bool	_show_grid;
 	bool	_show_crosshairs;
 	bool	_show_directions;
@@ -86,6 +88,8 @@ class StarChartWidget : public QWidget {
 	StarChartRetriever	*_retriever;
 	BusyWidget	*_busywidget;
 
+	StarChartLegend	*_legend;
+
 	QPointF	_center;
 	QPointF	convert(const astro::RaDec& radec);
 public:
@@ -97,6 +101,9 @@ public:
 
 	void	negative(bool n) { _negative = n; }
 	bool	negative() const { return _negative; }
+
+	void	show_stars(bool s) { _show_stars = s; }
+	bool	show_stars() const { return _show_stars; }
 
 	void	show_grid(bool g) { _show_grid = g; }
 	bool	show_grid() const { return _show_grid; }
@@ -128,6 +135,7 @@ signals:
 private:
 	void	draw();
 	void	drawStar(QPainter& painter, const astro::catalog::Star& star);
+	void	drawStars(QPainter& painter);
 	void	drawDeepSkyObject(QPainter& painter,
 			const astro::catalog::DeepSkyObject& deepskyobject);
 	void	drawLine(QPainter& painter, const astro::RaDec& from,
@@ -160,6 +168,7 @@ public slots:
 	void	imagerResolution(astro::Angle);
 	void	resolutionChanged(astro::Angle);
 
+	void	setStarsVisible(bool);
 	void	setGridVisible(bool);
 	void	setCrosshairsVisible(bool);
 	void	setDirectionsVisible(bool);
@@ -168,6 +177,7 @@ public slots:
 	void	setTooltipsVisible(bool);
 	void	setNegative(bool);
 	
+	void	toggleStarsVisible();
 	void	toggleGridVisible();
 	void	toggleCrosshairsVisible();
 	void	toggleDirectionsVisible();
@@ -180,10 +190,11 @@ public slots:
 	void	useGuiderResolution();
 	void	useImagerResolution();
 	void	useStandardResolution();
+
+	void	showLegend();
+	void	removeLegend();
 	
 	void    showContextMenu(const QPoint& point);
-
-	
 };
 
 } // namespace snowgui
