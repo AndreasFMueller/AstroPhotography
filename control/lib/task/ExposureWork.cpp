@@ -233,6 +233,7 @@ void	ExposureWork::run() {
 	gateway::Gateway::update(instrument, cooler);		// ccdtemperature
 	gateway::Gateway::update(instrument, mount);		// position
 	gateway::Gateway::updateImageStart(instrument);		// lastimagestart
+	gateway::Gateway::update(instrument, _task.project());	// project
 
 	// start exposure
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "start exposure: time=%f",
