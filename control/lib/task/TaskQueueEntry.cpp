@@ -27,6 +27,7 @@ TaskParameters	TaskQueueEntry::parameters() const {
 	parameters.filter(filter());
 	parameters.instrument(instrument());
 	parameters.mountindex(mountindex());
+	parameters.focuserindex(focuserindex());
 	parameters.project(project());
 	parameters.repository(repository());
 	parameters.repodb(repodb());
@@ -45,6 +46,7 @@ TaskInfo	TaskQueueEntry::info() const {
 	info.cooler(cooler());
 	info.filterwheel(filterwheel());
 	info.mount(mount());
+	info.focuser(focuser());
 	return info;
 }
 

@@ -38,6 +38,8 @@ public:
 	bool	west;
 	// filterwheel
 	int	filter;
+	// focuser
+	long	focus;
 	LongLat	observatory;
 	std::string	project;
 	std::string	toString(std::string separator = std::string(" ")) const;
@@ -62,6 +64,8 @@ public:
 	static void	update(const std::string& instrument,
 				device::MountPtr mount);
 	static void	update(const std::string& instrument,
+				camera::FocuserPtr focuser);
+	static void	update(const std::string& instrument,
 				camera::CoolerPtr cooler);
 	static void	update(const std::string& instrument,
 				camera::FilterWheelPtr filterwheel);
@@ -70,12 +74,12 @@ public:
 	static void	update(const std::string& instrument,
 				float avgguideerror);
 	static void	update(const std::string& instrument,
-				int currenttaskid);
-	static void	update(const std::string& instrument,
 				const astro::Point& offset);
-	static void	updateImageStart(const std::string& instrument);
 	static void	update(const std::string& instrument,
 				const std::string& project);
+	static void	updateImageStart(const std::string& instrument);
+	static void	update(const std::string& instrument,
+				int currenttaskid);
 	static void	send(const std::string& instrument);
 };
 

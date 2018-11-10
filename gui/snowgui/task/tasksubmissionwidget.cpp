@@ -25,6 +25,7 @@ tasksubmissionwidget::tasksubmissionwidget(QWidget *parent)
 	_coolerindex = -1;
 	_filterwheelindex = -1;
 	_mountindex = -1;
+	_focuserindex = -1;
 
 	ui->submitButton->setEnabled(false);
 
@@ -49,7 +50,8 @@ tasksubmissionwidget::~tasksubmissionwidget() {
 void	tasksubmissionwidget::instrumentSetup(
 		astro::discover::ServiceObject serviceobject,
 		snowstar::RemoteInstrument instrument) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "setting up instrument for task sub");
+	debug(LOG_DEBUG, DEBUG_LOG, 0,
+		"setting up instrument for task submission");
 
 	// parent setup
 	InstrumentWidget::instrumentSetup(serviceobject, instrument);
@@ -218,11 +220,13 @@ void	tasksubmissionwidget::submitClicked() {
 	parameters.coolerIndex = _coolerindex;
 	parameters.filterwheelIndex = _filterwheelindex;
 	parameters.mountIndex = _mountindex;
+	parameters.focuserIndex = _focuserindex;
 	debug(LOG_DEBUG, DEBUG_LOG, 0,
-		"camera: %d, ccd: %d, cooler: %d, filterwheel: %d, mount: %d",
+		"camera: %d, ccd: %d, cooler: %d, filterwheel: %d, mount: %d, "
+		"focuser: %d",
 		parameters.cameraIndex, parameters.ccdIndex,
 		parameters.coolerIndex, parameters.filterwheelIndex,
-		parameters.mountIndex);
+		parameters.mountIndex, parameters.focuserIndex);
 
 	// get all the information about the exposure from the
 	// ccdcontrollerwidget
@@ -304,6 +308,11 @@ void	tasksubmissionwidget::filterwheelSelected(int filterwheelindex) {
 void	tasksubmissionwidget::mountSelected(int mountindex) {
 	_mountindex = mountindex;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "Mount index: %d", _mountindex);
+}
+
+void	tasksubmissionwidget::focuserSelected(int focuserindex) {
+	_focuserindex = focuserindex;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "Focuser index: %d", _focuserindex);
 }
 
 void	tasksubmissionwidget::projectChanged(const QString& p) {

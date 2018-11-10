@@ -165,6 +165,18 @@ int TaskQueueI::submit(const TaskParameters& parameters,
 	}
 
 	if ((instrument->nComponentsOfType(
+		astro::discover::InstrumentComponentKey::Focuser) > 0)
+		&& (tp.focuserIndex >= 0)) {
+		astro::discover::InstrumentComponent	focuser
+			= instrument->getFocuser(tp.focuserIndex);
+		info.focuser(focuser.deviceurl());
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "found focuser %s",
+			info.focuser().c_str());
+	} else {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "no focuser components");
+	}
+
+	if ((instrument->nComponentsOfType(
 		astro::discover::InstrumentComponentKey::Mount) > 0)
 		&& (tp.mountIndex >= 0)) {
 		astro::discover::InstrumentComponent	mount

@@ -63,6 +63,7 @@ TaskInfo	convert(const astro::task::TaskInfo& info) {
 	result.cooler = info.cooler();
 	result.filterwheel = info.filterwheel();
 	result.mount = info.mount();
+	result.focuser = info.focuser();
 	return result;
 }
 
@@ -78,6 +79,7 @@ astro::task::TaskInfo	convert(const TaskInfo& info) {
 	result.cooler(info.cooler);
 	result.filterwheel(info.filterwheel);
 	result.mount(info.mount);
+	result.focuser(info.focuser);
 	return result;
 }
 
@@ -91,6 +93,7 @@ TaskParameters	convert(const astro::task::TaskParameters& parameters) {
 	result.filterwheelIndex = parameters.filterwheelindex();
 	result.filter = parameters.filter();
 	result.mountIndex = parameters.mountindex();
+	result.focuserIndex = parameters.focuserindex();
 	result.project = parameters.project();
 	result.repodb = parameters.repodb();
 	result.repository = parameters.repository();
@@ -109,6 +112,7 @@ astro::task::TaskParameters	convert(const TaskParameters& parameters) {
 	result.filterwheelindex(parameters.filterwheelIndex);
 	result.filter(parameters.filter);
 	result.mountindex(parameters.mountIndex);
+	result.focuserindex(parameters.focuserIndex);
 	result.project(parameters.project);
 	result.repodb(parameters.repodb);
 	result.repository(parameters.repository);
@@ -188,6 +192,7 @@ astro::gateway::TaskUpdate convert(const StatusUpdate& statusupdate) {
 		astro::Angle(statusupdate.observatory.latitude,
 			astro::Angle::Degrees));
 	result.project = statusupdate.project;
+	result.focus = statusupdate.focus;
 	return result;
 }
 
@@ -209,6 +214,7 @@ StatusUpdate    convert(const astro::gateway::TaskUpdate& taskupdate) {
 	result.observatory.latitude
 		= taskupdate.observatory.latitude().degrees();
 	result.project = taskupdate.project;
+	result.focus = taskupdate.focus;
 	return result;
 }
 

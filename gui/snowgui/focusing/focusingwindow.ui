@@ -15,16 +15,16 @@
   </property>
   <layout class="QHBoxLayout" name="horizontalLayout">
    <property name="leftMargin">
-    <number>12</number>
+    <number>6</number>
    </property>
    <property name="topMargin">
-    <number>12</number>
+    <number>6</number>
    </property>
    <property name="rightMargin">
-    <number>12</number>
+    <number>6</number>
    </property>
    <property name="bottomMargin">
-    <number>12</number>
+    <number>6</number>
    </property>
    <item>
     <widget class="QWidget" name="leftWidget" native="true">
@@ -70,7 +70,7 @@
          </item>
          <item>
           <widget class="snowgui::FocusElementStack" name="focusingMonitor">
-           <widget class="QWidget" name="focusingMonitorPage1" native="true"/>
+           <widget class="QWidget" name="focusingMonitorPage1"/>
           </widget>
          </item>
         </layout>
@@ -169,7 +169,7 @@
            <x>0</x>
            <y>0</y>
            <width>325</width>
-           <height>551</height>
+           <height>563</height>
           </rect>
          </property>
          <attribute name="label">
@@ -181,8 +181,8 @@
           <rect>
            <x>0</x>
            <y>0</y>
-           <width>325</width>
-           <height>551</height>
+           <width>100</width>
+           <height>30</height>
           </rect>
          </property>
          <attribute name="label">
@@ -194,8 +194,8 @@
           <rect>
            <x>0</x>
            <y>0</y>
-           <width>325</width>
-           <height>551</height>
+           <width>100</width>
+           <height>30</height>
           </rect>
          </property>
          <attribute name="label">
@@ -207,8 +207,8 @@
           <rect>
            <x>0</x>
            <y>0</y>
-           <width>325</width>
-           <height>551</height>
+           <width>100</width>
+           <height>30</height>
           </rect>
          </property>
          <attribute name="label">
@@ -220,8 +220,8 @@
           <rect>
            <x>0</x>
            <y>0</y>
-           <width>325</width>
-           <height>551</height>
+           <width>100</width>
+           <height>30</height>
           </rect>
          </property>
          <attribute name="label">
@@ -246,6 +246,24 @@
    </slots>
   </customwidget>
   <customwidget>
+   <class>snowgui::coolercontrollerwidget</class>
+   <extends>QWidget</extends>
+   <header location="global">coolercontrollerwidget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>snowgui::filterwheelcontrollerwidget</class>
+   <extends>QWidget</extends>
+   <header location="global">filterwheelcontrollerwidget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>snowgui::mountcontrollerwidget</class>
+   <extends>QWidget</extends>
+   <header location="global">mountcontrollerwidget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
    <class>snowgui::ccdcontrollerwidget</class>
    <extends>QWidget</extends>
    <header location="global">ccdcontrollerwidget.h</header>
@@ -261,33 +279,15 @@
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>snowgui::coolercontrollerwidget</class>
-   <extends>QWidget</extends>
-   <header location="global">coolercontrollerwidget.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
    <class>snowgui::focusercontrollerwidget</class>
    <extends>QWidget</extends>
    <header location="global">focusercontrollerwidget.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>snowgui::filterwheelcontrollerwidget</class>
-   <extends>QWidget</extends>
-   <header location="global">filterwheelcontrollerwidget.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
    <class>snowgui::adaptiveopticscontrollerwidget</class>
    <extends>QWidget</extends>
    <header location="global">adaptiveopticscontrollerwidget.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>snowgui::mountcontrollerwidget</class>
-   <extends>QWidget</extends>
-   <header location="global">mountcontrollerwidget.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>

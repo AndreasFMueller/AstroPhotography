@@ -34,6 +34,7 @@ int	ccdIndex = 0;
 int	coolerIndex = 0;
 int	filterwheelIndex = 0;
 int	mountIndex = 0;
+int	focuserIndex = 0;
 
 void	signal_handler(int /* sig */) {
 	completed = true;
@@ -379,6 +380,7 @@ int	command_submit(TaskQueuePrx tasks, InstrumentsPrx /* instruments */) {
 	parameters.filterwheelIndex = filterwheelIndex;
 	parameters.filter = filter;
 	parameters.mountIndex = mountIndex;
+	parameters.focuserIndex = focuserIndex;
 
 	// exposure parameters
 	parameters.exp = convert(exposure);

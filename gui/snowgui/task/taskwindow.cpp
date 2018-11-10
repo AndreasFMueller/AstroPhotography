@@ -65,6 +65,10 @@ taskwindow::taskwindow(QWidget *parent)
 		SIGNAL(mountSelected(int)),
 		ui->tasksubmissionWidget,
 		SLOT(mountSelected(int)));
+	connect(ui->focusercontrollerWidget,
+		SIGNAL(focuserSelected(int)),
+		ui->tasksubmissionWidget,
+		SLOT(focuserSelected(int)));
 
 	// set up connections with this class
 }
@@ -97,6 +101,8 @@ void	taskwindow::instrumentSetup(
 	ui->filterwheelcontrollerWidget->launchInstrumentSetup(serviceobject,
 		instrument);
 	ui->mountcontrollerWidget->launchInstrumentSetup(serviceobject,
+		instrument);
+	ui->focusercontrollerWidget->launchInstrumentSetup(serviceobject,
 		instrument);
 
 	// task status

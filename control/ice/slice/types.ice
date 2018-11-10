@@ -262,6 +262,7 @@ module snowstar {
 		RaDec	telescope;
 		bool	west;
 		int	filter;
+		int	focus;
 		string	project;
 		LongLat	observatory;
 	};

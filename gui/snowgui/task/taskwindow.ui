@@ -199,47 +199,47 @@
        <widget class="snowgui::ccdcontrollerwidget" name="ccdcontrollerWidget" native="true"/>
       </item>
       <item>
-       <widget class="Line" name="ccdcoolerLine">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
+       <widget class="QToolBox" name="toolBox">
+        <property name="currentIndex">
+         <number>0</number>
         </property>
+        <widget class="snowgui::coolercontrollerwidget" name="coolercontrollerWidget">
+         <property name="geometry">
+          <rect>
+           <x>0</x>
+           <y>0</y>
+           <width>388</width>
+           <height>540</height>
+          </rect>
+         </property>
+         <attribute name="label">
+          <string>Cooler</string>
+         </attribute>
+        </widget>
+        <widget class="snowgui::filterwheelcontrollerwidget" name="filterwheelcontrollerWidget">
+         <attribute name="label">
+          <string>Filterwheel</string>
+         </attribute>
+        </widget>
+        <widget class="snowgui::focusercontrollerwidget" name="focusercontrollerWidget">
+         <property name="geometry">
+          <rect>
+           <x>0</x>
+           <y>0</y>
+           <width>388</width>
+           <height>540</height>
+          </rect>
+         </property>
+         <attribute name="label">
+          <string>Focuser</string>
+         </attribute>
+        </widget>
+        <widget class="snowgui::mountcontrollerwidget" name="mountcontrollerWidget">
+         <attribute name="label">
+          <string>Mount</string>
+         </attribute>
+        </widget>
        </widget>
-      </item>
-      <item>
-       <widget class="snowgui::coolercontrollerwidget" name="coolercontrollerWidget" native="true"/>
-      </item>
-      <item>
-       <widget class="Line" name="coolerfilterwheelLine">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="snowgui::filterwheelcontrollerwidget" name="filterwheelcontrollerWidget" native="true"/>
-      </item>
-      <item>
-       <widget class="Line" name="line">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="snowgui::mountcontrollerwidget" name="mountcontrollerWidget" native="true"/>
-      </item>
-      <item>
-       <spacer name="verticalSpacer">
-        <property name="orientation">
-         <enum>Qt::Vertical</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>20</width>
-          <height>40</height>
-         </size>
-        </property>
-       </spacer>
       </item>
      </layout>
     </widget>
@@ -305,6 +305,12 @@
    <class>snowgui::taskqueuemanagerwidget</class>
    <extends>QWidget</extends>
    <header>taskqueuemanagerwidget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>snowgui::focusercontrollerwidget</class>
+   <extends>QWidget</extends>
+   <header location="global">focusercontrollerwidget.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

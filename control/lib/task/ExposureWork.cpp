@@ -111,6 +111,21 @@ ExposureWork::ExposureWork(TaskQueueEntry& task) : _task(task) {
 		}
 	}
 
+	// get the focuser
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "get focuser %s", _task.focuser().c_str());
+	if (_task.focuser().size() > 0) {
+		try {
+			astro::device::DeviceAccessor<astro::camera::FocuserPtr>
+				df(repository);
+			focuser = df.get(_task.focuser());
+		} catch (const std::exception& x) {
+			std::string	msg = stringprintf("cannot get focuser: %s",
+				x.what());
+			debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+			throw;
+		}
+	}
+
 	// if the task does not have a frame size, then take the one from the
 	// the CCD
 	if (_task.size() == ImageSize()) {
@@ -232,6 +247,7 @@ void	ExposureWork::run() {
 	gateway::Gateway::update(instrument, filterwheel);	// filter
 	gateway::Gateway::update(instrument, cooler);		// ccdtemperature
 	gateway::Gateway::update(instrument, mount);		// position
+	gateway::Gateway::update(instrument, focuser);		// focus
 	gateway::Gateway::updateImageStart(instrument);		// lastimagestart
 	gateway::Gateway::update(instrument, _task.project());	// project
 
@@ -293,6 +309,11 @@ void	ExposureWork::run() {
 	// add temperature metadata
 	if (cooler) {
 		cooler->addTemperatureMetadata(*image);
+	}
+
+	// add focus metadata
+	if (focuser) {
+		focuser->addFocusMetadata(*image);
 	}
 
 	// position information from the mount

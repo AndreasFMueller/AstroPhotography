@@ -190,7 +190,7 @@ Mount::state_type	Mount::string2state(const std::string& s) {
 void	Mount::addPositionMetadata(astro::image::ImageBase& image) {
 	RaDec   position = getRaDec();
 	image.setMetadata(astro::io::FITSKeywords::meta("RACENTR", 
-		position.ra().degrees()));
+		position.ra().hours()));
 	image.setMetadata(astro::io::FITSKeywords::meta("DECCENTR", 
 		position.dec().degrees()));
 	try {

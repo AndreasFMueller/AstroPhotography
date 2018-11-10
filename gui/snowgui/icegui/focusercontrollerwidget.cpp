@@ -57,7 +57,11 @@ void	focusercontrollerwidget::instrumentSetup(
 	while (_instrument.has(snowstar::InstrumentFocuser, index)) {
 		snowstar::FocuserPrx	focuser = _instrument.focuser(index);
 		if (!_focuser) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "emitting focuser %d",
+				index);
+			emit focuserSelected(index);
 			_focuser = focuser;
+			emit focuserSelected(_focuser);
 		}
 		std::string	sn = instrument.displayname(
 					snowstar::InstrumentFocuser,
@@ -282,6 +286,8 @@ void	focusercontrollerwidget::statusUpdate() {
 void	focusercontrollerwidget::focuserChanged(int index) {
 	statusTimer.stop();
 	_focuser = _instrument.focuser(index);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "emitting focuser %d", index);
+	emit focuserSelected(index);
 	setupFocuser();
 }
 

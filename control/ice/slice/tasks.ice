@@ -29,6 +29,9 @@ module snowstar {
 		// information about the mount
 		int	mountIndex;
 
+		// information about the focus
+		int	focuserIndex;
+
 		// project
 		string	project;
 		string	repodb;
@@ -82,6 +85,7 @@ module snowstar {
 		string	cooler;
 		string	filterwheel;
 		string	mount;
+		string	focuser;
 	};
 
 	/**

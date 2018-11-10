@@ -6,6 +6,7 @@
 #include <AstroCamera.h>
 #include <AstroExceptions.h>
 #include <AstroDebug.h>
+#include <AstroIO.h>
 #include <includes.h>
 
 using namespace astro::device;
@@ -52,6 +53,7 @@ void	Focuser::set(long /* value */) {
  *
  * This method calls the set method but then waits until either
  * the position is reached, or the timeout occurs.
+ *
  * \param value		new focuser position
  * \param timeout	maximum numer of seconds to wait for the focuser to
  *			reach the new position
@@ -90,6 +92,16 @@ bool	Focuser::moveto(long value, unsigned long timeout) {
 
 	// report whether we have reached the position
 	return (currentposition == value);
+}
+
+/**
+ * \brief Add focus position to the image metadata
+ *
+ * \param image		image to add the info to
+ */
+void	Focuser::addFocusMetadata(ImageBase& image) {
+	image.setMetadata(astro::io::FITSKeywords::meta("FOCUSPOS",
+		current()));
 }
 
 } // namespace camera

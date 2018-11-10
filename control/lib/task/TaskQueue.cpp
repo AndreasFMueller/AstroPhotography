@@ -383,6 +383,7 @@ taskid_t	TaskQueue::submit(const TaskParameters& parameters,
 	entry.cooler(info.cooler());
 	entry.filterwheel(info.filterwheel());
 	entry.mount(info.mount());
+	entry.focuser(info.focuser());
 	long taskqueueid = tasktable.add(entry);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "task with id %d added to table",
 		taskqueueid);

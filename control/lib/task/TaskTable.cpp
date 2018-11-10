@@ -34,6 +34,8 @@ std::string	TaskTableAdapter::createstatement() {
 	"    filter varchar(32) not null default '',\n"
 	"    mountindex int not null default -1,\n"
 	"    mount varchar(256) not null default '',\n"
+	"    focuserindex int not null default -1,\n"
+	"    focuser varchar(256) not null default '',\n"
 	"    originx integer not null default 0,\n"
 	"    originy integer not null default 0,\n"
 	"    width integer not null default 0,\n"
@@ -71,6 +73,7 @@ TaskQueueEntry	TaskTableAdapter::row_to_object(int objectid, const Row& row) {
 	parameters.filterwheelindex(row["filterwheelindex"]->intValue());
 	parameters.filter(row["filter"]->stringValue());
 	parameters.mountindex(row["mountindex"]->intValue());
+	parameters.focuserindex(row["focuserindex"]->intValue());
 	parameters.project(row["project"]->stringValue());
 	parameters.repodb(row["repodb"]->stringValue());
 	parameters.repository(row["repository"]->stringValue());
@@ -101,6 +104,7 @@ TaskQueueEntry	TaskTableAdapter::row_to_object(int objectid, const Row& row) {
 	entry.cooler(row["cooler"]->stringValue());
 	entry.filterwheel(row["filterwheel"]->stringValue());
 	entry.mount(row["mount"]->stringValue());
+	entry.focuser(row["focuser"]->stringValue());
 	entry.state((TaskQueueEntry::taskstate)row["state"]->intValue());
 	entry.lastchange(row["lastchange"]->intValue());
 	entry.cause(row["cause"]->stringValue());
@@ -135,6 +139,8 @@ UpdateSpec TaskTableAdapter::object_to_updatespec(const TaskQueueEntry& entry) {
 
 	spec.insert(Field("mount", factory.get(entry.mount())));
 	spec.insert(Field("mountindex", factory.get(entry.mountindex())));
+	spec.insert(Field("focuser", factory.get(entry.focuser())));
+	spec.insert(Field("focuserindex", factory.get(entry.focuserindex())));
 
 	Exposure	exposure = entry.exposure();
 	ImageRectangle	frame = exposure.frame();

@@ -108,6 +108,11 @@ void	taskinfowidget::updateTask(int taskid) {
 	} else {
 		ui->mountField->setText(QString());
 	}
+	if (parameters.focuserIndex >= 0) {
+		ui->focuserField->setText(QString::number(parameters.focuserIndex));
+	} else {
+		ui->focuserField->setText(QString());
+	}
 	ui->projectField->setText(QString(parameters.project.c_str()));
 	ui->repositoryField->setText(QString(parameters.repository.c_str()));
 
@@ -136,6 +141,7 @@ void	taskinfowidget::updateTask(int taskid) {
 	ui->coolerurlField->setText(QString(info.cooler.c_str()));
 	ui->filterwheelurlField->setText(QString(info.filterwheel.c_str()));
 	ui->mounturlField->setText(QString(info.mount.c_str()));
+	ui->focuserurlField->setText(QString(info.focuser.c_str()));
 
 	// update title
 	setWindowTitle(QString(astro::stringprintf("Info for Task %d",

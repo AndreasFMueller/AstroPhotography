@@ -103,6 +103,19 @@ void	Gateway::update(const std::string& instrument,
 }
 
 void	Gateway::update(const std::string& instrument,
+		camera::FocuserPtr focuser) {
+	if (instrument.size() == 0) { return; }
+	if (!focuser) { return; }
+	TaskUpdatePtr	taskupdate = get(instrument);
+	try {
+		taskupdate->focus = focuser->current();
+	} catch (const std::exception& ex) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "cannot get focus position: %s",
+			ex.what());
+	}
+}
+
+void	Gateway::update(const std::string& instrument,
 		float avgguideerror) {
 	if (instrument.size() == 0) { return; }
 	TaskUpdatePtr	taskupdate = get(instrument);

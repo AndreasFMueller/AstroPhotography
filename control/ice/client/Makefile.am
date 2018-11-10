@@ -121,7 +121,7 @@ send-test:
 monitor-test:
 	./snowgateway --debug --foreground --exec=./buildimage.sh 	\
 		--post=http://cesario.othello.ch/telescope/update.php	\
-		telescope monitor
+		server monitor
 
 
 

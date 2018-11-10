@@ -19,6 +19,7 @@ TaskUpdate::TaskUpdate(const std::string& instrument)
 	currenttaskid = 0;
 	west = true;
 	filter = -1;
+	focus = -1;
 }
 
 TaskUpdate::TaskUpdate(const TaskUpdate& other)
@@ -34,6 +35,7 @@ TaskUpdate::TaskUpdate(const TaskUpdate& other)
 	filter = other.filter;
 	observatory = other.observatory;
 	project = other.project;
+	focus = other.focus;
 }
 
 TaskUpdate&	TaskUpdate::operator=(const TaskUpdate& other) {
@@ -49,6 +51,7 @@ TaskUpdate&	TaskUpdate::operator=(const TaskUpdate& other) {
 	filter = other.filter;
 	observatory = other.observatory;
 	project = other.project;
+	focus = other.focus;
 	return *this;
 }
 
@@ -87,6 +90,9 @@ std::string	TaskUpdate::toString(std::string separator) const {
 	out << separator;
 
 	out << stringprintf("filter=%d", filter);
+	out << separator;
+
+	out << stringprintf("focus=%ld", focus);
 	out << separator;
 
 	out << "telescope=" << telescope.ra().hours();
@@ -130,6 +136,8 @@ TaskUpdate::operator	PostData() const {
 		(west) ? std::string("yes") : std::string("no")));
 	result.insert(std::make_pair(std::string("filter"), 
 		stringprintf("%d", filter)));
+	result.insert(std::make_pair(std::string("focus"), 
+		stringprintf("%ld", focus)));
 	result.insert(std::make_pair(std::string("observatoryLONG"), 
 		stringprintf("%.5f", observatory.longitude().degrees())));
 	result.insert(std::make_pair(std::string("observatoryLAT"), 

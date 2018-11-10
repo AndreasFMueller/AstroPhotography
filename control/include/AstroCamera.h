@@ -636,6 +636,7 @@ public:
 	virtual long	backlash();
 	virtual void	set(long value);
 	bool	moveto(long value, unsigned long timeout = 60);
+	void	addFocusMetadata(ImageBase& image);
 };
 
 class AdaptiveOptics;
