@@ -399,8 +399,8 @@ Angle	CelestronMount::gps_latitude() {
 CelestronMount::gps_date_t	CelestronMount::gps_date() {
 	std::vector<uint8_t>	xy = gps_command(3, 2, 2);
 	gps_date_t	result;
-	result.day = xy[0];
-	result.month = xy[1];
+	result.month = xy[0];
+	result.day = xy[1];
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "GPS date: %d. %d.",
 		result.day, result.month);
 	return result;
@@ -465,15 +465,21 @@ time_t	CelestronMount::time() {
 	if (gps_linked()) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "querying GPS time");
 		struct tm	t;
-		gps_date_t	d = gps_date();
-		t.tm_mon = d.month - 1;
-		t.tm_mday = d.day;
-		t.tm_wday = 0; // ignored by timegm
-		t.tm_year = gps_year() - 1900;
 		gps_time_t	h = gps_time();
-		t.tm_hour = h.hour;
-		t.tm_min = h.minute;
 		t.tm_sec = h.seconds;
+		t.tm_min = h.minute;
+		t.tm_hour = h.hour;
+
+		gps_date_t	d = gps_date();
+		t.tm_mday = d.day;
+		t.tm_mon = d.month - 1;
+		t.tm_year = gps_year() - 1900;
+
+		t.tm_wday = 0; // ignored by timegm
+		t.tm_yday = 0;
+		t.tm_isdst = 0;
+		t.tm_zone = NULL;
+		t.tm_gmtoff = 0;
 
 		// log what you have read from the mount
 		char	buffer[40];
@@ -484,7 +490,7 @@ time_t	CelestronMount::time() {
 		// convert into a time
 		time_t	result = timegm(&t);
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "GPS time found: %s",
-			ctime(&result));
+			ctime_r(&result, buffer));
 
 		// recompute the time offset
 		::time(&now);
