@@ -49,6 +49,7 @@ static void	usage(const char *progname) {
  */
 int	main(int argc, char *argv[]) {
 	debug_set_ident("snowservers");
+	debugthreads = true;
 	int	c;
 	int	longindex;
 	while (EOF != (c = getopt_long(argc, argv, "dh", longopts,
@@ -83,6 +84,7 @@ int	main(int argc, char *argv[]) {
 	ServiceDiscoveryPtr	sd = ServiceDiscovery::get();
 
 	// find the service keys
+	int	counter = 10;
 	ServiceDiscovery::ServiceKeySet	keys;
 	do {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "displaying the list");
@@ -125,7 +127,7 @@ int	main(int argc, char *argv[]) {
 		keys = sks;
 
 		sleep(1);
-	} while (1);
+	} while (counter--);
 
 	return EXIT_SUCCESS;
 }

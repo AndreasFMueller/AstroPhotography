@@ -81,7 +81,8 @@ void	AvahiDiscovery::browse_callback(
 		break;
 	case AVAHI_BROWSER_NEW:
 		debug(LOG_DEBUG, DEBUG_LOG, 0,
-			"new service %s of type %s in domain %s",
+			"client=%p new service %s of type %s in domain %s",
+			client,
 			(name) ? name : "(null)",
 			(type) ? type : "(null)",
 			(domain) ? domain : "(null)");
@@ -104,8 +105,10 @@ void	AvahiDiscovery::browse_callback(
 		}
 		break;
 	case AVAHI_BROWSER_ALL_FOR_NOW:
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "all for now");
 		break;
 	case AVAHI_BROWSER_CACHE_EXHAUSTED:
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "cache exhausted");
 		break;
 	}
 }

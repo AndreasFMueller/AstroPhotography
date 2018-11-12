@@ -71,7 +71,7 @@ static void	resolve_callback(
  */
 ServiceObject	AvahiResolver::do_resolve() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0,
-		"%p->do_resolve %p, key = %s, interface=%d, protocol=%d",
+		"%p->do_resolve client=%p, key = %s, interface=%d, protocol=%d",
 		this, _client,
 		_key.toString().c_str(), _key.interface(), _key.protocol());
 	prom = std::shared_ptr<std::promise<bool> >(new std::promise<bool>());
@@ -81,7 +81,7 @@ ServiceObject	AvahiResolver::do_resolve() {
 
 	char	*name = strdup(_key.name().c_str());
 	char	*type = strdup(_key.type().c_str());
-	char	*domain = strdup(_key.type().c_str());
+	char	*domain = strdup(_key.domain().c_str());
 
 	// create a resolver structure
 	AvahiServiceResolver	*resolver = avahi_service_resolver_new(_client,
@@ -108,9 +108,6 @@ ServiceObject	AvahiResolver::do_resolve() {
 		debug(LOG_ERR, DEBUG_LOG, 0, "this=%p failed to resolve", this);
 	}
 	fut.reset();
-
-	// free the resolver
-	avahi_service_resolver_free(resolver);
 
 	// free the names
 	free(name);
@@ -141,15 +138,17 @@ void	AvahiResolver::resolve_callback(
 			uint16_t port,
 			AvahiStringList *txt,
 			AvahiLookupResultFlags /* flags */) {
+	AvahiClient	*client = avahi_service_resolver_get_client(resolver);
 	debug(LOG_DEBUG, DEBUG_LOG, 0,
 		"%p->resolve_callback interface=%d protocol=%d, name=%s, "
-		"type=%s, domain=%s, host_name=%s",
+		"type=%s, domain=%s, host_name=%s, client=%p",
 		this,
 		interface, protocol,
 		(name) ? name : "(null)",
 		(type) ? type : "(null)",
 		(domain) ? domain : "(null)",
-		(host_name) ? host_name : "(null)");
+		(host_name) ? host_name : "(null)",
+		client);
 	if (event == AVAHI_RESOLVER_FAILURE) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "resolver failure");
 		prom->set_value(false);

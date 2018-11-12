@@ -123,5 +123,7 @@ monitor-test:
 		--post=http://cesario.othello.ch/telescope/update.php	\
 		telescope monitor
 
-
+EFENCE = LD_PRELOAD=libefence.so.0.0 EF_PROTECT_FREE=1 EF_FILL=255 EF_ALLOW_MALLOC_0=1
+mdns-test:
+	$(EFENCE) ./snowservers --debug 2>&1 | tee test.log
 
