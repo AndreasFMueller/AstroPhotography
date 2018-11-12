@@ -16,6 +16,7 @@ namespace servers {
 static struct option	longopts[] = {
 { "debug",	no_argument,		NULL,		'd' },
 { "help",	no_argument,		NULL,		'h' },
+{ "timeout",	required_argument,	NULL,		't' },
 { NULL,		0,			NULL,		0   }
 };
 
@@ -52,7 +53,8 @@ int	main(int argc, char *argv[]) {
 	debugthreads = true;
 	int	c;
 	int	longindex;
-	while (EOF != (c = getopt_long(argc, argv, "dh", longopts,
+	int	timeout = -1;
+	while (EOF != (c = getopt_long(argc, argv, "dht:", longopts,
 		&longindex))) {
 		switch (c) {
 		case 'd':
@@ -61,6 +63,9 @@ int	main(int argc, char *argv[]) {
 		case 'h':
 			usage(argv[0]);
 			return EXIT_SUCCESS;
+		case 't':
+			timeout = std::stod(optarg);
+			break;
 		default:
 			throw std::runtime_error("unknown option");
 		}
@@ -84,7 +89,6 @@ int	main(int argc, char *argv[]) {
 	ServiceDiscoveryPtr	sd = ServiceDiscovery::get();
 
 	// find the service keys
-	int	counter = 10;
 	ServiceDiscovery::ServiceKeySet	keys;
 	do {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "displaying the list");
@@ -127,7 +131,7 @@ int	main(int argc, char *argv[]) {
 		keys = sks;
 
 		sleep(1);
-	} while (counter--);
+	} while (timeout--);
 
 	return EXIT_SUCCESS;
 }

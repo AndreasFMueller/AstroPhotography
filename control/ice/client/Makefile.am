@@ -125,5 +125,5 @@ monitor-test:
 
 EFENCE = LD_PRELOAD=libefence.so.0.0 EF_PROTECT_FREE=1 EF_FILL=255 EF_ALLOW_MALLOC_0=1
 mdns-test:
-	$(EFENCE) ./snowservers --debug 2>&1 | tee test.log
+	./snowservers --timeout=10 --debug 2>&1 | tee test.log
 
