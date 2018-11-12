@@ -18,7 +18,7 @@ void	ProcessorParser::startStack(const attr_t& attrs) {
 	ProcessingStepPtr	sstep(ss);
 
 	// remember everyhwere
-	_stepstack.push(sstep);
+	push(sstep);
 
 	// we need the baseimage attribute (don't confuse with the base
 	// attribute, which relates to the base directory)

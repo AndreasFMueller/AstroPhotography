@@ -8,6 +8,7 @@
 #include <AstroUtils.h>
 #include <AstroFormat.h>
 #include <AstroExceptions.h>
+#include <AstroUtils.h>
 
 namespace astro {
 namespace process {
@@ -145,7 +146,7 @@ int	ProcessorNetwork::process(int id) {
 		demangle(typeid(*current).name()).c_str());
 	switch (s) {
 		case ProcessingStep::needswork:
-			debug(LOG_DEBUG, DEBUG_LOG, 0, "%d needs work", id);
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "id=%d needs work", id);
 			return id;
 		case ProcessingStep::idle:
 			// check all precursors
@@ -173,7 +174,7 @@ int	ProcessorNetwork::process(const ProcessingStep::steps& steps) {
 		int	id = process(*i);
 		if (id >= 0) {
 			debug(LOG_DEBUG, DEBUG_LOG, 0,
-				"found %d in need of work", id);
+				"found id=%d in need of work", id);
 			return id;
 		}
 	}
@@ -190,7 +191,7 @@ void	ProcessorNetwork::process() {
 	int	id;
 	while (0 <= (id = process(t))) {
 		ProcessingStepPtr	step = ProcessingStep::byid(id);
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "working on %d '%s'", id,
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "working on id=%d '%s'", id,
 			step->name().c_str());
 		ProcessingThreadPtr	t(new ProcessingThread(step));
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "wait for thread to complete");
@@ -200,6 +201,25 @@ void	ProcessorNetwork::process() {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "thread joined");
 	} 
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "end processing");
+}
+
+/**
+ * \brief Dump the network
+ */
+void	ProcessorNetwork::dump(std::ostream& out) const {
+	std::for_each(_steps.begin(), _steps.end(),
+		[&](const std::pair<int, ProcessingStepPtr>& p) {
+			ProcessingStepPtr	step = p.second;
+			out << "step " << step->name();
+			out << "(" << step->id() << ")";
+			out << " " << demangle(typeid(*step).name());
+			out << std::endl;
+			out << "    precursors:" << std::endl;
+			step->dumpPrecursors(out);
+			out << "    successors:" << std::endl;
+			step->dumpSuccessors(out);
+		}
+	);
 }
 
 } // namespace process

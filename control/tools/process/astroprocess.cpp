@@ -74,6 +74,10 @@ int	main(int argc, char *argv[]) {
 	ProcessorFactory	factory;
 	ProcessorNetworkPtr	network = factory(filename);
 
+	if (debuglevel == LOG_DEBUG) {
+		network->dump(std::cout);
+	}
+
 	// execute the network
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "start execution");
 	network->process();

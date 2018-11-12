@@ -28,17 +28,12 @@ void	ProcessorParser::startFileimage(const attr_t& attrs) {
 	ProcessingStepPtr	step(filestep);
 
 	// push the process on the stack
-	_stepstack.push(step);
+	push(step);
 
 	startCommon(attrs);
 
 	if (filename.size() > 0) {
-		if (filename[0] != '/') {
-			std::string	f = fullname(filename);
-			debug(LOG_DEBUG, DEBUG_LOG, 0, "new filename: %s",
-				f.c_str());
-			filestep->filename(f);
-		}
+		filestep->filename(filename);
 	}
 }
 

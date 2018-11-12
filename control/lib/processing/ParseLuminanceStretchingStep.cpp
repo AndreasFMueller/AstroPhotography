@@ -16,7 +16,7 @@ void	ProcessorParser::startLuminanceStretching(const attr_t& attrs) {
 	ProcessingStepPtr	step(s);
 
 	// remember everyhwere
-	_stepstack.push(step);
+	push(step);
 
 	double	crossover = 128;
 	double	top = 256;

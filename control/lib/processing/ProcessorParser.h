@@ -22,12 +22,16 @@ class ProcessorParser {
 	xmlSAXHandler		_handler;
 	ProcessorNetworkPtr	_network;
 	std::stack<ProcessingStepPtr>	_stepstack;
-	std::stack<std::string>		_basestack;
-	std::stack<std::string>		_namestack;
-	std::string	fullname(const std::string& filename) const;
+	ProcessingStepPtr	_parent;
+	void	push(ProcessingStepPtr step);
+	void	pop();
+	ProcessingStepPtr	top();
 	// private methods for handling different types of processing steps
 	void	startCommon(const attr_t& attrs);
 	void	endCommon();
+
+	void	setNodePaths(NodePaths& nodepaths, const attr_t& attrs,
+			NodePaths *parent = NULL);
 
 	void	startProcess(const attr_t& attrs);
 	void	endProcess();

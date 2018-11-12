@@ -23,6 +23,7 @@ libastroprocessing_la_SOURCES =						\
 	ImageCalibrationStep.cpp					\
 	ImageStep.cpp							\
 	LuminanceStretchingStep.cpp					\
+	NodePaths.cpp							\
 	ParseCalibrateStep.cpp						\
 	ParseColorStep.cpp						\
 	ParseColorclampStep.cpp						\
@@ -45,7 +46,8 @@ libastroprocessing_la_SOURCES =						\
 	ProcessorParser.cpp						\
 	RescaleStep.cpp							\
 	StackingStep.cpp						\
-	WriteableFileImageStep.cpp
+	StepPath.cpp							\
+	WritableFileImageStep.cpp
 
 libastroprocessing_la_CPPFLAGS = -DPKGLIBDIR=\"$(pkglibdir)\" \
 	-DDEVICEPROPERTIES=\"@DEVICEPROPERTIES@\"

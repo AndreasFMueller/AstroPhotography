@@ -19,8 +19,14 @@ void	ProcessorParser::startDarkimage(const attr_t& attrs) {
 	DarkImageStep	*dark = new DarkImageStep();
 	ProcessingStepPtr	step(dark);
 
+	// attribute stdeevs
+	auto    i = attrs.find(std::string("stddevs"));
+	if (i != attrs.end()) {
+		dark->badpixellimit(std::stod(i->second));
+	}
+
 	// remember the step everywhere
-	_stepstack.push(step);
+	push(step);
 
 	startCommon(attrs);
 }

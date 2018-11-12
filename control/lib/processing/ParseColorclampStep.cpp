@@ -16,7 +16,7 @@ void	ProcessorParser::startColorclamp(const attr_t& attrs) {
 	ProcessingStepPtr	step(s);
 
 	// remember everyhwere
-	_stepstack.push(step);
+	push(step);
 
 	// parse the Colorclamp attributes
 	attr_t::const_iterator  i;

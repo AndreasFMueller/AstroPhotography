@@ -135,6 +135,9 @@ ProcessorNetworkPtr	ProcessorParser::parse(const std::string& filename) {
 
 /**
  * \brief Parse the data in a buffer
+ *
+ * \param data	the dadta block to parse
+ * \param size	length of the data block to parse
  */
 ProcessorNetworkPtr	ProcessorParser::parse(const char *data, int size) {
 	_network.reset();
@@ -146,13 +149,41 @@ ProcessorNetworkPtr	ProcessorParser::parse(const char *data, int size) {
 	return _network;
 }
 
-std::string	ProcessorParser::fullname(const std::string& f) const {
-	// we need a file attribute
-	std::string     filename = f;
-	if (filename[0] != '/') {
-		filename = _basestack.top() + "/" + filename;
+/**
+ * \brief Push a processing stap on the stack
+ *
+ * \param step	the new proessing step to push on the stack
+ */
+void	ProcessorParser::push(ProcessingStepPtr step) {
+	if (_stepstack.size() > 0) {
+		_parent = _stepstack.top();
 	}
-	return filename;
+	_stepstack.push(step);
+}
+
+/**
+ * \brief Remove the processing step at the top of the stack
+ */
+void	ProcessorParser::pop() {
+	if (_stepstack.size() == 0) {
+		throw std::logic_error("stepstack is empty");
+	}
+	_stepstack.pop();
+	if (_stepstack.size() == 0) {
+		_parent = ProcessingStepPtr();
+	} else {
+		_parent = _stepstack.top();
+	}
+}
+
+/**
+ * \brief The processing step at the top of the stack
+ */
+ProcessingStepPtr	ProcessorParser::top() {
+	if (_stepstack.size() == 0) {
+		throw std::logic_error("stepstack is empty");
+	}
+	return _stepstack.top();
 }
 
 } // namespace process

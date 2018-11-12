@@ -21,6 +21,7 @@ DarkImageStep::DarkImageStep() {
  * \brief Perform the dark image computation
  */
 ProcessingStep::state	DarkImageStep::do_work() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "get precursor images");
 	// construct the sequence of images
 	ImageSequence	images = precursorimages();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "found %d images", images.size());

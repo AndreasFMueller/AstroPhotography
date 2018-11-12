@@ -20,7 +20,7 @@ void	ProcessorParser::startCalibrate(const attr_t& attrs) {
 	ProcessingStepPtr	step(cal);
 
 	// remember the step everywhere
-	_stepstack.push(step);
+	push(step);
 
 	// get the dark image
 	attr_t::const_iterator	i = attrs.find(std::string("dark"));

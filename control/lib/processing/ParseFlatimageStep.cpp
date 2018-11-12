@@ -20,7 +20,7 @@ void	ProcessorParser::startFlatimage(const attr_t& attrs) {
 	ProcessingStepPtr	step(flat);
 
 	// remember the step everywhere
-	_stepstack.push(step);
+	push(step);
 
 	// add a dark image if the dark attribute is present
 	attr_t::const_iterator	i = attrs.find(std::string("dark"));

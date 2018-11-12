@@ -282,10 +282,11 @@ void	ProcessingStep::work() {
 	state	_resultstate = failed;
 
 	// use the barrier to make sure the calling 
-	_barrier.await();
+	//_barrier.await();
 
 	// show what you are doing
-	std::string	msg = stringprintf("%d start %s", _id, what().c_str());
+	std::string	msg = stringprintf("id=%d start %s",
+				_id, what().c_str());
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "%s", msg.c_str());
 	if (verbose()) {
 		std::cout << msg << std::endl;
@@ -450,8 +451,18 @@ ProcessingStep::state	ProcessingStep::status() {
 	// if any precursor is in failed state, you are in failed state as well
 	if (std::any_of(_precursors.begin(), _precursors.end(),
 		[](int precursorid) -> bool {
-			return ProcessingStep::failed
-				== byid(precursorid)->status();
+			ProcessingStepPtr	precursor = byid(precursorid);
+			bool	result = (ProcessingStep::failed
+					== precursor->status());
+			if (result) {
+				std::string	name = demangle(
+					typeid(*precursor).name());
+				debug(LOG_DEBUG, DEBUG_LOG, 0,
+					"step %s (%s) failed",
+					precursor->name().c_str(),
+					name.c_str());
+			}
+			return result;
 		}
 	)) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "some precursors failed: failed");
@@ -491,6 +502,40 @@ ProcessingStep::state	ProcessingStep::status() {
 	}
 	throw std::runtime_error("cannot determine my status");
 }
+
+void	ProcessingStep::dumpSuccessors(std::ostream& out) const {
+	std::for_each(_successors.begin(), _successors.end(),
+		[&](int sid) {
+			out << "        ";
+			ProcessingStepPtr	s = byid(sid);
+			out << s->name() << "(" << sid << ")";
+			out << demangle(typeid(*s).name());
+			out << std::endl;
+		}
+	);
+}
+
+void	ProcessingStep::dumpPrecursors(std::ostream& out) const {
+	std::for_each(_precursors.begin(), _precursors.end(),
+		[&](int sid) {
+			out << "        ";
+			ProcessingStepPtr	s = byid(sid);
+			out << s->name() << "(" << sid << ")";
+			out << demangle(typeid(*s).name());
+			out << std::endl;
+		}
+	);
+}
+
+#if 0
+std::string	ProcessingStep::srcfile(const std::string& file) const {
+	return _srcpath->file(file);
+}
+
+std::string	ProcessingStep::dstfile(const std::string& file) const {
+	return _dstpath->file(file);
+}
+#endif
 
 } // namespace process
 } // namespace astro

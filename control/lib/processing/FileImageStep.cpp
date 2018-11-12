@@ -25,6 +25,18 @@ FileImageStep::~FileImageStep() {
 //	debug(LOG_DEBUG, DEBUG_LOG, 0, "destroying %s", _filename.c_str());
 }
 
+std::string	FileImageStep::srcname() const {
+	return srcfile(_filename);
+}
+
+std::string	FileImageStep::dstname() const {
+	return dstfile(_filename);
+}
+
+std::string	FileImageStep::fullname() const {
+	return srcname();
+}
+
 /**
  * \brief Get the time when a file was last changed
  *
@@ -32,11 +44,12 @@ FileImageStep::~FileImageStep() {
  */
 time_t	FileImageStep::when() const {
 	struct stat	sb;
-	int	rc = stat(_filename.c_str(), &sb);
+	std::string	_f = fullname();
+	int	rc = stat(_f.c_str(), &sb);
 	if (rc < 0) {
 		std::string	msg = stringprintf(
 			"file '%s' not accessible: %s",
-			_filename.c_str(), strerror(errno));
+			_f.c_str(), strerror(errno));
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "%s", msg.c_str());
 		return 0;
 	}
@@ -60,7 +73,7 @@ ProcessingStep::state	FileImageStep::status() {
  * \brief Get the image by reading it form disk
  */
 ImagePtr	FileImageStep::image() {
-	astro::io::FITSin	in(_filename);
+	astro::io::FITSin	in(fullname());
 	ImagePtr	image = in.read();
 	return image;
 }
@@ -82,7 +95,7 @@ bool	FileImageStep::exists() {
 	//debug(LOG_DEBUG, DEBUG_LOG, 0, "check existence of '%s'",
 	//	_filename.c_str());
 	struct stat	sb;
-	int	rc = stat(_filename.c_str(), &sb);
+	int	rc = stat(fullname().c_str(), &sb);
 	if (rc < 0) {
 		return false;
 	}

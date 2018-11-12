@@ -22,22 +22,17 @@ void	ProcessorParser::startWritefileimage(const attr_t& attrs) {
 	std::string	filename = i->second;
 
 	// create a new dark process
-	WriteableFileImageStep	*writeable
-		= new WriteableFileImageStep(filename);
-	ProcessingStepPtr	step(writeable);
+	WritableFileImageStep	*writable
+		= new WritableFileImageStep(filename);
+	ProcessingStepPtr	step(writable);
 
 	// remember the step everywhere
-	_stepstack.push(step);
+	push(step);
 
 	startCommon(attrs);
 
 	if (filename.size() > 0) {
-		if (filename[0] != '/') {
-			std::string	f = fullname(filename);
-			debug(LOG_DEBUG, DEBUG_LOG, 0, "new filename: %s",
-				f.c_str());
-			writeable->filename(f);
-		}
+		writable->filename(filename);
 	}
 }
 

@@ -15,8 +15,37 @@
 #include <AstroTonemapping.h>
 #include <thread>
 #include <mutex>
+#include <iostream>
 
 namespace astro {
+
+namespace process {
+
+class StepPath;
+typedef std::shared_ptr<StepPath>	StepPathPtr;
+
+/**
+ * \brief Class representing the path of a step
+ *
+ * This class is designed so that hierarchical paths are easy to formulate
+ * in the process XML file.
+ */
+class StepPath {
+	StepPathPtr	_parent;
+	std::string	_path;
+	bool	absolute(const std::string& s) const;
+public:
+	StepPath(StepPathPtr parent = StepPathPtr());
+	StepPath(const std::string& p, StepPathPtr parent = StepPathPtr());
+	const std::string&	path() const { return _path; }
+	std::string	dir() const;
+	std::string	file(const std::string& f) const;
+	bool	direxists() const;
+	bool	fileexists(const std::string& f) const;
+};
+
+} // namespace process
+
 namespace adapter {
 
 class PreviewAdapter;
@@ -122,6 +151,16 @@ class ProcessingThread;
 
 class ProcessingSteps;
 
+class NodePaths {
+protected:
+	StepPathPtr	_srcpath;
+	StepPathPtr	_dstpath;
+public:
+	std::string	srcfile(const std::string& file) const;
+	std::string	dstfile(const std::string& file) const;
+	friend class ProcessorParser;
+};
+
 /**
  * \brief ProcessingStep base class
  *
@@ -131,7 +170,7 @@ class ProcessingSteps;
  * to complete, it is probably a good idea to run it in a separate thread.
  * 
  */
-class ProcessingStep {
+class ProcessingStep : public NodePaths {
 	static ProcessingSteps	*processing_steps;
 public:
 	static int	newid();
@@ -176,6 +215,8 @@ public:
 	bool	hasPrecursor(int id) const;
 	bool	hasSuccessor(ProcessingStepPtr step) const;
 	bool	hasPrecursor(ProcessingStepPtr step) const;
+	void	dumpSuccessors(std::ostream& out) const;
+	void	dumpPrecursors(std::ostream& out) const;
 protected:
 	// derived classes may have their own methods to handle their inputs,
 	// but they use the methods here to maintain the dependency graph
@@ -291,6 +332,9 @@ protected:
 public:
 	const std::string&	filename() const { return _filename; }
 	void	filename(const std::string& f) { _filename = f; }
+	std::string	srcname() const;
+	std::string	dstname() const;
+	virtual std::string	fullname() const;
 protected:
 	bool	_exists;
 	bool	exists();
@@ -305,15 +349,16 @@ public:
 };
 
 /**
- * \brief Writeable File image step
+ * \brief Writable File image step
  *
  * The writeable file image step writes an image to a file when its
  * dependencies have changed
  */
-class WriteableFileImageStep : public FileImageStep {
+class WritableFileImageStep : public FileImageStep {
 	std::recursive_mutex	_mutex;
 public:
-	WriteableFileImageStep(const std::string& filename);
+	WritableFileImageStep(const std::string& filename);
+	virtual std::string	fullname() const;
 private:
 	virtual ProcessingStep::state	do_work();
 	ProcessingStep::state	_previousstate;
@@ -511,7 +556,7 @@ public:
 /**
 * \brief Network Class to manage a complete network of interdependen steps
 */
-class ProcessorNetwork {
+class ProcessorNetwork : public NodePaths {
 	typedef std::map<int, ProcessingStepPtr>	stepmap_t;
 	typedef std::map<int, std::string>		id2namemap_t;
 	typedef std::multimap<std::string, int>		name2idmap_t;
@@ -539,6 +584,7 @@ public:
 	void	process();
 	int	process(int id);
 	int	process(const ProcessingStep::steps& steps);
+	void	dump(std::ostream& out) const;
 };
 typedef std::shared_ptr<ProcessorNetwork>	ProcessorNetworkPtr;
 

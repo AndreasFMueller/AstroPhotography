@@ -16,7 +16,7 @@ void	ProcessorParser::startRescale(const attr_t& attrs) {
 	ProcessingStepPtr	step(s);
 
 	// remember everyhwere
-	_stepstack.push(step);
+	push(step);
 
 	// parse the Rescale attributes
 	attr_t::const_iterator	i;
