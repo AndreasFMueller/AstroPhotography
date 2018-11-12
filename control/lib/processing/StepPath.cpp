@@ -5,6 +5,7 @@
  */
 #include <AstroProcess.h>
 #include <sys/stat.h>
+#include <string.h>
 
 namespace astro {
 namespace process {
