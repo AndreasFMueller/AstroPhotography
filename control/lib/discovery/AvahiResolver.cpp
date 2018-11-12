@@ -10,18 +10,20 @@
 #include <avahi-common/simple-watch.h>
 #include <avahi-common/error.h>
 #include <AstroDebug.h>
+#include <cstring>
 
 namespace astro {
 namespace discover {
 
 AvahiResolver::AvahiResolver(const ServiceKey& key, AvahiClient *client)
 	: ServiceResolver(key), _client(client) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "AvahiResolver constructed for %s at %p",
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "AvahiResolver constructed key=%s this=%p",
 		key.toString().c_str(), this);
 }
 
 AvahiResolver::~AvahiResolver() {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "resolver %p goes out of scope", this);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "resolver this=%p goes out of scope",
+		this);
 }
 
 /**
@@ -46,9 +48,10 @@ static void	resolve_callback(
 			void* userdata) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0,
 		"resolver callback event=%s, name=%s, domain=%s, host_name=%s, "
-		"userdata=%p",
+		"userdata(AvahiResolver)=%p",
 		(event == AVAHI_RESOLVER_FOUND) ? "FOUND" : "FAILURE",
-		name, domain, host_name, userdata);
+		(name) ? name : "(null)", (domain) ? domain : "(null)",
+		(host_name) ? host_name : "(null)", userdata);
 	if (NULL == userdata) {
 		debug(LOG_ERR, DEBUG_LOG, 0,
 			"no resolver provided in userdata, giving up");
@@ -68,29 +71,47 @@ static void	resolve_callback(
  */
 ServiceObject	AvahiResolver::do_resolve() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0,
-		"start do_resolve %p, key = %s, interface=%d, protocol=%d",
-		_client, _key.toString().c_str(), _key.interface(), _key.protocol());
+		"%p->do_resolve %p, key = %s, interface=%d, protocol=%d",
+		this, _client,
+		_key.toString().c_str(), _key.interface(), _key.protocol());
 	prom = std::shared_ptr<std::promise<bool> >(new std::promise<bool>());
 	fut = std::shared_ptr<std::future<bool> >(
 		new std::future<bool>(prom->get_future()));
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "this=%p futures initialized", this);
+
+	char	*name = strdup(_key.name().c_str());
+	char	*type = strdup(_key.type().c_str());
+	char	*domain = strdup(_key.type().c_str());
 
 	// create a resolver structure
 	AvahiServiceResolver	*resolver = avahi_service_resolver_new(_client,
 		_key.interface(), _key.protocol(),
-		_key.name().c_str(), _key.type().c_str(), _key.domain().c_str(),
+		name, type, domain,
 		AVAHI_PROTO_UNSPEC,
 		(AvahiLookupFlags)0, discover::resolve_callback,
 		this);
 
 	if (NULL == resolver) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "failed to create resolver: %s",
+		debug(LOG_DEBUG, DEBUG_LOG, 0,
+			"this=%p failed to create resolver: %s", this,
 			avahi_strerror(avahi_client_errno(_client)));
 		throw std::runtime_error("cannot construct a resolver");
 	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "resolver created at %p", resolver);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "%p->resolver created at %p",
+		this, resolver);
 
 	// now wait for the resolver to produce a result
-	fut->get();
+	bool	resolved = fut->get();
+
+	// free the names
+	free(name);
+	free(type);
+	free(domain);
+
+	// did we resolve?
+	if (!resolved) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "this=%p failed to resolve", this);
+	}
 	fut.reset();
 
 	// done, return the info
@@ -118,28 +139,38 @@ void	AvahiResolver::resolve_callback(
 			AvahiStringList *txt,
 			AvahiLookupResultFlags /* flags */) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0,
-		"resolve_callback interface=%d protocol=%d, name=%s, type=%s, "
-		"domain=%s, host_name=%s",
-		interface, protocol, name, type, domain, host_name);
+		"%p->resolve_callback interface=%d protocol=%d, name=%s, "
+		"type=%s, domain=%s, host_name=%s",
+		this,
+		interface, protocol,
+		(name) ? name : "(null)",
+		(type) ? type : "(null)",
+		(domain) ? domain : "(null)",
+		(host_name) ? host_name : "(null)");
 	if (event == AVAHI_RESOLVER_FAILURE) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "resolver failure");
+		prom->set_value(false);
 		return;
 	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "service %s %s resolved", name, type);
+	debug(LOG_DEBUG, DEBUG_LOG, 0,
+		"service name=%s type=%s resolved this=%p",
+		(name) ? name : "(null)", (type) ? type : "(null)", this);
 	if (port) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "port: %hu", port);
 		_object.port(port);
 	}
 	if (host_name) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "host name: %s", host_name);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "host name: %s",
+			(host_name) ? host_name : "(null)");
 		_object.host(host_name);
 	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "parsing %d txt entries",
-		avahi_string_list_length(txt));
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "this=%p parsing %d txt entries",
+		this, avahi_string_list_length(txt));
 	while (txt) {
 		std::string	s((char *)avahi_string_list_get_text(txt),
 					avahi_string_list_get_size(txt));
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "adding txt '%s'", s.c_str());
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "this=%p adding txt '%s'",
+			this, s.c_str());
 		_object.set(s);
 		txt = avahi_string_list_get_next(txt);
 	}
@@ -148,10 +179,9 @@ void	AvahiResolver::resolve_callback(
 	avahi_service_resolver_free(resolver);
 
 	// resolution complete, signal this to the waiting do_resolve method
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "resolution complete");
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "this=%p resolution complete", this);
 	prom->set_value(true);
 }
-
 
 } // namespace discover
 } // namespace astro

@@ -51,6 +51,7 @@ static void	browse_callback(
 			const char *domain,
 			AvahiLookupResultFlags flags,
 			void* userdata) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "browse_callback forwarding");
 	AvahiDiscovery	*discovery = ((AvahiDiscovery *)userdata);
 	discovery->browse_callback(sb, interface, protocol, event,
 		name, type, domain, flags);
@@ -67,7 +68,10 @@ void	AvahiDiscovery::browse_callback(
 			AvahiLookupResultFlags /* flags */) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0,
 		"browse_callback interface=%d, protocol=%d, name=%s, type=%s, "
-		"domain=%s", interface, protocol, name, type, domain);
+		"domain=%s", interface, protocol,
+		(name) ? name : "(null)",
+		(type) ? type : "(null)",
+		(domain) ? domain : "(null)");
 	AvahiClient	*client = avahi_service_browser_get_client(sb);
 	switch (event) {
 	case AVAHI_BROWSER_FAILURE:
@@ -78,7 +82,9 @@ void	AvahiDiscovery::browse_callback(
 	case AVAHI_BROWSER_NEW:
 		debug(LOG_DEBUG, DEBUG_LOG, 0,
 			"new service %s of type %s in domain %s",
-			name, type, domain);
+			(name) ? name : "(null)",
+			(type) ? type : "(null)",
+			(domain) ? domain : "(null)");
 		{
 			ServiceKey	key(name, type, domain);
 			key.interface(interface);
@@ -89,7 +95,9 @@ void	AvahiDiscovery::browse_callback(
 	case AVAHI_BROWSER_REMOVE:
 		debug(LOG_DEBUG, DEBUG_LOG, 0,
 			"remove service %s of type %s in domain %s",
-			name, type, domain);
+			(name) ? name : "(null)",
+			(type) ? type : "(null)",
+			(domain) ? domain : "(null)");
 		{
 			ServiceKey	key(name, type, domain);
 			remove(key);
