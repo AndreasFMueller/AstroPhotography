@@ -33,6 +33,10 @@ calibrationwidget::calibrationwidget(QWidget *parent) :
 
 	_state = snowstar::GuiderUNCONFIGURED;
 
+	_guiderdescriptor.ccdIndex = -1;
+	_guiderdescriptor.guideportIndex = -1;
+	_guiderdescriptor.adaptiveopticsIndex = -1;
+
 	_guidercontroller = NULL;
 	_calibration.id = -1;
 
@@ -73,6 +77,10 @@ void	calibrationwidget::setGuider(snowstar::ControlType controltype,
 		return;
 	}
 
+	// now that everything is configured, we start the timer
+	_statusTimer.start();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "statusTimer started");
+
 	// find out whether the guider is currently calibrated
 	try {
 		_calibration = _guider->getCalibration(_controltype);
@@ -83,9 +91,6 @@ void	calibrationwidget::setGuider(snowstar::ControlType controltype,
 			x.what());
 		return;
 	}
-
-	// now that everything is configured, we start the timer
-	_statusTimer.start();
 }
 
 /**
