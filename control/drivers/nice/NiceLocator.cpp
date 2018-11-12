@@ -171,6 +171,11 @@ snowstar::DriverModulePrx	NiceLocator::getDriverModule(
 	snowstar::ModulesPrx	mprx = getModules(servicename);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "get module '%s' from service '%s'",
 		modulename.c_str(), servicename.c_str());
+	if (!mprx) {
+		std::string	msg("no modules proxy (mdns resolution?)");
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw std::runtime_error(msg);
+	}
 	snowstar::DriverModulePrx	dmprx = mprx->getModule(modulename);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "got a driver module");
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "driver module version: %s",
@@ -189,6 +194,11 @@ snowstar::DriverModulePrx	NiceLocator::getDriverModule(
 	snowstar::ModulesPrx	mprx = getModules(key);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "get module '%s' from service '%s'",
 		modulename.c_str(), key.toString().c_str());
+	if (!mprx) {
+		std::string	msg("no modules proxy (mdns resolution?)");
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw std::runtime_error(msg);
+	}
 	snowstar::DriverModulePrx	dmprx =  mprx->getModule(modulename);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "got a driver module");
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "driver module version: %s",

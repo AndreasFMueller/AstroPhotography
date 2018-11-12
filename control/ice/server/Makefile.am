@@ -120,7 +120,7 @@ snowstar_CPPFLAGS = -I$(top_builddir)/ice/include -I$(top_builddir)/ice/slice \
 
 COMMONFLAGS = --debug --foreground --base=`pwd`/images \
 	--database=`pwd`/testdb.db --config=`pwd`/testdb.db \
-	--name=$${servername} 
+	--pidfile=`pwd`/var/run/snowstar.pid --name=$${servername} 
 EFENCE = LD_PRELOAD=libefence.so.0.0 EF_PROTECT_FREE=1 EF_FILL=255 EF_ALLOW_MALLOC_0=1
 
 test:	snowstar

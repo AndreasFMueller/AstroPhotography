@@ -43,6 +43,7 @@ AvahiBase::~AvahiBase() {
 		client = NULL;
 	}
 	if (simple_poll) {
+		avahi_simple_poll_quit(simple_poll);
 		avahi_simple_poll_free(simple_poll);
 		simple_poll = NULL;
 	}
@@ -93,7 +94,9 @@ bool	AvahiBase::main_startup() {
 	// create avahi client
 	int	error;
 	client = avahi_client_new(avahi_simple_poll_get(simple_poll),
-		(AvahiClientFlags)0, discover::client_callback, this, &error);
+			//(AvahiClientFlags)AVAHI_CLIENT_NO_FAIL,
+			(AvahiClientFlags)0,
+			discover::client_callback, this, &error);
 	if (NULL == client) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "failed to create client: %s",
 			avahi_strerror(error));
@@ -122,7 +125,9 @@ void	AvahiBase::client_callback(AvahiClient *client,
 	if (state == AVAHI_CLIENT_FAILURE) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "server connection failure: %s",
 			avahi_strerror(avahi_client_errno(client)));
-		avahi_simple_poll_quit(simple_poll);
+		if (simple_poll) {
+			avahi_simple_poll_quit(simple_poll);
+		}
 		_valid = false;
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "client callback completed");
