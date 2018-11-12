@@ -162,9 +162,15 @@ fail:
 }
 
 ServiceObject	AvahiDiscovery::find(const ServiceKey& key) {
-	AvahiResolver	resolver(key, client);
+	std::unique_lock<std::mutex>	_lock(_mutex);
+	auto i = _objects.find(key);
+	if (i != _objects.end()) {
+		return i->second;
+	}
+	AvahiResolver	resolver(key, *this);
 	resolver.resolve();
 	ServiceObject	result = resolver.resolved();
+	_objects.insert(std::make_pair(key, result));
 	return result;
 }
 

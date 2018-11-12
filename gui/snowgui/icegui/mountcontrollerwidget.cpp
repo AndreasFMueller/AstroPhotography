@@ -430,12 +430,25 @@ void	mountcontrollerwidget::catalogClicked() {
 		_catalogdialog->raise();
 		return;
 	}
-	_catalogdialog = new CatalogDialog(NULL);
-	connect(_catalogdialog, SIGNAL(objectSelected(astro::RaDec)),
-		this, SLOT(targetChanged(astro::RaDec)));
-	connect(_catalogdialog, SIGNAL(destroyed()),
-		this, SLOT(catalogDestroyed()));
-	_catalogdialog->show();
+	try {
+		_catalogdialog = new CatalogDialog(NULL);
+		connect(_catalogdialog, SIGNAL(objectSelected(astro::RaDec)),
+			this, SLOT(targetChanged(astro::RaDec)));
+		connect(_catalogdialog, SIGNAL(destroyed()),
+			this, SLOT(catalogDestroyed()));
+		_catalogdialog->show();
+	} catch (const std::exception& x) {
+		// no catalog available, disable button
+		ui->catalogButton->setEnabled(false);
+		// also display a message
+		QMessageBox	message(NULL);
+		message.setText(QString("No catalogs"));
+		std::ostringstream      out;
+		out << "No nebulae catalogs were found, so object ";
+		out << "select from a catalog is not available.";
+		message.setInformativeText(QString(out.str().c_str()));
+		message.exec();
+	}
 }
 
 } // namespace snowgui

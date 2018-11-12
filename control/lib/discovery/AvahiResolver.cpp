@@ -15,10 +15,10 @@
 namespace astro {
 namespace discover {
 
-AvahiResolver::AvahiResolver(const ServiceKey& key, AvahiClient *client)
-	: ServiceResolver(key), _client(client) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "AvahiResolver constructed key=%s this=%p",
-		key.toString().c_str(), this);
+AvahiResolver::AvahiResolver(const ServiceKey& key, AvahiBase& base)
+	: ServiceResolver(key), _base(base) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "AvahiResolver constructed key=%s this=%p, client=%p",
+		key.toString().c_str(), this, _base.client);
 }
 
 AvahiResolver::~AvahiResolver() {
@@ -70,9 +70,12 @@ static void	resolve_callback(
  * synchronization mechanism to be used.
  */
 ServiceObject	AvahiResolver::do_resolve() {
+	{
+	std::unique_lock<std::recursive_mutex>	lock(_base._mutex);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "--> lock resolve");
 	debug(LOG_DEBUG, DEBUG_LOG, 0,
 		"%p->do_resolve client=%p, key = %s, interface=%d, protocol=%d",
-		this, _client,
+		this, _base.client,
 		_key.toString().c_str(), _key.interface(), _key.protocol());
 	prom = std::shared_ptr<std::promise<bool> >(new std::promise<bool>());
 	fut = std::shared_ptr<std::future<bool> >(
@@ -84,7 +87,8 @@ ServiceObject	AvahiResolver::do_resolve() {
 	char	*domain = strdup(_key.domain().c_str());
 
 	// create a resolver structure
-	AvahiServiceResolver	*resolver = avahi_service_resolver_new(_client,
+	AvahiServiceResolver	*resolver = avahi_service_resolver_new(
+		_base.client,
 		_key.interface(), _key.protocol(),
 		name, type, domain,
 		AVAHI_PROTO_UNSPEC,
@@ -94,7 +98,7 @@ ServiceObject	AvahiResolver::do_resolve() {
 	if (NULL == resolver) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0,
 			"this=%p failed to create resolver: %s", this,
-			avahi_strerror(avahi_client_errno(_client)));
+			avahi_strerror(avahi_client_errno(_base.client)));
 		throw std::runtime_error("cannot construct a resolver");
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "%p->resolver created at %p",
@@ -108,11 +112,14 @@ ServiceObject	AvahiResolver::do_resolve() {
 		debug(LOG_ERR, DEBUG_LOG, 0, "this=%p failed to resolve", this);
 	}
 	fut.reset();
-
+	
 	// free the names
 	free(name);
 	free(type);
 	free(domain);
+
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "<-- release lock");
+	}
 
 	// done, return the info
 	return _object;

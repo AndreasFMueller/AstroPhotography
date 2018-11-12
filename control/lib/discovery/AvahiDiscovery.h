@@ -12,6 +12,7 @@
 #include <avahi-client/client.h>
 #include <avahi-client/publish.h>
 #include <avahi-client/lookup.h>
+#include <mutex>
 
 namespace astro {
 namespace discover {
@@ -27,6 +28,8 @@ public:
 	static AvahiStringList	*stringlist(const ServiceSubset& s);
 	AvahiStringList	*stringlist() const;
 };
+
+class AvahiResolver;
 
 /**
  * \brief Avahi base class
@@ -44,6 +47,7 @@ protected:
 	AvahiSimplePoll	*simple_poll;
 	AvahiClient	*client;
 	bool	main_startup();
+	std::recursive_mutex	_mutex;
 private:
 	// make AvahiDiscovery uncopiable
 	AvahiBase(const AvahiBase& other);
@@ -54,6 +58,7 @@ public:
 	// virtual main function, needs to be implemented in derived class
 	virtual void	client_callback(AvahiClient *client,
 				AvahiClientState state);
+	friend class AvahiResolver;
 };
 
 /**
@@ -79,7 +84,7 @@ protected:
  * \brief resolver class for Avahi implementation
  */
 class AvahiResolver : public ServiceResolver {
-	AvahiClient	*_client;
+	AvahiBase&	_base;
 	// a std::future variable is used as the handshake mechanism
 	// to signal completion of the resolution
 	std::shared_ptr<std::future<bool> >	fut;
@@ -88,7 +93,7 @@ class AvahiResolver : public ServiceResolver {
 	AvahiResolver(const AvahiResolver& other);
 	AvahiResolver&	operator=(const AvahiResolver& other);
 public:
-	AvahiResolver(const ServiceKey& key, AvahiClient *client);
+	AvahiResolver(const ServiceKey& key, AvahiBase& base);
 	~AvahiResolver();
 	virtual ServiceObject	do_resolve();
 
@@ -128,8 +133,10 @@ public:
 			const char *type,
 			const char *domain,
 			AvahiLookupResultFlags flags);
-
-
+private:
+	std::map<ServiceKey, ServiceObject>	_objects;
+	std::mutex	_mutex;
+public:
 	virtual ServiceObject	find(const ServiceKey& key);
 	void	start() { AvahiThread::start(); }
 };

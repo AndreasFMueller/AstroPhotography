@@ -32,15 +32,19 @@ SkyStarThread::~SkyStarThread() {
  */
 void	SkyStarThread::run() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "star retrieval started");
-	CatalogPtr catalog = CatalogFactory::get();
-	SkyWindow	windowall;
-	MagnitudeRange  magrange(-30, 6);
-	Catalog::starsetptr	_stars = catalog->find(windowall, magrange);
-	astro::Precession	precession;
-	_stars = precess(precession, _stars);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "star retrieval complete");
-	emit stars(_stars);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "stars sent to main thread");
+	try {
+		CatalogPtr catalog = CatalogFactory::get();
+		SkyWindow	windowall;
+		MagnitudeRange  magrange(-30, 6);
+		Catalog::starsetptr	_stars = catalog->find(windowall, magrange);
+		astro::Precession	precession;
+		_stars = precess(precession, _stars);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "star retrieval complete");
+		emit stars(_stars);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "stars sent to main thread");
+	} catch (const std::exception& x) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "no catalog available: %s", x.what());
+	}
 }
 
 } // namespace snowgui
