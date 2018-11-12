@@ -103,16 +103,19 @@ ServiceObject	AvahiResolver::do_resolve() {
 	// now wait for the resolver to produce a result
 	bool	resolved = fut->get();
 
-	// free the names
-	free(name);
-	free(type);
-	free(domain);
-
 	// did we resolve?
 	if (!resolved) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "this=%p failed to resolve", this);
 	}
 	fut.reset();
+
+	// free the resolver
+	avahi_service_resolver_free(resolver);
+
+	// free the names
+	free(name);
+	free(type);
+	free(domain);
 
 	// done, return the info
 	return _object;
