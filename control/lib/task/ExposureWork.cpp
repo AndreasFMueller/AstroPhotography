@@ -384,6 +384,7 @@ ExposureWork::~ExposureWork() {
 	// turn of the cooler
 	// XXX we should make this configurable, but for the time being
 	// XXX we disable it, the cooler can still be turned off manually
+#if 0
 	if (cooler) {
 		try {
 			cooler->setOn(false);
@@ -392,6 +393,7 @@ ExposureWork::~ExposureWork() {
 				"cannot turn off the cooler, giving up");
 		}
 	}
+#endif
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "ExposureWork destroyed");
 }
 
