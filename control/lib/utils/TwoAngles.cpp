@@ -11,6 +11,7 @@
 #include <regex>
 #include <mutex>
 #include <typeinfo>
+#include <sstream>
 
 namespace astro {
 
@@ -48,6 +49,12 @@ bool	TwoAngles::operator==(const TwoAngles& other) const {
 
 bool	TwoAngles::operator!=(const TwoAngles& other) const {
 	return (_a1 != other._a1) || (_a2 != other._a2);
+}
+
+std::string	TwoAngles::toString() const {
+	std::ostringstream	out;
+	out << _a1.degrees() << "/" << _a2.degrees();
+	return out.str();
 }
 
 } // namespace astro

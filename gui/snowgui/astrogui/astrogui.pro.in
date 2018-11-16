@@ -57,6 +57,7 @@ SOURCES += 								\
 	Histogram.cpp							\
 	HourAngleWidget.cpp						\
 	Image2Pixmap.cpp						\
+	ImagerRectangle.cpp						\
 	LocalSiderealTime.cpp						\
 	LocalTimeWidget.cpp						\
 	LogSpinBox.cpp							\
@@ -86,6 +87,7 @@ HEADERS  += 								\
 	Histogram.h							\
 	HourAngleWidget.h						\
 	Image2Pixmap.h							\
+	ImagerRectangle.h						\
 	LocalSiderealTime.h						\
 	LocalTimeWidget.h						\
 	LogSpinBox.h							\

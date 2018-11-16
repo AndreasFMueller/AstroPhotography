@@ -18,6 +18,8 @@ pointingwindow::pointingwindow(QWidget *parent)
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "construct a pointingwindow");
 	ui->setupUi(this);
 
+	qRegisterMetaType<snowgui::ImagerRectangle>("snowgui::ImagerRectangle");
+
 	// set up the image display widget
 	ui->finderImageWidget->setInfoVisible(true);
         ui->finderImageWidget->setRectangleSelectionEnabled(false);
@@ -106,6 +108,19 @@ pointingwindow::pointingwindow(QWidget *parent)
 		ui->chartWidget, SLOT(finderResolution(astro::Angle)));
 	connect(ui->ccdcontrollerWidget, SIGNAL(guiderResolution(astro::Angle)),
 		ui->chartWidget, SLOT(guiderResolution(astro::Angle)));
+
+	connect(ui->ccdcontrollerWidget,
+		SIGNAL(imagerRectangle(snowgui::ImagerRectangle)),
+		ui->chartWidget,
+		SLOT(imagerRectangle(snowgui::ImagerRectangle)));
+	connect(ui->ccdcontrollerWidget,
+		SIGNAL(finderRectangle(snowgui::ImagerRectangle)),
+		ui->chartWidget,
+		SLOT(finderRectangle(snowgui::ImagerRectangle)));
+	connect(ui->ccdcontrollerWidget,
+		SIGNAL(guiderRectangle(snowgui::ImagerRectangle)),
+		ui->chartWidget,
+		SLOT(guiderRectangle(snowgui::ImagerRectangle)));
 }
 
 /**
@@ -226,7 +241,7 @@ void	pointingwindow::pointSelected(astro::image::ImagePoint p,
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "resolution: %.4f",
 		angular_resolution.degrees());
 	astro::ImageCoordinates	coord(radec, angular_resolution,
-					_ccd.azimut(), false);
+					_ccd.azimuth(), false);
 	// XXX mirror is initialized to false, this will change
 
 	// calculate the new target, this first means that we need the

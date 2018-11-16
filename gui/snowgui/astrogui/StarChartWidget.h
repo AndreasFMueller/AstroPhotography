@@ -13,6 +13,7 @@
 #include <AstroDevice.h>
 #include <BusyWidget.h>
 #include <StarChartLegend.h>
+#include <ImagerRectangle.h>
 
 namespace snowgui {
 
@@ -71,6 +72,9 @@ class StarChartWidget : public QWidget {
 	astro::Angle	_imager_resolution;
 	astro::Angle	_finder_resolution;
 	astro::Angle	_guider_resolution;
+	snowgui::ImagerRectangle	_imager_rectangle;
+	snowgui::ImagerRectangle	_finder_rectangle;
+	snowgui::ImagerRectangle	_guider_rectangle;
 	astro::RaDec	_direction;
 	astro::RaDec	_chartcenter;
 	astro::device::Mount::state_type	_state;
@@ -85,6 +89,9 @@ class StarChartWidget : public QWidget {
 	bool	_show_tooltips;
 	bool	_show_cataloglabels;
 	bool	_flip;
+	bool	_show_imager_rectangle;
+	bool	_show_finder_rectangle;
+	bool	_show_guider_rectangle;
 
 	bool	_retrieval_necessary;
 	StarChartRetriever	*_retriever;
@@ -128,6 +135,15 @@ public:
 	void	flip(bool f) { _flip = f; }
 	bool	flip() const { return _flip; }
 
+	void	show_imager_rectangle(bool r) { _show_imager_rectangle = r; }
+	bool	show_imager_rectangle() const { return _show_imager_rectangle; }
+
+	void	show_finder_rectangle(bool r) { _show_finder_rectangle = r; }
+	bool	show_finder_rectangle() const { return _show_finder_rectangle; }
+
+	void	show_guider_rectangle(bool r) { _show_guider_rectangle = r; }
+	bool	show_guider_rectangle() const { return _show_guider_rectangle; }
+
 	explicit StarChartWidget(QWidget *parent = NULL);
 	virtual ~StarChartWidget();
 
@@ -145,6 +161,10 @@ private:
 	void	drawGrid(QPainter& painter);
 	void	drawCrosshairs(QPainter& painter);
 	void	drawDirections(QPainter& painter);
+	QPointF	rectanglePoint(const astro::RaDec&);
+	void	drawRectangle(QPainter& painter,
+			const ImagerRectangle& rectangle,
+			const astro::Angle& resolution);
 
 	void	mouseCommon(QMouseEvent *event);
 
@@ -171,6 +191,9 @@ public slots:
 	void	finderResolution(astro::Angle);
 	void	imagerResolution(astro::Angle);
 	void	resolutionChanged(astro::Angle);
+	void	guiderRectangle(snowgui::ImagerRectangle);
+	void	finderRectangle(snowgui::ImagerRectangle);
+	void	imagerRectangle(snowgui::ImagerRectangle);
 
 	void	setStarsVisible(bool);
 	void	setGridVisible(bool);
@@ -180,6 +203,9 @@ public slots:
 	void	setCataloglabelsVisible(bool);
 	void	setTooltipsVisible(bool);
 	void	setNegative(bool);
+	void	setImagerRectangleVisible(bool);
+	void	setFinderRectangleVisible(bool);
+	void	setGuiderRectangleVisible(bool);
 	
 	void	toggleStarsVisible();
 	void	toggleGridVisible();
@@ -189,6 +215,9 @@ public slots:
 	void	toggleCataloglabelsVisible();
 	void	toggleTooltipsVisible();
 	void	toggleNegative();
+	void	toggleImagerRectangleVisible();
+	void	toggleFinderRectangleVisible();
+	void	toggleGuiderRectangleVisible();
 
 	void	useFinderResolution();
 	void	useGuiderResolution();
