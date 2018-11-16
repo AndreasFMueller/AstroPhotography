@@ -274,6 +274,31 @@ public:
 	DeepSkyCatalogPtr	get(deepskycatalog_t ct);
 };
 
+/*
+ * \brief Outline of a DeepSkyObject
+ */
+class Outline : public std::list<astro::RaDec> {
+	std::string	_name;
+public:
+	const std::string&	name() const { return _name; }
+	void	name(const std::string& name) { _name = name; }
+	Outline(const std::string& name) : _name(name) { }
+	std::string	toString() const;
+};
+
+/**
+ * \brief Build a catalog of outlines
+ */
+class OutlineCatalog {
+	std::map<std::string, Outline>	_outlinemap;
+	void	parse(const std::string& directory);
+public:
+	OutlineCatalog();
+	OutlineCatalog(const std::string& directory);
+	bool	has(const std::string& name) const;
+	Outline	find(const std::string& name) const;
+};
+
 } // namespace catalog
 } // namespace astro
 

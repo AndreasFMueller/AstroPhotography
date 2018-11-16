@@ -68,6 +68,8 @@ libastrocatalogs_la_SOURCES =						\
 	MessierCatalog.cpp						\
 	NGCIC.cpp							\
 	NGCICCatalog.cpp						\
+	Outline.cpp							\
+	OutlineCatalog.cpp						\
 	PointSpreadFunctionAdapter.cpp					\
 	PointSpreadFunction.cpp						\
 	SkyRectangle.cpp						\
