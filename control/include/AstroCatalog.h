@@ -117,6 +117,7 @@ class DeepSkyObject : public CelestialObject {
 public:
 	DeepSkyObject() { _mag = 0; }
 	virtual ~DeepSkyObject() { }
+	int	number;
 	std::string	name;
 	std::string	constellation;
 	typedef enum { Galaxy, OpenCluster, GlobularCluster, BrightNebula,
@@ -129,6 +130,10 @@ public:
 	TwoAngles	size;
 	Angle		azimuth;
 	std::string	toString() const;
+private:
+	std::list<std::string>	_names;
+public:
+	const std::list<std::string>&	names() const { return _names; }
 };
 
 /**

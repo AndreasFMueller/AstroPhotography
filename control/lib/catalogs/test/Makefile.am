@@ -32,6 +32,7 @@ tests_SOURCES = tests.cpp						\
 	SkyWindowTest.cpp 						\
 	StereographicChartTest.cpp 					\
 	StereographicProjectionTest.cpp 				\
+	StellariumTest.cpp						\
 	Tycho2Test.cpp							\
 	Ucac4Test.cpp
 
@@ -43,7 +44,7 @@ test:	tests
 
 # single test
 singletest_SOURCES = singletest.cpp 					\
-	OutlineTest.cpp
+	StellariumTest.cpp
 singletest_LDADD = $(catalogs_ldadd)
 singletest_DEPENDENCIES = $(catalogs_dependencies)
 
