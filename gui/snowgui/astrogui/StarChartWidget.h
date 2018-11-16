@@ -147,9 +147,11 @@ private:
 
 	void	mouseCommon(QMouseEvent *event);
 
+	bool	_mouse_pressed;
+
+private slots:
 	void	startRetrieval();
 
-	bool	_mouse_pressed;
 protected:
 	void	paintEvent(QPaintEvent *event);
 	void	mousePressEvent(QMouseEvent *event);

@@ -986,6 +986,12 @@ void	StarChartWidget::showContextMenu(const QPoint& point) {
 	connect(&actionLegend, SIGNAL(triggered()),
 		this, SLOT(showLegend()));
 
+	QAction	actionReload(QString("Reload stars"), this);
+	actionReload.setEnabled(_retriever == NULL);
+	contextMenu.addAction(&actionReload);
+	connect(&actionReload, SIGNAL(triggered),
+		this, SLOT(startRetrieval()));
+
 	contextMenu.exec(mapToGlobal(point));
 }
 
