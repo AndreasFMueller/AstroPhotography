@@ -74,6 +74,15 @@ StarChartWidget::StarChartWidget(QWidget *parent) : QWidget(parent),
 	//connect(deepsky_thread, SIGNAL(finished()),
 	//	this, SLOT(workerFinished()));
 	deepsky_thread->start();
+
+	// create the outline catalog
+	try {
+		_outlines = astro::catalog::OutlineCatalogPtr(
+			new astro::catalog::OutlineCatalog());
+	} catch (std::exception& x) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "no outline catalog: %s",
+			x.what());
+	}
 }
 
 /**
@@ -205,33 +214,53 @@ void	StarChartWidget::drawDeepSkyObject(QPainter& painter,
 	//debug(LOG_DEBUG, DEBUG_LOG, 0, "draw deep sky object %s",
 	//	deepskyobject.name.c_str());
 
-	// get the axes
-	double	a = deepskyobject.size.a1().radians() / _resolution.radians();
-	double	b = deepskyobject.size.a2().radians() / _resolution.radians();
-	//debug(LOG_DEBUG, DEBUG_LOG, 0, "axes: %f, %f", a, b);
-	a /= 2;
-	b /= 2;
+	if ((_outlines) && (_outlines->has(deepskyobject.name))) {
+		QPainterPath	outlinepath;
+		Outline	outline = _outlines->find(deepskyobject.name);
+		QPointF	first = convert(*outline.begin());
+		outlinepath.moveTo(first);
+		auto i = outline.begin();
+		i++;
+		while (i != outline.end()) {
+			QPointF	next = convert(*i);
+			outlinepath.lineTo(next);
+			i++;
+		}
+		outlinepath.closeSubpath();
+		painter.drawPath(outlinepath);
+	} else {
+		// get the axes
+		double	a = deepskyobject.size.a1().radians()
+				/ _resolution.radians();
+		double	b = deepskyobject.size.a2().radians()
+				/ _resolution.radians();
+		//debug(LOG_DEBUG, DEBUG_LOG, 0, "axes: %f, %f", a, b);
+		a /= 2;
+		b /= 2;
 
-	// draw an ellipse at the position of the object
-	QPainterPath	ellipse;
-	double	s = sin(deepskyobject.azimuth);
-	double	c = cos(deepskyobject.azimuth);
-	double	phi = 0;
-	double	x = a * c;
-	double	y = -a * s;
-	ellipse.moveTo(p.x() + x, p.y() + y);
-	double	phistep = M_PI / 50;
-	while (phi < 2 * M_PI + phistep/2) {
-		phi += phistep;
-		x = a * cos(phi);
-		y = b * sin(phi);
-		ellipse.lineTo(p.x() + c * x + s * y, p.y() - s * x + c * y);
+		// draw an ellipse at the position of the object
+		QPainterPath	ellipse;
+		double	s = sin(deepskyobject.azimuth);
+		double	c = cos(deepskyobject.azimuth);
+		double	phi = 0;
+		double	x = a * c;
+		double	y = -a * s;
+		ellipse.moveTo(p.x() + x, p.y() + y);
+		double	phistep = M_PI / 50;
+		while (phi < 2 * M_PI + phistep/2) {
+			phi += phistep;
+			x = a * cos(phi);
+			y = b * sin(phi);
+			ellipse.lineTo(p.x() + c * x + s * y,
+				p.y() - s * x + c * y);
+		}
+		painter.drawPath(ellipse);
 	}
-	painter.drawPath(ellipse);
 
 	if (!show_cataloglabels()) {
 		return;
 	}
+
 	// draw the name of the object
 	painter.drawText(p.x() - 40, p.y() - 10, 80, 20,
 		Qt::AlignCenter,

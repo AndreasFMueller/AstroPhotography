@@ -299,6 +299,8 @@ public:
 	Outline	find(const std::string& name) const;
 };
 
+typedef std::shared_ptr<OutlineCatalog>	OutlineCatalogPtr;
+
 } // namespace catalog
 } // namespace astro
 

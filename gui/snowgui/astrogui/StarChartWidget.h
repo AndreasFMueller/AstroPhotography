@@ -66,6 +66,7 @@ class StarChartWidget : public QWidget {
 	astro::catalog::Catalog::starsetptr	_stars;
 	astro::catalog::Catalog::starsetptr	_sky;
 	astro::catalog::DeepSkyCatalog::deepskyobjectsetptr	_deepsky;
+	astro::catalog::OutlineCatalogPtr	_outlines;
 	astro::Angle	_resolution;	// angle per pixel
 	astro::Angle	_imager_resolution;
 	astro::Angle	_finder_resolution;
