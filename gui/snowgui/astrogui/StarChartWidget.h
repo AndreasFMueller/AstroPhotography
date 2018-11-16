@@ -71,6 +71,7 @@ class StarChartWidget : public QWidget {
 	astro::Angle	_finder_resolution;
 	astro::Angle	_guider_resolution;
 	astro::RaDec	_direction;
+	astro::RaDec	_chartcenter;
 	astro::device::Mount::state_type	_state;
 	astro::ImageCoordinates	_converter;
 	float	_limit_magnitude;

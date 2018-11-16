@@ -139,6 +139,9 @@ void	mountcontrollerwidget::setupMount() {
 			convert(_telescope).toString().c_str());
 		emit telescopeChanged(convert(_telescope));
 
+		// initially, telescope and target are identical
+		targetChanged(convert(_telescope));
+
 		// write the position to the position label
 		std::string	pl;
 		pl += _position.longitude().dms(':', 0).substr(1);
@@ -418,7 +421,6 @@ void	mountcontrollerwidget::targetChanged(astro::RaDec newtarget) {
 
 	// set the new target
 	setTarget(newtarget);
-
 }
 
 /**

@@ -163,7 +163,6 @@ void	StarChartWidget::drawStar(QPainter& painter, const Star& star) {
  */
 // XXX suggested improvements:
 // XXX - background behind the object label to make it more readable
-// XXX - distinguish between Glx, Nebula, globular cluster (at least)
 // XXX - get different half axes and azimuth for objects that are not circular
 void	StarChartWidget::drawDeepSkyObject(QPainter& painter,
 	const DeepSkyObject& deepskyobject) {
@@ -508,6 +507,10 @@ void	StarChartWidget::startRetrieval() {
 	astro::Angle	decheight(1.5 * height() * _resolution.radians());
 	SkyWindow	window = SkyWindow::hull(_direction, rawidth, decheight);
 
+	// after the retrieval, the new chart center will be
+	// the current telescope direction
+	_chartcenter = _direction;
+
 	// if no retriever is running, start one
 	if (NULL == _retriever) {
 		// get the stars from the catalog
@@ -558,10 +561,10 @@ void	StarChartWidget::directionChanged(astro::RaDec direction) {
 
 	// decide whether the change is big enough to warrant computing
 	// a new catalog
-	double  deltaRa = (_direction.ra() - direction.ra()).radians();
+	double  deltaRa = (_chartcenter.ra() - direction.ra()).radians();
         if (deltaRa > M_PI) { deltaRa -= 2 *M_PI; }
         if (deltaRa < -M_PI) { deltaRa += 2 * M_PI; }
-        double  deltaDec = (_direction.dec() - direction.dec()).radians();
+        double  deltaDec = (_chartcenter.dec() - direction.dec()).radians();
         double  change = hypot(deltaRa, deltaDec);
 
 	if (change < 0.01) {
