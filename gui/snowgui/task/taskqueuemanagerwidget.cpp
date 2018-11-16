@@ -19,7 +19,12 @@ taskqueuemanagerwidget::taskqueuemanagerwidget(QWidget *parent)
 
 	qRegisterMetaType<QVector<int>>("QVector<int>");
 
+	ui->infoButton->setEnabled(false);
 	ui->cancelButton->setEnabled(false);
+	ui->deleteButton->setEnabled(false);
+	ui->resubmitButton->setEnabled(false);
+	ui->previewButton->setEnabled(false);
+	ui->imageButton->setEnabled(false);
 	ui->downloadButton->setEnabled(false);
 
 	_taskinfowidget = NULL;
@@ -718,18 +723,25 @@ void	taskqueuemanagerwidget::itemSelectionChanged() {
 	QList<QTreeWidgetItem*>	selected = ui->taskTree->selectedItems();
 	if (1 == selected.count()) {
 		ui->infoButton->setEnabled(true);
-		ui->imageButton->setEnabled((ui->taskTree->topLevelItem(0)
-					== (*selected.begin())->parent()));
+		bool	imageenabled = (ui->taskTree->topLevelItem(0)
+					== (*selected.begin())->parent());
+		ui->imageButton->setEnabled(imageenabled);
+		ui->previewButton->setEnabled(imageenabled);
 	} else {
 		ui->infoButton->setEnabled(false);
 		ui->imageButton->setEnabled(false);
+		ui->previewButton->setEnabled(false);
 	}
 	if (selected.count() > 0) {
 		ui->cancelButton->setEnabled(true);
+		ui->deleteButton->setEnabled(true);
 		ui->resubmitButton->setEnabled(true);
+		ui->downloadButton->setEnabled(true);
 	} else {
 		ui->cancelButton->setEnabled(false);
+		ui->deleteButton->setEnabled(false);
 		ui->resubmitButton->setEnabled(false);
+		ui->downloadButton->setEnabled(false);
 	}
 }
 

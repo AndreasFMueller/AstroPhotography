@@ -33,6 +33,7 @@ Guiding:
       - All calls should test whether the instrument is really available
 	and throw a useful exception for the user (particularly important
 	for calls via ICE)
+      - Communicator cleanup when the snowguide utility exits
 
 Focusing:
       - FWHM does not work reliably
