@@ -30,7 +30,10 @@ AzmAlt  NiceMount::getAzmAlt() {
 }
 
 LongLat NiceMount::location() {
-	return convert(_mount->getLocation());
+	LongLat	l = convert(_mount->getLocation());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "got remote location: %s",
+		l.toString().c_str());
+	return l;
 }
 
 time_t  NiceMount::time() {

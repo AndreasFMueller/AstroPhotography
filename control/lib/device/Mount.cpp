@@ -188,6 +188,7 @@ Mount::state_type	Mount::string2state(const std::string& s) {
  * \param image		image to add the meta data
  */
 void	Mount::addPositionMetadata(astro::image::ImageBase& image) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "adding mount metadata to image");
 	RaDec   position = getRaDec();
 	image.setMetadata(astro::io::FITSKeywords::meta("RACENTR", 
 		position.ra().hours()));
