@@ -25,6 +25,7 @@ private:
 	timer_method	_method;
 	double	_relaxation;
 	double	_limit;
+	double	_minimum;
 public:
 	ExposureTimer(double exposuretime = 0, double targetvalue = 1,
 		timer_method method = NONE)
@@ -36,6 +37,8 @@ public:
 	void	relaxation(double relaxation) { _relaxation = relaxation; }
 	double	limit() const { return _limit; }
 	void	limit(double limit) { _limit = limit; }
+	double	minimum() const { return _minimum; }
+	void	minimum(double m) { _minimum = m; }
 	void	update(ImagePtr image);
 	operator double () { return _exposuretime; }
 };

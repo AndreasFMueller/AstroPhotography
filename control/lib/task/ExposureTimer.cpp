@@ -39,6 +39,9 @@ void	ExposureTimer::update(ImagePtr image) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "limit exposure time to %f",
 			_exposuretime);
 	}
+	if (_exposuretime < _minimum) {
+		_exposuretime = _minimum;
+	}
 }
 
 } // namespace task

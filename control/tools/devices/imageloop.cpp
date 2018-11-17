@@ -71,6 +71,7 @@ static void	usage(const char *progname) {
 	std::cout << "  -M,--median=<median>       attemtp to vary the exposure time in such a way" << std::endl;
 	std::cout << "                             that the median pixel value stays close to the" << std::endl;
 	std::cout << "                             <median>" << std::endl;
+	std::cout << "  -i,--minimum=<min>         minimum exposure time" << std::endl;
 	std::cout << "  -F,--foreground            stay in the foreground" << std::endl;
 	std::cout << "  -P,--image-callback=<prog> processing script for individual images," << std::endl;
 	std::cout << "                             e.g. convert FITS to JPEG" << std::endl;
@@ -255,22 +256,23 @@ static struct option	longopts[] = {
 { "exposure",		required_argument,	NULL,	'e' }, /*  5 */
 { "foreground",		no_argument,		NULL,	'F' }, /*  6 */
 { "height",		required_argument,	NULL,	'h' }, /*  7 */
-{ "longitude",		required_argument,	NULL,	'L' }, /*  8 */
-{ "latitude",		required_argument, 	NULL,	'l' }, /*  9 */
-{ "median",		required_argument,	NULL,	'M' }, /* 10 */
-{ "module",		required_argument,	NULL,	'm' }, /* 11 */
-{ "night",		no_argument,		NULL,	'N' }, /* 12 */
-{ "number",		required_argument,	NULL,	'n' }, /* 13 */
-{ "outdir",		required_argument,	NULL,	'o' }, /* 14 */
-{ "image-callback",	required_argument,	NULL,	'P' }, /* 15 */
-{ "period",		required_argument,	NULL,	'p' }, /* 16 */
-{ "loop-callback",	required_argument,	NULL,	'Q' }, /* 17 */
-{ "timestamp",		no_argument,		NULL,	't' }, /* 18 */
-{ "width",		required_argument,	NULL,	'w' }, /* 19 */
-{ "x-offset",		required_argument,	NULL,	'x' }, /* 20 */
-{ "y-offset",		required_argument,	NULL,	'y' }, /* 21 */
-{ "help",		no_argument,		NULL,	'?' }, /* 22 */
-{ NULL,			0,			NULL,	 0  }  /* 23 */
+{ "minimum",		required_argument,	NULL,	'i' }, /*  8 */
+{ "longitude",		required_argument,	NULL,	'L' }, /*  9 */
+{ "latitude",		required_argument, 	NULL,	'l' }, /* 10 */
+{ "median",		required_argument,	NULL,	'M' }, /* 11 */
+{ "module",		required_argument,	NULL,	'm' }, /* 12 */
+{ "night",		no_argument,		NULL,	'N' }, /* 13 */
+{ "number",		required_argument,	NULL,	'n' }, /* 14 */
+{ "outdir",		required_argument,	NULL,	'o' }, /* 15 */
+{ "image-callback",	required_argument,	NULL,	'P' }, /* 16 */
+{ "period",		required_argument,	NULL,	'p' }, /* 17 */
+{ "loop-callback",	required_argument,	NULL,	'Q' }, /* 18 */
+{ "timestamp",		no_argument,		NULL,	't' }, /* 19 */
+{ "width",		required_argument,	NULL,	'w' }, /* 20 */
+{ "x-offset",		required_argument,	NULL,	'x' }, /* 21 */
+{ "y-offset",		required_argument,	NULL,	'y' }, /* 22 */
+{ "help",		no_argument,		NULL,	'?' }, /* 23 */
+{ NULL,			0,			NULL,	 0  }  /* 24 */
 };
 
 
@@ -289,11 +291,12 @@ int	main(int argc, char *argv[]) {
 	unsigned int	cameraid = 0;
 	unsigned int	ccdid = 0;
 	double	exposuretime = 0.1;
+	double	minimum = 0.1;
 	const char	*modulename = "uvc";
 	bool	night = false;
 	bool	daemonize = true;
 	while (EOF != (c = getopt_long(argc, argv,
-			"adw:x:y:w:h:o:C:c:n:e:E:m:p:t?L:l:NFM:P:Q:",
+			"adw:x:y:w:h:o:C:c:n:e:E:i:m:p:t?L:l:NFM:P:Q:",
 			longopts, &longindex))) {
 		switch (c) {
 		case 'a':
@@ -319,6 +322,9 @@ int	main(int argc, char *argv[]) {
 			break;
 		case 'h':
 			height = atoi(optarg);
+			break;
+		case 'i':
+			minimum = atof(optarg);
 			break;
 		case 'L':
 			longitude = atof(optarg);
@@ -452,6 +458,7 @@ int	main(int argc, char *argv[]) {
 		timer = ExposureTimer(exposure.exposuretime(),
 			targetmedian, ExposureTimer::MEDIAN);
 	}
+	timer.minimum(minimum);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "exposure time: %.3f",
 		exposure.exposuretime());
 
