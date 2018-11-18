@@ -32,6 +32,7 @@ static void	usage(const std::string& progname) {
 	std::cout << p << " [ options ] [ <server> ] help" << std::endl;
 	std::cout << p << " [ options ] <server> list" << std::endl;
 	std::cout << p << " [ options ] <server> location MOUNT" << std::endl;
+	std::cout << p << " [ options ] <server> altaz MOUNT" << std::endl;
 	std::cout << p << " [ options ] <server> get MOUNT" << std::endl;
 	std::cout << p << " [ options ] <server> set MOUNT RA DEC" << std::endl;
 	std::cout << p << " [ options ] <server> cancel MOUNT" << std::endl;
@@ -114,7 +115,7 @@ int	command_get(MountPrx mount) {
 	RaDec	radec = mount->getRaDec();
 	astro::Angle	ra;	ra.hours(radec.ra);
 	astro::Angle	dec;	dec.degrees(radec.dec);
-	if (decimal) {
+	if (!decimal) {
 		std::cout << ra.hms(':', 1) << " " << dec.dms(':', 0) << " ";
 	} else {
 		std::cout << ra.hours() << " " << dec.degrees() << " ";
@@ -131,10 +132,26 @@ int	command_location(MountPrx mount) {
 	astro::LongLat	location = convert(mount->getLocation());
 	astro::Angle	longitude = location.longitude();
 	astro::Angle	latitude = location.latitude();
-	if (decimal) {
+	if (!decimal) {
 		std::cout << longitude.dms(':', 0) << " " << latitude.dms(':', 0) << " ";
 	} else {
 		std::cout << longitude.degrees() << " " << latitude.degrees() << " ";
+	}
+	std::cout << std::endl;
+	return EXIT_SUCCESS;
+}
+
+/**
+ * \brief Get command implementation
+ */
+int	command_altaz(MountPrx mount) {
+	astro::AzmAlt	azmalt = convert(mount->getAzmAlt());
+	astro::Angle	azm = azmalt.azm();
+	astro::Angle	alt = azmalt.alt();
+	if (!decimal) {
+		std::cout << azm.hms(':', 0) << " " << alt.dms(':', 0) << " ";
+	} else {
+		std::cout << azm.hours() << " " << alt.degrees() << " ";
 	}
 	std::cout << std::endl;
 	return EXIT_SUCCESS;
@@ -248,6 +265,9 @@ int	main(int argc, char *argv[]) {
 	}
 	if (command == "location") {
 		return command_location(mount);
+	}
+	if (command == "altaz") {
+		return command_altaz(mount);
 	}
 	if (command == "cancel") {
 		return command_cancel(mount);
