@@ -63,6 +63,9 @@ void	QsiCcd::startExposure(const Exposure& exposure) {
 	// if it is still around. The thread will set the state to exposed.
 	if (_thread) {
 		if (_thread->joinable()) {
+			// if the thread is still running, then we must 
+			// unlock because the thread would otherwise not
+			// be able to continue
 			lock.unlock();
 			_thread->join();
 			lock.lock();

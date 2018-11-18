@@ -116,6 +116,7 @@ typedef std::shared_ptr<FocusElement>	FocusElementPtr;
 /**
  * \brief A queue used to forward focus elements between threads
  */
+#if 0
 class FocusElementQueue : std::queue<FocusElementPtr> {
 	std::mutex	_mutex;
 	std::condition_variable	_condition;
@@ -127,6 +128,12 @@ public:
 	void	terminate();
 	FocusElementPtr	get();
 };
+#else
+class FocusElementQueue : public thread::SyncQueue<FocusElementPtr> {
+public:
+	virtual FocusElementPtr	get();
+};
+#endif
 typedef std::shared_ptr<FocusElementQueue>	FocusElementQueuePtr;
 
 /**

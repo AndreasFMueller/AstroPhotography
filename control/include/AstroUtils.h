@@ -10,6 +10,7 @@
 #include <vector>
 #include <set>
 #include <list>
+#include <queue>
 #include <map>
 #include <AstroDebug.h>
 #include <mutex>
@@ -590,6 +591,52 @@ public:
 	}
 	operator	T() const {
 		return _value;
+	}
+};
+
+/**
+ * \brief Queue with synchronization
+ *
+ * This queue only works for types T that have a default constructor
+ */
+template <typename T>
+class SyncQueue : std::queue<T> {
+	std::mutex	_mutex;
+	std::condition_variable	_condition;
+	bool	_terminated;
+public:
+	bool	terminated() const { return _terminated; }
+
+	SyncQueue() : _terminated(false) { }
+
+	void	put(T element) {
+		std::unique_lock<std::mutex>	lock(_mutex);
+		if (_terminated) {
+			throw std::runtime_error("queue already terminated");
+		}
+		std::queue<T>::push(element);
+		_condition.notify_all();
+	}
+
+	void	terminate() {
+		std::unique_lock<std::mutex>	lock(_mutex);
+		_terminated = true;
+		_condition.notify_all();
+	}
+
+	virtual T	get() {
+		std::unique_lock<std::mutex>	lock(_mutex);
+		while (1) {
+			if (!std::queue<T>::empty()) {
+				T	element = std::queue<T>::front();
+				std::queue<T>::pop();
+				return element;
+			}
+			if (_terminated) {
+				throw std::range_error("queue empty");
+			}
+			_condition.wait(lock);
+		}
 	}
 };
 
