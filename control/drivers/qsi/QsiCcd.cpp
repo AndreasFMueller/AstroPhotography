@@ -122,7 +122,7 @@ void	QsiCcd::startExposure(const Exposure& exposure) {
 		_camera.camera().StartExposure(Ccd::exposure.exposuretime(),
 			light);
 		END_STOPWATCH("StartExposure()()");
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "%fsec %s exposure started",
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "%.2fsec %s exposure started",
 			Ccd::exposure.exposuretime(),
 			(light) ? "light" : "dark");
 	} catch (const std::exception& x) {
