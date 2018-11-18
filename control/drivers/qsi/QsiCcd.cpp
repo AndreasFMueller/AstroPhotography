@@ -62,7 +62,9 @@ void	QsiCcd::startExposure(const Exposure& exposure) {
 	// before starting a new exposure, we should clean up the thread
 	// if it is still around. The thread will set the state to exposed.
 	if (_thread) {
-		_thread->join();
+		if (_thread->joinable()) {
+			_thread->join();
+		}
 		delete _thread;
 		_thread = NULL;
 	}
