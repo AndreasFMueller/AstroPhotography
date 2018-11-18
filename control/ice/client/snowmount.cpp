@@ -31,6 +31,7 @@ static void	usage(const std::string& progname) {
 	std::cout << std::endl;
 	std::cout << p << " [ options ] [ <server> ] help" << std::endl;
 	std::cout << p << " [ options ] <server> list" << std::endl;
+	std::cout << p << " [ options ] <server> location MOUNT" << std::endl;
 	std::cout << p << " [ options ] <server> get MOUNT" << std::endl;
 	std::cout << p << " [ options ] <server> set MOUNT RA DEC" << std::endl;
 	std::cout << p << " [ options ] <server> cancel MOUNT" << std::endl;
@@ -119,6 +120,22 @@ int	command_get(MountPrx mount) {
 		std::cout << ra.hours() << " " << dec.degrees() << " ";
 	}
 	std::cout << state2string(mount->state());
+	std::cout << std::endl;
+	return EXIT_SUCCESS;
+}
+
+/**
+ * \brief Get command implementation
+ */
+int	command_location(MountPrx mount) {
+	astro::LongLat	location = convert(mount->getLocation());
+	astro::Angle	longitude = location.longitude();
+	astro::Angle	latitude = location.latitude();
+	if (decimal) {
+		std::cout << longitude.dms(':', 0) << " " << latitude.dms(':', 0) << " ";
+	} else {
+		std::cout << longitude.degrees() << " " << latitude.degrees() << " ";
+	}
 	std::cout << std::endl;
 	return EXIT_SUCCESS;
 }
@@ -228,6 +245,9 @@ int	main(int argc, char *argv[]) {
 	// get command
 	if (command == "get") {
 		return command_get(mount);
+	}
+	if (command == "location") {
+		return command_location(mount);
 	}
 	if (command == "cancel") {
 		return command_cancel(mount);
