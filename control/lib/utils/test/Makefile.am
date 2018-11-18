@@ -15,7 +15,7 @@ noinst_PROGRAMS = tests singletest
 
 # single test
 singletest_SOURCES = singletest.cpp 					\
-	AngleTest.cpp
+	SyncQueueTest.cpp
 singletest_LDADD = $(test_ldadd)
 singletest_DEPENDENCIES = $(test_dependencies)
 
@@ -24,12 +24,14 @@ single:	singletest
 
 ## general tests
 tests_SOURCES = tests.cpp 						\
+	AngleTest.cpp							\
 	ConcatenatorTest.cpp 						\
 	JulianDateTest.cpp						\
 	MedianTest.cpp							\
 	PathTest.cpp 							\
 	SplitterTest.cpp						\
 	StacktraceTest.cpp 						\
+	SyncQueueTest.cpp						\
 	TrimTest.cpp
 
 tests_LDADD = $(test_ldadd)
