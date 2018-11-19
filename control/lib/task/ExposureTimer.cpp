@@ -21,10 +21,10 @@ void	ExposureTimer::update(ImagePtr image) {
 		actualvalue = _targetvalue;
 		break;
 	case MEAN:
-		actualvalue = mean(image);
+		actualvalue = mean_luminance(image);
 		break;
 	case MEDIAN:
-		actualvalue = median(image);
+		actualvalue = median_luminance(image);
 		break;
 	}
 	double	x = _targetvalue / actualvalue;

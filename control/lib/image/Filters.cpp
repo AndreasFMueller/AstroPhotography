@@ -204,6 +204,16 @@ double	mean_luminance(const ImagePtr image) {
 	return mean(image);
 }
 
+double	median_luminance(const ImagePtr image) {
+	filter_luminance_rgb(image, Median, unsigned char);
+	filter_luminance_rgb(image, Median, unsigned short);
+	filter_luminance_rgb(image, Median, unsigned int);
+	filter_luminance_rgb(image, Median, unsigned long);
+	filter_luminance_rgb(image, Median, float);
+	filter_luminance_rgb(image, Median, double);
+	return mean(image);
+}
+
 #define	filter_MaxRGB_rgb(image, pixel) 				\
 {									\
 	Image<RGB<pixel> >	*imagep					\

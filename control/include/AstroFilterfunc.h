@@ -33,6 +33,7 @@ extern double	meanrel(const ImagePtr image);
 extern RGB<double>	mean_color(ImagePtr image);
 
 extern double	median(const ImagePtr image);
+extern double	median_luminance(const ImagePtr image);
 
 extern int	bytespervalue(const ImagePtr image);
 extern int	bytesperpixel(const ImagePtr image);
