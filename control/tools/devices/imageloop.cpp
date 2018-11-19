@@ -40,13 +40,10 @@ static void	usage(const char *progname) {
 	Path	p(progname);
 	std::cout << "usage: " << std::endl;
 	std::cout << "    " << std::endl;
-	std::cout << p.basename() << " [ options ]" << std::endl;
+	std::cout << p.basename() << " [ options ] ccdurl" << std::endl;
 	std::cout << std::endl;
 	std::cout << "options:" << std::endl;
 	std::cout << "  -d,--debug                 increase deug level" << std::endl;
-	std::cout << "  -m,--module=<module>       load camera module" << std::endl;
-	std::cout << "  -C,--camera=<cameraid>     which camera to use, default 0" << std::endl;
-	std::cout << "  -c,--ccd=<ccdid>           which ccd to use, default 0" << std::endl;
 	std::cout << "  -n,--number=<nimages>      number of images to retrieve, 0 means never stop" << std::endl;
 	std::cout << "  -p,--period=<period>       image period" << std::endl;
 	std::cout << "  -w,--width=<width>         width of image rectangle" << std::endl;
@@ -66,7 +63,7 @@ static void	usage(const char *progname) {
 	std::cout << "  -t,--timestamp             use timestamps as filenames" << std::endl;
 	std::cout << "  -e,--exposure=<time>       (initial) exposure time, modified later if target" << std::endl;
 	std::cout << "                             mean set" << std::endl;
-	std::cout << "  -E,--mean=<mean>           attempt to vary the exposure time in such a way" << std::endl;
+	std::cout << "  -m,--mean=<mean>           attempt to vary the exposure time in such a way" << std::endl;
 	std::cout << "                             that the mean pixel value stays close to <mean>" << std::endl;
 	std::cout << "  -M,--median=<median>       attemtp to vary the exposure time in such a way" << std::endl;
 	std::cout << "                             that the median pixel value stays close to the" << std::endl;
@@ -248,17 +245,14 @@ void	loop(CcdPtr ccd, Exposure& exposure, ExposureTimer& timer) {
 
 static struct option	longopts[] = {
 { "align",		no_argument,		NULL,	'a' }, /*  0 */
-{ "ccd",		required_argument,	NULL,	'c' }, /*  1 */
-{ "cameraid",		required_argument,	NULL,	'C' }, /*  2 */
 { "debug",		no_argument,		NULL,	'd' }, /*  3 */
-{ "mean",		required_argument,	NULL,	'E' }, /*  4 */
+{ "mean",		required_argument,	NULL,	'm' }, /*  4 */
 { "exposure",		required_argument,	NULL,	'e' }, /*  5 */
 { "foreground",		no_argument,		NULL,	'F' }, /*  6 */
 { "height",		required_argument,	NULL,	'h' }, /*  7 */
 { "longitude",		required_argument,	NULL,	'L' }, /*  8 */
 { "latitude",		required_argument, 	NULL,	'l' }, /*  9 */
 { "median",		required_argument,	NULL,	'M' }, /* 10 */
-{ "module",		required_argument,	NULL,	'm' }, /* 11 */
 { "night",		no_argument,		NULL,	'N' }, /* 12 */
 { "number",		required_argument,	NULL,	'n' }, /* 13 */
 { "outdir",		required_argument,	NULL,	'o' }, /* 14 */
@@ -286,29 +280,20 @@ int	main(int argc, char *argv[]) {
 	unsigned int	height = 0;
 	int	xoffset = 0;
 	int	yoffset = 0;
-	unsigned int	cameraid = 0;
-	unsigned int	ccdid = 0;
 	double	exposuretime = 0.1;
-	const char	*modulename = "uvc";
 	bool	night = false;
 	bool	daemonize = true;
 	while (EOF != (c = getopt_long(argc, argv,
-			"adw:x:y:w:h:o:C:c:n:e:E:m:p:t?L:l:NFM:P:Q:",
+			"adw:x:y:w:h:o:n:e:E:m:p:t?L:l:NFM:P:Q:",
 			longopts, &longindex))) {
 		switch (c) {
 		case 'a':
 			align = true;
 			break;
-		case 'C':
-			cameraid = atoi(optarg);
-			break;
-		case 'c':
-			ccdid = atoi(optarg);
-			break;
 		case 'd':
 			debuglevel = LOG_DEBUG;
 			break;
-		case 'E':
+		case 'm':
 			targetmean = atof(optarg);
 			break;
 		case 'e':
@@ -328,9 +313,6 @@ int	main(int argc, char *argv[]) {
 			break;
 		case 'M':
 			targetmedian = atof(optarg);
-			break;
-		case 'm':
-			modulename = optarg;
 			break;
 		case 'N':
 			night = true;
@@ -372,6 +354,19 @@ int	main(int argc, char *argv[]) {
 		}
 	}
 
+	// next argument must be the CCD
+	if (optind >= argc) {
+		std::cerr << "missing CCD argument" << std::endl;
+		return EXIT_FAILURE;
+	}
+	std::string	ccdurl(argv[optind++]);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "ccd name: %s", ccdurl.c_str());
+
+	// get the CCD
+	ModuleRepositoryPtr	repository = getModuleRepository();
+	Devices	devices(repository);
+	CcdPtr	ccd = devices.getCcd(ccdurl);
+
 	// if E is set, and the initial exposure time is zero, then
 	// we should change it to something more reasonable
 	if (((0 != targetmean) || (0 != targetmedian)) && (exposuretime == 0)) {
@@ -403,32 +398,6 @@ int	main(int argc, char *argv[]) {
 	format = (timestamped)	? FITSdirectory::BOTH
 				: FITSdirectory::COUNTER;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "format: %d", format);
-
-	// load the module
-	ModuleRepositoryPtr	repository = getModuleRepository();
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "recovering module '%s'", modulename);
-	ModulePtr       module = repository->getModule(modulename);
-	module->open();
-
-        // get the camera list
-	DeviceLocatorPtr        locator = module->getDeviceLocator();
-	std::vector<std::string>        cameras = locator->getDevicelist();
-	if (cameraid >= cameras.size()) {
-		std::string	msg = stringprintf("camera id %d out of range",
-			cameraid);
-		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
-		throw std::range_error(msg);
-	}
-
-	// get the camera
-	std::string	cameraname = cameras[cameraid];
-	CameraPtr	camera = locator->getCamera(cameraname);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "got camera %s", cameraname.c_str());
-
-	// get the ccd
-        CcdPtr  ccd = camera->getCcd(ccdid);
-        debug(LOG_DEBUG, DEBUG_LOG, 0, "got a ccd: %s",
-                ccd->getInfo().toString().c_str());
 
 	// find a fitting image rectangle, initialize the exposure structure
         if (width == 0) {
