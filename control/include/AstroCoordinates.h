@@ -40,6 +40,7 @@ public:
 	Angle	operator+(const Angle& other) const;
 	Angle	operator-(const Angle& other) const;
 	Angle	operator*(const double& other) const;
+	double	operator/(const Angle& other) const;
 	Angle	operator-() const;
 	Angle	reduced(const double base = 0) const;
 static double	hours_to_radians(const double h);
@@ -96,6 +97,7 @@ public:
 	TwoAngles	operator*(double t) const;
 	bool	operator==(const TwoAngles& other) const;
 	bool	operator!=(const TwoAngles& other) const;
+	std::string	toString() const;
 };
 
 class LongLat;

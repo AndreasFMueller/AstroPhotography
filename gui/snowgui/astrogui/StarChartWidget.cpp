@@ -45,6 +45,7 @@ StarChartWidget::StarChartWidget(QWidget *parent) : QWidget(parent),
 	qRegisterMetaType<astro::catalog::Catalog::starsetptr>("astro::catalog::Catalog::starsetptr");
 	qRegisterMetaType<astro::catalog::DeepSkyCatalog::deepskyobjectsetptr>("astro::catalog::DeepSkyCatalog::deepskyobjectsetptr");
 	qRegisterMetaType<astro::Angle>("astro::Angle");
+	qRegisterMetaType<snowgui::ImagerRectangle>("snowgui::ImagerRectangle");
 
 	setMouseTracking(true);
 
@@ -74,6 +75,15 @@ StarChartWidget::StarChartWidget(QWidget *parent) : QWidget(parent),
 	//connect(deepsky_thread, SIGNAL(finished()),
 	//	this, SLOT(workerFinished()));
 	deepsky_thread->start();
+
+	// create the outline catalog
+	try {
+		_outlines = astro::catalog::OutlineCatalogPtr(
+			new astro::catalog::OutlineCatalog());
+	} catch (std::exception& x) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "no outline catalog: %s",
+			x.what());
+	}
 }
 
 /**
@@ -163,7 +173,6 @@ void	StarChartWidget::drawStar(QPainter& painter, const Star& star) {
  */
 // XXX suggested improvements:
 // XXX - background behind the object label to make it more readable
-// XXX - distinguish between Glx, Nebula, globular cluster (at least)
 // XXX - get different half axes and azimuth for objects that are not circular
 void	StarChartWidget::drawDeepSkyObject(QPainter& painter,
 	const DeepSkyObject& deepskyobject) {
@@ -206,33 +215,53 @@ void	StarChartWidget::drawDeepSkyObject(QPainter& painter,
 	//debug(LOG_DEBUG, DEBUG_LOG, 0, "draw deep sky object %s",
 	//	deepskyobject.name.c_str());
 
-	// get the axes
-	double	a = deepskyobject.size.a1().radians() / _resolution.radians();
-	double	b = deepskyobject.size.a2().radians() / _resolution.radians();
-	//debug(LOG_DEBUG, DEBUG_LOG, 0, "axes: %f, %f", a, b);
-	a /= 2;
-	b /= 2;
+	if ((_outlines) && (_outlines->has(deepskyobject.name))) {
+		QPainterPath	outlinepath;
+		Outline	outline = _outlines->find(deepskyobject.name);
+		QPointF	first = convert(*outline.begin());
+		outlinepath.moveTo(first);
+		auto i = outline.begin();
+		i++;
+		while (i != outline.end()) {
+			QPointF	next = convert(*i);
+			outlinepath.lineTo(next);
+			i++;
+		}
+		outlinepath.closeSubpath();
+		painter.drawPath(outlinepath);
+	} else {
+		// get the axes
+		double	a = deepskyobject.size.a1().radians()
+				/ _resolution.radians();
+		double	b = deepskyobject.size.a2().radians()
+				/ _resolution.radians();
+		//debug(LOG_DEBUG, DEBUG_LOG, 0, "axes: %f, %f", a, b);
+		a /= 2;
+		b /= 2;
 
-	// draw an ellipse at the position of the object
-	QPainterPath	ellipse;
-	double	s = sin(deepskyobject.azimuth);
-	double	c = cos(deepskyobject.azimuth);
-	double	phi = 0;
-	double	x = a * c;
-	double	y = -a * s;
-	ellipse.moveTo(p.x() + x, p.y() + y);
-	double	phistep = M_PI / 50;
-	while (phi < 2 * M_PI + phistep/2) {
-		phi += phistep;
-		x = a * cos(phi);
-		y = b * sin(phi);
-		ellipse.lineTo(p.x() + c * x + s * y, p.y() - s * x + c * y);
+		// draw an ellipse at the position of the object
+		QPainterPath	ellipse;
+		double	s = sin(deepskyobject.azimuth);
+		double	c = cos(deepskyobject.azimuth);
+		double	phi = 0;
+		double	x = a * c;
+		double	y = -a * s;
+		ellipse.moveTo(p.x() + x, p.y() + y);
+		double	phistep = M_PI / 50;
+		while (phi < 2 * M_PI + phistep/2) {
+			phi += phistep;
+			x = a * cos(phi);
+			y = b * sin(phi);
+			ellipse.lineTo(p.x() + c * x + s * y,
+				p.y() - s * x + c * y);
+		}
+		painter.drawPath(ellipse);
 	}
-	painter.drawPath(ellipse);
 
 	if (!show_cataloglabels()) {
 		return;
 	}
+
 	// draw the name of the object
 	painter.drawText(p.x() - 40, p.y() - 10, 80, 20,
 		Qt::AlignCenter,
@@ -488,6 +517,17 @@ void	StarChartWidget::draw() {
 			drawStar(painter, *i);
 		}
 	}
+
+	// draw the rectangles
+	if (show_finder_rectangle()) {
+		drawRectangle(painter, _finder_rectangle, _finder_resolution);
+	}
+	if (show_guider_rectangle()) {
+		drawRectangle(painter, _guider_rectangle, _guider_resolution);
+	}
+	if (show_imager_rectangle()) {
+		drawRectangle(painter, _imager_rectangle, _imager_resolution);
+	}
 }
 
 /**
@@ -507,6 +547,10 @@ void	StarChartWidget::startRetrieval() {
 	astro::Angle	rawidth(1.5 * width() * _resolution.radians());
 	astro::Angle	decheight(1.5 * height() * _resolution.radians());
 	SkyWindow	window = SkyWindow::hull(_direction, rawidth, decheight);
+
+	// after the retrieval, the new chart center will be
+	// the current telescope direction
+	_chartcenter = _direction;
 
 	// if no retriever is running, start one
 	if (NULL == _retriever) {
@@ -558,10 +602,10 @@ void	StarChartWidget::directionChanged(astro::RaDec direction) {
 
 	// decide whether the change is big enough to warrant computing
 	// a new catalog
-	double  deltaRa = (_direction.ra() - direction.ra()).radians();
+	double  deltaRa = (_chartcenter.ra() - direction.ra()).radians();
         if (deltaRa > M_PI) { deltaRa -= 2 *M_PI; }
         if (deltaRa < -M_PI) { deltaRa += 2 * M_PI; }
-        double  deltaDec = (_direction.dec() - direction.dec()).radians();
+        double  deltaDec = (_chartcenter.dec() - direction.dec()).radians();
         double  change = hypot(deltaRa, deltaDec);
 
 	if (change < 0.01) {
@@ -784,6 +828,18 @@ void	StarChartWidget::guiderResolution(astro::Angle g) {
 	repaint();
 }
 
+void	StarChartWidget::imagerRectangle(ImagerRectangle r) {
+	_imager_rectangle = r;
+}
+
+void	StarChartWidget::finderRectangle(ImagerRectangle r) {
+	_finder_rectangle = r;
+}
+
+void	StarChartWidget::guiderRectangle(ImagerRectangle r) {
+	_guider_rectangle = r;
+}
+
 void	StarChartWidget::setStarsVisible(bool s) {
 	show_stars(s);
 	repaint();
@@ -816,6 +872,21 @@ void	StarChartWidget::setCataloglabelsVisible(bool s) {
 
 void	StarChartWidget::setTooltipsVisible(bool s) {
 	show_tooltips(s);
+	repaint();
+}
+
+void	StarChartWidget::setImagerRectangleVisible(bool s) {
+	show_imager_rectangle(s);
+	repaint();
+}
+
+void	StarChartWidget::setFinderRectangleVisible(bool s) {
+	show_finder_rectangle(s);
+	repaint();
+}
+
+void	StarChartWidget::setGuiderRectangleVisible(bool s) {
+	show_guider_rectangle(s);
 	repaint();
 }
 
@@ -854,6 +925,18 @@ void	StarChartWidget::toggleTooltipsVisible() {
 
 void	StarChartWidget::toggleNegative() {
 	setNegative(!negative());
+}
+
+void	StarChartWidget::toggleImagerRectangleVisible() {
+	setImagerRectangleVisible(!show_imager_rectangle());
+}
+
+void	StarChartWidget::toggleFinderRectangleVisible() {
+	setFinderRectangleVisible(!show_finder_rectangle());
+}
+
+void	StarChartWidget::toggleGuiderRectangleVisible() {
+	setGuiderRectangleVisible(!show_guider_rectangle());
 }
 
 void	StarChartWidget::useFinderResolution() {
@@ -971,10 +1054,39 @@ void	StarChartWidget::showContextMenu(const QPoint& point) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "no imager resolution");
 	}
 
-	QAction actionStandardResolution(QString("standard resolution"), this);
+	QAction actionStandardResolution(QString("Standard resolution"), this);
 	contextMenu.addAction(&actionStandardResolution);
 	connect(&actionStandardResolution, SIGNAL(triggered()),
 		this, SLOT(useStandardResolution()));
+
+	contextMenu.addSeparator();
+
+	QAction	actionFinderRectangle(QString("Finder rectangle"), this);
+	if (_finder_resolution > 0) {
+		actionFinderRectangle.setCheckable(true);
+		actionFinderRectangle.setChecked(show_finder_rectangle());
+		contextMenu.addAction(&actionFinderRectangle);
+		connect(&actionFinderRectangle, SIGNAL(triggered()),
+			this, SLOT(toggleFinderRectangleVisible()));
+	}
+
+	QAction	actionGuiderRectangle(QString("Guider rectangle"), this);
+	if (_guider_resolution > 0) {
+		actionGuiderRectangle.setCheckable(true);
+		actionGuiderRectangle.setChecked(show_guider_rectangle());
+		contextMenu.addAction(&actionGuiderRectangle);
+		connect(&actionGuiderRectangle, SIGNAL(triggered()),
+			this, SLOT(toggleGuiderRectangleVisible()));
+	}
+
+	QAction	actionImagerRectangle(QString("Imager rectangle"), this);
+	if (_imager_resolution > 0) {
+		actionImagerRectangle.setCheckable(true);
+		actionImagerRectangle.setChecked(show_imager_rectangle());
+		contextMenu.addAction(&actionImagerRectangle);
+		connect(&actionImagerRectangle, SIGNAL(triggered()),
+			this, SLOT(toggleImagerRectangleVisible()));
+	}
 
 	contextMenu.addSeparator();
 
@@ -983,21 +1095,79 @@ void	StarChartWidget::showContextMenu(const QPoint& point) {
 	connect(&actionLegend, SIGNAL(triggered()),
 		this, SLOT(showLegend()));
 
+	QAction	actionReload(QString("Reload stars"), this);
+	actionReload.setEnabled(_retriever == NULL);
+	contextMenu.addAction(&actionReload);
+	connect(&actionReload, SIGNAL(triggered()),
+		this, SLOT(startRetrieval()));
+
 	contextMenu.exec(mapToGlobal(point));
 }
 
+/**
+ * \brief Show the legend
+ */
 void	StarChartWidget::showLegend() {
 	if (NULL == _legend) {
 		_legend = new StarChartLegend();
-		connect(_legend, SIGNAL(destroyed()),
-			this, SLOT(removeLegend()));
+		connect(_legend,
+			SIGNAL(destroyed()),
+			this,
+			SLOT(removeLegend()));
 		_legend->show();
 	}
 	_legend->raise();
 }
 
+/**
+ * \brief Remove the legend
+ */
 void	StarChartWidget::removeLegend() {
 	_legend = NULL;
+}
+
+/**
+ * \brief Compute a corner of the rectangle
+ */
+QPointF	StarChartWidget::rectanglePoint(const astro::RaDec& p) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "convert %f/%f with resolution %f",
+		p.ra().degrees(), p.dec().degrees(), _resolution.degrees());
+	float	x = p.ra() / _resolution;
+	float	y = p.dec() / _resolution;
+	return QPointF(_center.x() + x, _center.y() + y);
+}
+
+/**
+ * \brief Draw a rectangle outlining the imager
+ */
+void	StarChartWidget::drawRectangle(QPainter& painter,
+		const ImagerRectangle& rectangle,
+		const astro::Angle& resolution) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "drawing rectangle %s",
+		rectangle.toString().c_str());
+	// set line color
+	QPen	pen;
+	QColor	orange(255, 102, 0);
+	pen.setColor(orange);
+	pen.setWidth(1);
+	painter.setPen(pen);
+	// set up the path for drawing
+	QPainterPath	rectpath;
+	float	s = 0.5;
+	QPointF	p1 = rectanglePoint(rectangle.point( s,  s));
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "p1 = %f,%f", p1.x(), p1.x());
+	rectpath.moveTo(p1);
+	QPointF	p2 = rectanglePoint(rectangle.point(-s,  s));
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "p2 = %f,%f", p2.x(), p2.x());
+	rectpath.lineTo(p2);
+	QPointF	p3 = rectanglePoint(rectangle.point(-s, -s));
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "p3 = %f,%f", p3.x(), p3.x());
+	rectpath.lineTo(p3);
+	QPointF	p4 = rectanglePoint(rectangle.point( s, -s));
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "p4 = %f,%f", p4.x(), p4.x());
+	rectpath.lineTo(p4);
+	rectpath.closeSubpath();
+	painter.drawPath(rectpath);
 }
 
 } // namespace snowgui

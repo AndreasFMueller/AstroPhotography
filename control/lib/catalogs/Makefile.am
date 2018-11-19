@@ -25,6 +25,7 @@ noinst_HEADERS =							\
 	Hipparcos.h							\
 	MappedFile.h							\
 	NGCIC.h								\
+	Stellarium.h							\
 	Tycho2.h							\
 	Ucac4.h
 
@@ -68,11 +69,14 @@ libastrocatalogs_la_SOURCES =						\
 	MessierCatalog.cpp						\
 	NGCIC.cpp							\
 	NGCICCatalog.cpp						\
+	Outline.cpp							\
+	OutlineCatalog.cpp						\
 	PointSpreadFunctionAdapter.cpp					\
 	PointSpreadFunction.cpp						\
 	SkyRectangle.cpp						\
 	SkyWindow.cpp							\
 	Star.cpp							\
+	Stellarium.cpp							\
 	StereographicChart.cpp						\
 	Tycho2.cpp							\
 	Tycho2Star.cpp							\

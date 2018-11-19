@@ -73,7 +73,8 @@ calibrationcalculatordialog::calibrationcalculatordialog(
 	_cal.det = 1;
 	_cal.complete = true;
 	_cal.focallength = _focallength;
-	_cal.masPerPixel = (_pixelsize / _focallength) * (180 * 3600 * 1000 / M_PI);;
+	_cal.masPerPixel = (_pixelsize / _focallength)
+			* (180 * 3600 * 1000 / M_PI);;
 	_cal.guiderate = _guiderate;
 	_cal.interval = 0;
 	_cal.type = type;
@@ -130,8 +131,8 @@ void	calibrationcalculatordialog::updateCalibration() {
 	double	a = _angle * M_PI / 180;
 	int	decsign = (_decinvert) ? -1 : 1;
 	int	westsign = (_telescopewest) ? 1 : -1;
-	_cal.coefficients[1] = -decsign * westsign * pixelspeed * sin(a);
-	_cal.coefficients[4] =  decsign * westsign * pixelspeed * cos(a);
+	_cal.coefficients[1] = -decsign * pixelspeed * sin(a);
+	_cal.coefficients[4] =  decsign * pixelspeed * cos(a);
 	pixelspeed = 2 * pixelspeed * cos(_declination * M_PI / 180);
 	_cal.coefficients[0] = pixelspeed * westsign * cos(a);
 	_cal.coefficients[3] = pixelspeed * westsign * sin(a);

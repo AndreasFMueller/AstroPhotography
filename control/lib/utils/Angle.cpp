@@ -115,6 +115,10 @@ Angle	Angle::operator*(const double& other) const {
 	return Angle(_angle * other);
 }
 
+double	Angle::operator/(const Angle& other) const {
+	return _angle / other._angle;
+}
+
 bool	Angle::operator<(const Angle& other) const {
 	return _angle < other._angle;
 }

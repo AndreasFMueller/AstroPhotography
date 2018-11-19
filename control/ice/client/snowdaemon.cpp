@@ -63,7 +63,7 @@ int	command_sync(DaemonPrx daemon) {
 	try {
 		time_t	now;
 		time(&now);
-		daemon->setSystemTime(daemon);
+		daemon->setSystemTime(now);
 		return EXIT_SUCCESS;
 	} catch (const std::exception& x) {
 		std::cerr << "cannot set system time: ";

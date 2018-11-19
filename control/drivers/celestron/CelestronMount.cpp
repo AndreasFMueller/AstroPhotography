@@ -16,7 +16,7 @@ namespace astro {
 namespace device {
 namespace celestron {
 
-const unsigned int	query_interval = 60;
+const unsigned int	query_interval = 600;
 
 /**
  * \brief Get the serial name from the properties

@@ -8,6 +8,7 @@
 namespace astro {
 namespace focusing {
 
+#if 0
 /**
  * \brief Create a new focus element queue
  */
@@ -66,6 +67,16 @@ FocusElementPtr	FocusElementQueue::get() {
 		_condition.wait(lock);
 	}
 }
+#else
+
+FocusElementPtr	FocusElementQueue::get() {
+	try {
+		return thread::SyncQueue<FocusElementPtr>::get();
+	} catch (std::range_error& x) {
+		return FocusElementPtr();
+	}
+}
+#endif
 
 } // namespace focusing
 } // namespace astro

@@ -38,6 +38,7 @@ ccdcontrollerwidget::ccdcontrollerwidget(QWidget *parent) :
 	qRegisterMetaType<astro::image::ImagePtr>("astro::image::ImagePtr");
 	qRegisterMetaType<snowstar::ImagePrx>("snowstar::ImagePrx");
 	qRegisterMetaType<snowstar::ExposureState>("snowstar::ExposureState");
+	qRegisterMetaType<snowgui::ImagerRectangle>("snowgui::ImagerRectangle");
 
 	// install all internal connections
 	ui->ccdSelectionBox->blockSignals(true);
@@ -196,6 +197,7 @@ void	ccdcontrollerwidget::instrumentSetup(
 					_current_ccddata = d;
 				}
 				emit imagerResolution(d.resolution());
+				emit imagerRectangle(d.imagerrectangle());
 			} catch (const std::exception& x) {
 				debug(LOG_DEBUG, DEBUG_LOG, 0,
 					"ignoring imaging ccd %d", index);
@@ -224,6 +226,7 @@ void	ccdcontrollerwidget::instrumentSetup(
 					_current_ccddata = d;
 				}
 				emit finderResolution(d.resolution());
+				emit finderRectangle(d.imagerrectangle());
 			} catch (const std::exception& x) {
 				debug(LOG_DEBUG, DEBUG_LOG, 0,
 					"ignoring finder ccd %d", index);
@@ -253,6 +256,7 @@ void	ccdcontrollerwidget::instrumentSetup(
 				_current_ccddata = d;
 			}
 			emit guiderResolution(d.resolution());
+			emit guiderRectangle(d.imagerrectangle());
 		} catch (const std::exception& x) {
 			debug(LOG_DEBUG, DEBUG_LOG, 0, "ignoring guider ccd %d",
 				index);

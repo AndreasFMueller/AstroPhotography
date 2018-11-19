@@ -14,6 +14,7 @@
 #include <QTimer>
 #include <HideWidget.h>
 #include <HideProgress.h>
+#include <ImagerRectangle.h>
 
 namespace snowgui {
 
@@ -28,26 +29,27 @@ class ccddata {
 	snowstar::InstrumentComponentType	_type;
 	int	_index;
 	double	_focallength;
-	astro::Angle	_azimut;
+	astro::Angle	_azimuth;
 	std::string	_name;
 	snowstar::CcdInfo	_ccdinfo;
 public:
 	ccddata() : _type(snowstar::InstrumentCCD), _index(-1),
-		    _focallength(0), _azimut(0), _name("") { }
+		    _focallength(0), _azimuth(0), _name("") { }
 	ccddata(snowstar::InstrumentComponentType type, int index,
-		double focallength, const astro::Angle& azimut,
+		double focallength, const astro::Angle& azimuth,
 		const std::string& name)
 		: _type(type), _index(index), _focallength(focallength),
-		  _azimut(azimut), _name(name) { }
+		  _azimuth(azimuth), _name(name) { }
 	snowstar::InstrumentComponentType	type() const { return _type; }
 	int	index() const { return _index; }
 	double	focallength() const { return _focallength; }
-	const astro::Angle&	azimut() const { return _azimut; }
+	const astro::Angle&	azimuth() const { return _azimuth; }
 	const std::string& 	name() const { return _name; }
 	void	ccdinfo(const snowstar::CcdInfo& i) { _ccdinfo = i; }
 	const snowstar::CcdInfo&	ccdinfo() const { return _ccdinfo; }
 	std::string	toString() const;
 	astro::Angle	resolution() const;
+	ImagerRectangle	imagerrectangle() const;
 };
 
 class ccdcontrollerwidget;
@@ -141,6 +143,9 @@ signals:
 	void	finderResolution(astro::Angle);
 	void	guiderResolution(astro::Angle);
 	void	imagerResolution(astro::Angle);
+	void	finderRectangle(snowgui::ImagerRectangle);
+	void	guiderRectangle(snowgui::ImagerRectangle);
+	void	imagerRectangle(snowgui::ImagerRectangle);
 
 private:
 	void	setupCcd();

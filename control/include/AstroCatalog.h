@@ -117,6 +117,7 @@ class DeepSkyObject : public CelestialObject {
 public:
 	DeepSkyObject() { _mag = 0; }
 	virtual ~DeepSkyObject() { }
+	int	number;
 	std::string	name;
 	std::string	constellation;
 	typedef enum { Galaxy, OpenCluster, GlobularCluster, BrightNebula,
@@ -129,6 +130,10 @@ public:
 	TwoAngles	size;
 	Angle		azimuth;
 	std::string	toString() const;
+private:
+	std::list<std::string>	_names;
+public:
+	const std::list<std::string>&	names() const { return _names; }
 };
 
 /**
@@ -273,6 +278,33 @@ public:
 	DeepSkyCatalogFactory();
 	DeepSkyCatalogPtr	get(deepskycatalog_t ct);
 };
+
+/*
+ * \brief Outline of a DeepSkyObject
+ */
+class Outline : public std::list<astro::RaDec> {
+	std::string	_name;
+public:
+	const std::string&	name() const { return _name; }
+	void	name(const std::string& name) { _name = name; }
+	Outline(const std::string& name) : _name(name) { }
+	std::string	toString() const;
+};
+
+/**
+ * \brief Build a catalog of outlines
+ */
+class OutlineCatalog {
+	std::map<std::string, Outline>	_outlinemap;
+	void	parse(const std::string& directory);
+public:
+	OutlineCatalog();
+	OutlineCatalog(const std::string& directory);
+	bool	has(const std::string& name) const;
+	Outline	find(const std::string& name) const;
+};
+
+typedef std::shared_ptr<OutlineCatalog>	OutlineCatalogPtr;
 
 } // namespace catalog
 } // namespace astro

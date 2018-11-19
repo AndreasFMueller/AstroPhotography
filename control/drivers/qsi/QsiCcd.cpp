@@ -52,7 +52,7 @@ static void	start_main(QsiCcd *qsiccd) {
  * \param exposure	exposure parameters
  */
 void	QsiCcd::startExposure(const Exposure& exposure) {
-	std::lock_guard<std::recursive_mutex>	lock(_camera.mutex);
+	std::unique_lock<std::recursive_mutex>	lock(_camera.mutex);
 
 	// set the state to exposure, this also ensures we actually
 	// are in a state where we could start a new exposure. The
@@ -62,7 +62,14 @@ void	QsiCcd::startExposure(const Exposure& exposure) {
 	// before starting a new exposure, we should clean up the thread
 	// if it is still around. The thread will set the state to exposed.
 	if (_thread) {
-		_thread->join();
+		if (_thread->joinable()) {
+			// if the thread is still running, then we must 
+			// unlock because the thread would otherwise not
+			// be able to continue
+			lock.unlock();
+			_thread->join();
+			lock.lock();
+		}
 		delete _thread;
 		_thread = NULL;
 	}
@@ -120,7 +127,7 @@ void	QsiCcd::startExposure(const Exposure& exposure) {
 		_camera.camera().StartExposure(Ccd::exposure.exposuretime(),
 			light);
 		END_STOPWATCH("StartExposure()()");
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "%fsec %s exposure started",
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "%.2fsec %s exposure started",
 			Ccd::exposure.exposuretime(),
 			(light) ? "light" : "dark");
 	} catch (const std::exception& x) {

@@ -183,7 +183,8 @@ public:
  * cancel is recognized.
  */
 void	ExposureWork::run() {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "start ExposureWork");
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "start ExposureWork on task %d",
+		_task.id());
 	// work with the instrument
 	std::string	instrument = _task.instrument();
 
@@ -241,32 +242,45 @@ void	ExposureWork::run() {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "no filter");
 	}
 
-	// record the current task id
-	gateway::Gateway::update(instrument, (int)_task.id());	// currenttaskid
-	gateway::Gateway::update(instrument, _task.exposure());	// exosuretime
-	gateway::Gateway::update(instrument, filterwheel);	// filter
-	gateway::Gateway::update(instrument, cooler);		// ccdtemperature
-	gateway::Gateway::update(instrument, mount);		// position
-	gateway::Gateway::update(instrument, focuser);		// focus
-	gateway::Gateway::updateImageStart(instrument);		// lastimagestart
-	gateway::Gateway::update(instrument, _task.project());	// project
-
 	// start exposure
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "start exposure: time=%f",
 		_task.exposure().exposuretime());
 	ccd->startExposure(_task.exposure());
 
+	// record the current task information. This may take some time,
+	// so we keep the time so that we can later correct the wait time
+	// for exposure completion
+	Timer	gatewaytime;
+	gatewaytime.start();
+	gateway::Gateway::update(instrument, (int)_task.id());	// currenttaskid
+	gateway::Gateway::updateImageStart(instrument);		// lastimagestart
+	gateway::Gateway::update(instrument, _task.project());	// project
+	gateway::Gateway::update(instrument, _task.exposure());	// exosuretime
+	gateway::Gateway::update(instrument, filterwheel);	// filter
+	gateway::Gateway::update(instrument, cooler);		// ccdtemperature
+	gateway::Gateway::update(instrument, mount);		// position
+	gateway::Gateway::update(instrument, focuser);		// focus
+
 	gateway::Gateway::send(instrument);
+	gatewaytime.end();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "gateway time took %.3f seconds",
+		gatewaytime.elapsed());
+
+	// cmopute the remaining time to wait
+	double	waittime = _task.exposure().exposuretime()
+			- gatewaytime.elapsed();
+	if (waittime < 0) {
+		waittime = 0.001;
+	}
 
 	// wait for completion of exposure
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "waiting for %.3f seconds",
-		_task.exposure().exposuretime());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "waiting for %.3f seconds", waittime);
 	CcdCondition	ccdcondition(ccd, camera::CcdState::exposed);
 
 	// if waiting is cancelled, then we have to cancel the exposure
 	// also
 	try {
-		if (!wait(_task.exposure().exposuretime() + 30, ccdcondition)) {
+		if (!wait(waittime + 30, ccdcondition)) {
 			debug(LOG_DEBUG, DEBUG_LOG, 0,
 				"waiting for image failed");
 			throw std::runtime_error("failed waiting for image");
@@ -372,6 +386,8 @@ void	ExposureWork::run() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "image %s written",
 		_task.filename().c_str());
 	_task.state(TaskQueueEntry::complete);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "finish ExposureWork for task %d",
+		_task.id());
 }
 
 /**
@@ -384,6 +400,7 @@ ExposureWork::~ExposureWork() {
 	// turn of the cooler
 	// XXX we should make this configurable, but for the time being
 	// XXX we disable it, the cooler can still be turned off manually
+#if 0
 	if (cooler) {
 		try {
 			cooler->setOn(false);
@@ -392,6 +409,7 @@ ExposureWork::~ExposureWork() {
 				"cannot turn off the cooler, giving up");
 		}
 	}
+#endif
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "ExposureWork destroyed");
 }
 
