@@ -111,6 +111,7 @@ Ccd::Ccd(const CcdInfo& _info)
  * \brief Get the state
  */
 CcdState::State	Ccd::state() {
+#if 0
 	if (ccd_lck_debug)
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "LCK state query state()");
 	std::unique_lock<std::recursive_mutex>	lock(_mutex);
@@ -118,6 +119,7 @@ CcdState::State	Ccd::state() {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "--> LCK acquired state()");
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "<-- LCK released state()");
 	}
+#endif
 	return _state;
 }
 

@@ -194,10 +194,23 @@ void	AsiCcd::cancelExposure() {
  */
 void	AsiCcd::run() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "start thread");
+	double	starttime = Timer::gettime();
+	double	step = 10;
 	do {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "tick %d", exposureStatus());
-		Timer::sleep(0.1);
+		double	remaining = exposure.exposuretime()
+					- (Timer::gettime() - starttime);
+		if ((remaining > 0) && (remaining < 10)) {
+			step = remaining - 0.1;
+		}
+		if (step < 0) {
+			step = 0.1;
+		}
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "state %s, sleep for %.3fsec",
+			CcdState::state2string(exposureStatus()).c_str(),
+			step);
+		Timer::sleep(step);
 	} while (CcdState::exposing == exposureStatus());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "no longer exposing");
 	std::lock_guard<std::recursive_mutex>	lock(_mutex);
 	_exposure_done = true;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "exposing finished");

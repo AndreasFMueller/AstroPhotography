@@ -43,6 +43,7 @@ static void	usage(const char *progname) {
 	std::cout << p.basename() << " [ options ] ccdurl" << std::endl;
 	std::cout << std::endl;
 	std::cout << "options:" << std::endl;
+	std::cout << "  -a,--align                 align imges with the clock" << std::endl;
 	std::cout << "  -d,--debug                 increase deug level" << std::endl;
 	std::cout << "  -n,--number=<nimages>      number of images to retrieve, 0 means never stop" << std::endl;
 	std::cout << "  -p,--period=<period>       image period" << std::endl;
@@ -362,11 +363,6 @@ int	main(int argc, char *argv[]) {
 	std::string	ccdurl(argv[optind++]);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "ccd name: %s", ccdurl.c_str());
 
-	// get the CCD
-	ModuleRepositoryPtr	repository = getModuleRepository();
-	Devices	devices(repository);
-	CcdPtr	ccd = devices.getCcd(ccdurl);
-
 	// if E is set, and the initial exposure time is zero, then
 	// we should change it to something more reasonable
 	if (((0 != targetmean) || (0 != targetmedian)) && (exposuretime == 0)) {
@@ -393,6 +389,11 @@ int	main(int argc, char *argv[]) {
 		umask(022);
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "child process started");
 	}
+
+	// get the CCD
+	ModuleRepositoryPtr	repository = getModuleRepository();
+	Devices	devices(repository);
+	CcdPtr	ccd = devices.getCcd(ccdurl);
 
 	// what format for the file names is expected?
 	format = (timestamped)	? FITSdirectory::BOTH

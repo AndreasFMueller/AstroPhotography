@@ -54,12 +54,21 @@ filterwheel_LDADD = -L$(top_builddir)/lib -lastro
 
 # full night with the Starlight Express Oculus all sky camera.
 looptest:	imageloop
-	./imageloop -d -p 60 -t -m sx -n 0 -e 0.01 -M 20000 -o cat -a \
-		-L 8.494 -l 46.318 -N -F -w 1040 -x 176 \
-		-P ./convertimage.sh -Q ./makemovie.sh
+	./imageloop --debug --period=60 --timestamp --exposure=0.01 	\
+		--median=20000 --outdir=cat --align --night 		\
+		--foreground --longitude=8.494 --latitude=46.318 	\
+		--width=1040 --x-offset=176 				\
+		--image-callback=./convertimage.sh 			\
+		--loop-callback=./makemovie.sh
+
+asiloop:	imageloop
+	./imageloop --debug --period=60 --timestamp --exposure=59	\
+		--mean=100 --outdir=asi --align --number=0 --foreground	\
+		ccd:asi/0/rgb24 2>&1 | tee test.log
 
 focusingtest:	focusing
 	./focusing -d -w 64 -h 64 -x 350 -y 255 -e 2 2>&1 | tee focusing.log
 
 test:	filterwheel
-	./filterwheel --debug filterwheel:sx/080
+	./filterwheel --debug filterwheel:sx/080 
+
