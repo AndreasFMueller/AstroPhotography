@@ -67,6 +67,12 @@ asiloop:	imageloop
 		--image-callback=./asiconvert.sh			\
 		ccd:asi/0/rgb24 2>&1 | tee test.log
 
+simloop:	imageloop
+	./imageloop --debug --period=10 --timestamp --exposure=1	\
+		--mean=10000 --outdir=sim --align --number=0		\
+		--foreground --image-callback=./simconvert.sh		\
+		ccd:simulator/camera/finder 2>&1 | tee test.log
+
 focusingtest:	focusing
 	./focusing -d -w 64 -h 64 -x 350 -y 255 -e 2 2>&1 | tee focusing.log
 

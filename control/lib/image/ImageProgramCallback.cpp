@@ -31,6 +31,7 @@ public:
  * can also be read from.
  */
 static void	imageprogramcallback(callbackargs *cba) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "thread started");
 	// we create a shared ptr for cba, which will take ownership of the
 	// callback arguments and deallocate them when we exit this function
 	std::shared_ptr<callbackargs>	ptr(cba);
@@ -71,6 +72,8 @@ CallbackDataPtr	ImageProgramCallback::operator()(CallbackDataPtr data) {
 			"argument is not ImageCallbackData");
 		return CallbackDataPtr();
 	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "got callback data");
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "filename: %s", icb->filename().c_str());
 
 	// if we should wait for the completion of the program, we just issue
 	// the system call
@@ -93,7 +96,9 @@ CallbackDataPtr	ImageProgramCallback::operator()(CallbackDataPtr data) {
 
 	// create the thread
 	try {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "launch thread for program");
 		std::thread	thread(imageprogramcallback, cba);
+		thread.detach();
 	} catch (...) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "cannot start program: %s",
 			strerror(errno));
