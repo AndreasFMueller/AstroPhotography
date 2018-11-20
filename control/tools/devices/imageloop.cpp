@@ -281,7 +281,9 @@ int	main(int argc, char *argv[]) {
 	unsigned int	height = 0;
 	int	xoffset = 0;
 	int	yoffset = 0;
-	double	exposuretime = 0.1;
+	double	exposuretime = 0.0;	// start with zero, will later be
+					// replaced by the minimum exposure
+					// time for this camera
 	bool	night = false;
 	bool	daemonize = true;
 	while (EOF != (c = getopt_long(argc, argv,
@@ -394,6 +396,9 @@ int	main(int argc, char *argv[]) {
 	ModuleRepositoryPtr	repository = getModuleRepository();
 	Devices	devices(repository);
 	CcdPtr	ccd = devices.getCcd(ccdurl);
+	if (exposuretime < ccd->getInfo().minexposuretime()) {
+		exposuretime = ccd->getInfo().minexposuretime();
+	}
 
 	// what format for the file names is expected?
 	format = (timestamped)	? FITSdirectory::BOTH
@@ -415,12 +420,15 @@ int	main(int argc, char *argv[]) {
 
 	// depending on the target values, construct a timer
 	ExposureTimer	timer;
+	timer.minimum(ccd->getInfo().minexposuretime());
 	if (targetmean > 0) {
+		// timer based on the mean value
 		timer = ExposureTimer(exposure.exposuretime(),
-			targetmean, ExposureTimer::MEAN);
+				targetmean, ExposureTimer::MEAN);
 	} else if (targetmedian > 0) {
+		// timer that attempts to get images with a given median value
 		timer = ExposureTimer(exposure.exposuretime(),
-			targetmedian, ExposureTimer::MEDIAN);
+				targetmedian, ExposureTimer::MEDIAN);
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "exposure time: %.3f",
 		exposure.exposuretime());

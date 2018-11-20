@@ -36,7 +36,10 @@ typedef enum AsiControlType_ {
 	AsiCoolerPowerSpec,
 	AsiTargetTemp,
 	AsiCoolerOn,
-	AsiMonoBin
+	AsiMonoBin,
+	AsiFanOn,
+	AsiPatternAdjust,
+	AsiAntiDewHeater
 } AsiControlType;
 
 class AsiControlValue {

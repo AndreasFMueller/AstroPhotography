@@ -392,13 +392,16 @@ static ASI_CONTROL_TYPE	type2asitype(AsiControlType type) {
         case AsiTargetTemp:		return ASI_TARGET_TEMP;
         case AsiCoolerOn:		return ASI_COOLER_ON;
         case AsiMonoBin:		return ASI_MONO_BIN;
+	case AsiFanOn:			return ASI_FAN_ON;
+	case AsiPatternAdjust:		return ASI_PATTERN_ADJUST;
+	case AsiAntiDewHeater:		return ASI_ANTI_DEW_HEATER;
 	}
 	std::string	msg = stringprintf("unknown control type %d", type);
 	debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 	throw std::runtime_error(msg);
 }
 
-#if 0
+#if 1
 static AsiControlType	asitype2type(ASI_CONTROL_TYPE asitype) {
 	switch (asitype) {
 	case ASI_GAIN:			return AsiGain;
@@ -420,6 +423,9 @@ static AsiControlType	asitype2type(ASI_CONTROL_TYPE asitype) {
 	case ASI_TARGET_TEMP:		return AsiTargetTemp;
 	case ASI_COOLER_ON:		return AsiCoolerOn;
 	case ASI_MONO_BIN:		return AsiMonoBin;
+	case ASI_FAN_ON:		return AsiFanOn;
+	case ASI_PATTERN_ADJUST:	return AsiPatternAdjust;
+	case ASI_ANTI_DEW_HEATER:	return AsiAntiDewHeater;
 	}
 }
 #endif
