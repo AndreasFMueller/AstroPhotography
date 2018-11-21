@@ -157,7 +157,7 @@ int	main(int argc, char *argv[]) {
 	QSize	size(s, s);
 	QImage	image(size, QImage::Format_ARGB32);
 	QPainter	painter(&image);
-	painter.fillRect(0, 0, s, s, Qt::black);
+	//painter.fillRect(0, 0, s, s, Qt::black);
 	QColor	transparent(0, 0, 0, 0);
 	painter.fillRect(0, 0, s, s, transparent);
 
