@@ -91,13 +91,17 @@ void	Mount::Goto(const AzmAlt& /* azmalt */) {
  * \brief Find out on which side of the mount the telescope currently is
  */
 bool	Mount::telescopePositionWest() {
-	// use the hour angle to decide whether the telescope is on the
-	// east or west
-	AzmAltConverter	azmaltconverter(location());
-	Angle	hourangle = azmaltconverter.hourangle(this->getRaDec());
-	//debug(LOG_DEBUG, DEBUG_LOG, 0, "hour angle: %.4f, orientation=%s",
-	//	hourangle.hours(), (hourangle > 0) ? "east" : "west");
-	return (hourangle <= 0);
+	try {
+		// use the hour angle to decide whether the telescope is on the
+		// east or west
+		AzmAltConverter	azmaltconverter(location());
+		Angle	hourangle = azmaltconverter.hourangle(this->getRaDec());
+		return (hourangle <= 0);
+	} catch (const std::exception& x) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "cannot get telescope "
+			"position: %s", x.what());
+	}
+	return true;
 }
 
 /**

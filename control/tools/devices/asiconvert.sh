@@ -10,8 +10,9 @@ jpegimage=`echo ${fitsimage} | sed -e 's/-.*.fits/.jpeg/'`
 tmpfile=/tmp/t$$.jpeg
 trap "rm -f ${tmpfile}" 0 1 2 3 15
 
-convert -extract 2760x2080+100+0 ${fitsimage} -combine -set colorspace sRGB \
-	${tmpfile}
+convert ${fitsimage} -combine -set colorspace sRGB ${tmpfile}
+
+rm -f ${fitsimage}
 
 convert -size 2760x2080 xc:none -fill ${tmpfile} \
 	-draw "circle 1380,1040 1,1040" \
