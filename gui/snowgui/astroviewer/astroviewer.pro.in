@@ -20,7 +20,7 @@ ASTROLIBDIR = @ASTROLIBDIR@
 
 LIBS += -L../astrogui -lastrogui 
 LIBS += -L../browser -lbrowser 
-LIBS += -L$${ASTROLIBDIR} -Wl,-rpath,$${ASTROLIBDIR} -lastro
+LIBS += -L$${ASTROLIBDIR} -Wl,-rpath,$${ASTROLIBDIR} -lastro
 LIBS += @EXTRA_LIBS@
 
 INCLUDEPATH += /usr/local/include
