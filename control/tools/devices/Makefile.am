@@ -63,7 +63,7 @@ looptest:	imageloop
 
 asiloop:	imageloop
 	./imageloop --debug --period=60 --timestamp --exposure=0.001	\
-		--mean=100 --outdir=asi --align --number=0 --foreground	\
+		--mean=64 --outdir=asi --align --number=0 --foreground	\
 		--image-callback=./asiconvert.sh			\
 		ccd:asi/0/rgb24 2>&1 | tee test.log
 
