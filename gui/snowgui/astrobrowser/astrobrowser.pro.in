@@ -19,7 +19,7 @@ ASTROLIBDIR = @ASTROLIBDIR@
 
 LIBS += -L../browser -lbrowser 
 LIBS += -L../astrogui -lastrogui 
-LIBS += -L$${ASTROLIBDIR} -lastro
+LIBS += -L$${ASTROLIBDIR} -Wl,-rpath,$${ASTROLIBDIR} -lastro
 LIBS += @EXTRA_LIBS@
 LIBS += @EXTRA_LIBS@
 
