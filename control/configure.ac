@@ -588,11 +588,6 @@ AC_CONFIG_FILES([Makefile include/Makefile
 	lib/usb/Makefile lib/usb/test/Makefile
 	lib/unicap/Makefile lib/unicap/test/Makefile
 	lib/test/Makefile
-	ice/Makefile ice/slice/Makefile ice/include/Makefile
-	ice/lib/Makefile ice/lib/common/Makefile ice/lib/client/Makefile
-	ice/lib/conversion/Makefile ice/lib/server/Makefile
-	ice/client/Makefile ice/client/guide/Makefile
-	ice/server/Makefile
 	tools/Makefile tools/config/Makefile tools/mount/Makefile
 	tools/devices/Makefile tools/image/Makefile tools/guiding/Makefile
 	tools/catalog/Makefile tools/process/Makefile tools/process/process.xml
@@ -602,8 +597,13 @@ AC_CONFIG_FILES([Makefile include/Makefile
 	drivers/sx/Makefile drivers/sbig/Makefile drivers/othello/Makefile
 	drivers/uvc/Makefile drivers/unicap/Makefile 
 	drivers/microtouch/Makefile drivers/qsi/Makefile drivers/qhy/Makefile
-	drivers/celestron/Makefile drivers/gpio/Makefile drivers/nice/Makefile
+	drivers/celestron/Makefile drivers/gpio/Makefile
 	drivers/asi/Makefile drivers/atik/Makefile
+	ice/Makefile ice/slice/Makefile ice/include/Makefile
+	ice/lib/Makefile ice/lib/common/Makefile ice/lib/client/Makefile
+	ice/lib/conversion/Makefile ice/lib/server/Makefile
+	ice/client/Makefile ice/client/guide/Makefile
+	ice/server/Makefile ice/nice/Makefile
 	man/Makefile doc/Makefile doc/manual/Makefile
 	scripts/Makefile scripts/startastro
 	test/Makefile])
