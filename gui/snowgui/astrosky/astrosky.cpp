@@ -18,7 +18,7 @@ namespace sky {
 void	usage(char *progname) {
 	astro::Path	path(progname);
 	std::cout << "Usage:" << std::endl;
-	std::cout << "    " << path.basename() << " [ options ]" << std::endl;
+	std::cout << "    " << path.basename() << " [ options ] <filename>" << std::endl;
 	std::cout << "Options:" << std::endl;
 	std::cout << "  -a,--altaz                  toggle display of altitude and azimut" << std::endl;
 	std::cout << "  -c,--constellations         toggle the display of constellations" << std::endl;
@@ -27,11 +27,12 @@ void	usage(char *progname) {
 	std::cout << "  -D,--declination=<dec>      DEC of the telescope marker" << std::endl;
 	std::cout << "  -e,--ecliptic               toggle display of the ecliptic" << std::endl;
 	std::cout << "  -g,--grid                   toggle the RA/DEC grid" << std::endl;
-	std::cout << "  -h,-?,--help                show this help message and exit";
-	std::cout << "  -L,--longitude<long>        longitude of the observatory" << std::endl;
-	std::cout << "  -l,--latitude<lat>          latitude of the observatory" << std::endl;
+	std::cout << "  -h,-?,--help                show this help message and exit" << std::endl;
+	std::cout << "  -L,--longitude=<long>       longitude of the observatory" << std::endl;
+	std::cout << "  -l,--latitude=<lat>         latitude of the observatory" << std::endl;
 	std::cout << "  -R,--rightascension=<ra>    RA of the telescope marker" << std::endl;
 	std::cout << "  -s,--size=<s>               generate a <s>x<s> image, default is 1024" << std::endl;
+	std::cout << "  -t,--time=<t>               time for which to draw the image" << std::endl;
 	std::cout << std::endl;
 }
 
@@ -48,6 +49,7 @@ static struct option	longopts[] = {
 { "longitude",		required_argument,	NULL,		'L' },
 { "latitude",		required_argument,	NULL,		'l' },
 { "size",		required_argument,	NULL,		's' },
+{ "time",		required_argument,	NULL,		't' },
 { NULL,			0,			NULL,		 0  }
 };
 
@@ -59,11 +61,11 @@ int	main(int argc, char *argv[]) {
 	astro::RaDec	telescope;
 	SkyDrawing	skydrawing;
 
-
 	int	c;
 	int	longindex;
 	int	s = 1024;
-	while (EOF != (c = getopt_long(argc, argv, "acdegh?L:l:s:D:R:",
+	time_t	t = 0;
+	while (EOF != (c = getopt_long(argc, argv, "acdegh?L:l:s:D:R:t:",
 		longopts, &longindex)))
 		switch (c) {
 		case 'a':
@@ -117,6 +119,9 @@ int	main(int argc, char *argv[]) {
 		case 's':
 			s = std::stoi(optarg);
 			break;
+		case 't':
+			t = std::stoi(optarg);
+			break;
 		}
 
 	QApplication	*app = NULL;
@@ -133,9 +138,13 @@ int	main(int argc, char *argv[]) {
 
 	// create the drawing object
 	skydrawing.positionChanged(position);
+	if (t) {
+		skydrawing.time(t);
+	}
 
 	// get the star catalog
-	astro::catalog::CatalogPtr catalog = astro::catalog::CatalogFactory::get();
+	astro::catalog::CatalogPtr catalog
+		= astro::catalog::CatalogFactory::get();
 	astro::catalog::SkyWindow       windowall;
 	astro::catalog::MagnitudeRange  magrange(-30, 6);
 	astro::catalog::Catalog::starsetptr     stars
@@ -148,6 +157,7 @@ int	main(int argc, char *argv[]) {
 	QSize	size(s, s);
 	QImage	image(size, QImage::Format_ARGB32);
 	QPainter	painter(&image);
+	painter.fillRect(0, 0, s, s, Qt::black);
 	QColor	transparent(0, 0, 0, 0);
 	painter.fillRect(0, 0, s, s, transparent);
 

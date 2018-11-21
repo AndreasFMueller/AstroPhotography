@@ -32,6 +32,7 @@ private:
 	astro::RaDec	_telescope;
 	astro::RaDec	_target;
 	astro::LongLat	_position;
+	time_t		_time;
 public:
 	explicit	SkyDrawing();
 	virtual ~SkyDrawing();
@@ -55,6 +56,8 @@ public:
 	const astro::RaDec&	target() const { return _target; }
 	void	position(const astro::LongLat& p) { _position = p; }
         const astro::LongLat&	position() const { return _position; }
+	void	time(time_t t) { _time = t; }
+	time_t	time() const { return _time; }
 
 public:
 	virtual void	telescopeChanged(astro::RaDec);

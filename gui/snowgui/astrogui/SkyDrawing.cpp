@@ -25,6 +25,7 @@ SkyDrawing::SkyDrawing() {
 	_show_target = false;
 	_show_labels = true;
 	_converter = NULL;
+	_time = 0;
 }
 
 /**
@@ -320,7 +321,11 @@ void	SkyDrawing::draw(QPainter& painter, QSize& size) {
 		delete _converter;
 	}
 	_converter = new astro::AzmAltConverter(_position);
-	_converter->update(); // updates to the current time
+	if (_time) {
+		_converter->update(_time);
+	} else {
+		_converter->update(); // updates to the current time
+	}
 
 	// set up the parameters of drawing: radius and center
 	_radius = std::min<float>(size.width() / 2., size.height() / 2);
