@@ -40,7 +40,8 @@ void    DaemonI::shutdownServer(Ice::Float delay,
 		const Ice::Current& current) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "server shutdown requested");
 	Restart::shutdown_instead(true);
-	std::thread	*t = new std::thread(do_shutdown, delay, current);
+	std::thread	t(do_shutdown, delay, current);
+	t.detach();
 }
 
 static void	do_shutdownsystem(float delay, const Ice::Current& /* current */) {
@@ -57,7 +58,8 @@ static void	do_shutdownsystem(float delay, const Ice::Current& /* current */) {
  */
 void	DaemonI::shutdownSystem(Ice::Float delay, const Ice::Current& current) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "shutdown request");
-	std::thread	*t = new std::thread(do_shutdownsystem, delay, current);
+	std::thread	t(do_shutdownsystem, delay, current);
+	t.detach();
 }
 
 /**
@@ -67,7 +69,8 @@ void    DaemonI::restartServer(Ice::Float delay,
 		const Ice::Current& current) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "server restart requested");
 	Restart::shutdown_instead(false);
-	std::thread	*t = new std::thread(do_shutdown, delay, current);
+	std::thread	t(do_shutdown, delay, current);
+	t.detach();
 }
 
 /**
