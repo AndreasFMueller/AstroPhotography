@@ -41,23 +41,38 @@ FocusProcess::FocusProcess(const FocusParameters& parameters,
  * \param pos	focuser position to move to
  */
 void	FocusProcess::moveto(unsigned long pos) {
+	long	cur = _focuser->current();
 	// backlash compensation
 	long	bl = _focuser->backlash();
 	if (bl != 0) {
-		long	cur = _focuser->current();
 		if (cur > pos) {
 			long	backpos = pos - bl;
 			_focuser->set(backpos);
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "focus backlash: %ld",
+				backpos);
 			do {
 				Timer::sleep(0.1);
-			} while (_focuser->current() != backpos);
+				long	newpos = _focuser->current();
+				if (newpos != cur) {
+					debug(LOG_WARNING, DEBUG_LOG, 0, "no longer moving?");
+					_focuser->set(backpos);
+				}
+				cur = newpos;
+			} while (cur != backpos);
 		}
 	}
 	// now move to the target position
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "moving to position %ld", pos);
 	_focuser->moveto(pos);
 	do {
 		Timer::sleep(0.1);
-	} while (_focuser->current() != pos);
+		long	newpos = _focuser->current();
+		if (newpos != cur) {
+			_focuser->set(pos);
+		}
+		cur = newpos;
+	} while (cur != pos);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "position %ld reached", pos);
 }
 
 /**
