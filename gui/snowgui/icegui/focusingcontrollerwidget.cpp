@@ -11,6 +11,7 @@
 #include <IceConversions.h>
 #include <CommunicatorSingleton.h>
 #include <CommonClientTasks.h>
+#include <QMessageBox>
 
 namespace snowgui {
 
@@ -204,6 +205,29 @@ void	focusingcontrollerwidget::startClicked() {
 		return;
 	}
 
+	// make sure a small enough rectangle has been selected
+	if ((_rectangle.size().getPixels() == 0)
+		|| (_rectangle.size().getPixels() > 1000000)) {
+		QMessageBox	message(this);
+		message.setText(QString("Warning"));
+		std::ostringstream      out;
+		out << "The window you have selected is rather large, the ";
+		out << "processing of the images may take a very long time. ";
+		out << "Do you really want to submit these tasks?";
+		message.setInformativeText(QString(out.str().c_str()));
+		message.setStandardButtons(QMessageBox::Cancel
+					| QMessageBox::Ok);
+		message.setDefaultButton(QMessageBox::Cancel);
+		int     rc = message.exec();
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "message rc=%d", rc);
+		switch (rc) {
+		case QMessageBox::Cancel:
+			return;
+		case QMessageBox::Ok:
+			break;
+		}
+	}
+
 	switch (_focusing->status()) {
 	case snowstar::FocusIDLE:
 	case snowstar::FocusFOCUSED:
@@ -327,6 +351,11 @@ void    focusingcontrollerwidget::receiveFocusElement(snowstar::FocusElement ele
 
 void	focusingcontrollerwidget::repositoryChanged(const QString& text) {
 	_repository = std::string(text.toLatin1().data());
+}
+
+void	focusingcontrollerwidget::rectangleSelected(
+		astro::image::ImageRectangle r) {
+	_rectangle = r;
 }
 
 } // namespace snowgui

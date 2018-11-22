@@ -217,6 +217,14 @@
          </attribute>
         </widget>
         <widget class="snowgui::filterwheelcontrollerwidget" name="filterwheelcontrollerWidget">
+         <property name="geometry">
+          <rect>
+           <x>0</x>
+           <y>0</y>
+           <width>98</width>
+           <height>28</height>
+          </rect>
+         </property>
          <attribute name="label">
           <string>Filterwheel</string>
          </attribute>
@@ -226,8 +234,8 @@
           <rect>
            <x>0</x>
            <y>0</y>
-           <width>388</width>
-           <height>540</height>
+           <width>98</width>
+           <height>28</height>
           </rect>
          </property>
          <attribute name="label">
@@ -235,6 +243,14 @@
          </attribute>
         </widget>
         <widget class="snowgui::mountcontrollerwidget" name="mountcontrollerWidget">
+         <property name="geometry">
+          <rect>
+           <x>0</x>
+           <y>0</y>
+           <width>98</width>
+           <height>28</height>
+          </rect>
+         </property>
          <attribute name="label">
           <string>Mount</string>
          </attribute>
@@ -284,6 +300,12 @@
    </slots>
   </customwidget>
   <customwidget>
+   <class>snowgui::focusercontrollerwidget</class>
+   <extends>QWidget</extends>
+   <header location="global">focusercontrollerwidget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
    <class>snowgui::taskstatuswidget</class>
    <extends>QWidget</extends>
    <header>taskstatuswidget.h</header>
@@ -305,12 +327,6 @@
    <class>snowgui::taskqueuemanagerwidget</class>
    <extends>QWidget</extends>
    <header>taskqueuemanagerwidget.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>snowgui::focusercontrollerwidget</class>
-   <extends>QWidget</extends>
-   <header location="global">focusercontrollerwidget.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

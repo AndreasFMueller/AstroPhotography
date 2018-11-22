@@ -8,6 +8,7 @@
 
 #include <InstrumentWidget.h>
 #include <AstroImage.h>
+#include <focusing.h>
 
 namespace snowgui {
 
@@ -32,6 +33,7 @@ private:
 public slots:
 	void	receiveImage(astro::image::ImagePtr image);
 	void	rectangleSelected(astro::image::ImageRectangle);
+	void	receiveState(snowstar::FocusState);
 protected:
 	void	closeEvent(QCloseEvent *);
 };

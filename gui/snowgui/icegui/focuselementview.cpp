@@ -9,6 +9,7 @@
 #include <QLabel>
 #include <QPixmap>
 #include <QScrollBar>
+#include <QMenu>
 
 namespace snowgui {
 
@@ -32,6 +33,15 @@ FocusElementView::FocusElementView(QWidget *parent)
 		SIGNAL(valueChanged(int)),
 		this,
 		SLOT(sliderChanged(int)));
+	// custom context menu
+	setContextMenuPolicy(Qt::CustomContextMenu);
+	connect(this,
+		SIGNAL(customContextMenuRequested(const QPoint &)),
+                this,
+		SLOT(showContextMenu(const QPoint &)));
+
+	setShowRawimage(true);
+	setShowEvaluatedimage(true);
 }
 
 FocusElementView::~FocusElementView() {
@@ -80,6 +90,60 @@ void	FocusElementView::sliderChanged(int v) {
 	if(sender() == ui->evaluatedimageArea->verticalScrollBar()) {
 		ui->rawimageArea->verticalScrollBar()->setValue(v);
 	}
+}
+
+void	FocusElementView::show_rawimage(bool r) {
+	_show_rawimage = r;
+	ui->rawimageArea->setHidden(!_show_rawimage);
+}
+
+void	FocusElementView::show_evaluatedimage(bool e) {
+	_show_evaluatedimage = e;
+	ui->evaluatedimageArea->setHidden(!_show_evaluatedimage);
+}
+
+void	FocusElementView::setShowRawimage(bool r) {
+	show_rawimage(r);
+	repaint();
+}
+
+void	FocusElementView::setShowEvaluatedimage(bool e) {
+	show_evaluatedimage(e);
+	repaint();
+}
+
+void	FocusElementView::toggleShowRawimage() {
+	setShowRawimage(!show_rawimage());
+	if ((!show_rawimage()) && (!show_evaluatedimage())) {
+		setShowEvaluatedimage(true);
+	}
+}
+
+void	FocusElementView::toggleShowEvaluatedimage() {
+	setShowEvaluatedimage(!show_evaluatedimage());
+	if ((!show_rawimage()) && (!show_evaluatedimage())) {
+		setShowRawimage(true);
+	}
+}
+
+void	FocusElementView::showContextMenu(const QPoint& point) {
+	QMenu	contextMenu(QString("Display Options"), this);
+
+	QAction	actionRaw(QString("raw image"), this);
+	actionRaw.setCheckable(true);
+	actionRaw.setChecked(show_rawimage());
+	contextMenu.addAction(&actionRaw);
+	connect(&actionRaw, SIGNAL(triggered()),
+		this, SLOT(toggleShowRawimage()));
+
+	QAction	actionEvaluated(QString("evaluated image"), this);
+	actionEvaluated.setCheckable(true);
+	actionEvaluated.setChecked(show_evaluatedimage());
+	contextMenu.addAction(&actionEvaluated);
+	connect(&actionEvaluated, SIGNAL(triggered()),
+		this, SLOT(toggleShowEvaluatedimage()));
+
+	contextMenu.exec(mapToGlobal(point));
 }
 
 } // namespace snowgui

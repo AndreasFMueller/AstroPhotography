@@ -41,10 +41,12 @@ focusingwindow::focusingwindow(QWidget *parent)
 		SIGNAL(focuselementReceived(snowstar::FocusElement)),
 		ui->focusingMonitor,
 		SLOT(receiveFocusElement(snowstar::FocusElement)));
+
 	connect(ui->focusingcontrollerWidget,
 		SIGNAL(pointReceived(snowstar::FocusPoint)),
 		ui->focusingHistory,
 		SLOT(receivePoint(snowstar::FocusPoint)));
+
 	connect(ui->focusingcontrollerWidget,
 		SIGNAL(stateReceived(snowstar::FocusState)),
 		ui->focusingHistory,
@@ -52,6 +54,10 @@ focusingwindow::focusingwindow(QWidget *parent)
 	connect(ui->focusingcontrollerWidget,
 		SIGNAL(stateReceived(snowstar::FocusState)),
 		ui->focusingMonitor,
+		SLOT(receiveState(snowstar::FocusState)));
+	connect(ui->focusingcontrollerWidget,
+		SIGNAL(stateReceived(snowstar::FocusState)),
+		this,
 		SLOT(receiveState(snowstar::FocusState)));
 
 	// selections in the focusing progress
@@ -130,6 +136,9 @@ void	focusingwindow::receiveImage(ImagePtr _image) {
 	if (_image) {
 		sendImage(_image, std::string("focusing"));
 	}
+
+	// make sure the image is visible
+	ui->tabWidget->setCurrentIndex(0);
 }
 
 /**
@@ -149,6 +158,13 @@ void	focusingwindow::rectangleSelected(ImageRectangle rectangle) {
 void	focusingwindow::closeEvent(QCloseEvent * /* event */) {
 	sendImage(ImagePtr(NULL), std::string());
 	deleteLater();
+}
+
+/**
+ * \brief Make the progress indicators visible
+ */
+void    focusingwindow::receiveState(snowstar::FocusState) {
+	ui->tabWidget->setCurrentIndex(1);
 }
 
 } // namespace snowgui

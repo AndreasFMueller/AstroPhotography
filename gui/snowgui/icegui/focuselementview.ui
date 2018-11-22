@@ -14,6 +14,18 @@
    <string>Form</string>
   </property>
   <layout class="QHBoxLayout" name="horizontalLayout">
+   <property name="leftMargin">
+    <number>6</number>
+   </property>
+   <property name="topMargin">
+    <number>6</number>
+   </property>
+   <property name="rightMargin">
+    <number>6</number>
+   </property>
+   <property name="bottomMargin">
+    <number>6</number>
+   </property>
    <item>
     <widget class="QScrollArea" name="rawimageArea">
      <property name="widgetResizable">
@@ -27,8 +39,8 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>181</width>
-        <height>274</height>
+        <width>187</width>
+        <height>286</height>
        </rect>
       </property>
      </widget>
@@ -47,8 +59,8 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>181</width>
-        <height>274</height>
+        <width>187</width>
+        <height>286</height>
        </rect>
       </property>
      </widget>

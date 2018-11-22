@@ -20,17 +20,29 @@ class FocusElementView : public QWidget {
 
 	snowstar::FocusElement	_element;
 
+	bool	_show_rawimage;
+	bool	_show_evaluatedimage;
+
 public:
 	explicit FocusElementView(QWidget *parent = 0);
 	~FocusElementView();
+
+	bool	show_rawimage() const { return _show_rawimage; }
+	void	show_rawimage(bool r);
+	bool	show_evaluatedimage() const { return _show_evaluatedimage; }
+	void	show_evaluatedimage(bool p);
 
 private:
 	Ui::FocusElementView *ui;
 
 public slots:
 	void	setFocusElement(snowstar::FocusElement);
-
 	void	sliderChanged(int);
+	void	showContextMenu(const QPoint& point);
+	void	setShowRawimage(bool);
+	void	setShowEvaluatedimage(bool);
+	void	toggleShowRawimage();
+	void	toggleShowEvaluatedimage();
 };
 
 } // namespace snowgui

@@ -42,6 +42,8 @@ class focusingcontrollerwidget : public InstrumentWidget {
 
 	astro::camera::Exposure		_exposure;
 
+	astro::image::ImageRectangle	_rectangle;
+
 	snowstar::FocusState	_previousstate;
 
 	QTimer	_timer;
@@ -78,7 +80,7 @@ public slots:
 	void	centerChanged(int);
 	void	exposureChanged(astro::camera::Exposure);
 	void	repositoryChanged(const QString& text);
-
+	void	rectangleSelected(astro::image::ImageRectangle);
 	void	receivePoint(snowstar::FocusPoint);
 	void	receiveState(snowstar::FocusState);
 	void	receiveFocusElement(snowstar::FocusElement);
@@ -87,3 +89,4 @@ public slots:
 
 } // namespace snowgui
 #endif // SNOWGUI_FOCUSINGCONTROLLERWIDGET_H
+
