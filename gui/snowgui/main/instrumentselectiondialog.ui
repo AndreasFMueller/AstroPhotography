@@ -13,32 +13,33 @@
   <property name="windowTitle">
    <string>Dialog</string>
   </property>
-  <widget class="QDialogButtonBox" name="buttonBox">
-   <property name="geometry">
-    <rect>
-     <x>290</x>
-     <y>20</y>
-     <width>81</width>
-     <height>241</height>
-    </rect>
+  <layout class="QHBoxLayout" name="horizontalLayout">
+   <property name="leftMargin">
+    <number>6</number>
    </property>
-   <property name="orientation">
-    <enum>Qt::Vertical</enum>
+   <property name="topMargin">
+    <number>6</number>
    </property>
-   <property name="standardButtons">
-    <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+   <property name="rightMargin">
+    <number>6</number>
    </property>
-  </widget>
-  <widget class="QListWidget" name="instrumentListWidget">
-   <property name="geometry">
-    <rect>
-     <x>10</x>
-     <y>10</y>
-     <width>261</width>
-     <height>281</height>
-    </rect>
+   <property name="bottomMargin">
+    <number>6</number>
    </property>
-  </widget>
+   <item>
+    <widget class="QListWidget" name="instrumentListWidget"/>
+   </item>
+   <item>
+    <widget class="QDialogButtonBox" name="buttonBox">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+     <property name="standardButtons">
+      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+     </property>
+    </widget>
+   </item>
+  </layout>
  </widget>
  <resources/>
  <connections>

@@ -197,14 +197,6 @@ void	QsiCcd::run() {
  * \return the current QSI state
  */
 CcdState::State	QsiCcd::exposureStatus() {
-	//debug(LOG_DEBUG, DEBUG_LOG, 0, "checking exopsure status");
-	std::unique_lock<std::recursive_mutex>	lock(_camera.mutex,
-		std::try_to_lock);
-	if (!lock) {
-		//debug(LOG_DEBUG, DEBUG_LOG, 0, "return last state %d",
-		//	(int)_last_state);
-		return _last_state;
-	}
 	// while the exposure thread is running, we don't need to check
 	// the camera status, the update thread will do that for us.
 	if (_thread) {
@@ -213,97 +205,17 @@ CcdState::State	QsiCcd::exposureStatus() {
 			delete _thread;
 			_thread = NULL;
 		}
-		return _last_state = state();
+//		return _last_state = state();
 	}
 
 #if 0
-	// in all other cases, we have to query the camera again
-	try {
-		//debug(LOG_DEBUG, DEBUG_LOG, 0, "checking camera state");
-		// reading the camera state
-		QSICamera::CameraState	qsistate;
-		START_STOPWATCH;
-		_camera.camera().get_CameraState(&qsistate);
-		END_STOPWATCH("get_CameraState()");
-		//debug(LOG_DEBUG, DEBUG_LOG, 0, "qsistate = %s",
-		//	state2string(qsistate).c_str());
-
-		// compute the new state depending on the QSI state
-		switch (state()) {
-		case CcdState::idle:
-			switch (qsistate) {
-			case QSICamera::CameraIdle:
-				break;
-			case QSICamera::CameraWaiting:
-			case QSICamera::CameraExposing:
-				state(CcdState::exposing);
-				break;
-			case QSICamera::CameraReading:
-			case QSICamera::CameraDownload:
-				debug(LOG_DEBUG, DEBUG_LOG, 0, "turn LED on");
-				_camera.camera().put_LEDEnabled(true);
-				state(CcdState::exposed);
-				break;
-			case QSICamera::CameraError:
-				break;
-			}
-			break;
-		case CcdState::exposing:
-			switch (qsistate) {
-			case QSICamera::CameraIdle:
-			case QSICamera::CameraWaiting:
-				state(CcdState::exposed);
-				break;
-			case QSICamera::CameraExposing:
-				state(CcdState::exposing);
-				break;
-			case QSICamera::CameraReading:
-			case QSICamera::CameraDownload:
-				debug(LOG_DEBUG, DEBUG_LOG, 0, "turn LED on");
-				_camera.camera().put_LEDEnabled(true);
-				state(CcdState::exposed);
-				break;
-			case QSICamera::CameraError:
-				break;
-			}
-			break;
-		case CcdState::exposed:
-			switch (qsistate) {
-			case QSICamera::CameraIdle:
-			case QSICamera::CameraWaiting:
-			case QSICamera::CameraExposing:
-			case QSICamera::CameraReading:
-			case QSICamera::CameraDownload:
-			case QSICamera::CameraError:
-				break;
-			}
-			break;
-		case CcdState::cancelling:
-			switch (qsistate) {
-			case QSICamera::CameraIdle:
-				state(CcdState::idle);
-				break;
-			case QSICamera::CameraWaiting:
-				break;
-			case QSICamera::CameraExposing:
-			case QSICamera::CameraReading:
-			case QSICamera::CameraDownload:
-				state(CcdState::exposing);
-				break;
-			case QSICamera::CameraError:
-				break;
-			}
-			break;
-		case CcdState::streaming:
-			// just ignore this state
-			break;
-		}
-		//debug(LOG_DEBUG, DEBUG_LOG, 0, "new state %s",
-		//	CcdState::state2string(state()).c_str());
-		_last_state = state();
-	} catch (const std::exception& x) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "could not get the state: %s",
-			x.what());
+	//debug(LOG_DEBUG, DEBUG_LOG, 0, "checking exopsure status");
+	std::unique_lock<std::recursive_mutex>	lock(_camera.mutex,
+		std::try_to_lock);
+	if (!lock) {
+		//debug(LOG_DEBUG, DEBUG_LOG, 0, "return last state %d",
+		//	(int)_last_state);
+		return _last_state;
 	}
 #endif
 	return _last_state = state();
