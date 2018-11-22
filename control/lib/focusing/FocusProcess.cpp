@@ -53,7 +53,7 @@ void	FocusProcess::moveto(unsigned long pos) {
 			do {
 				Timer::sleep(0.5);
 				long	newpos = _focuser->current();
-				if (newpos != cur) {
+				if (newpos == cur) {
 					debug(LOG_WARNING, DEBUG_LOG, 0,
 						"no longer moving? cur=%ld, "
 						"newpos=%ld", cur, newpos);
@@ -69,7 +69,7 @@ void	FocusProcess::moveto(unsigned long pos) {
 	do {
 		Timer::sleep(0.5);
 		long	newpos = _focuser->current();
-		if (newpos != cur) {
+		if (newpos == cur) {
 			debug(LOG_WARNING, DEBUG_LOG, 0, "no longer moving? "
 				"cur=%ld, newpos=%ld", cur, newpos);
 			_focuser->set(pos);
