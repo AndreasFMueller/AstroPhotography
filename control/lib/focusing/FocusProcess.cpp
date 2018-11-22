@@ -65,7 +65,7 @@ void	FocusProcess::moveto(unsigned long pos) {
 	}
 	// now move to the target position
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "moving to position %ld", pos);
-	_focuser->moveto(pos);
+	_focuser->set(pos);
 	do {
 		Timer::sleep(0.5);
 		long	newpos = _focuser->current();
