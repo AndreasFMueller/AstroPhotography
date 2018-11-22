@@ -152,6 +152,7 @@ bool	FocusProcessBase::measure0() {
 	status(Focus::MEASURED);
 	reportState();
 	_focus_elements->terminate();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "measure0() process complete");
 	return true;
 
 failed:
@@ -275,6 +276,12 @@ void	FocusProcessBase::measure() {
 		event(EVENT_CLASS, astro::events::CRIT,
 			astro::events::Event::FOCUS,
 			stringprintf("measure thread crashed: %s", x.what()));
+		status(Focus::FAILED);
+	} catch (...) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "unknown exception");
+		event(EVENT_CLASS, astro::events::CRIT,
+			astro::events::Event::FOCUS,
+			stringprintf("measure thread terminated (unkown)"));
 		status(Focus::FAILED);
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "measure thread terminates");

@@ -51,10 +51,12 @@ void	FocusProcess::moveto(unsigned long pos) {
 			debug(LOG_DEBUG, DEBUG_LOG, 0, "focus backlash: %ld",
 				backpos);
 			do {
-				Timer::sleep(0.1);
+				Timer::sleep(0.5);
 				long	newpos = _focuser->current();
 				if (newpos != cur) {
-					debug(LOG_WARNING, DEBUG_LOG, 0, "no longer moving?");
+					debug(LOG_WARNING, DEBUG_LOG, 0,
+						"no longer moving? cur=%ld, "
+						"newpos=%ld", cur, newpos);
 					_focuser->set(backpos);
 				}
 				cur = newpos;
@@ -65,10 +67,11 @@ void	FocusProcess::moveto(unsigned long pos) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "moving to position %ld", pos);
 	_focuser->moveto(pos);
 	do {
-		Timer::sleep(0.1);
+		Timer::sleep(0.5);
 		long	newpos = _focuser->current();
 		if (newpos != cur) {
-			debug(LOG_WARNING, DEBUG_LOG, 0, "no longer moving?");
+			debug(LOG_WARNING, DEBUG_LOG, 0, "no longer moving? "
+				"cur=%ld, newpos=%ld", cur, newpos);
 			_focuser->set(pos);
 		}
 		cur = newpos;
