@@ -68,6 +68,7 @@ void	FocusProcess::moveto(unsigned long pos) {
 		Timer::sleep(0.1);
 		long	newpos = _focuser->current();
 		if (newpos != cur) {
+			debug(LOG_WARNING, DEBUG_LOG, 0, "no longer moving?");
 			_focuser->set(pos);
 		}
 		cur = newpos;
