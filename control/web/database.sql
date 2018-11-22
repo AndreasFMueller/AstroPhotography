@@ -20,6 +20,8 @@ create table statusupdate (
 	filter integer not null default -1,
 	longitude float not null default 0,
 	latitude float not null default 0,
+	project varchar(256) not null default '',
+	focus integer not null default -1,
 	primary key(id)
 );
 
