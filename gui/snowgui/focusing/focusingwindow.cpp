@@ -35,6 +35,10 @@ focusingwindow::focusingwindow(QWidget *parent)
 		SIGNAL(rectangleSelected(astro::image::ImageRectangle)),
 		this,
 		SLOT(rectangleSelected(astro::image::ImageRectangle)));
+	connect(ui->imageWidget,
+		SIGNAL(rectangleSelected(astro::image::ImageRectangle)),
+		ui->focusingcontrollerWidget,
+		SLOT(rectangleSelected(astro::image::ImageRectangle)));
 
 	// send FocusElements to the monitor
 	connect(ui->focusingcontrollerWidget,
@@ -46,10 +50,18 @@ focusingwindow::focusingwindow(QWidget *parent)
 		SIGNAL(pointReceived(snowstar::FocusPoint)),
 		ui->focusingHistory,
 		SLOT(receivePoint(snowstar::FocusPoint)));
+	connect(ui->focusingcontrollerWidget,
+		SIGNAL(pointReceived(snowstar::FocusPoint)),
+		ui->focusgraphWidget,
+		SLOT(receivePoint(snowstar::FocusPoint)));
 
 	connect(ui->focusingcontrollerWidget,
 		SIGNAL(stateReceived(snowstar::FocusState)),
 		ui->focusingHistory,
+		SLOT(receiveState(snowstar::FocusState)));
+	connect(ui->focusingcontrollerWidget,
+		SIGNAL(stateReceived(snowstar::FocusState)),
+		ui->focusgraphWidget,
 		SLOT(receiveState(snowstar::FocusState)));
 	connect(ui->focusingcontrollerWidget,
 		SIGNAL(stateReceived(snowstar::FocusState)),

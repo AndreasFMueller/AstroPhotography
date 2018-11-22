@@ -75,6 +75,7 @@ private:
 public slots:
 	void	statusUpdate();
 	void	startClicked();
+	void	currentClicked();
 	void	stepsChanged(int);
 	void	stepsizeChanged(int);
 	void	centerChanged(int);

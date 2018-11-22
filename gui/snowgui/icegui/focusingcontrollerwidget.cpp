@@ -30,6 +30,8 @@ focusingcontrollerwidget::focusingcontrollerwidget(QWidget *parent) :
 	// set up connections
 	connect(ui->startButton, SIGNAL(clicked()),
 		this, SLOT(startClicked()));
+	connect(ui->currentButton, SIGNAL(clicked()),
+		this, SLOT(currentClicked()));
 	connect(ui->stepsSpinBox, SIGNAL(valueChanged(int)),
 		this, SLOT(stepsChanged(int)));
 	connect(ui->stepsizeSpinBox, SIGNAL(valueChanged(int)),
@@ -206,14 +208,19 @@ void	focusingcontrollerwidget::startClicked() {
 	}
 
 	// make sure a small enough rectangle has been selected
-	if ((_rectangle.size().getPixels() == 0)
-		|| (_rectangle.size().getPixels() > 1000000)) {
+	int	pixels = _rectangle.size().getPixels();
+	if ((pixels == 0) || (pixels > 1000000)) {
 		QMessageBox	message(this);
 		message.setText(QString("Warning"));
 		std::ostringstream      out;
-		out << "The window you have selected is rather large, the ";
-		out << "processing of the images may take a very long time. ";
-		out << "Do you really want to submit these tasks?";
+		out << "The window you have selected is rather large. ";
+		if (pixels > 0) {
+			out << "The selected window has " << pixels;
+			out << " pixels. ";
+		}
+		out << "The processing of the images may take a very long ";
+		out << "time. ";
+		out << "Do you really want to focus with these parameters?";
 		message.setInformativeText(QString(out.str().c_str()));
 		message.setStandardButtons(QMessageBox::Cancel
 					| QMessageBox::Ok);
@@ -321,6 +328,8 @@ void	focusingcontrollerwidget::statusUpdate() {
 		ui->stepsSpinBox->setEnabled(true);
 		ui->stepsizeSpinBox->setEnabled(true);
 		ui->centerSpinBox->setEnabled(true);
+		ui->currentButton->setEnabled(true);
+		ui->repositoryBox->setEnabled(true);
 		ui->startButton->setText(QString("Start"));
 		break;
 	case snowstar::FocusMOVING:
@@ -331,6 +340,8 @@ void	focusingcontrollerwidget::statusUpdate() {
 		ui->stepsSpinBox->setEnabled(false);
 		ui->stepsizeSpinBox->setEnabled(false);
 		ui->centerSpinBox->setEnabled(false);
+		ui->currentButton->setEnabled(false);
+		ui->repositoryBox->setEnabled(false);
 		ui->startButton->setText(QString("Stop"));
 		break;
 	}
@@ -356,6 +367,16 @@ void	focusingcontrollerwidget::repositoryChanged(const QString& text) {
 void	focusingcontrollerwidget::rectangleSelected(
 		astro::image::ImageRectangle r) {
 	_rectangle = r;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "rectangle selected: %s",
+		_rectangle.toString().c_str());
+}
+
+void	focusingcontrollerwidget::currentClicked() {
+	if (!_focuser) {
+		return;
+	}
+	_center = _focuser->current();
+	ui->centerSpinBox->setValue(_center);
 }
 
 } // namespace snowgui

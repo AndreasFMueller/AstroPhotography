@@ -33,11 +33,13 @@ FORMS    +=								\
 	focusingwindow.ui
 
 SOURCES += 								\
+	FocusGraphWidget.cpp						\
 	focusscancontroller.cpp						\
 	focusinghistorywidget.cpp					\
 	focusingwindow.cpp 
 
 HEADERS  += 								\
+	FocusGraphWidget.h						\
 	focusscancontroller.h						\
 	focusinghistorywidget.h						\
 	focusingwindow.h
