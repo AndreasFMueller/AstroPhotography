@@ -85,6 +85,14 @@ void	ProcessorParser::startStack(const attr_t& attrs) {
 			ss->rigid(true);
 		}
 	}
+	if (attrs.end() != (i = attrs.find("rescale"))) {
+		std::string	value = i->second;
+		if ((value == "no") || (value == "false")) {
+			ss->rescale(false);
+		} else {
+			ss->rescale(true);
+		}
+	}
 
 	startCommon(attrs);
 

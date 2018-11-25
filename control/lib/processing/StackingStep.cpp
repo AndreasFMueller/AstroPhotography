@@ -5,7 +5,10 @@
  */
 #include <AstroProcess.h>
 #include <AstroStacking.h>
+#include <AstroImage.h>
 #include <sstream>
+
+using namespace astro::image;
 
 namespace astro {
 namespace process {
@@ -21,6 +24,48 @@ StackingStep::StackingStep(NodePaths& parent) : ImageStep(parent) {
 	_notransform = false;
 	_usetriangles = false;
 	_rigid = false;
+	_rescale = true;	// rescale by default
+}
+
+#define do_rescale(Pixel)						\
+{									\
+	Image<Pixel >	*img = dynamic_cast<Image<Pixel >*>(&*image);	\
+	if (img) {							\
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "%s pixel", 		\
+			demangle(typeid(Pixel).name()).c_str());	\
+		for (int x = 0; x < w; x++) {				\
+			for (int y = 0; y < h; y++) {			\
+				Pixel	p = img->pixel(x, y);		\
+				p = p * s;				\
+				img->writablepixel(x, y) = p;		\
+			}						\
+		}							\
+		return;							\
+	}								\
+}
+
+/**
+ * \brief Rescale an image with the factor given as second argument
+ *
+ * \param image		image to rescale
+ * \param s		scaling factor
+ */
+void	StackingStep::rescale_image(ImagePtr image, double s) {
+	int	w = image->size().width();
+	int	h = image->size().height();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "rescaling %dx%d image", w, h);
+	do_rescale(unsigned char)
+	do_rescale(unsigned short)
+	do_rescale(unsigned int)
+	do_rescale(unsigned long)
+	do_rescale(float)
+	do_rescale(double)
+	do_rescale(RGB<unsigned char>)
+	do_rescale(RGB<unsigned short>)
+	do_rescale(RGB<unsigned int>)
+	do_rescale(RGB<unsigned long>)
+	do_rescale(RGB<float>)
+	do_rescale(RGB<double>)
 }
 
 /**
@@ -83,6 +128,12 @@ ProcessingStep::state	StackingStep::do_work() {
 	_image = stacker->image();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "%s stacked extracted",
 		_image->size().toString().c_str());
+
+	// if rescaling is requested, do it now
+	if (rescale()) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "rescaling the image");
+		rescale_image(_image, 1. / counter);
+	}
 
 	return ProcessingStep::complete;
 }

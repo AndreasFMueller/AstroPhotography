@@ -115,6 +115,7 @@ public:
 	ImagePoint	centerWithinRectangle(const ImageSize& frame) const;
 	// scaling
 	ImageSize	operator*(const double l) const;
+	ImageSize	operator/(const double l) const;
 	// reduction 
 	ImagePoint	operator()(const int x, const int y) const;
 	ImagePoint	operator()(const ImagePoint& p) const;

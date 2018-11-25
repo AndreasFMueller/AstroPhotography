@@ -464,6 +464,26 @@ public:
 };
 
 /**
+ * \brief Some image processing operations
+ */
+class ImageTransformationStep : public ImageStep {
+	bool	_vertical_flip;
+	bool	_horizontal_flip;
+	int	_scale;
+public:
+	bool	vertical_flip() const { return _vertical_flip; }
+	bool	horizontal_flip() const { return _horizontal_flip; }
+	void	vertical_flip(bool v) { _vertical_flip = v; }
+	void	horizontal_flip(bool h) { _horizontal_flip = h; }
+	int	scale() const { return _scale; }
+	void	scale(int s) { _scale = s; }
+	ImageTransformationStep(NodePaths& parent);
+	virtual ProcessingStep::state	do_work();
+	virtual std::string	what() const;
+	virtual std::string	verboseinfo() const;
+};
+
+/**
  * \brief Step that performs the stacking operation
  */
 class StackingStep : public ImageStep {
@@ -475,6 +495,8 @@ class StackingStep : public ImageStep {
 	bool	_notransform;
 	bool	_usetriangles;
 	bool	_rigid;
+	bool	_rescale;
+	void	rescale_image(ImagePtr image, double s);
 public:
 	StackingStep(NodePaths& parent);
 	ProcessingStepPtr	baseimage() const { return _baseimage; }
@@ -493,6 +515,8 @@ public:
 	void	usetriangles(bool u) { _usetriangles = u; }
 	bool	rigid() const { return _rigid; }
 	void	rigid(bool r) { _rigid = r; }
+	bool	rescale() const { return _rescale; }
+	void	rescale(bool r) { _rescale = r; }
 private:
 	virtual ProcessingStep::state	do_work();
 	virtual std::string	what() const;

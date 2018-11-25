@@ -187,6 +187,44 @@ public:
 	}
 };
 
+template<typename Pixel>
+class UpscaleAdapter : public ConstImageAdapter<Pixel> {
+	const ConstImageAdapter<Pixel>&	_image;
+	int	_scale;
+public:
+	UpscaleAdapter(const ConstImageAdapter<Pixel>& image, int scale)
+		: ConstImageAdapter<Pixel>(image.getSize() * scale),
+		  _image(image), _scale(scale) {
+	}
+	virtual Pixel	pixel(int x, int y) const {
+		int	X = x / _scale;
+		int	Y = y / _scale;
+		return _image.pixel(X, Y);
+	}
+};
+
+template<typename Pixel>
+class DownscaleAdapter : public ConstImageAdapter<Pixel> {
+	const ConstImageAdapter<Pixel>&	_image;
+	int	_scale;
+public:
+	DownscaleAdapter(const ConstImageAdapter<Pixel>& image, int scale)
+		: ConstImageAdapter<Pixel>(image.getSize() / scale),
+		  _image(image), _scale(scale) {
+	}
+	virtual Pixel	pixel(int x, int y) const {
+		int	X = _scale * x;
+		int	Y = _scale * y;
+		Pixel	p(0);
+		for (int dx = 0; dx < _scale; dx++) {
+			for (int dy = 0; dy < _scale; dy++) {
+				p = p + _image.pixel(X + dx, Y + dy);
+			}
+		}
+		return p;
+	}
+};
+
 //////////////////////////////////////////////////////////////////////
 //
 //////////////////////////////////////////////////////////////////////

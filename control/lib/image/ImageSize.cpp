@@ -212,6 +212,12 @@ ImageSize	ImageSize::operator*(const double l) const {
 	return ImageSize(x, y);
 }
 
+ImageSize	ImageSize::operator/(const double l) const {
+	unsigned int	x = _width / l;
+	unsigned int	y = _height / l;
+	return ImageSize(x, y);
+}
+
 std::ostream&	operator<<(std::ostream& out, const ImageSize& size) {
 	out << size.width() << "x" << size.height();
 	return out;

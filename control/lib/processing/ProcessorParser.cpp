@@ -79,6 +79,10 @@ void	ProcessorParser::startElement(const std::string& name,
 		startStack(attrs);
 		return;
 	}
+	if (name == std::string("transform")) {
+		startTransform(attrs);
+		return;
+	}
 	if (name == std::string("rescale")) {
 		startRescale(attrs);
 		return;

@@ -45,6 +45,7 @@ class ProcessorParser {
 	void	startCalibrate(const attr_t& attrs);
 	void	startWritefileimage(const attr_t& attrs);
 	void	startStack(const attr_t& attrs);
+	void	startTransform(const attr_t& attrs);
 	void	startColor(const attr_t& attrs);
 	void	startColorclamp(const attr_t& attrs);
 	void	startHDR(const attr_t& attrs);

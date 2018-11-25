@@ -22,6 +22,7 @@ libastroprocessing_la_SOURCES =						\
 	HDRStep.cpp							\
 	ImageCalibrationStep.cpp					\
 	ImageStep.cpp							\
+	ImageTransformationStep.cpp					\
 	LuminanceStretchingStep.cpp					\
 	NodePaths.cpp							\
 	ParseCalibrateStep.cpp						\
@@ -35,6 +36,7 @@ libastroprocessing_la_SOURCES =						\
 	ParseLuminanceStretchingStep.cpp				\
 	ParseRescaleStep.cpp						\
 	ParseStackStep.cpp						\
+	ParseTransformationStep.cpp					\
 	ParseWriteFileimageStep.cpp					\
 	ParserSteps.cpp							\
 	PreviewAdapter.cpp						\
