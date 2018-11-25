@@ -24,7 +24,8 @@ namespace process {
 /**
  * \brief Construct a new Image step
  */
-ImageCalibrationStep::ImageCalibrationStep() {
+ImageCalibrationStep::ImageCalibrationStep(NodePaths& parent)
+	: ImageStep(parent) {
 	_interpolate = false;
 	_demosaic = false;
 	_flip = false;

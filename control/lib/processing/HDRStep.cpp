@@ -11,7 +11,7 @@ namespace process {
 /**
  * \brief Construct a new HDRStep
  */
-HDRStep::HDRStep() {
+HDRStep::HDRStep(NodePaths& parent) : ImageStep(parent) {
 }
 
 ProcessingStep::state	HDRStep::do_work() {

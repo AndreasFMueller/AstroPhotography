@@ -12,6 +12,7 @@
 #include <AstroDebug.h>
 #include <AstroFormat.h>
 #include <typeinfo>
+#include <sstream>
 
 using namespace astro::adapter;
 
@@ -29,6 +30,16 @@ ProcessingStep::ProcessingStep() : _barrier(2) {
 	_status = idle;
 	_when = 0;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "new processing step %d created", _id);
+}
+
+ProcessingStep::ProcessingStep(NodePaths& parent)
+	: NodePaths(parent), _barrier(2) {
+	_id = newid();
+	_status = idle;
+	_when = 0;
+	debug(LOG_DEBUG, DEBUG_LOG, 0,
+		"new processing step %d created from parent %s, %s",
+		_id, parent.info().c_str(), NodePaths::info().c_str());
 }
 
 /**
@@ -508,8 +519,7 @@ void	ProcessingStep::dumpSuccessors(std::ostream& out) const {
 		[&](int sid) {
 			out << "        ";
 			ProcessingStepPtr	s = byid(sid);
-			out << s->name() << "(" << sid << ")";
-			out << demangle(typeid(*s).name());
+			out << s->info();
 			out << std::endl;
 		}
 	);
@@ -520,22 +530,23 @@ void	ProcessingStep::dumpPrecursors(std::ostream& out) const {
 		[&](int sid) {
 			out << "        ";
 			ProcessingStepPtr	s = byid(sid);
-			out << s->name() << "(" << sid << ")";
-			out << demangle(typeid(*s).name());
+			out << s->info();
 			out << std::endl;
 		}
 	);
 }
 
-#if 0
-std::string	ProcessingStep::srcfile(const std::string& file) const {
-	return _srcpath->file(file);
+std::string	ProcessingStep::info() const {
+	return stringprintf("%s(%d) %s", _name.c_str(), _id,
+		demangle(typeid(*this).name()).c_str());
 }
 
-std::string	ProcessingStep::dstfile(const std::string& file) const {
-	return _dstpath->file(file);
+std::string	ProcessingStep::verboseinfo() const {
+	std::ostringstream	out;
+	out << info();
+	out << NodePaths::info();
+	return out.str();
 }
-#endif
 
 } // namespace process
 } // namespace astro

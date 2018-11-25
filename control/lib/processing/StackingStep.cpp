@@ -13,7 +13,7 @@ namespace process {
 /**
  * \brief Create a new stacking step
  */
-StackingStep::StackingStep() {
+StackingStep::StackingStep(NodePaths& parent) : ImageStep(parent) {
 	_patchsize = 256;
 	_residual = 30;
 	_searchradius = 10;

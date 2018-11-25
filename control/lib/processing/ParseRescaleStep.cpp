@@ -12,7 +12,7 @@ namespace process {
 
 void	ProcessorParser::startRescale(const attr_t& attrs) {
 	// create the stacking step
-	RescaleStep	*s = new RescaleStep();
+	RescaleStep	*s = new RescaleStep(nodePaths());
 	ProcessingStepPtr	step(s);
 
 	// remember everyhwere

@@ -16,9 +16,14 @@ namespace calibration {
  * \brief Base class for calibration frame factories
  */
 class CalibrationFrameFactory {
+	ImagePtr	_report;
 protected:
+	virtual void	copyMetadata(astro::image::ImagePtr calframe,
+				astro::image::ImagePtr firstimage) const;
 public:
-astro::image::ImagePtr	operator()(const astro::image::ImageSequence& images) const;
+	ImagePtr	report() const { return _report; }
+	astro::image::ImagePtr	operator()(
+		const astro::image::ImageSequence& images) const;
 };
 
 /**
@@ -28,13 +33,17 @@ astro::image::ImagePtr	operator()(const astro::image::ImageSequence& images) con
  */
 class DarkFrameFactory : public CalibrationFrameFactory {
 	double	_badpixellimit;
+protected:
+	virtual void	copyMetadata(astro::image::ImagePtr calframe,
+				astro::image::ImagePtr firstimage) const;
 public:
 	double	badpixellimit() const { return _badpixellimit; }
 	void	badpixellimit(double b) { _badpixellimit = b; }
 	DarkFrameFactory(double badpixellimit = 3)
 		: _badpixellimit(badpixellimit) {
 	}
-astro::image::ImagePtr	operator()(const astro::image::ImageSequence& images) const;
+	astro::image::ImagePtr	operator()(
+		const astro::image::ImageSequence& images) const;
 };
 
 /**
@@ -43,9 +52,13 @@ astro::image::ImagePtr	operator()(const astro::image::ImageSequence& images) con
  *
  */
 class FlatFrameFactory : public CalibrationFrameFactory {
+protected:
+	virtual void	copyMetadata(astro::image::ImagePtr calframe,
+				astro::image::ImagePtr firstimage) const;
 public:
-astro::image::ImagePtr	operator()(const astro::image::ImageSequence& images,
-	const astro::image::ImagePtr darkimage) const;
+	astro::image::ImagePtr	operator()(
+				const astro::image::ImageSequence& images,
+				const astro::image::ImagePtr biasimage) const;
 };
 
 /**

@@ -42,6 +42,10 @@ public:
 	void	checkstate();
 	void	verbose(bool v);
 	bool	verbose();
+	stepmap_t::iterator	begin() { return _allsteps.begin(); }
+	stepmap_t::iterator	end() { return _allsteps.end(); }
+	stepmap_t::const_iterator	begin() const { return _allsteps.begin(); }
+	stepmap_t::const_iterator	end() const { return _allsteps.end(); }
 };
 
 // static variables and initialization

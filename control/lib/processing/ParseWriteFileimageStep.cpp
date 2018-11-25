@@ -23,7 +23,7 @@ void	ProcessorParser::startWritefileimage(const attr_t& attrs) {
 
 	// create a new dark process
 	WritableFileImageStep	*writable
-		= new WritableFileImageStep(filename);
+		= new WritableFileImageStep(nodePaths(), filename);
 	ProcessingStepPtr	step(writable);
 
 	// remember the step everywhere

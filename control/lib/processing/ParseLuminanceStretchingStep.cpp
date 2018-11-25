@@ -12,7 +12,7 @@ namespace process {
 
 void	ProcessorParser::startLuminanceStretching(const attr_t& attrs) {
 	// create the stacking step
-	LuminanceStretchingStep	*s = new LuminanceStretchingStep();
+	LuminanceStretchingStep	*s = new LuminanceStretchingStep(nodePaths());
 	ProcessingStepPtr	step(s);
 
 	// remember everyhwere

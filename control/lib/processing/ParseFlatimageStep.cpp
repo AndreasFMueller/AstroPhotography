@@ -16,7 +16,7 @@ namespace process {
  */
 void	ProcessorParser::startFlatimage(const attr_t& attrs) {
 	// create a new flat process
-	FlatImageStep	*flat = new FlatImageStep();
+	FlatImageStep	*flat = new FlatImageStep(nodePaths());
 	ProcessingStepPtr	step(flat);
 
 	// remember the step everywhere

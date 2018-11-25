@@ -13,7 +13,7 @@ namespace process {
 /**
  * \brief Create a FlatImageStep instance
  */
-FlatImageStep::FlatImageStep() {
+FlatImageStep::FlatImageStep(NodePaths& parent) : ImageStep(parent) {
 }
 
 /**

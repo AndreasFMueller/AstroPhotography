@@ -13,6 +13,7 @@
 #include <AstroUtils.h>
 #include <AstroPostprocessing.h>
 #include <AstroTonemapping.h>
+#include <AstroCamera.h>
 #include <thread>
 #include <mutex>
 #include <iostream>
@@ -28,12 +29,20 @@ typedef std::shared_ptr<StepPath>	StepPathPtr;
  * \brief Class representing the path of a step
  *
  * This class is designed so that hierarchical paths are easy to formulate
- * in the process XML file.
+ * in the process XML file. A StepPath object always represents a directory,
+ * never a file.
  */
 class StepPath {
-	StepPathPtr	_parent;
+	// that _path member contains the path valid for the current step.
+	// If that path begins with a /, it is to be interpreted as a
+	// absolute path, if it begins with a !, the ! should be stripped
+	// it should be considered a path relativ to the parent path
+	// in all other cases, it is to be considered a path relative
+	// to the current working directory.
 	std::string	_path;
 	bool	absolute(const std::string& s) const;
+	bool	relative(const std::string& s) const;
+	bool	parent_relative(const std::string& s) const;
 public:
 	StepPath(StepPathPtr parent = StepPathPtr());
 	StepPath(const std::string& p, StepPathPtr parent = StepPathPtr());
@@ -151,13 +160,21 @@ class ProcessingThread;
 
 class ProcessingSteps;
 
+/**
+ * \brief Object keeping common node information
+ */
 class NodePaths {
 protected:
 	StepPathPtr	_srcpath;
 	StepPathPtr	_dstpath;
 public:
+	NodePaths();
+	NodePaths(NodePaths& other);
 	std::string	srcfile(const std::string& file) const;
 	std::string	dstfile(const std::string& file) const;
+	StepPathPtr	srcpath() const { return _srcpath; }
+	StepPathPtr	dstpath() const { return _dstpath; }
+	virtual std::string	info() const;
 	friend class ProcessorParser;
 };
 
@@ -193,6 +210,9 @@ private:
 public:
 	const std::string&	name() const { return _name; }
 	void	name(const std::string& n) { _name = n; }
+
+	virtual std::string	info() const;
+	virtual std::string	verboseinfo() const;
 
 	// precursors and successors of each step, these turn the processing
 	// steps into directed graph
@@ -282,10 +302,10 @@ protected:
 	// constructor
 public:
 	ProcessingStep();
+	ProcessingStep(NodePaths& parent);
 	virtual ~ProcessingStep();
-private:	// prevent copying
-	ProcessingStep(const ProcessingStep& other);
-	ProcessingStep&	operator=(const ProcessingStep& other);
+	ProcessingStep(const ProcessingStep& other) = delete;
+	ProcessingStep&	operator=(const ProcessingStep& other) = delete;
 public:
 	std::string	type_name() const;
 	// dependency tracking
@@ -299,6 +319,9 @@ public:
 	virtual std::string	what() const = 0;
 };
 
+/**
+ * \brief Thread performing the processing work within a step
+ */
 class ProcessingThread : public std::thread {
 	ProcessingStepPtr	_step;
 public:
@@ -309,13 +332,15 @@ public:
 };
 typedef std::shared_ptr<ProcessingThread>	ProcessingThreadPtr;
 
-
+/**
+ * \brief Base class for steps that process an image
+ */
 class ImageStep : public ProcessingStep {
 protected:
 	ImagePtr	_image;
 public:
 	virtual ImagePtr	image() { return _image; }
-	ImageStep() : ProcessingStep() { }
+	ImageStep(NodePaths& parent) : ProcessingStep(parent) { }
 	ImageSequence	precursorimages(std::vector<int> exlude = std::vector<int>());
 	virtual ProcessingStep::state	do_work() = 0;
 	ImagePtr	precursorimage(std::vector<int> exlude = std::vector<int>());
@@ -339,13 +364,14 @@ protected:
 	bool	_exists;
 	bool	exists();
 public:
-	FileImageStep(const std::string& filename);
+	FileImageStep(NodePaths& parent, const std::string& filename);
 	~FileImageStep();
 	virtual time_t	when() const;
 	virtual ProcessingStep::state	status();
 	virtual ImagePtr image();
 	virtual ProcessingStep::state	do_work();
 	virtual std::string	what() const;
+	virtual std::string	verboseinfo() const;
 };
 
 /**
@@ -357,7 +383,7 @@ public:
 class WritableFileImageStep : public FileImageStep {
 	std::recursive_mutex	_mutex;
 public:
-	WritableFileImageStep(const std::string& filename);
+	WritableFileImageStep(NodePaths& parent, const std::string& filename);
 	virtual std::string	fullname() const;
 private:
 	virtual ProcessingStep::state	do_work();
@@ -373,8 +399,12 @@ private:
  * The dark image step constructs a dark image from a set of dark images
  */
 class DarkImageStep : public ImageStep {
+	camera::Exposure::purpose_t	_purpose;
 public:
-	DarkImageStep();
+	camera::Exposure::purpose_t	purpose() const { return _purpose; }
+public:
+	DarkImageStep(NodePaths& parent,
+		camera::Exposure::purpose_t purpose = camera::Exposure::flat);
 private:
 	double	_badpixellimit;
 public:
@@ -397,7 +427,7 @@ class FlatImageStep : public ImageStep {
 public:
 	ProcessingStepPtr	dark() const { return _dark; }
 	void	dark(ProcessingStepPtr d) { _dark = d; }
-	FlatImageStep();
+	FlatImageStep(NodePaths& parent);
 private:
 	virtual ProcessingStep::state	do_work();
 public:
@@ -427,7 +457,7 @@ public:
 	void	demosaic(bool d) { _demosaic = d; }
 	bool	flip() const { return _flip; }
 	void	flip(bool f) { _flip = f; }
-	ImageCalibrationStep();
+	ImageCalibrationStep(NodePaths& parent);
 	virtual ProcessingStep::state	do_work();
 	virtual ProcessingStep::state	status();
 	virtual std::string	what() const;
@@ -446,7 +476,7 @@ class StackingStep : public ImageStep {
 	bool	_usetriangles;
 	bool	_rigid;
 public:
-	StackingStep();
+	StackingStep(NodePaths& parent);
 	ProcessingStepPtr	baseimage() const { return _baseimage; }
 	void	baseimage(ProcessingStepPtr b) { _baseimage = b; }
 	int	numberofstars() const { return _numberofstars; }
@@ -474,7 +504,7 @@ private:
  */
 class ColorStep : public ImageStep, public astro::adapter::ColorTransformBase {
 public:
-	ColorStep();
+	ColorStep(NodePaths& parent);
 	virtual ProcessingStep::state	do_work();
 	virtual std::string	what() const;
 	virtual ImagePtr	image();
@@ -489,7 +519,7 @@ public:
 	int	maskid() const { return _maskid; }
 	void	maskid(int m) { _maskid = m; }
 public:
-	HDRStep();
+	HDRStep(NodePaths& parent);
 	virtual ProcessingStep::state	do_work();
 	virtual std::string	what() const;
 };
@@ -499,7 +529,7 @@ public:
  */
 class RescaleStep : public ImageStep, public astro::image::post::Rescale {
 public:
-	RescaleStep();
+	RescaleStep(NodePaths& parent);
 	virtual ProcessingStep::state	do_work();
 	virtual std::string	what() const;
 	virtual ImagePtr	image();
@@ -519,7 +549,7 @@ public:
 	double	maximum() const { return _maximum; }
 	void	maximum(double m) { _maximum = m; }
 public:
-	ColorclampStep();
+	ColorclampStep(NodePaths& parent);
 	virtual ProcessingStep::state	do_work();
 	virtual std::string	what() const;
 	virtual ImagePtr	image();
@@ -534,7 +564,7 @@ public:
 	double	radius() const { return _radius; }
 	void	radius(double r) { _radius = r; }
 public:
-	DestarStep();
+	DestarStep(NodePaths& parent);
 	virtual ProcessingStep::state	do_work();
 	virtual std::string	what() const;
 };
@@ -548,7 +578,7 @@ public:
 	adapter::LuminanceFactorPtr	factor() const { return _factor; }
 	void	factor(adapter::LuminanceFactorPtr f) { _factor = f; }
 public:
-	LuminanceStretchingStep();
+	LuminanceStretchingStep(NodePaths& parent);
 	virtual ProcessingStep::state	do_work();
 	virtual std::string	what() const;
 };

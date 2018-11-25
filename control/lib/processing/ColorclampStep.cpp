@@ -13,7 +13,7 @@ namespace process {
 /**
  * \brief Construct a new ColorclampStep
  */
-ColorclampStep::ColorclampStep() {
+ColorclampStep::ColorclampStep(NodePaths& parent) : ImageStep(parent) {
 	_minimum = 0;
 	_maximum = 255;
 }

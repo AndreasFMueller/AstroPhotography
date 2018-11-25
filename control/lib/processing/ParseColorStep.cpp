@@ -12,7 +12,7 @@ namespace process {
 
 void	ProcessorParser::startColor(const attr_t& attrs) {
 	// create the stacking step
-	ColorStep	*s = new ColorStep();
+	ColorStep	*s = new ColorStep(nodePaths());
 	ProcessingStepPtr	step(s);
 
 	// remember everyhwere

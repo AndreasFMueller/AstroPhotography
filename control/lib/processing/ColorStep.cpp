@@ -11,7 +11,7 @@ namespace process {
 /**
  * \brief Construct a new ColorStep
  */
-ColorStep::ColorStep() {
+ColorStep::ColorStep(NodePaths& parent) : ImageStep(parent) {
 }
 
 ProcessingStep::state	ColorStep::do_work() {

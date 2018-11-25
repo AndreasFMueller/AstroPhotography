@@ -12,7 +12,7 @@ namespace process {
 
 void	ProcessorParser::startHDR(const attr_t& attrs) {
 	// create the stacking step
-	HDRStep	*s = new HDRStep();
+	HDRStep	*s = new HDRStep(nodePaths());
 	ProcessingStepPtr	step(s);
 
 	// remember everyhwere

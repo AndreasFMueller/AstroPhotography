@@ -16,7 +16,7 @@ namespace process {
  */
 void	ProcessorParser::startCalibrate(const attr_t& attrs) {
 	// create a new image calibration step
-	ImageCalibrationStep	*cal = new ImageCalibrationStep();
+	ImageCalibrationStep	*cal = new ImageCalibrationStep(nodePaths());
 	ProcessingStepPtr	step(cal);
 
 	// remember the step everywhere

@@ -8,7 +8,8 @@
 namespace astro {
 namespace process {
 
-LuminanceStretchingStep::LuminanceStretchingStep() {
+LuminanceStretchingStep::LuminanceStretchingStep(NodePaths& parent)
+	: ImageStep(parent) {
 }
 
 ProcessingStep::state	LuminanceStretchingStep::do_work() {

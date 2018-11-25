@@ -14,7 +14,7 @@ namespace process {
  */
 void	ProcessorParser::startStack(const attr_t& attrs) {
 	// create the stacking step
-	StackingStep	*ss = new StackingStep();
+	StackingStep	*ss = new StackingStep(nodePaths());
 	ProcessingStepPtr	sstep(ss);
 
 	// remember everyhwere

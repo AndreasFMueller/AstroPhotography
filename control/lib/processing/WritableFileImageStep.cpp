@@ -13,13 +13,15 @@ namespace process {
 /**
  * \brief Create a writable file image step
  */
-WritableFileImageStep::WritableFileImageStep(const std::string& filename)
-	: FileImageStep(filename) {
+WritableFileImageStep::WritableFileImageStep(NodePaths& parent,
+	const std::string& filename)
+	: FileImageStep(parent, filename) {
 	_previousstate = idle;
 	ProcessingStep::status(idle);
 }
 
 std::string	WritableFileImageStep::fullname() const {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "constructing full name");
 	return dstname();
 }
 

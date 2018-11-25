@@ -19,30 +19,38 @@ static std::string	generate_name() {
 void	ProcessorParser::setNodePaths(NodePaths& nodepaths,
 		const attr_t& attrs, NodePaths *parent) {
 	// handle the processing step
-	std::string	_src;
 	{
 		auto	i = attrs.find(std::string("src"));
 		if (i != attrs.end()) {
-			_src = i->second;
+			std::string	_src = i->second;
+			if (parent) {
+				nodepaths._srcpath = StepPathPtr(
+					new StepPath(_src, parent->_srcpath));
+			} else {
+				nodepaths._srcpath = StepPathPtr(
+					new StepPath(_src));
+			}
+		} else {
+			// don't overwrite the paths
 		}
 	}
-	std::string	_dst;
 	{
 		auto	i = attrs.find(std::string("dst"));
 		if (i != attrs.end()) {
-			_dst = i->second;
+			std::string	_dst = i->second;
+			if (parent) {
+				nodepaths._dstpath = StepPathPtr(
+					new StepPath(_dst, parent->_dstpath));
+			} else {
+				nodepaths._dstpath = StepPathPtr(
+					new StepPath(_dst));
+			}
+		} else {
+			// don't overwrite the paths
 		}
 	}
-	if (parent) {
-		nodepaths._srcpath = StepPathPtr(new StepPath(_src,
-					parent->_srcpath));
-		nodepaths._dstpath = StepPathPtr(new StepPath(_dst,
-					parent->_dstpath));
-	} else {
-		nodepaths._srcpath = StepPathPtr(new StepPath(_src));
-		nodepaths._dstpath = StepPathPtr(new StepPath(_dst));
-	}
-
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "paths set to %s",
+	nodepaths.NodePaths::info().c_str());
 }
 
 /**
@@ -56,37 +64,11 @@ void	ProcessorParser::startCommon(const attr_t& attrs) {
 	ProcessingStepPtr	step = top();
 
 	// handle the processing step
-#if 0
-	std::string	_src;
-	{
-		auto	i = attrs.find(std::string("src"));
-		if (i != attrs.end()) {
-			_src = i->second;
-		}
-	}
-	std::string	_dst;
-	{
-		auto	i = attrs.find(std::string("dst"));
-		if (i != attrs.end()) {
-			_dst = i->second;
-		}
-	}
-	if (_parent) {
-		step->_srcpath = StepPathPtr(new StepPath(_src,
-					_parent->_srcpath));
-		step->_dstpath = StepPathPtr(new StepPath(_dst,
-					_parent->_dstpath));
-	} else {
-		step->_srcpath = StepPathPtr(new StepPath(_src));
-		step->_dstpath = StepPathPtr(new StepPath(_dst));
-	}
-#else
 	if (_parent) {
 		setNodePaths(*step, attrs, &*_parent);
 	} else {
 		setNodePaths(*step, attrs, &*_network);
 	}
-#endif
 
 	// check the name attribute
 	auto i = attrs.find(std::string("name"));

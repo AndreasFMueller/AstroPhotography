@@ -23,6 +23,8 @@ ProcessorNetwork::ProcessorNetwork() {
 
 /**
  * \brief Add a processing step to a network
+ *
+ * \param step	the step to add to the network
  */
 void	ProcessorNetwork::add(ProcessingStepPtr step) {
 	if (!step) {
@@ -46,6 +48,8 @@ void	ProcessorNetwork::add(ProcessingStepPtr step) {
 
 /**
  * \brief Retrieve a step from the network by id
+ *
+ * \param id	the id of the node to find
  */
 ProcessingStepPtr	ProcessorNetwork::byid(int id) const {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "looking for step with id %d", id);
@@ -59,6 +63,8 @@ ProcessingStepPtr	ProcessorNetwork::byid(int id) const {
 
 /**
  * \brief Retrieve a step from the network by name
+ *
+ * \param name	name of the processing step to search for
  */
 ProcessingStepPtr	ProcessorNetwork::byname(const std::string& name) const {
 	int	n = _name2ids.count(name);
@@ -78,6 +84,11 @@ ProcessingStepPtr	ProcessorNetwork::byname(const std::string& name) const {
 	return _steps.find(i->second)->second;
 }
 
+/**
+ * \brief Get a step by name or id
+ *
+ * \param name	name
+ */
 ProcessingStepPtr	ProcessorNetwork::bynameid(const std::string& name) const {
 	if (name.size() == 0) {
 		std::string	msg = stringprintf("no step named '%s'",
@@ -136,6 +147,9 @@ bool	ProcessorNetwork::hasneedswork() {
 
 /**
  * \brief finds the topmost node that needs work
+ *
+ * \param id	id of the node to consider for building
+ * \return	id of the node that needs work
  */
 int	ProcessorNetwork::process(int id) {
 	// check the current node
@@ -165,6 +179,8 @@ int	ProcessorNetwork::process(int id) {
 
 /**
  * \brief Check a list of steps for a possible node that needs work
+ *
+ * \param steps	steps that need to be processed
  */
 int	ProcessorNetwork::process(const ProcessingStep::steps& steps) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "checking %lu steps for work",
@@ -188,6 +204,15 @@ void	ProcessorNetwork::process() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "start processing");
 	ProcessingStep::steps	t = terminals();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "found %d terminals", t.size());
+	int	counter = 0;
+	std::for_each(t.begin(), t.end(),
+		[&](int stepid) {
+			ProcessingStepPtr	step
+				= ProcessingStep::byid(stepid);
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "terminal[%d]: %d, %s",
+				++counter, stepid, step->verboseinfo().c_str());
+		}
+	);
 	int	id;
 	while (0 <= (id = process(t))) {
 		ProcessingStepPtr	step = ProcessingStep::byid(id);
@@ -205,19 +230,35 @@ void	ProcessorNetwork::process() {
 
 /**
  * \brief Dump the network
+ *
+ * \param out	the stream to dump the network information on
  */
 void	ProcessorNetwork::dump(std::ostream& out) const {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "dumping %d steps", _steps.size());
 	std::for_each(_steps.begin(), _steps.end(),
 		[&](const std::pair<int, ProcessingStepPtr>& p) {
 			ProcessingStepPtr	step = p.second;
-			out << "step " << step->name();
-			out << "(" << step->id() << ")";
-			out << " " << demangle(typeid(*step).name());
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "dumping step %s(%d)",
+				step->name().c_str(), step->id());
+			out << "step ";
+			if (ProcessingStep::verbose()) {
+				out << step->verboseinfo();
+			} else {
+				out << step->info();
+			}
 			out << std::endl;
-			out << "    precursors:" << std::endl;
-			step->dumpPrecursors(out);
-			out << "    successors:" << std::endl;
-			step->dumpSuccessors(out);
+			if (step->precursorCount() > 0) {
+				out << "    precursors:" << std::endl;
+				step->dumpPrecursors(out);
+			} else {
+				out << "    no precursors" << std::endl;
+			}
+			if (step->successorCount() > 0) {
+				out << "    successors:" << std::endl;
+				step->dumpSuccessors(out);
+			} else {
+				out << "    no successors" << std::endl;
+			}
 		}
 	);
 }

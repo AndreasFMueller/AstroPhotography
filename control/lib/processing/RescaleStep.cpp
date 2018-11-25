@@ -12,7 +12,7 @@ namespace process {
 /**
  * \brief Construct a new RescaleStep
  */
-RescaleStep::RescaleStep() {
+RescaleStep::RescaleStep(NodePaths& parent) : ImageStep(parent) {
 }
 
 ProcessingStep::state	RescaleStep::do_work() {

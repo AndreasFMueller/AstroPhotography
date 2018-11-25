@@ -24,7 +24,7 @@ void	ProcessorParser::startFileimage(const attr_t& attrs) {
 	}
 	std::string	filename = i->second;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "filename: %s", filename.c_str());
-	FileImageStep	*filestep = new FileImageStep(filename);
+	FileImageStep	*filestep = new FileImageStep(nodePaths(), filename);
 	ProcessingStepPtr	step(filestep);
 
 	// push the process on the stack

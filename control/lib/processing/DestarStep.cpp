@@ -13,7 +13,7 @@ namespace process {
  *
  * set the default radius for destarring to 10 pixels
  */
-DestarStep::DestarStep() : _radius(10) {
+DestarStep::DestarStep(NodePaths& parent) : ImageStep(parent), _radius(10) {
 }
 
 /**

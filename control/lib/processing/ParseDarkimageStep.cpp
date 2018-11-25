@@ -14,9 +14,10 @@ namespace process {
  *
  * \param attrs		XML attributes specified in the start element
  */
-void	ProcessorParser::startDarkimage(const attr_t& attrs) {
+void	ProcessorParser::startDarkimage(const attr_t& attrs,
+		camera::Exposure::purpose_t purpose) {
 	// create a new dark process
-	DarkImageStep	*dark = new DarkImageStep();
+	DarkImageStep	*dark = new DarkImageStep(nodePaths(), purpose);
 	ProcessingStepPtr	step(dark);
 
 	// attribute stdeevs

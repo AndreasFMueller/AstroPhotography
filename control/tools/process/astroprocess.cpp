@@ -29,6 +29,8 @@ void	usage(const char *progname) {
 	std::cout << "  -d,--debug          show debug messages" << std::endl;
 	std::cout << "  -h,--help,-?        show this help message and exit"
 		<< std::endl;
+	std::cout << "  -v,--verbose        show additional information" << std::endl;
+	std::cout << "  -n,--net            display the dependency net and exit" << std::endl;
 }
 
 // options for the process command
@@ -36,6 +38,7 @@ static struct option	longopts[] = {
 { "debug",	no_argument,	NULL,	'd' },
 { "help",	no_argument,	NULL,	'h' },
 { "verbose",	no_argument,	NULL,	'v' },
+{ "net",	no_argument,	NULL,	'n' },
 { NULL,		0,		NULL,	 0  }
 };
 
@@ -43,10 +46,11 @@ static struct option	longopts[] = {
  * \brief Main method for the astroprocess program
  */
 int	main(int argc, char *argv[]) {
+	bool	netonly = false;
 	int	c;
 	int	longindex;
 	debugthreads = 1;
-	while (EOF != (c = getopt_long(argc, argv, "dh?v",
+	while (EOF != (c = getopt_long(argc, argv, "dh?vn",
 			longopts, &longindex)))
 		switch (c) {
 		case 'd':
@@ -55,6 +59,9 @@ int	main(int argc, char *argv[]) {
 		case 'h':
 			usage(argv[0]);
 			return EXIT_SUCCESS;
+		case 'n':
+			netonly = true;
+			break;
 		case 'v':
 			ProcessingStep::verbose(true);
 			break;
@@ -74,8 +81,13 @@ int	main(int argc, char *argv[]) {
 	ProcessorFactory	factory;
 	ProcessorNetworkPtr	network = factory(filename);
 
-	if (debuglevel == LOG_DEBUG) {
+	// decide on whether to dump the network
+	if (ProcessingStep::verbose() || netonly) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "dumping the network");
 		network->dump(std::cout);
+		if (netonly) {
+			return EXIT_SUCCESS;
+		}
 	}
 
 	// execute the network

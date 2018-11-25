@@ -12,7 +12,7 @@ namespace process {
 
 void	ProcessorParser::startDestar(const attr_t& attrs) {
 	// create the stacking step
-	DestarStep	*s = new DestarStep();
+	DestarStep	*s = new DestarStep(nodePaths());
 	ProcessingStepPtr	step(s);
 
 	// remember everyhwere

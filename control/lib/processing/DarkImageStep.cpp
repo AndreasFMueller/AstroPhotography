@@ -5,6 +5,7 @@
  */
 #include <AstroProcess.h>
 #include <AstroCalibration.h>
+#include <AstroIO.h>
 #include <sstream>
 
 namespace astro {
@@ -12,9 +13,16 @@ namespace process {
 
 /**
  * \brief Construct a new dark image
+ *
+ * \param parent	the parent paths
+ * \param purpose	the purpose of the dark step
  */
-DarkImageStep::DarkImageStep() {
+DarkImageStep::DarkImageStep(NodePaths& parent,
+	camera::Exposure::purpose_t purpose)
+	: ImageStep(parent), _purpose(purpose) {
 	_badpixellimit = 3;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "nodepaths: %s",
+		NodePaths::info().c_str());
 }
 
 /**
@@ -32,6 +40,12 @@ ProcessingStep::state	DarkImageStep::do_work() {
 	// actually produce the dark frame
 	astro::calibration::DarkFrameFactory	dff(_badpixellimit);
 	_image = dff(images);
+
+	// set the purpose
+	if (camera::Exposure::bias == purpose()) {
+		_image->setMetadata(io::FITSKeywords::meta(
+			std::string("PURPOSE"), std::string("bias")));
+	}
 
 	// remember that 
 	time_t	now;

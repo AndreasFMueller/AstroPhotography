@@ -25,6 +25,22 @@ ProcessorParser::ProcessorParser() {
 	_handler.warning = ::warning;
 }
 
+NodePaths&	ProcessorParser::parentNodePaths() {
+	if (_parent) {
+		return *_parent;
+	}
+	return *_network;
+}
+
+NodePaths&	ProcessorParser::nodePaths() {
+	if (_stepstack.size() > 0) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "top path: %s",
+			_stepstack.top()->NodePaths::info().c_str());
+		return *_stepstack.top();
+	}
+	return *_network;
+}
+
 /**
  * \brief Handle a start element
  */
@@ -44,7 +60,11 @@ void	ProcessorParser::startElement(const std::string& name,
 		return;
 	}
 	if (name == std::string("darkimage")) {
-		startDarkimage(attrs);
+		startDarkimage(attrs, camera::Exposure::dark);
+		return;
+	}
+	if (name == std::string("biasimage")) {
+		startDarkimage(attrs, camera::Exposure::bias);
 		return;
 	}
 	if (name == std::string("flatimage")) {
@@ -127,8 +147,11 @@ void	ProcessorParser::fatal(const std::string& msg) {
 ProcessorNetworkPtr	ProcessorParser::parse(const std::string& filename) {
 	// use the libXML function to actuall run the parser over the file
 	int	rc = xmlSAXUserParseFile(&_handler, this, filename.c_str());
-	if (rc < 0) {
-		throw std::runtime_error("parse error");
+	if (rc != 0) {
+		std::string	msg = stringprintf("parse error in file %s: %d",
+			filename.c_str(), rc);
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw std::runtime_error(msg);
 	}
 	return _network;
 }
@@ -143,8 +166,10 @@ ProcessorNetworkPtr	ProcessorParser::parse(const char *data, int size) {
 	_network.reset();
 	// use the libXML function to actuall run the parser over the file
 	int	rc = xmlSAXUserParseMemory(&_handler, this, data, size);
-	if (rc < 0) {
-		throw std::runtime_error("parse error");
+	if (rc != 0) {
+		std::string	msg = stringprintf("parse error: %d", rc);
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw std::runtime_error(msg);
 	}
 	return _network;
 }
@@ -170,7 +195,7 @@ void	ProcessorParser::pop() {
 	}
 	_stepstack.pop();
 	if (_stepstack.size() == 0) {
-		_parent = ProcessingStepPtr();
+		_parent.reset();
 	} else {
 		_parent = _stepstack.top();
 	}

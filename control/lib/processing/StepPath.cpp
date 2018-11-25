@@ -10,63 +10,82 @@
 namespace astro {
 namespace process {
 
-StepPath::StepPath(StepPathPtr parent) : _parent(parent) {
+StepPath::StepPath(StepPathPtr parent) {
+	if (parent) {
+		_path = parent->dir();
+	}
 }
 
-StepPath::StepPath(const std::string& p, StepPathPtr parent)
-	: _parent(parent), _path(p) {
+StepPath::StepPath(const std::string& p, StepPathPtr parent) {
+	if (parent_relative(p)) {
+		if (parent) {
+			_path = parent->dir() + "/" + p;
+		} else {
+			std::string	msg = stringprintf("cannot use parent "
+				"relative path '%s' without parent", p.c_str());
+			debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+			throw std::runtime_error(msg);
+		}
+	} else {
+		_path = p;
+	}
 }
 
 bool	StepPath::absolute(const std::string& s) const {
 	if (s.size() == 0) return false;
-	if (s[0] == '/') return true;
-	if (s.size() > 1) {
-		if ((s[0] == '.') && (s[1] == '/')) {
-			return true;
-		}
-	}
-	return false;
+	return (s[0] == '/');
 }
 
+bool	StepPath::parent_relative(const std::string& s) const {
+	return (!(absolute(s) || relative(s)));
+}
+
+bool	StepPath::relative(const std::string& s) const {
+	if (s.size() <= 1) return false;
+	return (s.substr(0,2) == std::string("./"));
+}
+
+/**
+ * \brief Get the full path for the directory pointed to by this object
+ */
 std::string	StepPath::dir() const {
-	std::string	result = _path;
-	if (absolute(_path)) {
-		goto thatsit;
-	}
-	if (!_parent) {
-		goto thatsit;
-	}
-	if (_path.size() > 0) {
-		result = _parent->dir() + '/' + _path;
-	} else {
-		result = _parent->dir();
-	}
-thatsit:
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "constructed dir name: %s",
-		result.c_str());
-	return result;
+	return _path;
 }
 
+/**
+ * \brief Construct a filename from the path
+ *
+ * \param file	name of the file
+ */
 std::string	StepPath::file(const std::string& file) const {
-	std::string	result = file;
+	// empty file names are not acceptable
 	if (file.size() == 0) {
-		goto thatsit;
+		std::string	msg = stringprintf("empty filename");
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw std::runtime_error(msg);
 	}
-	if (absolute(file)) {
-		goto thatsit;
-	}
-	{
+
+	std::string	result = file;
+
+	// for a parent relative file, we use the parent step path to 
+	// construct the file name
+	if (parent_relative(file)) {
 		std::string	d = dir();
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "relative path from '%s' '%s'",
+			d.c_str(), file.c_str());
 		if (d.size() > 0) {
 			result = d + "/" + file;
 		}
 	}
-thatsit:
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "constructed file name: %s",
-		result.c_str());
+
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "file name constructed from '%s': '%s'",
+		file.c_str(), result.c_str());
 	return result;
 }
 
+/**
+ * \brief Find out whether the directory exists
+ */
 bool	StepPath::direxists() const {
 	struct stat	sb;
 	std::string	name = dir();
@@ -83,6 +102,11 @@ bool	StepPath::direxists() const {
 	return true;
 }
 
+/**
+ * \brief Test whether a file exists
+ *
+ * \param f	Filename
+ */
 bool	StepPath::fileexists(const std::string& f) const {
 	struct stat	sb;
 	std::string	name = file(f);

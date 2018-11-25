@@ -23,6 +23,8 @@ class ProcessorParser {
 	ProcessorNetworkPtr	_network;
 	std::stack<ProcessingStepPtr>	_stepstack;
 	ProcessingStepPtr	_parent;
+	NodePaths&	parentNodePaths();
+	NodePaths&	nodePaths();
 	void	push(ProcessingStepPtr step);
 	void	pop();
 	ProcessingStepPtr	top();
@@ -37,7 +39,8 @@ class ProcessorParser {
 	void	endProcess();
 
 	void	startFileimage(const attr_t& attrs);
-	void	startDarkimage(const attr_t& attrs);
+	void	startDarkimage(const attr_t& attrs,
+			camera::Exposure::purpose_t purpose);
 	void	startFlatimage(const attr_t& attrs);
 	void	startCalibrate(const attr_t& attrs);
 	void	startWritefileimage(const attr_t& attrs);

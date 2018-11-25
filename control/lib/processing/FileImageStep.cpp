@@ -6,6 +6,7 @@
 #include <AstroProcess.h>
 #include <includes.h>
 #include <AstroIO.h>
+#include <sstream>
 
 namespace astro {
 namespace process {
@@ -13,9 +14,11 @@ namespace process {
 /**
  * \brief Construct a file image step
  */
-FileImageStep::FileImageStep(const std::string& filename)
-	: _filename(filename) {
+FileImageStep::FileImageStep(NodePaths& parent, const std::string& filename)
+	: ImageStep(parent), _filename(filename) {
 	_exists = false;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "node paths: %s",
+		NodePaths::info().c_str());
 }
 
 /**
@@ -105,6 +108,15 @@ bool	FileImageStep::exists() {
 
 std::string	FileImageStep::what() const {
 	return stringprintf("reading FITS file %s", _filename.c_str());
+}
+
+std::string	FileImageStep::verboseinfo() const {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "verboseinfo()");
+	std::ostringstream	out;
+	out << ProcessingStep::verboseinfo();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "construct fullname");
+	out << " file=" << fullname();
+	return out.str();
 }
 
 } // namespace process

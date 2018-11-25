@@ -6,6 +6,7 @@
 SUBDIRS = . test
 
 noinst_HEADERS =							\
+	ImageMean.h							\
 	LevelExtractor.h						\
 	Miniball.hpp							\
 	TransformBuilder.h						\
@@ -27,7 +28,9 @@ libastroimage_la_SOURCES = 						\
 	BasicDeconvolutionOperator.cpp					\
 	Binning.cpp							\
 	Blurr.cpp							\
-	CalibrationFactory.cpp						\
+	CalibrationFrameFactory.cpp					\
+	CalibrationFrameProcess.cpp					\
+	Calibrator.cpp							\
 	CentralProjection.cpp						\
 	CGFilter.cpp							\
 	Circle.cpp							\
@@ -43,6 +46,8 @@ libastroimage_la_SOURCES = 						\
 	Corrector.cpp							\
 	Cut.cpp								\
 	DarkCorrector.cpp						\
+	DarkFrameFactory.cpp						\
+	DarkFrameProcess.cpp						\
 	DarkNoiseAdapter.cpp						\
 	DeconvolutionOperator.cpp					\
 	Deemphasize.cpp							\
@@ -66,6 +71,8 @@ libastroimage_la_SOURCES = 						\
 	FITSoutfile.cpp							\
 	Filters.cpp							\
 	FlatCorrector.cpp						\
+	FlatFrameFactory.cpp						\
+	FlatFrameProcess.cpp						\
 	Flip.cpp							\
 	FocusFilterfunc.cpp						\
 	Format.cpp							\
