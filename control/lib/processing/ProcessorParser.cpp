@@ -103,6 +103,14 @@ void	ProcessorParser::startElement(const std::string& name,
 		startHDR(attrs);
 		return;
 	}
+	if (name == std::string("layers")) {
+		startLayerImage(attrs);
+		return;
+	}
+	if (name == std::string("imageplane")) {
+		startImagePlane(attrs);
+		return;
+	}
 	if (name == std::string("luminancestretching")) {
 		startLuminanceStretching(attrs);
 		return;

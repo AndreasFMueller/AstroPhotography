@@ -347,6 +347,20 @@ public:
 };
 
 /**
+ * \brief Image step to extract a plane from an image
+ */
+class ImagePlaneStep : public ImageStep {
+	int	_n;
+public:
+	int	n() const { return _n; }
+	void	n(int i) { _n = i; }
+	ImagePlaneStep(NodePaths& parent) : ImageStep(parent), _n(0) { }
+	ImagePlaneStep(NodePaths& parent, int n) : ImageStep(parent), _n(n) { }
+	virtual ProcessingStep::state	do_work();
+	virtual std::string	what() const;
+};
+
+/**
  * \brief File Image step class definition
  *
  * A processing step that is based on a file
@@ -522,6 +536,15 @@ private:
 	virtual std::string	what() const;
 };
 
+/**
+ * \brief Processing step that combines the precursor images into a single image
+ */
+class LayerImageStep : public ImageStep {
+public:
+	LayerImageStep(NodePaths& parent);
+	virtual ProcessingStep::state	do_work();
+	virtual std::string	what() const;
+};
 
 /**
  * \brief Image Step to change the color balance (see tools/image/color)
