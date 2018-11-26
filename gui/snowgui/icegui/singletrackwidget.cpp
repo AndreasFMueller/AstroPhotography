@@ -21,8 +21,8 @@ singletrackwidget::singletrackwidget(QWidget *parent) :
 	ui->offsetArcsecButton->setEnabled(false);
 
 	// two channels
-	ui->dataWidget->addChannel(QColor(0, 255, 0));
-	ui->dataWidget->addChannel(QColor(0, 0, 255));
+	ui->dataWidget->addChannel(QColor(0, 0, 204)); // X
+	ui->dataWidget->addChannel(QColor(0, 153, 0)); // Y
 
 	// starting with px offset display
 	_datatype = offsetPx;

@@ -119,7 +119,7 @@ send-test:
 		server send
 
 monitor-test:
-	./snowgateway --debug --foreground --exec=./buildimage.sh 	\
+	./snowgateway --debug --foreground 				\
 		--post=http://cesario.othello.ch/telescope/update.php	\
 		telescope monitor
 

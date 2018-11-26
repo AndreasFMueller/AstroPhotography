@@ -356,10 +356,11 @@ astro::image::ImagePtr	Ccd::getImage() {
 	std::unique_lock<std::recursive_mutex>	lock(_mutex);
 	//debug(LOG_DEBUG, DEBUG_LOG, 0, "--> LCK acquired getImage()");
 	// must have an exposed image to call this method
-	if (CcdState::exposed != this->exposureStatus()) {
+	CcdState::State	s = this->exposureStatus();
+	if (CcdState::exposed != s) {
 		std::string	msg = stringprintf("no exposed image to "
 			"retrieve, bad state: %s",
-			CcdState::state2string(state()).c_str());
+			CcdState::state2string(s).c_str());
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "%s", msg.c_str());
 		throw BadState(msg);
 	}
