@@ -29,6 +29,7 @@ ProcessingStep::ProcessingStep() : _barrier(2) {
 	_id = newid();
 	_status = idle;
 	_when = 0;
+	_weight = 1;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "new processing step %d created", _id);
 }
 
@@ -37,6 +38,7 @@ ProcessingStep::ProcessingStep(NodePaths& parent)
 	_id = newid();
 	_status = idle;
 	_when = 0;
+	_weight = 1;
 	debug(LOG_DEBUG, DEBUG_LOG, 0,
 		"new processing step %d created from parent %s, %s",
 		_id, parent.info().c_str(), NodePaths::info().c_str());

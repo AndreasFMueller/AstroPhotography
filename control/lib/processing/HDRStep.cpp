@@ -12,20 +12,30 @@ namespace process {
  * \brief Construct a new HDRStep
  */
 HDRStep::HDRStep(NodePaths& parent) : ImageStep(parent) {
+	_maskid = -1;
 }
 
 ProcessingStep::state	HDRStep::do_work() {
 	try {
-		// get the mask precursor
-		ProcessingStepPtr	maskstep = byid(maskid());
-		ImageStep	*maskimagestep
-			= dynamic_cast<ImageStep*>(&*maskstep);
-		mask(maskimagestep->image());
-
 		// get the only remaining precursor, i.e. the image
 		std::vector<int>	exclude;
-		exclude.push_back(maskid());
+		if (maskid() > 0) {
+			exclude.push_back(maskid());
+		}
 		ImagePtr        precursor = precursorimage(exclude);
+
+		// get the mask precursor
+		if (maskid() > 0) {
+			ProcessingStepPtr	maskstep = byid(maskid());
+			ImageStep	*maskimagestep
+				= dynamic_cast<ImageStep*>(&*maskstep);
+			mask(maskimagestep->image());
+		} else {
+			Image<float>	*maskimg
+				= new Image<float>(precursor->size());
+			maskimg->fill(1);
+			mask(ImagePtr(maskimg));
+		}
 
 		// apply HDR transformation
 		_image = (*this)(precursor);

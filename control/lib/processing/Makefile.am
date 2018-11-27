@@ -13,17 +13,18 @@ noinst_LTLIBRARIES = libastroprocessing.la
 libastroprocessing_la_SOURCES =						\
 	CalibrationImageStep.cpp					\
 	CalibrationProcessorStep.cpp					\
-	ColorclampStep.cpp						\
 	ColorStep.cpp							\
+	ColorclampStep.cpp						\
 	DarkImageStep.cpp						\
 	DestarStep.cpp							\
 	FileImageStep.cpp						\
 	FlatImageStep.cpp						\
 	HDRStep.cpp							\
 	ImageCalibrationStep.cpp					\
-	ImageStep.cpp							\
 	ImagePlaneStep.cpp						\
+	ImageStep.cpp							\
 	ImageTransformationStep.cpp					\
+	LRGBStep.cpp							\
 	LayerImageStep.cpp						\
 	LuminanceStretchingStep.cpp					\
 	NodePaths.cpp							\
@@ -36,7 +37,9 @@ libastroprocessing_la_SOURCES =						\
 	ParseFlatimageStep.cpp						\
 	ParseHDRStep.cpp						\
 	ParseImagePlaneStep.cpp						\
+	ParseLRGBStep.cpp						\
 	ParseLuminanceStretchingStep.cpp				\
+	ParseRGBStep.cpp						\
 	ParseRescaleStep.cpp						\
 	ParseStackStep.cpp						\
 	ParseTransformationStep.cpp					\
@@ -49,9 +52,11 @@ libastroprocessing_la_SOURCES =						\
 	ProcessorFactory.cpp						\
 	ProcessorNetwork.cpp						\
 	ProcessorParser.cpp						\
+	RGBStep.cpp							\
 	RescaleStep.cpp							\
 	StackingStep.cpp						\
 	StepPath.cpp							\
+	SumStep.cpp							\
 	WritableFileImageStep.cpp
 
 libastroprocessing_la_CPPFLAGS = -DPKGLIBDIR=\"$(pkglibdir)\" \

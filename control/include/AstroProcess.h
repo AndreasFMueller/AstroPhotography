@@ -213,6 +213,11 @@ public:
 
 	virtual std::string	info() const;
 	virtual std::string	verboseinfo() const;
+private:
+	double	_weight;
+public:
+	double	weight() const { return _weight; }
+	void	weight(double w) { _weight = w; }
 
 	// precursors and successors of each step, these turn the processing
 	// steps into directed graph
@@ -341,9 +346,13 @@ protected:
 public:
 	virtual ImagePtr	image() { return _image; }
 	ImageStep(NodePaths& parent) : ProcessingStep(parent) { }
-	ImageSequence	precursorimages(std::vector<int> exlude = std::vector<int>());
+	ImageSequence	precursorimages(std::vector<int> exlude
+				= std::vector<int>()) const;
+	bool	precursorSizesConsistent(std::vector<int> exlude
+				= std::vector<int>()) const;
 	virtual ProcessingStep::state	do_work() = 0;
-	ImagePtr	precursorimage(std::vector<int> exlude = std::vector<int>());
+	ImagePtr	precursorimage(std::vector<int> exlude
+				= std::vector<int>()) const;
 };
 
 /**
@@ -537,11 +546,41 @@ private:
 };
 
 /**
+ * \brief 
+ */
+class SumStep : public ImageStep {
+public:
+	SumStep(NodePaths& parent) : ImageStep(parent) { }
+	virtual ProcessingStep::state	do_work();
+	virtual std::string	what() const;
+};
+
+/**
  * \brief Processing step that combines the precursor images into a single image
  */
 class LayerImageStep : public ImageStep {
 public:
 	LayerImageStep(NodePaths& parent);
+	virtual ProcessingStep::state	do_work();
+	virtual std::string	what() const;
+};
+
+/**
+ * \brief Step to combine images into an RGB image
+ */
+class RGBStep : public ImageStep {
+public:
+	RGBStep(NodePaths& parent) : ImageStep(parent) { }
+	virtual ProcessingStep::state	do_work();
+	virtual std::string	what() const;
+};
+
+/**
+ * \brief Step to combine RGB colors with luminance
+ */
+class LRGBStep : public ImageStep {
+public:
+	LRGBStep(NodePaths& parent) : ImageStep(parent) { }
 	virtual ProcessingStep::state	do_work();
 	virtual std::string	what() const;
 };

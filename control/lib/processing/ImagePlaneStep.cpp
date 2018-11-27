@@ -45,9 +45,14 @@ ImagePtr	extract_rgb(Image<RGB<Pixel> >*image, int i) {
 		for (int y = 0; y < h; y++) {
 			RGB<Pixel>	p = image->pixel(x, y);
 			switch (i) {
-			case 0:	outimg->writablepixel(x, y) = p.R; break;
-			case 1:	outimg->writablepixel(x, y) = p.G; break;
-			case 2:	outimg->writablepixel(x, y) = p.B; break;
+			case 0:	outimg->writablepixel(x, y) = p.R;
+				break;
+			case 1:	outimg->writablepixel(x, y) = p.G;
+				break;
+			case 2:	outimg->writablepixel(x, y) = p.B;
+				break;
+			case 3: outimg->writablepixel(x, y) = p.luminance();
+				break;
 			default:
 				break;
 			}

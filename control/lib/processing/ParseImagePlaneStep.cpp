@@ -24,6 +24,9 @@ static int	name2plane(const std::string name) {
 	if (name == std::string("B")) {
 		return 2;
 	}
+	if (name == std::string("L")) {
+		return 3;
+	}
 	std::string	msg = stringprintf("cannot convert plane name '%s'",
 		name.c_str());
 	debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
@@ -45,6 +48,12 @@ void	ProcessorParser::startImagePlane(const attr_t& attrs) {
 	std::string	planename = i->second;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "planename: %s", planename.c_str());
 	int	plane = name2plane(planename);
+	if ((plane > 3) || (plane < 0)) {
+		std::string	msg = stringprintf("bad plane number %d",
+			plane);
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw std::runtime_error(msg);
+	}
 	ImagePlaneStep	*planestep = new ImagePlaneStep(nodePaths(), plane);
 	ProcessingStepPtr	step(planestep);
 

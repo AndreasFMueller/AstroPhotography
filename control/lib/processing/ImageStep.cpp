@@ -20,7 +20,7 @@ namespace process {
 /**
  * \brief Get a vector of precursor images
  */
-ImageSequence	ImageStep::precursorimages(std::vector<int> exclude) {
+ImageSequence	ImageStep::precursorimages(std::vector<int> exclude) const {
 	ImageSequence   images;
 	std::for_each(precursors().begin(), precursors().end(),
 		[&images,&exclude](int precursorid) mutable {
@@ -56,7 +56,7 @@ ImageSequence	ImageStep::precursorimages(std::vector<int> exclude) {
  * If there is not exactly one precursor image, throw an exception,
  * otherwise return the unique precursor image
  */
-ImagePtr	ImageStep::precursorimage(std::vector<int> exclude) {
+ImagePtr	ImageStep::precursorimage(std::vector<int> exclude) const {
 	// get the image from the precursor
 	ImageSequence	p = precursorimages(exclude);
 	if (p.size() != 1) {
@@ -67,6 +67,29 @@ ImagePtr	ImageStep::precursorimage(std::vector<int> exclude) {
 	}
 	ImagePtr	precursorimage = *p.begin();
 	return precursorimage;
+}
+
+class inconsistent_size : public std::exception {
+};
+
+/**
+ * \brief Verify that the precursor images are consistent in size
+ */
+bool	ImageStep::precursorSizesConsistent(std::vector<int> exclude) const {
+	ImageSequence	images = precursorimages(exclude);
+	ImageSize	size = (*images.begin())->size();
+	try {
+		std::for_each(images.begin(), images.end(),
+			[&](ImagePtr image) {
+				if (image->size() != size) {
+					throw inconsistent_size();
+				}
+			}
+		);
+	} catch (inconsistent_size) {
+		return false;
+	}
+	return true;
 }
 
 } // namespace process

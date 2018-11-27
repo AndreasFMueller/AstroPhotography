@@ -51,9 +51,12 @@ class ProcessorParser {
 	void	startHDR(const attr_t& attrs);
 	void	startImagePlane(const attr_t& attrs);
 	void	startLayerImage(const attr_t& attrs);
+	void	startRGB(const attr_t& attrs);
 	void	startRescale(const attr_t& attrs);
 	void	startDestar(const attr_t& attrs);
 	void	startLuminanceStretching(const attr_t& attrs);
+	void	startSum(const attr_t& attrs);
+	void	startLRGB(const attr_t& attrs);
 public:
 	ProcessorParser();
 	void	startElement(const std::string& name, const attr_t& attrs);

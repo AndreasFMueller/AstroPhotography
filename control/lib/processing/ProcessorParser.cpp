@@ -79,6 +79,10 @@ void	ProcessorParser::startElement(const std::string& name,
 		startStack(attrs);
 		return;
 	}
+	if (name == std::string("sum")) {
+		startSum(attrs);
+		return;
+	}
 	if (name == std::string("transform")) {
 		startTransform(attrs);
 		return;
@@ -105,6 +109,14 @@ void	ProcessorParser::startElement(const std::string& name,
 	}
 	if (name == std::string("layers")) {
 		startLayerImage(attrs);
+		return;
+	}
+	if (name == std::string("rgb")) {
+		startRGB(attrs);
+		return;
+	}
+	if (name == std::string("lrgb")) {
+		startLRGB(attrs);
 		return;
 	}
 	if (name == std::string("imageplane")) {

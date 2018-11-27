@@ -80,6 +80,12 @@ void	ProcessorParser::startCommon(const attr_t& attrs) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "name of %d node: %s",
 		step->id(), step->name().c_str());
 
+	// check the weight attribute
+	i = attrs.find(std::string("weight"));
+	if (i != attrs.end()) {
+		step->weight(std::stod(i->second));
+	}
+
 	// if there is a current top element, then add the present element
 	// as a precursor to the top of stack
 	if (_parent) {
