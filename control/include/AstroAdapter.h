@@ -2753,6 +2753,21 @@ ImagePtr	deemphasize(ImagePtr imageptr,
 			const ConstImageAdapter<double>& blurredmask,
 			double degree);
 
+//////////////////////////////////////////////////////////////////////
+// NaNzero adapter
+//////////////////////////////////////////////////////////////////////
+template<typename T>
+class NaNzeroAdapter : public ConstImageAdapter<T> {
+	const ConstImageAdapter<T>&     _image;
+public:
+	NaNzeroAdapter(const ConstImageAdapter<T>& image)
+		: ConstImageAdapter<T>(image.getSize()), _image(image) {
+	}
+	virtual	T	pixel(int x, int y) const {
+		return nanzero(_image.pixel(x, y));
+	}
+};
+
 } // namespace adapter
 } // namespace astro
 

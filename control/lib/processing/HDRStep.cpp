@@ -26,15 +26,14 @@ ProcessingStep::state	HDRStep::do_work() {
 
 		// get the mask precursor
 		if (maskid() > 0) {
+			// use the mask image
 			ProcessingStepPtr	maskstep = byid(maskid());
 			ImageStep	*maskimagestep
 				= dynamic_cast<ImageStep*>(&*maskstep);
 			mask(maskimagestep->image());
 		} else {
-			Image<float>	*maskimg
-				= new Image<float>(precursor->size());
-			maskimg->fill(1);
-			mask(ImagePtr(maskimg));
+			// use the image itself	as the mask
+			mask(precursor);
 		}
 
 		// apply HDR transformation

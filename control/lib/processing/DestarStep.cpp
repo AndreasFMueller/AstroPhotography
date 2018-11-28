@@ -20,9 +20,11 @@ DestarStep::DestarStep(NodePaths& parent) : ImageStep(parent), _radius(10) {
  * \brief Work function for destarring
  */
 ProcessingStep::state	DestarStep::do_work() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "start destarring, radius=%f", radius());
 	try {
 		ImagePtr	precursor = precursorimage();
 		_image = adapter::destarptr(precursor, radius());
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "destarring complete");
 		return ProcessingStep::complete;
 	} catch (const std::exception& x) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "processing error: %s", x.what());

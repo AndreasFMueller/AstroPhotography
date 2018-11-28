@@ -1363,6 +1363,15 @@ double	blue(const Pixel& pixel) {
 	return blue_typed(pixel, typename color_traits<Pixel>::color_category());
 }
 
+template<typename T>
+T	nanzero(const T& x) {
+	return (x == x) ? x : (T)0;
+}
+template<typename T>
+RGB<T>	nanzero(const RGB<T>& x) {
+	return RGB<T>(nanzero<T>(x.R), nanzero<T>(x.G), nanzero<T>(x.B));
+}
+
 } // namespace image
 } // namespace astro
 

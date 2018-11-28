@@ -10,9 +10,12 @@ namespace process {
 
 template<typename Pixel, int n>
 ImagePtr	extract_multiplane(Image<Multiplane<Pixel, n> >*image, int i) {
-	if ((i >= n) || (NULL != image)) {
+	if ((i >= n) || (NULL == image)) {
 		return ImagePtr();
 	}
+
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "try extract plane %d from %s", i,
+		demangle(typeid(*image).name()).c_str());
 
 	// create the target image
 	int	w = image->size().width();
@@ -32,9 +35,13 @@ ImagePtr	extract_multiplane(Image<Multiplane<Pixel, n> >*image, int i) {
 
 template<typename Pixel>
 ImagePtr	extract_rgb(Image<RGB<Pixel> >*image, int i) {
-	if ((i >= 3) || (NULL != image)) {
+	if ((i > 3) || (NULL == image)) {
 		return ImagePtr();
 	}
+
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "try extract plane %d from %s", i,
+		demangle(typeid(*image).name()).c_str());
+
 	// create the target image
 	int	w = image->size().width();
 	int	h = image->size().height();
@@ -65,6 +72,8 @@ ImagePtr	extract_rgb(Image<RGB<Pixel> >*image, int i) {
 
 template<typename Pixel>
 ImagePtr	extract(ImagePtr image, int i) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "try pixel type %s",
+		demangle(typeid(Pixel).name()).c_str());
 	ImagePtr	result;
 	if ((result = extract_rgb(dynamic_cast<Image<RGB<Pixel> >*>(&*image),
 		i))) return result;
@@ -90,18 +99,25 @@ ImagePtr	extract(ImagePtr image, int i) {
 }
 
 ProcessingStep::state	ImagePlaneStep::do_work() {
-	if ((_image = extract<unsigned char>(precursorimage(), _n)))
+	ImagePtr	pre = precursorimage();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "extract plane %d from %s", _n,
+		demangle(typeid(*pre).name()).c_str());
+
+	if ((_image = extract<unsigned char>(pre, _n)))
 		return ProcessingStep::complete;
-	if ((_image = extract<unsigned short>(precursorimage(), _n)))
+	if ((_image = extract<unsigned short>(pre, _n)))
 		return ProcessingStep::complete;
-	if ((_image = extract<unsigned int>(precursorimage(), _n)))
+	if ((_image = extract<unsigned int>(pre, _n)))
 		return ProcessingStep::complete;
-	if ((_image = extract<unsigned long>(precursorimage(), _n)))
+	if ((_image = extract<unsigned long>(pre, _n)))
 		return ProcessingStep::complete;
-	if ((_image = extract<float>(precursorimage(), _n)))
+	if ((_image = extract<float>(pre, _n)))
 		return ProcessingStep::complete;
-	if ((_image = extract<double>(precursorimage(), _n)))
+	if ((_image = extract<double>(pre, _n)))
 		return ProcessingStep::complete;
+
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "cannot extract %s",
+		demangle(typeid(*_image).name()).c_str());
 
 	return ProcessingStep::failed;
 }

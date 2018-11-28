@@ -50,6 +50,7 @@ class ProcessorParser {
 	void	startColorclamp(const attr_t& attrs);
 	void	startHDR(const attr_t& attrs);
 	void	startImagePlane(const attr_t& attrs);
+	void	startImage(const attr_t& attrs);
 	void	startLayerImage(const attr_t& attrs);
 	void	startRGB(const attr_t& attrs);
 	void	startRescale(const attr_t& attrs);

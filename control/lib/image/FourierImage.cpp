@@ -82,10 +82,9 @@ void	FourierImage::fourier(const Image<double>& image) {
  */
 FourierImage::FourierImage(const ImageSize& s)
 	: Image<double>(FourierImage::fsize(s)), _orig(s) {
-	size_t	m = size().getPixels();
-	for (size_t o = 0; o < m; o++) {
-		pixels[o] = 0.;
-	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "construct fourier image of size %s",
+		size().toString().c_str());
+	fill(0);
 }
 
 /**
@@ -146,7 +145,6 @@ ImagePtr	FourierImage::inverse() const {
 	fftw_execute(p);
 	fftw_destroy_plan(p);
 	fftw_cleanup();
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "inverse fourier transform complete");
 
 	// normalize to the dimensions of the domain
 	double	value = 1. / (n0 * n1);
