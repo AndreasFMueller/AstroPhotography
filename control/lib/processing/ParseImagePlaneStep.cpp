@@ -48,7 +48,7 @@ void	ProcessorParser::startImagePlane(const attr_t& attrs) {
 	std::string	planename = i->second;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "planename: %s", planename.c_str());
 	int	plane = name2plane(planename);
-	if ((plane > 3) || (plane < 0)) {
+	if ((plane > 3) || (plane < 0)) {
 		std::string	msg = stringprintf("bad plane number %d",
 			plane);
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());

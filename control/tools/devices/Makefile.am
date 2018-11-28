@@ -62,8 +62,8 @@ looptest:	imageloop
 		--loop-callback=./makemovie.sh
 
 asiloop:	imageloop
-	./imageloop --debug --period=60 --timestamp --exposure=0.001	\
-		--mean=64 --outdir=asi --align --number=0 --foreground	\
+	./imageloop --debug --period=60 --timestamp --exposure=55	\
+		--mean=100 --outdir=asi --align --number=0 --foreground	\
 		--x-offset=100 --width=2760				\
 		--image-callback=./asiconvert.sh			\
 		ccd:asi/0/rgb24 2>&1 | tee test.log

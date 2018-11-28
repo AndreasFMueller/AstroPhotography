@@ -37,7 +37,7 @@ bool	StepPath::absolute(const std::string& s) const {
 }
 
 bool	StepPath::parent_relative(const std::string& s) const {
-	return (!(absolute(s) || relative(s)));
+	return (!(absolute(s) || relative(s)));
 }
 
 bool	StepPath::relative(const std::string& s) const {
