@@ -21,10 +21,6 @@ void	ProcessorParser::startSum(const attr_t& attrs) {
 	push(sstep);
 
 	startCommon(attrs);
-
-	if (ss->baseimage()) {
-		sstep->add_precursor(ss->baseimage());
-	}
 }
 
 } // namespace process

@@ -43,6 +43,7 @@ libastroprocessing_la_SOURCES =						\
 	ParseRGBStep.cpp						\
 	ParseRescaleStep.cpp						\
 	ParseStackStep.cpp						\
+	ParseSumStep.cpp						\
 	ParseTransformationStep.cpp					\
 	ParseWriteFileimageStep.cpp					\
 	ParserSteps.cpp							\
