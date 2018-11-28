@@ -176,7 +176,7 @@ public:
 	ConfigurationPtr	config(uint8_t index);
 	ConfigurationPtr	activeConfig();
 	ConfigurationPtr	configValue(uint8_t value);
-	std::string	getStringDescriptor(uint8_t index) const;
+	std::string	getStringDescriptor(uint8_t index);
 	ContextHolderPtr	getContext() const;
 
 	// find all the interface association descriptors

@@ -116,7 +116,7 @@ static const int	max_retries = 3;
  *
  * \param index	Index of the string descriptor to retrieve
  */
-std::string	Device::getStringDescriptor(uint8_t index) const {
+std::string	Device::getStringDescriptor(uint8_t index) {
 	USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "retrieve string descriptor %d from %p",
 		index, dev_handle);
 	if (0 == index) {
@@ -145,6 +145,12 @@ std::string	Device::getStringDescriptor(uint8_t index) const {
 			return result;
 		}
 	} while (max_retries > ++retries);
+
+	// fake the strings for SX devices
+	if (getVendorId() == 0x1278) {
+		return stringprintf("string%d", index);
+	}
+
 	std::string	msg = stringprintf("cannot get string %d: %s (%d)",
 		index, libusb_error_name(rc), rc);
 	USBdebug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
