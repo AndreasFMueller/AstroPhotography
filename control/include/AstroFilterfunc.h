@@ -20,11 +20,13 @@ extern double	max(const ImagePtr image);
 extern double	max_luminance(const ImagePtr image);
 extern double	max_RGB(const ImagePtr image);
 extern double	maxrel(const ImagePtr image);
+extern RGB<double>	max_color(ImagePtr image);
 
 extern double	min(const ImagePtr image);
 extern double	min_luminance(const ImagePtr image);
 extern double	min_RGB(const ImagePtr image);
 extern double	minrel(const ImagePtr image);
+extern RGB<double>	min_color(ImagePtr image);
 
 extern double	mean(const ImagePtr image);
 extern double	mean2(const ImagePtr image);

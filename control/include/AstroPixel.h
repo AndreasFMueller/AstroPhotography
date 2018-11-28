@@ -1363,13 +1363,36 @@ double	blue(const Pixel& pixel) {
 	return blue_typed(pixel, typename color_traits<Pixel>::color_category());
 }
 
+/**
+ * \brief Replace NaN components by a replacement value
+ */
 template<typename T>
-T	nanzero(const T& x) {
-	return (x == x) ? x : (T)0;
+T	nanzero(const T& x, const T replacement = (T)0) {
+	return (x == x) ? x : replacement;
 }
+
 template<typename T>
-RGB<T>	nanzero(const RGB<T>& x) {
-	return RGB<T>(nanzero<T>(x.R), nanzero<T>(x.G), nanzero<T>(x.B));
+RGB<T>	nanzero(const RGB<T>& x, const T replacement = (T)0) {
+	return RGB<T>(nanzero<T>(x.R, replacement),
+			nanzero<T>(x.G, replacement),
+			nanzero<T>(x.B, replacement));
+}
+
+/**
+ * \brief Clamp luminance so that color stays the same
+ */
+template<typename T>
+RGB<T>	colorluminanceclamp(const RGB<T> p, T maximum, T minimum = (T)0) {
+	RGB<T>	q = p - RGB<T>(minimum);
+	if ((q.R > maximum) && ((q.R >= q.G) && (q.R >= q.B))) {
+		return RGB<T>(maximum, q.G * maximum / q.R, q.B * maximum / q.R);
+	}
+	if ((q.G > maximum) && ((q.G >= q.R) && (q.G >= q.B))) {
+		return RGB<T>(q.R * maximum / q.G, maximum, q.B * maximum / q.G);
+	}
+	if ((q.R > maximum) && ((q.R >= q.G) && (q.R >= q.B))) {
+		return RGB<T>(q.R * maximum / q.B, q.G * maximum / q.B, maximum);
+	}
 }
 
 } // namespace image

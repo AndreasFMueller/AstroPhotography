@@ -989,6 +989,23 @@ public:
 	}
 };
 
+template<typename T>
+class ColorLuminanceAdapter : public ConstImageAdapter<RGB<T> > {
+	const ConstImageAdapter<RGB<T> >&	_image;
+	T	_minimum;
+	T	_maximum;
+public:
+	ColorLuminanceAdapter(const ConstImageAdapter<RGB<T> >& image,
+		T minimum, T maximum)
+		: ConstImageAdapter<RGB<T> >(image.getSize()), _image(image),
+		  _minimum(minimum), _maximum(maximum) {
+	}
+	RGB<T>	pixel(int x, int y) const {
+		return colorluminanceclamp(_image.pixel(x, y)
+			- RGB<T>(_minimum), _maximum);
+	}
+};
+
 //////////////////////////////////////////////////////////////////////
 // Rescaling adapter
 //////////////////////////////////////////////////////////////////////

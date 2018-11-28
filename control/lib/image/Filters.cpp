@@ -87,7 +87,63 @@ static RGB<double>	mean_color(const Image<Pixel>& image) {
 	return RGB<double>(R / counterR, G / counterG, B / counterB);
 }
 
-#define filter_rgb(image, pixel)					\
+template<typename Pixel>
+static RGB<double>	max_color(const Image<Pixel>& image) {
+	MosaicType	mosaic = image.getMosaicType();
+	double	R = 0, G = 0, B = 0;
+	int	w = image.size().width();
+	int	h = image.size().height();
+	for (int x = 0; x < w; x++) {
+		for (int y = 0; y < h; y++) {
+			double	value = image.pixel(x, y);
+			if (value != value) {
+				// skip nans
+				continue;
+			}
+			if (mosaic.isR(x, y) && (value > R)) {
+				R = value;
+			}
+			if (mosaic.isG(x, y) && (value > G)) {
+				G = value;
+			}
+			if (mosaic.isB(x, y) && (value > B)) {
+				B = value;
+			}
+		}
+	}
+	return RGB<double>(R, G, B);
+}
+
+template<typename Pixel>
+static RGB<double>	min_color(const Image<Pixel>& image) {
+	MosaicType	mosaic = image.getMosaicType();
+	double	R = std::numeric_limits<double>::max();
+	double	G = std::numeric_limits<double>::max();
+	double	B = std::numeric_limits<double>::max();
+	int	w = image.size().width();
+	int	h = image.size().height();
+	for (int x = 0; x < w; x++) {
+		for (int y = 0; y < h; y++) {
+			double	value = image.pixel(x, y);
+			if (value != value) {
+				// skip nans
+				continue;
+			}
+			if (mosaic.isR(x, y) && (value < R)) {
+				R = value;
+			}
+			if (mosaic.isG(x, y) && (value < G)) {
+				G = value;
+			}
+			if (mosaic.isB(x, y) && (value < B)) {
+				B = value;
+			}
+		}
+	}
+	return RGB<double>(R, G, B);
+}
+
+#define mean_rgb(image, pixel)						\
 	{								\
 		Image<pixel>	*imagep					\
 			= dynamic_cast<Image<pixel> *>(&*image);	\
@@ -96,17 +152,61 @@ static RGB<double>	mean_color(const Image<Pixel>& image) {
 		}							\
 	}
 
+#define min_rgb(image, pixel)						\
+	{								\
+		Image<pixel>	*imagep					\
+			= dynamic_cast<Image<pixel> *>(&*image);	\
+		if (NULL != imagep) {					\
+			return min_color(*imagep);			\
+		}							\
+	}
+
+#define max_rgb(image, pixel)						\
+	{								\
+		Image<pixel>	*imagep					\
+			= dynamic_cast<Image<pixel> *>(&*image);	\
+		if (NULL != imagep) {					\
+			return max_color(*imagep);			\
+		}							\
+	}
+
 RGB<double>	mean_color(const ImagePtr image) {
 	if (image->getMosaicType() == MosaicType()) {
 		return RGB<double>(mean(image));
 	}
-	filter_rgb(image, unsigned char);
-	filter_rgb(image, unsigned short);
-	filter_rgb(image, unsigned int);
-	filter_rgb(image, unsigned long);
-	filter_rgb(image, float);
-	filter_rgb(image, double);
+	mean_rgb(image, unsigned char);
+	mean_rgb(image, unsigned short);
+	mean_rgb(image, unsigned int);
+	mean_rgb(image, unsigned long);
+	mean_rgb(image, float);
+	mean_rgb(image, double);
 	return RGB<double>();
+}
+
+RGB<double>	min_color(const ImagePtr image) {
+	if (image->getMosaicType() == MosaicType()) {
+		return RGB<double>(min(image));
+	}
+	min_rgb(image, unsigned char);
+	min_rgb(image, unsigned short);
+	min_rgb(image, unsigned int);
+	min_rgb(image, unsigned long);
+	min_rgb(image, float);
+	min_rgb(image, double);
+	return RGB<double>();
+}
+
+RGB<double>	max_color(const ImagePtr image) {
+	if (image->getMosaicType() == MosaicType()) {
+		return RGB<double>(max(image));
+	}
+	max_rgb(image, unsigned char);
+	max_rgb(image, unsigned short);
+	max_rgb(image, unsigned int);
+	max_rgb(image, unsigned long);
+	max_rgb(image, float);
+	max_rgb(image, double);
+	return RGB<double>(std::numeric_limits<double>::max());
 }
 
 #define	filter_typed1(image, f, pixel)					\
