@@ -72,8 +72,6 @@ ImagePtr	flat(const ImageSequence& images) {
 	float	maxvalue = maxfilter(*image);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "maximum value: %f", maxvalue);
 
-	// XXX get the mean values and add them to the metadata
-
 	// devide the image by that value, so that the new maximum value
 	// is 1
 	for (int x = 0; x < image->size().width(); x++) {
@@ -88,9 +86,6 @@ ImagePtr	flat(const ImageSequence& images) {
 void	FlatFrameFactory::copyMetadata(ImagePtr flat,
 	ImagePtr firstimage) const {
 	CalibrationFrameFactory::copyMetadata(flat, firstimage);
-	if (firstimage->hasMetadata("FILTER")) {
-		flat->setMetadata(firstimage->getMetadata("FILTER"));
-	}
 	flat->setMetadata(FITSKeywords::meta(std::string("PURPOSE"),
                 std::string("flat")));
 }

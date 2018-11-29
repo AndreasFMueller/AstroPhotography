@@ -9,6 +9,7 @@
 #include <includes.h>
 #include <AstroCalibration.h>
 #include <AstroFilter.h>
+#include <AstroFilterfunc.h>
 #include <PixelValue.h>
 #include <limits>
 #include <AstroDebug.h>
@@ -52,6 +53,9 @@ public:
 	 * This image contains the mean values for pixels at the same position
 	 */
 	Image<T>	*image;
+private:
+	ImagePtr	imageptr;
+public:
 
 	/**
 	 * \brief Variance per pixel
@@ -59,17 +63,19 @@ public:
 	 * This image contains the variance of pixel values at the same position
  	 */
 	Image<T>	*var;
+private:
+	ImagePtr	varptr;
 
 private:
 	void	setup_images(const ImageSequence& images);
 	void	compute(int x, int y, T darkvalue);
+	void	statistics();
 
 public:
 	ImageMean(const ImageSequence& images, bool _enableVariance = false);
 	ImageMean(const ImageSequence& images, const Image<T>& dark,
 		bool _enableVariance = false);
 
-	~ImageMean();
 	T	mean(const Subgrid grid = Subgrid()) const;
 	T	mean(const ImageRectangle& rectangle,
 			const Subgrid grid = Subgrid()) const;
@@ -85,13 +91,29 @@ public:
 template<typename T>
 void	ImageMean<T>::setup_images(const ImageSequence& images) {
 	// create an image of appropriate size
-	size = (*images.begin())->size();
+	ImagePtr	firstimage = *images.begin();
+	size = firstimage->size();
+
+	// result image
 	image = new Image<T>(size);
+	imageptr = ImagePtr(image);
+
+	// variance (if needed
 	if (enableVariance) {
 		// prepare the variance image
 		var = new Image<T>(size);
+		varptr = ImagePtr(var);
 	} else {
 		var = NULL;
+		varptr = ImagePtr();
+	}
+
+	// mosaic info
+	imageptr->setMosaicType(firstimage->getMosaicType());
+
+	// do we have filter information?
+	if (firstimage->hasMetadata("FILTER")) {
+		imageptr->setMetadata(firstimage->getMetadata("FILTER"));
 	}
 }
 
@@ -270,6 +292,9 @@ ImageMean<T>::ImageMean(const ImageSequence& images, bool _enableVariance)
 
 	// number of standard deviations for bad pixels
 	k = 3;
+
+	// compute statistics
+	statistics();
 }
 
 /**
@@ -299,18 +324,9 @@ ImageMean<T>::ImageMean(const ImageSequence& images, const Image<T>& dark,
 
 	// number of standard deviations for bad pixels
 	k = 3;
-}
 
-template<typename T>
-ImageMean<T>::~ImageMean() {
-	if (image) {
-		delete image;
-		image = NULL;
-	}
-	if (var) {
-		delete var;
-		image = NULL;
-	}
+	// compute statistics
+	statistics();
 }
 
 /**
@@ -353,7 +369,6 @@ T	ImageMean<T>::variance(const ImageRectangle& rectangle,
 	return varianceoperator(sga);
 }
 
-
 /**
  * \brief retrieve the result image from the ImageMean object
  *
@@ -363,9 +378,61 @@ T	ImageMean<T>::variance(const ImageRectangle& rectangle,
  */
 template<typename T>
 ImagePtr	ImageMean<T>::getImagePtr() {
-	ImagePtr	result(image);
-	image = NULL;
-	return result;
+	return imageptr;
+}
+
+/**
+ * \brief Compute statistics values
+ */
+template<typename T>
+void	ImageMean<T>::statistics() {
+	if (imageptr->getMosaicType() != MosaicType()) {
+		// get statistics from an RGB image
+		RGB<double>	min = min_color(imageptr);
+		imageptr->setMetadata(io::FITSKeywords::meta("MIN-R", min.R));
+		imageptr->setMetadata(io::FITSKeywords::meta("MIN-G", min.G));
+		imageptr->setMetadata(io::FITSKeywords::meta("MIN-B", min.B));
+
+		RGB<double>	max = max_color(imageptr);
+		imageptr->setMetadata(io::FITSKeywords::meta("MAX-R", max.R));
+		imageptr->setMetadata(io::FITSKeywords::meta("MAX-G", max.G));
+		imageptr->setMetadata(io::FITSKeywords::meta("MAX-B", max.B));
+
+		RGB<double>	mn = mean_color(imageptr);
+		imageptr->setMetadata(io::FITSKeywords::meta("MEAN-R", mn.R));
+		imageptr->setMetadata(io::FITSKeywords::meta("MEAN-G", mn.G));
+		imageptr->setMetadata(io::FITSKeywords::meta("MEAN-B", mn.B));
+
+		return;
+	}
+
+	// compute the max/min/mean values
+	double	minval = filter::min(imageptr);
+	double	maxval = filter::max(imageptr);
+	double	mnval = filter::mean(imageptr);
+
+	// do we have filter information?
+	std::string	filtername;
+	if (imageptr->hasMetadata("FILTER")) {
+		filtername = trim(imageptr->getMetadata("FILTER").getValue());
+	}
+	if (filtername == "R") {
+		imageptr->setMetadata(io::FITSKeywords::meta("MIN-R", minval));
+		imageptr->setMetadata(io::FITSKeywords::meta("MAX-R", maxval));
+		imageptr->setMetadata(io::FITSKeywords::meta("MEAN-R", mnval));
+	} else if (filtername == "G") {
+		imageptr->setMetadata(io::FITSKeywords::meta("MIN-G", minval));
+		imageptr->setMetadata(io::FITSKeywords::meta("MAX-G", maxval));
+		imageptr->setMetadata(io::FITSKeywords::meta("MEAN-G", mnval));
+	} else if (filtername == "B") {
+		imageptr->setMetadata(io::FITSKeywords::meta("MIN-B", minval));
+		imageptr->setMetadata(io::FITSKeywords::meta("MAX-B", maxval));
+		imageptr->setMetadata(io::FITSKeywords::meta("MEAN-B", mnval));
+	} else {
+		imageptr->setMetadata(io::FITSKeywords::meta("MIN", minval));
+		imageptr->setMetadata(io::FITSKeywords::meta("MAX", maxval));
+		imageptr->setMetadata(io::FITSKeywords::meta("MEAN", mnval));
+	}
 }
 
 } // calibration

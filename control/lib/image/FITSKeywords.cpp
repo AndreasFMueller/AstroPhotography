@@ -20,7 +20,7 @@ typedef struct {
 	bool	unique;
 } FITSKeyword;
 
-#define	Nkeywors	95
+#define	Nkeywors	98
 FITSKeyword	keywors[Nkeywors] = {
 // standard keywords
 { // 0
@@ -541,56 +541,74 @@ FITSKeyword	keywors[Nkeywors] = {
 	true
 },
 { // 86
-	std::string("MEANR"),
+	std::string("MEAN-R"),
 	std::string("mean value of R pixels"),
 	std::type_index(typeid(double)),
 	true
 },
 { // 87
-	std::string("MEANG"),
+	std::string("MEAN-G"),
 	std::string("mean value of G pixels"),
 	std::type_index(typeid(double)),
 	true
 },
 { // 88
-	std::string("MEANB"),
+	std::string("MEAN-B"),
 	std::string("mean value of B pixels"),
 	std::type_index(typeid(double)),
 	true
 },
 { // 89
-	std::string("MINR"),
+	std::string("MIN-R"),
 	std::string("min value of R pixels"),
 	std::type_index(typeid(double)),
 	true
 },
 { // 90
-	std::string("MING"),
+	std::string("MIN-G"),
 	std::string("min value of G pixels"),
 	std::type_index(typeid(double)),
 	true
 },
 { // 91
-	std::string("MINB"),
+	std::string("MIN-B"),
 	std::string("min value of B pixels"),
 	std::type_index(typeid(double)),
 	true
 },
 { // 92
-	std::string("MAXR"),
+	std::string("MAX-R"),
 	std::string("max value of R pixels"),
 	std::type_index(typeid(double)),
 	true
 },
 { // 93
-	std::string("MAXG"),
+	std::string("MAX-G"),
 	std::string("max value of G pixels"),
 	std::type_index(typeid(double)),
 	true
 },
 { // 94
-	std::string("MAXB"),
+	std::string("MAX-B"),
 	std::string("max value of B pixels"),
+	std::type_index(typeid(double)),
+	true
+},
+{ // 95
+	std::string("MEAN"),
+	std::string("mean pixel value"),
+	std::type_index(typeid(double)),
+	true
+},
+{ // 96
+	std::string("MIN"),
+	std::string("minimum pixel value"),
+	std::type_index(typeid(double)),
+	true
+},
+{ // 97
+	std::string("MAX"),
+	std::string("maximum pixel value"),
 	std::type_index(typeid(double)),
 	true
 },
