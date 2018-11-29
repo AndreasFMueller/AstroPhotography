@@ -58,7 +58,9 @@ private:
 public:
 	SxFilterWheel(const DeviceName& name);
 	~SxFilterWheel();
-	virtual unsigned int	nFilters();
+protected:
+	virtual unsigned int	nFilters0();
+public:
 	virtual unsigned int	currentPosition();
 	virtual void	select(size_t filterindex);
 	virtual void	select(const std::string& filtername);

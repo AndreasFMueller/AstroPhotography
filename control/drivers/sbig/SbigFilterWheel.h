@@ -26,7 +26,9 @@ class SbigFilterWheel : public FilterWheel, public SbigDevice {
 public:
 	SbigFilterWheel(SbigCamera& camera);
 	virtual ~SbigFilterWheel();
-	virtual unsigned int	nFilters();
+protected:
+	virtual unsigned int	nFilters0();
+public:
 	virtual unsigned int	currentPosition();
 	virtual void	select(size_t filterindex);
 	virtual std::string	filterName(size_t filterindex);

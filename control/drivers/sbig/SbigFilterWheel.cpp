@@ -165,7 +165,7 @@ SbigFilterWheel::~SbigFilterWheel() {
 	cfw(&params, &results, "cannot close filter wheel");
 }
 
-unsigned int	SbigFilterWheel::nFilters() {
+unsigned int	SbigFilterWheel::nFilters0() {
 	return npositions;
 }
 

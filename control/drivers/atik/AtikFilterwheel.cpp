@@ -24,7 +24,7 @@ AtikFilterwheel::AtikFilterwheel(::AtikCamera *camera)
  *
  * \return the number filters this camera has
  */
-unsigned int	AtikFilterwheel::nFilters() {
+unsigned int	AtikFilterwheel::nFilters0() {
 	unsigned int	filtercount;
 	bool	moving;
 	unsigned int	current;

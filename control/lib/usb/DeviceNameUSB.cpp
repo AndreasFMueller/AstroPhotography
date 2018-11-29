@@ -64,10 +64,12 @@ void	DeviceNameUSB::parse(const std::string& name) {
 	}
 	
 	// find the next dash to extract idvendor and idproduct
-	usb::USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "%s has bus=%d, addr=%d, iprod=%s, "
+	usb::USBdebug(LOG_DEBUG, DEBUG_LOG, 0,
+		"%s has bus=%d, addr=%d, iprod=%s, "
 		"idvendor=%04x, idproduct=%04x, serial=%s", name.c_str(),
 		_busnumber, _deviceaddress, _iproduct.c_str(),
-		_idvendor, _idproduct, _serial.c_str());
+		(unsigned int)_idvendor, (unsigned int)_idproduct,
+		_serial.c_str());
 }
 
 /**

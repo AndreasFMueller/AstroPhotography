@@ -59,6 +59,7 @@ DeviceName	FilterWheel::defaultname(const DeviceName& parent,
  */
 FilterWheel::FilterWheel(const DeviceName& name)
 	: Device(name, DeviceName::Filterwheel) {
+	nfilters = std::numeric_limits<unsigned int>::max();
 }
 
 /**
@@ -66,6 +67,7 @@ FilterWheel::FilterWheel(const DeviceName& name)
  */
 FilterWheel::FilterWheel(const std::string& name)
 	: Device(name, DeviceName::Filterwheel) {
+	nfilters = std::numeric_limits<unsigned int>::max();
 }
 
 /**
@@ -113,7 +115,7 @@ void	FilterWheel::select(const std::string& filtername) {
 /**
  * \brief Get the number of filters from the properties
  */
-unsigned int	FilterWheel::nFilters() {
+unsigned int	FilterWheel::nFilters0() {
 	Properties	properties(name().toString());
 	try {
 		std::string	nfilterstring 
@@ -122,6 +124,16 @@ unsigned int	FilterWheel::nFilters() {
 	} catch (...) {
 		return 1;
 	}
+}
+
+/**
+ * \brief The public method to retrieve the number of filters
+ */
+unsigned int	FilterWheel::nFilters() {
+	if (std::numeric_limits<unsigned int>::max() == nfilters) {
+		nfilters = this->nFilters0();
+	}
+	return nfilters;
 }
 
 /**

@@ -61,6 +61,7 @@ extern "C"
 astro::module::ModuleDescriptor	*getDescriptor() {
 	std::call_once(astro::module::sx::descriptor_once,
 		astro::module::sx::setup_descriptor);
+	USBdebugEnable();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "SxDescriptor: %p",
 		astro::module::sx::descriptor);
 	return astro::module::sx::descriptor;
@@ -244,7 +245,8 @@ std::vector<std::string>	SxCameraLocator::getDevicelist(
 	}
 
 	// list all devices from the context
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "iterating through devices");
+	debug(LOG_DEBUG, DEBUG_LOG, 0,
+		"iterating through remaining device types");
 	std::vector<DevicePtr>	d = context.devices((uint16_t)SX_VENDOR_ID);
 	std::vector<DevicePtr>::const_iterator	i;
 	for (i = d.begin(); i != d.end(); i++) {
@@ -253,6 +255,8 @@ std::vector<std::string>	SxCameraLocator::getDevicelist(
 		// all devices. We ignore devices that we cannot open
 		try {
 			DevicePtr	devptr = *i;
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "checking %04x:%04x",
+				devptr->getVendorId(), devptr->getProductId());
 			// skip filter wheels
 			if (devptr->getProductId() == SX_FILTERWHEEL_PRODUCT_ID)
 				continue;

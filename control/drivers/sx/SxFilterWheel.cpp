@@ -219,7 +219,7 @@ SxFilterWheel::~SxFilterWheel() {
 	_hid = NULL;
 }
 
-unsigned int	SxFilterWheel::nFilters() {
+unsigned int	SxFilterWheel::nFilters0() {
 	std::unique_lock<std::recursive_mutex>	lock(_mutex);
 	if (nfilters > 0) {
 		return nfilters;

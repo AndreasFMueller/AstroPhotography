@@ -91,36 +91,4 @@ Hardware:
 
 Bugs:
 
-Hang in QSI driver:
-
-Thread 16 (Thread 0xa3f0b2f0 (LWP 19909)):
-#0  __libc_do_syscall () at ../sysdeps/unix/sysv/linux/arm/libc-do-syscall.S:46
-#1  0xb65d34ac in pthread_join (threadid=2803888880, thread_return=0x0) at pthread_join.c:90
-#2  0xb654ad50 in std::thread::join() () from /usr/lib/arm-linux-gnueabihf/libstdc++.so.6
-#3  0xb024e7a2 in astro::camera::qsi::QsiCcd::startExposure (this=0xaf801d70, exposure=...) at QsiCcd.cpp:65
-#4  0xb6e5f814 in astro::task::ExposureWork::run (this=0xae6096a8) at ExposureWork.cpp:248
-#5  0xb6c9a9c8 in astro::task::TaskExecutor::main (this=0xae602c68) at TaskExecutor.cpp:72
-#6  0xb6e61a3e in astro::task::taskmain (te=<optimized out>) at TaskExecutor.cpp:36
-#7  0xb654adc8 in ?? () from /usr/lib/arm-linux-gnueabihf/libstdc++.so.6
-#8  0xb65d25b4 in start_thread (arg=0x0) at pthread_create.c:335
-#9  0xb643dc4c in ?? () at ../sysdeps/unix/sysv/linux/arm/clone.S:89 from /lib/arm-linux-gnueabihf/libc.so.6
-Backtrace stopped: previous frame identical to this frame (corrupt stack?)
-
-Thread 15 (Thread 0xa71ff2f0 (LWP 19906)):
-#0  __libc_do_syscall () at ../sysdeps/unix/sysv/linux/arm/libc-do-syscall.S:46
-#1  0xb65d91f8 in __lll_lock_wait (futex=0xae601fb4, private=0) at lowlevellock.c:46
-#2  0xb65d440c in __GI___pthread_mutex_lock (mutex=0xae601fb4) at pthread_mutex_lock.c:115
-#3  0xb024e5ec in __gthread_mutex_lock (__mutex=<optimized out>)
-    at /usr/include/arm-linux-gnueabihf/c++/5/bits/gthr-default.h:748
-#4  __gthread_recursive_mutex_lock (__mutex=<optimized out>)
-    at /usr/include/arm-linux-gnueabihf/c++/5/bits/gthr-default.h:810
-#5  std::recursive_mutex::lock (this=<optimized out>) at /usr/include/c++/5/mutex:176
-#6  std::unique_lock<std::recursive_mutex>::lock (this=0xa71fecbc) at /usr/include/c++/5/mutex:485
-#7  std::unique_lock<std::recursive_mutex>::unique_lock (__m=..., this=0xa71fecbc) at /usr/include/c++/5/mutex:415
-#8  astro::camera::qsi::QsiCcd::run (this=0xaf801d70) at QsiCcd.cpp:171
-#9  0xb654adc8 in ?? () from /usr/lib/arm-linux-gnueabihf/libstdc++.so.6
-#10 0xb65d25b4 in start_thread (arg=0x0) at pthread_create.c:335
-#11 0xb643dc4c in ?? () at ../sysdeps/unix/sysv/linux/arm/clone.S:89 from /lib/arm-linux-gnueabihf/libc.so.6
-Backtrace stopped: previous frame identical to this frame (corrupt stack?)
-
 

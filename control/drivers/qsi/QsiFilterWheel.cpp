@@ -75,7 +75,7 @@ QsiFilterWheel::~QsiFilterWheel() {
 /**
  * \brief Number of filters
  */
-unsigned int	QsiFilterWheel::nFilters() {
+unsigned int	QsiFilterWheel::nFilters0() {
 	return nfilters;
 }
 

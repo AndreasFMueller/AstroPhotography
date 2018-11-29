@@ -6,7 +6,7 @@
 #
 
 bin_PROGRAMS = astroscan devicemapper getimages imageloop focus focustest \
-	dark flat focusing getstream filterwheel
+	dark flat focusing getstream astrofilterwheel
 
 astroscan_SOURCES = astroscan.cpp
 astroscan_DEPENDENCIES = $(top_builddir)/lib/libastro.la
@@ -48,9 +48,9 @@ devicemapper_SOURCES = devicemapper.cpp
 devicemapper_DEPENDENCIES = $(top_builddir)/lib/libastro.la
 devicemapper_LDADD = -L$(top_builddir)/lib -lastro
 
-filterwheel_SOURCES = filterwheel.cpp
-filterwheel_DEPENDENCIES = $(top_builddir)/lib/libastro.la
-filterwheel_LDADD = -L$(top_builddir)/lib -lastro 
+astrofilterwheel_SOURCES = astrofilterwheel.cpp
+astrofilterwheel_DEPENDENCIES = $(top_builddir)/lib/libastro.la
+astrofilterwheel_LDADD = -L$(top_builddir)/lib -lastro 
 
 # full night with the Starlight Express Oculus all sky camera.
 looptest:	imageloop
@@ -77,6 +77,6 @@ simloop:	imageloop
 focusingtest:	focusing
 	./focusing -d -w 64 -h 64 -x 350 -y 255 -e 2 2>&1 | tee focusing.log
 
-test:	filterwheel
-	./filterwheel --debug filterwheel:sx/080 
+test:	astrofilterwheel
+	./astrofilterwheel --debug filterwheel:sx/080 
 

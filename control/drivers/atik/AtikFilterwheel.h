@@ -17,7 +17,9 @@ class AtikFilterwheel : public FilterWheel {
 	::AtikCamera	*_camera;
 public:
 	AtikFilterwheel(::AtikCamera *);
-	virtual unsigned int	nFilters();
+protected:
+	virtual unsigned int	nFilters0();
+public:
 	virtual unsigned int	currentPosition();
 	virtual void	select(size_t filterindex);
 	virtual State	getState();

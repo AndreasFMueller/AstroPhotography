@@ -35,7 +35,9 @@ public:
 	QsiFilterWheel(QsiCamera& camera);
 	virtual ~QsiFilterWheel();
 
-	virtual unsigned int	nFilters();
+protected:
+	virtual unsigned int	nFilters0();
+public:
 	virtual unsigned int	currentPosition();
 	virtual void	select(size_t filterindex);
 	virtual void	select(const std::string& filtername);

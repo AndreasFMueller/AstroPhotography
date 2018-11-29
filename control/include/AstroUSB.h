@@ -146,6 +146,7 @@ typedef std::shared_ptr<Transfer>	TransferPtr;
 class 	Device {
 	ContextHolderPtr	context;
 	libusb_device	*dev;
+	struct libusb_device_descriptor	devdesc;
 	libusb_device_handle	*dev_handle;
 
 	// Device objects can only be created from a Context
@@ -589,7 +590,6 @@ public:
  */
 class	DeviceDescriptor {
 	Device&	dev;
-	struct libusb_device_descriptor	d;
 	std::string	manufacturer;
 	std::string	product;
 	std::string	serialnumber;

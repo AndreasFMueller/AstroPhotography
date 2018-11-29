@@ -22,7 +22,9 @@ class SimFilterWheel : public FilterWheel {
 	void	checkstate();
 public:
 	SimFilterWheel(SimLocator& locator);
-	virtual unsigned int	nFilters() { return 5; }
+protected:
+	virtual unsigned int	nFilters0() { return 5; }
+public:
 	virtual unsigned int	currentPosition();
 	virtual void	select(size_t filterindex);
 	virtual std::string	filterName(size_t filterindex);

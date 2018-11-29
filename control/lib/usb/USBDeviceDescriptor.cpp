@@ -24,24 +24,21 @@ DeviceDescriptor::DeviceDescriptor(Device& device) : dev(device) {
 	USBdebug(LOG_DEBUG, DEBUG_LOG, 0,
 		"Construct DeviceDescriptor for bus=%d, port=%d",
 		device.getBusNumber(), device.getPortNumber());
-	// copy the descriptor data
-	int	rc = libusb_get_device_descriptor(device.dev, &d);
-	if (rc != LIBUSB_SUCCESS) {
-		std::string     msg = stringprintf("cannot get device "
-			"descriptor: %s", libusb_error_name(rc));
-		USBdebug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
-		throw USBError(msg);
-	}
-
 	// manufacturer
-	USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "iManufacturer = %d", d.iManufacturer);
-	manufacturer = device.getStringDescriptor(d.iManufacturer);
-	USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "iProduct = %d", d.iProduct);
-	product = device.getStringDescriptor(d.iProduct);
-	if (d.iSerialNumber > 0) {
+	USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "iManufacturer = %d",
+		device.devdesc.iManufacturer);
+	manufacturer = device.getStringDescriptor(device.devdesc.iManufacturer);
+
+	// product
+	USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "iProduct = %d",
+		device.devdesc.iProduct);
+	product = device.getStringDescriptor(device.devdesc.iProduct);
+
+	// serial number
+	if (device.devdesc.iSerialNumber > 0) {
 		try {
 			serialnumber = device.getStringDescriptor(
-				d.iSerialNumber);
+				device.devdesc.iSerialNumber);
 			USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "found serial: %s",
 				serialnumber.c_str());
 		} catch (const USBError& e) {
@@ -94,35 +91,35 @@ std::ostream&	operator<<(std::ostream& out, const DeviceDescriptor& devdesc) {
 
 
 uint16_t        DeviceDescriptor::bcdUSB() const {
-	return d.bcdUSB;
+	return dev.devdesc.bcdUSB;
 }
 
 uint8_t         DeviceDescriptor::bDeviceClass() const {
-	return d.bDeviceClass;
+	return dev.devdesc.bDeviceClass;
 }
 
 uint8_t         DeviceDescriptor::bDeviceSubClass() const {
-	return d.bDeviceSubClass;
+	return dev.devdesc.bDeviceSubClass;
 }
 
 uint8_t         DeviceDescriptor::bDeviceProtocol() const {
-	return d.bDeviceProtocol;
+	return dev.devdesc.bDeviceProtocol;
 }
 
 uint8_t         DeviceDescriptor::bMaxPacketSize0() const {
-	return d.bMaxPacketSize0;
+	return dev.devdesc.bMaxPacketSize0;
 }
 
 uint16_t        DeviceDescriptor::idVendor() const {
-	return d.idVendor;
+	return dev.devdesc.idVendor;
 }
 
 uint16_t        DeviceDescriptor::idProduct() const {
-	return d.idProduct;
+	return dev.devdesc.idProduct;
 }
 
 uint16_t        DeviceDescriptor::bcdDevice() const {
-	return d.bcdDevice;
+	return dev.devdesc.bcdDevice;
 }
 
 const std::string&     DeviceDescriptor::iManufacturer() const {
@@ -138,7 +135,7 @@ const std::string&     DeviceDescriptor::iSerialNumber() const {
 }
 
 uint8_t DeviceDescriptor::bNumConfigurations() const {
-	return d.bNumConfigurations;
+	return dev.devdesc.bNumConfigurations;
 }
 
 } // namespace usb

@@ -87,7 +87,7 @@ std::vector<DevicePtr>	Context::devices() {
  * \param vendor_id	list devices from this vendor
  */
 std::vector<DevicePtr>	Context::devices(uint16_t vendor_id) {
-	USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "getting devices for vendor %04x",
+	USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "getting devices for vendor %04hx",
 		vendor_id);
 	std::vector<DevicePtr>	result;
 
@@ -108,6 +108,8 @@ std::vector<DevicePtr>	Context::devices(uint16_t vendor_id) {
 		libusb_device_descriptor	desc;
 		rc = libusb_get_device_descriptor(devlist[i], &desc);
 		if ((rc == LIBUSB_SUCCESS) && (desc.idVendor == vendor_id)) {
+			USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "device %04hx:%04hx",
+				desc.idVendor, desc.idProduct);
 			DevicePtr	dev(new Device(context, devlist[i]));
 			result.push_back(dev);
 		}
@@ -127,7 +129,7 @@ std::vector<DevicePtr>	Context::devices(uint16_t vendor_id) {
  * \param product_id	product id to search for
  */
 DevicePtr	Context::find(uint16_t vendor_id, uint16_t product_id) {
-	USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "find device VID=%04x/PID=%04x",
+	USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "find device VID=%04hx/PID=%04hx",
 		vendor_id, product_id);
 	libusb_device	**devlist;
 	ssize_t	length = libusb_get_device_list(context->context(), &devlist);

@@ -83,21 +83,33 @@ Device::Device(ContextHolderPtr _context, libusb_device *_dev)
 	// increment the reference counter
 	libusb_ref_device(dev);
 
+	// get the device descriptor
+	int	rc = libusb_get_device_descriptor(dev, &devdesc);
+	if (rc != LIBUSB_SUCCESS) {
+		std::string	msg = stringprintf("cannot get device "
+			"descriptor: %s", libusb_error_name(rc));
+		USBdebug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw USBError(msg);
+	}
+
 	// we need to open the device, otherwise we cannot read the
-	// descriptors
+	// string descriptors
 	open();
 
 	// find out whether this is a broken device
-	DeviceDescriptorPtr	d = descriptor();
-	if (d->idVendor() == VENDOR_THE_IMAGING_SOURCE) {
+	switch (getVendorId()) {
+	case VENDOR_THE_IMAGING_SOURCE:
 		USBdebug(LOG_DEBUG, DEBUG_LOG, 0,
 			"broken camera: The Imaging Source");
 		broken = BROKEN_THE_IMAGING_SOURCE;
-	}
-	if (d->idVendor() == VENDOR_ZWO) {
+		break;
+	case VENDOR_ZWO:
 		USBdebug(LOG_DEBUG, DEBUG_LOG, 0,
 			"broken camera: ZWO ASI");
 		broken = BROKEN_ZWO;
+		break;
+	default:
+		break;
 	}
 }
 
@@ -161,19 +173,9 @@ std::string	Device::getStringDescriptor(uint8_t index) {
  * \brief Get the descriptor of the device
  */
 DeviceDescriptorPtr	Device::descriptor() {
-	// get the device descriptor
-	libusb_device_descriptor	d;
-	int	rc = libusb_get_device_descriptor(dev, &d);
-	if (rc != LIBUSB_SUCCESS) {
-		std::string	msg = stringprintf("cannot get device "
-			"descriptor: %s", libusb_error_name(rc));
-		USBdebug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
-		throw USBError(msg);
-	}
-
 	// create a DeviceDescriptor object
-	DeviceDescriptor	*devdesc = new DeviceDescriptor(*this);
-	return DeviceDescriptorPtr(devdesc);
+	DeviceDescriptor	*Devdesc = new DeviceDescriptor(*this);
+	return DeviceDescriptorPtr(Devdesc);
 }
 
 /**
@@ -367,8 +369,11 @@ void	Device::setInterfaceAltSetting(uint8_t interface, uint8_t altsetting) {
 void	Device::controlRequest(RequestBase *request) {
 	USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "bmRequest = %02x, bRequest = %02x, "
 		"wValue = %04x, wIndex = %04x, wLength = %d",
-		request->bmRequestType(), request->bRequest(),
-		request->wValue(), request->wIndex(), request->wLength());
+		(unsigned int)request->bmRequestType(),
+		(unsigned int)request->bRequest(),
+		(unsigned int)request->wValue(),
+		(unsigned int)request->wIndex(),
+		(unsigned int)request->wLength());
 
 	// for debugging, display the request content if it is going to
 	// the host
@@ -413,11 +418,11 @@ enum Device::usb_speed	Device::getDeviceSpeed() const {
 }
 
 uint16_t	Device::getVendorId() {
-	return descriptor()->idVendor();
+	return devdesc.idVendor;
 }
 
 uint16_t	Device::getProductId() {
-	return descriptor()->idProduct();
+	return devdesc.idProduct;
 }
 
 std::ostream&	operator<<(std::ostream& out, const Device& device) {

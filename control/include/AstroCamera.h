@@ -572,7 +572,12 @@ static State	string2state(const std::string& s);
 	FilterWheel(const std::string& name);
 	FilterWheel(const DeviceName& name);
 	virtual ~FilterWheel();
-	virtual unsigned int	nFilters();
+private:
+	unsigned int	nfilters;
+protected:
+	virtual unsigned int	nFilters0();
+public:
+	unsigned int	nFilters();
 	virtual unsigned int	currentPosition() = 0;
 	virtual void	select(size_t filterindex) = 0;
 	virtual void	select(const std::string& name);
