@@ -80,3 +80,6 @@ focusingtest:	focusing
 test:	astrofilterwheel
 	./astrofilterwheel --debug filterwheel:sx/080 
 
+sxtest:	getimages
+	./getimages --debug --config=database.db --out=test.fits SX56
+
