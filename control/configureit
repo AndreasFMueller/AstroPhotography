@@ -58,10 +58,6 @@ if [ -d /usr/local/Ice ]
 then
 	ICEDIR=/usr/local/Ice
 	SLICEDIR=/usr/local/Ice/share/ice/slice
-elif [ -d /Library/Developer/Ice-3.5.1 ]
-then
-	ICEDIR=/Library/Developer/Ice-3.5.1
-	SLICEDIR=/Library/Developer/Ice-3.5.1/slice
 elif [ -x /usr/bin/slice2cpp ]
 then
 	ICEDIR=/usr

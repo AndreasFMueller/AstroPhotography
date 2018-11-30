@@ -76,7 +76,7 @@ namespace sx {
 //////////////////////////////////////////////////////////////////////
 
 SxCameraLocator::SxCameraLocator() {
-	// context.setDebugLevel(0);
+	context.setDebugLevel(4);
 }
 
 SxCameraLocator::~SxCameraLocator() {

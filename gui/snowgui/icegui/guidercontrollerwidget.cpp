@@ -54,6 +54,9 @@ float	GuiderParameterConverter::dial2parameter(int dial) const {
 	case snowstar::FilterKALMAN:
 		return 0.2 + dial / 8.;
 	}
+	std::string	msg = astro::stringprintf("unknown method %d", _method);
+	debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+	throw std::runtime_error(msg);
 }
 
 /**
@@ -80,6 +83,9 @@ int	GuiderParameterConverter::parameter2dial(float value) const {
 			return dial;
 		}
 	}
+	std::string	msg = astro::stringprintf("unknown method %d", _method);
+	debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+	throw std::runtime_error(msg);
 }
 
 /**

@@ -30,12 +30,22 @@ AC_CHECK_LIB([lapack], [dgels_], [LIBS="-llapack $LIBS"],
 AC_CHECK_LIB([fftw3], [fftw_malloc])
 AC_CHECK_LIB([pthread], [pthread_create])
 AC_CHECK_LIB([glpk], [glp_create_prob])
-AC_CHECK_LIB([sqlite3], [sqlite3_initialize])
 
 ## Multiarch support in debian #######################################
 if test -r /etc/debian_version
 then
 	multiarch=`dpkg-architecture -qDEB_HOST_MULTIARCH`
+fi
+
+## LIBUSB ############################################################
+if pkg-config --exists libusb-1.0
+then
+	LIBS="${LIBS} `pkg-config --libs libusb-1.0`"
+	CFLAGS="${CFLAGS} `pkg-config --cflags libusb-1.0`"
+	CXXFLAGS="${CXXFLAGS} `pkg-config --cflags libusb-1.0`"
+else
+	AC_CHECK_HEADERS([libusb-1.0/libusb.h])
+	AC_CHECK_LIB([usb-1.0], [libusb_bulk_transfer])
 fi
 
 ## CFITS #############################################################
@@ -67,6 +77,16 @@ then
 	CXXFLAGS="${CXXFLAGS} `pkg-config --cflags libpng`"
 else
 AC_CHECK_LIB([png], [png_free])
+fi
+
+## LIBSQLITE3 ########################################################
+# if libjpeg is installed with pkginfo, we use that
+if pkg-config --exists sqlite3
+then
+	LIBS="${LIBS} `pkg-config --libs sqlite3`"
+	CXXFLAGS="${CXXFLAGS} `pkg-config --cflags sqlite3`"
+else
+AC_CHECK_LIB([sqlite3], [sqlite3_initialize])
 fi
 
 ## UUID ##############################################################
@@ -180,6 +200,10 @@ else
 	ASTROLIBDIR=${ASTROPATH}/lib
 fi
 AC_SUBST(ASTROLIBDIR)
+
+EXTRA_CXXFLAGS="${EXTRA_CXXFLAGS} ${CXXFLAGS}"
+EXTRA_LDFLAGS="${EXTRA_LDFLAGS} ${LDFLAGS}"
+EXTRA_LIBS="${EXTRA_LIBS} ${LIBS}"
 
 AC_SUBST(EXTRA_CXXFLAGS)
 AC_SUBST(EXTRA_LDFLAGS)

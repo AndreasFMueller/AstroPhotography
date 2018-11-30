@@ -1142,7 +1142,7 @@ QPointF	StarChartWidget::rectanglePoint(const astro::RaDec& p) {
  */
 void	StarChartWidget::drawRectangle(QPainter& painter,
 		const ImagerRectangle& rectangle,
-		const astro::Angle& resolution) {
+		const astro::Angle& /* resolution */) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "drawing rectangle %s",
 		rectangle.toString().c_str());
 	// set line color

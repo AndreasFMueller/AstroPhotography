@@ -8,6 +8,7 @@
 #include <AstroDebug.h>
 #include <CameraLister.h>
 #include <AstroLoader.h>
+#include <AstroUSB.h>
 #include <QAction>
 #include "DeviceAction.h"
 #include <sstream>
@@ -565,6 +566,7 @@ void	LiveView::showFocuserStepsMenu(const QPoint& p) {
  */
 void	LiveView::stepsizeChanged() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "stepsize changed");
+	astro::usb::USBdebugEnable();
 	QAction *act = qobject_cast<QAction *>(sender());
 	QVariant	v = act->data();
 	int	stepsize = v.value<int>();

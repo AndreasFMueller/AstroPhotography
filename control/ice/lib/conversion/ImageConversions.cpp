@@ -347,6 +347,10 @@ astro::image::Format::type_t    convert(ImageEncoding e) {
 	case ImageEncodingJPEG:	return astro::image::Format::JPEG;
 	case ImageEncodingPNG:	return astro::image::Format::PNG;
 	}
+	std::string	msg = astro::stringprintf("unknown image encoding: %d",
+		e);
+	debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+	throw std::runtime_error(msg);
 }
 
 ImageEncoding   convert(astro::image::Format::type_t t) {
@@ -355,6 +359,10 @@ ImageEncoding   convert(astro::image::Format::type_t t) {
 	case astro::image::Format::JPEG:	return ImageEncodingJPEG;
 	case astro::image::Format::PNG:		return ImageEncodingPNG;
 	}
+	std::string	msg = astro::stringprintf("unknown image format: %d",
+		t);
+	debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+	throw std::runtime_error(msg);
 }
 
 astro::image::ImageBufferPtr	convert(const ImageBuffer& imagebuffer) {

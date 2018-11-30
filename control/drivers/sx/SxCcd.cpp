@@ -42,7 +42,13 @@ SxCcd::~SxCcd() {
  */
 void	start_routine(SxCcd *ccd) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "start exposure thread");
-	ccd->getImage0();
+	try {
+		ccd->getImage0();
+	} catch (const std::exception& x) {
+		std::string	msg = stringprintf("getImage0 failed: %s",
+			x.what());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "end exposure thread");
 }
 
@@ -218,6 +224,12 @@ void	SxCcd::getImage0() {
 	state(CcdState::exposing);
 	this->startExposure0(exposure);
 
+	// wait a little bit of time before performing the data transfer
+	double	waittime = exposure.exposuretime() - 0.1;
+	if (waittime > 0) {
+		Timer::sleep(waittime);
+	}
+
 	// compute the target image size, using the binning mode
 	ImageSize	targetsize = exposure.size() / exposure.mode();
 
@@ -244,6 +256,7 @@ void	SxCcd::getImage0() {
 		std::string	msg = stringprintf("%s usb error: %s",
 			name().toString().c_str(), x.what());
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		state(CcdState::idle);
 		throw DeviceTimeout(msg);
 	}
 	camera.release("exposure");
