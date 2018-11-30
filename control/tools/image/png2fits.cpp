@@ -25,22 +25,28 @@ static void	usage(const char *progname) {
 	std::cout << std::endl;
 	std::cout << "options:" << std::endl;
 	std::cout << " -d,--debug      enable debug messages" << std::endl;
+	std::cout << " -h,-?,--help    display this help message and exit";
+	std::cout << std::endl;
 }
 
 static struct option	longopts[] = {
 { "debug",	no_argument,		NULL,		'd' },
+{ "help",	no_argument,		NULL,		'h' },
 { NULL,		0,			NULL,		 0  }
 };
 
 int	main(int argc, char *argv[]) {
 	int     c;
 	int     longindex;
-	while (EOF != (c = getopt_long(argc, argv, "d", longopts,
+	while (EOF != (c = getopt_long(argc, argv, "dh?", longopts,
 		&longindex))) {
 		switch (c) {
 		case 'd':
 			debuglevel = LOG_DEBUG;
 			break;
+		case 'h':
+			usage(argv[0]);
+			return EXIT_SUCCESS;
 		}
 	}
 
