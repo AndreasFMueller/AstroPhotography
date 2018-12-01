@@ -1,1 +1,14 @@
+#
+# Large format cameras like the SX-56 need more USB memory, this rule runs
+# a program to increse the memory size. Create a script name
+# /usr/local/sbin/usbmemory with the contents
+#
+# echo 128 > /sys/module/usbcore/parameters/usbfs_memory_mb
+#
+# and make sure it is executable. Then the following rule will ensure the
+# USB memory is large enough whenver you plug in the SX-56 camera
+# 
+ATTRS{idVendor}=="1278", ATTRS{idProduct}=="0601", OWNER="root", GROUP="root", MODE="0666", RUN="/usr/local/sbin/usbmemory"
+
 ATTRS{idVendor}=="1278", ATTRS{idProduct}=="*", OWNER="root", GROUP="root", MODE="0666"
+

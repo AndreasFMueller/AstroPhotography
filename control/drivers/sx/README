@@ -1,0 +1,19 @@
+This driver allows to control Starlight Express cameras with the
+ECHO2 interface, Starlight Express Adaptive Optics units using a
+serial interface and the USB maxi filterwheel, which presents itself
+as a HID device on the USB bus.
+
+USB memory size issue on Linux
+------------------------------
+
+On Linux, there is an issue with the transfer size for large images.
+The default maximum memory size for USB transfers in the kernel is
+set to 16MB, as can be read from
+
+/sys/module/usbcore/parameters/usbfs_memory_mb
+
+To increase the memory size, one has to write the memory size to
+this sys filesystem node. This can be automated and done from within
+the udev rules. See the file 80-sx.rules in this directory for
+instructions how to set up udev to automaticall set the memory size.
+
