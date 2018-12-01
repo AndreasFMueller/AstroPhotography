@@ -25,6 +25,9 @@ public:
 	virtual void	operator()(Image<T>& image) = 0;
 };
 
+/**
+ * \brief Operator to verticall flip an image
+ */
 template<typename T>
 class FlipOperator : public ImageOperator<T> {
 public:
@@ -52,6 +55,9 @@ void	flip(Image<T>& image) {
 
 void	flip(ImagePtr image);
 
+/**
+ * \brief Operator to limit pixel values
+ */
 template<typename T>
 class LimitOperator : public ImageOperator<T> {
 	T	lower;
@@ -61,7 +67,7 @@ public:
 		: lower(_lower), upper(_upper) {
 	}
 	virtual void	operator()(astro::image::Image<T>& image) {
-		for (unsigned int i = 0; i < image.size().pixels; i++) {
+		for (unsigned int i = 0; i < image.size().getPixels(); i++) {
 			T	v = image.pixels[i];
 			if (v != v) {
 				continue;
@@ -77,6 +83,11 @@ public:
 };
 
 template<typename T>
+void	limit(Image<T>& image, const T& _lower, const T& _upper) {
+	LimitOperator<T>(_lower, _upper)(image);
+}
+
+template<typename T>
 class ScaleOperator : public ImageOperator<T> {
 	T	lower;
 	T	delta;
@@ -89,7 +100,7 @@ public:
 	virtual void	operator()(astro::image::Image<T>& image) {
 		T	min = image.pixels[0];
 		T	max = image.pixels[0];
-		for (unsigned int i = 0; i < image.size().pixels; i++) {
+		for (unsigned int i = 0; i < image.size().getPixels(); i++) {
 			T	v = image.pixels[i];
 			if (v != v) {
 				continue;

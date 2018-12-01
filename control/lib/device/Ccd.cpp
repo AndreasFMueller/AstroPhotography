@@ -292,7 +292,7 @@ bool	Ccd::wait() {
 		lastexposurestart, exposure.exposuretime());
 	double	endtime = lastexposurestart;
 	endtime += exposure.exposuretime();
-	endtime += 60; // additional time
+	endtime += 600; // additional time
 	time_t	now = time(NULL);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "now: %d", now);
 	int	delta = endtime - now;
@@ -309,25 +309,31 @@ bool	Ccd::wait() {
 	// notified, check whether the state has changed, and retry if not
 	while (std::cv_status::no_timeout == _condition.wait_for(lock,
 		std::chrono::seconds(delta))) {
-		// if we get to this point, we know that the state
-		// actually changed, but we don't own the lock
+		// if we get to this point, we know that there was no timeout
+		// and therefore that the state actually changed, and we
+		// do own the lock
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "state change detected");
 		if (ccd_lck_debug)
 			debug(LOG_DEBUG, DEBUG_LOG, 0,
 				"--> LCK wait complete, state %s",
 				CcdState::state2string(state()).c_str());
+
 		// if we get the exposed state, we return true
 		if (CcdState::exposed == this->state()) {
 			debug(LOG_DEBUG, DEBUG_LOG, 0, "state now exposed");
 			return true;
 		}
+
 		// if we get any other state and not exposing, we return false
 		if (CcdState::exposing != this->state()) {
 			debug(LOG_DEBUG, DEBUG_LOG, 0,
-				"state %s, waiting some more",
+				"state %s, giving up",
 			CcdState::state2string(this->state()).c_str());
 			return false;
 		}
+
 		// if we are still exposing, we we just continue waiting
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "still exposing, wait longer");
 	}
 
 	// this really should not happen, it indicates a serious problem
