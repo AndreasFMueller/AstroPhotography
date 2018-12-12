@@ -49,7 +49,8 @@ ImagePtr	ColorclampStep::image() {
 	if (NULL == inimage) {
 		throw std::runtime_error("unknown image format");
 	}
-	adapter::ColorLuminanceAdapter<float>     clamp(*inimage, minimum(), maximum());
+	adapter::ColorLuminanceAdapter<float>     clamp(*inimage, minimum(),
+							maximum());
 	Image<RGB<float> >      *outimage = new Image<RGB<float> >(clamp);
 	ImagePtr        outimageptr(outimage);
 	return outimageptr;
