@@ -37,6 +37,7 @@ class ProcessorParser {
 
 	void	startProcess(const attr_t& attrs);
 	void	endProcess();
+	void	startGroup(const attr_t& attrs);
 
 	void	startFileimage(const attr_t& attrs);
 	void	startDarkimage(const attr_t& attrs,

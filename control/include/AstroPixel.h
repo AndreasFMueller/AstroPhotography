@@ -1390,9 +1390,10 @@ RGB<T>	colorluminanceclamp(const RGB<T> p, T maximum, T minimum = (T)0) {
 	if ((q.G > maximum) && ((q.G >= q.R) && (q.G >= q.B))) {
 		return RGB<T>(q.R * maximum / q.G, maximum, q.B * maximum / q.G);
 	}
-	if ((q.R > maximum) && ((q.R >= q.G) && (q.R >= q.B))) {
+	if ((q.B > maximum) && ((q.B >= q.G) && (q.B >= q.R))) {
 		return RGB<T>(q.R * maximum / q.B, q.G * maximum / q.B, maximum);
 	}
+	return q;
 }
 
 } // namespace image

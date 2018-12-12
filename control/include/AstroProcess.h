@@ -325,6 +325,16 @@ public:
 };
 
 /**
+ * \brief A step used for grouping in the configuration file only
+ */
+class GroupStep : public ProcessingStep {
+public:
+	GroupStep(NodePaths& parent) : ProcessingStep(parent) { }
+	virtual ProcessingStep::state	do_work();
+	virtual std::string	what() const;
+};
+
+/**
  * \brief Thread performing the processing work within a step
  */
 class ProcessingThread : public std::thread {

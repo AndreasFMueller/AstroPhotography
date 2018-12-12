@@ -47,15 +47,16 @@ static void	accumulate_image(Image<float>& sumimg, double weight,
 
 ProcessingStep::state	SumStep::do_work() {
 	if (!precursorSizesConsistent()) {
-		throw std::runtime_error("precursor images are inconsitent");
+		throw std::runtime_error("precursor images are inconsistent");
 	}
 
+	// get the precursors
+	steps	ids = precursors();
+
 	// create and initialize an image
-	Image<float>	*sumimage = new Image<float>(precursorimage()->size());
-	sumimage->fill(0);
+	Image<float>	*sumimage = NULL;
 
 	// add all the precursor images 
-	steps	ids = precursors();
 	std::for_each(ids.begin(), ids.end(),
 		[&](int precursorid) {
 			ProcessingStepPtr step = byid(precursorid);
@@ -63,13 +64,20 @@ ProcessingStep::state	SumStep::do_work() {
 			if (imagestep == NULL) {
 				return;
 			}
+			if (NULL == sumimage) {
+				ImageSize size = imagestep->image()->size();
+				sumimage = new Image<float>(size);
+				sumimage->fill(0);
+			}
 			double	weight = imagestep->weight();
 			ImagePtr	image = imagestep->image();
 			accumulate_image(*sumimage, weight, image);
 		}
 	);
 
-	return ProcessingStep::failed;
+	_image = ImagePtr(sumimage);
+
+	return ProcessingStep::complete;
 }
 
 std::string	SumStep::what() const {

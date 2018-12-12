@@ -51,6 +51,10 @@ void	ProcessorParser::startElement(const std::string& name,
 		startProcess(attrs);
 		return;
 	}
+	if (name == std::string("group")) {
+		startGroup(attrs);
+		return;
+	}
 	if (name == std::string("fileimage")) {
 		startFileimage(attrs);
 		return;
