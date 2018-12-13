@@ -48,6 +48,7 @@ public:
 			return;
 		}
 		_imageptr = new Image<AccumulatorPixel>(*baseimage);
+		_imageptr->fill(AccumulatorPixel(0));
 		_image = ImagePtr(_imageptr);
 		_counter = 0;
 	}

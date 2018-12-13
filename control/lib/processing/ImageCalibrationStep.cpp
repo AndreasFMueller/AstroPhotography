@@ -95,7 +95,7 @@ ProcessingStep::state	ImageCalibrationStep::do_work() {
 		return ProcessingStep::failed;
 	}
 	_image = astro::image::ops::duplicate(imagestep->image());
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "precursor image duplicate: %s",
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "precursor image duplicate: %s, %s",
 		_image->size().toString().c_str(),
 		demangle(typeid(_image->pixel_type()).name()).c_str());
 
@@ -112,6 +112,7 @@ ProcessingStep::state	ImageCalibrationStep::do_work() {
 	}
 
 	// perform flip the image
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "flip: %s", (_flip) ? "yes" : "no");
 	if (_flip) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "flipping");
 		astro::image::operators::flip(_image);
