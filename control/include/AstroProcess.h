@@ -13,6 +13,7 @@
 #include <AstroUtils.h>
 #include <AstroPostprocessing.h>
 #include <AstroTonemapping.h>
+#include <AstroTransform.h>
 #include <AstroCamera.h>
 #include <thread>
 #include <mutex>
@@ -215,9 +216,12 @@ public:
 	virtual std::string	verboseinfo() const;
 private:
 	double	_weight;
+	transform::Transform	_transform;
 public:
 	double	weight() const { return _weight; }
 	void	weight(double w) { _weight = w; }
+	const transform::Transform&	transform() const { return _transform; }
+	void	transform(const transform::Transform& t) { _transform = t; }
 
 	// precursors and successors of each step, these turn the processing
 	// steps into directed graph

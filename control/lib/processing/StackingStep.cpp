@@ -117,7 +117,7 @@ ProcessingStep::state	StackingStep::do_work() {
 		} else {
 			debug(LOG_DEBUG, DEBUG_LOG, 0, "add image '%s'(%d)", 
 				next->name().c_str(), next->id());
-			stacker->add(is->image());
+			stacker->add(is->image(), is->transform());
 			counter++;
 		}
 	}

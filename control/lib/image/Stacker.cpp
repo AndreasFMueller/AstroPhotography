@@ -41,18 +41,31 @@ class Accumulator {
 	ImagePtr	_image;		// used for resource management
 	Image<AccumulatorPixel>	*_imageptr;
 	int	_counter;
-public:
-	int	counter() const { return _counter; }
-	Accumulator(const ConstImageAdapter<Pixel> *baseimage) {
-		if (NULL == baseimage) {
-			return;
-		}
-		_imageptr = new Image<AccumulatorPixel>(*baseimage);
+	void	setup(const ImageSize& size) {
+		_imageptr = new Image<AccumulatorPixel>(size);
 		_imageptr->fill(AccumulatorPixel(0));
 		_image = ImagePtr(_imageptr);
 		_counter = 0;
 	}
+public:
+	int	counter() const { return _counter; }
+
+	Accumulator(const ConstImageAdapter<Pixel> *baseimage) {
+		// a base image is required
+		if (NULL == baseimage) {
+			std::string	msg("no base image specified");
+			debug(LOG_ERR, DEBUG_LOG, 0, "%s");
+			throw std::runtime_error(msg);
+		}
+		setup(baseimage->getSize());
+	}
+
+	Accumulator(const ImageSize& size) {
+		setup(size);
+	}
+
 	void	accumulate(const ConstImageAdapter<AccumulatorPixel>& add);
+
 	ImagePtr	image() {
 		return _image;
 	}
@@ -81,7 +94,8 @@ void	Accumulator<AccumulatorPixel, Pixel>::accumulate(
 }
 
 Transform	Stacker::findtransform(const ConstImageAdapter<double>& base,
-			const ConstImageAdapter<double>& image) const {
+			const ConstImageAdapter<double>& image,
+			Transform initial_transform) const {
 	// find the mean levels, this is used for the reduction later on
 	double	mb = filter::Mean<double, double>().filter(base);
 	double	mi = filter::Mean<double, double>().filter(image);
@@ -98,6 +112,8 @@ Transform	Stacker::findtransform(const ConstImageAdapter<double>& base,
 
 		// find the transform between the base image and the new image
 		transform = transformanalyzer.transform(image);
+	} else {
+		transform = initial_transform;
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "initial transform: %s",
 		transform.toString().c_str());
@@ -197,8 +213,9 @@ public:
 		}
 	}
 	virtual ~MonochromeStacker() { }
-	void	add(const ConstImageAdapter<Pixel>& image);
-	void	add(ImagePtr imageptr);
+	void	add(const ConstImageAdapter<Pixel>& image,
+			Transform initial_transform);
+	void	add(ImagePtr imageptr, Transform initial_transform);
 	ImagePtr	image() {
 		return _accumulator.image();
 	}
@@ -206,7 +223,8 @@ public:
 
 template<typename AccumulatorPixel, typename Pixel>
 void	MonochromeStacker<AccumulatorPixel, Pixel>::add(
-		const ConstImageAdapter<Pixel>& image) {
+		const ConstImageAdapter<Pixel>& image,
+		Transform initial_transform) {
 	// first handle the case where there is no transform
 	if (notransform()) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "accumulate with no transform");
@@ -222,7 +240,7 @@ void	MonochromeStacker<AccumulatorPixel, Pixel>::add(
 	TypeConversionAdapter<Pixel>	targetimageadapter(image);
 
 	Transform	transform = findtransform(baseimageadapter,
-					targetimageadapter);
+					targetimageadapter, initial_transform);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "add transform: %s",
 		transform.toString().c_str());
 
@@ -238,12 +256,13 @@ void	MonochromeStacker<AccumulatorPixel, Pixel>::add(
 }
 
 template<typename AccumulatorPixel, typename Pixel>
-void	MonochromeStacker<AccumulatorPixel, Pixel>::add(ImagePtr imageptr) {
+void	MonochromeStacker<AccumulatorPixel, Pixel>::add(ImagePtr imageptr,
+		Transform initial_transform) {
 	Image<Pixel>	*imagep = dynamic_cast<Image<Pixel>*>(&*imageptr);
 	if (NULL == imagep) {
 		throw std::logic_error("new image has wrong type");
 	}
-	add(*imagep);
+	add(*imagep, initial_transform);
 }
 
 /**
@@ -267,9 +286,10 @@ public:
 	}
 	virtual ~RGBStacker() { }
 
-	void	add(const ConstImageAdapter<RGB<Pixel> >& image);
+	void	add(const ConstImageAdapter<RGB<Pixel> >& image,
+			Transform inital_transform);
 
-	void	add(ImagePtr imageptr);
+	void	add(ImagePtr imageptr, Transform inital_transform);
 	
 	ImagePtr	image() {
 		return _accumulator.image();
@@ -283,7 +303,8 @@ public:
  */
 template<typename AccumulatorPixel, typename Pixel>
 void	RGBStacker<AccumulatorPixel, Pixel>::add(
-		const ConstImageAdapter<RGB<Pixel> >& image) {
+		const ConstImageAdapter<RGB<Pixel> >& image,
+		Transform initial_transform) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "stacking new image");
 
 	// first handle the case where there is no transform
@@ -299,7 +320,8 @@ void	RGBStacker<AccumulatorPixel, Pixel>::add(
 
 	// find the transform to the new image
 	LuminanceAdapter<RGB<Pixel>, double>	luminanceimage(image);
-	Transform	transform = findtransform(luminancebase, luminanceimage);
+	Transform	transform = findtransform(luminancebase, luminanceimage,
+				initial_transform);
 
 	// create an adapter that converts the pixels of the original image
 	// into pixels that are compatible with the accumulator
@@ -313,7 +335,8 @@ void	RGBStacker<AccumulatorPixel, Pixel>::add(
 }
 
 template<typename AccumulatorPixel, typename Pixel>
-void	RGBStacker<AccumulatorPixel, Pixel>::add(ImagePtr newimage) {
+void	RGBStacker<AccumulatorPixel, Pixel>::add(ImagePtr newimage,
+		Transform initial_transform) {
 	// convert the image to a strongly typed image
 	Image<RGB<Pixel> >	*imagep
 		= dynamic_cast<Image<RGB<Pixel> >*>(&*newimage);
@@ -322,7 +345,7 @@ void	RGBStacker<AccumulatorPixel, Pixel>::add(ImagePtr newimage) {
 	}
 
 	// now add the image
-	add(*imagep);
+	add(*imagep, initial_transform);
 }
 
 //////////////////////////////////////////////////////////////////////

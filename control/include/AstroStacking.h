@@ -102,12 +102,14 @@ protected:
 		  _notransform(true), _usetriangles(false), _rigid(false) {
 	}
 public:
-	virtual void	add(ImagePtr) = 0;
+	virtual void	add(ImagePtr, transform::Transform initial_transform
+					= transform::Transform()) = 0;
 	virtual ImagePtr	image() = 0;
 
 protected:
 	transform::Transform	findtransform(const ConstImageAdapter<double>& base,
-				const ConstImageAdapter<double>& image) const;
+				const ConstImageAdapter<double>& image,
+				transform::Transform initial_transform) const;
 };
 
 } // namespace stacking

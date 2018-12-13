@@ -5,6 +5,7 @@
  */
 #include <includes.h>
 #include <AstroProcess.h>
+#include <AstroCoordinates.h>
 #include "ProcessorParser.h"
 
 namespace astro {
@@ -84,6 +85,34 @@ void	ProcessorParser::startCommon(const attr_t& attrs) {
 	i = attrs.find(std::string("weight"));
 	if (i != attrs.end()) {
 		step->weight(std::stod(i->second));
+	}
+
+	// check the attributes used to formulate the initial transform
+	double	xshift = 0;
+	double	yshift = 0;
+	double	rotate = 0;
+	double	scale = 1;
+	bool	transform_specified = false;
+	if (attrs.end() != (i = attrs.find(std::string("xshift")))) {
+		xshift = std::stod(i->second);
+		transform_specified = true;
+	}
+	if (attrs.end() != (i = attrs.find(std::string("yshift")))) {
+		yshift = std::stod(i->second);
+		transform_specified = true;
+	}
+	if (attrs.end() != (i = attrs.find(std::string("rotate")))) {
+		rotate = Angle(std::stod(i->second), Angle::Degrees).radians();
+		transform_specified = true;
+	}
+	if (attrs.end() != (i = attrs.find(std::string("scale")))) {
+		scale = std::stod(i->second);
+		transform_specified = true;
+	}
+	if (transform_specified) {
+		Point	translation(xshift, yshift);
+		transform::Transform	transform(rotate, translation, scale);
+		step->transform(transform);
 	}
 
 	// if there is a current top element, then add the present element
