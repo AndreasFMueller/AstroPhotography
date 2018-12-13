@@ -165,9 +165,10 @@ class PixelInterpolationAdapter : public ConstImageAdapter<Pixel> {
 	const ConstImageAdapter<Pixel>&	image;
 	Pixel	defaultpixel;
 public:
-	PixelInterpolationAdapter(const ConstImageAdapter<Pixel>& _image)
+	PixelInterpolationAdapter(const ConstImageAdapter<Pixel>& _image,
+			bool _use_nan = true)
 		: ConstImageAdapter<Pixel>(_image.getSize()), image(_image) {
-		if (std::numeric_limits<Pixel>::has_quiet_NaN) {
+		if (std::numeric_limits<Pixel>::has_quiet_NaN && _use_nan) {
 			defaultpixel = std::numeric_limits<Pixel>::quiet_NaN();
 		} else {
 			defaultpixel = Pixel(0);
@@ -338,25 +339,29 @@ class TransformAdapter : public ConstImageAdapter<Pixel> {
 public:
 	TransformAdapter(const ImageSize& targetsize,
 		const ConstImageAdapter<Pixel>& image,
-		const Transform& transform);
+		const Transform& transform,
+		bool _use_nan = true);
 	TransformAdapter(const ConstImageAdapter<Pixel>& image,
-		const Transform& transform);
+		const Transform& transform,
+		bool _use_nan = true);
 	virtual Pixel	pixel(int x, int y) const;
 };
 
 template<typename Pixel>
 TransformAdapter<Pixel>::TransformAdapter(const ImageSize& targetsize,
-	const ConstImageAdapter<Pixel>& _image, const Transform& _transform)
-	: ConstImageAdapter<Pixel>(targetsize), image(_image),
+	const ConstImageAdapter<Pixel>& _image, const Transform& _transform,
+	bool _use_nan)
+	: ConstImageAdapter<Pixel>(targetsize), image(_image, _use_nan),
 	  transform(_transform) {
 	inverse = transform.inverse();
 }
 
 template<typename Pixel>
 TransformAdapter<Pixel>::TransformAdapter(
-	const ConstImageAdapter<Pixel>& _image, const Transform& _transform)
+	const ConstImageAdapter<Pixel>& _image, const Transform& _transform,
+	bool _use_nan)
 	: ConstImageAdapter<Pixel>(_image.getSize()),
-	  image(_image), transform(_transform) {
+	  image(_image, _use_nan), transform(_transform) {
 	inverse = transform.inverse();
 }
 

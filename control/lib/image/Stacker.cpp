@@ -105,7 +105,7 @@ Transform	Stacker::findtransform(const ConstImageAdapter<double>& base,
 	// we now use this preliminary transform to improve using the Analyzer
 	int	repeats = 3;
 	while (repeats--) {
-		TransformAdapter<double> transformedbase(base, transform);
+		TransformAdapter<double> transformedbase(base, transform, false);
 		ReductionAdapter	reducedbase(transformedbase,
 						mb, 2 * mb);
 		Analyzer	analyzer(reducedbase);
@@ -232,7 +232,7 @@ void	MonochromeStacker<AccumulatorPixel, Pixel>::add(
 
 	// create an adapter that applies the transform to the image
 	TransformAdapter<AccumulatorPixel>	transformadapter(
-		accumulatorimage, transform.inverse());
+		accumulatorimage, transform.inverse(), false);
 	_accumulator.accumulate(transformadapter);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "image added");
 }
@@ -307,7 +307,7 @@ void	RGBStacker<AccumulatorPixel, Pixel>::add(
 
 	// create an adapter that applies the transform to the image
 	TransformAdapter<RGB<AccumulatorPixel> >	transformadapter(
-		accumulatorimage, transform.inverse());
+		accumulatorimage, transform.inverse(), false);
 	_accumulator.accumulate(transformadapter);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "image added");
 }
