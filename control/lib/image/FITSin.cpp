@@ -53,26 +53,47 @@ ImagePtr	FITSin::read() {
 			origin.toString().c_str());
 	}
 
-	/* images with 3 planes have RGB pixels */
+	// check whether we have color space information
+	bool	xyz = false;
+	if (infile.hasHeader(std::string("CSPACE"))) {
+		std::string cspace = infile.getHeader(std::string("CSPACE"));
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "color space: %s",
+			cspace.c_str());
+		if (cspace.find("XYZ") != std::string::npos) {
+			xyz = true;
+		}
+	}
+
+	/* images with 3 planes have RGB or XYZ pixels */
 	if (infile.getPlanes() == 3) {
 		switch (infile.getImgtype()) {
 		case BYTE_IMG:
 		case SBYTE_IMG:
-			result = do_read<RGB<unsigned char> >(filename);
+			result = (xyz)
+				? do_read<XYZ<unsigned char> >(filename)
+				: do_read<RGB<unsigned char> >(filename);
 			break;
 		case USHORT_IMG:
 		case SHORT_IMG:
-			result = do_read<RGB<unsigned short> >(filename);
+			result = (xyz)
+				? do_read<XYZ<unsigned short> >(filename)
+				: do_read<RGB<unsigned short> >(filename);
 			break;
 		case ULONG_IMG:
 		case LONG_IMG:
-			result = do_read<RGB<unsigned int> >(filename);
+			result = (xyz)
+				? do_read<XYZ<unsigned int> >(filename)
+				: do_read<RGB<unsigned int> >(filename);
 			break;
 		case FLOAT_IMG:
-			result = do_read<RGB<float> >(filename);
+			result = (xyz)
+				? do_read<XYZ<float> >(filename)
+				: do_read<RGB<float> >(filename);
 			break;
 		case DOUBLE_IMG:
-			result = do_read<RGB<double> >(filename);
+			result = (xyz)
+				? do_read<XYZ<double> >(filename)
+				: do_read<RGB<double> >(filename);
 			break;
 		}
 		result->setOrigin(origin);

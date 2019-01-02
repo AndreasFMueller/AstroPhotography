@@ -20,107 +20,107 @@ typedef struct {
 	bool	unique;
 } FITSKeyword;
 
-#define	Nkeywors	98
+#define	Nkeywors	103
 FITSKeyword	keywors[Nkeywors] = {
 // standard keywords
 { // 0
+	std::string("APERTURE"),
+	std::string("Aperture"),
+	std::type_index(typeid(std::string)),
+	false
+},
+{ // 1
 	std::string("AUTHOR"),
 	std::string("author of the data"),
 	std::type_index(typeid(std::string)),
 	false
 },
-{ // 1
+{ // 2
 	std::string("BITPIX"),
 	std::string("bits per data value"),
 	std::type_index(typeid(long)),
 	true
 },
-{ // 2
+{ // 3
 	std::string("BLANK"),
 	std::string("value used for undefined array elements"),
 	std::type_index(typeid(long)),
 	true
 },
-{ // 3
+{ // 4
 	std::string("BLOCKED"),
 	std::string("is physical blocksize a multiple of 2880"),
 	std::type_index(typeid(bool)),
 	true
 },
-{ // 4
+{ // 5
 	std::string("BSCALE"),
 	std::string("linear factor in scaling equation"),
 	std::type_index(typeid(double)),
 	true
 },
-{ // 5
+{ // 6
 	std::string("BUNIT"),
 	std::string("physical units of the array values"),
 	std::type_index(typeid(std::string)),
 	true
 },
-{ // 6
+{ // 7
 	std::string("BZERO"),
 	std::string("zero point in scaling equation"),
 	std::type_index(typeid(double)),
 	true
 },
-{ // 7
+{ // 8
 	std::string("CDELT1"),
 	std::string("coordinate increment along axis 1"),
 	std::type_index(typeid(double)),
 	true
 },
-{ // 8
+{ // 9
 	std::string("CDELT2"),
 	std::string("coordinate increment along axis 2"),
 	std::type_index(typeid(double)),
 	true
 },
-{ // 9
+{ // 10
 	std::string("CDELT3"),
 	std::string("coordinate increment along axis 3"),
 	std::type_index(typeid(double)),
 	true
 },
-{ // 10
+{ // 11
 	std::string("COMMENT"),
 	std::string("descriptive comment"),
 	std::type_index(typeid(void)),
 	false
 },
-{ // 11
+{ // 12
+	std::string("CREATOR"),
+	std::string("creator of image file"),
+	std::type_index(typeid(std::string)),
+	true
+},
+{ // 13
 	std::string("CROTA1"),
 	std::string("coordinate system rotation angle"),
 	std::type_index(typeid(double)),
 	true
 },
-{ // 12
+{ // 14
 	std::string("CROTA2"),
 	std::string("coordinate system rotation angle"),
 	std::type_index(typeid(double)),
 	true
 },
-{ // 13
+{ // 15
 	std::string("CROTA3"),
 	std::string("coordinate system rotation angle"),
 	std::type_index(typeid(double)),
 	true
 },
-{ // 14
-	std::string("CRPIX1"),
-	std::string("coordinate system reference pixel"),
-	std::type_index(typeid(double)),
-	true
-},
-{ // 15
-	std::string("CRPIX2"),
-	std::string("coordinate system reference pixel"),
-	std::type_index(typeid(double)),
-	true
-},
 { // 16
-	std::string("CRPIX3"),
+	std::string("CRPIX1"),
 	std::string("coordinate system reference pixel"),
 	std::type_index(typeid(double)),
 	true
@@ -138,475 +138,505 @@ FITSKeyword	keywors[Nkeywors] = {
 	true
 },
 { // 19
+	std::string("CRPIX2"),
+	std::string("coordinate system reference pixel"),
+	std::type_index(typeid(double)),
+	true
+},
+{ // 20
+	std::string("CRPIX3"),
+	std::string("coordinate system reference pixel"),
+	std::type_index(typeid(double)),
+	true
+},
+{ // 21
 	std::string("CRVAL1"),
 	std::string("coordinate system value at reference pixel"),
 	std::type_index(typeid(double)),
 	true
 },
-{ // 20
+{ // 22
 	std::string("CRVAL2"),
 	std::string("coordinate system value at reference pixel"),
 	std::type_index(typeid(double)),
 	true
 },
-{ // 21
+{ // 23
+	std::string("CSPACE"),
+	std::string("color space"),
+	std::type_index(typeid(std::string)),
+	true
+},
+{ // 24
 	std::string("CRVAL3"),
 	std::string("coordinate system value at reference pixel"),
 	std::type_index(typeid(double)),
 	true
 },
-{ // 22
+{ // 25
 	std::string("CTYPE1"),
 	std::string("name of the coordinate axis 1"),
 	std::type_index(typeid(std::string)),
 	true
 },
-{ // 23
+{ // 26
 	std::string("CTYPE2"),
 	std::string("name of the coordinate axis 1"),
 	std::type_index(typeid(std::string)),
 	true
 },
-{ // 24
+{ // 27
 	std::string("CTYPE3"),
 	std::string("name of the coordinate axis 1"),
 	std::type_index(typeid(std::string)),
 	true
 },
-{ // 25
+{ // 28
 	std::string("DATAMIN"),
 	std::string("minimum data value"),
 	std::type_index(typeid(double)),
 	true
 },
-{ // 26
+{ // 29
 	std::string("DATAMAX"),
 	std::string("maximum data value"),
 	std::type_index(typeid(double)),
 	true
 },
-{ // 27
+{ // 30
 	std::string("DATE"),
 	std::string("date of file creation"),
 	std::type_index(typeid(FITSdate)),
 	true
 },
-{ // 28
+{ // 31
 	std::string("DATE-OBS"),
 	std::string("date of observation"),
 	std::type_index(typeid(FITSdate)),
 	true
 },
-{ // 29
+{ // 32
 	std::string("EQUINOX"),
 	std::string("equinox of celestial coordinate system"),
 	std::type_index(typeid(double)),
 	true
 },
-{ // 30
+{ // 33
 	std::string("EXTEND"),
 	std::string("may the FITS file contain extensions?"),
 	std::type_index(typeid(bool)),
 	true
 },
-{ // 31
+{ // 34
 	std::string("EXTLEVEL"),
 	std::string("hierarchical level of the extension"),
 	std::type_index(typeid(long)),
 	false
 },
-{ // 32
+{ // 35
 	std::string("EXTNAME"),
 	std::string("name of the extension"),
 	std::type_index(typeid(long)),
 	false
 },
-{ // 33
+{ // 36
 	std::string("EXTVER"),
 	std::string("version of the extension"),
 	std::type_index(typeid(long)),
 	false
 },
-{ // 34
+{ // 37
 	std::string("GCOUNT"),
 	std::string("group count"),
 	std::type_index(typeid(long)),
 	false
 },
-{ // 35
+{ // 38
 	std::string("GROUPS"),
 	std::string("indicate random groups structure"),
 	std::type_index(typeid(bool)),
 	false
 },
-{ // 36
+{ // 39
 	std::string("HISTORY"),
 	std::string("processing history of data"),
 	std::type_index(typeid(void)),
 	false
 },
-{ // 37
+{ // 40
 	std::string("INSTRUME"),
 	std::string("name of instrument"),
 	std::type_index(typeid(std::string)),
 	true
 },
-{ // 38
+{ // 41
+	std::string("ISO"),
+	std::string("ISO speed"),
+	std::type_index(typeid(double)),
+	true
+},
+{ // 42
 	std::string("NAXIS"),
 	std::string("number of axes"),
 	std::type_index(typeid(long)),
 	true
 },
-{ // 39
+{ // 43
 	std::string("NAXIS1"),
 	std::string("size of axis 1"),
 	std::type_index(typeid(long)),
 	true
 },
-{ // 40
+{ // 44
 	std::string("NAXIS2"),
 	std::string("size of axis 2"),
 	std::type_index(typeid(long)),
 	true
 },
-{ // 41
+{ // 45
 	std::string("NAXIS3"),
 	std::string("size of axis 3"),
 	std::type_index(typeid(long)),
 	true
 },
-{ // 42
+{ // 46
 	std::string("OBJECT"),
 	std::string("name of observed object"),
 	std::type_index(typeid(std::string)),
 	true
 },
-{ // 43
+{ // 47
 	std::string("OBSERVER"),
 	std::string("observer who acquired the data"),
 	std::type_index(typeid(std::string)),
 	true
 },
-{ // 44
+{ // 48
 	std::string("ORIGIN"),
 	std::string("organization responsible for the data"),
 	std::type_index(typeid(std::string)),
 	true
 },
-{ // 45
+{ // 49
 	std::string("PCOUNT"),
 	std::string("parameter count"),
 	std::type_index(typeid(long)),
 	true
 },
-{ // 46
+{ // 50
 	std::string("PSCAL0"),
 	std::string("parameter scaling factor"),
 	std::type_index(typeid(double)),
 	true
 },
-{ // 47
+{ // 51
 	std::string("PTYPE0"),
 	std::string("name of random groups parameter"),
 	std::type_index(typeid(std::string)),
 	true
 },
-{ // 48
+{ // 52
 	std::string("PZERO0"),
 	std::string("parameter scaling zero point"),
 	std::type_index(typeid(double)),
 	true
 },
-{ // 49
+{ // 53
 	std::string("REFERENC"),
 	std::string("bibliographic reference"),
 	std::type_index(typeid(std::string)),
 	true
 },
-{ // 50
+{ // 54
 	std::string("SIMPLE"),
 	std::string("does file conform to the Standard?"),
 	std::type_index(typeid(bool)),
 	true
 },
-{ // 51
+{ // 55
 	std::string("TELESCOP"),
 	std::string("name of telescope"),
 	std::type_index(typeid(std::string)),
 	true
 },
-{ // 52
+{ // 56
 	std::string("XTENSION"),
 	std::string("makes beginning of a new HDU"),
 	std::type_index(typeid(std::string)),
 	false
 },
 // nonstandard keywords
-{ // 53
+{ // 57
 	std::string("DECCENTR"),
 	std::string("declination of image center in degrees"),
 	std::type_index(typeid(double)),
 	true
 },
-{ // 54
+{ // 58
 	std::string("DECHIGHT"),
 	std::string("height of image in declination degrees"),
 	std::type_index(typeid(double)),
 	true
 },
-{ // 55
+{ // 59
 	std::string("RACENTR"),
 	std::string("right ascension of image center in hours"),
 	std::type_index(typeid(double)),
 	true
 },
-{ // 56
+{ // 60
 	std::string("RAWIDTH"),
 	std::string("width of image in right ascension hours"),
 	std::type_index(typeid(double)),
 	true
 },
-{ // 57
+{ // 61
 	std::string("PXLWIDTH"),
 	std::string("width of a pixel in microns"),
 	std::type_index(typeid(double)),
 	true
 },
-{ // 58
+{ // 62
 	std::string("PXLHIGHT"),
 	std::string("height of pixel in microns"),
 	std::type_index(typeid(double)),
 	true
 },
-{ // 59
+{ // 63
 	std::string("FOCAL"),
 	std::string("focal length of instrument in meteres"),
 	std::type_index(typeid(double)),
 	true
 },
-{ // 60
+{ // 64
 	std::string("XOFFSET"),
 	std::string("x offset of image center"),
 	std::type_index(typeid(double)),
 	true
 },
-{ // 61
+{ // 65
 	std::string("YOFFSET"),
 	std::string("y offset of image center"),
 	std::type_index(typeid(double)),
 	true
 },
-{ // 62
+{ // 66
 	std::string("EXPTIME"),
 	std::string("exposure time in seconds"),
 	std::type_index(typeid(double)),
 	true
 },
-{ // 63
+{ // 67
 	std::string("XBINNING"),
 	std::string("binning in x direction"),
 	std::type_index(typeid(long)),
 	true
 },
-{ // 64
+{ // 68
 	std::string("YBINNING"),
 	std::string("binning in y direction"),
 	std::type_index(typeid(long)),
 	true
 },
-{ // 65
+{ // 69
 	std::string("XORGSUBF"),
 	std::string("x origin of subframe"),
 	std::type_index(typeid(long)),
 	true
 },
-{ // 66
+{ // 70
 	std::string("YORGSUBF"),
 	std::string("y origin of subframe"),
 	std::type_index(typeid(long)),
 	true
 },
-{ // 67
+{ // 71
 	std::string("SET-TEMP"),
 	std::string("set temperature of CCD in degrees C"),
 	std::type_index(typeid(double)),
 	true
 },
-{ // 68
+{ // 72
 	std::string("CCD-TEMP"),
 	std::string("actual temperature of CCD in degrees C"),
 	std::type_index(typeid(double)),
 	true
 },
-{ // 69
+{ // 73
 	std::string("FILTER"),
 	std::string("name of filter"),
 	std::type_index(typeid(std::string)),
 	true
 },
-{ // 70
+{ // 74
 	std::string("BAYER"),
 	std::string("Bayer RGB filter layout"),
 	std::type_index(typeid(std::string)),
 	true
 },
-{ // 71
+{ // 75
 	std::string("IMAGEID"),
 	std::string("Image id in repositry"),
 	std::type_index(typeid(long)),
 	true
 },
-{ // 72
+{ // 76
 	std::string("PURPOSE"),
 	std::string("Purpose of an image: light, dark, flat, bias, test, guide, focus"),
 	std::type_index(typeid(std::string)),
 	true
 },
-{ // 73
+{ // 77
 	std::string("PROJECT"),
 	std::string("project this image was taken for"),
 	std::type_index(typeid(std::string)),
 	true
 },
-{ // 74
+{ // 78
 	std::string("UUID"),
 	std::string("UUID of images"),
 	std::type_index(typeid(std::string)),
 	true
 },
-{ // 75
+{ // 79
 	std::string("TELALT"),
 	std::string("Telescope altitude in degrees"),
 	std::type_index(typeid(float)),
 	true
 },
-{ // 76
+{ // 80
 	std::string("TELAZ"),
 	std::string("Telescope azimut in degrees"),
 	std::type_index(typeid(float)),
 	true
 },
-{ // 77
+{ // 81
 	std::string("LATITUDE"),
 	std::string("Observatory latitude in degrees"),
 	std::type_index(typeid(float)),
 	true
 },
-{ // 78
+{ // 82
 	std::string("LONGITUD"),
 	std::string("Observatory longitude in degrees"),
 	std::type_index(typeid(float)),
 	true
 },
-{ // 79
+{ // 83
 	std::string("BADPIXEL"),
 	std::string("Number of bad pixels"),
 	std::type_index(typeid(long)),
 	true
 },
-{ // 80
+{ // 84
 	std::string("IMGCOUNT"),
 	std::string("Number of images used to build dark/flat"),
 	std::type_index(typeid(long)),
 	true
 },
-{ // 81
+{ // 85
 	std::string("BDPXLLIM"),
 	std::string("number of std devs to consider a pixel bad"),
 	std::type_index(typeid(double)),
 	true
 },
-{ // 82
+{ // 86
 	std::string("CCDWIDTH"),
 	std::string("width of CCD area in mm"),
 	std::type_index(typeid(double)),
 	true
 },
-{ // 83
+{ // 87
 	std::string("CCDHIGHT"),
 	std::string("height of CCD area in mm"),
 	std::type_index(typeid(double)),
 	true
 },
-{ // 84
+{ // 88
 	std::string("CAMERA"),
 	std::string("name of the camera"),
 	std::type_index(typeid(std::string)),
 	true
 },
-{ // 85
+{ // 89
+	std::string("FOCUS"),
+	std::string("[mm] focal length"),
+	std::type_index(typeid(long)),
+	true
+},
+{ // 90
 	std::string("FOCUSPOS"),
 	std::string("focus position"),
 	std::type_index(typeid(long)),
 	true
 },
-{ // 86
+{ // 91
 	std::string("MEAN-R"),
 	std::string("mean value of R pixels"),
 	std::type_index(typeid(double)),
 	true
 },
-{ // 87
+{ // 92
 	std::string("MEAN-G"),
 	std::string("mean value of G pixels"),
 	std::type_index(typeid(double)),
 	true
 },
-{ // 88
+{ // 93
 	std::string("MEAN-B"),
 	std::string("mean value of B pixels"),
 	std::type_index(typeid(double)),
 	true
 },
-{ // 89
+{ // 94
 	std::string("MIN-R"),
 	std::string("min value of R pixels"),
 	std::type_index(typeid(double)),
 	true
 },
-{ // 90
+{ // 95
 	std::string("MIN-G"),
 	std::string("min value of G pixels"),
 	std::type_index(typeid(double)),
 	true
 },
-{ // 91
+{ // 96
 	std::string("MIN-B"),
 	std::string("min value of B pixels"),
 	std::type_index(typeid(double)),
 	true
 },
-{ // 92
+{ // 97
 	std::string("MAX-R"),
 	std::string("max value of R pixels"),
 	std::type_index(typeid(double)),
 	true
 },
-{ // 93
+{ // 98
 	std::string("MAX-G"),
 	std::string("max value of G pixels"),
 	std::type_index(typeid(double)),
 	true
 },
-{ // 94
+{ // 99
 	std::string("MAX-B"),
 	std::string("max value of B pixels"),
 	std::type_index(typeid(double)),
 	true
 },
-{ // 95
+{ // 100
 	std::string("MEAN"),
 	std::string("mean pixel value"),
 	std::type_index(typeid(double)),
 	true
 },
-{ // 96
+{ // 101 
 	std::string("MIN"),
 	std::string("minimum pixel value"),
 	std::type_index(typeid(double)),
 	true
 },
-{ // 97
+{ // 102
 	std::string("MAX"),
 	std::string("maximum pixel value"),
 	std::type_index(typeid(double)),

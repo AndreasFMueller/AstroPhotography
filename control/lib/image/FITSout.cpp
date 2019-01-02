@@ -78,6 +78,13 @@ void	FITSout::write(const ImagePtr image) {
 	do_write_typed(RGB<float>)
 	do_write_typed(RGB<double>)
 
+	do_write_typed(XYZ<unsigned char>)
+	do_write_typed(XYZ<unsigned short>)
+	do_write_typed(XYZ<unsigned int>)
+	do_write_typed(XYZ<unsigned long>)
+	do_write_typed(XYZ<float>)
+	do_write_typed(XYZ<double>)
+
 	do_write_typed(YUYV<unsigned char>)
 	do_write_typed(YUYV<unsigned short>)
 	do_write_typed(YUYV<unsigned int>)
