@@ -483,6 +483,7 @@ class ImageCalibrationStep : public ImageStep {
 	bool	_interpolate;
 	bool	_demosaic;
 	bool	_flip;
+	bool	_hflip;
 public:
 	ProcessingStepPtr	dark() const { return _dark; }
 	void	dark(ProcessingStepPtr d) { _dark = d; }
@@ -494,6 +495,8 @@ public:
 	void	demosaic(bool d) { _demosaic = d; }
 	bool	flip() const { return _flip; }
 	void	flip(bool f) { _flip = f; }
+	bool	hflip() const { return _hflip; }
+	void	hflip(bool f) { _hflip = f; }
 	ImageCalibrationStep(NodePaths& parent);
 	virtual ProcessingStep::state	do_work();
 	virtual ProcessingStep::state	status();

@@ -2747,6 +2747,9 @@ ImagePtr	colortransform(ImagePtr image,
 // Deemphasizing adapter
 //////////////////////////////////////////////////////////////////////
 
+/**
+ * \brief Use deemph pixel values to reduce image pixel values
+ */
 template<typename T, typename S>
 class DeemphasizingAdapter : public ConstImageAdapter<T> {
 	const ConstImageAdapter<T>&     _image;

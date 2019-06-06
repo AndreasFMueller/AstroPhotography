@@ -69,6 +69,16 @@ void	ProcessorParser::startCalibrate(const attr_t& attrs) {
 		}
 	}
 
+	i = attrs.find(std::string("hflip"));
+	if (i != attrs.end()) {
+		if ((i->second == std::string("yes"))
+			|| (i->second == std::string("true"))) {
+			cal->hflip(true);
+		} else {
+			cal->hflip(false);
+		}
+	}
+
 	startCommon(attrs);
 	if (cal->dark()) {
 		step->add_precursor(cal->dark());

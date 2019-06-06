@@ -114,8 +114,12 @@ ProcessingStep::state	ImageCalibrationStep::do_work() {
 	// perform flip the image
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "flip: %s", (_flip) ? "yes" : "no");
 	if (_flip) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "flipping");
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "flipping vertically");
 		astro::image::operators::flip(_image);
+	}
+	if (_hflip) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "flipping horizontally");
+		astro::image::operators::hflip(_image);
 	}
 
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "image calibration complete");

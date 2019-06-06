@@ -50,6 +50,44 @@ void	flip(ImagePtr image) {
 }
 
 
+#define	do_hflip(image, pixel)						\
+	{								\
+		Image<pixel >	*imagep					\
+			= dynamic_cast<Image<pixel >*>(&*image);	\
+		if (NULL != imagep) {					\
+			hflip(*imagep);					\
+			return;						\
+		}							\
+	}
+
+void	hflip(ImagePtr image) {
+	if (!image) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "no image to flip");
+		return;
+	}
+	do_hflip(image, unsigned char)
+	do_hflip(image, unsigned short)
+	do_hflip(image, unsigned int)
+	do_hflip(image, unsigned long)
+	do_hflip(image, float)
+	do_hflip(image, double)
+	do_hflip(image, RGB<unsigned char>)
+	do_hflip(image, RGB<unsigned short>)
+	do_hflip(image, RGB<unsigned int>)
+	do_hflip(image, RGB<unsigned long>)
+	do_hflip(image, RGB<float>)
+	do_hflip(image, RGB<double>)
+	do_hflip(image, YUYV<unsigned char>)
+	do_hflip(image, YUYV<unsigned short>)
+	do_hflip(image, YUYV<unsigned int>)
+	do_hflip(image, YUYV<unsigned long>)
+	do_hflip(image, YUYV<float>)
+	do_hflip(image, YUYV<double>)
+	std::string	cause = stringprintf("unknown image type %s, cannot hflip", demangle(image->pixel_type().name()).c_str());
+	debug(LOG_ERR, DEBUG_LOG, 0, "%s", cause.c_str());
+	throw std::runtime_error(cause);
+}
+
 } // namespace operators
 } // namespace image
 } // namespace astro

@@ -55,6 +55,32 @@ void	flip(Image<T>& image) {
 
 void	flip(ImagePtr image);
 
+template<typename T>
+class HFlipOperator : public ImageOperator<T> {
+public:
+	HFlipOperator() { }
+	virtual void	operator()(astro::image::Image<T>& image) {
+		int	h = image.size().height();
+		int	w = image.size().width();
+		int	w2 = w >> 1;
+		for (int line = 0; line < h; line++) {
+			T	*p = &image.pixels[line * w];
+			for (int x = 0; x < w2; x++) {
+				T	v = p[x];
+				p[x] = p[w - 1 - x];
+				p[w - 1 - x] = v;
+			}
+		}
+	}
+};
+
+template<typename T>
+void	hflip(Image<T>& image) {
+	HFlipOperator<T>()(image);
+}
+
+void	hflip(ImagePtr image);
+
 /**
  * \brief Operator to limit pixel values
  */
