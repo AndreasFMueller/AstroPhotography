@@ -226,7 +226,7 @@ public:
 };
 
 //////////////////////////////////////////////////////////////////////
-//
+// Masking a channel
 //////////////////////////////////////////////////////////////////////
 template<typename Pixel>
 class ChannelMaskingAdapter : public ConstImageAdapter<RGB<Pixel> > {
@@ -418,6 +418,30 @@ TargetPixel	ConvertingAdapter<TargetPixel, SourcePixel>::pixel(int x, int y) con
 	const SourcePixel	t = image.pixel(x, y);
 	// convert to Pixel type
 	TargetPixel	p(t);
+	return p;
+}
+
+/**
+ * \brief Adapter to convert image pixels between different color spaces
+ */
+template<typename TargetPixel, typename SourcePixel>
+class ColorConversionAdapter : public ConstImageAdapter<TargetPixel> {
+	const ConstImageAdapter<SourcePixel>&	image;
+public:
+	ColorConversionAdapter(const ConstImageAdapter<SourcePixel>& image);
+	virtual TargetPixel	pixel(int x, int y) const;
+};
+
+template<typename TargetPixel, typename SourcePixel>
+ColorConversionAdapter<TargetPixel, SourcePixel>::ColorConversionAdapter(
+	const ConstImageAdapter<SourcePixel>& _image)
+	: ConstImageAdapter<TargetPixel>(_image.getSize()), image(_image) {
+}
+
+template<typename TargetPixel, typename SourcePixel>
+TargetPixel	ColorConversionAdapter<TargetPixel, SourcePixel>::pixel(int x, int y) const {
+	TargetPixel	p;
+	convertPixel(p, image.pixel(x, y));
 	return p;
 }
 

@@ -196,5 +196,24 @@ std::string	ImageBase::info() const {
 		size().toString().c_str());
 }
 
+void	ImageBase::addColorspace(const monochrome_color_tag&) {
+}
+
+void	ImageBase::addColorspace(const multiplane_color_tag&) {
+}
+
+void	ImageBase::addColorspace(const yuv_color_tag&) {
+}
+
+void	ImageBase::addColorspace(const yuyv_color_tag&) {
+}
+
+void	ImageBase::addColorspace(const rgb_color_tag&) {
+}
+
+void	ImageBase::addColorspace(const xyz_color_tag&) {
+	setMetadata(io::FITSKeywords::meta("CSPACE", std::string("XYZ")));
+}
+
 } // namespace image
 } // namespace astro

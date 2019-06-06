@@ -457,6 +457,14 @@ public:
 
 	// info string for the image
 	virtual std::string	info() const;
+
+	// add color space information
+	void	addColorspace(const monochrome_color_tag&);
+	void	addColorspace(const multiplane_color_tag&);
+	void	addColorspace(const yuv_color_tag&);
+	void	addColorspace(const yuyv_color_tag&);
+	void	addColorspace(const rgb_color_tag&);
+	void	addColorspace(const xyz_color_tag&);
 };
 
 std::ostream&	operator<<(std::ostream& out, const ImageBase& image);
@@ -651,6 +659,7 @@ public:
 	 */
 	Image<Pixel>(unsigned int _w, unsigned int _h, Pixel *p = NULL)
 		: ImageBase(_w, _h), ImageAdapter<Pixel>(ImageSize(_w, _h)) {
+		addColorspace(typename color_traits<Pixel>::color_category());
 		if (p) {
 			pixels = p;
 			debug(LOG_DEBUG, DEBUG_LOG, 0, "taking ownership of "
@@ -681,6 +690,7 @@ public:
 	 */
 	Image<Pixel>(const ImageSize& size, Pixel *p = NULL)
 		: ImageBase(size), ImageAdapter<Pixel>(size) {
+		addColorspace(typename color_traits<Pixel>::color_category());
 		if (p) {
 			pixels = p;
 			debug(LOG_DEBUG, DEBUG_LOG, 0, "taking ownership of "
@@ -708,6 +718,7 @@ public:
 	Image<Pixel>(const ConstImageAdapter<srcPixel>& adapter)
 		: ImageBase(adapter.getSize()),
 		  ImageAdapter<Pixel>(adapter.getSize()) {
+		addColorspace(typename color_traits<Pixel>::color_category());
 		long	number_of_pixels = frame.size().getPixels();
 		pixels = new Pixel[number_of_pixels];
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "copy %s alloc %ld pixels at %p",
@@ -734,6 +745,7 @@ public:
 		double scalefactor)
 		: ImageBase(adapter.getSize()),
 		  ImageAdapter<Pixel>(adapter.getSize()) {
+		addColorspace(typename color_traits<Pixel>::color_category());
 		long	number_of_pixels = frame.size().getPixels();
 		pixels = new Pixel[number_of_pixels];
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "copy %s alloc %d pixels at %p",
@@ -757,6 +769,7 @@ public:
 	Image<Pixel>(const Image<srcPixel>& other)
 		: ImageBase(other.size()),
 		  ImageAdapter<Pixel>(other.size()) {
+		addColorspace(typename color_traits<Pixel>::color_category());
 		pixels = new Pixel[frame.size().getPixels()];
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "copy %s alloc %d pixels at %p",
 			frame.size().toString().c_str(),
@@ -782,6 +795,7 @@ public:
 	 */
 	Image<Pixel>(const Image<Pixel>& p) : ImageBase(p),
 		ImageAdapter<Pixel>(p.frame.size()) {
+		addColorspace(typename color_traits<Pixel>::color_category());
 		pixels = new Pixel[frame.size().getPixels()];
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "copy %s alloc %d pixels at %p",
 			frame.size().toString().c_str(),
@@ -800,6 +814,7 @@ public:
 	template<typename srcPixel>
 	Image<Pixel>(const Image<srcPixel>& p, double scalefactor)
 		: ImageBase(p), ImageAdapter<Pixel>(p.getFrame().size()) {
+		addColorspace(typename color_traits<Pixel>::color_category());
 		long	number_of_pixels = frame.size().getPixels();
 		pixels = new Pixel[number_of_pixels];
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "copy %s alloc %d pixels at %p",

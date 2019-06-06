@@ -227,6 +227,7 @@ void	convertPixelValue(destValue& dest, const srcValue& src) {
 struct yuv_color_tag { };
 struct yuyv_color_tag { };
 struct rgb_color_tag { };
+struct xyz_color_tag { };
 struct multiplane_color_tag { };
 struct monochrome_color_tag { };
 
@@ -323,13 +324,30 @@ void	convertPixelTyped(destPixel& dest, const srcPixel& src,
 	dest.uv = destPixel::zero;
 }
 
+/* RGB -> XYZ */
+template<typename destPixel, typename srcPixel>
+void	convertPixelTyped(destPixel& dest, const srcPixel& src,
+		const xyz_color_tag&, const rgb_color_tag&) {
+	dest.X = 0.4124 * src.R + 0.3576 * src.G + 0.1805 * src.B;
+	dest.Y = 0.2126 * src.R + 0.7152 * src.G + 0.0722 * src.B;
+	dest.Z = 0.0193 * src.R + 0.1192 * src.G + 0.9505 * src.B;
+}
+
+/* XYZ -> RGB */
+template<typename destPixel, typename srcPixel>
+void	convertPixelTyped(destPixel& dest, const srcPixel& src,
+		const rgb_color_tag&, const xyz_color_tag&) {
+	dest.R =  3.2406 * src.X - 1.5372 * src.Y - 0.4986 * src.Z;
+	dest.G = -0.9689 * src.X + 1.8758 * src.Y + 0.0415 * src.Z;
+	dest.B =  0.0557 * src.X - 0.2040 * src.Y + 1.0570 * src.Z;
+}
+
 template<typename destPixel, typename srcPixel>
 void	convertPixel(destPixel& dest, const srcPixel& src) {
 	convertPixelTyped(dest, src,
 		typename color_traits<destPixel>::color_category(),
 		typename color_traits<srcPixel>::color_category());
 }
-
 
 template<typename P>
 class Color {
@@ -754,6 +772,125 @@ public:
 	RGB<P>	colorcomponents() const {
 		double	l = luminance();
 		return RGB<P>(R - l, G - l, B - l);
+	}
+};
+
+/**
+ * \brief Pixels in the XYZ color space
+ */
+template<typename P>
+class XYZ : public Color<P> {
+public:
+	P	X;
+	P	Y;
+	P	Z;
+	XYZ() : X(0), Y(0), Z(0) { }
+	XYZ(P w) : X(w), Y(w), Z(w) { }
+	XYZ(P x, P y, P z) : X(x), Y(y), Z(z) { }
+	virtual ~XYZ() { }
+
+	template<typename Q>
+	XYZ(Q x, Q y, Q z) {
+		convertPixel(X, x);
+		convertPixel(Y, y);
+		convertPixel(Z, z);
+	}
+
+	/**
+	 * \brief Copy constructor for XYZ pixels.
+	 *
+	 * Since the R,G,B pixel values can be any integer type, which
+	 * necessitates shifting them when converting from one type to
+	 * another, we have to use the convertPixel functions when copying
+	 * an XYZ pixel.
+	 */
+	template<typename Q>
+	XYZ(const XYZ<Q>& q) {
+		convertPixelValue(X, q.X);
+		convertPixelValue(Y, q.Y);
+		convertPixelValue(Z, q.Z);
+	}
+
+	bool	operator==(const XYZ<P>& other) const {
+		return (X == other.X) && (Y == other.Y) && (Z == other.Z);
+	}
+	bool	operator!=(const XYZ<P>& other) const {
+		return !(*this == other);
+	}
+	typedef xyz_color_tag color_category;
+
+	// numeric operators on XYZ pixels
+	XYZ<P>	operator+(const XYZ<P>& other) const {
+		XYZ<P>	result;
+		result.X = X + other.X;
+		result.Y = Y + other.Y;
+		result.Z = Z + other.Z;
+		return result;
+	}
+	XYZ<P>	operator-(const XYZ<P>& other) const {
+		XYZ<P>	result;
+		result.X = (X < other.X) ? 0 : (X - other.X);
+		result.Y = (Y < other.Y) ? 0 : (Y - other.Y);
+		result.Z = (Z < other.Z) ? 0 : (Z - other.Z);
+		return result;
+	}
+	XYZ<P>	operator*(const double value) const {
+		XYZ<P>	result;
+		if ((X * value) > std::numeric_limits<P>::max()) {
+			result.X = std::numeric_limits<P>::max();
+		} else {
+			result.X = X * value;
+		}
+		if ((Y * value) > std::numeric_limits<P>::max()) {
+			result.Y = std::numeric_limits<P>::max();
+		} else {
+			result.Y = Y * value;
+		}
+		if ((Z * value) > std::numeric_limits<P>::max()) {
+			result.Z = std::numeric_limits<P>::max();
+		} else {
+			result.Z = Z * value;
+		}
+		return result;
+	}
+	XYZ<P>	operator*(const float value) const {
+		return (*this) * (double)value;
+	}
+
+	XYZ<P>	operator*(const XYZ<P>& other) const {
+		return XYZ<P>(X * other.X, Y * other.Y, Z * other.Z);
+	}
+
+	XYZ<P>	operator/(const XYZ<P>& other) const {
+		return XYZ<P>(X / other.X, Y / other.Y, Z / other.Z);
+	}
+
+	static unsigned int	bytesPerPixel() {
+		return 3 * Color<P>::bytesPerValue();
+	}
+
+	static unsigned int	bitsPerPixel() {
+		return 8 * bytesPerPixel();
+	}
+
+	static unsigned int	bytesPerValue() {
+		return Color<P>::bytesPerValue();
+	}
+
+	static unsigned int	bitsPerValue() {
+		return 8 * bytesPerValue();
+	}
+
+	P	luminance() const {
+		return Y;
+	}
+
+	operator double() {
+		return (double)luminance();
+	}
+
+	XYZ<P>	operator/(const P value) const {
+		return XYZ<P>(X / value, Y / value, Z / value);
 	}
 };
 
@@ -1276,6 +1413,11 @@ double	luminance_typed(const Pixel& pixel, const rgb_color_tag&) {
 }
 
 template<typename Pixel>
+double	luminance_typed(const Pixel& pixel, const xyz_color_tag&) {
+	return pixel.luminance();
+}
+
+template<typename Pixel>
 double	luminance_typed(const Pixel& pixel, const yuyv_color_tag&) {
 	return pixel.luminance();
 }
@@ -1301,6 +1443,11 @@ double	maximum_typed(const Pixel&, const multiplane_color_tag&) {
 
 template<typename Pixel>
 double	maximum_typed(const Pixel&, const rgb_color_tag&) {
+	return std::numeric_limits<typename Pixel::value_type>::max();
+}
+
+template<typename Pixel>
+double	maximum_typed(const Pixel&, const xyz_color_tag&) {
 	return std::numeric_limits<typename Pixel::value_type>::max();
 }
 

@@ -112,11 +112,11 @@ void	instrumentswindow::instrumentEnabled(bool enabled) {
  */
 void	instrumentswindow::instrumentSelected(QString name) {
 	_instrument = _instruments->get(std::string(name.toLatin1().data()));
+	instrumentEnabled(true);
 
 	// XXX make sure everything we know about this instrument is displayed
         ui->instrumentdisplayWidget->setInstrument(_instrument);
 
-	instrumentEnabled(true);
 }
 
 /**

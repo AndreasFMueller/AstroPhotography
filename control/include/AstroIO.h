@@ -375,6 +375,13 @@ FITS_OUTFILE_SPECIALIZATION(RGB<unsigned long>)
 FITS_OUTFILE_SPECIALIZATION(RGB<float>)
 FITS_OUTFILE_SPECIALIZATION(RGB<double>)
 
+FITS_OUTFILE_SPECIALIZATION(XYZ<unsigned char>)
+FITS_OUTFILE_SPECIALIZATION(XYZ<unsigned short>)
+FITS_OUTFILE_SPECIALIZATION(XYZ<unsigned int>)
+FITS_OUTFILE_SPECIALIZATION(XYZ<unsigned long>)
+FITS_OUTFILE_SPECIALIZATION(XYZ<float>)
+FITS_OUTFILE_SPECIALIZATION(XYZ<double>)
+
 FITS_OUTFILE_SPECIALIZATION(YUYV<unsigned char>)
 FITS_OUTFILE_SPECIALIZATION(YUYV<unsigned short>)
 FITS_OUTFILE_SPECIALIZATION(YUYV<unsigned int>)
@@ -512,6 +519,37 @@ int	FITSWriteDoWork(const long /* totaln */, long /* offset */,
 		array[offset        ] = user->image[offset].R;
 		array[offset + size ] = user->image[offset].G;
 		array[offset + size2] = user->image[offset].B;
+	}
+	return 0;
+}
+
+/**
+ * \brief Work function to write XYZ pixels to the FITS file
+ *
+ * This algorithm just has to redestribute the color channels from pixels
+ * each pixel to the three planes of the FITS file.
+ */
+template<typename Pixel>
+int	FITSWriteDoWork(const long /* totaln */, long /* offset */,
+		long /* firstn */, long /* nvalues */, int /* narray */,
+		iteratorCol *data, void *userPointer,
+		xyz_color_tag) {
+	// get the data array, and write a zero into it
+	typedef	typename pixel_value_type<Pixel>::value_type	value_type;
+	value_type   *array = (value_type *)fits_iter_get_array(data);
+	*array++ = 0;
+
+	// get the user data pointer
+        IteratorData<Pixel, xyz_color_tag>     *user
+		= (IteratorData<Pixel, xyz_color_tag>*)userPointer;
+
+	// iterate through the pixels and convert them to RGB on the fly
+	const int	size = user->image.getSize().getPixels();
+	const int	size2 = user->image.getSize().getPixels() << 1;
+	for (int offset = 0; offset < size; offset++) {
+		array[offset        ] = user->image[offset].X;
+		array[offset + size ] = user->image[offset].Y;
+		array[offset + size2] = user->image[offset].Z;
 	}
 	return 0;
 }

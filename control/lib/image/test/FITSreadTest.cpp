@@ -12,6 +12,7 @@
 #include <config.h>
 #include <iostream>
 #include <AstroDebug.h>
+#include <AstroAdapter.h>
 
 using namespace astro::io;
 using namespace astro::image;
@@ -28,6 +29,7 @@ public:
 	void	testReadYUYV();
 	void	testReadRGB();
 	void	testReadRGBUShort();
+	void	testReadXYZ();
 
 	CPPUNIT_TEST_SUITE(FITSreadTest);
 	CPPUNIT_TEST(testReadUChar);
@@ -35,6 +37,7 @@ public:
 	CPPUNIT_TEST(testReadYUYV);
 	CPPUNIT_TEST(testReadRGB);
 	CPPUNIT_TEST(testReadRGBUShort);
+	CPPUNIT_TEST(testReadXYZ);
 	CPPUNIT_TEST_SUITE_END();
 };
 
@@ -142,6 +145,24 @@ void	FITSreadTest::testReadRGBUShort() {
 	delete image;
 	delete outfile;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testReadRGBUShort() end");
+}
+
+void	FITSreadTest::testReadXYZ() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testReadXYZ() begin");
+	FITSin	in("3.fits");
+	ImagePtr	img = in.read();
+	Image<XYZ<unsigned short> >	*xyzimg
+		= dynamic_cast<Image<XYZ<unsigned short> >*>(&*img);
+	if (NULL != xyzimg) {
+		adapter::ColorConversionAdapter<RGB<float>, XYZ<unsigned short> > cc(*xyzimg);
+		Image<RGB<float> >	*rgbimg = new Image<RGB<float> >(cc);
+		FITSoutfile<RGB<float> >	outfile("3-rgb.fits");
+		outfile.setPrecious(false);
+		outfile.write(*rgbimg);
+	} else {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "not an XYZ image");
+	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testReadXYZ() end");
 }
 
 CPPUNIT_TEST_SUITE_REGISTRATION(FITSreadTest);

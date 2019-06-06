@@ -107,3 +107,12 @@ stacktrace caused by signal 11
 [15] 15  libsystem_pthread.dylib             0x00007fff75e0abf9 thread_start + 13
 QObject::~QObject: Timers cannot be stopped from another thread
 !! 15.10.2018 00:44:39.183 error: communicator not destroyed during global destr
+
+
+
+Dez 15 14:56:35 snowgui[90554/1] ServerName.cpp:091: connection string Images:default -h telescope.local. -p 10000
+QObject::connect: Incompatible sender/receiver arguments
+        snowgui::imagedisplaywidget::rectangleSelected(astro::image::ImageRectangle) --> snowgui::imagedisplaywidget::selectRectangle(QRect)
+Dez 15 14:56:35 snowgui[90554/1] imagedisplaywidget.cpp:913: set rectangle selection to yes
+Dez 15 14:56:35 snowgui[90554/1] SelectableImage.cpp:103: set rectangle selection to yes
+

@@ -19,7 +19,8 @@ noinst_PROGRAMS = tests singletest
 
 # single test
 singletest_SOURCES = singletest.cpp \
-	FITSdateTest.cpp
+	FITSreadTest.cpp
+#	FITSdateTest.cpp
 #	DebayerTest.cpp
 #	FWHMTest.cpp
 #	EuclideanDisplacementTest.cpp

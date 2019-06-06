@@ -9,7 +9,7 @@ bin_PROGRAMS = imageinfo makedark makeflat calibrate \
 	transform clamp logscale stack fitsheader imagerepo rescale \
 	gammacorrect convolve background crop radon backprojection \
 	colorbalance stars findtransform luminance unsharp color \
-	colorclamp hdr destar jpg2fits png2fits nan
+	colorclamp hdr destar jpg2fits png2fits nan rgb2xyz
 
 color_SOURCES = color.cpp
 color_DEPENDENCIES = $(top_builddir)/lib/libastro.la
@@ -126,6 +126,10 @@ png2fits_LDADD = -L$(top_builddir)/lib -lastro
 nan_SOURCES = nan.cpp
 nan_DEPENDENCIES = $(top_builddir)/lib/libastro.la
 nan_LDADD = -L$(top_builddir)/lib -lastro
+
+rgb2xyz_SOURCES = rgb2xyz.cpp
+rgb2xyz_DEPENDENCIES = $(top_builddir)/lib/libastro.la
+rgb2xyz_LDADD = -L$(top_builddir)/lib -lastro
 
 fitsheadertest:	fitsheader
 	cp andromeda-chart.fits headertest.fits
