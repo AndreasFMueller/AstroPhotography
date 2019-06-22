@@ -4,7 +4,10 @@
 # (c) 2017 Prof Dr Andreas Müller, Hochschule Rapperswil
 #
 
-if [ -d /Applications/Qt5/Qt5.12/5.12.3/clang_64/bin ]
+if [ -d /Applications/Qt5/Qt5.12/5.12.4/clang_64/bin ]
+then
+	PATH=${PATH}:/Applications/Qt5/Qt5.12/5.12.4/clang_64/bin
+elif [ -d /Applications/Qt5/Qt5.12/5.12.3/clang_64/bin ]
 then
 	PATH=${PATH}:/Applications/Qt5/Qt5.12/5.12.3/clang_64/bin
 elif [ -d /Applications/Qt5/Qt5.11/5.11.2/clang_64/bin ]
@@ -14,4 +17,5 @@ elif [ -d /Applications/Qt5/Qt5.7/5.7/clang_64/bin ]
 then
 	PATH=${PATH}:/Applications/Qt5/Qt5.7/5.7/clang_64/bin
 fi
+export PATH
 
