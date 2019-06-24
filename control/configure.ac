@@ -17,6 +17,7 @@ AC_CONFIG_HEADERS(include/config.h)
 # Checks for programs
 AC_PROG_CXX
 AC_PROG_CC
+AC_OPENMP
 AC_PROG_LIBTOOL
 AC_CHECK_TOOL(FLEX, flex)
 AC_CHECK_TOOL(BISON, bison)

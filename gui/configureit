@@ -69,14 +69,14 @@ EXTRA_LDFLAGS="-Wl,-rpath -Wl,${ASTROPREFIX}/lib"
 case ${systemtype} in
 Linux)
 	CXXFLAGS="${CFLAGS} --std=c++11 -fopenmp"
-	EXTRA_CXXFLAGS="--std=c++11 -fopenmp"
-	EXTRA_LDFLAGS="-fopenmp"
+	EXTRA_CXXFLAGS="--std=c++11"
+	EXTRA_LDFLAGS=""
 	;;
 Debian)
 	CXXFLAGS="${CXXFLAGS} --std=c++11 -fopenmp"
 	LDFLAGS="${LDFLAGS} -Wl,-rpath -Wl,/usr/local/lib"
-	EXTRA_CXXFLAGS="--std=c++11 -fopenmp"
-	EXTRA_LIBS="-lgomp"
+	EXTRA_CXXFLAGS="--std=c++11"
+	EXTRA_LIBS=""
 	;;
 SuSE)
 	LDFLAGS="-L/usr/local/lib64 -lusb-1.0"

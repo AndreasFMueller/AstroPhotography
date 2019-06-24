@@ -1,5 +1,8 @@
 ChangeLog for the Astro project.
 
+20190624:
+	* add AC_OPENMP
+
 20180514:
 	* portability to Ubuntu 18.04
 
