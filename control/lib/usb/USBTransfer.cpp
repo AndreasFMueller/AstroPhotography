@@ -48,6 +48,8 @@ libusb_context	*Transfer::getContext() {
 // BulkTransfer implementation
 //////////////////////////////////////////////////////////////////////
 static void bulktransfer_callback(libusb_transfer *transfer) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "USB bulk transfer callback %p",
+		transfer);
 	((BulkTransfer *)transfer->user_data)->callback(transfer);
 }
 
@@ -117,9 +119,11 @@ void	BulkTransfer::submit(libusb_device_handle *dev_handle) {
 		length, bulktransfer_callback, this, timeout);
 
 	// submit the transfer
-	USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "submitting bulk transfer, timeout = %d",
+	USBdebug(LOG_DEBUG, DEBUG_LOG, 0,
+		"submitting bulk transfer %p, timeout = %d", transfer,
 		timeout);
 	int	rc = libusb_submit_transfer(transfer);
+	USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "transfer submit: %d", rc);
 	if (rc != LIBUSB_SUCCESS) {
 		throw USBError(libusb_error_name(rc));
 	}
@@ -127,6 +131,7 @@ void	BulkTransfer::submit(libusb_device_handle *dev_handle) {
 	// handle events until the complete flag is set
 	libusb_context  *ctx = getContext();
 	while (!complete) {
+		USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "handle events");
 		libusb_handle_events(ctx);
 	}
 

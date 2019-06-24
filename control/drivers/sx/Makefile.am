@@ -10,6 +10,8 @@ pkglib_LTLIBRARIES = sx.la
 noinst_HEADERS = sx.h SxUtils.h SxLocator.h SxCamera.h SxCcd.h SxDemux.h \
 	SxGuidePort.h SxAO.h SxCooler.h SxFilterWheel.h
 
+sbin_SCRIPTS = sxusbmemory
+
 if ENABLE_UNITTESTS
 
 noinst_LTLIBRARIES = libsx.la
@@ -41,4 +43,4 @@ sx_la_LIBADD = ../../lib/libastro.la
 
 endif
 
-EXTRA_DIST = device.properties 80-sx.rules
+EXTRA_DIST = device.properties 80-sx.rules sxusbmemory
