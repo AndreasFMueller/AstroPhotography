@@ -1,0 +1,10 @@
+#! /bin/bash
+# 
+# sxusbmemory -- fix USB memory for SX large format cameras
+#
+# (c) 2019 Prof Dr Andreas Müller, Hochschule Rapperswil
+#
+if [ -f /sys/module/usbcore/parameters/usbfs_memory_mb ]
+then
+	echo 128 > /sys/module/usbcore/parameters/usbfs_memory_mb
+fi

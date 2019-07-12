@@ -17,6 +17,7 @@ AC_CONFIG_HEADERS(include/config.h)
 # Checks for programs
 AC_PROG_CXX
 AC_PROG_CC
+AC_OPENMP
 AC_PROG_LIBTOOL
 AC_CHECK_TOOL(FLEX, flex)
 AC_CHECK_TOOL(BISON, bison)
@@ -606,7 +607,8 @@ AC_CONFIG_FILES([Makefile include/Makefile
 	tools/focus/Makefile tools/utils/Makefile
 	drivers/Makefile drivers/mock1/Makefile drivers/mock2/Makefile
 	drivers/simulator/Makefile drivers/net/Makefile
-	drivers/sx/Makefile drivers/sbig/Makefile drivers/othello/Makefile
+	drivers/sx/Makefile drivers/sx/80-sx.rules
+	drivers/sbig/Makefile drivers/othello/Makefile
 	drivers/uvc/Makefile drivers/unicap/Makefile 
 	drivers/microtouch/Makefile drivers/qsi/Makefile drivers/qhy/Makefile
 	drivers/celestron/Makefile drivers/gpio/Makefile

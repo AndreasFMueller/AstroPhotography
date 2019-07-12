@@ -8,5 +8,5 @@ if [ -d snowlife.app ]
 then
 	snowlife.app/Contents/MacOS/snowlife --debug 2>&1 | tee build.log
 else
-	./snowlife --debug 2>&1 | tee build.log
+	strace -o /var/tmp/snowlife.strace ./snowlife --debug 2>&1 | tee build.log
 fi

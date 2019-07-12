@@ -42,6 +42,12 @@ SxCcd::~SxCcd() {
  */
 void	start_routine(SxCcd *ccd) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "start exposure thread");
+	pthread_attr_t	attr;
+	pthread_attr_init(&attr);
+	size_t	stacksize = 0;
+	pthread_attr_getstacksize(&attr, &stacksize);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "stack size: %lu", stacksize);
+
 	try {
 		ccd->getImage0();
 	} catch (const std::exception& x) {
