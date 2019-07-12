@@ -307,8 +307,18 @@ void	DaemonI::setSystemTime(Ice::Long unixtime,
 	// construct the command
 	struct tm	*tp = localtime(&t);
 	char	buffer[30];
+	std::string	cmd;
+#if BSD_DATE == 1
+	// BSD date command
 	strftime(buffer, sizeof(buffer), "%m%d%H%M%Y.%S", tp);
-	std::string	cmd = astro::stringprintf("sudo date %s", buffer);
+	cmd = astro::stringprintf("sudo date %s", buffer);
+#else /* BSD_DATE == 1 */
+	// GNU date command
+	// note that on Ubuntu this only works if ntp is disabled using
+	// 'timedatectl ntp-set false'
+	strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S", tp);
+	cmd = astro::stringprintf("sudo date --set='%s'", buffer);
+#endif /* BSD_DATE == 1 */
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "time set command: %s", cmd.c_str());
 
 	// execute the command

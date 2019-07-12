@@ -152,6 +152,16 @@ module snowstar {
 		void	unmount(string mountpoint)
 				throws NotFound, IOException, OperationFailed;
 		long	getSystemTime();
+		/**
+		 * \brief set the system time
+		 * Note that on Ubuntu this function only works if ntp sync
+		 * has been disabled using the command
+		 *
+		 *    timedatectl ntp-set false
+		 *
+		 * otherwise the date (1) command used to set the time has
+		 * no effect
+		 */
 		void	setSystemTime(long unixtime);
 	};
 

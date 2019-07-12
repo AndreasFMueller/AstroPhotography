@@ -47,3 +47,8 @@ depcomp
 astro-*.tar.gz
 *.csv
 gui.old
+
+*.fits
+*.png
+*.jpg
+*.jpeg

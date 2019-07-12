@@ -22,6 +22,8 @@ AC_CHECK_TOOL(FLEX, flex)
 AC_CHECK_TOOL(BISON, bison)
 AC_PATH_TOOL(MOUNT, mount)
 AC_PATH_TOOL(UMOUNT, umount)
+AC_PATH_TOOL(DATE, date)
+AC_SUBST(DATE)
 AC_SUBST(MOUNT)
 AC_SUBST(UMOUNT)
 AC_CHECK_PROG(PDFLATEX, pdflatex, pdflatex)
@@ -47,6 +49,16 @@ AC_CHECK_LIB([fftw3], [fftw_malloc])
 AC_CHECK_LIB([pthread], [pthread_create])
 AC_CHECK_LIB([glpk], [glp_create_prob])
 AC_CHECK_LIB([sqlite3], [sqlite3_initialize])
+
+## Type of date command ##############################################
+if ${DATE} --version >/dev/null 2>&1
+then
+	BSD_DATE=0
+else
+	BSD_DATE=1
+fi
+CFLAGS="${CFLAGS} -DBSD_DATE=${BSD_DATE}"
+CXXFLAGS="${CXXFLAGS} -DBSD_DATE=${BSD_DATE}"
 
 ## LIBUSB ############################################################
 if pkg-config --exists libusb-1.0
