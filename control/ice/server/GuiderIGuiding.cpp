@@ -344,4 +344,40 @@ FilterMethod	GuiderI::getFilterMethod(const Ice::Current& /* current */) {
 	throw std::runtime_error("unknown filter method");
 }
 
+
+/**
+ * \brief Set a new dither offset
+ */
+void	GuiderI::setDither(const Point& point,
+		const Ice::Current& /* current */) {
+	try {
+		guider->dither(convert(point));
+	} catch (const astro::guiding::BadState& exception) {
+		throw BadState(exception.what());
+	}
+}
+
+/**
+ * \brief Get the current dither offset
+ */
+Point	GuiderI::getDither(const Ice::Current& current) {
+	try {
+		return convert(guider->dither());
+	} catch (const astro::guiding::BadState& exception) {
+		throw BadState(exception.what());
+	}
+}
+
+/**
+ * \brief Generate and set a new dither offset
+ */
+void    GuiderI::setDitherArcsec(double arcsec, const Ice::Current& current) {
+	try {
+		guider->ditherArcsec(arcsec);
+	} catch (const astro::guiding::BadState& exception) {
+		throw BadState(exception.what());
+	}
+}
+
+
 } // namespace snowstar

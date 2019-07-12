@@ -336,6 +336,11 @@ module snowstar {
 				throws BadState;
 		void	stopGuiding() throws BadState;
 
+		// methods related to dithering
+		Point	getDither() throws BadState;
+		void	setDither(Point d) throws BadState;
+		void	setDitherArcsec(double arcsec) throws BadState;
+
 		// The following methods are used to monitor the calibration
 		// or the guiding. The guider keeps the most recent image
 		// so that a GUI application can fetch those images and 

@@ -115,6 +115,13 @@ public:
 			const Ice::Current& current);
 	virtual void stopGuiding(const Ice::Current& current);
 
+	// methods related to dithering
+	virtual void	setDither(const Point& point,
+				const Ice::Current& current);
+	virtual Point	getDither(const Ice::Current& current);
+	virtual void	setDitherArcsec(double arcsec,
+				const Ice::Current& current);
+
 	// recent tracking data
 	virtual ImagePrx mostRecentImage(const Ice::Current& current);
 	virtual TrackingPoint mostRecentTrackingPoint(
