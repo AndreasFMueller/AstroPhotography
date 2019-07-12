@@ -21,6 +21,7 @@ std::string	TaskTableAdapter::createstatement() {
 	return std::string(
 	"create table taskqueue (\n"
 	"    id integer not null,\n"
+	"    tasktype integer not null default 0,\n"
 	"    instrument varchar(32) not null,\n"
 	"    cameraindex int not null default -1,\n"
 	"    camera varchar(256) not null default '',\n"
@@ -36,6 +37,10 @@ std::string	TaskTableAdapter::createstatement() {
 	"    mount varchar(256) not null default '',\n"
 	"    focuserindex int not null default -1,\n"
 	"    focuser varchar(256) not null default '',\n"
+	"    guideportindex int not null default -1,\n"
+	"    guiderport varchar(256) not null default '',\n"
+	"    adaptiveopticsindex int not null default -1,\n"
+	"    adaptiveoptics varchar(256) not null default '',\n"
 	"    originx integer not null default 0,\n"
 	"    originy integer not null default 0,\n"
 	"    width integer not null default 0,\n"
@@ -65,6 +70,7 @@ std::string	TaskTableAdapter::createstatement() {
 TaskQueueEntry	TaskTableAdapter::row_to_object(int objectid, const Row& row) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "convert object %d", objectid);
 	TaskParameters	parameters;
+	parameters.taskType(row["tasktype"]->intValue());
 	parameters.instrument(row["instrument"]->stringValue());
 	parameters.cameraindex(row["cameraindex"]->intValue());
 	parameters.ccdindex(row["ccdindex"]->intValue());
@@ -74,6 +80,8 @@ TaskQueueEntry	TaskTableAdapter::row_to_object(int objectid, const Row& row) {
 	parameters.filter(row["filter"]->stringValue());
 	parameters.mountindex(row["mountindex"]->intValue());
 	parameters.focuserindex(row["focuserindex"]->intValue());
+	parameters.guideportindex(row["guideportindex"]->intValue());
+	parameters.adaptiveopticsindex(row["adaptiveopticsindex"]->intValue());
 	parameters.project(row["project"]->stringValue());
 	parameters.repodb(row["repodb"]->stringValue());
 	parameters.repository(row["repository"]->stringValue());
@@ -103,6 +111,8 @@ TaskQueueEntry	TaskTableAdapter::row_to_object(int objectid, const Row& row) {
 	entry.ccd(row["ccd"]->stringValue());
 	entry.cooler(row["cooler"]->stringValue());
 	entry.filterwheel(row["filterwheel"]->stringValue());
+	entry.guideport(row["guideport"]->stringValue());
+	entry.adaptiveoptics(row["adaptiveoptics"]->stringValue());
 	entry.mount(row["mount"]->stringValue());
 	entry.focuser(row["focuser"]->stringValue());
 	entry.state((TaskQueueEntry::taskstate)row["state"]->intValue());
@@ -123,6 +133,7 @@ UpdateSpec TaskTableAdapter::object_to_updatespec(const TaskQueueEntry& entry) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "convert entry %d", entry.id());
 	UpdateSpec	spec;
 	FieldValueFactory	factory;
+	spec.insert(Field("tasktype", factory.get((int)entry.taskType())));
 	spec.insert(Field("instrument", factory.get(entry.instrument())));
 	spec.insert(Field("camera", factory.get(entry.camera())));
 	spec.insert(Field("cameraindex", factory.get(entry.cameraindex())));
@@ -141,6 +152,10 @@ UpdateSpec TaskTableAdapter::object_to_updatespec(const TaskQueueEntry& entry) {
 	spec.insert(Field("mountindex", factory.get(entry.mountindex())));
 	spec.insert(Field("focuser", factory.get(entry.focuser())));
 	spec.insert(Field("focuserindex", factory.get(entry.focuserindex())));
+	spec.insert(Field("guideport", factory.get(entry.guideport())));
+	spec.insert(Field("guideportindex", factory.get(entry.guideportindex())));
+	spec.insert(Field("adaptiveoptics", factory.get(entry.adaptiveoptics())));
+	spec.insert(Field("adaptiveopticsindex", factory.get(entry.adaptiveopticsindex())));
 
 	Exposure	exposure = entry.exposure();
 	ImageRectangle	frame = exposure.frame();

@@ -33,20 +33,27 @@ namespace task {
  * The constructor sets up the devices used for task execution. This should
  * not take any noticable time, in particular this can be done synchronously.
  */
-ExposureWork::ExposureWork(TaskQueueEntry& task) : _task(task) {
+ExposureWork::ExposureWork(TaskQueueEntry& __task) : TaskWork(__task) {
+	if (__task.taskType() != tasktype(tasktype::EXPOSURE)) {
+		std::string	msg = stringprintf("%d is not an exposure task",
+			__task.id());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw std::logic_error(msg);
+	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "constructing Work object for task %s",
-		task.toString().c_str());
+		task().toString().c_str());
 	// create a repository, we are always using the default
 	// repository
-	astro::module::ModuleRepositoryPtr	repository = module::getModuleRepository();
+	astro::module::ModuleRepositoryPtr	repository
+		= module::getModuleRepository();
 	
 	// get camera and ccd
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "get camera '%s' and ccd %s",
-		_task.camera().c_str(), _task.ccd().c_str());
+		task().camera().c_str(), task().ccd().c_str());
 	try {
 		astro::device::DeviceAccessor<astro::camera::CameraPtr>
 			dc(repository);
-		camera = dc.get(_task.camera());
+		camera = dc.get(task().camera());
 	} catch (const std::exception& x) {
 		std::string	msg = stringprintf("cannot get camera: %s",
 			x.what());
@@ -56,7 +63,7 @@ ExposureWork::ExposureWork(TaskQueueEntry& task) : _task(task) {
 	try {
 		astro::device::DeviceAccessor<astro::camera::CcdPtr>
 			dc(repository);
-		ccd = camera->getCcd(_task.ccd());
+		ccd = camera->getCcd(task().ccd());
 	} catch (const std::exception& x) {
 		std::string	msg = stringprintf("cannot get ccd: %s",
 			x.what());
@@ -66,12 +73,12 @@ ExposureWork::ExposureWork(TaskQueueEntry& task) : _task(task) {
 
 	// turn on the cooler
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "get cooler '%s', temperature %.2f ",
-		_task.cooler().c_str(), _task.ccdtemperature());
-	if ((_task.cooler().size() > 0) && (_task.ccdtemperature() > 0)) {
+		task().cooler().c_str(), task().ccdtemperature());
+	if ((task().cooler().size() > 0) && (task().ccdtemperature() > 0)) {
 		try {
 			astro::device::DeviceAccessor<astro::camera::CoolerPtr>
 				df(repository);
-			cooler = df.get(_task.cooler());
+			cooler = df.get(task().cooler());
 		} catch (std::exception& x) {
 			std::string	msg = stringprintf("cannot get cooler: %s",
 				x.what());
@@ -82,12 +89,12 @@ ExposureWork::ExposureWork(TaskQueueEntry& task) : _task(task) {
 
 	// get the filterwheel
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "get filter '%s' of wheel '%s'",
-		_task.filter().c_str(), _task.filterwheel().c_str());
-	if (_task.filterwheel().size() > 0) {
+		task().filter().c_str(), task().filterwheel().c_str());
+	if (task().filterwheel().size() > 0) {
 		try {
 			astro::device::DeviceAccessor<astro::camera::FilterWheelPtr>
 				df(repository);
-			filterwheel = df.get(_task.filterwheel());
+			filterwheel = df.get(task().filterwheel());
 		} catch (const std::exception& x) {
 			std::string	msg = stringprintf("cannot get filterwheel: %s",
 				x.what());
@@ -97,12 +104,12 @@ ExposureWork::ExposureWork(TaskQueueEntry& task) : _task(task) {
 	}
 
 	// get the mount
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "get mount %s", _task.mount().c_str());
-	if (_task.mount().size() > 0) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "get mount %s", task().mount().c_str());
+	if (task().mount().size() > 0) {
 		try {
 			astro::device::DeviceAccessor<astro::device::MountPtr>
 				df(repository);
-			mount = df.get(_task.mount());
+			mount = df.get(task().mount());
 		} catch (const std::exception& x) {
 			std::string	msg = stringprintf("cannot get mount: %s",
 				x.what());
@@ -112,12 +119,12 @@ ExposureWork::ExposureWork(TaskQueueEntry& task) : _task(task) {
 	}
 
 	// get the focuser
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "get focuser %s", _task.focuser().c_str());
-	if (_task.focuser().size() > 0) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "get focuser %s", task().focuser().c_str());
+	if (task().focuser().size() > 0) {
 		try {
 			astro::device::DeviceAccessor<astro::camera::FocuserPtr>
 				df(repository);
-			focuser = df.get(_task.focuser());
+			focuser = df.get(task().focuser());
 		} catch (const std::exception& x) {
 			std::string	msg = stringprintf("cannot get focuser: %s",
 				x.what());
@@ -128,9 +135,9 @@ ExposureWork::ExposureWork(TaskQueueEntry& task) : _task(task) {
 
 	// if the task does not have a frame size, then take the one from the
 	// the CCD
-	if (_task.size() == ImageSize()) {
+	if (task().size() == ImageSize()) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "using the full chip");
-		_task.frame(ccd->getInfo().getFrame());
+		task().frame(ccd->getInfo().getFrame());
 	}
 
 	// that's it, the task is constructed
@@ -184,14 +191,14 @@ public:
  */
 void	ExposureWork::run() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "start ExposureWork on task %d",
-		_task.id());
+		task().id());
 	// work with the instrument
-	std::string	instrument = _task.instrument();
+	std::string	instrument = task().instrument();
 
 	// set the cooler
 	if (cooler) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "turning on cooler");
-		cooler->setTemperature(_task.ccdtemperature());
+		cooler->setTemperature(task().ccdtemperature());
 		cooler->setOn(true);
 	}
 
@@ -207,9 +214,9 @@ void	ExposureWork::run() {
 		}
 
 		// select the new filter
-		if (_task.filter().size() > 0) {
-			filterwheel->select(_task.filter());
-			filtername = _task.filter();
+		if (task().filter().size() > 0) {
+			filterwheel->select(task().filter());
+			filtername = task().filter();
 		}
 	}
 
@@ -244,18 +251,18 @@ void	ExposureWork::run() {
 
 	// start exposure
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "start exposure: time=%f",
-		_task.exposure().exposuretime());
-	ccd->startExposure(_task.exposure());
+		task().exposure().exposuretime());
+	ccd->startExposure(task().exposure());
 
 	// record the current task information. This may take some time,
 	// so we keep the time so that we can later correct the wait time
 	// for exposure completion
 	Timer	gatewaytime;
 	gatewaytime.start();
-	gateway::Gateway::update(instrument, (int)_task.id());	// currenttaskid
+	gateway::Gateway::update(instrument, (int)task().id());	// currenttaskid
 	gateway::Gateway::updateImageStart(instrument);		// lastimagestart
-	gateway::Gateway::update(instrument, _task.project());	// project
-	gateway::Gateway::update(instrument, _task.exposure());	// exosuretime
+	gateway::Gateway::update(instrument, task().project());	// project
+	gateway::Gateway::update(instrument, task().exposure());	// exosuretime
 	gateway::Gateway::update(instrument, filterwheel);	// filter
 	gateway::Gateway::update(instrument, cooler);		// ccdtemperature
 	gateway::Gateway::update(instrument, mount);		// position
@@ -267,7 +274,7 @@ void	ExposureWork::run() {
 		gatewaytime.elapsed());
 
 	// cmopute the remaining time to wait
-	double	waittime = _task.exposure().exposuretime()
+	double	waittime = task().exposure().exposuretime()
 			- gatewaytime.elapsed();
 	if (waittime < 0) {
 		waittime = 0.001;
@@ -310,9 +317,9 @@ void	ExposureWork::run() {
 		image->getFrame().toString().c_str());
 
 	// add instrument info
-	if (_task.instrument().size() > 0) {
+	if (task().instrument().size() > 0) {
 		image->setMetadata(FITSKeywords::meta("INSTRUME",
-			_task.instrument()));
+			task().instrument()));
 	}
 
 	// add filter information to the image, if present
@@ -336,15 +343,15 @@ void	ExposureWork::run() {
 	}
 
 	// project inforamtion
-	if (_task.project().size() > 0) {
+	if (task().project().size() > 0) {
 		image->setMetadata(astro::io::FITSKeywords::meta(
-			std::string("PROJECT"), _task.project()));
+			std::string("PROJECT"), task().project()));
 	}
 
-	if (_task.repository().size() > 0) {
+	if (task().repository().size() > 0) {
 		// add the image to the repository
-		std::string	repodb = _task.repodb();
-		std::string	repository = _task.repository();
+		std::string	repodb = task().repodb();
+		std::string	repository = task().repository();
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "saving image to repo %s@%s",
 			repository.c_str(), repodb.c_str());
 
@@ -358,7 +365,7 @@ void	ExposureWork::run() {
 		project::ImageRepoPtr	imagerepo = config::ImageRepoConfiguration::get(config)->repo(repository);
 		if (imagerepo) {
 			long	id = imagerepo->save(image);
-			_task.filename(stringprintf("%ld", id));
+			task().filename(stringprintf("%ld", id));
 		} else {
 			debug(LOG_DEBUG, DEBUG_LOG, 0, "no image repo found");
 		}
@@ -369,25 +376,25 @@ void	ExposureWork::run() {
 		std::string	filename = imagedir.save(image);
 
 		// remember the filename
-		_task.filename(filename);
+		task().filename(filename);
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "saving image to file %s",
 			filename.c_str());
 	}
 
 	// update the frame information
-	astro::camera::Exposure	exposure = _task.exposure();
-	_task.exposure(exposure);
+	astro::camera::Exposure	exposure = task().exposure();
+	task().exposure(exposure);
 
 	// copy the returned image information
-	_task.size(image->size());
-	_task.origin(image->origin());
+	task().size(image->size());
+	task().origin(image->origin());
 
 	// log info
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "image %s written",
-		_task.filename().c_str());
-	_task.state(TaskQueueEntry::complete);
+		task().filename().c_str());
+	task().state(TaskQueueEntry::complete);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "finish ExposureWork for task %d",
-		_task.id());
+		task().id());
 }
 
 /**

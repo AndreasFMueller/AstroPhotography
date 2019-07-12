@@ -10,6 +10,35 @@
 
 namespace snowstar {
 
+astro::task::tasktype	convert(const TaskType& type) {
+	switch (type) {
+	case TaskEXPOSURE:
+		return astro::task::tasktype::EXPOSURE;
+	case TaskDITHER:
+		return astro::task::tasktype::DITHER;
+	case TaskFOCUS:
+		return astro::task::tasktype::FOCUS;
+	case TaskSLEEP:
+		return astro::task::tasktype::SLEEP;
+	}
+	throw std::runtime_error("unknown task type");
+}
+
+TaskType	convert(const astro::task::tasktype& type) {
+	int	t = type;
+	switch (t) {
+	case astro::task::tasktype::EXPOSURE:
+		return TaskEXPOSURE;
+	case astro::task::tasktype::DITHER:
+		return TaskDITHER;
+	case astro::task::tasktype::FOCUS:
+		return TaskFOCUS;
+	case astro::task::tasktype::SLEEP:
+		return TaskSLEEP;
+	}
+	throw std::runtime_error("unknown task type");
+}
+
 astro::task::TaskInfo::taskstate	convert(const TaskState& state) {
 	switch (state) {
 	case TskPENDING:
@@ -64,6 +93,8 @@ TaskInfo	convert(const astro::task::TaskInfo& info) {
 	result.filterwheel = info.filterwheel();
 	result.mount = info.mount();
 	result.focuser = info.focuser();
+	result.guideport = info.guideport();
+	result.adaptiveoptics = info.adaptiveoptics();
 	return result;
 }
 
@@ -80,11 +111,14 @@ astro::task::TaskInfo	convert(const TaskInfo& info) {
 	result.filterwheel(info.filterwheel);
 	result.mount(info.mount);
 	result.focuser(info.focuser);
+	result.guideport(info.guideport);
+	result.adaptiveoptics(info.adaptiveoptics);
 	return result;
 }
 
 TaskParameters	convert(const astro::task::TaskParameters& parameters) {
 	TaskParameters	result;
+	result.type = convert(parameters.taskType());
 	result.instrument = parameters.instrument();
 	result.cameraIndex = parameters.cameraindex();
 	result.ccdIndex = parameters.ccdindex();
@@ -94,6 +128,8 @@ TaskParameters	convert(const astro::task::TaskParameters& parameters) {
 	result.filter = parameters.filter();
 	result.mountIndex = parameters.mountindex();
 	result.focuserIndex = parameters.focuserindex();
+	result.guideportIndex = parameters.guideportindex();
+	result.adaptiveopticsIndex = parameters.adaptiveopticsindex();
 	result.project = parameters.project();
 	result.repodb = parameters.repodb();
 	result.repository = parameters.repository();
@@ -103,6 +139,7 @@ TaskParameters	convert(const astro::task::TaskParameters& parameters) {
 
 astro::task::TaskParameters	convert(const TaskParameters& parameters) {
 	astro::task::TaskParameters	result;
+	result.taskType(convert(parameters.type));
 	result.exposure(convert(parameters.exp));
 	result.instrument(parameters.instrument);
 	result.cameraindex(parameters.cameraIndex);
@@ -113,6 +150,8 @@ astro::task::TaskParameters	convert(const TaskParameters& parameters) {
 	result.filter(parameters.filter);
 	result.mountindex(parameters.mountIndex);
 	result.focuserindex(parameters.focuserIndex);
+	result.guideportindex(parameters.guideportIndex);
+	result.adaptiveopticsindex(parameters.adaptiveopticsIndex);
 	result.project(parameters.project);
 	result.repodb(parameters.repodb);
 	result.repository(parameters.repository);

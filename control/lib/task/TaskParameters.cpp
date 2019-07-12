@@ -11,6 +11,14 @@ namespace task {
 
 TaskParameters::TaskParameters() {
 	_ccdtemperature = -1;
+	_cameraindex = -1;
+	_ccdindex = -1;
+	_coolerindex = -1;
+	_filterwheelindex = -1;
+	_mountindex = -1;
+	_focuserindex = -1;
+	_guideportindex = -1;
+	_adaptiveopticsindex = -1;
 }
 
 } // namespace task

@@ -7,10 +7,19 @@
 #include <Ice/Identity.ice>
 
 module snowstar {
+	enum TaskType {
+		TaskEXPOSURE,
+		TaskDITHER,
+		TaskFOCUS,
+		TaskSLEEP
+	};
+
 	/**
 	 * \brief Task Parameters
 	 */
 	struct TaskParameters {
+		TaskType	type;
+		
 		// instrument
 		string	instrument;
 
@@ -31,6 +40,10 @@ module snowstar {
 
 		// information about the focus
 		int	focuserIndex;
+
+		// information about guideport and adaptive optics
+		int	guideportIndex;
+		int	adaptiveopticsIndex;
 
 		// project
 		string	project;
@@ -86,6 +99,8 @@ module snowstar {
 		string	filterwheel;
 		string	mount;
 		string	focuser;
+		string	guideport;
+		string	adaptiveoptics;
 	};
 
 	/**

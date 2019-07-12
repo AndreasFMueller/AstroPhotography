@@ -9,9 +9,11 @@ noinst_LTLIBRARIES = libastrotask.la
 
 libastrotask_la_SOURCES = 						\
 	CancellableWork.cpp						\
+	DitherWork.cpp							\
 	ExposureTimer.cpp						\
 	ExposureWork.cpp						\
 	Loop.cpp							\
+	SleepWork.cpp							\
 	TaskExecutor.cpp						\
 	TaskInfo.cpp							\
 	TaskParameters.cpp						\

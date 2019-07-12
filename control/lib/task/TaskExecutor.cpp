@@ -69,7 +69,11 @@ void	TaskExecutor::main() {
 
 		// the exposure task starts to run when we call the run method
 		// this is also the moment when the 
-		exposurework->run();
+		if (NULL != taskwork) {
+			taskwork->run();
+		} else {
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "no task work");
+		}
 		_task.state(TaskQueueEntry::complete);
 	} catch (CancelException& x) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "execution cancelled: %s",
@@ -108,7 +112,20 @@ TaskExecutor::TaskExecutor(TaskQueue& queue, const TaskQueueEntry& task)
 	// create a new ExposureTask object. The ExposureTask contains
 	// the logic to actually execute the task
 	try {
-		exposurework = new ExposureWork(_task);
+		switch ((int)task.taskType()) {
+		case tasktype::EXPOSURE:
+			taskwork = new ExposureWork(_task);
+			break;
+		case tasktype::DITHER:
+			taskwork = new DitherWork(_task);
+			break;
+		case tasktype::SLEEP:
+			taskwork = new SleepWork(_task);
+			break;
+		case tasktype::FOCUS:
+			taskwork = NULL;
+			break;
+		}
 	} catch (std::exception& x) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "cannot tart the task: %s",
 			x.what());
@@ -142,17 +159,17 @@ void	TaskExecutor::release() {
 TaskExecutor::~TaskExecutor() {
 	cancel();
 	wait();
-	// when we have waited for the thread, we are sure the exposurework
+	// when we have waited for the thread, we are sure the taskwork
 	// is no longer needed, and can be detroyed
-	delete exposurework;
-	exposurework = NULL;
+	delete taskwork;
+	taskwork = NULL;
 }
 
 /**
  * \brief cancel execution 
  */
 void	TaskExecutor::cancel() {
-	exposurework->cancel();
+	taskwork->cancel();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "thread cancel signal sent");
 }
 
