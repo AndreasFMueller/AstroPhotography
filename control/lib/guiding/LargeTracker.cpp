@@ -24,7 +24,7 @@ Point	LargeTracker::operator()(image::ImagePtr newimage) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0,
 		"found center of gravity %s, center offset %s",
 		cg.toString().c_str(), offset.toString().c_str());
-	return offset;
+	return dithered(offset);
 }
 
 } // namespace guiding

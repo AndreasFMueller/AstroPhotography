@@ -273,6 +273,79 @@ const TrackingSummary&	Guider::summary() {
 }
 
 /**
+ * \brief Get the currently active tracker
+ */
+TrackerPtr	Guider::currentTracker() const {
+	// first make sure we have a tracking process currently working
+	if (trackingprocess) {
+		if (!trackingprocess->isrunning()) {
+			TrackerPtr	result(NULL);
+			return result;
+		}
+	}
+	// convert the tracking process to
+	TrackingProcess	*tp
+		= dynamic_cast<TrackingProcess *>(&*trackingprocess);
+	if (NULL == tp) {
+		TrackerPtr	result(NULL);
+		return result;
+	}
+	// now retrieve the tracker from the tracking process
+	return tp->tracker();
+}
+
+/**
+ * \brief Offset tracking by a small vector
+ *
+ * \param _dither	offset to apply to tracking
+ */
+void	Guider::dither(const Point& _dither) {
+	TrackerPtr	tracker = currentTracker();
+	if (tracker) {
+		tracker->dither(_dither);
+	} else {
+		std::string	cause = stringprintf("wrong state for dither: "
+			"%s", Guide::state2string(_state).c_str());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", cause.c_str());
+		throw BadState(cause);
+	}
+}
+
+/**
+ * \brief Get the current dither offset
+ *
+ * If the guider is not currently tracking, the zero vector is returned
+ */
+Point	Guider::dither() const {
+	TrackerPtr	tracker = currentTracker();
+	if (tracker) {
+		return tracker->dither();
+	} else {
+		Point	result;
+		return result;
+	}
+}
+
+/**
+ * \brief Generate a dither vector given the arcsec size
+ */
+void	Guider::ditherArcsec(double arcsec) {
+	// convert arcsec into pixel radius
+	double	arcsec_per_pixel = (180 / M_PI) * (pixelsize() / focallength());
+	double	r = arcsec / arcsec_per_pixel;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "dither radius in arcsec: %3.f, "
+		"pixel: %.2f", arcsec, r);
+
+	// generate vector in polar coordinates
+	double	phi = 2 * M_PI * (random() / (double)2147483647);
+	r *= random() / (double)2147483647;
+	Point	v(r * cos(phi), r * sin(phi));
+	dither(v);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "using dither offset %s",
+		v.toString().c_str());
+}
+
+/**
  * \brief check the current state
  *
  * This method should always be called before the state is check. It checks

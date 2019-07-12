@@ -137,6 +137,13 @@ public:
 	 */
 	virtual Point	operator()(image::ImagePtr newimage) = 0;
 	virtual	std::string	toString() const;
+private:
+	Point	_dither;
+public:
+	const Point&	dither() const { return _dither; }
+	void	dither(const Point& dither) { _dither = dither; }
+protected:
+	Point	dithered(const Point& point) { return point + dither(); }
 };
 
 typedef std::shared_ptr<Tracker>	TrackerPtr;
@@ -252,7 +259,7 @@ public:
 		Adapter	to(*a);
 		Point	result = correlate(to);
 		delete a;
-		return result;
+		return dithered(result);
 	}
 };
 
@@ -1137,6 +1144,11 @@ public:
 	double	getInterval();
 	const TrackingSummary&	summary();
 
+	// access to the current tracker, mainly for dithering
+	TrackerPtr	currentTracker() const;
+	void	dither(const Point& _dither);
+	void	ditherArcsec(double arcsec);
+	Point	dither() const;
 private:
 	float	_filter_parameters[2];
 public:

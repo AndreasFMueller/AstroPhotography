@@ -72,7 +72,7 @@ Point	StarTracker::operator()(ImagePtr newimage) {
 		newpoint.toString().c_str(), offset.toString().c_str());
 
 	// new compute the offset
-	return newpoint - _point;
+	return dithered(newpoint - _point);
 }
 
 std::string	StarTracker::toString() const {
