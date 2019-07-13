@@ -26,7 +26,7 @@ public:
 /**
  * \brief Condition class used for waiting
  *
- * Ths wait method of the CancellableWork class waits until either the
+ * The wait method of the CancellableWork class waits until either the
  * work is cancelled, the time expires or the condition is met.
  */
 class Condition {

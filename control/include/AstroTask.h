@@ -31,8 +31,9 @@ private:
 public:
 	tasktype() { _t = EXPOSURE; }
 	tasktype(type t) { _t = t; }
-	tasktype(int t) { _t = (type)t; }
+	tasktype(int t);
 	operator int() const { return (int)_t; }
+	std::string	toString() const;
 };
 
 /**
@@ -64,6 +65,7 @@ private:
 	int	_filterwheelindex;
 	int	_mountindex;
 	int	_focuserindex;
+	int	_guiderccdindex;
 	int	_guideportindex;
 	int	_adaptiveopticsindex;
 public:
@@ -79,6 +81,8 @@ public:
 	void	mountindex(int i) { _mountindex = i; }
 	int	focuserindex() const { return _focuserindex; }
 	void	focuserindex(int i) { _focuserindex = i; }
+	int	guiderccdindex() const { return _guiderccdindex; }
+	void	guiderccdindex(int i) { _guiderccdindex = i; }
 	int	guideportindex() const { return _guideportindex; }
 	void	guideportindex(int i) { _guideportindex = i; }
 	int	adaptiveopticsindex() const { return _adaptiveopticsindex; }
@@ -166,6 +170,7 @@ private:
 	std::string	_filterwheel;
 	std::string	_mount;
 	std::string	_focuser;
+	std::string	_guiderccd;
 	std::string	_guideport;
 	std::string	_adaptiveoptics;
 public:
@@ -183,6 +188,10 @@ public:
 	void	mount(const std::string& mount) { _mount = mount; }
 	const std::string&	focuser() const { return _focuser; }
 	void	focuser(const std::string& focuser) { _focuser = focuser; }
+	const std::string&	guiderccd() const { return _guiderccd; }
+	void	guiderccd(const std::string& guiderccd) {
+		_guiderccd = guiderccd;
+	}
 	const std::string&	guideport() const { return _guideport; }
 	void	guideport(const std::string& guideport) {
 		_guideport = guideport;

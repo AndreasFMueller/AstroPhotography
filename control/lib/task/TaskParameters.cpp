@@ -17,6 +17,7 @@ TaskParameters::TaskParameters() {
 	_filterwheelindex = -1;
 	_mountindex = -1;
 	_focuserindex = -1;
+	_guiderccdindex = -1;
 	_guideportindex = -1;
 	_adaptiveopticsindex = -1;
 }

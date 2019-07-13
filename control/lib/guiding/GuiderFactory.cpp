@@ -13,9 +13,28 @@ using namespace astro::device;
 namespace astro {
 namespace guiding {
 
-//////////////////////////////////////////////////////////////////////
-// GuiderFactory implementation
-//////////////////////////////////////////////////////////////////////
+GuiderFactoryPtr	guiderfactory;
+
+/**
+ * \brief Initialize the GuiderFactory
+ */
+void	GuiderFactory::initialize(module::ModuleRepositoryPtr _repository,
+		persistence::Database _database) {
+	GuiderFactory	*gf = new GuiderFactory(_repository, _database);
+	guiderfactory = GuiderFactoryPtr(gf);
+}
+
+/**
+ * \brief Access to the GuiderFactory
+ */
+GuiderFactoryPtr	GuiderFactory::get() {
+	if (guiderfactory) {
+		return guiderfactory;
+	}
+	std::string	msg = stringprintf("no guider factory");
+	debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+	throw std::runtime_error(msg);
+}
 
 /**
  * \brief Retrieve a list of known guiders

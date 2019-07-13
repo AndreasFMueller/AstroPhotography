@@ -173,6 +173,12 @@ BacklashDirection	convert(const astro::guiding::backlash_t);
 astro::guiding::backlash_t	convert(BacklashDirection);
 
 // TaskQueue
+TaskType	convert(const astro::task::tasktype& type);
+astro::task::tasktype	convert(const TaskType& type);
+
+std::string	tasktype2string(const TaskType& type);
+TaskType	string2tasktype(const std::string& type);
+
 TaskState	convert(const astro::task::TaskInfo::taskstate& state);
 astro::task::TaskInfo::taskstate	convert(const TaskState& state);
 

@@ -35,6 +35,9 @@ int	coolerIndex = 0;
 int	filterwheelIndex = 0;
 int	mountIndex = 0;
 int	focuserIndex = 0;
+int	guiderccdIndex = 0;
+int	guideportIndex = 0;
+int	adaptiveopticsIndex = -1;
 
 void	signal_handler(int /* sig */) {
 	completed = true;
@@ -146,6 +149,8 @@ int	common_list(TaskQueuePrx tasks, const std::set<int> ids) {
 			size = info.frame.size;
 			break;
 		}
+		std::cout << astro::stringprintf("%-10.10s",
+			tasktype2string(parameters.type).c_str());
 		std::string	s = astro::stringprintf("%dx%d",
 					size.width, size.height);
 		std::cout << astro::stringprintf(" %-9.9s %1dx%1d ",
@@ -362,13 +367,14 @@ int	command_cancel(TaskQueuePrx tasks, std::list<int> ids) {
 /**
  * \brief Implementation of the submit command
  */
-int	command_submit(TaskQueuePrx tasks, InstrumentsPrx /* instruments */) {
+int	command_submit(TaskQueuePrx tasks, InstrumentsPrx /* instruments */, const std::string& type) {
 	// get the configuration
 	astro::config::ConfigurationPtr	config
 		= astro::config::Configuration::get();
 
 	// prepare the parameters 
 	TaskParameters	parameters;
+	parameters.type = string2tasktype(type);
 	parameters.project = project;
 	parameters.instrument = instrumentname;
 
@@ -381,6 +387,9 @@ int	command_submit(TaskQueuePrx tasks, InstrumentsPrx /* instruments */) {
 	parameters.filter = filter;
 	parameters.mountIndex = mountIndex;
 	parameters.focuserIndex = focuserIndex;
+	parameters.guiderccdIndex = guiderccdIndex;
+	parameters.guideportIndex = guideportIndex;
+	parameters.adaptiveopticsIndex = adaptiveopticsIndex;
 
 	// exposure parameters
 	parameters.exp = convert(exposure);
@@ -500,7 +509,7 @@ static void	usage(const char *progname) {
 	std::cout << p << " [ options ] <service> state" << std::endl;
 	std::cout << p << " [ options ] <service> cancel <id> ..." << std::endl;
 	std::cout << p << " [ options ] <service> remove <id> ..." << std::endl;
-	std::cout << p << " [ options ] <service> submit" << std::endl;
+	std::cout << p << " [ options ] <service> submit [ tasktype ]" << std::endl;
 	std::cout << p << " [ options ] <service> project <projectname> <partno>" << std::endl;
 	std::cout << p << " [ options ] <service> image <id> <filename>" << std::endl;
 	std::cout << p << " [ options ] <service> remote <id> <imagerepo>" << std::endl;
@@ -527,9 +536,13 @@ static void	usage(const char *progname) {
 		"the queue" << std::endl;
 	std::cout << " -p,--purpose=p     expose with purpose <p>" << std::endl;
 	std::cout << " -r,--rectangle=r   exposre rectangle <r>" << std::endl;
-	std::cout << " -s,--server<srv>   connect to the queue on <srv>"
+	std::cout << " -s,--server=<srv>  connect to the queue on <srv>"
+		<< std::endl;
+	std::cout << " -S,--sleep=<t>     time to sleep for sleep tasks"
 		<< std::endl;
 	std::cout << " -t,--temperature=t cool chip to temperature t"
+		<< std::endl;
+	std::cout << " -D,--dither=d      add a dither task for d arcsec"
 		<< std::endl;
 	std::cout << " -v,--verbose       verbose mode" << std::endl;
 }
@@ -552,12 +565,14 @@ static struct option	longopts[] = {
 { "dryrun",	no_argument,		NULL,		'n' }, /*  3 */
 { "exposure",	required_argument,	NULL,		'e' }, /*  4 */
 { "filter",	required_argument,	NULL,		'F' }, /*  5 */
+{ "dither",	required_argument,	NULL,		'D' },
 { "frame",	required_argument,	NULL,		'f' }, /*  6 */
 { "help",	no_argument,		NULL,		'h' }, /*  7 */
 { "instrument",	required_argument,	NULL,		'i' }, /*  8 */
 { "purpose",	required_argument,	NULL,		'p' }, /*  9 */
 { "project",	required_argument,	NULL,		'P' }, /* 10 */
 { "repeat",	required_argument,	NULL,		'r' }, /* 11 */
+{ "sleep",	required_argument,	NULL,		's' },
 { "temperature",required_argument,	NULL,		't' }, /* 13 */
 { "verbose",	no_argument,		NULL,		'v' }, /* 14 */
 { NULL,		0,			NULL,		0   }
@@ -575,7 +590,7 @@ int	main(int argc, char *argv[]) {
 	// parse command line options
 	int	c;
 	int	longindex;
-	while (EOF != (c = getopt_long(argc, argv, "b:c:de:F:f:h?i:p:P:r:t:v",
+	while (EOF != (c = getopt_long(argc, argv, "b:c:dD:e:F:f:h?i:p:P:r:s:t:v",
 			longopts, &longindex)))
 		switch (c) {
 		case 'b':
@@ -588,6 +603,7 @@ int	main(int argc, char *argv[]) {
 			debuglevel = LOG_DEBUG;
 			break;
 		case 'e':
+		case 's':
 			exposure.exposuretime(std::stod(optarg));
 			break;
 		case 'F':
@@ -595,6 +611,9 @@ int	main(int argc, char *argv[]) {
 			break;
 		case 'f':
 			exposure.frame(astro::image::ImageRectangle(optarg));
+			break;
+		case 'D':
+			temperature = std::stod(optarg);
 			break;
 		case 'h':
 		case '?':
@@ -693,7 +712,11 @@ int	main(int argc, char *argv[]) {
 		return command_cancel(tasks, ids);
 	}
 	if (command == "submit") {
-		return command_submit(tasks, instruments);
+		std::string	type("exposure");
+		if (optind < argc) {
+			type = std::string(argv[optind++]);
+		}
+		return command_submit(tasks, instruments, type);
 	}
 	if (command == "image") {
 		if (argc <= optind) {

@@ -105,6 +105,53 @@ bool	Instrument::hasMount() {
 	return this->has(InstrumentComponentKey::Mount);
 }
 
+bool	Instrument::hasGuidername() {
+	return hasGuiderCcd() && (hasGuidePort() || hasAdaptiveOptics());
+}
+
+astro::guiding::GuiderName	Instrument::guidername() {
+	if (!hasGuidername()) {
+		std::string	msg = stringprintf("instrument %s cannot guide",
+			name().c_str());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw std::runtime_error(msg);
+	}
+	int	guideportindex = -1;
+	if (hasGuidePort()) { guideportindex = 0; }
+	int	adaptiveopticsindex = -1;
+	if (hasAdaptiveOptics()) { adaptiveopticsindex = 0; }
+	astro::guiding::GuiderName	guidername(name(), 0, guideportindex,
+		adaptiveopticsindex);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "got GuiderName '%s'",
+		guidername.name().c_str());
+	return guidername;
+}
+
+astro::guiding::GuiderDescriptor	Instrument::guiderdescriptor() {
+	if (!hasGuidername()) {
+		std::string	msg = stringprintf("instrument %s cannot guide",
+			name().c_str());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw std::runtime_error(msg);
+	}
+	astro::guiding::GuiderName	guidername = Instrument::guidername();
+	std::string	ccd = getGuiderCcd().deviceurl();
+	// check for guideport
+	std::string	guideport;
+	if (guidername.hasGuidePort()) {
+		guideport = getGuidePort().deviceurl();
+	}
+	std::string	adaptiveoptics;
+	if (guidername.hasAdaptiveOptics()) {
+		adaptiveoptics = getAdaptiveOptics().deviceurl();
+	}
+	astro::guiding::GuiderDescriptor	guiderdescriptor(
+		guidername.name(), name(), ccd, guideport, adaptiveoptics);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "got guiderdescriptor '%s'",
+		guiderdescriptor.toString().c_str());
+	return guiderdescriptor;
+}
+
 /**
  * \brief Auxiliary function to add components to a list
  */

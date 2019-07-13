@@ -25,7 +25,6 @@ class Server {
 	astro::module::ModuleRepositoryPtr	repository;
 	astro::module::Devices		devices;
 	astro::persistence::Database	database;
-	astro::guiding::GuiderFactory	guiderfactory;
 	astro::task::TaskQueue		taskqueue;
 	astro::image::ImageDirectory	imagedirectory;
 

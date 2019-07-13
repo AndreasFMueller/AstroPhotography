@@ -1211,6 +1211,8 @@ typedef std::shared_ptr<Guider>	GuiderPtr;
 /**
  * \brief GuiderFactory class
  */
+class GuiderFactory;
+typedef std::shared_ptr<GuiderFactory>	GuiderFactoryPtr;
 class GuiderFactory {
 	module::ModuleRepositoryPtr	repository;
 	persistence::Database	database;
@@ -1223,8 +1225,10 @@ public:
 		: repository(_repository), database(_database) { }
 	std::vector<GuiderDescriptor>	list() const;
 	GuiderPtr	get(const GuiderDescriptor& guiderdescriptor);
+	static GuiderFactoryPtr	get();
+	static void	initialize(module::ModuleRepositoryPtr _repository,
+				persistence::Database _database);
 };
-typedef std::shared_ptr<GuiderFactory>	GuiderFactoryPtr;
 
 /**
  * \brief Encapsulation of the information about a guide run

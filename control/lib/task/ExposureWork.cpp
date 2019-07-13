@@ -207,9 +207,9 @@ void	ExposureWork::run() {
 	if (filterwheel) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "selecting filter");
 		// make sure filter wheel is ready
-		FilterwheelCondition	condition(filterwheel,
+		FilterwheelCondition	filterwheelcondition(filterwheel,
 			camera::FilterWheel::idle);
-		if (!wait(10., condition)) {
+		if (!wait(10., filterwheelcondition)) {
 			throw std::runtime_error("filterwheel did not settle");
 		}
 
@@ -239,9 +239,9 @@ void	ExposureWork::run() {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "wait for filterwheel");
 
 		// wait once more for the filterwheel to become ready
-		FilterwheelCondition	condition(filterwheel,
+		FilterwheelCondition	filterwheelcondition(filterwheel,
 			camera::FilterWheel::idle);
-		if (!wait(30., condition)) {
+		if (!wait(30., filterwheelcondition)) {
 			throw std::runtime_error("filter wheel does not idle");
 		}
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "filterwheel now idle");

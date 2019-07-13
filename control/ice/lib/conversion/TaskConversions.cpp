@@ -39,6 +39,36 @@ TaskType	convert(const astro::task::tasktype& type) {
 	throw std::runtime_error("unknown task type");
 }
 
+std::string	tasktype2string(const TaskType& type) {
+	switch (type) {
+	case TaskEXPOSURE:
+		return std::string("exposure");
+	case TaskDITHER:
+		return std::string("dither");
+	case TaskFOCUS:
+		return std::string("focus");
+	case TaskSLEEP:
+		return std::string("sleep");
+	}
+	throw std::runtime_error("unknown task type");
+}
+
+TaskType	string2tasktype(const std::string& type) {
+	if (type == std::string("exposure")) {
+		return TaskEXPOSURE;
+	}
+	if (type == std::string("dither")) {
+		return TaskDITHER;
+	}
+	if (type == std::string("focus")) {
+		return TaskFOCUS;
+	}
+	if (type == std::string("sleep")) {
+		return TaskSLEEP;
+	}
+	throw std::runtime_error("unknown task type");
+}
+
 astro::task::TaskInfo::taskstate	convert(const TaskState& state) {
 	switch (state) {
 	case TskPENDING:
@@ -93,6 +123,7 @@ TaskInfo	convert(const astro::task::TaskInfo& info) {
 	result.filterwheel = info.filterwheel();
 	result.mount = info.mount();
 	result.focuser = info.focuser();
+	result.guiderccd = info.guiderccd();
 	result.guideport = info.guideport();
 	result.adaptiveoptics = info.adaptiveoptics();
 	return result;
@@ -111,6 +142,7 @@ astro::task::TaskInfo	convert(const TaskInfo& info) {
 	result.filterwheel(info.filterwheel);
 	result.mount(info.mount);
 	result.focuser(info.focuser);
+	result.guiderccd(info.guiderccd);
 	result.guideport(info.guideport);
 	result.adaptiveoptics(info.adaptiveoptics);
 	return result;
@@ -128,6 +160,7 @@ TaskParameters	convert(const astro::task::TaskParameters& parameters) {
 	result.filter = parameters.filter();
 	result.mountIndex = parameters.mountindex();
 	result.focuserIndex = parameters.focuserindex();
+	result.guiderccdIndex = parameters.guiderccdindex();
 	result.guideportIndex = parameters.guideportindex();
 	result.adaptiveopticsIndex = parameters.adaptiveopticsindex();
 	result.project = parameters.project();
@@ -150,6 +183,7 @@ astro::task::TaskParameters	convert(const TaskParameters& parameters) {
 	result.filter(parameters.filter);
 	result.mountindex(parameters.mountIndex);
 	result.focuserindex(parameters.focuserIndex);
+	result.guiderccdindex(parameters.guiderccdIndex);
 	result.guideportindex(parameters.guideportIndex);
 	result.adaptiveopticsindex(parameters.adaptiveopticsIndex);
 	result.project(parameters.project);

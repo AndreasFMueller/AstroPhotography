@@ -4,7 +4,7 @@
 # (c) 2012 Prof Dr Andreas Mueller, Hochschule Rapperswil
 #
 SUBDIRS = utils persistence event discovery image processing device config \
-	catalogs task guiding focusing usb unicap . test
+	catalogs guiding focusing task usb unicap . test
 
 noinst_HEADERS = Version.h
 

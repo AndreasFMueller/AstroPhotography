@@ -21,11 +21,9 @@ namespace snowstar {
  */
 class GuiderFactoryI : virtual public GuiderFactory {
 	astro::persistence::Database	database;
-	astro::guiding::GuiderFactory&	guiderfactory;
 	GuiderLocator	*locator;
 public:
 	GuiderFactoryI(astro::persistence::Database database,
-		astro::guiding::GuiderFactory& guiderfactory,
 		GuiderLocator *locator);
 	virtual ~GuiderFactoryI();
 	// conversions
@@ -52,6 +50,7 @@ public:
 	TrackingSummary	getTrackingSummary(int id, ControlType type,
 		const Ice::Current& current);
 	void	deleteTrackingHistory(int id, const Ice::Current& current);
+	astro::guiding::GuiderFactoryPtr	guiderfactory();
 };
 
 } // namespace snowstar

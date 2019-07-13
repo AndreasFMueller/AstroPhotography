@@ -42,6 +42,7 @@ module snowstar {
 		int	focuserIndex;
 
 		// information about guideport and adaptive optics
+		int	guiderccdIndex;
 		int	guideportIndex;
 		int	adaptiveopticsIndex;
 
@@ -99,6 +100,7 @@ module snowstar {
 		string	filterwheel;
 		string	mount;
 		string	focuser;
+		string	guiderccd;
 		string	guideport;
 		string	adaptiveoptics;
 	};

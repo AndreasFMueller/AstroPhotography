@@ -16,6 +16,7 @@
 #include <mutex>
 #include <condition_variable>
 #include <AstroDevice.h>
+#include <AstroGuiding.h>
 
 namespace astro {
 namespace discover {
@@ -455,6 +456,11 @@ public:
 	InstrumentComponent	getFilterWheel(int index = 0);
 	InstrumentComponent	getFocuser(int index = 0);
 	InstrumentComponent	getMount(int index = 0);
+
+	// convenience functions for access to the guiders
+	bool	hasGuidername();
+	astro::guiding::GuiderName	guidername();
+	astro::guiding::GuiderDescriptor	guiderdescriptor();
 
 	// properties
 	virtual int	addProperty(const InstrumentProperty& property) = 0;

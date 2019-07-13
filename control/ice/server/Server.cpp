@@ -201,8 +201,7 @@ void	Server::add_repository_servant() {
 
 void	Server::add_guiding_servant() {
 	GuiderLocator	*guiderlocator = new GuiderLocator();
-	Ice::ObjectPtr	object = new GuiderFactoryI(database, guiderfactory,
-		guiderlocator);
+	Ice::ObjectPtr	object = new GuiderFactoryI(database, guiderlocator);
 	adapter->add(object, STRING_TO_IDENTITY("Guiders"));
 	adapter->addServantLocator(guiderlocator, "guider");
 	astro::event(EVENT_GLOBAL, astro::events::INFO,
@@ -231,7 +230,6 @@ Server::Server(Ice::CommunicatorPtr _ic, const std::string& dbfilename)
 	  repository(astro::module::getModuleRepository()),
 	  devices(repository),
 	  database(getdatabase(dbfilename)),
-	  guiderfactory(repository, database),
 	  taskqueue(database) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "creating a server");
 	// activate the event log
@@ -257,6 +255,9 @@ Server::Server(Ice::CommunicatorPtr _ic, const std::string& dbfilename)
 	sp->publish();
 	if (sps) { sps->publish(); }
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "services pubilshed");
+
+	// initialize the guider factory
+	astro::guiding::GuiderFactory::initialize(repository, database);
 
 	// initialize servants
 

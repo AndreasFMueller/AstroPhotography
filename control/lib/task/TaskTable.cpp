@@ -37,6 +37,8 @@ std::string	TaskTableAdapter::createstatement() {
 	"    mount varchar(256) not null default '',\n"
 	"    focuserindex int not null default -1,\n"
 	"    focuser varchar(256) not null default '',\n"
+	"    guiderccdindex int not null default -1,\n"
+	"    guiderccd varchar(256) not null default '',\n"
 	"    guideportindex int not null default -1,\n"
 	"    guiderport varchar(256) not null default '',\n"
 	"    adaptiveopticsindex int not null default -1,\n"
@@ -80,6 +82,7 @@ TaskQueueEntry	TaskTableAdapter::row_to_object(int objectid, const Row& row) {
 	parameters.filter(row["filter"]->stringValue());
 	parameters.mountindex(row["mountindex"]->intValue());
 	parameters.focuserindex(row["focuserindex"]->intValue());
+	parameters.guiderccdindex(row["guiderccdindex"]->intValue());
 	parameters.guideportindex(row["guideportindex"]->intValue());
 	parameters.adaptiveopticsindex(row["adaptiveopticsindex"]->intValue());
 	parameters.project(row["project"]->stringValue());
@@ -111,6 +114,7 @@ TaskQueueEntry	TaskTableAdapter::row_to_object(int objectid, const Row& row) {
 	entry.ccd(row["ccd"]->stringValue());
 	entry.cooler(row["cooler"]->stringValue());
 	entry.filterwheel(row["filterwheel"]->stringValue());
+	entry.guiderccd(row["guiderccd"]->stringValue());
 	entry.guideport(row["guideport"]->stringValue());
 	entry.adaptiveoptics(row["adaptiveoptics"]->stringValue());
 	entry.mount(row["mount"]->stringValue());
@@ -152,6 +156,8 @@ UpdateSpec TaskTableAdapter::object_to_updatespec(const TaskQueueEntry& entry) {
 	spec.insert(Field("mountindex", factory.get(entry.mountindex())));
 	spec.insert(Field("focuser", factory.get(entry.focuser())));
 	spec.insert(Field("focuserindex", factory.get(entry.focuserindex())));
+	spec.insert(Field("guiderccd", factory.get(entry.guiderccd())));
+	spec.insert(Field("guiderccdindex", factory.get(entry.guiderccdindex())));
 	spec.insert(Field("guideport", factory.get(entry.guideport())));
 	spec.insert(Field("guideportindex", factory.get(entry.guideportindex())));
 	spec.insert(Field("adaptiveoptics", factory.get(entry.adaptiveoptics())));

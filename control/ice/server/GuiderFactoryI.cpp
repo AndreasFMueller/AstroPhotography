@@ -22,17 +22,14 @@ namespace snowstar {
  * There will usually be only one instance of the factory. 
  * \param _database		the persistence database to use for calibrations
  *				and tracking histories
- * \param _guiderfactory	the factory to use to create the actual objects
  * \param _locator		Locator for guiders, used to store a guider
  *				requested by a guider (the factory only
  *				returns a proxy, which will be converted to
  *				to an actual object by the locator)
  */
 GuiderFactoryI::GuiderFactoryI(astro::persistence::Database _database,
-		astro::guiding::GuiderFactory& _guiderfactory,
 		GuiderLocator *_locator)
-	: database(_database), guiderfactory(_guiderfactory),
-	  locator(_locator) {
+	: database(_database), locator(_locator) {
 }
 
 /**
@@ -49,7 +46,7 @@ GuiderFactoryI::~GuiderFactoryI() {
  */
 GuiderList	GuiderFactoryI::list(const Ice::Current& /* current */) {
 	std::vector<astro::guiding::GuiderDescriptor>	l
-		= guiderfactory.list();
+		= guiderfactory()->list();
 	GuiderList	result;
 	std::vector<astro::guiding::GuiderDescriptor>::const_iterator	i;
 	for (i = l.begin(); i != l.end(); i++) {
@@ -84,7 +81,7 @@ GuiderPrx	GuiderFactoryI::get(const GuiderDescriptor& descriptor,
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "building new guider for '%s'",
 			gn.c_str());
 		// get an GuiderPtr from the original factory
-		astro::guiding::GuiderPtr	guider = guiderfactory.get(d);
+		astro::guiding::GuiderPtr	guider = guiderfactory()->get(d);
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "got the guider");
 
 		// get the focallength from the instrument properties
@@ -401,6 +398,13 @@ void	GuiderFactoryI::deleteTrackingHistory(int id,
 		throw exception;
 	}
 	store.deleteTrackingHistory(id);
+}
+
+/**
+ * \brief Get the guider factory
+ */
+astro::guiding::GuiderFactoryPtr	GuiderFactoryI::guiderfactory() {
+	return astro::guiding::GuiderFactory::get();
 }
 
 } // namespace snowstar

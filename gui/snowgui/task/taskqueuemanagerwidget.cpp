@@ -12,6 +12,21 @@
 
 namespace snowgui {
 
+#define	taskcol_id		 0
+#define taskcol_type		 1
+#define taskcol_instrument	 2
+#define taskcol_project		 3
+#define taskcol_purpose		 4
+#define taskcol_lastchange	 5
+#define taskcol_exposure	 6
+#define taskcol_filter		 7
+#define taskcol_frame		 8
+#define taskcol_binning		 9
+#define taskcol_temperature	10
+#define taskcol_repository	11
+#define taskcol_database	12
+#define taskcol_filename	13
+
 taskqueuemanagerwidget::taskqueuemanagerwidget(QWidget *parent)
 	: QWidget(parent), ui(new Ui::taskqueuemanagerwidget) {
 	ui->setupUi(this);
@@ -40,36 +55,38 @@ taskqueuemanagerwidget::taskqueuemanagerwidget(QWidget *parent)
 	// configure the task list
 	QStringList	headers;
 	headers << "ID";		//  0
-	headers << "Instrument";	//  1
-	headers << "Project";		//  2
-	headers << "Purpose";		//  3
-	headers << "Last change";	//  4
-	headers << "Exposure";		//  5
-	headers << "Filter";		//  6
-	headers << "Frame";		//  7
-	headers << "Binning";		//  8
-	headers << "Temperature";	//  9
-	headers << "Repository";	// 10
-	headers << "Database";		// 11
-	headers << "Filename/Cause";	// 12
+	headers << "Type";		//  1
+	headers << "Instrument";	//  2
+	headers << "Project";		//  3
+	headers << "Purpose";		//  4
+	headers << "Last change";	//  5
+	headers << "Exposure";		//  6
+	headers << "Filter";		//  7
+	headers << "Frame";		//  8
+	headers << "Binning";		//  9
+	headers << "Temperature";	// 10
+	headers << "Repository";	// 11
+	headers << "Database";		// 12
+	headers << "Filename/Cause";	// 13
 	ui->taskTree->setHeaderLabels(headers);
-	ui->taskTree->header()->resizeSection(0, 80);	// ID
-	ui->taskTree->header()->resizeSection(1, 110);	// Instrument
-	ui->taskTree->header()->resizeSection(2, 100);	// Project
-	ui->taskTree->header()->resizeSection(3, 60);	// Purpose
-	ui->taskTree->header()->resizeSection(4, 150);	// Last change
-	ui->taskTree->header()->resizeSection(5, 60);	// Exposure
-	ui->taskTree->header()->resizeSection(6, 100);	// Filter
-	ui->taskTree->header()->resizeSection(7, 90);	// Frame
-	ui->taskTree->header()->resizeSection(8, 50);	// Binning
-	ui->taskTree->header()->resizeSection(9, 80);	// Temperature
-	ui->taskTree->header()->resizeSection(10, 80);	// Repository
-	ui->taskTree->header()->resizeSection(11, 80);	// Database
+	ui->taskTree->header()->resizeSection(taskcol_id,          80);
+	ui->taskTree->header()->resizeSection(taskcol_type,        80);
+	ui->taskTree->header()->resizeSection(taskcol_instrument, 110);
+	ui->taskTree->header()->resizeSection(taskcol_project,    100);
+	ui->taskTree->header()->resizeSection(taskcol_purpose,     60);
+	ui->taskTree->header()->resizeSection(taskcol_lastchange, 150);
+	ui->taskTree->header()->resizeSection(taskcol_exposure,    60);
+	ui->taskTree->header()->resizeSection(taskcol_filter,     100);
+	ui->taskTree->header()->resizeSection(taskcol_frame,       90);
+	ui->taskTree->header()->resizeSection(taskcol_binning,     50);
+	ui->taskTree->header()->resizeSection(taskcol_temperature, 80);
+	ui->taskTree->header()->resizeSection(taskcol_repository,  80);
+	ui->taskTree->header()->resizeSection(taskcol_filename,    80);
 
 	// create the top level entries in the tree
 	{
 		QStringList	list;
-		list << "" << "completed";
+		list << "" << "" << "completed";
 		QTreeWidgetItem	*item;
 		item = new QTreeWidgetItem(list, QTreeWidgetItem::Type);
 		item->setChildIndicatorPolicy(QTreeWidgetItem::ShowIndicator);
@@ -77,7 +94,7 @@ taskqueuemanagerwidget::taskqueuemanagerwidget(QWidget *parent)
 	}
 	{
 		QStringList	list;
-		list << "" << "cancelled";
+		list << "" << "" << "cancelled";
 		QTreeWidgetItem	*item;
 		item = new QTreeWidgetItem(list, QTreeWidgetItem::Type);
 		item->setChildIndicatorPolicy(QTreeWidgetItem::ShowIndicator);
@@ -85,7 +102,7 @@ taskqueuemanagerwidget::taskqueuemanagerwidget(QWidget *parent)
 	}
 	{
 		QStringList	list;
-		list << "" << "failed";
+		list << "" << "" << "failed";
 		QTreeWidgetItem	*item;
 		item = new QTreeWidgetItem(list, QTreeWidgetItem::Type);
 		item->setChildIndicatorPolicy(QTreeWidgetItem::ShowIndicator);
@@ -93,7 +110,7 @@ taskqueuemanagerwidget::taskqueuemanagerwidget(QWidget *parent)
 	}
 	{
 		QStringList	list;
-		list << "" << "executing";
+		list << "" << "" << "executing";
 		QTreeWidgetItem	*item;
 		item = new QTreeWidgetItem(list, QTreeWidgetItem::Type);
 		item->setChildIndicatorPolicy(QTreeWidgetItem::ShowIndicator);
@@ -101,7 +118,7 @@ taskqueuemanagerwidget::taskqueuemanagerwidget(QWidget *parent)
 	}
 	{
 		QStringList	list;
-		list << "" << "pending";
+		list << "" << "" << "pending";
 		QTreeWidgetItem	*item;
 		item = new QTreeWidgetItem(list, QTreeWidgetItem::Type);
 		item->setChildIndicatorPolicy(QTreeWidgetItem::ShowIndicator);
@@ -161,75 +178,123 @@ void	taskqueuemanagerwidget::addTask(QTreeWidgetItem *parent,
 	// 0 taskid>
 	list << QString::number(info.taskid);
 
-	// 1 instrument
+	// 1 task type
+	list << QString(tasktype2string(parameters.type).c_str());
+
+	// 2 instrument
 	list << QString(parameters.instrument.c_str());
 
-	// 2 project
+	// 3 project
 	list << QString(parameters.project.c_str());
 
-	// 3 purpose
-	list << QString(astro::camera::Exposure::purpose2string(
-		exposure.purpose()).c_str());
+	// 4 purpose
+	if (parameters.type == snowstar::TaskEXPOSURE) {
+		list << QString(astro::camera::Exposure::purpose2string(
+			exposure.purpose()).c_str());
+	} else {
+		list << QString();
+	}
 
-	// 4 last state change
+	// 5 last state change
 	time_t  when = snowstar::converttime(info.lastchange);
 	struct tm       *tmp = localtime(&when);
 	char    buffer[100];
 	strftime(buffer, sizeof(buffer), "%F %T", tmp);
 	list << buffer;
 
-	// 5 exposure time
-	if (exposure.exposuretime() < 10) {
-		list << QString(astro::stringprintf("%.3fs",
-			exposure.exposuretime()).c_str());
-	} else {
-		list << QString(astro::stringprintf("%.0fs",
-			exposure.exposuretime()).c_str());
+	// 6 exposure time
+	switch (parameters.type) {
+	case snowstar::TaskEXPOSURE:
+	case snowstar::TaskSLEEP:
+		if (exposure.exposuretime() < 10) {
+			list << QString(astro::stringprintf("%.3fs",
+				exposure.exposuretime()).c_str());
+		} else {
+			list << QString(astro::stringprintf("%.0fs",
+				exposure.exposuretime()).c_str());
+		}
+		break;
+	case snowstar::TaskDITHER:
+		list << QString(astro::stringprintf("%.1f pixels",
+			parameters.ccdtemperature).c_str());
+		break;
+	case snowstar::TaskFOCUS:
+		list << QString();
+		break;
 	}
 	float	e = _totaltimes.find(info.state)->second;
 	e += exposure.exposuretime();
 	_totaltimes.find(info.state)->second = e;
 
-	// 6 filter
-	list << QString(parameters.filter.c_str());
+	// 7 filter
+	if (parameters.type == snowstar::TaskEXPOSURE) {
+		list << QString(parameters.filter.c_str());
+	} else {
+		list << QString();
+	}
 
-	// 7 frame
-	list << QString(astro::stringprintf("%dx%d",
-			info.frame.size.width,
-			info.frame.size.height).c_str());
+	// 8 frame
+	if (parameters.type == snowstar::TaskEXPOSURE) {
+		list << QString(astro::stringprintf("%dx%d",
+				info.frame.size.width,
+				info.frame.size.height).c_str());
+	} else {
+		list << QString();
+	}
 
-	// 8 binning
-	std::string	binning = exposure.mode().toString();
-	list << QString(binning.substr(1, binning.size() - 2).c_str());
+	// 9 binning
+	if (parameters.type == snowstar::TaskEXPOSURE) {
+		std::string	binning = exposure.mode().toString();
+		list << QString(binning.substr(1, binning.size() - 2).c_str());
+	} else {
+		list << QString();
+	}
 
-	// 9 temperature
-	list << QString(astro::stringprintf("%.1f°C",
-		parameters.ccdtemperature - 273.15).c_str());
+	// 10 temperature
+	if (parameters.type == snowstar::TaskEXPOSURE) {
+		list << QString(astro::stringprintf("%.1f°C",
+			parameters.ccdtemperature - 273.15).c_str());
+	} else {
+		list << QString();
+	}
 
-	// 10 repository
-	list << QString(parameters.repository.c_str());
+	// 11 repository
+	if (parameters.type == snowstar::TaskEXPOSURE) {
+		list << QString(parameters.repository.c_str());
+	} else {
+		list << QString();
+	}
 
-	// 11 repository database name
-	list << QString(parameters.repodb.c_str());
+	// 12 repository database name
+	if (parameters.type == snowstar::TaskEXPOSURE) {
+		list << QString(parameters.repodb.c_str());
+	} else {
+		list << QString();
+	}
 
-	// 12 filename
-	list << QString(info.filename.c_str());
+	// 13 filename
+	if (parameters.type == snowstar::TaskEXPOSURE) {
+		list << QString(info.filename.c_str());
+	} else {
+		list << QString();
+	}
 
 	QTreeWidgetItem	*item = new QTreeWidgetItem(list,
 		QTreeWidgetItem::Type);
-	item->setTextAlignment(0, Qt::AlignRight);
-	item->setTextAlignment(1, Qt::AlignLeft);
-	item->setTextAlignment(2, Qt::AlignLeft);
-	item->setTextAlignment(3, Qt::AlignLeft);
-	item->setTextAlignment(4, Qt::AlignLeft);
-	item->setTextAlignment(5, Qt::AlignRight);
-	item->setTextAlignment(6, Qt::AlignLeft);
-	item->setTextAlignment(7, Qt::AlignLeft);
-	item->setTextAlignment(8, Qt::AlignLeft);
-	item->setTextAlignment(9, Qt::AlignRight);
-	item->setTextAlignment(10, Qt::AlignLeft);
-	item->setTextAlignment(11, Qt::AlignLeft);
-	item->setTextAlignment(12, Qt::AlignLeft);
+	item->setTextAlignment(taskcol_id,          Qt::AlignRight);
+	item->setTextAlignment(taskcol_type,        Qt::AlignLeft);
+	item->setTextAlignment(taskcol_instrument,  Qt::AlignLeft);
+	item->setTextAlignment(taskcol_project,     Qt::AlignLeft);
+	item->setTextAlignment(taskcol_purpose,     Qt::AlignLeft);
+	item->setTextAlignment(taskcol_lastchange,  Qt::AlignLeft);
+	item->setTextAlignment(taskcol_exposure,    Qt::AlignRight);
+	item->setTextAlignment(taskcol_filter,      Qt::AlignLeft);
+	item->setTextAlignment(taskcol_frame,       Qt::AlignLeft);
+	item->setTextAlignment(taskcol_binning,     Qt::AlignLeft);
+	item->setTextAlignment(taskcol_temperature, Qt::AlignRight);
+	item->setTextAlignment(taskcol_repository,  Qt::AlignLeft);
+	item->setTextAlignment(taskcol_database,    Qt::AlignLeft);
+	item->setTextAlignment(taskcol_filename,    Qt::AlignLeft);
 
 	// now add the new entry to the parent
 	parent->addChild(item);
@@ -319,14 +384,15 @@ void	taskqueuemanagerwidget::setHeader(snowstar::TaskState state) {
 		break;
 	}
 	count = top->childCount();
-	top->setText(1, QString(astro::stringprintf("%s (%d)",
+	top->setText(2, QString(astro::stringprintf("%s (%d)",
 			tag.c_str(), count).c_str()));
 	top->setTextAlignment(5, Qt::AlignRight);
 	if (count > 0) {
-		top->setText(5, QString(astro::stringprintf("%.0fs",
-					exposuretime).c_str()));
+		top->setText(taskcol_exposure,
+			QString(astro::stringprintf("%.0fs",
+				exposuretime).c_str()));
 	} else {
-		top->setText(5, QString());
+		top->setText(taskcol_exposure, QString());
 	}
 }
 
@@ -450,12 +516,18 @@ void	taskqueuemanagerwidget::showImage(snowstar::ImageEncoding encoding) {
 	int	taskid = std::stoi((*selected.begin())->text(0).toLatin1().data());
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "task id = %d", taskid);
 	try {
+		// return if not an exposure task
+		snowstar::TaskParameters	parameters
+			= _tasks->parameters(taskid);
+		if (parameters.type != snowstar::TaskEXPOSURE) {
+			return;
+		}
+		// return if not complete
 		snowstar::TaskInfo	info = _tasks->info(taskid);
 		if (info.state != snowstar::TskCOMPLETE) {
 			return;
 		}
-		snowstar::TaskParameters	parameters
-			= _tasks->parameters(taskid);
+		// now get the image
 		ImagePtr	imageptr;
 		if (parameters.repository.size() > 0) {
 			int	imageid = std::stoi(info.filename);
@@ -556,18 +628,19 @@ void	taskqueuemanagerwidget::updateInfo(QTreeWidgetItem *item,
 	switch (info.state) {
 	case snowstar::TskPENDING:
 	case snowstar::TskEXECUTING:
-		item->setText(12, QString(""));
+		item->setText(taskcol_filename, QString(""));
 		break;
 	case snowstar::TskFAILED:
 	case snowstar::TskCANCELLED:
-		item->setText(12, QString(info.cause.c_str()));
+		item->setText(taskcol_filename, QString(info.cause.c_str()));
 		break;
 	case snowstar::TskCOMPLETE:
-		item->setText(12, QString(info.filename.c_str()));
+		item->setText(taskcol_filename, QString(info.filename.c_str()));
 		break;
 	}
 	if ((info.frame.size.width != 0) && (info.frame.size.height != 0)) {
-		item->setText(7, QString(astro::stringprintf("%dx%d",
+		item->setText(taskcol_frame,
+			QString(astro::stringprintf("%dx%d",
 			info.frame.size.width,
 			info.frame.size.height).c_str()));
 	}
@@ -577,7 +650,7 @@ void	taskqueuemanagerwidget::updateInfo(QTreeWidgetItem *item,
 	struct tm       *tmp = localtime(&when);
 	char    buffer[100];
 	strftime(buffer, sizeof(buffer), "%F %T", tmp);
-	item->setText(4, QString(buffer));
+	item->setText(taskcol_lastchange, QString(buffer));
 }
 
 /**
