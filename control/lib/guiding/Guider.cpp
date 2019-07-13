@@ -330,16 +330,9 @@ Point	Guider::dither() const {
  * \brief Generate a dither vector given the arcsec size
  */
 void	Guider::ditherArcsec(double arcsec) {
-	// convert arcsec into pixel radius
-	double	arcsec_per_pixel = (180 / M_PI) * (pixelsize() / focallength());
-	double	r = arcsec / arcsec_per_pixel;
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "dither radius in arcsec: %3.f, "
-		"pixel: %.2f", arcsec, r);
-
-	// generate vector in polar coordinates
-	double	phi = 2 * M_PI * (random() / (double)2147483647);
-	r *= random() / (double)2147483647;
-	Point	v(r * cos(phi), r * sin(phi));
+	AngularSize	angularpixelsize(pixelsize(), focallength());
+	DitherCalculator	calculator(angularpixelsize);
+	Point	v = calculator.ditherArcsec(arcsec);
 	dither(v);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "using dither offset %s",
 		v.toString().c_str());

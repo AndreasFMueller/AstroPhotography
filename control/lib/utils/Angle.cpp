@@ -79,8 +79,24 @@ double	Angle::degrees() const {
 	return radians_to_degrees(_angle);
 }
 
+double	Angle::arcminutes() const {
+	return 60 * degrees();
+}
+
+double	Angle::arcseconds() const {
+	return 3600 * degrees();
+}
+
 void	Angle::degrees(double degrees) {
 	_angle = degrees_to_radians(degrees);
+}
+
+void	Angle::arcminutes(double arcminutes) {
+	_angle = degrees_to_radians(arcminutes / 60.);
+}
+
+void	Angle::arcseconds(double arcseconds) {
+	_angle = degrees_to_radians(arcseconds / 3600.);
 }
 
 std::string	Angle::dms(const char separator, int precision) const {

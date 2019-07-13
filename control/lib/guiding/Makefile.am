@@ -45,6 +45,7 @@ libastroguiding_la_SOURCES = 						\
 	ControlDeviceCallback.cpp					\
 	ControlDeviceName.cpp						\
 	ControlDeviceType.cpp						\
+	DitherCalculator.cpp						\
 	GainControl.cpp							\
 	GPCalibrationProcess.cpp					\
 	GridConstant.cpp						\

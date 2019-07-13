@@ -1356,6 +1356,18 @@ public:
 	TrackingSummary	getSummary(long id);
 };
 
+/**
+ * \brief Computations for dithering
+ */
+class DitherCalculator {
+	AngularSize	_pixelsize;
+public:
+	const AngularSize&	pixelsize() const { return _pixelsize; }
+	DitherCalculator(const AngularSize& pixelsize);
+	Point	ditherArcsec(double arcsec);
+	Point	dither(double pixels);
+};
+
 } // namespace guiding
 } // namespace astro
 

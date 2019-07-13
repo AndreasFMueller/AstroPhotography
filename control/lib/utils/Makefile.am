@@ -8,6 +8,7 @@ noinst_LTLIBRARIES = libastroutils.la
 
 libastroutils_la_SOURCES = 						\
 	Angle.cpp							\
+	AngularSize.cpp							\
 	AsynchronousAction.cpp						\
 	AttributeValuePairs.cpp						\
 	AzmAltConverter.cpp						\

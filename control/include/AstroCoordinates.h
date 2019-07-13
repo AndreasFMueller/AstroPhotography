@@ -30,7 +30,11 @@ public:
 	Angle(double angle = 0, unit u = Radians);
 	virtual ~Angle() { }
 	double	degrees() const;
+	double	arcminutes() const;
+	double	arcseconds() const;
 	void	degrees(double degrees);
+	void	arcminutes(double arcminutes);
+	void	arcseconds(double arcseconds);
 	std::string	dms(const char separator = ':', int precision = 3) const;
 	double	hours() const;
 	void	hours(double hours);
@@ -345,6 +349,19 @@ public:
 	RaDec	inverse(const AzmAlt& azmalt);
 	Angle	hourangle(const RaDec& radec) const;
 };
+
+/**
+ * \brief Converter for pixelsize/focallength into arcsec per pixel
+ */
+class AngularSize : public Angle {
+public:
+	AngularSize(double pixelsize, double focallength);
+	AngularSize(const Angle& angle);
+	double	scaledPixel(double distance) const;
+};
+
+double	operator/(double r, const AngularSize& s);
+double	operator/(const Angle& angle, const AngularSize& s);
 
 } // namespace astro
 
