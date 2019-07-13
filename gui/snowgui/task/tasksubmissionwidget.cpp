@@ -26,8 +26,22 @@ tasksubmissionwidget::tasksubmissionwidget(QWidget *parent)
 	_filterwheelindex = -1;
 	_mountindex = -1;
 	_focuserindex = -1;
+	_guiderccdindex = -1;
+	_guideportindex = -1;
+	_adaptiveopticsindex = -1;
 
 	ui->submitButton->setEnabled(false);
+
+	// add task type entries
+	ui->tasktypeBox->addItem(QString("exposure"));
+	ui->tasktypeBox->addItem(QString("dither"));
+	ui->tasktypeBox->addItem(QString("focus"));
+	ui->tasktypeBox->addItem(QString("sleep"));
+	tasktypeChanged(0);
+
+	// connect the tasktype button
+	connect(ui->tasktypeBox, SIGNAL(currentIndexChanged(int)),
+		this, SLOT(tasktypeChanged(int)));
 
 	// connect submit button
 	connect(ui->submitButton, SIGNAL(clicked()),
@@ -211,8 +225,6 @@ void	tasksubmissionwidget::submitClicked() {
 	// prepare the structure for submission to the task queue
 	snowstar::TaskParameters	parameters;
 	parameters.instrument = _instrumentname;
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "instrument: %s",
-		parameters.instrument.c_str());
 
 	// set all the device indices (must ask the controller widgets)
 	parameters.cameraIndex = ui->cameraBox->currentIndex();
@@ -221,12 +233,103 @@ void	tasksubmissionwidget::submitClicked() {
 	parameters.filterwheelIndex = _filterwheelindex;
 	parameters.mountIndex = _mountindex;
 	parameters.focuserIndex = _focuserindex;
+	parameters.guiderccdIndex = _guiderccdindex;
+	parameters.guideportIndex = _guideportindex;
+	parameters.adaptiveopticsIndex = _adaptiveopticsindex;
 	debug(LOG_DEBUG, DEBUG_LOG, 0,
 		"camera: %d, ccd: %d, cooler: %d, filterwheel: %d, mount: %d, "
 		"focuser: %d",
 		parameters.cameraIndex, parameters.ccdIndex,
 		parameters.coolerIndex, parameters.filterwheelIndex,
 		parameters.mountIndex, parameters.focuserIndex);
+
+	parameters.exp.frame.origin.x = 0;
+	parameters.exp.frame.origin.y = 0;
+	parameters.exp.frame.size.width = 0;
+	parameters.exp.frame.size.height = 0;
+	parameters.exp.exposuretime = 0;
+	parameters.exp.gain = 0;
+	parameters.exp.limit = 0;
+	parameters.exp.shutter = snowstar::ShOPEN;
+	parameters.exp.purpose = snowstar::ExTEST;
+	parameters.exp.mode.x = 1;
+	parameters.exp.mode.y = 1;
+
+	switch (ui->tasktypeBox->currentIndex()) {
+	case 0:
+		submitExposure(parameters);
+		break;
+	case 1:
+		submitDither(parameters);
+		break;
+	case 2:
+		submitFocus(parameters);
+		break;
+	case 3:
+		submitSleep(parameters);
+		break;
+	}
+}
+
+/**
+ * \brief Common work for a task submit
+ */
+void	tasksubmissionwidget::submitCommon(
+		snowstar::TaskParameters& parameters) {
+	try {
+		_tasks->submit(parameters);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "Task submitted");
+	} catch (const std::exception& x) {
+		std::string	msg = astro::stringprintf("cannot submit task: "
+			"%s", x.what());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		// XXX warning message
+		return;
+	}
+}
+
+/**
+ * \brief Submit a sleep task
+ *
+ * This task lets the server sleep for a few seconds
+ */
+void	tasksubmissionwidget::submitSleep(snowstar::TaskParameters& parameters) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "submit a sleep task");
+	parameters.type = snowstar::TaskSLEEP;
+	parameters.exp.exposuretime = ui->sleeptimeSpinBox->value();
+	submitCommon(parameters);
+}
+
+/**
+ * \brief Submit a dither task
+ */
+void	tasksubmissionwidget::submitDither(
+		snowstar::TaskParameters& parameters) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "submit a dither task");
+	parameters.type = snowstar::TaskDITHER;
+	parameters.exp.exposuretime = ui->waitSpinBox->value();
+	parameters.ccdtemperature = ui->ditherSpinBox->value();
+	submitCommon(parameters);
+}
+
+/**
+ * \brief Submit a focusing task
+ *
+ * This type of task is not implemented yet
+ */
+void	tasksubmissionwidget::submitFocus(
+		snowstar::TaskParameters& parameters) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0,
+		"submit a focus task -> not implemented");
+	parameters.type = snowstar::TaskFOCUS;
+}
+
+/**
+ * \brief Submit an exposure task
+ */
+void	tasksubmissionwidget::submitExposure(
+		snowstar::TaskParameters& parameters) {
+	parameters.type = snowstar::TaskEXPOSURE;
 
 	// get all the information about the exposure from the
 	// ccdcontrollerwidget
@@ -273,16 +376,8 @@ void	tasksubmissionwidget::submitClicked() {
 	int	counter = 0;
 	while (repeats--) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "submitting task %d", ++counter);
-		try {
-			_tasks->submit(parameters);
-			debug(LOG_DEBUG, DEBUG_LOG, 0, "Task %d submitted",
-				counter);
-		} catch (const std::exception& x) {
-			std::string	msg = astro::stringprintf("cannot submit task: %s", x.what());
-			debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
-			// XXX warning message
-			return;
-		}
+		submitCommon(parameters);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "task %d submitted", counter);
 	}
 }
 
@@ -320,6 +415,44 @@ void	tasksubmissionwidget::projectChanged(const QString& p) {
 	std::string	s(_projectname.toLatin1().data());
 	s = astro::trim(s);
 	ui->submitButton->setEnabled(s.size() > 0);
+}
+
+void	tasksubmissionwidget::tasktypeChanged(int index) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "task type changed to %d", index);
+	switch (index) {
+	case 0:
+		ui->exposureParameterWidget->setVisible(true);
+		ui->ditherParameterWidget->setVisible(false);
+		ui->focusParameterWidget->setVisible(false);
+		ui->sleepParameterWidget->setVisible(false);
+		{
+			std::string	s(ui->projectField->text().toLatin1().data());
+			s = astro::trim(s);
+			ui->submitButton->setEnabled(s.size() > 0);
+		}
+		break;
+	case 1:
+		ui->exposureParameterWidget->setVisible(false);
+		ui->ditherParameterWidget->setVisible(true);
+		ui->focusParameterWidget->setVisible(false);
+		ui->sleepParameterWidget->setVisible(false);
+		ui->submitButton->setEnabled(true);
+		break;
+	case 2:
+		ui->exposureParameterWidget->setVisible(false);
+		ui->ditherParameterWidget->setVisible(false);
+		ui->focusParameterWidget->setVisible(true);
+		ui->sleepParameterWidget->setVisible(false);
+		ui->submitButton->setEnabled(false);
+		break;
+	case 3:
+		ui->ditherParameterWidget->setVisible(false);
+		ui->exposureParameterWidget->setVisible(false);
+		ui->focusParameterWidget->setVisible(false);
+		ui->sleepParameterWidget->setVisible(true);
+		ui->submitButton->setEnabled(true);
+		break;
+	}
 }
 
 } // namespace snowgui

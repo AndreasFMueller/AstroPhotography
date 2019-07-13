@@ -30,6 +30,9 @@ class tasksubmissionwidget : public InstrumentWidget {
 	int	_filterwheelindex;
 	int	_mountindex;
 	int	_focuserindex;
+	int	_guiderccdindex;
+	int	_guideportindex;
+	int	_adaptiveopticsindex;
 	QString	_projectname;
 	std::vector<std::string>	_camera_names;
 
@@ -44,6 +47,12 @@ public:
 	void	setRepositories(snowstar::RepositoriesPrx repositories);
 	int	warnParameters(const std::string& m);
 
+	void	submitExposure(snowstar::TaskParameters& parameters);
+	void	submitDither(snowstar::TaskParameters& parameters);
+	void	submitFocus(snowstar::TaskParameters& parameters);
+	void	submitSleep(snowstar::TaskParameters& parameters);
+	void	submitCommon(snowstar::TaskParameters& parameters);
+
 public slots:
 	void	filterwheelSelected(snowstar::FilterWheelPrx);
 	void	submitClicked();
@@ -54,6 +63,7 @@ public slots:
 	void	mountSelected(int);
 	void	focuserSelected(int);
 	void	projectChanged(const QString&);
+	void	tasktypeChanged(int);
 
 private:
 	Ui::tasksubmissionwidget *ui;

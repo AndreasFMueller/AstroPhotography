@@ -76,11 +76,17 @@ void	DitherWork::run() {
 		// for that.
 		guiding::GuiderPtr	guider
 			= guiding::GuiderFactory::get()->get(guiderdescriptor);
+		if (!guider) {
+			throw std::runtime_error("no guider");
+		}
 
 		// Send the dither command to the guider
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "dithering for %f arcsec",
+			arcsec);
 		guider->ditherArcsec(arcsec);
 
 		// get the maximum time to wait from the exposure time
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "setting up dither condition");
 		DitherCondition	dithercondition(guider);
 		double	maxwaittime = task().exposure().exposuretime();
 		if (maxwaittime <= 0) {
@@ -88,6 +94,7 @@ void	DitherWork::run() {
 		}
 
 		// now wait for the guiding condition to be satisfied again
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "waiting for dither");
 		if (!wait(maxwaittime, dithercondition)) {
 			debug(LOG_DEBUG, DEBUG_LOG, 0,
 				"dither condition not met");

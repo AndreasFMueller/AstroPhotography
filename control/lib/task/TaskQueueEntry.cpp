@@ -11,42 +11,20 @@ namespace task {
 
 TaskQueueEntry::TaskQueueEntry(taskid_t queueid, const TaskParameters& task)
 	: TaskParameters(task), TaskInfo(queueid) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "build entry of type %s",
+		task.taskType().toString().c_str());
 	state(pending);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "filterwheel: %s",
-		filterwheel().c_str());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "filterwheel: %s, type: %s",
+		filterwheel().c_str(), taskType().toString().c_str());
 }
 
 TaskParameters	TaskQueueEntry::parameters() const {
-	TaskParameters	parameters;
-	parameters.exposure(exposure());
-	parameters.cameraindex(cameraindex());
-	parameters.ccdindex(ccdindex());
-	parameters.coolerindex(coolerindex());
-	parameters.ccdtemperature(ccdtemperature());
-	parameters.filterwheelindex(filterwheelindex());
-	parameters.filter(filter());
-	parameters.instrument(instrument());
-	parameters.mountindex(mountindex());
-	parameters.focuserindex(focuserindex());
-	parameters.project(project());
-	parameters.repository(repository());
-	parameters.repodb(repodb());
+	TaskParameters	parameters(*this);
 	return parameters;
 }
 
 TaskInfo	TaskQueueEntry::info() const {
-	TaskInfo	info(id());
-	info.state(state());
-	info.lastchange(lastchange());
-	info.cause(cause());
-	info.filename(filename());
-	info.frame(frame());
-	info.camera(camera());
-	info.ccd(ccd());
-	info.cooler(cooler());
-	info.filterwheel(filterwheel());
-	info.mount(mount());
-	info.focuser(focuser());
+	TaskInfo	info(*this);
 	return info;
 }
 

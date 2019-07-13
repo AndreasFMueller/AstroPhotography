@@ -28,10 +28,14 @@ void GuiderI::startGuiding(Ice::Float gpinterval, Ice::Float aointerval,
 		gpinterval, aointerval);
 	// construct a tracker
 	astro::guiding::TrackerPtr	tracker = getTracker();
+	if (!tracker) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "no tracker returned");
+		throw std::runtime_error("no tracker returned");
+	}
 
 	// start guiding
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "start guiding (filter method %d)",
-		_filter_method);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "start guiding (filter method %d, tracker %p)",
+		_filter_method, tracker.get());
 	guider->startGuiding(tracker, gpinterval, aointerval, stepping,
 		_filter_method);
 	astro::event(EVENT_CLASS, astro::events::INFO,

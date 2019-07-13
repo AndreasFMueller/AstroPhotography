@@ -72,7 +72,10 @@ std::string	TaskTableAdapter::createstatement() {
 TaskQueueEntry	TaskTableAdapter::row_to_object(int objectid, const Row& row) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "convert object %d", objectid);
 	TaskParameters	parameters;
-	parameters.taskType(row["tasktype"]->intValue());
+	tasktype	t(row["tasktype"]->intValue());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "found task of type %s",
+		t.toString().c_str());
+	parameters.taskType(t);
 	parameters.instrument(row["instrument"]->stringValue());
 	parameters.cameraindex(row["cameraindex"]->intValue());
 	parameters.ccdindex(row["ccdindex"]->intValue());

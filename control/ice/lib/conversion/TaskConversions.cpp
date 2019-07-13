@@ -232,6 +232,7 @@ TaskMonitorInfo convert(const astro::task::TaskMonitorInfo& monitorinfo) {
 	TaskMonitorInfo	result;
 	result.taskid = monitorinfo.taskid();
 	result.newstate = convert(monitorinfo.state());
+	result.type = convert(monitorinfo.taskType());
 	result.timeago = converttime(monitorinfo.when());
 	return result;
 }
@@ -239,6 +240,7 @@ TaskMonitorInfo convert(const astro::task::TaskMonitorInfo& monitorinfo) {
 astro::task::TaskMonitorInfo    convert(const TaskMonitorInfo& monitorinfo) {
 	astro::task::TaskMonitorInfo	result;
 	result.taskid(monitorinfo.taskid);
+	result.taskType(astro::task::tasktype(monitorinfo.type));
 	result.state(convert(monitorinfo.newstate));
 	result.when(converttime(monitorinfo.timeago));
 	return result;

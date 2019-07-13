@@ -16,13 +16,15 @@ taskmonitorwidget::taskmonitorwidget(QWidget *parent) : QWidget(parent),
 
 	// set the table headers
 	QStringList	headerlist;
-	headerlist << "Time" << "Task" << "State";
+	headerlist << "Time" << "Task" << "Type" << "State";
 	ui->monitorTable->setHorizontalHeaderLabels(headerlist);
 	ui->monitorTable->horizontalHeader()->setStretchLastSection(true);
 
 	// make first columns somewhat smaller
 	ui->monitorTable->setColumnWidth(0, 150);
-	ui->monitorTable->setColumnWidth(1, 50);
+	ui->monitorTable->setColumnWidth(1, 40);
+	ui->monitorTable->setColumnWidth(2, 70);
+	//ui->monitorTable->setColumnWidth(3, 70);
 }
 
 taskmonitorwidget::~taskmonitorwidget() {
@@ -38,8 +40,7 @@ void	taskmonitorwidget::setServiceObject(
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "set service object");
 	Ice::CommunicatorPtr    ic = snowstar::CommunicatorSingleton::get();
         astro::ServerName       servername(serviceobject.name());
-        Ice::ObjectPrx  base
-                = ic->stringToProxy(servername.connect("Tasks"));
+        Ice::ObjectPrx  base = ic->stringToProxy(servername.connect("Tasks"));
 	_tasks = snowstar::TaskQueuePrx::checkedCast(base);
 
 	if (!_tasks) {
@@ -81,6 +82,13 @@ void	taskmonitorwidget::taskUpdate(snowstar::TaskMonitorInfo info) {
 	i->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter);
 	ui->monitorTable->setItem(row, 1, i);
 
+	// type info
+	i = new QTableWidgetItem(QString(
+		snowstar::tasktype2string(info.type).c_str()));
+	i->setFlags(Qt::NoItemFlags);
+	i->setTextAlignment(Qt::AlignLeft | Qt::AlignVCenter);
+	ui->monitorTable->setItem(row, 2, i);
+
 	// entry for the state
 	switch (info.newstate) {
 	case snowstar::TskPENDING:
@@ -100,7 +108,7 @@ void	taskmonitorwidget::taskUpdate(snowstar::TaskMonitorInfo info) {
 		break;
 	}
 	i->setFlags(Qt::NoItemFlags);
-	ui->monitorTable->setItem(row, 2, i);
+	ui->monitorTable->setItem(row, 3, i);
 	ui->monitorTable->scrollToBottom();
 }
 

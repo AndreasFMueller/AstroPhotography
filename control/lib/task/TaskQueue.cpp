@@ -480,6 +480,9 @@ void	TaskQueue::call(const TaskInfo& info) {
 	monitorinfo.taskid(info.id());
 	monitorinfo.when(time(NULL));
 
+	TaskQueueEntry	entry = this->entry(info.id());
+	monitorinfo.taskType(entry.parameters().taskType());
+
 	CallbackDataPtr	cbd(new TaskMonitorCallbackData(monitorinfo));
 	(*callback)(cbd);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "callback complete");

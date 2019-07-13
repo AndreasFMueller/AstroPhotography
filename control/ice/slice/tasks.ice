@@ -125,6 +125,7 @@ module snowstar {
 	 */
 	struct TaskMonitorInfo {
 		int		taskid;
+		TaskType	type;
 		TaskState	newstate;
 		double		timeago;
 	};

@@ -150,6 +150,8 @@ TrackerPtr	Guider::getTracker(const Point& point) {
 	astro::guiding::TrackerPtr      tracker(
 		new astro::guiding::StarTracker(trackerstar,
 			trackerrectangle, 10));
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "tracker constructed: %p",
+		tracker.get());
 	return tracker;
 }
 
@@ -197,6 +199,10 @@ TrackerPtr	Guider::getLargeTracker() {
  */
 void	Guider::startGuiding(TrackerPtr tracker, double gpinterval,
 		double aointerval, bool stepping, FilterMethod filtermethod) {
+	if (!tracker) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "no tracker specified");
+		throw std::runtime_error("no tracker specified");
+	}
 	// create a TrackingProcess instance
 	_state.startGuiding();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "creating new tracking process");
@@ -276,21 +282,33 @@ const TrackingSummary&	Guider::summary() {
  * \brief Get the currently active tracker
  */
 TrackerPtr	Guider::currentTracker() const {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "get current tracker");
 	// first make sure we have a tracking process currently working
-	if (trackingprocess) {
-		if (!trackingprocess->isrunning()) {
-			TrackerPtr	result(NULL);
-			return result;
-		}
+	if (!trackingprocess) {
+		TrackerPtr	result(NULL);
+		return result;
 	}
+
+	// check whether the tracking process is running, if not we cannot
+	// get a tracker
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "has a tracking process");
+	if (!trackingprocess->isrunning()) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "not tracking");
+		TrackerPtr	result(NULL);
+		return result;
+	}
+
 	// convert the tracking process to
 	TrackingProcess	*tp
 		= dynamic_cast<TrackingProcess *>(&*trackingprocess);
 	if (NULL == tp) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "no tracking process");
 		TrackerPtr	result(NULL);
 		return result;
 	}
+
 	// now retrieve the tracker from the tracking process
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "returning tracker");
 	return tp->tracker();
 }
 

@@ -17,9 +17,6 @@ namespace guiding {
 class TrackingProcess : public BasicProcess {
 	ControlDevicePtr	_guidePortDevice;
 	ControlDevicePtr	_adaptiveOpticsDevice;
-	TrackerPtr	_tracker;
-public:
-	TrackerPtr	tracker() const { return _tracker; }
 private:
 	int	_id;
 	float	_filter_parameters[2];

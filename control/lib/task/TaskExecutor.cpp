@@ -69,7 +69,7 @@ void	TaskExecutor::main() {
 
 		// the exposure task starts to run when we call the run method
 		// this is also the moment when the 
-		if (NULL != taskwork) {
+		if (taskwork) {
 			taskwork->run();
 		} else {
 			debug(LOG_DEBUG, DEBUG_LOG, 0, "no task work");
@@ -108,6 +108,7 @@ void	TaskExecutor::main() {
 TaskExecutor::TaskExecutor(TaskQueue& queue, const TaskQueueEntry& task)
 	: _queue(queue), _task(task), _barrier(2) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "%d constructing executor", _task.id());
+	taskwork = NULL;
 
 	// create a new ExposureTask object. The ExposureTask contains
 	// the logic to actually execute the task

@@ -264,6 +264,11 @@ void	TrackingProcess::step(thread::Thread<TrackingProcess>& thread,
 	}
 
 	// use the tracker to find the tracking offset
+	TrackerPtr	t = tracker();
+	if (!t) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "no tracker");
+		return;
+	}
 	Point	offset = tracker()->operator()(image);
 	debug(LOG_DEBUG, DEBUG_LOG, 0,
 		"TRACK %d: current tracker offset: %s", _id,

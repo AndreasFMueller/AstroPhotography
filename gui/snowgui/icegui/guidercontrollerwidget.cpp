@@ -210,9 +210,13 @@ void	guidercontrollerwidget::instrumentSetup(
 
 	// now build a GuiderDescriptor for the guider
 	_guiderdescriptor.instrumentname = _instrument.name();
-	_guiderdescriptor.ccdIndex = 0;
-	_guiderdescriptor.guideportIndex = 0;
-	_guiderdescriptor.adaptiveopticsIndex = 0;
+	_guiderdescriptor.ccdIndex
+		= (_instrument.has(snowstar::InstrumentGuiderCCD)) ? 0 : -1;
+	_guiderdescriptor.guideportIndex
+		= (_instrument.has(snowstar::InstrumentGuidePort)) ? 0 : -1;
+	_guiderdescriptor.adaptiveopticsIndex
+		= (_instrument.has(snowstar::InstrumentAdaptiveOptics))
+			? 0 : -1;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "guiderdescriptor: '%s'",
 		convert(_guiderdescriptor).toString().c_str());
 }

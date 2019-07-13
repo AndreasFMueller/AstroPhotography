@@ -90,6 +90,7 @@ taskqueuemanagerwidget::taskqueuemanagerwidget(QWidget *parent)
 		QTreeWidgetItem	*item;
 		item = new QTreeWidgetItem(list, QTreeWidgetItem::Type);
 		item->setChildIndicatorPolicy(QTreeWidgetItem::ShowIndicator);
+		item->setTextAlignment(taskcol_exposure,    Qt::AlignRight);
 		ui->taskTree->addTopLevelItem(item);
 	}
 	{
@@ -98,6 +99,7 @@ taskqueuemanagerwidget::taskqueuemanagerwidget(QWidget *parent)
 		QTreeWidgetItem	*item;
 		item = new QTreeWidgetItem(list, QTreeWidgetItem::Type);
 		item->setChildIndicatorPolicy(QTreeWidgetItem::ShowIndicator);
+		item->setTextAlignment(taskcol_exposure,    Qt::AlignRight);
 		ui->taskTree->addTopLevelItem(item);
 	}
 	{
@@ -106,6 +108,7 @@ taskqueuemanagerwidget::taskqueuemanagerwidget(QWidget *parent)
 		QTreeWidgetItem	*item;
 		item = new QTreeWidgetItem(list, QTreeWidgetItem::Type);
 		item->setChildIndicatorPolicy(QTreeWidgetItem::ShowIndicator);
+		item->setTextAlignment(taskcol_exposure,    Qt::AlignRight);
 		ui->taskTree->addTopLevelItem(item);
 	}
 	{
@@ -114,6 +117,7 @@ taskqueuemanagerwidget::taskqueuemanagerwidget(QWidget *parent)
 		QTreeWidgetItem	*item;
 		item = new QTreeWidgetItem(list, QTreeWidgetItem::Type);
 		item->setChildIndicatorPolicy(QTreeWidgetItem::ShowIndicator);
+		item->setTextAlignment(taskcol_exposure,    Qt::AlignRight);
 		ui->taskTree->addTopLevelItem(item);
 	}
 	{
@@ -122,6 +126,7 @@ taskqueuemanagerwidget::taskqueuemanagerwidget(QWidget *parent)
 		QTreeWidgetItem	*item;
 		item = new QTreeWidgetItem(list, QTreeWidgetItem::Type);
 		item->setChildIndicatorPolicy(QTreeWidgetItem::ShowIndicator);
+		item->setTextAlignment(taskcol_exposure,    Qt::AlignRight);
 		ui->taskTree->addTopLevelItem(item);
 	}
 
@@ -172,6 +177,7 @@ void	taskqueuemanagerwidget::addTask(QTreeWidgetItem *parent,
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "add task to '%s'",
 		parent->text(1).toLatin1().data());
 	astro::camera::Exposure	exposure = snowstar::convert(parameters.exp);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "task type: %d", parameters.type);
 
 	QStringList	list;
 
@@ -215,16 +221,19 @@ void	taskqueuemanagerwidget::addTask(QTreeWidgetItem *parent,
 		}
 		break;
 	case snowstar::TaskDITHER:
-		list << QString(astro::stringprintf("%.1f pixels",
+		list << QString(astro::stringprintf("%.1f\"",
 			parameters.ccdtemperature).c_str());
 		break;
 	case snowstar::TaskFOCUS:
 		list << QString();
 		break;
 	}
-	float	e = _totaltimes.find(info.state)->second;
-	e += exposure.exposuretime();
-	_totaltimes.find(info.state)->second = e;
+
+	if (parameters.type == snowstar::TaskEXPOSURE) {
+		float	e = _totaltimes.find(info.state)->second;
+		e += exposure.exposuretime();
+		_totaltimes.find(info.state)->second = e;
+	}
 
 	// 7 filter
 	if (parameters.type == snowstar::TaskEXPOSURE) {
@@ -708,29 +717,33 @@ void	taskqueuemanagerwidget::taskUpdate(snowstar::TaskMonitorInfo info) {
 	return;
 
 summarize:
-	// get the task parameters
-	float	exposuretime = _tasks->parameters(info.taskid).exp.exposuretime;
+	if (_tasks->parameters(info.taskid).type == snowstar::TaskEXPOSURE) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "skipping exposure task %d",
+			info.taskid);
+		// get the task parameters
+		float	exposuretime = _tasks->parameters(info.taskid).exp.exposuretime;
 
-	// remove the time from the section where we found it
-	snowstar::TaskState	state;
-	switch (tasksection) {
-	case 0:	state = snowstar::TskCOMPLETE;
-		break;
-	case 1:	state = snowstar::TskFAILED;
-		break;
-	case 2:	state = snowstar::TskCANCELLED;
-		break;
-	case 3:	state = snowstar::TskEXECUTING;
-		break;
-	case 4:	state = snowstar::TskPENDING;
-		break;
+		// remove the time from the section where we found it
+		snowstar::TaskState	state;
+		switch (tasksection) {
+		case 0:	state = snowstar::TskCOMPLETE;
+			break;
+		case 1:	state = snowstar::TskFAILED;
+			break;
+		case 2:	state = snowstar::TskCANCELLED;
+			break;
+		case 3:	state = snowstar::TskEXECUTING;
+			break;
+		case 4:	state = snowstar::TskPENDING;
+			break;
+		}
+		_totaltimes.find(state)->second = 
+			_totaltimes.find(state)->second - exposuretime;
+
+		// add the time to the section to which we moved it
+		_totaltimes.find(tinfo.state)->second = 
+			_totaltimes.find(tinfo.state)->second + exposuretime;
 	}
-	_totaltimes.find(state)->second = 
-		_totaltimes.find(state)->second - exposuretime;
-
-	// add the time to the section to which we moved it
-	_totaltimes.find(tinfo.state)->second = 
-		_totaltimes.find(tinfo.state)->second + exposuretime;
 
 	// display the headers
 	setHeaders();
@@ -778,10 +791,13 @@ void	taskqueuemanagerwidget::deleteTask(int taskid) {
 summarize:
 	// get the task information from the database to update the total time
 	try {
-		snowstar::TaskInfo	ti = _tasks->info(taskid);
-		float	f = _totaltimes.find(ti.state)->second;
-		f -= _tasks->parameters(taskid).exp.exposuretime;
-		_totaltimes.find(ti.state)->second = f;
+		snowstar::TaskParameters	tp = _tasks->parameters(taskid);
+		if (tp.type == snowstar::TaskEXPOSURE) {
+			snowstar::TaskInfo	ti = _tasks->info(taskid);
+			float	f = _totaltimes.find(ti.state)->second;
+			f -= _tasks->parameters(taskid).exp.exposuretime;
+			_totaltimes.find(ti.state)->second = f;
+		}
 	} catch (const std::exception& x) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "could not get task info %d: %s",
 			taskid, x.what());

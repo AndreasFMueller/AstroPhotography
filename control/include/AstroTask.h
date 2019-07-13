@@ -31,7 +31,12 @@ private:
 public:
 	tasktype() { _t = EXPOSURE; }
 	tasktype(type t) { _t = t; }
+	tasktype(const tasktype& other) { _t = other._t; }
 	tasktype(int t);
+	tasktype&	operator=(const tasktype& other) {
+		_t = other._t;
+		return *this;
+	}
 	operator int() const { return (int)_t; }
 	std::string	toString() const;
 };
@@ -401,6 +406,11 @@ private:
 public:
 	long	taskid() const { return _taskid; }
 	void	taskid(long ti) { _taskid = ti; }
+private:
+	tasktype	_type;
+public:
+	const tasktype&	taskType() const { return _type; }
+	void	taskType(const tasktype& t) { _type = t; }
 private:
 	TaskQueueEntry::taskstate	_state;
 public:
