@@ -12,7 +12,7 @@
 namespace astro {
 
 std::string	version() {
-	return stringprintf("%s - %s", VERSION, __DATE__);
+	return stringprintf("%s - %s %s", VERSION, __DATE__, __TIME__);
 }
 
 }

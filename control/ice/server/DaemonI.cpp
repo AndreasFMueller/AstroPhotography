@@ -339,7 +339,7 @@ void	DaemonI::setSystemTime(Ice::Long unixtime,
 std::string	DaemonI::osVersion(const Ice::Current& /* current */) {
 	struct utsname	u;
 	uname(&u);
-	return astro::stringprintf("%s", u.version);
+	return std::string(u.version);
 }
 
 std::string	DaemonI::astroVersion(const Ice::Current& /* current */) {
@@ -347,7 +347,8 @@ std::string	DaemonI::astroVersion(const Ice::Current& /* current */) {
 }
 
 std::string	DaemonI::snowstarVersion(const Ice::Current& /* current */) {
-	return snowstar::version;
+	return astro::stringprintf("%s - %s %s", snowstar::version.c_str(),
+		__DATE__ ,__TIME__);
 }
 
 } // namespace snowstar
