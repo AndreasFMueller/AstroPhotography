@@ -5,14 +5,16 @@
 # $Id$
 #
 SLICES = camera.ice exceptions.ice focusing.ice guider.ice image.ice \
-	device.ice tasks.ice types.ice repository.ice instruments.ice
+	device.ice tasks.ice types.ice repository.ice instruments.ice \
+	version.ice
 
 EXTRA_DIST = $(SLICES)
 
 SLICEHEADERS = camera.h exceptions.h focusing.h guider.h image.h device.h \
-	tasks.h types.h repository.h instruments.h
+	tasks.h types.h repository.h instruments.h version.h
 SLICESOURCES = camera.cpp exceptions.cpp focusing.cpp guider.cpp image.cpp \
-	device.cpp tasks.cpp types.cpp  repository.cpp instruments.cpp
+	device.cpp tasks.cpp types.cpp  repository.cpp instruments.cpp \
+	version.cpp
 
 include_HEADERS = $(SLICEHEADERS)
 
@@ -48,13 +50,16 @@ repository.h repository.cpp:	repository.ice
 instruments.h instruments.cpp:	instruments.ice
 	@SLICE2CPP@ -I. -I@SLICEDIR@ instruments.ice
 
+version.h version.cpp:	version.ice
+	@SLICE2CPP@ -I. -I@SLICEDIR@ version.ice
+
 #
 # We should automatically add the slice directory of the Ice installation
 # to the slic2cpp command
 #
 copytimestamp:  $(SLICEHEADERS) $(SLICESOURCE)
 	for h in camera exceptions focusing guider image device tasks types \
-		repository instruments; \
+		repository instruments version; \
 	do \
 		cp $${h}.cpp ../lib/common; \
 	done

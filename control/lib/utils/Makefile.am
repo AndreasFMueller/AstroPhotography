@@ -46,7 +46,8 @@ libastroutils_la_SOURCES = 						\
 	Typename.cpp							\
 	utils.cpp							\
 	UUID.cpp							\
-	Vector.cpp
+	Vector.cpp							\
+	Version.cpp
 
 libastroutils_la_CPPFLAGS = -DPKGLIBDIR=\"$(pkglibdir)\" \
 	-DDEVICEPROPERTIES=\"@DEVICEPROPERTIES@\"

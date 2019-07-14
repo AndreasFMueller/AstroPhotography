@@ -44,6 +44,8 @@ extern void	stderr_stacktrace(int sig);
 
 namespace astro {
 
+std::string	version();
+
 /**
  * \brief Square function
  */

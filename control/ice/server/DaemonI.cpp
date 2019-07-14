@@ -12,6 +12,9 @@
 #include <AstroFormat.h>
 #include <dirent.h>
 #include <unistd.h>
+#include <version.h>
+#include <AstroUtils.h>
+#include <sys/utsname.h>
 
 namespace snowstar {
 
@@ -331,6 +334,20 @@ void	DaemonI::setSystemTime(Ice::Long unixtime,
 			f.cause.c_str());
 		throw f;
 	}
+}
+
+std::string	DaemonI::osVersion(const Ice::Current& /* current */) {
+	struct utsname	u;
+	uname(&u);
+	return astro::stringprintf("%s", u.version);
+}
+
+std::string	DaemonI::astroVersion(const Ice::Current& /* current */) {
+	return astro::version();
+}
+
+std::string	DaemonI::snowstarVersion(const Ice::Current& /* current */) {
+	return snowstar::version;
 }
 
 } // namespace snowstar

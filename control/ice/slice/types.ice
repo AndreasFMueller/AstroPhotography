@@ -163,6 +163,9 @@ module snowstar {
 		 * no effect
 		 */
 		void	setSystemTime(long unixtime);
+		string	osVersion();
+		string	astroVersion();
+		string	snowstarVersion();
 	};
 
 	/**

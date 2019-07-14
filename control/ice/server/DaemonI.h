@@ -32,6 +32,9 @@ public:
 			const Ice::Current& current);
 	Ice::Long	getSystemTime(const Ice::Current& current);
 	void	setSystemTime(Ice::Long unixtime, const Ice::Current& current);
+	std::string	osVersion(const Ice::Current& current);
+	std::string	astroVersion(const Ice::Current& current);
+	std::string	snowstarVersion(const Ice::Current& current);
 };
 
 } // namespace snowstar

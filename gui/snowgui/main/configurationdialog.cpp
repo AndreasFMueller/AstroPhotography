@@ -10,6 +10,8 @@
 #include <AstroFormat.h>
 #include <AstroDebug.h>
 #include <QMessageBox>
+#include <sys/utsname.h>
+#include <version.h>
 
 namespace snowgui {
 
@@ -43,6 +45,18 @@ configurationdialog::configurationdialog(QWidget *parent,
 		throw std::runtime_error("cannot create daemon app");
 	}
 	setDaemon(daemon);
+
+	// get remote version information
+	ui->remoteosField->setText(QString(daemon->osVersion().c_str()));
+	ui->astroversionField->setText(QString(daemon->astroVersion().c_str()));
+	ui->snowstarversionField->setText(QString(daemon->snowstarVersion().c_str()));
+
+	// get local system information
+	struct utsname	u;
+	uname(&u);
+	ui->localsystemField->setText(QString(u.version));
+	ui->localastroversionField->setText(QString(astro::version().c_str()));
+	ui->localsnowstarversionField->setText(QString(snowstar::version.c_str()));
 
 	// modules connection
 	base = ic->stringToProxy(_serviceobject.connect("Modules"));
