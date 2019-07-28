@@ -106,6 +106,11 @@ int	Tycho2::index(const std::string& name) {
 				maxkey.c_str());
 			return max;
 		}
+		if ((max - min) == 1) {
+			std::string	msg = stringprintf("name %s does not "
+				"exist", name.c_str());
+			throw std::runtime_error(msg);
+		}
 		int	current = (min + max) / 2;
 		std::string	currentkey = Tycho2::key(current);
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "current = %d, currentkey = %s",

@@ -33,6 +33,9 @@ private:
 
 	void	searchCommon(const std::string& name);
 
+	std::string	labelString(const std::string& name,
+				const astro::RaDec& position) const;
+
 signals:
 	void	objectSelected(astro::RaDec);
 
@@ -41,6 +44,7 @@ public slots:
 	void	searchChanged(const QString&);
 	void	textEdited(const QString&);
 	void	nameActivated(QListWidgetItem *);
+	void	currentItemChanged(int);
 };
 
 } // namespace snowgui

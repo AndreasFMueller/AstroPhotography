@@ -15,12 +15,15 @@
   </property>
   <layout class="QGridLayout" name="gridLayout">
    <item row="0" column="1" colspan="2">
-    <widget class="QComboBox" name="comboBox"/>
+    <widget class="QComboBox" name="catalogBox"/>
    </item>
-   <item row="0" column="0">
-    <widget class="QLabel" name="catalogLabel">
+   <item row="1" column="1">
+    <widget class="QLineEdit" name="objectnameField"/>
+   </item>
+   <item row="2" column="0">
+    <widget class="QLabel" name="objectLabel">
      <property name="text">
-      <string>Catalog:</string>
+      <string>Object:</string>
      </property>
     </widget>
    </item>
@@ -38,11 +41,22 @@
      </property>
     </widget>
    </item>
-   <item row="1" column="1">
-    <widget class="QLineEdit" name="objectnameField"/>
-   </item>
-   <item row="2" column="0" colspan="3">
+   <item row="3" column="0" colspan="3">
     <widget class="QListWidget" name="listWidget"/>
+   </item>
+   <item row="0" column="0">
+    <widget class="QLabel" name="catalogLabel">
+     <property name="text">
+      <string>Catalog:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="1" colspan="2">
+    <widget class="QLabel" name="objectField">
+     <property name="text">
+      <string/>
+     </property>
+    </widget>
    </item>
   </layout>
  </widget>

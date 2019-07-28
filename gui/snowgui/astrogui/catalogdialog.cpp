@@ -22,6 +22,13 @@ CatalogDialog::CatalogDialog(QWidget *parent)
 	: QDialog(parent), ui(new Ui::CatalogDialog) {
 	ui->setupUi(this);
 
+	// set the various catalog names
+	ui->catalogBox->addItem(QString("NGC/IC"));
+	ui->catalogBox->addItem(QString("Bright Star Catalog"));
+	ui->catalogBox->addItem(QString("Hipparcos"));
+	ui->catalogBox->addItem(QString("Tycho2"));
+	ui->catalogBox->addItem(QString("UCAC4"));
+
 	setWindowTitle(QString("Search deep sky catalog"));
 
 	QFont	font("Microsoft Sans Serif");
@@ -36,6 +43,8 @@ CatalogDialog::CatalogDialog(QWidget *parent)
 		this, SLOT(textEdited(const QString&)));
 	connect(ui->listWidget, SIGNAL(itemActivated(QListWidgetItem*)),
 		this, SLOT(nameActivated(QListWidgetItem*)));
+	connect(ui->catalogBox, SIGNAL(currentIndexChanged(int)),
+		this, SLOT(currentItemChanged(int)));
 
 	DeepSkyCatalogFactory	factory;
 	_catalog = factory.get(DeepSkyCatalogFactory::NGCIC);
@@ -49,20 +58,89 @@ CatalogDialog::~CatalogDialog() {
 }
 
 /**
+ * \brief build the object label string
+ *
+ * \param name		name of the object
+ * \param position	position of the object
+ */
+std::string	CatalogDialog::labelString(const std::string& name, 
+				const astro::RaDec& position) const {
+	return astro::stringprintf("%s    @ %s, %s", name.c_str(),
+		position.ra().hms(':', 1).c_str(),
+		position.dec().dms(':', 0).c_str());
+}
+
+/**
  * \brief Common work for the full name search§
  *
  * \param name		name of the object to search for
  */
 void	CatalogDialog::searchCommon(const std::string& name) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "searchCommon(\"%s\")", name.c_str());
+	astro::RaDec	targetpos;
+	std::string	targetname;
 	try {
-		DeepSkyObject	object = _catalog->find(name);
-		// update the target
-		astro::RaDec	target = object.position(2000);
-		emit objectSelected(target);
+		// find out which catalog we are supposed to use
+		switch (ui->catalogBox->currentIndex()) {
+		case 0: {
+				DeepSkyCatalogFactory	factory;
+				DeepSkyCatalogPtr	catalog
+					= factory.get(DeepSkyCatalogFactory::NGCIC);
+				DeepSkyObject	object = catalog->find(name);
+				// update the target
+				targetpos = object.position(2000);
+				targetname = object.name;
+			}
+			break;
+		case 1:	{
+				CatalogFactory	factory;
+				CatalogPtr	catalog
+					= factory.get(CatalogFactory::BSC);
+				Star	object = catalog->find(name);
+				targetpos = object.position(2000);
+				targetname = object.name();
+			}
+			break;
+		case 2:	{
+				CatalogFactory	factory;
+				CatalogPtr	catalog
+					= factory.get(CatalogFactory::Hipparcos);
+				Star	object = catalog->find(name);
+				targetpos = object.position(2000);
+				targetname = object.name();
+			}
+			break;
+		case 3:	{
+				CatalogFactory	factory;
+				CatalogPtr	catalog
+					= factory.get(CatalogFactory::Tycho2);
+				Star	object = catalog->find(name);
+				targetpos = object.position(2000);
+				targetname = object.name();
+			}
+			break;
+		case 4:	{
+				CatalogFactory	factory;
+				CatalogPtr	catalog
+					= factory.get(CatalogFactory::Ucac4);
+				Star	object = catalog->find(name);
+				targetpos = object.position(2000);
+				targetname = object.name();
+			}
+			break;
+		}
 	} catch (const std::exception& x) {
+		if (ui->catalogBox->currentIndex() > 0) {
+			currentItemChanged(ui->catalogBox->currentIndex());
+		} else {
+			ui->objectField->setText(QString());
+		}
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "%s not found", name.c_str());
+		return;
 	}
+	std::string	targetlabel = labelString(targetname, targetpos);
+	ui->objectField->setText(QString(targetlabel.c_str()));
+	emit objectSelected(targetpos);
 }
 
 /**
@@ -72,8 +150,9 @@ void	CatalogDialog::searchCommon(const std::string& name) {
  * performs a search just as if the user had pressed <return>
  */
 void	CatalogDialog::searchClicked() {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "looking for object '%s'",
-		ui->objectnameField->text().toLatin1().data());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "looking for object '%s' in catalog %d",
+		ui->objectnameField->text().toLatin1().data(),
+		ui->catalogBox->currentIndex());
 	std::string	name(ui->objectnameField->text().toLatin1().data());
 	searchCommon(name);
 }
@@ -125,6 +204,32 @@ void	CatalogDialog::textEdited(const QString& newtext) {
 		ui->listWidget->addItem(item);
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "found %d matching names", names.size());
+}
+
+/**
+ * \brief change the selected catalog
+ *
+ * \param index		new current index
+ */
+void	CatalogDialog::currentItemChanged(int index) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "new catalog selection");
+	switch (index) {
+	case 0:
+		ui->objectField->setText("<font color='white'>NGC1234 or IC1234</font>");
+		break;
+	case 1:
+		ui->objectField->setText("<font color='white'>BSC12345</font>");
+		break;
+	case 2:
+		ui->objectField->setText("<font color='white'>HIP123456</font>");
+		break;
+	case 3:
+		ui->objectField->setText("<font color='white'>T1234 12345 1</font>");
+		break;
+	case 4:
+		ui->objectField->setText("<font color='white'>UCAC4-123-123456</font>");
+		break;
+	}
 }
 
 /**
