@@ -50,6 +50,8 @@ public:
 	virtual Star	find(const std::string& name);
 	virtual starsetptr	find(const SkyWindow& window,
 					const MagnitudeRange& magrange);
+	virtual starsetptr	findLike(const std::string& name,
+					int maxstars = 100);
 	virtual unsigned long	numberOfStars();
 
 	virtual CatalogIterator	begin();

@@ -213,6 +213,11 @@ public:
 	typedef	std::set<Star>	starset;
 	typedef std::shared_ptr<starset>	starsetptr;
 
+	// get a set of stars matching a name
+	virtual starsetptr	findLike(const std::string& name,
+					int maxstars = 100);
+	static std::set<std::string>	starlist(const starsetptr stars);
+
 	// start to find the all stars in an a sky window
 	virtual starsetptr	find(const SkyWindow& window,
 					const MagnitudeRange& magrange) = 0;

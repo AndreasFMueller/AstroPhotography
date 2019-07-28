@@ -139,5 +139,51 @@ CatalogIterator	BSC::begin() {
 	return CatalogIterator(impl);
 }
 
+/**
+ * \brief Find a set of stars
+ *
+ * \param name		prefix of star names
+ * \param maxstars	maximum number of stars to retrieve
+ */
+Catalog::starsetptr	BSC::findLike(const std::string& name,
+		int maxstars) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "get stars for prefix %s", name.c_str());
+	Catalog::starsetptr	result(new Catalog::starset());
+	// ignore short names
+	if (name.size() < 3) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "short name");
+		throw std::runtime_error("short name");
+	}
+	if (name.substr(0,3) != std::string("BSC")) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "not a BSC name");
+		throw std::runtime_error("not a BSC name");
+	}
+
+	// find the first number
+	int	firstnumber = std::stoi((name + std::string("0000")).substr(3, 4));
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "firstnumber = %d", firstnumber);
+
+	// find the last matching number
+	int	intervallength = 1;
+	for (int i = name.size(); i < 7; i++) {
+		intervallength *= 10;
+	}
+	int	lastnumber = firstnumber + intervallength;
+
+	// scan for these numbers
+	int	i = firstnumber;
+	while ((result->size() < maxstars) && (i < lastnumber)) {
+		try {
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "get BSC %d", i);
+			Star	star = find(i);
+			result->insert(star);
+		} catch (const std::exception x) {
+		}
+		i++;
+	}
+
+	return result;
+}
+
 } // namespace catalog
 } // namespace astro

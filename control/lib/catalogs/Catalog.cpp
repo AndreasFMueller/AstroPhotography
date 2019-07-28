@@ -72,5 +72,41 @@ Catalog::starsetptr	precess(const Precession& precession,
 	return result;
 }
 
+/**
+ * \brief Find stars matching a name
+ *
+ * \param name		name prefix
+ */
+Catalog::starsetptr	Catalog::findLike(const std::string& name,
+		int maxstars) {
+	Catalog::starsetptr	result(new starset());
+	try {
+		Star	s = find(name);
+		result->insert(s);
+	} catch (const std::exception& x) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "'%s' not found", name.c_str());
+	}
+	return result;
+}
+
+/**
+ * \brief Convert a set of stars int a list
+ *
+ * \param stars		starset to convert
+ */
+std::set<std::string>	Catalog::starlist(const Catalog::starsetptr stars) {
+	std::set<std::string>	result;
+	std::set<Star>::const_iterator	i;
+	for (i = stars->begin(); i != stars->end(); i++) {
+		RaDec	pos = i->position(2000);
+		std::string	s = stringprintf("%-20.20s|  %s %s",
+					i->name().c_str(),
+					pos.ra().hms(':', 1).substr(1).c_str(),
+					pos.dec().dms(':', 0).c_str());
+		result.insert(s);
+	}
+	return result;
+}
+
 } // namespace catalog
 } // namespace astro

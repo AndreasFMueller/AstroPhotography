@@ -189,21 +189,66 @@ void	CatalogDialog::textEdited(const QString& newtext) {
 	ui->listWidget->clear();
 	QFont	font = QFontDatabase::systemFont(QFontDatabase::FixedFont);
 	ui->listWidget->setFont(font);
-	std::set<std::string>	names = _catalog->findLike(prefix);
-	for (auto i = names.begin(); i != names.end(); i++) {
-		DeepSkyObject	dso = _catalog->find(*i);
-		astro::RaDec	rd = dso.position(2000);
-		std::string	l = astro::stringprintf("%-20.20s|  %s %s  |  %s",
-			i->c_str(),
-			rd.ra().hms(':', 1).substr(1).c_str(),
-			rd.dec().dms(':', 0).c_str(),
-			DeepSkyObject::classification2string(dso.classification).c_str());
 
-		QListWidgetItem	*item = new QListWidgetItem(QString(l.c_str()));
-		item->setFont(font);
-		ui->listWidget->addItem(item);
+	// perform NGC catalog search
+	if (ui->catalogBox->currentIndex() == 0) {
+		std::set<std::string>	names = _catalog->findLike(prefix);
+		for (auto i = names.begin(); i != names.end(); i++) {
+			DeepSkyObject	dso = _catalog->find(*i);
+			astro::RaDec	rd = dso.position(2000);
+			std::string	l = astro::stringprintf("%-20.20s|  %s %s  |  %s",
+				i->c_str(),
+				rd.ra().hms(':', 1).substr(1).c_str(),
+				rd.dec().dms(':', 0).c_str(),
+				DeepSkyObject::classification2string(dso.classification).c_str());
+
+			QListWidgetItem	*item = new QListWidgetItem(QString(l.c_str()));
+			item->setFont(font);
+			ui->listWidget->addItem(item);
+		}
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "found %d matching names", names.size());
+		return;
 	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "found %d matching names", names.size());
+
+	// handle star catalogs
+	astro::catalog::Catalog::starsetptr	stars;
+	try {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "getting stars for prefix %s",
+			prefix.c_str());
+		switch (ui->catalogBox->currentIndex()) {
+		case 1:	{
+			astro::catalog::CatalogFactory	factory;
+			astro::catalog::CatalogPtr	catalog
+				= factory.get(CatalogFactory::BSC);
+			stars = catalog->findLike(prefix);
+			}
+			break;
+		case 2:
+		case 3:
+		case 4:
+			break;
+		}
+	} catch (const std::exception& x) {
+	}
+
+	if (stars) {
+		std::set<std::string>	starstrings = Catalog::starlist(stars);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "%d star strings",
+			starstrings.size());
+		QListWidget	*listWidget = ui->listWidget;
+		std::for_each(starstrings.begin(), starstrings.end(),
+			[listWidget,font](const std::string& s) mutable {
+				debug(LOG_DEBUG, DEBUG_LOG, 0, "adding %s",
+					s.c_str());
+				QListWidgetItem	*item = new QListWidgetItem(
+					QString(s.c_str()));
+				item->setFont(font);
+				listWidget->addItem(item);
+			}
+		);
+	} else {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "no stars returned");
+	}
 }
 
 /**
