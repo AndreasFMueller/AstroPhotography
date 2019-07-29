@@ -1,1 +1,21 @@
-How to compile ZeroC Ice for local use
+How to compile ZeroC ICE for use with AstroPhotography
+
+Distributions usually come with old versions of ICE and
+it needs to be compiled for the current system.
+
+1. get the source
+
+	git clone https://github.com/zeroc-ice/ice
+	git clone https://github.com/zeroc-ice/ice-demos
+
+2. modify the scripts to include the correct installation
+directory
+
+3. Compile:
+
+	bash ice.build
+
+4. Install:
+
+	bash ice.install
+
