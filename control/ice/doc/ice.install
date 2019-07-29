@@ -1,0 +1,14 @@
+#
+# ice.build -- build the current version of the Ice software
+#
+# (c) 2018 Prof Dr Andreas Müller, Hochschule Rapperswil
+#
+(
+cd ice/cpp
+time make -j 1 prefix=/usr/local/Ice-3.7.2 V=1				\
+	CXXFLAGS=-std=c++11						\
+	CONFIGS="shared"					\
+	SKIP="slice2confluence slice2py slice2rb slice2js slice2java slice2matlab slice2php slice2cs slice2objc slice2html slice2swift"	\
+	LANGUAGES=cpp install
+) 2>&1 | tee install.log
+
