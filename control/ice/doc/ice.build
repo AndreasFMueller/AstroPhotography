@@ -6,9 +6,12 @@
 
 # Ubuntu: make sure liblmdb-dev is installed
 
+installdir=/usr/local/Ice-3.7.2
+jobs=2
+
 (
 cd ice/cpp
-time make -j2 prefix=/usr/local/Ice-3.7.2 V=1				\
+time make -j${jobs} prefix=${installdir} V=1				\
 	CXXFLAGS=-std=c++11						\
 	CONFIGS="shared"						\
 	SKIP="slice2confluence slice2py slice2rb slice2js slice2java slice2matlab slice2php slice2cs slice2objc slice2html slice2swift"	\
