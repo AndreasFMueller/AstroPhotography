@@ -107,7 +107,7 @@ static std::vector<std::string>	splitline(const char *data) {
 			i = j + 1;
 		}
 	} while (data[j] != '\n');
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "found %d components", result.size());
+	//debug(LOG_DEBUG, DEBUG_LOG, 0, "found %d components", result.size());
 	return result;
 }
 
@@ -134,10 +134,11 @@ void	OutlineCatalog::parseEllipses(const std::string& directory) {
 		std::vector<std::string>	components = splitline(buffer);
 
 		// tell about the object we are going to parse
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "parsing %d", std::stoi(components[0]));
+		//debug(LOG_DEBUG, DEBUG_LOG, 0, "parsing %d",
+		//	std::stoi(components[0]));
 
-		// check whether the object has an NGC number and skip if it already
-		// has an outline
+		// check whether the object has an NGC number and skip if it
+		// already has an outline
 		int	ngc = std::stoi(components[16]);
 		std::string	ngcname = stringprintf("NGC%d", ngc);
 		if (ngc > 0) {
@@ -146,8 +147,8 @@ void	OutlineCatalog::parseEllipses(const std::string& directory) {
 			}
 		}
 
-		// check whether the object has an IC number and skip if it already
-		// has an outline
+		// check whether the object has an IC number and skip if it
+		// already has an outline
 		int	ic = std::stoi(components[17]);
 		std::string	icname = stringprintf("IC%d", ic);
 		if (ic > 0) {
@@ -156,8 +157,8 @@ void	OutlineCatalog::parseEllipses(const std::string& directory) {
 			}
 		}
 
-		// check whether the object has an Messier number and skip if it already
-		// has an outline
+		// check whether the object has an Messier number and skip if
+		// it already has an outline
 		int	messier = std::stoi(components[18]);
 		std::string	messiername = stringprintf("M%d", messier);
 		if (messier > 0) {
@@ -172,12 +173,16 @@ void	OutlineCatalog::parseEllipses(const std::string& directory) {
 
 		// create an ellipse outline object from the data
 		RaDec	position;
-		position.ra() = Angle(std::stod(components[1]), Angle::Degrees);
-		position.dec() = Angle(std::stod(components[2]), Angle::Degrees);
+		position.ra() = Angle(std::stod(components[1]),
+			Angle::Degrees);
+		position.dec() = Angle(std::stod(components[2]),
+			Angle::Degrees);
 
 		TwoAngles	dimensions;
-		dimensions.a1() = Angle(std::stod(components[7]) / 60, Angle::Degrees);
-		dimensions.a2() = Angle(std::stod(components[8]) / 60, Angle::Degrees);
+		dimensions.a1() = Angle(std::stod(components[7]) / 60,
+			Angle::Degrees);
+		dimensions.a2() = Angle(std::stod(components[8]) / 60,
+			Angle::Degrees);
 
 		Angle	orientation(std::stod(components[9]), Angle::Degrees);
 
@@ -187,13 +192,15 @@ void	OutlineCatalog::parseEllipses(const std::string& directory) {
 			Outline	ngcoutline(ngcname);
 			ngcoutline = outline;
 			ngcoutline.name(ngcname);
-			_outlinemap.insert(std::make_pair(ngcoutline.name(), ngcoutline));
+			_outlinemap.insert(std::make_pair(ngcoutline.name(),
+				ngcoutline));
 		}
 		if (ic > 0) {
 			Outline	icoutline(icname);
 			icoutline = outline;
 			icoutline.name(icname);
-			_outlinemap.insert(std::make_pair(icoutline.name(), icoutline));
+			_outlinemap.insert(std::make_pair(icoutline.name(),
+				icoutline));
 		}
 		if (messier > 0) {
 			Outline	messieroutline(messiername);
