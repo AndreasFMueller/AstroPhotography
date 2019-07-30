@@ -15,7 +15,7 @@ time make -j 1 prefix=${installdir} V=1					\
 ) 2>&1 | tee install.log
 
 (
-cd ice/slice
-find . -name \*.ice -print | cpio -pdu ${installdir}/share/ice
+cd ice
+find slice -name \*.ice -print | cpio -pdu ${installdir}/share/ice
 )
 
