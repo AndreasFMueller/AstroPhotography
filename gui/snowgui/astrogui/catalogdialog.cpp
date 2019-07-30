@@ -206,7 +206,8 @@ void	CatalogDialog::textEdited(const QString& newtext) {
 			item->setFont(font);
 			ui->listWidget->addItem(item);
 		}
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "found %d matching names", names.size());
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "found %d matching names",
+			names.size());
 		return;
 	}
 
@@ -290,6 +291,7 @@ void	CatalogDialog::nameActivated(QListWidgetItem *item) {
 	std::string	s(item->text().toLatin1().data());
 	s = s.substr(0, s.find('|'));
 	s = astro::trim(s);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "found object named %s", s.c_str());
 	searchChanged(QString(s.c_str()));
 }
 

@@ -41,6 +41,9 @@ then
 	. ${sysconfdir}/snowstar.conf
 fi
 
+LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:@ICELIBDIR@
+export LD_LIBRARY_PATH
+
 # start/stop the service
 case $1 in
 	start)

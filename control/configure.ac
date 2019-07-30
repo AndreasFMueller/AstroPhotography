@@ -231,6 +231,7 @@ LIBS="${LIBS} ${ICELIBS}"
 AC_SUBST(ICEDIR)
 AC_SUBST(ICELIBS)
 AC_SUBST(ICEINCLUDE)
+AC_SUBST(ICELIBDIR)
 
 LIBS="${OLDLIBS}"
 CXXFLAGS="${OLDCXXFLAGS}"
@@ -619,7 +620,7 @@ AC_CONFIG_FILES([Makefile include/Makefile
 	ice/client/Makefile ice/client/guide/Makefile
 	ice/server/Makefile ice/nice/Makefile
 	man/Makefile doc/Makefile doc/manual/Makefile
-	scripts/Makefile scripts/startastro
+	scripts/Makefile scripts/startastro scripts/snowstar.service
 	test/Makefile])
 AC_OUTPUT
 

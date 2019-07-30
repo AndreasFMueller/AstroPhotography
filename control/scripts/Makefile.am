@@ -6,3 +6,5 @@
 
 sbin_SCRIPTS = startastro
 
+noinst_SCRIPTS = snowstar.service
+

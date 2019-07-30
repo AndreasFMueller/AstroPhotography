@@ -1,0 +1,20 @@
+[Unit]
+Description=snowstar astrophotography service
+After=network.target autofs.service
+
+[Service]
+Type=simple
+Restart=always
+RestartSec=1
+StartLimitInterval=0
+User=astro
+Group=astro
+Environment="LD_LIBRARY_PATH=@ICELIBDIR@"
+ExecStartPre=chdir @prefix@
+ExecStart=@prefix@/sbin/snowstar --debug --base=@prefix@/var/images --database=@prefix@/var/database.db --config=@prefix@/var/database.db --name=telescope --logfile=@prefix@/var/log/snowstar.log --lines=100000 --files=10 --foreground
+StandardOutput=syslog
+StandardError=syslog
+
+[Install]
+WantedBy=multi-user.target
+

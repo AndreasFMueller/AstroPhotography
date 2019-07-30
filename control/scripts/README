@@ -1,1 +1,13 @@
 This directory contains scripts for starting/stopping the server
+
+init.d:
+
+	create a start script that calls /usr/local/astro/etc/startastro
+
+systemd:
+
+	1. install snowstar.service in /lib/systemd/system
+	2. systemctl daemon-reload
+	3. systemctl enable snowstar.service
+	4. systemctl start snowstar.service
+
