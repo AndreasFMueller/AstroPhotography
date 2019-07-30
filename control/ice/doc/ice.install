@@ -16,6 +16,6 @@ time make -j 1 prefix=${installdir} V=1					\
 
 (
 cd ice/slice
-find . -name \*.ice | cpio -pdu ${installdir}/share/ice
+find . -name \*.ice -print | cpio -pdu ${installdir}/share/ice
 )
 
