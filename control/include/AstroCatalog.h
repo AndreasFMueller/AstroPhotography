@@ -293,6 +293,8 @@ public:
 	const std::string&	name() const { return _name; }
 	void	name(const std::string& name) { _name = name; }
 	Outline(const std::string& name) : _name(name) { }
+	Outline(const std::string& name, const astro::RaDec& center,
+		const astro::TwoAngles& dimensions, const astro::Angle& orientation);
 	std::string	toString() const;
 };
 
@@ -301,12 +303,15 @@ public:
  */
 class OutlineCatalog {
 	std::map<std::string, Outline>	_outlinemap;
+	void	parseOutlines(const std::string& directory);
+	void	parseEllipses(const std::string& directory);
 	void	parse(const std::string& directory);
 public:
 	OutlineCatalog();
 	OutlineCatalog(const std::string& directory);
 	bool	has(const std::string& name) const;
 	Outline	find(const std::string& name) const;
+	size_t	size() const { return _outlinemap.size(); }
 };
 
 typedef std::shared_ptr<OutlineCatalog>	OutlineCatalogPtr;

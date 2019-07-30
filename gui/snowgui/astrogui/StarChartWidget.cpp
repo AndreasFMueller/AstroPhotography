@@ -80,6 +80,7 @@ StarChartWidget::StarChartWidget(QWidget *parent) : QWidget(parent),
 	try {
 		_outlines = astro::catalog::OutlineCatalogPtr(
 			new astro::catalog::OutlineCatalog());
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "%d outlines", _outlines->size());
 	} catch (std::exception& x) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "no outline catalog: %s",
 			x.what());
@@ -216,6 +217,8 @@ void	StarChartWidget::drawDeepSkyObject(QPainter& painter,
 	//	deepskyobject.name.c_str());
 
 	if ((_outlines) && (_outlines->has(deepskyobject.name))) {
+		//debug(LOG_DEBUG, DEBUG_LOG, 0, "%s has outline", 
+		//	deepskyobject.name.c_str());
 		QPainterPath	outlinepath;
 		Outline	outline = _outlines->find(deepskyobject.name);
 		QPointF	first = convert(*outline.begin());
@@ -230,6 +233,8 @@ void	StarChartWidget::drawDeepSkyObject(QPainter& painter,
 		outlinepath.closeSubpath();
 		painter.drawPath(outlinepath);
 	} else {
+		//debug(LOG_DEBUG, DEBUG_LOG, 0, "draw %s as circle",
+		//	deepskyobject.name.c_str());
 		// get the axes
 		double	a = deepskyobject.size.a1().radians()
 				/ _resolution.radians();
