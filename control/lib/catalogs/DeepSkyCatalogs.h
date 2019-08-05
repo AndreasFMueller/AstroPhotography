@@ -8,6 +8,7 @@
 
 #include <AstroCatalog.h>
 #include "NGCIC.h"
+#include "PGC.h"
 #include "Stellarium.h"
 
 namespace astro {
@@ -30,6 +31,17 @@ public:
 class NGCICCatalog : public DeepSkyCatalog, public NGCIC {
 public:
 	NGCICCatalog(const std::string& basedir);
+	virtual deepskyobjectsetptr	find(const SkyWindow&);
+	virtual DeepSkyObject	find(const std::string& name);
+	virtual std::set<std::string>	findLike(const std::string& name);
+};
+
+/**
+ * \brief NGC/IC catalog
+ */
+class PGCCatalog : public DeepSkyCatalog, public PGC {
+public:
+	PGCCatalog(const std::string& basedir);
 	virtual deepskyobjectsetptr	find(const SkyWindow&);
 	virtual DeepSkyObject	find(const std::string& name);
 	virtual std::set<std::string>	findLike(const std::string& name);

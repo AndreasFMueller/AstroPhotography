@@ -28,6 +28,9 @@ DeepSkyCatalogPtr	DeepSkyCatalogFactory::get(deepskycatalog_t catalogtype) {
 	case NGCIC:
 		catalog = new NGCICCatalog(_basedir + "/ngcic");
 		break;
+	case PGC:
+		catalog = new PGCCatalog(_basedir + "/pgc");
+		break;
 	default:
 		throw std::runtime_error("unknown deep sky catalog");
 	}
