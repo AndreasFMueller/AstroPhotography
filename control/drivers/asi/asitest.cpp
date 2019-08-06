@@ -3,7 +3,7 @@
  *
  * (c) 2016 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
-#include <AsiLocator.h>
+#include "AsiLocator.h"
 #include <cppunit/TestFixture.h>
 #include <cppunit/TestAssert.h>
 #include <cppunit/extensions/HelperMacros.h>

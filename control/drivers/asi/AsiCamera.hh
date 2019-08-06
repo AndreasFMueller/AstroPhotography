@@ -95,6 +95,17 @@ private:
 	bool	_isColor;
 public:
 	bool	isColor() const;
+private:
+	image::MosaicType	_mosaic;
+public:
+	image::MosaicType	mosaic() const { return _mosaic; }
+
+private:
+	float	_settemperature;
+public:
+	float	settemperature() const { return _settemperature; }
+	void	settemperature(float s) { _settemperature = s; }
+	
 	// error converstion
 	static std::string	error(int errorcode);
 	// properties
