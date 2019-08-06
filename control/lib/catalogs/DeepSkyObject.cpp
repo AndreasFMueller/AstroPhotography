@@ -21,9 +21,13 @@ namespace catalog {
  * \brief string representation of a DeepSkyObject
  */
 std::string	DeepSkyObject::toString() const {
-	return stringprintf("%s: %s %s %.2f (%s)", name.c_str(),
+	return stringprintf("%s: %s %s %.2f (%s) %.0f\"x%.0f\"@%.0f°",
+			name.c_str(),
 			ra().hms().c_str(), dec().dms().c_str(), mag(),
-			constellation.c_str());
+			constellation.c_str(),
+			size.a1().degrees() * 3600,
+			size.a2().degrees() * 3600,
+			azimuth.degrees());
 }
 
 std::string      DeepSkyObject::classification2string(DeepSkyObject::object_class c) {
@@ -58,6 +62,10 @@ std::string      DeepSkyObject::classification2string(DeepSkyObject::object_clas
 		return std::string("nonexistent");
 	case PlateDefect:
 		return std::string("plate defect");
+	case MultipleSystem:
+		return std::string("multiple system");
+	case GalaxyInMultipleSystem:
+		return std::string("galaxy in multiple system");
 	}
 }
 
@@ -107,6 +115,15 @@ DeepSkyObject::object_class   DeepSkyObject::string2classification(const std::st
 	if (s == "plate defect") {
 		return PlateDefect;
 	}
+	if (s == "multiple system") {
+		return MultipleSystem;
+	}
+	if (s == "galaxy in multiple system") {
+		return GalaxyInMultipleSystem;
+	}
+	std::string	msg = stringprintf("unknown DSO type: %s", s.c_str());
+	debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+	throw std::runtime_error(msg);
 }
 
 } // namespace catalog

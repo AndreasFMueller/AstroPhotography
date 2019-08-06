@@ -27,6 +27,7 @@ tests_SOURCES = tests.cpp						\
 	ImageNormalizerTest.cpp						\
 	NGCICTest.cpp							\
 	OutlineTest.cpp							\
+	PGCTest.cpp							\
 	ProjectionTest.cpp						\
 	SkyRectangleTest.cpp						\
 	SkyWindowTest.cpp 						\
@@ -44,7 +45,7 @@ test:	tests
 
 # single test
 singletest_SOURCES = singletest.cpp 					\
-	StellariumTest.cpp
+	PGCTest.cpp
 singletest_LDADD = $(catalogs_ldadd)
 singletest_DEPENDENCIES = $(catalogs_dependencies)
 

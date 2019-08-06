@@ -123,7 +123,8 @@ public:
 	typedef enum { Galaxy, OpenCluster, GlobularCluster, BrightNebula,
 			PlanetaryNebula, ClusterNebulosity, Asterism,
 			Knot, TripleStar, DoubleStar, SingleStar, Uncertain,
-			Unidentified, Nonexistent, PlateDefect } object_class;
+			Unidentified, Nonexistent, PlateDefect,
+			MultipleSystem, GalaxyInMultipleSystem } object_class;
 	object_class	classification;
 	static std::string	classification2string(object_class);
 	static object_class	string2classification(const std::string&);
@@ -134,6 +135,7 @@ private:
 	std::list<std::string>	_names;
 public:
 	const std::list<std::string>&	names() const { return _names; }
+	void	addname(const std::string& n) { _names.push_back(n); }
 };
 
 /**
@@ -278,7 +280,10 @@ typedef std::shared_ptr<DeepSkyCatalog>	DeepSkyCatalogPtr;
 class DeepSkyCatalogFactory {
 	std::string	_basedir;
 public:
-	typedef enum deepskycatalog_e { Messier, NGCIC } deepskycatalog_t;
+	typedef enum deepskycatalog_e { Messier, NGCIC, PGC } deepskycatalog_t;
+private:
+	static std::map<deepskycatalog_t, DeepSkyCatalogPtr>	catalogmap;
+public:
 	DeepSkyCatalogFactory(const std::string& basedir) : _basedir(basedir) { }
 	DeepSkyCatalogFactory();
 	DeepSkyCatalogPtr	get(deepskycatalog_t ct);
@@ -293,6 +298,8 @@ public:
 	const std::string&	name() const { return _name; }
 	void	name(const std::string& name) { _name = name; }
 	Outline(const std::string& name) : _name(name) { }
+	Outline(const std::string& name, const astro::RaDec& center,
+		const astro::TwoAngles& dimensions, const astro::Angle& orientation);
 	std::string	toString() const;
 };
 
@@ -301,12 +308,15 @@ public:
  */
 class OutlineCatalog {
 	std::map<std::string, Outline>	_outlinemap;
+	void	parseOutlines(const std::string& directory);
+	void	parseEllipses(const std::string& directory);
 	void	parse(const std::string& directory);
 public:
 	OutlineCatalog();
 	OutlineCatalog(const std::string& directory);
 	bool	has(const std::string& name) const;
 	Outline	find(const std::string& name) const;
+	size_t	size() const { return _outlinemap.size(); }
 };
 
 typedef std::shared_ptr<OutlineCatalog>	OutlineCatalogPtr;
