@@ -110,12 +110,30 @@ public:
 	virtual std::string	toString() const;
 };
 
+/*
+ * \brief Outline of a DeepSkyObject
+ */
+class Outline : public std::list<astro::RaDec> {
+	std::string	_name;
+public:
+	const std::string&	name() const { return _name; }
+	void	name(const std::string& name) { _name = name; }
+	Outline(const std::string& name) : _name(name) { }
+	Outline(const std::string& name, const astro::RaDec& center,
+		const astro::TwoAngles& axes,
+		const astro::Angle& position_angle);
+	std::string	toString() const;
+};
+
 /**
  * \brief Deep Sky objects
  */
 class DeepSkyObject : public CelestialObject {
+	bool		_has_dimensions;
+	TwoAngles	_axes;
+	Angle		_position_angle;
 public:
-	DeepSkyObject() { _mag = 0; }
+	DeepSkyObject() { _mag = 0; _has_dimensions = false; }
 	virtual ~DeepSkyObject() { }
 	int	number;
 	std::string	name;
@@ -128,14 +146,20 @@ public:
 	object_class	classification;
 	static std::string	classification2string(object_class);
 	static object_class	string2classification(const std::string&);
-	TwoAngles	size;
-	Angle		azimuth;
+	const TwoAngles&	axes() const { return _axes; }
+	void	axes(const TwoAngles& a) {
+		_has_dimensions = true;
+		_axes = a;
+	}
+	const Angle&	position_angle() const { return _position_angle; }
+	void	position_angle(const Angle& pa) { _position_angle = pa; }
 	std::string	toString() const;
 private:
 	std::list<std::string>	_names;
 public:
 	const std::list<std::string>&	names() const { return _names; }
 	void	addname(const std::string& n) { _names.push_back(n); }
+	Outline	outline() const;
 };
 
 /**
@@ -287,20 +311,6 @@ public:
 	DeepSkyCatalogFactory(const std::string& basedir) : _basedir(basedir) { }
 	DeepSkyCatalogFactory();
 	DeepSkyCatalogPtr	get(deepskycatalog_t ct);
-};
-
-/*
- * \brief Outline of a DeepSkyObject
- */
-class Outline : public std::list<astro::RaDec> {
-	std::string	_name;
-public:
-	const std::string&	name() const { return _name; }
-	void	name(const std::string& name) { _name = name; }
-	Outline(const std::string& name) : _name(name) { }
-	Outline(const std::string& name, const astro::RaDec& center,
-		const astro::TwoAngles& dimensions, const astro::Angle& orientation);
-	std::string	toString() const;
 };
 
 /**

@@ -181,6 +181,8 @@ void	StarChartWidget::drawDeepSkyObject(QPainter& painter,
 	QPen	pen(Qt::SolidLine);
 	switch (deepskyobject.classification) {
 	case astro::catalog::DeepSkyObject::Galaxy:
+	case astro::catalog::DeepSkyObject::MultipleSystem:
+	case astro::catalog::DeepSkyObject::GalaxyInMultipleSystem:
 		pen.setColor(Qt::red);
 		break;
 	case astro::catalog::DeepSkyObject::BrightNebula:
@@ -236,9 +238,9 @@ void	StarChartWidget::drawDeepSkyObject(QPainter& painter,
 		//debug(LOG_DEBUG, DEBUG_LOG, 0, "draw %s as circle",
 		//	deepskyobject.name.c_str());
 		// get the axes
-		double	a = deepskyobject.size.a1().radians()
+		double	a = deepskyobject.axes().a1().radians()
 				/ _resolution.radians();
-		double	b = deepskyobject.size.a2().radians()
+		double	b = deepskyobject.axes().a2().radians()
 				/ _resolution.radians();
 		//debug(LOG_DEBUG, DEBUG_LOG, 0, "axes: %f, %f", a, b);
 		a /= 2;
@@ -246,8 +248,8 @@ void	StarChartWidget::drawDeepSkyObject(QPainter& painter,
 
 		// draw an ellipse at the position of the object
 		QPainterPath	ellipse;
-		double	s = sin(deepskyobject.azimuth);
-		double	c = cos(deepskyobject.azimuth);
+		double	s = sin(deepskyobject.position_angle());
+		double	c = cos(deepskyobject.position_angle());
 		double	phi = 0;
 		double	x = a * c;
 		double	y = -a * s;

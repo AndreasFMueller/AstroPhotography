@@ -59,12 +59,13 @@ void	Stellarium::parse(const std::string& filename) {
 		object.dec() = astro::Angle(stod(components[2]),
 					astro::Angle::Degrees);
 		object.mag(std::stod(components[4]));
-		object.size.a1() = Angle(std::stod(components[8]) / 60,
-			astro::Angle::Degrees);
-		object.size.a2() = Angle(std::stod(components[9]) / 60,
-			astro::Angle::Degrees);
-		object.azimuth = Angle(std::stod(components[10]),
-			astro::Angle::Degrees);
+		Angle	major(std::stod(components[8]) / 60,
+				astro::Angle::Degrees);
+		Angle	minor(std::stod(components[9]) / 60,
+				astro::Angle::Degrees);
+		object.axes(TwoAngles(major, minor));
+		object.position_angle(Angle(std::stod(components[10]),
+			astro::Angle::Degrees));
 
 		// insert the object
 		insert(std::make_pair(object.number, object));

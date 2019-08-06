@@ -25,9 +25,9 @@ std::string	DeepSkyObject::toString() const {
 			name.c_str(),
 			ra().hms().c_str(), dec().dms().c_str(), mag(),
 			constellation.c_str(),
-			size.a1().degrees() * 3600,
-			size.a2().degrees() * 3600,
-			azimuth.degrees());
+			axes().a1().degrees() * 3600,
+			axes().a2().degrees() * 3600,
+			position_angle().degrees());
 }
 
 std::string      DeepSkyObject::classification2string(DeepSkyObject::object_class c) {
@@ -124,6 +124,10 @@ DeepSkyObject::object_class   DeepSkyObject::string2classification(const std::st
 	std::string	msg = stringprintf("unknown DSO type: %s", s.c_str());
 	debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 	throw std::runtime_error(msg);
+}
+
+Outline	DeepSkyObject::outline() const {
+	return Outline(name, position(2000), axes(), position_angle());
 }
 
 } // namespace catalog

@@ -22,18 +22,19 @@ std::string	Outline::toString() const {
 }
 
 Outline::Outline(const std::string& name, const astro::RaDec& center,
-                const astro::TwoAngles& dimensions, const astro::Angle& orientation)
+                 const astro::TwoAngles& axes,
+		 const astro::Angle& position_angle)
 	: _name(name) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "construct %s outline", name.c_str());
 	
 	// create points on an ellipse
 	for (float angle = 0; angle < 1.9 * M_PI; angle += M_PI / 6) {
-		double	x0 = dimensions.a1().radians() * cos(angle);
-		double	y0 = dimensions.a2().radians() * sin(angle);
+		double	x0 = axes.a1().radians() * cos(angle);
+		double	y0 = axes.a2().radians() * sin(angle);
 
 		// rotate by orientation
-		double	x = cos(orientation) * x0 - sin(orientation) * y0;
-		double	y = sin(orientation) * x0 + cos(orientation) * y0;
+		double	x = cos(position_angle) * x0 - sin(position_angle) * y0;
+		double	y = sin(position_angle) * x0 + cos(position_angle) * y0;
 
 		// compute point on the ellipse
 		Angle	r = Angle(hypot(x, y), Angle::Radians);

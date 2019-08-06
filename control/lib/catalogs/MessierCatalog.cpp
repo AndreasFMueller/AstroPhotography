@@ -16,11 +16,11 @@ DeepSkyCatalog::deepskyobjectsetptr     MessierCatalog::find(const SkyWindow&) {
 	return result;
 }
 
-DeepSkyObject	MessierCatalog::find(const std::string& name) {
+DeepSkyObject	MessierCatalog::find(const std::string& /* name */) {
 	throw std::runtime_error("find by name not implemented yet");
 }
 
-std::set<std::string>	MessierCatalog::findLike(const std::string& name) {
+std::set<std::string>	MessierCatalog::findLike(const std::string& /* name */) {
 	throw std::runtime_error("findLike not implemented");
 }
 

@@ -79,8 +79,7 @@ static DeepSkyObject	Object_from_Record(const std::string& record) {
 			minor = Angle(pow(10., -std::stod(record.substr(50, 4)))
 					* major.degrees(), Angle::Degrees);
 		}
-		result.size.a1() = major;
-		result.size.a2() = minor;
+		result.axes(TwoAngles(major, minor));
 	} catch (const std::exception& x) {
 		std::string	msg = stringprintf("no size for %s: %s",
 			result.name.c_str(), x.what());
@@ -90,12 +89,13 @@ static DeepSkyObject	Object_from_Record(const std::string& record) {
 
 	// get position angle
 	try {
-		std::string	azimuthstring = record.substr(63, 4);
-		if (azimuthstring == "999.") {
-			result.azimuth = std::numeric_limits<double>::quiet_NaN();
+		std::string	pastring = record.substr(63, 4);
+		if (pastring == "999.") {
+			result.position_angle(
+				std::numeric_limits<double>::quiet_NaN());
 		} else {
-			double	deg = std::stod(azimuthstring);
-			result.azimuth = Angle(deg, Angle::Degrees);
+			double	deg = std::stod(pastring);
+			result.position_angle(Angle(deg, Angle::Degrees));
 		}
 	} catch (const std::exception& x) {
 		std::string	msg = stringprintf("no pa for %s: %s",

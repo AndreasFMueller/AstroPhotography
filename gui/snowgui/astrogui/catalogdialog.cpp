@@ -24,6 +24,7 @@ CatalogDialog::CatalogDialog(QWidget *parent)
 
 	// set the various catalog names
 	ui->catalogBox->addItem(QString("NGC/IC"));
+	ui->catalogBox->addItem(QString("PGC"));
 	ui->catalogBox->addItem(QString("Bright Star Catalog"));
 	ui->catalogBox->addItem(QString("Hipparcos"));
 	ui->catalogBox->addItem(QString("Tycho2"));
@@ -92,7 +93,17 @@ void	CatalogDialog::searchCommon(const std::string& name) {
 				targetname = object.name;
 			}
 			break;
-		case 1:	{
+		case 1: {
+				DeepSkyCatalogFactory	factory;
+				DeepSkyCatalogPtr	catalog
+					= factory.get(DeepSkyCatalogFactory::PGC);
+				DeepSkyObject	object = catalog->find(name);
+				// update the target
+				targetpos = object.position(2000);
+				targetname = object.name;
+			}
+			break;
+		case 2:	{
 				CatalogFactory	factory;
 				CatalogPtr	catalog
 					= factory.get(CatalogFactory::BSC);
@@ -101,7 +112,7 @@ void	CatalogDialog::searchCommon(const std::string& name) {
 				targetname = object.name();
 			}
 			break;
-		case 2:	{
+		case 3:	{
 				CatalogFactory	factory;
 				CatalogPtr	catalog
 					= factory.get(CatalogFactory::Hipparcos);
@@ -110,7 +121,7 @@ void	CatalogDialog::searchCommon(const std::string& name) {
 				targetname = object.name();
 			}
 			break;
-		case 3:	{
+		case 4:	{
 				CatalogFactory	factory;
 				CatalogPtr	catalog
 					= factory.get(CatalogFactory::Tycho2);
@@ -119,7 +130,7 @@ void	CatalogDialog::searchCommon(const std::string& name) {
 				targetname = object.name();
 			}
 			break;
-		case 4:	{
+		case 5:	{
 				CatalogFactory	factory;
 				CatalogPtr	catalog
 					= factory.get(CatalogFactory::Ucac4);
@@ -264,15 +275,18 @@ void	CatalogDialog::currentItemChanged(int index) {
 		ui->objectField->setText("<font color='white'>NGC1234 or IC1234</font>");
 		break;
 	case 1:
-		ui->objectField->setText("<font color='white'>BSC12345</font>");
+		ui->objectField->setText("<font color='white'>PGC0002557</font>");
 		break;
 	case 2:
-		ui->objectField->setText("<font color='white'>HIP123456</font>");
+		ui->objectField->setText("<font color='white'>BSC12345</font>");
 		break;
 	case 3:
-		ui->objectField->setText("<font color='white'>T1234 12345 1</font>");
+		ui->objectField->setText("<font color='white'>HIP123456</font>");
 		break;
 	case 4:
+		ui->objectField->setText("<font color='white'>T1234 12345 1</font>");
+		break;
+	case 5:
 		ui->objectField->setText("<font color='white'>UCAC4-123-123456</font>");
 		break;
 	}
