@@ -8,6 +8,7 @@
 #include <AstroFormat.h>
 #include <fstream>
 #include <cmath>
+#include <limits>
 
 namespace astro {
 namespace catalog {
@@ -40,7 +41,7 @@ static DeepSkyObject	Object_from_Record(const std::string& record) {
 	}
 
 	// magnitude
-	result.mag(0.0);
+	//result.mag(0.0); // this is the default anyway
 
 	// constellation
 	result.constellation = "unknown";
@@ -59,10 +60,25 @@ static DeepSkyObject	Object_from_Record(const std::string& record) {
 
 	// size
 	try {
-		Angle	major(std::stod(record.substr(36, 5)) / 60,
-					Angle::Degrees);
-		Angle	minor(pow(10., -std::stod(record.substr(50, 4)))
-				* major.degrees(), Angle::Degrees);
+		std::string	majorstring = record.substr(36, 5);
+		Angle	major;
+		if (majorstring == " 9.99") {
+			major = Angle(std::numeric_limits<double>::quiet_NaN(),
+					Angle::Radians);
+		} else {
+			major = Angle(
+				pow(10., std::stod(majorstring)) * 0.1 / 60,
+				Angle::Degrees);
+		}
+		Angle	minor;
+		std::string	minorstring = record.substr(50, 4);
+		if (minorstring == "9.99") {
+			minor = Angle(std::numeric_limits<double>::quiet_NaN(),
+					Angle::Radians);
+		} else {
+			minor = Angle(pow(10., -std::stod(record.substr(50, 4)))
+					* major.degrees(), Angle::Degrees);
+		}
 		result.size.a1() = major;
 		result.size.a2() = minor;
 	} catch (const std::exception& x) {
@@ -74,8 +90,13 @@ static DeepSkyObject	Object_from_Record(const std::string& record) {
 
 	// get position angle
 	try {
-		double	deg = std::stod(record.substr(63, 4));
-		result.azimuth = Angle(deg, Angle::Degrees);
+		std::string	azimuthstring = record.substr(63, 4);
+		if (azimuthstring == "999.") {
+			result.azimuth = std::numeric_limits<double>::quiet_NaN();
+		} else {
+			double	deg = std::stod(azimuthstring);
+			result.azimuth = Angle(deg, Angle::Degrees);
+		}
 	} catch (const std::exception& x) {
 		std::string	msg = stringprintf("no pa for %s: %s",
 			result.name.c_str(), x.what());

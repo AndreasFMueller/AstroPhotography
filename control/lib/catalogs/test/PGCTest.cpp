@@ -48,8 +48,14 @@ void	PGCTest::testConstructor() {
 void	PGCTest::testAccess() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testAccess() begin");
 	PGC	catalog("/usr/local/starcatalogs/pgc");
-	DeepSkyObject	object = catalog.find("PGC0237909");
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "%s", object.toString().c_str());
+	DeepSkyObject	object1 = catalog.find("PGC0237909");
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "%s", object1.toString().c_str());
+	DeepSkyObject	object2 = catalog.find("PGC2801111");
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "%s", object2.toString().c_str());
+	DeepSkyObject	object3 = catalog.find("NGC2403");
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "%s", object3.toString().c_str());
+	DeepSkyObject	object4 = catalog.find("NGC224");
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "%s", object4.toString().c_str());
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testAccess() end");
 }
 
