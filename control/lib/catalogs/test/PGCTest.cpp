@@ -41,34 +41,40 @@ void	PGCTest::tearDown() {
 
 void	PGCTest::testConstructor() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testConstructor() begin");
-	PGC	catalog("/usr/local/starcatalogs/pgc");
+	DeepSkyCatalogFactory	factory("/usr/local/starcatalogs");
+	DeepSkyCatalogPtr	catalog = factory.get(
+						DeepSkyCatalogFactory::PGC);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testConstructor() end");
 }
 
 void	PGCTest::testAccess() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testAccess() begin");
-	PGC	catalog("/usr/local/starcatalogs/pgc");
-	DeepSkyObject	object1 = catalog.find("PGC0237909");
+	DeepSkyCatalogFactory	factory("/usr/local/starcatalogs");
+	DeepSkyCatalogPtr	catalog = factory.get(
+						DeepSkyCatalogFactory::PGC);
+	DeepSkyObject	object1 = catalog->find("PGC0237909");
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "%s", object1.toString().c_str());
-	DeepSkyObject	object2 = catalog.find("PGC2801111");
+	DeepSkyObject	object2 = catalog->find("PGC2801111");
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "%s", object2.toString().c_str());
-	DeepSkyObject	object3 = catalog.find("NGC2403");
+	DeepSkyObject	object3 = catalog->find("NGC2403");
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "%s", object3.toString().c_str());
-	DeepSkyObject	object4 = catalog.find("NGC224");
+	DeepSkyObject	object4 = catalog->find("NGC224");
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "%s", object4.toString().c_str());
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testAccess() end");
 }
 
 void	PGCTest::testWindow() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testWindow() begin");
-	PGC	catalog("/usr/local/starcatalogs/pgc");
+	DeepSkyCatalogFactory	factory("/usr/local/starcatalogs");
+	DeepSkyCatalogPtr	catalog = factory.get(
+						DeepSkyCatalogFactory::PGC);
 	RaDec	center(0, 0);
 	center.ra().hours(6.75247702777777777777);
 	center.dec().degrees(-16.71611583333333333333);
 	Angle	width; width.hours(1);
 	Angle	height; height.degrees(15);
 	SkyWindow	window(center, width, height);
-	PGC::objectsetptr	objects = catalog.find(window);
+	PGC::objectsetptr	objects = catalog->find(window);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "%d objects", objects->size());
 	CPPUNIT_ASSERT(objects->size() == 1431);
 	PGC::objectset::const_iterator	o;

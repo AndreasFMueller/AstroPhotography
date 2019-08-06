@@ -281,6 +281,9 @@ class DeepSkyCatalogFactory {
 	std::string	_basedir;
 public:
 	typedef enum deepskycatalog_e { Messier, NGCIC, PGC } deepskycatalog_t;
+private:
+	static std::map<deepskycatalog_t, DeepSkyCatalogPtr>	catalogmap;
+public:
 	DeepSkyCatalogFactory(const std::string& basedir) : _basedir(basedir) { }
 	DeepSkyCatalogFactory();
 	DeepSkyCatalogPtr	get(deepskycatalog_t ct);

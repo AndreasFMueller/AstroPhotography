@@ -9,6 +9,8 @@
 namespace astro {
 namespace catalog {
 
+std::map<DeepSkyCatalogFactory::deepskycatalog_t, DeepSkyCatalogPtr>	DeepSkyCatalogFactory::catalogmap;
+
 /**
  * \brief Construct a catalog based on the directory
  */
@@ -20,21 +22,29 @@ DeepSkyCatalogFactory::DeepSkyCatalogFactory()
  * \brief construct a catalog of a given type
  */
 DeepSkyCatalogPtr	DeepSkyCatalogFactory::get(deepskycatalog_t catalogtype) {
-	DeepSkyCatalog	*catalog = NULL;
+	DeepSkyCatalogPtr	catalog;
+	auto	i = catalogmap.find(catalogtype);
+	if (i != catalogmap.end()) {
+		return i->second;
+	}
 	switch (catalogtype) {
 	case Messier:
-		catalog = new MessierCatalog(_basedir + "/messier");
+		catalog = DeepSkyCatalogPtr(
+				new MessierCatalog(_basedir + "/messier"));
 		break;
 	case NGCIC:
-		catalog = new NGCICCatalog(_basedir + "/ngcic");
+		catalog = DeepSkyCatalogPtr(
+				new NGCICCatalog(_basedir + "/ngcic"));
 		break;
 	case PGC:
-		catalog = new PGCCatalog(_basedir + "/pgc");
+		catalog = DeepSkyCatalogPtr(
+				new PGCCatalog(_basedir + "/pgc"));
 		break;
 	default:
 		throw std::runtime_error("unknown deep sky catalog");
 	}
-	return DeepSkyCatalogPtr(catalog);
+	catalogmap.insert(std::make_pair(catalogtype, catalog));
+	return catalog;
 }
 
 } // namespace catalog
