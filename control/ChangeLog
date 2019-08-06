@@ -1,5 +1,9 @@
 ChangeLog for the Astro project.
 
+20190806:
+	* added PGC catalog
+	* improved performance of DSO catalogs using singleton map
+
 20190729:
 	* add LD_LIBRARY_PATH so that snowstar is able to find libraries
 	  (seems to be necessary for Ice-3.7.3, the current git version)
