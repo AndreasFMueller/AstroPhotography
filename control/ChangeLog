@@ -1,5 +1,8 @@
 ChangeLog for the Astro project.
 
+20190807:
+	* database backend for PGC catalog implemented
+
 20190806:
 	* added PGC catalog
 	* improved performance of DSO catalogs using singleton map

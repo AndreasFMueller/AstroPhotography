@@ -10,9 +10,26 @@
 #include <map>
 #include <set>
 #include <memory>
+#include <sqlite3.h>
 
 namespace astro {
 namespace catalog {
+
+class PGCDatabase {
+	std::string	_dbfilename;
+	sqlite3		*_database;
+	sqlite3_stmt	*_insert_stmt;
+public:
+	PGCDatabase(const std::string& dbfilename);
+	~PGCDatabase();
+	const std::string&	dbfilename() const { return _dbfilename; }
+	void	add(const DeepSkyObject& deepskyobject);
+	DeepSkyObject	find(const std::string& name);
+	DeepSkyObjectSetPtr	find(const SkyWindow& window);
+	std::set<std::string>	findLike(const std::string& name,
+					int maxobjects = 100);
+	size_t	size();
+};
 
 /**
  * \brief NGC/IC catalog class
@@ -25,8 +42,9 @@ public:
 public:
 	PGC(const std::string& filename);
 	DeepSkyObject	find(const std::string& name) const;
-	objectsetptr	find(const SkyWindow& window) const;
-	std::set<std::string>	findLike(const std::string& name) const;
+	DeepSkyObjectSetPtr	find(const SkyWindow& window) const;
+	std::set<std::string>	findLike(const std::string& name,
+					int maxobjects = 100) const;
 };
 
 } // namespace catalog

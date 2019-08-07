@@ -152,11 +152,10 @@ DeepSkyObject	Stellarium::find(const std::string& name) const {
 	throw std::runtime_error(msg);
 }
 
-DeepSkyCatalog::deepskyobjectsetptr	Stellarium::find(
+DeepSkyObjectSetPtr	Stellarium::find(
 						const SkyWindow& window) const {
-	DeepSkyCatalog::deepskyobjectset	*result
-		= new DeepSkyCatalog::deepskyobjectset();
-	DeepSkyCatalog::deepskyobjectsetptr	resultptr(result);
+	DeepSkyObjectSet	*result = new DeepSkyObjectSet();
+	DeepSkyObjectSetPtr	resultptr(result);
 	std::for_each(begin(), end(),
 		[&](const std::pair<int, DeepSkyObject>& p) {
 			if (window.contains(p.second.position(2000))) {

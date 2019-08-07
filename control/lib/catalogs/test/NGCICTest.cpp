@@ -63,10 +63,10 @@ void	NGCICTest::testWindow() {
 	Angle	width; width.hours(1);
 	Angle	height; height.degrees(15);
 	SkyWindow	window(center, width, height);
-	NGCIC::objectsetptr	objects = catalog.find(window);
+	DeepSkyObjectSetPtr	objects = catalog.find(window);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "%d objects", objects->size());
 	CPPUNIT_ASSERT(objects->size() == 27);
-	NGCIC::objectset::const_iterator	o;
+	DeepSkyObjectSet::const_iterator	o;
 	for (o = objects->begin(); o != objects->end(); o++) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "%s", o->toString().c_str());
 	}

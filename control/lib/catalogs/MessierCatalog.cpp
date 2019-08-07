@@ -11,8 +11,8 @@ namespace catalog {
 /**
  * \brief Empty Messier catalog implementation
  */
-DeepSkyCatalog::deepskyobjectsetptr     MessierCatalog::find(const SkyWindow&) {
-	deepskyobjectsetptr	result;
+DeepSkyObjectSetPtr     MessierCatalog::find(const SkyWindow&) {
+	DeepSkyObjectSetPtr	result;
 	return result;
 }
 

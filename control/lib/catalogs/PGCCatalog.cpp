@@ -19,7 +19,7 @@ PGCCatalog::PGCCatalog(const std::string& path)
 /**
  * \brief Empty PGC catalog implementation
  */
-DeepSkyCatalog::deepskyobjectsetptr     PGCCatalog::find(const SkyWindow& window) {
+DeepSkyObjectSetPtr	PGCCatalog::find(const SkyWindow& window) {
 	return PGC::find(window);
 }
 

@@ -230,9 +230,9 @@ DeepSkyObject	NGCIC::find(const std::string& name) const {
 /**
  * \brief Retrieve all objects in a RA/DEC rectangle
  */
-NGCIC::objectsetptr	NGCIC::find(const SkyWindow& window) const {
-	objectset	*result = new objectset();
-	objectsetptr	resultptr(result);
+DeepSkyObjectSetPtr	NGCIC::find(const SkyWindow& window) const {
+	DeepSkyObjectSet	*result = new DeepSkyObjectSet();
+	DeepSkyObjectSetPtr	resultptr(result);
 	std::map<std::string, DeepSkyObject>::const_iterator	o;
 	for (o = begin(); o != end(); o++) {
 		if (window.contains(o->second)) {

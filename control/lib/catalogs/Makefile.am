@@ -70,6 +70,7 @@ libastrocatalogs_la_SOURCES =						\
 	MessierCatalog.cpp						\
 	NGCIC.cpp							\
 	NGCICCatalog.cpp						\
+	PGCDatabase.cpp							\
 	PGC.cpp								\
 	PGCCatalog.cpp							\
 	Outline.cpp							\

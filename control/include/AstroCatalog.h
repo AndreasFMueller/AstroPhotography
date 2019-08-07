@@ -162,6 +162,10 @@ public:
 	Outline	outline() const;
 };
 
+typedef std::set<DeepSkyObject> DeepSkyObjectSet;
+typedef std::shared_ptr<DeepSkyObjectSet>	DeepSkyObjectSetPtr;
+
+
 /**
  * \brief A class to encode a magnitude range
  */
@@ -289,10 +293,7 @@ public:
 	DeepSkyCatalog(const std::string& basedir) : _basedir(basedir)  { }
 	virtual ~DeepSkyCatalog() { }
 
-	typedef std::set<DeepSkyObject>	deepskyobjectset;
-	typedef std::shared_ptr<deepskyobjectset> deepskyobjectsetptr;
-
-	virtual deepskyobjectsetptr	find(const SkyWindow&) = 0;
+	virtual DeepSkyObjectSetPtr	find(const SkyWindow&) = 0;
 	virtual DeepSkyObject	find(const std::string& name) = 0;
 	virtual	std::set<std::string>	findLike(const std::string& name) = 0;
 };

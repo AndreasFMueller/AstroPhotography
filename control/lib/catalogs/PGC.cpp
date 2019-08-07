@@ -200,21 +200,35 @@ PGC::objectsetptr	PGC::find(const SkyWindow& window) const {
 	return resultptr;
 }
 
-std::set<std::string>	PGC::findLike(const std::string& name) const {
+std::set<std::string>	PGC::findLike(const std::string& name,
+	int maxobjects) const {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "start finding like %s", name.c_str());
 	std::set<std::string>	result;
 	size_t	l = name.size();
-	// find matching NGC/IC names
+	int	counter = 0;
+	// find matching PGC names
 	for (auto i = begin(); i != end(); i++) {
 		if (i->first.size() < l)
 			continue;
 		if ((i->first.size() == l) && (i->first == name)) {
 			result.insert(i->first);
+			counter++;
+			if (counter >= maxobjects) {
+				goto complete;
+			}
 			continue;
 		}
 		if (i->first.substr(0, l) == name) {
 			result.insert(i->first);
+			counter++;
+			if (counter >= maxobjects) {
+				goto complete;
+			}
 		}
 	}
+complete:
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "search complete, %d objects",
+		result.size());
 	return result;
 }
 

@@ -19,7 +19,7 @@ NGCICCatalog::NGCICCatalog(const std::string& path)
 /**
  * \brief Empty NGCIC catalog implementation
  */
-DeepSkyCatalog::deepskyobjectsetptr     NGCICCatalog::find(const SkyWindow& window) {
+DeepSkyObjectSetPtr     NGCICCatalog::find(const SkyWindow& window) {
 	return NGCIC::find(window);
 }
 
