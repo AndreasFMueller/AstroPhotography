@@ -1,5 +1,8 @@
 ChangeLog for the Qt GUI to Astrophotography
 
+20190822:
+	* fix data types for deep sky object catalogs
+
 20190624:
 	* add openmp to compilation
 

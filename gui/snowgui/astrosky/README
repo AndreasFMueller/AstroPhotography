@@ -1,0 +1,5 @@
+The astrosky program is used to create a view of the sky from a given
+point on earth for some specific time. This can be used to create
+a website that displays the current position the telescope is pointing to.
+
+

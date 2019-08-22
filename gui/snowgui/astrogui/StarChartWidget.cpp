@@ -43,7 +43,7 @@ StarChartWidget::StarChartWidget(QWidget *parent) : QWidget(parent),
 	_legend = NULL;
 
 	qRegisterMetaType<astro::catalog::Catalog::starsetptr>("astro::catalog::Catalog::starsetptr");
-	qRegisterMetaType<astro::catalog::DeepSkyCatalog::deepskyobjectsetptr>("astro::catalog::DeepSkyCatalog::deepskyobjectsetptr");
+	qRegisterMetaType<astro::catalog::DeepSkyObjectSetPtr>("astro::catalog::DeepSkyObjectSetPtr");
 	qRegisterMetaType<astro::Angle>("astro::Angle");
 	qRegisterMetaType<snowgui::ImagerRectangle>("snowgui::ImagerRectangle");
 
@@ -69,9 +69,9 @@ StarChartWidget::StarChartWidget(QWidget *parent) : QWidget(parent),
 	DeepSkyRetriever	*deepsky_thread
 		= new DeepSkyRetriever(this);
 	connect(deepsky_thread,
-		SIGNAL(deepskyReady(astro::catalog::DeepSkyCatalog::deepskyobjectsetptr)),
+		SIGNAL(deepskyReady(astro::catalog::DeepSkyObjectSetPtr)),
 		this,
-		SLOT(useDeepSky(astro::catalog::DeepSkyCatalog::deepskyobjectsetptr)));
+		SLOT(useDeepSky(astro::catalog::DeepSkyObjectSetPtr)));
 	//connect(deepsky_thread, SIGNAL(finished()),
 	//	this, SLOT(workerFinished()));
 	deepsky_thread->start();
@@ -511,7 +511,7 @@ void	StarChartWidget::draw() {
 
 	// draw the deep sky objects
 	if (show_deepsky() && _deepsky) {
-		DeepSkyCatalog::deepskyobjectset::const_iterator	i;
+		DeepSkyObjectSet::const_iterator	i;
 		for (i = _deepsky->begin(); i != _deepsky->end(); i++) {
 			drawDeepSkyObject(painter, *i);
 		}
@@ -758,7 +758,7 @@ void	StarChartWidget::useSky(astro::catalog::Catalog::starsetptr sky) {
  * \param deepsky	set of deep ky objects to display in the star chart
  */
 void	StarChartWidget::useDeepSky(
-		astro::catalog::DeepSkyCatalog::deepskyobjectsetptr deepsky) {
+		astro::catalog::DeepSkyObjectSetPtr deepsky) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "got %d deepsky objects",
 		deepsky->size());
 	_deepsky = deepsky;
