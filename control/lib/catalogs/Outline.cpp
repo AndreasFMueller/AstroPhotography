@@ -26,28 +26,46 @@ Outline::Outline(const std::string& name, const astro::RaDec& center,
 		 const astro::Angle& position_angle)
 	: _name(name) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "construct %s outline", name.c_str());
+
+	// get the major and minor axes
+	double	a = axes.a1().radians() / 2.;
+	double	b = axes.a2().radians() / 2.;
+	if (a < b) {
+		double	temp = a;
+		a = b;
+		b = temp;
+	}
+
+	// if the minor axes is very small, we consider it erroneous and draw
+	// a circle instead, i.e. b = a
+	if ((b / a) < 0.01) {
+		b = a;
+	}
+
+	// how many points do we want to create
+	const static int	minsteps = 6;
+	const static int	maxsteps = 18;
+	int	steps = round(maxsteps * a
+				/ Angle(0.5, Angle::Degrees).radians());
+	if (steps < minsteps) {
+		steps = minsteps;
+	}
+	if (steps > maxsteps) {
+		steps = maxsteps;
+	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "drawing ellipse with %d points (%s,%s)",
+		Angle(a).dms().c_str(), Angle(b).dms().c_str());
 	
 	// create points on an ellipse
-	for (float angle = 0; angle < 1.9 * M_PI; angle += M_PI / 6) {
-		double	x0 = axes.a1().radians() * cos(angle);
-		double	y0 = axes.a2().radians() * sin(angle);
-
-		// rotate by orientation
-		double	x = cos(position_angle) * x0 - sin(position_angle) * y0;
-		double	y = sin(position_angle) * x0 + cos(position_angle) * y0;
-
-		// compute point on the ellipse
-		Angle	r = Angle(hypot(x, y), Angle::Radians);
-		Angle	phi = arctan2(y, x);
-
-		// compute spherical triangle
-		Angle	a = Angle::right_angle - center.dec();
-		Angle	b = arccos(cos(a) * cos(r) + sin(a) * sin(r) * cos(phi));
-		Angle	beta = arcsin(sin(r) * sin(phi) / sin(b));
-
-		// compute RA / DEC
-		RaDec	radec(center.ra() + beta, Angle::right_angle - b);
-		push_back(radec);
+	float	anglestep = M_PI / steps;
+	float	angle = anglestep / 2.;
+	for (int i = 0; i < 2 * steps; i++, angle += anglestep) {
+		double	x0 = a * cos(angle);
+		double	y0 = b * sin(angle);
+		Angle	radius(hypot(x0, y0), Angle::Radians);
+		Angle	t = position_angle + arctan2(y0, x0);
+		RaDec	point = center.exp(t, radius);
+		push_back(point);
 	}
 }
 

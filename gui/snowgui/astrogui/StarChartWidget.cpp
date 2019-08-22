@@ -55,7 +55,7 @@ StarChartWidget::StarChartWidget(QWidget *parent) : QWidget(parent),
 		this, SLOT(showContextMenu(const QPoint &)));
 
 
-	// launch a thread to retrieve the 
+	// launch a thread to retrieve the stars
 	SkyStarThread	*skystarthread = new SkyStarThread(this);
 	connect(skystarthread,
 		SIGNAL(stars(astro::catalog::Catalog::starsetptr)),
@@ -174,9 +174,16 @@ void	StarChartWidget::drawStar(QPainter& painter, const Star& star) {
  */
 // XXX suggested improvements:
 // XXX - background behind the object label to make it more readable
-// XXX - get different half axes and azimuth for objects that are not circular
 void	StarChartWidget::drawDeepSkyObject(QPainter& painter,
 	const DeepSkyObject& deepskyobject) {
+
+	// first find out whether we actually have to display the object
+	if (_direction.scalarproduct(deepskyobject) < 0) {
+		//debug(LOG_DEBUG, DEBUG_LOG, 0, "ignore %s",
+		//	deepskyobject.name.c_str());
+		return;
+	}
+
 	// make sure we draw in red
 	QPen	pen(Qt::SolidLine);
 	switch (deepskyobject.classification) {
@@ -202,7 +209,7 @@ void	StarChartWidget::drawDeepSkyObject(QPainter& painter,
 		pen.setColor(Qt::gray);
 		break;
 	}
-	pen.setWidth(1);
+	pen.setWidth(2);
 	painter.setPen(pen);
 
 	// get the position
@@ -902,6 +909,11 @@ void	StarChartWidget::setNegative(bool s) {
 	repaint();
 }
 
+void	StarChartWidget::setFlip(bool s) {
+	flip(s);
+	repaint();
+}
+
 void	StarChartWidget::toggleStarsVisible() {
 	setStarsVisible(!show_stars());
 }
@@ -932,6 +944,10 @@ void	StarChartWidget::toggleTooltipsVisible() {
 
 void	StarChartWidget::toggleNegative() {
 	setNegative(!negative());
+}
+
+void	StarChartWidget::toggleFlip() {
+	setFlip(!flip());
 }
 
 void	StarChartWidget::toggleImagerRectangleVisible() {
@@ -1031,6 +1047,13 @@ void	StarChartWidget::showContextMenu(const QPoint& point) {
 	contextMenu.addAction(&actionNegative);
 	connect(&actionNegative, SIGNAL(triggered()),
 		this, SLOT(toggleNegative()));
+
+	QAction	actionFlip(QString("Rotate"), this);
+	actionFlip.setCheckable(true);
+	actionFlip.setChecked(flip());
+	contextMenu.addAction(&actionFlip);
+	connect(&actionFlip, SIGNAL(triggered()),
+		this, SLOT(toggleFlip()));
 
 	contextMenu.addSeparator();
 

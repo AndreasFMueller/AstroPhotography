@@ -1,5 +1,9 @@
 ChangeLog for the Astro project.
 
+20190822:
+	* add scalar product to RaDec
+	* add exp(), distance() methods to RaDec
+
 20190807:
 	* database backend for PGC catalog implemented
 

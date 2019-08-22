@@ -86,4 +86,44 @@ void	RaDec::precess(const Precession& precession) {
 	dec() = precessed.dec();
 }
 
+/**
+ * \brief compute the coordinates 
+ *
+ * \param position_angle	direction measured from north
+ * \param radius		length along the great circle
+ */
+RaDec	RaDec::exp(const Angle& position_angle, const Angle& radius) const {
+	double	cosradius = cos(radius);
+	double	cosdec = cos(Angle::right_angle - dec());
+	double	sindec = sin(Angle::right_angle - dec());
+	double	cosdec1 = cosdec * cosradius
+				+ sindec * sin(radius) * cos(position_angle);
+	Angle	dec1 = Angle::right_angle - arccos(cosdec1);
+	double	cosbeta = (cosradius - cosdec * cosdec1)
+				/ (sindec * sin(Angle::right_angle - dec1));
+	double	sinbeta = sin(position_angle) * sin(radius)
+			/ sin(Angle::right_angle - dec1);
+	Angle	beta = arctan2(sinbeta, cosbeta);
+	return RaDec(ra() + beta, dec1);
+}
+
+/**
+ * \brief Compute angular distance between two points on the celestial sphere
+ */
+Angle	RaDec::distance(const RaDec& other) const {
+	Angle	dec1 = Angle::right_angle - dec();
+	Angle	dec2 = Angle::right_angle - other.dec();
+	Angle	a = ra() - other.ra();
+	a = a.reduced();
+	double	cosd = cos(dec1) * cos(dec2) + sin(dec1) * sin(dec2) * cos(a);
+	return arccos(cosd);
+}
+
+/**
+ * \brief scalar product with some other vector
+ */
+double	RaDec::scalarproduct(const RaDec& other) const {
+	return UnitVector(*this) * UnitVector(other);
+}
+
 } // namespace astro

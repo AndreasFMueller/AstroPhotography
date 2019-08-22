@@ -203,6 +203,7 @@ public slots:
 	void	setCataloglabelsVisible(bool);
 	void	setTooltipsVisible(bool);
 	void	setNegative(bool);
+	void	setFlip(bool);
 	void	setImagerRectangleVisible(bool);
 	void	setFinderRectangleVisible(bool);
 	void	setGuiderRectangleVisible(bool);
@@ -215,6 +216,7 @@ public slots:
 	void	toggleCataloglabelsVisible();
 	void	toggleTooltipsVisible();
 	void	toggleNegative();
+	void	toggleFlip();
 	void	toggleImagerRectangleVisible();
 	void	toggleFinderRectangleVisible();
 	void	toggleGuiderRectangleVisible();

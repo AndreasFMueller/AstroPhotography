@@ -2,6 +2,9 @@ ChangeLog for the Qt GUI to Astrophotography
 
 20190822:
 	* fix data types for deep sky object catalogs
+	* fix bug that displayed objects from the other side of the
+	  celestial sphere in the StarChartWidget
+	* add flip-option to the StarChartWidget
 
 20190624:
 	* add openmp to compilation

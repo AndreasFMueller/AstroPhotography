@@ -15,14 +15,16 @@
 namespace astro {
 
 SphericalCoordinates::SphericalCoordinates(const LongLat& longlat)
-	: TwoAngles(longlat.longitude(), Angle(M_PI / 2) - longlat.latitude()) {
+	: TwoAngles(longlat.longitude(),
+	  Angle::right_angle - longlat.latitude()) {
 }
 
 SphericalCoordinates::SphericalCoordinates(const RaDec& radec)
-	: TwoAngles(radec.ra(), Angle(M_PI / 2) - radec.dec()) {
+	: TwoAngles(radec.ra(), Angle::right_angle - radec.dec()) {
 }
 
-Angle	operator-(const SphericalCoordinates& s1, const SphericalCoordinates& s2) {
+Angle	operator-(const SphericalCoordinates& s1,
+		const SphericalCoordinates& s2) {
 	return UnitVector(s1).angle(UnitVector(s2));
 }
 
