@@ -1,5 +1,9 @@
 ChangeLog for the Astro project.
 
+20190823:
+	* get rid of macros major/minor, as they conflict with member 
+	  variable names in Stellarium.cpp
+
 20190822:
 	* add scalar product to RaDec
 	* add exp(), distance() methods to RaDec
