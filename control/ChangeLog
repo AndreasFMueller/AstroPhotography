@@ -2,6 +2,7 @@ ChangeLog for the Astro project.
 
 
 20190823:
+	* fix ifstream.fail missing in catalogs
 	* fix bug that PGC data file open was not checked
 	* get rid of macros major/minor, as they conflict with member 
 	  variable names in Stellarium.cpp
