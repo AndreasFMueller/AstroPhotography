@@ -129,6 +129,12 @@ PGC::PGC(const std::string& dirname) {
 	std::string	pgcfilename(dirname + "/pgc.dat");
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "reading from %s", pgcfilename.c_str());
 	std::ifstream	in(pgcfilename.c_str());
+	if (in.fail()) {
+		std::string	msg = stringprintf("cannot open PGC file %s",
+			pgcfilename.c_str());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw std::runtime_error(msg);
+	}
 
 	// read the stream line by line
 	do {
