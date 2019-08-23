@@ -160,6 +160,9 @@ static const RaDec	north_pole;
 static const RaDec	south_pole;
 	Ecliptic	ecliptic() const;
 	void	precess(const Precession& precession);
+	RaDec	exp(const Angle& position_angle, const Angle& radius) const;
+	Angle	distance(const RaDec& other) const;
+	double	scalarproduct(const RaDec& other) const;
 };
 
 /**

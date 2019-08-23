@@ -93,8 +93,7 @@ static DeepSkyObject	Object_from_Record(const std::string& record) {
 	// size
 	try {
 		Angle	s(std::stod(record.substr(33, 5)) / 60, Angle::Degrees);
-		result.size.a1() = s;
-		result.size.a2() = s;
+		result.axes(TwoAngles(s, s));
 	} catch (...) {
 		//debug(LOG_DEBUG, DEBUG_LOG, 0, "no size for %s",
 		//	result.name.c_str());
@@ -142,7 +141,7 @@ NGCIC::NGCIC(const std::string& dirname) {
 		std::string	n;
 		if ((buffer[0] == 'M') && (buffer[1] == ' ')) {
 			// Messier names
-			n = std::string("M") + trim(std::string(buffer + 1, 5));
+			n = std::string("M") + trim(std::string(buffer + 1, 4));
 		} else {
 			n = trim(std::string(buffer, 36));
 		}
@@ -157,19 +156,71 @@ NGCIC::NGCIC(const std::string& dirname) {
  * \brief retrieve a single object by name
  */
 DeepSkyObject	NGCIC::find(const std::string& name) const {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "searching NGC/IC for '%s' %d",
+		name.c_str(), name.size());
+	// handle special M names that are missing from NGC
+	if (name == std::string("M24")) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "M24 found");
+		DeepSkyObject	object;
+		object.name = name;
+		object.constellation = std::string("Saggitarius");
+		object.mag(4.6);
+		object.ra() = Angle(18.28, Angle::Hours);
+		object.dec() = Angle(-18.55, Angle::Degrees);
+		object.classification = DeepSkyObject::OpenCluster;
+		return object;
+	} else if (name == std::string("M40")) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "M40 found");
+		DeepSkyObject	object;
+		object.name = name;
+		object.constellation = std::string("Ursa Maior");
+		object.mag(9.7);
+		object.ra() = Angle(12.37015, Angle::Hours);
+		object.dec() = Angle(58.08294, Angle::Degrees);
+		object.classification = DeepSkyObject::DoubleStar;
+		return object;
+	} else if (name == std::string("M45")) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "M45 found");
+		DeepSkyObject	object;
+		object.name = name;
+		object.constellation = std::string("Taurus");
+		object.mag(1.6);
+		object.ra() = Angle(3.79, Angle::Hours);
+		object.dec() = Angle(24.11667, Angle::Degrees);
+		object.classification = DeepSkyObject::OpenCluster;
+		return object;
+	} else if (name == std::string("M103")) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "M103 found");
+		DeepSkyObject	object;
+		object.name = name;
+		object.constellation = std::string("Cassiopeia");
+		object.mag(7.4);
+		object.ra() = Angle(1.55606, Angle::Hours);
+		object.dec() = Angle(60.65806, Angle::Degrees);
+		object.classification = DeepSkyObject::OpenCluster;
+		return object;
+	}
+
 	// direct search
 	const_iterator	o = std::map<std::string, DeepSkyObject>::find(name);
 	if (o != end()) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "generic %s found",
-			name.c_str());
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "generic %s found: '%s'",
+			name.c_str(), o->second.name.c_str());
 		return o->second;
+	} else {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "generic %s not found",
+			name.c_str());
 	}
 
 	// name search
 	auto	i = names.find(name);
 	if (i != names.end()) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "name %s found", name.c_str());
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "name %s found: '%s'",
+			name.c_str(), i->second.c_str());
 		return find(i->second);
+	} else {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "name %s not found",
+			name.c_str());
 	}
 
 	// 
@@ -179,9 +230,9 @@ DeepSkyObject	NGCIC::find(const std::string& name) const {
 /**
  * \brief Retrieve all objects in a RA/DEC rectangle
  */
-NGCIC::objectsetptr	NGCIC::find(const SkyWindow& window) const {
-	objectset	*result = new objectset();
-	objectsetptr	resultptr(result);
+DeepSkyObjectSetPtr	NGCIC::find(const SkyWindow& window) const {
+	DeepSkyObjectSet	*result = new DeepSkyObjectSet();
+	DeepSkyObjectSetPtr	resultptr(result);
 	std::map<std::string, DeepSkyObject>::const_iterator	o;
 	for (o = begin(); o != end(); o++) {
 		if (window.contains(o->second)) {

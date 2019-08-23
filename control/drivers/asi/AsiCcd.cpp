@@ -387,9 +387,7 @@ astro::image::ImagePtr	AsiCcd::getRawImage() {
 		}
 		// if this is a color camera, add the mosaic information
 		if (_camera.isColor()) {
-			image->setMosaicType(
-				MosaicType::shift(MosaicType::BAYER_RGGB,
-					origin));
+			image->setMosaicType(_camera.mosaic().shifted(origin));
 		}
 		result = ImagePtr(image);
 		}

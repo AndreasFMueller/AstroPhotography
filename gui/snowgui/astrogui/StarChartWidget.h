@@ -51,7 +51,7 @@ public:
 
 	DeepSkyRetriever(QObject *parent = NULL);
 signals:
-	void	deepskyReady(astro::catalog::DeepSkyCatalog::deepskyobjectsetptr);
+	void	deepskyReady(astro::catalog::DeepSkyObjectSetPtr);
 };
 
 /**
@@ -66,7 +66,7 @@ class StarChartWidget : public QWidget {
 
 	astro::catalog::Catalog::starsetptr	_stars;
 	astro::catalog::Catalog::starsetptr	_sky;
-	astro::catalog::DeepSkyCatalog::deepskyobjectsetptr	_deepsky;
+	astro::catalog::DeepSkyObjectSetPtr	_deepsky;
 	astro::catalog::OutlineCatalogPtr	_outlines;
 	astro::Angle	_resolution;	// angle per pixel
 	astro::Angle	_imager_resolution;
@@ -185,7 +185,7 @@ public slots:
 	void	stateChanged(astro::device::Mount::state_type);
 	void	useStars(astro::catalog::Catalog::starsetptr);
 	void	useSky(astro::catalog::Catalog::starsetptr);
-	void	useDeepSky(astro::catalog::DeepSkyCatalog::deepskyobjectsetptr);
+	void	useDeepSky(astro::catalog::DeepSkyObjectSetPtr);
 	void	workerFinished();
 	void	guiderResolution(astro::Angle);
 	void	finderResolution(astro::Angle);
@@ -203,6 +203,7 @@ public slots:
 	void	setCataloglabelsVisible(bool);
 	void	setTooltipsVisible(bool);
 	void	setNegative(bool);
+	void	setFlip(bool);
 	void	setImagerRectangleVisible(bool);
 	void	setFinderRectangleVisible(bool);
 	void	setGuiderRectangleVisible(bool);
@@ -215,6 +216,7 @@ public slots:
 	void	toggleCataloglabelsVisible();
 	void	toggleTooltipsVisible();
 	void	toggleNegative();
+	void	toggleFlip();
 	void	toggleImagerRectangleVisible();
 	void	toggleFinderRectangleVisible();
 	void	toggleGuiderRectangleVisible();

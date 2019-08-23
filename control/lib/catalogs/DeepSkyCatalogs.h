@@ -8,6 +8,7 @@
 
 #include <AstroCatalog.h>
 #include "NGCIC.h"
+#include "PGC.h"
 #include "Stellarium.h"
 
 namespace astro {
@@ -19,7 +20,7 @@ namespace catalog {
 class MessierCatalog : public DeepSkyCatalog {
 public:
 	MessierCatalog(const std::string& basedir) : DeepSkyCatalog(basedir) { }
-	virtual deepskyobjectsetptr	find(const SkyWindow&);
+	virtual DeepSkyObjectSetPtr	find(const SkyWindow&);
 	virtual DeepSkyObject	find(const std::string& name);
 	virtual std::set<std::string>	findLike(const std::string& name);
 };
@@ -30,7 +31,18 @@ public:
 class NGCICCatalog : public DeepSkyCatalog, public NGCIC {
 public:
 	NGCICCatalog(const std::string& basedir);
-	virtual deepskyobjectsetptr	find(const SkyWindow&);
+	virtual DeepSkyObjectSetPtr	find(const SkyWindow&);
+	virtual DeepSkyObject	find(const std::string& name);
+	virtual std::set<std::string>	findLike(const std::string& name);
+};
+
+/**
+ * \brief NGC/IC catalog
+ */
+class PGCCatalog : public DeepSkyCatalog, public PGC {
+public:
+	PGCCatalog(const std::string& basedir);
+	virtual DeepSkyObjectSetPtr	find(const SkyWindow&);
 	virtual DeepSkyObject	find(const std::string& name);
 	virtual std::set<std::string>	findLike(const std::string& name);
 };
@@ -41,7 +53,7 @@ public:
 class StellariumCatalog : public DeepSkyCatalog, public Stellarium {
 public:
 	StellariumCatalog(const std::string& basedir);
-	virtual deepskyobjectsetptr	find(const SkyWindow&);
+	virtual DeepSkyObjectSetPtr	find(const SkyWindow&);
 	virtual DeepSkyObject	find(const std::string& name);
 	virtual std::set<std::string>	findLike(const std::string& name);
 };

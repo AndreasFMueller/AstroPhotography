@@ -26,7 +26,7 @@ void	DeepSkyRetriever::run() {
 		DeepSkyCatalogFactory	factory;
 		DeepSkyCatalogPtr catalog = factory.get(DeepSkyCatalogFactory::NGCIC);
 		SkyWindow	windowall;
-		astro::catalog::DeepSkyCatalog::deepskyobjectsetptr	deepskyobjects
+		astro::catalog::DeepSkyObjectSetPtr	deepskyobjects
 			= catalog->find(windowall);
 		//astro::Precession	precession;
 		//deepskyobjects = precess(precession, deepskyobjects);

@@ -45,7 +45,7 @@ public:
 	Stellarium();
 	Stellarium(const std::string& filename);
 	DeepSkyObject	find(const std::string& name) const;
-	DeepSkyCatalog::deepskyobjectsetptr	find(const SkyWindow& window) const;
+	DeepSkyObjectSetPtr	find(const SkyWindow& window) const;
 	std::set<std::string>	findLike(const std::string& name) const;
 };
 

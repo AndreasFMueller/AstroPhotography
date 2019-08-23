@@ -59,12 +59,13 @@ void	Stellarium::parse(const std::string& filename) {
 		object.dec() = astro::Angle(stod(components[2]),
 					astro::Angle::Degrees);
 		object.mag(std::stod(components[4]));
-		object.size.a1() = Angle(std::stod(components[8]) / 60,
-			astro::Angle::Degrees);
-		object.size.a2() = Angle(std::stod(components[9]) / 60,
-			astro::Angle::Degrees);
-		object.azimuth = Angle(std::stod(components[10]),
-			astro::Angle::Degrees);
+		Angle	major(std::stod(components[8]) / 60,
+				astro::Angle::Degrees);
+		Angle	minor(std::stod(components[9]) / 60,
+				astro::Angle::Degrees);
+		object.axes(TwoAngles(major, minor));
+		object.position_angle(Angle(std::stod(components[10]),
+			astro::Angle::Degrees));
 
 		// insert the object
 		insert(std::make_pair(object.number, object));
@@ -151,11 +152,10 @@ DeepSkyObject	Stellarium::find(const std::string& name) const {
 	throw std::runtime_error(msg);
 }
 
-DeepSkyCatalog::deepskyobjectsetptr	Stellarium::find(
+DeepSkyObjectSetPtr	Stellarium::find(
 						const SkyWindow& window) const {
-	DeepSkyCatalog::deepskyobjectset	*result
-		= new DeepSkyCatalog::deepskyobjectset();
-	DeepSkyCatalog::deepskyobjectsetptr	resultptr(result);
+	DeepSkyObjectSet	*result = new DeepSkyObjectSet();
+	DeepSkyObjectSetPtr	resultptr(result);
 	std::for_each(begin(), end(),
 		[&](const std::pair<int, DeepSkyObject>& p) {
 			if (window.contains(p.second.position(2000))) {

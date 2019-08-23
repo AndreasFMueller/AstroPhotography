@@ -25,6 +25,7 @@ noinst_HEADERS =							\
 	Hipparcos.h							\
 	MappedFile.h							\
 	NGCIC.h								\
+	PGC.h								\
 	Stellarium.h							\
 	Tycho2.h							\
 	Ucac4.h
@@ -69,6 +70,9 @@ libastrocatalogs_la_SOURCES =						\
 	MessierCatalog.cpp						\
 	NGCIC.cpp							\
 	NGCICCatalog.cpp						\
+	PGCDatabase.cpp							\
+	PGC.cpp								\
+	PGCCatalog.cpp							\
 	Outline.cpp							\
 	OutlineCatalog.cpp						\
 	PointSpreadFunctionAdapter.cpp					\

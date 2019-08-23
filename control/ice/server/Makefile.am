@@ -130,6 +130,7 @@ test:	snowstar
 	else								\
 		servername=server;					\
 	fi;								\
+	LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:@ICELIBDIR@			\
 	./snowstar $(COMMONFLAGS) 2>&1 | tee test.log
 
 #		--lines=100 --files=10 --logfile=test.log

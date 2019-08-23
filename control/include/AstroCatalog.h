@@ -110,12 +110,30 @@ public:
 	virtual std::string	toString() const;
 };
 
+/*
+ * \brief Outline of a DeepSkyObject
+ */
+class Outline : public std::list<astro::RaDec> {
+	std::string	_name;
+public:
+	const std::string&	name() const { return _name; }
+	void	name(const std::string& name) { _name = name; }
+	Outline(const std::string& name) : _name(name) { }
+	Outline(const std::string& name, const astro::RaDec& center,
+		const astro::TwoAngles& axes,
+		const astro::Angle& position_angle);
+	std::string	toString() const;
+};
+
 /**
  * \brief Deep Sky objects
  */
 class DeepSkyObject : public CelestialObject {
+	bool		_has_dimensions;
+	TwoAngles	_axes;
+	Angle		_position_angle;
 public:
-	DeepSkyObject() { _mag = 0; }
+	DeepSkyObject() { _mag = 0; _has_dimensions = false; }
 	virtual ~DeepSkyObject() { }
 	int	number;
 	std::string	name;
@@ -123,18 +141,30 @@ public:
 	typedef enum { Galaxy, OpenCluster, GlobularCluster, BrightNebula,
 			PlanetaryNebula, ClusterNebulosity, Asterism,
 			Knot, TripleStar, DoubleStar, SingleStar, Uncertain,
-			Unidentified, Nonexistent, PlateDefect } object_class;
+			Unidentified, Nonexistent, PlateDefect,
+			MultipleSystem, GalaxyInMultipleSystem } object_class;
 	object_class	classification;
 	static std::string	classification2string(object_class);
 	static object_class	string2classification(const std::string&);
-	TwoAngles	size;
-	Angle		azimuth;
+	const TwoAngles&	axes() const { return _axes; }
+	void	axes(const TwoAngles& a) {
+		_has_dimensions = true;
+		_axes = a;
+	}
+	const Angle&	position_angle() const { return _position_angle; }
+	void	position_angle(const Angle& pa) { _position_angle = pa; }
 	std::string	toString() const;
 private:
 	std::list<std::string>	_names;
 public:
 	const std::list<std::string>&	names() const { return _names; }
+	void	addname(const std::string& n) { _names.push_back(n); }
+	Outline	outline() const;
 };
+
+typedef std::set<DeepSkyObject> DeepSkyObjectSet;
+typedef std::shared_ptr<DeepSkyObjectSet>	DeepSkyObjectSetPtr;
+
 
 /**
  * \brief A class to encode a magnitude range
@@ -263,10 +293,7 @@ public:
 	DeepSkyCatalog(const std::string& basedir) : _basedir(basedir)  { }
 	virtual ~DeepSkyCatalog() { }
 
-	typedef std::set<DeepSkyObject>	deepskyobjectset;
-	typedef std::shared_ptr<deepskyobjectset> deepskyobjectsetptr;
-
-	virtual deepskyobjectsetptr	find(const SkyWindow&) = 0;
+	virtual DeepSkyObjectSetPtr	find(const SkyWindow&) = 0;
 	virtual DeepSkyObject	find(const std::string& name) = 0;
 	virtual	std::set<std::string>	findLike(const std::string& name) = 0;
 };
@@ -278,22 +305,13 @@ typedef std::shared_ptr<DeepSkyCatalog>	DeepSkyCatalogPtr;
 class DeepSkyCatalogFactory {
 	std::string	_basedir;
 public:
-	typedef enum deepskycatalog_e { Messier, NGCIC } deepskycatalog_t;
+	typedef enum deepskycatalog_e { Messier, NGCIC, PGC } deepskycatalog_t;
+private:
+	static std::map<deepskycatalog_t, DeepSkyCatalogPtr>	catalogmap;
+public:
 	DeepSkyCatalogFactory(const std::string& basedir) : _basedir(basedir) { }
 	DeepSkyCatalogFactory();
 	DeepSkyCatalogPtr	get(deepskycatalog_t ct);
-};
-
-/*
- * \brief Outline of a DeepSkyObject
- */
-class Outline : public std::list<astro::RaDec> {
-	std::string	_name;
-public:
-	const std::string&	name() const { return _name; }
-	void	name(const std::string& name) { _name = name; }
-	Outline(const std::string& name) : _name(name) { }
-	std::string	toString() const;
 };
 
 /**
@@ -301,12 +319,15 @@ public:
  */
 class OutlineCatalog {
 	std::map<std::string, Outline>	_outlinemap;
+	void	parseOutlines(const std::string& directory);
+	void	parseEllipses(const std::string& directory);
 	void	parse(const std::string& directory);
 public:
 	OutlineCatalog();
 	OutlineCatalog(const std::string& directory);
 	bool	has(const std::string& name) const;
 	Outline	find(const std::string& name) const;
+	size_t	size() const { return _outlinemap.size(); }
 };
 
 typedef std::shared_ptr<OutlineCatalog>	OutlineCatalogPtr;

@@ -79,6 +79,26 @@ AsiCamera::AsiCamera(AsiCameraLocator& locator, int index)
 	// set common variables depending on the camera info
 	_hasGuidePort = (camerainfo.ST4Port) ? true : false;
 	_isColor = (camerainfo.IsColorCam) ? true : false;
+	if (_isColor) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "Bayer-Pattern: %d",
+			camerainfo.BayerPattern);
+		switch (camerainfo.BayerPattern) {
+		case ASI_BAYER_RG:
+			_mosaic = image::MosaicType::BAYER_GBRG;
+			break;
+		case ASI_BAYER_BG:
+			_mosaic = image::MosaicType::BAYER_GRBG;
+			break;
+		case ASI_BAYER_GR:
+			_mosaic = image::MosaicType::BAYER_BGGR;
+			break;
+		case ASI_BAYER_GB:
+			_mosaic = image::MosaicType::BAYER_RGGB;
+			break;
+		}
+	} else {
+		_mosaic = image::MosaicType::NONE;
+	}
 	_hasCooler = (camerainfo.IsCoolerCam) ? true : false;
 	_id = camerainfo.CameraID;
 	_userFriendlyName = std::string(camerainfo.Name);
@@ -128,6 +148,8 @@ AsiCamera::AsiCamera(AsiCameraLocator& locator, int index)
 		long	bandwidth = std::stol(
 			properties.getProperty(std::string("bandwidth")));
 		if ((bandwidth <= 100) && (bandwidth > 0)) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0,
+				"setting bandwidth to %ld", bandwidth);
 			rc = ASISetControlValue(_id, ASI_BANDWIDTHOVERLOAD,
 				bandwidth, ASI_FALSE);
 			if (rc != ASI_SUCCESS) {

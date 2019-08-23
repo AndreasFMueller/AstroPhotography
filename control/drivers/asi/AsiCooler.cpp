@@ -22,6 +22,8 @@ static DeviceName	asiCoolerName(AsiCcd& ccd) {
  */
 AsiCooler::AsiCooler(AsiCamera& camera, AsiCcd& ccd)
 	: Cooler(asiCoolerName(ccd)), _camera(camera) {
+	float	t = getActualTemperature();
+	_camera.settemperature(t);
 }
 
 /**
@@ -41,7 +43,7 @@ AsiCooler::~AsiCooler() {
  * \brief Get the set temperature
  */
 float	AsiCooler::getSetTemperature() {
-	return 273.1 + _camera.getControlValue(AsiTargetTemp).value / 10.;
+	return _camera.settemperature();
 }
 
 /**
@@ -52,16 +54,25 @@ float	AsiCooler::getActualTemperature() {
 }
 
 /**
+ * \brief Set the temperature in the camera
+ */
+void	AsiCooler::setCoolerTemperature() {
+	AsiControlValue	value;
+	value.type = AsiTargetTemp;
+	// must not be multiplied by 10!
+	value.value = _camera.settemperature() - 273.1;
+	value.isauto = false;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "setting temperature to %.1f -> %d",
+		_camera.settemperature(), value.value);
+	_camera.setControlValue(value);
+}
+
+/**
  * \brief Set the target temperature of the cooler
  */
 void	AsiCooler::setTemperature(float temperature) {
-	AsiControlValue	value;
-	value.type = AsiTargetTemp;
-	value.value = 10 * (temperature - 273.1);
-	value.isauto = false;
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "setting temperature to %.1f -> %d",
-		temperature, value.value);
-	_camera.setControlValue(value);
+	_camera.settemperature(temperature);
+	setCoolerTemperature();
 }
 
 /**
@@ -73,8 +84,14 @@ bool	AsiCooler::isOn() {
 
 /**
  * \brief Turn cooler on/off
+ *
+ * Turning the cooler on also sets the temperature anew, because apparently
+ * the camera forgets the set temperature...
+ *
+ * \param onoff	state of the cooler after this operation
  */
 void	AsiCooler::setOn(bool onoff) {
+	// turn the heater on
 	AsiControlValue	value;
 	value.type = AsiCoolerOn;
 	value.value = (onoff) ? ASI_TRUE : ASI_FALSE;
@@ -82,6 +99,14 @@ void	AsiCooler::setOn(bool onoff) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "turning cooler %s",
 		onoff ? "on" : "off");
 	_camera.setControlValue(value);
+	// turn the fan on 
+	value.type = AsiFanOn;
+	_camera.setControlValue(value);
+	// turn anti dew heater on
+	value.type = AsiAntiDewHeater;
+	_camera.setControlValue(value);
+	// must send the set temperature again
+	setCoolerTemperature();
 }
 
 } // namespace asi

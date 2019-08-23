@@ -43,7 +43,7 @@ StarChartWidget::StarChartWidget(QWidget *parent) : QWidget(parent),
 	_legend = NULL;
 
 	qRegisterMetaType<astro::catalog::Catalog::starsetptr>("astro::catalog::Catalog::starsetptr");
-	qRegisterMetaType<astro::catalog::DeepSkyCatalog::deepskyobjectsetptr>("astro::catalog::DeepSkyCatalog::deepskyobjectsetptr");
+	qRegisterMetaType<astro::catalog::DeepSkyObjectSetPtr>("astro::catalog::DeepSkyObjectSetPtr");
 	qRegisterMetaType<astro::Angle>("astro::Angle");
 	qRegisterMetaType<snowgui::ImagerRectangle>("snowgui::ImagerRectangle");
 
@@ -55,7 +55,7 @@ StarChartWidget::StarChartWidget(QWidget *parent) : QWidget(parent),
 		this, SLOT(showContextMenu(const QPoint &)));
 
 
-	// launch a thread to retrieve the 
+	// launch a thread to retrieve the stars
 	SkyStarThread	*skystarthread = new SkyStarThread(this);
 	connect(skystarthread,
 		SIGNAL(stars(astro::catalog::Catalog::starsetptr)),
@@ -69,9 +69,9 @@ StarChartWidget::StarChartWidget(QWidget *parent) : QWidget(parent),
 	DeepSkyRetriever	*deepsky_thread
 		= new DeepSkyRetriever(this);
 	connect(deepsky_thread,
-		SIGNAL(deepskyReady(astro::catalog::DeepSkyCatalog::deepskyobjectsetptr)),
+		SIGNAL(deepskyReady(astro::catalog::DeepSkyObjectSetPtr)),
 		this,
-		SLOT(useDeepSky(astro::catalog::DeepSkyCatalog::deepskyobjectsetptr)));
+		SLOT(useDeepSky(astro::catalog::DeepSkyObjectSetPtr)));
 	//connect(deepsky_thread, SIGNAL(finished()),
 	//	this, SLOT(workerFinished()));
 	deepsky_thread->start();
@@ -80,6 +80,7 @@ StarChartWidget::StarChartWidget(QWidget *parent) : QWidget(parent),
 	try {
 		_outlines = astro::catalog::OutlineCatalogPtr(
 			new astro::catalog::OutlineCatalog());
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "%d outlines", _outlines->size());
 	} catch (std::exception& x) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "no outline catalog: %s",
 			x.what());
@@ -173,13 +174,22 @@ void	StarChartWidget::drawStar(QPainter& painter, const Star& star) {
  */
 // XXX suggested improvements:
 // XXX - background behind the object label to make it more readable
-// XXX - get different half axes and azimuth for objects that are not circular
 void	StarChartWidget::drawDeepSkyObject(QPainter& painter,
 	const DeepSkyObject& deepskyobject) {
+
+	// first find out whether we actually have to display the object
+	if (_direction.scalarproduct(deepskyobject) < 0) {
+		//debug(LOG_DEBUG, DEBUG_LOG, 0, "ignore %s",
+		//	deepskyobject.name.c_str());
+		return;
+	}
+
 	// make sure we draw in red
 	QPen	pen(Qt::SolidLine);
 	switch (deepskyobject.classification) {
 	case astro::catalog::DeepSkyObject::Galaxy:
+	case astro::catalog::DeepSkyObject::MultipleSystem:
+	case astro::catalog::DeepSkyObject::GalaxyInMultipleSystem:
 		pen.setColor(Qt::red);
 		break;
 	case astro::catalog::DeepSkyObject::BrightNebula:
@@ -199,7 +209,7 @@ void	StarChartWidget::drawDeepSkyObject(QPainter& painter,
 		pen.setColor(Qt::gray);
 		break;
 	}
-	pen.setWidth(1);
+	pen.setWidth(2);
 	painter.setPen(pen);
 
 	// get the position
@@ -216,6 +226,8 @@ void	StarChartWidget::drawDeepSkyObject(QPainter& painter,
 	//	deepskyobject.name.c_str());
 
 	if ((_outlines) && (_outlines->has(deepskyobject.name))) {
+		//debug(LOG_DEBUG, DEBUG_LOG, 0, "%s has outline", 
+		//	deepskyobject.name.c_str());
 		QPainterPath	outlinepath;
 		Outline	outline = _outlines->find(deepskyobject.name);
 		QPointF	first = convert(*outline.begin());
@@ -230,10 +242,12 @@ void	StarChartWidget::drawDeepSkyObject(QPainter& painter,
 		outlinepath.closeSubpath();
 		painter.drawPath(outlinepath);
 	} else {
+		//debug(LOG_DEBUG, DEBUG_LOG, 0, "draw %s as circle",
+		//	deepskyobject.name.c_str());
 		// get the axes
-		double	a = deepskyobject.size.a1().radians()
+		double	a = deepskyobject.axes().a1().radians()
 				/ _resolution.radians();
-		double	b = deepskyobject.size.a2().radians()
+		double	b = deepskyobject.axes().a2().radians()
 				/ _resolution.radians();
 		//debug(LOG_DEBUG, DEBUG_LOG, 0, "axes: %f, %f", a, b);
 		a /= 2;
@@ -241,8 +255,8 @@ void	StarChartWidget::drawDeepSkyObject(QPainter& painter,
 
 		// draw an ellipse at the position of the object
 		QPainterPath	ellipse;
-		double	s = sin(deepskyobject.azimuth);
-		double	c = cos(deepskyobject.azimuth);
+		double	s = sin(deepskyobject.position_angle());
+		double	c = cos(deepskyobject.position_angle());
 		double	phi = 0;
 		double	x = a * c;
 		double	y = -a * s;
@@ -504,7 +518,7 @@ void	StarChartWidget::draw() {
 
 	// draw the deep sky objects
 	if (show_deepsky() && _deepsky) {
-		DeepSkyCatalog::deepskyobjectset::const_iterator	i;
+		DeepSkyObjectSet::const_iterator	i;
 		for (i = _deepsky->begin(); i != _deepsky->end(); i++) {
 			drawDeepSkyObject(painter, *i);
 		}
@@ -751,7 +765,7 @@ void	StarChartWidget::useSky(astro::catalog::Catalog::starsetptr sky) {
  * \param deepsky	set of deep ky objects to display in the star chart
  */
 void	StarChartWidget::useDeepSky(
-		astro::catalog::DeepSkyCatalog::deepskyobjectsetptr deepsky) {
+		astro::catalog::DeepSkyObjectSetPtr deepsky) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "got %d deepsky objects",
 		deepsky->size());
 	_deepsky = deepsky;
@@ -895,6 +909,11 @@ void	StarChartWidget::setNegative(bool s) {
 	repaint();
 }
 
+void	StarChartWidget::setFlip(bool s) {
+	flip(s);
+	repaint();
+}
+
 void	StarChartWidget::toggleStarsVisible() {
 	setStarsVisible(!show_stars());
 }
@@ -925,6 +944,10 @@ void	StarChartWidget::toggleTooltipsVisible() {
 
 void	StarChartWidget::toggleNegative() {
 	setNegative(!negative());
+}
+
+void	StarChartWidget::toggleFlip() {
+	setFlip(!flip());
 }
 
 void	StarChartWidget::toggleImagerRectangleVisible() {
@@ -1024,6 +1047,13 @@ void	StarChartWidget::showContextMenu(const QPoint& point) {
 	contextMenu.addAction(&actionNegative);
 	connect(&actionNegative, SIGNAL(triggered()),
 		this, SLOT(toggleNegative()));
+
+	QAction	actionFlip(QString("Rotate"), this);
+	actionFlip.setCheckable(true);
+	actionFlip.setChecked(flip());
+	contextMenu.addAction(&actionFlip);
+	connect(&actionFlip, SIGNAL(triggered()),
+		this, SLOT(toggleFlip()));
 
 	contextMenu.addSeparator();
 

@@ -19,6 +19,7 @@ namespace asi {
  */
 class AsiCooler : public Cooler {
 	AsiCamera&	_camera;
+	void	setCoolerTemperature();
 public:
 	AsiCooler(AsiCamera& camera, AsiCcd& ccd);
 	~AsiCooler();

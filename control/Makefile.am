@@ -3,7 +3,7 @@
 #
 # (c) 2012 Prof Dr Andreas Mueller, Hochschule Rapperswil
 #
-SUBDIRS = include lib ice drivers tools test man doc
+SUBDIRS = include lib ice drivers tools test man doc scripts
 
 documentation:
 	cd doc; make doc

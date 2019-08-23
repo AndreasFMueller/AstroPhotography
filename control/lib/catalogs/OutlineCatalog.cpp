@@ -28,7 +28,7 @@ static std::string	removeblanks(const std::string& v) {
 /**
  * \brief Parse the data file
  */
-void	OutlineCatalog::parse(const std::string& directory) {
+void	OutlineCatalog::parseOutlines(const std::string& directory) {
 	// construct the file name
 	std::string	filename(directory + "/outlines.data");
 
@@ -91,6 +91,136 @@ void	OutlineCatalog::parse(const std::string& directory) {
 	
 	// close the file
 	in.close();
+}
+
+/**
+ * \brief Split catalog
+ */
+static std::vector<std::string>	splitline(const char *data) {
+	std::vector<std::string>	result;
+	int	i = 0;
+	int	j = 0;
+	do {
+		j++;
+		if ((data[j] == '\t') || (data[j] == '\n')) {
+			result.push_back(std::string(data + i, j - i));
+			i = j + 1;
+		}
+	} while (data[j] != '\n');
+	//debug(LOG_DEBUG, DEBUG_LOG, 0, "found %d components", result.size());
+	return result;
+}
+
+/**
+ * \brief Parse the main catalog and extract ellipses
+ */
+void	OutlineCatalog::parseEllipses(const std::string& directory) {
+	// construct the file name
+	std::string	filename(directory + "/catalog.txt");
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "parsing %s", filename.c_str());
+
+	// open the input file
+	std::ifstream	in(filename.c_str());
+
+	while (!in.eof()) {
+		char	buffer[1024];
+		in.getline(buffer, sizeof(buffer));
+
+		// skip comment lines
+		if (buffer[0] == '#')
+			continue;
+
+		// split at tab characters
+		std::vector<std::string>	components = splitline(buffer);
+
+		// tell about the object we are going to parse
+		//debug(LOG_DEBUG, DEBUG_LOG, 0, "parsing %d",
+		//	std::stoi(components[0]));
+
+		// check whether the object has an NGC number and skip if it
+		// already has an outline
+		int	ngc = std::stoi(components[16]);
+		std::string	ngcname = stringprintf("NGC%d", ngc);
+		if (ngc > 0) {
+			if (_outlinemap.find(ngcname) != _outlinemap.end()) {
+				continue;
+			}
+		}
+
+		// check whether the object has an IC number and skip if it
+		// already has an outline
+		int	ic = std::stoi(components[17]);
+		std::string	icname = stringprintf("IC%d", ic);
+		if (ic > 0) {
+			if (_outlinemap.find(icname) != _outlinemap.end()) {
+				continue;
+			}
+		}
+
+		// check whether the object has an Messier number and skip if
+		// it already has an outline
+		int	messier = std::stoi(components[18]);
+		std::string	messiername = stringprintf("M%d", messier);
+		if (messier > 0) {
+			if (_outlinemap.find(messiername) != _outlinemap.end()) {
+				continue;
+			}
+		}
+
+		// skip if in none of those catalogs
+		if ((ngc == 0) && (ic == 0) && (messier == 0))
+			continue;
+
+		// create an ellipse outline object from the data
+		RaDec	position;
+		position.ra() = Angle(std::stod(components[1]),
+			Angle::Degrees);
+		position.dec() = Angle(std::stod(components[2]),
+			Angle::Degrees);
+
+		TwoAngles	dimensions;
+		dimensions.a1() = Angle(std::stod(components[7]) / 60,
+			Angle::Degrees);
+		dimensions.a2() = Angle(std::stod(components[8]) / 60,
+			Angle::Degrees);
+
+		Angle	orientation(std::stod(components[9]), Angle::Degrees);
+
+		// add outline to the map
+		Outline	outline("blubb", position, dimensions, orientation);
+		if (ngc > 0) {
+			Outline	ngcoutline(ngcname);
+			ngcoutline = outline;
+			ngcoutline.name(ngcname);
+			_outlinemap.insert(std::make_pair(ngcoutline.name(),
+				ngcoutline));
+		}
+		if (ic > 0) {
+			Outline	icoutline(icname);
+			icoutline = outline;
+			icoutline.name(icname);
+			_outlinemap.insert(std::make_pair(icoutline.name(),
+				icoutline));
+		}
+		if (messier > 0) {
+			Outline	messieroutline(messiername);
+			messieroutline = outline;
+			messieroutline.name(messiername);
+			_outlinemap.insert(std::make_pair(messieroutline.name(),
+				messieroutline));
+		}
+	}
+
+	// close the file
+	in.close();
+}
+
+/**
+ * \brief Parse the stellarium catalog
+ */
+void	OutlineCatalog::parse(const std::string& directory) {
+	parseOutlines(directory);
+	parseEllipses(directory);
 }
 
 /**
