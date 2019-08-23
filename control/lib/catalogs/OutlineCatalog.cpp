@@ -121,6 +121,12 @@ void	OutlineCatalog::parseEllipses(const std::string& directory) {
 
 	// open the input file
 	std::ifstream	in(filename.c_str());
+	if (in.fail()) {
+		std::string	msg = stringprintf("catalog '%s' missing",
+			filename.c_str());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw std::runtime_error(msg);
+	}
 
 	while (!in.eof()) {
 		char	buffer[1024];

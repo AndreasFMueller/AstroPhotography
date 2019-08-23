@@ -32,13 +32,13 @@ void	BSC::setup() {
 	if (stat(_filename.c_str(), &sb) < 0) {
 		std::string	msg = stringprintf("cannot stat %s: %s",
 			_filename.c_str(), strerror(errno));
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "%s", msg.c_str());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 		throw std::runtime_error(msg);
 	}
 	if (stat(_notesfile.c_str(), &sb) < 0) {
 		std::string	msg = stringprintf("cannot stat %s: %s",
 			_notesfile.c_str(), strerror(errno));
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "%s", msg.c_str());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 		throw std::runtime_error(msg);
 	}
 
@@ -46,6 +46,12 @@ void	BSC::setup() {
 
 	// open the catalog file
 	std::ifstream	in(_filename);
+	if (in.fail()) {
+		std::string	msg = stringprintf("cannot open %s",
+			_filename.c_str());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s",msg.c_str());
+		throw std::runtime_error(msg);
+	}
 
 	// read all lines from the file
 	int	rejected = 0;
@@ -72,6 +78,12 @@ void	BSC::setup() {
 
 	// open the notes file
 	std::ifstream	notes(_notesfile);
+	if (notes.fail()) {
+		std::string	msg = stringprintf("notes file '%s' missing",
+			_notesfile.c_str());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw std::runtime_error(msg);
+	}
 
 	// read a line from the notes file and append it to the appropriate
 	// star

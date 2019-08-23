@@ -123,6 +123,12 @@ NGCIC::NGCIC(const std::string& dirname) {
 	// Open the names file to build the names map
 	std::string	namesfilename(dirname + "/names.dat");
 	std::ifstream	in(namesfilename.c_str());
+	if (in.fail()) {
+		std::string	msg = stringprintf("names file '%s' missing",
+			namesfilename.c_str());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw std::runtime_error(msg);
+	}
 
 	// read the stream line by line
 	do {
