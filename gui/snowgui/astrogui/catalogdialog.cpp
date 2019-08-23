@@ -77,13 +77,16 @@ std::string	CatalogDialog::labelString(const std::string& name,
  * \param name		name of the object to search for
  */
 void	CatalogDialog::searchCommon(const std::string& name) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "searchCommon(\"%s\")", name.c_str());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "searchCommon(\"%s\") currentIndex=%d",
+		name.c_str(), ui->catalogBox->currentIndex());
 	astro::RaDec	targetpos;
 	std::string	targetname;
 	try {
 		// find out which catalog we are supposed to use
 		switch (ui->catalogBox->currentIndex()) {
 		case 0: {
+				debug(LOG_DEBUG, DEBUG_LOG, 0,
+					"searching NGC for '%s'", name.c_str());
 				DeepSkyCatalogFactory	factory;
 				DeepSkyCatalogPtr	catalog
 					= factory.get(DeepSkyCatalogFactory::NGCIC);
@@ -94,6 +97,8 @@ void	CatalogDialog::searchCommon(const std::string& name) {
 			}
 			break;
 		case 1: {
+				debug(LOG_DEBUG, DEBUG_LOG, 0,
+					"searching PGC for '%s'", name.c_str());
 				DeepSkyCatalogFactory	factory;
 				DeepSkyCatalogPtr	catalog
 					= factory.get(DeepSkyCatalogFactory::PGC);
@@ -104,6 +109,8 @@ void	CatalogDialog::searchCommon(const std::string& name) {
 			}
 			break;
 		case 2:	{
+				debug(LOG_DEBUG, DEBUG_LOG, 0,
+					"searching BSC for '%s'", name.c_str());
 				CatalogFactory	factory;
 				CatalogPtr	catalog
 					= factory.get(CatalogFactory::BSC);
@@ -113,6 +120,9 @@ void	CatalogDialog::searchCommon(const std::string& name) {
 			}
 			break;
 		case 3:	{
+				debug(LOG_DEBUG, DEBUG_LOG, 0,
+					"searching Hipparcos for '%s'",
+					name.c_str());
 				CatalogFactory	factory;
 				CatalogPtr	catalog
 					= factory.get(CatalogFactory::Hipparcos);
@@ -122,6 +132,9 @@ void	CatalogDialog::searchCommon(const std::string& name) {
 			}
 			break;
 		case 4:	{
+				debug(LOG_DEBUG, DEBUG_LOG, 0,
+					"searching Tycho2 for '%s'",
+					name.c_str());
 				CatalogFactory	factory;
 				CatalogPtr	catalog
 					= factory.get(CatalogFactory::Tycho2);
@@ -131,6 +144,9 @@ void	CatalogDialog::searchCommon(const std::string& name) {
 			}
 			break;
 		case 5:	{
+				debug(LOG_DEBUG, DEBUG_LOG, 0,
+					"searching UCAC4 for '%s'",
+					name.c_str());
 				CatalogFactory	factory;
 				CatalogPtr	catalog
 					= factory.get(CatalogFactory::Ucac4);
@@ -202,10 +218,18 @@ void	CatalogDialog::textEdited(const QString& newtext) {
 	ui->listWidget->setFont(font);
 
 	// perform NGC catalog search
-	if (ui->catalogBox->currentIndex() == 0) {
-		std::set<std::string>	names = _catalog->findLike(prefix);
+	if (ui->catalogBox->currentIndex() < 2) {
+		DeepSkyCatalogFactory	factory;
+		DeepSkyCatalogPtr	catalog;
+		switch (ui->catalogBox->currentIndex()) {
+		case 0:	catalog = factory.get(DeepSkyCatalogFactory::NGCIC);
+			break;
+		case 1:	catalog = factory.get(DeepSkyCatalogFactory::PGC);
+			break;
+		}
+		std::set<std::string>	names = catalog->findLike(prefix);
 		for (auto i = names.begin(); i != names.end(); i++) {
-			DeepSkyObject	dso = _catalog->find(*i);
+			DeepSkyObject	dso = catalog->find(*i);
 			astro::RaDec	rd = dso.position(2000);
 			std::string	l = astro::stringprintf("%-20.20s|  %s %s  |  %s",
 				i->c_str(),
@@ -228,16 +252,19 @@ void	CatalogDialog::textEdited(const QString& newtext) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "getting stars for prefix %s",
 			prefix.c_str());
 		switch (ui->catalogBox->currentIndex()) {
-		case 1:	{
+		case 0:
+		case 1:
+			break;
+		case 2:	{
 			astro::catalog::CatalogFactory	factory;
 			astro::catalog::CatalogPtr	catalog
 				= factory.get(CatalogFactory::BSC);
 			stars = catalog->findLike(prefix);
 			}
 			break;
-		case 2:
 		case 3:
 		case 4:
+		case 5:
 			break;
 		}
 	} catch (const std::exception& x) {
@@ -269,7 +296,7 @@ void	CatalogDialog::textEdited(const QString& newtext) {
  * \param index		new current index
  */
 void	CatalogDialog::currentItemChanged(int index) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "new catalog selection");
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "new catalog selection: %d", index);
 	switch (index) {
 	case 0:
 		ui->objectField->setText("<font color='white'>NGC1234 or IC1234</font>");
