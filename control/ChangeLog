@@ -1,5 +1,8 @@
 ChangeLog for the Astro project.
 
+20190729:
+	* fix ICE installation location
+
 20190728:
 	* add findLike to BSC
 	* add star catalogs to catalogdialog
