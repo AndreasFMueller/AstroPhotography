@@ -1,7 +1,8 @@
 ChangeLog for the Qt GUI to Astrophotography
 
 20190823:
-	* fix textChanged in catalog dialog
+	* improve structure of textChanged in catalogdialog.cpp
+	* fix textChanged in catalogdialog.cpp
 
 20190822:
 	* fix data types for deep sky object catalogs
