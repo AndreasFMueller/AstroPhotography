@@ -4,6 +4,7 @@ ChangeLog for the Astro project.
 	* add long exposure time to Atik cameras that only support short
 	  exposures
 	* add add() method to Image template
+	* fix wrong column name
 
 20190823:
 	* fix ifstream.fail missing in catalogs
