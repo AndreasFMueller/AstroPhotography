@@ -1149,6 +1149,23 @@ public:
 	virtual std::type_index	pixel_type() const {
 		return std::type_index(typeid(Pixel));
 	}
+
+	/**
+	 * \brief Add another image to the present image
+	 */
+	template<class otherPixel>
+	void	add(const Image<otherPixel>& otherImage) {
+		// check for matching image size
+		if (size() != otherImage.size()) {
+			throw std::runtime_error("image size mismatch");
+		}
+		for (int x = 0; x < size().width(); x++) {
+			for (int y = 0; y < size().height(); y++) {
+				Pixel	p = pixel(x, y);
+				pixel(x, y) = p + otherImage.pixel(x, y);
+			}
+		}
+	}
 };
 
 /**

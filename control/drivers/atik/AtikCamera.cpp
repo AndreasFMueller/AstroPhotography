@@ -37,6 +37,12 @@ AtikCamera::AtikCamera(::AtikCamera *camera)
 			atikname);
 		_capa.colour = COLOUR_RGGB;
 	}
+	// similarly for the Atik GP/M, which is mono
+	if (std::string(atikname) == std::string("Atik GP/M")) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "faking mono camera for %s",
+			atikname);
+		_capa.colour = COLOUR_NONE;
+	}
 
 	// serial number
 	_serial = _camera->getSerialNumber();
@@ -55,10 +61,13 @@ AtikCamera::AtikCamera(::AtikCamera *camera)
 	// exposure times
 	if (_capa.supportsLongExposure) {
 		info.maxexposuretime(3600);
+		info.minexposuretime(0.2);
 	} else {
-		info.maxexposuretime(_capa.maxShortExposure);
+		// this mainly concerns the Atik GP, which also has
+		// a shorter minimum exposure time
+		info.maxexposuretime(32 * _capa.maxShortExposure);
+		info.minexposuretime(0.01);
 	}
-	info.minexposuretime(0.2);
 
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "add ccdinfo %s",
 		info.toString().c_str());
@@ -162,9 +171,12 @@ void	AtikCamera::exposureRun(Exposure& exposure, atik::AtikCcd& atikccd) {
 	int	xoffset = exposure.x();
 	int	yoffset = atikccd.getInfo().size().height() - exposure.y()
 				- exposure.height();
+	ImagePoint	offset(xoffset, yoffset);
+
+	// by default, try a short exposure
+	bool	shortexposure = true;
 
 	// set the shutter if we have
-	bool	shortexposure = true;
 	if (_capa.hasShutter) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "setting shutter to %s",
 			(exposure.needsshutteropen()) ? "open" : "closed");
@@ -187,55 +199,92 @@ void	AtikCamera::exposureRun(Exposure& exposure, atik::AtikCcd& atikccd) {
 			"support long exposure, and exposure time %.3f "
 			"exceeds limit %.3f for short exposures",
 			exposure.exposuretime(), _capa.maxShortExposure);
-		exposure.exposuretime(_capa.maxShortExposure);
+		//exposure.exposuretime(_capa.maxShortExposure);
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 	}
 
+	ImagePtr	resultimage(NULL);
+
 	// now we have to decide whether we can do a long exposure
-	if ((exposure.exposuretime() <= _capa.maxShortExposure)
-		&& (shortexposure)) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "start a short exposure");
-		// do a short exposure
-		rc = _camera->readCCD(xoffset, yoffset,
-			exposure.width(), exposure.height(),
-			exposure.mode().x(), exposure.mode().y(),
-			exposure.exposuretime());
-		if (!rc) {
-			atikccd.updatestate(CcdState::exposed);
-			std::string	msg = stringprintf("cannot do "
-				"exposure %.3f sec: %s",
-				exposure.exposuretime(),
-				getLastError().c_str());
-			debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
-			throw std::runtime_error(msg);
+	try {
+		if ((exposure.exposuretime() <= _capa.maxShortExposure)
+			&& (shortexposure)) {
+				resultimage = shortExposure(offset, exposure);
+		} else if (!_capa.supportsLongExposure) {
+			resultimage = multiExposure(offset, exposure);
+		} else {
+			resultimage = longExposure(offset, exposure);
 		}
-	} else {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "start a long exposure");
-		rc = _camera->startExposure(false);
-		if (!rc) {
-			// cannot start exposure
-			std::string	msg = stringprintf("cannot start long "
-				"exposure: %s", getLastError().c_str());
-			debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
-			throw std::runtime_error(msg);
-		}
-		// wait for the exposure time to expire
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "wating for %.1fs for exposure",
-			exposure.exposuretime());
-		usleep(_camera->delay(exposure.exposuretime()));
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "exposure time over, read CCD");
-		rc = _camera->readCCD(xoffset, yoffset,
-			exposure.width(), exposure.height(),
-			exposure.mode().x(), exposure.mode().y());
-		if (!rc) {
-			atikccd.updatestate(CcdState::exposed);
-			std::string	msg = stringprintf("cannot read after "
-				"long exposure: %s", getLastError().c_str());
-			debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
-			throw std::runtime_error(msg);
-		}
+	} catch (const std::exception& x) {
+		atikccd.updatestate(CcdState::exposed);
+		throw x;
 	}
 
+	// save the resulting image
+	_image = resultimage;
+	atikccd.image(_image);
+	atikccd.updatestate(CcdState::exposed);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "run method of AtikCcd complete");
+}
+
+/**
+ * \brief do a short exposure
+ */
+ImagePtr	AtikCamera::shortExposure(const ImagePoint& offset,
+			Exposure& exposure) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "start a short exposure");
+
+	bool rc = _camera->readCCD(offset.x(), offset.y(),
+		exposure.width(), exposure.height(),
+		exposure.mode().x(), exposure.mode().y(),
+		exposure.exposuretime());
+	if (!rc) {
+		std::string	msg = stringprintf("cannot do "
+			"exposure %.3f sec: %s",
+			exposure.exposuretime(),
+			getLastError().c_str());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw std::runtime_error(msg);
+	}
+	return getImage(exposure);
+}
+
+/**
+ * \brief do a long exposure
+ */
+ImagePtr	AtikCamera::longExposure(const ImagePoint& offset,
+			Exposure& exposure) {
+
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "start a long exposure");
+	bool	rc = _camera->startExposure(false);
+	if (!rc) {
+		// cannot start exposure
+		std::string	msg = stringprintf("cannot start long "
+			"exposure: %s", getLastError().c_str());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw std::runtime_error(msg);
+	}
+	// wait for the exposure time to expire
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "wating for %.1fs for exposure",
+		exposure.exposuretime());
+	usleep(_camera->delay(exposure.exposuretime()));
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "exposure time over, read CCD");
+	rc = _camera->readCCD(offset.x(), offset.y(),
+		exposure.width(), exposure.height(),
+		exposure.mode().x(), exposure.mode().y());
+	if (!rc) {
+		std::string	msg = stringprintf("cannot read after "
+			"long exposure: %s", getLastError().c_str());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw std::runtime_error(msg);
+	}
+	return getImage(exposure);
+}
+
+/**
+ * \brief get an expousre
+ */
+ImagePtr	AtikCamera::getImage(Exposure& exposure) {
 	// interpreting the data we have received
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "exposure %s complete. reading data",
 		exposure.toString().c_str());
@@ -273,28 +322,104 @@ void	AtikCamera::exposureRun(Exposure& exposure, atik::AtikCcd& atikccd) {
 	// now read the image data into the pixel array
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "reading image data: %d pixels",
 		image->getSize().getPixels());
-	rc = _camera->getImage(image->pixels, image->getSize().getPixels());
+	bool	rc = _camera->getImage(image->pixels,
+			image->getSize().getPixels());
 
-	// if unsuccessful, update the state to exposed and throw an exception
+	// throw an exception if we annot get the image
 	if (!rc) {
-		atikccd.updatestate(CcdState::exposed);
 		std::string	msg = stringprintf("cannot read data: %s",
 			getLastError().c_str());
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 		throw std::runtime_error(msg);
 	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "reading image data complete");
 
 	// we have to flip the image upside down, because our image class
 	// has the origin in the lower left corner, while ATIK has it
 	// in the upper left corner
 	image->flip();
 
-	// save the resulting image
-	_image = resultimage;
-	atikccd.image(_image);
-	atikccd.updatestate(CcdState::exposed);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "run method of AtikCcd complete");
+	return resultimage;
+}
+
+/**
+ * \brief Multi exposure
+ *
+ * \param offset	
+ * \param exposure
+ */
+ImagePtr	AtikCamera::multiExposure(const ImagePoint& offset,
+		Exposure& exposure) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "starting multi exposure");
+	double	accumulated = 0;
+
+	// get a new exposure structure
+	Exposure	shortexposure = exposure;
+	shortexposure.exposuretime(_capa.maxShortExposure);
+
+	// start building the result image
+	ImageSize	size = exposure.frame().size() / exposure.mode();
+	Image<unsigned short>	*image = new Image<unsigned short>(size);
+	image->fill(0);
+
+	// keep an ImagePtr for the image to ensure proper deallocation
+	ImagePtr	resultimage(image);	// to make sure image is dealloc
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "accumulator %s",
+		image->ImageBase::info().c_str());
+
+	// add the exposure metadata
+	exposure.addToImage(*image);
+
+	// expose all the images and add them to the list
+	int	counter = 0;
+	double	remaining = exposure.exposuretime() - accumulated;
+	while (remaining > 0.000001) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "start partial exposure %d",
+			counter);
+		ImagePtr	newimage = shortExposure(offset, shortexposure);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "got new image %s",
+			newimage->info().c_str());
+
+		// add the image
+		Image<unsigned short>	*newimg
+			= dynamic_cast<Image<unsigned short>*>(&*newimage);
+		if (NULL == newimg) {
+			throw std::runtime_error("not the right image type");
+		}
+		long	m = std::numeric_limits<unsigned short>::max();
+		for (int x = 0; x < image->size().width(); x++) {
+			for (int y = 0; y < image->size().height(); y++) {
+				long	v = image->pixel(x, y);
+				v += newimg->pixel(x, y);
+				if (v >= m) {
+					image->pixel(x, y) = m;
+				} else {
+					image->pixel(x, y) = v;
+				}
+			}
+		}
+		image->add(*newimg);
+		accumulated += shortexposure.exposuretime();
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "accumulated time: %.3f",
+			accumulated);
+
+		// if this is the first image, add all the metadata
+		if (0 == counter) {
+			image->setMosaicType(newimg->getMosaicType());
+		}
+
+		// compute the remaining exposure time
+		remaining = exposure.exposuretime() - accumulated;
+		if (remaining < shortexposure.exposuretime()) {
+			shortexposure.exposuretime(remaining);
+		}
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "remaining time: %.3f",
+			remaining);
+		counter++;
+	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "added %d images", counter);
+
+	// return sum image
+	return resultimage;
 }
 
 /**
