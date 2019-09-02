@@ -628,10 +628,24 @@ void	Image2Pixmap::drawCrosshairs(QPixmap *pixmap) {
 	QPen	pen(Qt::SolidLine);
 	pen.setColor(Qt::red);
 	painter.setPen(pen);
+	debug(LOG_DEBUG, DEBUG_LOG, 0,
+		"coordinates from pixmap->size() = %d,%d, center = %s, scale = %d",
+		pixmap->size().width(), pixmap->size().height(),
+		center.toString().c_str(), _scale);
 	int	w = pixmap->size().width();
 	int	h = pixmap->size().height();
-	int	y = h - 1 - center.y();
+	int	y = center.y();
 	int	x = center.x();
+	if (_scale > 0) {
+		x <<= _scale;
+		y <<= _scale;
+	}
+	if (_scale < 0) {
+		x >>= -_scale;
+		y >>= -_scale;
+	}
+	y = h - 1 - y;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "new crosshair center: (%d,%d)", x, y);
         painter.drawLine(QPoint(0, y), QPoint(x - 5, y));
 	painter.drawLine(QPoint(x + 5, y), QPoint(w - 1, y));
 	painter.drawLine(QPoint(x, 0), QPoint(x, y - 5));

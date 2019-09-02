@@ -1,5 +1,8 @@
 ChangeLog for the Qt GUI to Astrophotography
 
+20190902:
+	* fix center computation for crosshairs
+
 20190823:
 	* improve structure of textChanged in catalogdialog.cpp
 	* fix textChanged in catalogdialog.cpp

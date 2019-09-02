@@ -182,6 +182,8 @@ ImageRectangle	imagedisplaywidget::imageRectangle() {
  * \brief Set the rectangle to be displayed
  */
 void	imagedisplaywidget::setImageRectangle(const ImageRectangle& imagerectangle) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "imagerectangle = %s",
+		imagerectangle.toString().c_str());
 	displayRectangle(imagerectangle);
 	if (imageRectangleEnabled()) {
 		processNewSettings();
@@ -482,6 +484,7 @@ void	imagedisplaywidget::receiveImage(ImagePtr image) {
  * previous image.
  */
 void	imagedisplaywidget::processNewImageInfo(ImagePtr image) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "processing new image info");
 	if (!image) {
 		return;
 	}
@@ -574,6 +577,8 @@ void	imagedisplaywidget::processNewImageRectangle(ImagePtr image) {
 	if (!image) {
 		return;
 	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "taking rectangle from image: %s",
+		image->getFrame().toString().c_str());
 
 	// ensure the maximum values the subframe controls can move 
 	// stays within the bounds of the image
@@ -585,14 +590,20 @@ void	imagedisplaywidget::processNewImageRectangle(ImagePtr image) {
 	// check whether the current rectangle fits inside the new image
 	if (_rectangle.isEmpty()) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0,
-			"empty rectangle, use image size");
+			"empty rectangle, use image size %s",
+			image->size().toString().c_str());
 		displayRectangle(image->size());
 	} else {
 		if (!image->size().bounds(_rectangle)) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "XXX getting rectangle");
 			// XXX find a rectangle that works
 			displayRectangle(image->size());
 		}
 	}
+
+	// compute a the crosshair coordinates
+	ImageRectangle	imagerectangle = image->getFrame();
+	image2pixmap.crosshairs_center(imagerectangle.centerWithinFrame(image->size()));
 
 	// the subframe group was so far disabled, but now that we have an
 	// image, we enable it.
@@ -681,6 +692,7 @@ void	imagedisplaywidget::processDisplayImage(ImagePtr image) {
  * \brief Processing done for a new image 
  */
 void	imagedisplaywidget::processNewImage() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "processing new image");
 	if (!_image) {
 		return;
 	}
@@ -1030,7 +1042,8 @@ void	imagedisplaywidget::setCrosshairsVisible(bool c) {
 	image2pixmap.crosshairs(crosshairs());
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "crosshairs now %s",
 		(image2pixmap.crosshairs()) ? "on" : "off");
-	repaint();
+	processNewSettings();
+	//repaint();
 }
 
 void	imagedisplaywidget::toggleCrosshairsVisible() {
