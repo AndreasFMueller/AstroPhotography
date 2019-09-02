@@ -102,14 +102,16 @@ long	TableBase::lastid() {
  */
 Row	TableBase::rowbyid(long objectid) {
 	std::string	sq = selectquery(); 
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "select query: %s", sq.c_str());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "select query: %s, id = %d", sq.c_str(),
+		objectid);
 	StatementPtr	stmt = _database->statement(sq);
 	stmt->bind(0, (int)objectid);
 	//debug(LOG_DEBUG, DEBUG_LOG, 0, "object id: %d", objectid);
 	Result	result = stmt->result();
 	if (result.size() != 1) {
-		debug(LOG_ERR, DEBUG_LOG, 0, "internal error: objectid %s",
-			sq.c_str());
+		debug(LOG_ERR, DEBUG_LOG, 0,
+			"internal error: objectid %d, %s, size = %d",
+			objectid, sq.c_str(), result.size());
 		throw std::runtime_error("wrong number of rows");
 	}
 	return result.front();
@@ -164,6 +166,7 @@ void	TableBase::remove(long objectid) {
 	StatementPtr	stmt = _database->statement(out.str());
 	stmt->bind(0, (int)objectid);
 	stmt->execute();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "row %d deleted", objectid);
 }
 
 /**

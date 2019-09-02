@@ -1,10 +1,11 @@
 ChangeLog for the Astro project.
 
 20190901:
+	* add callback for deleted tasks
 	* add long exposure time to Atik cameras that only support short
 	  exposures
 	* add add() method to Image template
-	* fix wrong column name
+	* fix wrong column name in taskqueue table
 
 20190823:
 	* fix ifstream.fail missing in catalogs

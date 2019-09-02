@@ -480,10 +480,19 @@ void	TaskQueue::call(const TaskInfo& info) {
 	monitorinfo.taskid(info.id());
 	monitorinfo.when(time(NULL));
 
-	TaskQueueEntry	entry = this->entry(info.id());
-	monitorinfo.taskType(entry.parameters().taskType());
+	CallbackDataPtr	cbd(NULL);
+	try {
+		TaskQueueEntry	entry = this->entry(info.id());
+		monitorinfo.taskType(entry.parameters().taskType());
+		cbd = CallbackDataPtr(new TaskMonitorCallbackData(monitorinfo));
+	} catch (const std::exception& x) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0,
+			"bad entry: %s, assume task was deleted", x.what());
+		cbd = CallbackDataPtr(new TaskDeletedCallbackData(
+					TaskDeletedInfo(info.id())));
+	}
 
-	CallbackDataPtr	cbd(new TaskMonitorCallbackData(monitorinfo));
+	// send the information through the callback
 	(*callback)(cbd);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "callback complete");
 }
@@ -604,7 +613,7 @@ void	TaskQueue::remove(taskid_t queueid) {
 		}
 	}
 
-	// if we can uccessfully remove the entry, then we should inform
+	// if we can successfully remove the entry, then we should inform
 	// the clients that the state has changed
 	call(taskinfo);
 }

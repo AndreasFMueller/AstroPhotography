@@ -70,7 +70,8 @@ module snowstar {
 		TskEXECUTING,
 		TskFAILED,
 		TskCANCELLED,
-		TskCOMPLETE
+		TskCOMPLETE,
+		TskDELETED
 	};
 
 	/**

@@ -22,6 +22,23 @@ namespace snowstar {
 template<>
 void	callback_adapter<TaskMonitorPrx>(TaskMonitorPrx& p,
 		const astro::callback::CallbackDataPtr data) {
+	// sending information about a deleted task
+	astro::task::TaskDeletedCallbackData	*tdcd
+		= dynamic_cast<astro::task::TaskDeletedCallbackData *>(&*data);
+	if (tdcd != NULL) {
+		const astro::task::TaskDeletedInfo&	ti = tdcd->data();
+		TaskMonitorInfo	tmi;
+		tmi.taskid = ti.taskid();
+		tmi.type = TaskEXPOSURE;
+		tmi.newstate = TskDELETED;
+		tmi.timeago = 0;
+		p->update(tmi);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "send delete info %d",
+			tmi.taskid);
+		return;
+	}
+
+	// try to get task monitor info
 	astro::task::TaskMonitorCallbackData	*tmcd
 		= dynamic_cast<astro::task::TaskMonitorCallbackData *>(&*data);
 
@@ -299,7 +316,7 @@ void TaskQueueI::remove(int taskid, const Ice::Current& /* current */) {
 			astro::stringprintf("task %d removed", taskid));
 	} catch (const std::exception& x) {
 		std::string	 cause = astro::stringprintf(
-			"cannot cancel task %d: %s %s", taskid,
+			"cannot remove task %d: %s %s", taskid,
 			astro::demangle(typeid(x).name()).c_str(), x.what());
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", cause.c_str());
 		throw BadParameter(cause);
