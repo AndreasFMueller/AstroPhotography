@@ -1,6 +1,7 @@
 ChangeLog for the Qt GUI to Astrophotography
 
 2019093:
+	* make scales of both axes equal in ClibrationDisplayWidget
 	* fix initialization of west button in calibrationcalculator
 	* allow to open configuration directly from message box warning
 	  about time descrepancy

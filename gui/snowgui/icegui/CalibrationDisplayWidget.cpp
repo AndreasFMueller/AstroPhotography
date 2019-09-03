@@ -115,7 +115,7 @@ void	CalibrationDisplayWidget::drawCommon(QPainter& painter,
 	double	gray = (dim) ? 204. : 255.;
 	painter.fillRect(0, 0, width(), height(), QColor(gray, gray, gray));
 
-	// draw the coorrdinate system
+	// draw the coordinate system
 	gray = (dim) ? 128. : 102.;
 	painter.fillRect(width() / 2, 0, 1, height(), QColor(gray, gray, gray));
 	painter.fillRect(0, height() / 2, width(), 1, QColor(gray, gray, gray));
@@ -213,6 +213,8 @@ void	CalibrationDisplayWidget::drawCommon(QPainter& painter,
 	double	scaley = (height() / 2.) / maxy;
 	double	scale = (scalex < scaley) ? scalex : scaley;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "scale = %f", scale);
+	scalex = scale;
+	scaley = scale;
 
 	// center point
 	double	cx = width() / 2;
