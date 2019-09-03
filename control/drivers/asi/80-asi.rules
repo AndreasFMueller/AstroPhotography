@@ -1,1 +1,8 @@
-ATTRS{idVendor}=="03c3", ATTRS{idProduct}=="*", OWNER="root", GROUP="root", MODE="0666"
+#
+# rules as recommended by ASI
+#
+# (c) 2019 Prof Dr Andreas Müller, Hochschule Rapperswil
+#
+ACTION=="add", ATTR{idVendor}=="03c3", RUN+="/bin/sh -c '/bin/echo 200 >/sys/module/usbcore/parameters/usbfs_memory_mb'"
+# All ASI Cameras and filter wheels
+SUBSYSTEMS=="usb", ATTR{idVendor}=="03c3", MODE="0666"

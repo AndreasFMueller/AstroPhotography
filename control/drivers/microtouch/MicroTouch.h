@@ -82,7 +82,7 @@ public:
 	void		setPosition(uint16_t position);
 
 	uint8_t		getByte(uint8_t code);
-	bool	isMoving() throw(MicroTouchError);
+	bool	isMoving();
 	bool	isTemperatureCompensating();
 
 	float	getTemperature();
