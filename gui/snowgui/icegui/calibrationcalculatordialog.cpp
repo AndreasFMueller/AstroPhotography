@@ -29,6 +29,11 @@ calibrationcalculatordialog::calibrationcalculatordialog(
 	ui->angleUnit->setText(QString("º"));
 	ui->declinationUnit->setText(QString("º"));
 
+	ui->buttonBox->addButton(QString("Use calibration"),
+                QDialogButtonBox::ButtonRole::AcceptRole);
+	ui->buttonBox->addButton(QString("Cancel"),
+                QDialogButtonBox::ButtonRole::RejectRole);
+
 	// get information from the guider
 	if (_guider) {
 		_focallength = _guider->getFocallength();
@@ -56,7 +61,6 @@ calibrationcalculatordialog::calibrationcalculatordialog(
 		_decrate = 1.0;
 	}
 
-	_declination = ui->declinationSpinBox->value();
 
 	_decinvert = ui->decinvertCheckBox->isChecked();
 	_telescopewest = ui->westCheckBox->isChecked();
