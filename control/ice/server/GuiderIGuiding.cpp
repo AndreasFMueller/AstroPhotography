@@ -364,7 +364,7 @@ void	GuiderI::setDither(const Point& point,
 /**
  * \brief Get the current dither offset
  */
-Point	GuiderI::getDither(const Ice::Current& current) {
+Point	GuiderI::getDither(const Ice::Current& /* current */) {
 	try {
 		return convert(guider->dither());
 	} catch (const astro::guiding::BadState& exception) {
@@ -375,7 +375,7 @@ Point	GuiderI::getDither(const Ice::Current& current) {
 /**
  * \brief Generate and set a new dither offset
  */
-void    GuiderI::setDitherArcsec(double arcsec, const Ice::Current& current) {
+void    GuiderI::setDitherArcsec(double arcsec, const Ice::Current& /* current */) {
 	try {
 		guider->ditherArcsec(arcsec);
 	} catch (const astro::guiding::BadState& exception) {

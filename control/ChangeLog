@@ -1,6 +1,7 @@
 ChangeLog for the Astro project.
 
 20190901:
+	* fix bug that prevented calculated from being saved
 	* add callback for deleted tasks
 	* add long exposure time to Atik cameras that only support short
 	  exposures

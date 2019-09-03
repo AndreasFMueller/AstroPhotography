@@ -1,6 +1,7 @@
 ChangeLog for the Qt GUI to Astrophotography
 
 2019093:
+	* fix initialization of west button in calibrationcalculator
 	* allow to open configuration directly from message box warning
 	  about time descrepancy
 	* make sure only one configuration or events window can be created

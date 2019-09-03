@@ -46,6 +46,8 @@ calibrationcalculatordialog::calibrationcalculatordialog(
 		ui->guiderateField->setText(QString(astro::stringprintf("%.3f",
 			_guiderate).c_str()));
 	} else {
+		// we have no guider, so we have to provide some reasonable
+		// initial values
 		_focallength = 1;
 		_pixelsize = 0.005;
 		_angle = 0;
@@ -55,6 +57,7 @@ calibrationcalculatordialog::calibrationcalculatordialog(
 	_declination = ui->declinationSpinBox->value();
 
 	_decinvert = ui->decinvertCheckBox->isChecked();
+	_telescopewest = ui->westCheckBox->isChecked();
 	
 	// initialize the calibration
 	_cal.id = 0;
