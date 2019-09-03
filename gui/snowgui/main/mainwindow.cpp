@@ -243,10 +243,18 @@ void	MainWindow::launchInstruments() {
 void	MainWindow::launchConfiguration() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "launch configuration window");
 	try {
-		configurationdialog	*config = new configurationdialog(NULL,
-			_serviceobject);
-		config->show();
-		windowsMenu->add(config, QString("Configuration"));
+		if (_configurationdialog) {
+			_configurationdialog->raise();
+			_configurationdialog->activateWindow();
+		} else {
+			_configurationdialog = new configurationdialog(NULL,
+				_serviceobject);
+			_configurationdialog->show();
+			windowsMenu->add(_configurationdialog,
+				QString("Configuration"));
+			connect(_configurationdialog, SIGNAL(finished()),
+                		this, SLOT(forgetConfiguration()));
+		}
 	} catch (const std::exception& x) {
 		QMessageBox	*message = new QMessageBox(this);
 		message->setText(QString("Connection failure"));
@@ -260,6 +268,10 @@ void	MainWindow::launchConfiguration() {
 		message->exec();
 		delete message;
 	}
+}
+
+void	MainWindow::forgetConfiguration() {
+	_configurationdialog = NULL;
 }
 
 /**
@@ -554,10 +566,18 @@ void	MainWindow::imageForSaving(astro::image::ImagePtr image,
 void	MainWindow::launchEvents() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "launchEvents()");
 	try {
-		EventDisplayWidget	*edw = new EventDisplayWidget(NULL,
-						_serviceobject);
-		edw->show();
-		windowsMenu->add(edw, QString("Events"));
+		if (_eventdisplaywidget) {
+			_eventdisplaywidget->raise();
+			_eventdisplaywidget->activateWindow();
+		} else {
+			_eventdisplaywidget = new EventDisplayWidget(NULL,
+							_serviceobject);
+			_eventdisplaywidget->show();
+			windowsMenu->add(_eventdisplaywidget,
+				QString("Events"));
+			connect(_eventdisplaywidget, SIGNAL(finished()),
+				this, SLOT(forgetEvents()));
+		}
 	} catch (const std::exception& x) {
 		QMessageBox	*message = new QMessageBox(this);
 		message->setText(QString("Connection failure"));
@@ -571,6 +591,10 @@ void	MainWindow::launchEvents() {
 		message->exec();
 		delete message;
 	}
+}
+
+void	MainWindow::forgetEvents() {
+	_eventdisplaywidget = NULL;
 }
 
 /**

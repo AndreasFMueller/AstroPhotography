@@ -11,6 +11,8 @@
 #include <QLabel>
 #include <AstroImage.h>
 #include "WindowsMenu.h"
+#include "configurationdialog.h"
+#include <eventdisplaywidget.h>
 
 namespace snowgui {
 
@@ -27,6 +29,9 @@ class MainWindow : public QMainWindow
 
 	astro::image::ImagePtr	_image;
 	std::string	_imagestring;
+
+	configurationdialog	*_configurationdialog = NULL;
+	EventDisplayWidget	*_eventdisplaywidget = NULL;
 public:
 	explicit MainWindow(QWidget *parent,
 		const astro::discover::ServiceObject serviceobject);
@@ -41,9 +46,11 @@ public slots:
 	void	launchInstruments();
 	void	launchTasks();
 	void	launchConfiguration();
+	void	forgetConfiguration();
 	void	launchImages();
 	void	launchExpose();
 	void	launchEvents();
+	void	forgetEvents();
 	void	imageForSaving(astro::image::ImagePtr image, std::string);
 	void	timecheck();
 

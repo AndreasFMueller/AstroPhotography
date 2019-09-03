@@ -1,5 +1,9 @@
 ChangeLog for the Qt GUI to Astrophotography
 
+2019093:
+	* make sure only one configuration or events window can be created
+	  from the main window
+
 20190902:
 	* fix center computation for crosshairs
 

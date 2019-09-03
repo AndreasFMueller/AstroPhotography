@@ -202,6 +202,8 @@ void	imagedisplaywidget::setImageRectangle(const ImageRectangle& imagerectangle)
 
 	// compute the center for the crosshairs relative to this image
 	image2pixmap.crosshairs_center(imagerectangle.centerWithinFrame(_image->size()));
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "crosshair center set to %s",
+		image2pixmap.crosshairs_center().toString().c_str());
 }
 
 /**
@@ -603,6 +605,10 @@ void	imagedisplaywidget::processNewImageRectangle(ImagePtr image) {
 
 	// compute a the crosshair coordinates
 	ImageRectangle	imagerectangle = image->getFrame();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "image rectangle = %s",
+		imagerectangle.toString().c_str());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "center %s", 
+		imagerectangle.centerWithinFrame(image->size()).toString().c_str());
 	image2pixmap.crosshairs_center(imagerectangle.centerWithinFrame(image->size()));
 
 	// the subframe group was so far disabled, but now that we have an
