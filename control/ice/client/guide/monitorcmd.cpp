@@ -26,6 +26,7 @@ int	Guide::monitor_command(GuiderPrx guider) {
 	case GuiderFLATACQUIRE:
 	case GuiderBACKLASH:	// XXX backlash is monitorable, should be implemented
 		std::cout << "not in monitorable state" << std::endl;
+		return EXIT_FAILURE;
 	case GuiderCALIBRATING:
 		return monitor_calibration(guider);
 	case GuiderGUIDING:

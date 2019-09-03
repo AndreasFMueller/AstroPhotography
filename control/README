@@ -154,6 +154,10 @@ Mandatory packages:
  - Avahi client library: locating a server is done using zeroconf, which is
    implemented on Linux in the Avahi library (libavahi-client-dev).
 
+ - PNG library (libpng-dev)
+
+ - JPEG library (libjpeg-dev)
+
 Optional packages:
 
  - ZeroC ICE is the prefered communications engine, version 3.5.1 is required
