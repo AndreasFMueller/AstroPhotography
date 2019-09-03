@@ -1,6 +1,7 @@
 ChangeLog for the Qt GUI to Astrophotography
 
 2019093:
+	* better buttons in calculator dialog
 	* add dec rate spinbox in CalibrationCalculatorDialog
 	* make scales of both axes equal in ClibrationDisplayWidget
 	* fix initialization of west button in calibrationcalculator
