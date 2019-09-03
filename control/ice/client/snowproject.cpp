@@ -67,7 +67,7 @@ int	command_submit(const std::string& /* projectname */,
 	if (part->taskid() > 0) {
 		try {
 			TaskInfo info = tasks->info(part->taskid());
-		} catch (NotFound) {
+		} catch (const NotFound& x) {
 		} catch (...) {
 		}
 	}

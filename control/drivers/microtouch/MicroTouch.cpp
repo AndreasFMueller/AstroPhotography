@@ -41,7 +41,7 @@ typedef struct onebyte_s {
  *
  * \param device USB device representing the MicroTouch
  */
-MicroTouch::MicroTouch(DevicePtr _device) throw(USBError) : device(_device) {
+MicroTouch::MicroTouch(DevicePtr _device) : device(_device) {
 	device->open();
 
 	ConfigurationPtr	config = device->activeConfig();
@@ -99,7 +99,7 @@ struct mtdata {
  *
  * \param code	command code to send to the device
  */
-uint16_t	MicroTouch::getWord(uint8_t code) throw(MicroTouchError) {
+uint16_t	MicroTouch::getWord(uint8_t code) {
 	mtdata<2>	result = get<2>(code);
 	uint16_t	word = result.data[1];
 	word <<= 8;
@@ -112,7 +112,7 @@ uint16_t	MicroTouch::getWord(uint8_t code) throw(MicroTouchError) {
  *
  * \param code	command code to send to the device
  */
-uint8_t	MicroTouch::getByte(uint8_t code) throw(MicroTouchError) {
+uint8_t	MicroTouch::getByte(uint8_t code) {
 	mtdata<1>	result = get<1>(code);
 	return result.data[0];
 }
@@ -126,7 +126,7 @@ uint8_t	MicroTouch::getByte(uint8_t code) throw(MicroTouchError) {
  *
  * \return The current stepper motor position.
  */
-uint16_t	MicroTouch::position() throw(MicroTouchError) {
+uint16_t	MicroTouch::position() {
 	return getWord(MICROTOUCH_GETPOSITION);
 }
 
@@ -135,7 +135,7 @@ uint16_t	MicroTouch::position() throw(MicroTouchError) {
  * 
  * \return true if the motor is currently moving, false if not.
  */
-bool	MicroTouch::isMoving() throw(MicroTouchError) {
+bool	MicroTouch::isMoving() {
 	return getByte(MICROTOUCH_ISMOVING) ? true : false;
 }
 
@@ -144,7 +144,7 @@ bool	MicroTouch::isMoving() throw(MicroTouchError) {
  *
  * \return true if temperature consation is turned on, false if not.
  */
-bool	MicroTouch::isTemperatureCompensating() throw(MicroTouchError) {
+bool	MicroTouch::isTemperatureCompensating() {
 	return getByte(MICROTOUCH_ISTEMPCOMPENSATING) ? true : false;
 }
 
@@ -158,7 +158,7 @@ bool	MicroTouch::isTemperatureCompensating() throw(MicroTouchError) {
  *
  * \param position	the position to drive to.
  */
-void	MicroTouch::setPosition(uint16_t position) throw(MicroTouchError) {
+void	MicroTouch::setPosition(uint16_t position) {
 	// send a command to the MicroTouch
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "send position request");
 	mtdata<4>	request_data(MICROTOUCH_SETPOSITION);
@@ -187,7 +187,7 @@ void	MicroTouch::setPosition(uint16_t position) throw(MicroTouchError) {
  *
  * \return give the temperature of the hand controller in degrees Celsius.
  */
-float	MicroTouch::getTemperature() throw(MicroTouchError) {
+float	MicroTouch::getTemperature() {
 	// send a command to the MicroTouch
 	mtdata<5>	result = get<5>(MICROTOUCH_GETTEMPERATURE);
 
@@ -209,7 +209,7 @@ float	MicroTouch::getTemperature() throw(MicroTouchError) {
 /**
  * \brief Start moving up
  */
-void	MicroTouch::stepUp() throw(MicroTouchError) {
+void	MicroTouch::stepUp() {
 	mtdata<0>	stepup_request(MICROTOUCH_STARTUP);
 	BulkTransfer	request(outendpoint, &stepup_request);
 	device->submit(&request);

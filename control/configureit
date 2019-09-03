@@ -40,7 +40,7 @@ fi
 
 # find out whether the ASI library is installed, and trigger build the
 # ASI driver
-if [ -r /usr/local/include/ASICamera.h ]
+if [ -r /usr/local/include/ASICamera2.h ]
 then
 	commonflags="${commonflags} --enable-asi"
 fi

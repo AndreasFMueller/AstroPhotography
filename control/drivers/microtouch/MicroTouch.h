@@ -62,7 +62,7 @@ class MicroTouch {
 	 * \param code	command byte to send to the device
  	 */
 	template<size_t n>
-	mtdata<n>	get(uint8_t code) throw(MicroTouchError) {
+	mtdata<n>	get(uint8_t code) {
 		mtdata<0>	request_data(code);
 		astro::usb::BulkTransfer	request(outendpoint, &request_data);
 		device->submit(&request);
@@ -76,18 +76,18 @@ class MicroTouch {
 	}
 
 public:
-	MicroTouch(astro::usb::DevicePtr device) throw(astro::usb::USBError);
-	uint16_t	getWord(uint8_t code) throw(MicroTouchError);
-	uint16_t	position() throw(MicroTouchError);
-	void		setPosition(uint16_t position) throw(MicroTouchError);
+	MicroTouch(astro::usb::DevicePtr device);
+	uint16_t	getWord(uint8_t code);
+	uint16_t	position();
+	void		setPosition(uint16_t position);
 
-	uint8_t		getByte(uint8_t code) throw(MicroTouchError);
+	uint8_t		getByte(uint8_t code);
 	bool	isMoving() throw(MicroTouchError);
-	bool	isTemperatureCompensating() throw(MicroTouchError);
+	bool	isTemperatureCompensating();
 
-	float	getTemperature() throw(MicroTouchError);
+	float	getTemperature();
 
-	void	stepUp() throw(MicroTouchError);
+	void	stepUp();
 };
 
 } // namespace microtouch

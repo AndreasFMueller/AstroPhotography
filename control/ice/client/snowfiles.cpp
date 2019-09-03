@@ -47,12 +47,12 @@ static int	command_remove(ImagesPrx images, const std::string& filename) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "remove %s", filename.c_str());
 	try {
 		images->remove(filename);
-	} catch (snowstar::NotFound x) {
+	} catch (snowstar::NotFound& x) {
 		std::string	msg = astro::stringprintf("cannot delete: %s",
 			x.cause.c_str());
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 		throw;
-	} catch (const std::exception x) {
+	} catch (const std::exception& x) {
 		std::string	msg = astro::stringprintf("cannot delete: %s",
 			x.what());
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());

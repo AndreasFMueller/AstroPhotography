@@ -1,5 +1,9 @@
 ChangeLog for the Astro project.
 
+20190903:
+	* portability fixes for Raspbian/Debian 10
+	* fix ASI detection
+
 20190901:
 	* fix bug that prevented calculated from being saved
 	* add callback for deleted tasks
@@ -33,7 +37,6 @@ ChangeLog for the Astro project.
 	  (seems to be necessary for Ice-3.7.3, the current git version)
 	* fix build scripts
 	* add elliptical outlines from stellarium catalog
->>>>>>> 82ba2fc4e084f4cfbbbd20af1250aab73e6b9099
 
 20190728:
 	* add findLike to BSC
