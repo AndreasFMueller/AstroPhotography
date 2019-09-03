@@ -3,6 +3,8 @@ How to compile ZeroC ICE for use with AstroPhotography
 Distributions usually come with old versions of ICE and
 it needs to be compiled for the current system.
 
+0. Debian: install additional dependency 'libmccp-dev'
+
 1. get the source
 
 	git clone https://github.com/zeroc-ice/ice

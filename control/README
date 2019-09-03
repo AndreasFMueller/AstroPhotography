@@ -144,7 +144,7 @@ Mandatory packages:
  - UUID, library for unique ids, used to tag FITS files so that duplicates
    can be recognized (Ubuntu: uuid-dev)
 
- - libxml2, library used for parsing XML files
+ - libxml2, library used for parsing XML files (Ubuntu: libxml2-dev)
 
  - The std::regex class of the C++11 standard is used, but g++, although it
    does come with the appropriate headers, does not implement the std::regex
@@ -152,7 +152,7 @@ Mandatory packages:
    just install it, and it will be detected automatically
 
  - Avahi client library: locating a server is done using zeroconf, which is
-   implemented on Linux in the Avahi library.
+   implemented on Linux in the Avahi library (libavahi-client-dev).
 
 Optional packages:
 
