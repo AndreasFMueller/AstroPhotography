@@ -252,7 +252,7 @@ void	MainWindow::launchConfiguration() {
 			_configurationdialog->show();
 			windowsMenu->add(_configurationdialog,
 				QString("Configuration"));
-			connect(_configurationdialog, SIGNAL(finished()),
+			connect(_configurationdialog, SIGNAL(destroyed()),
                 		this, SLOT(forgetConfiguration()));
 		}
 	} catch (const std::exception& x) {
@@ -575,7 +575,7 @@ void	MainWindow::launchEvents() {
 			_eventdisplaywidget->show();
 			windowsMenu->add(_eventdisplaywidget,
 				QString("Events"));
-			connect(_eventdisplaywidget, SIGNAL(finished()),
+			connect(_eventdisplaywidget, SIGNAL(destroyed()),
 				this, SLOT(forgetEvents()));
 		}
 	} catch (const std::exception& x) {
@@ -622,6 +622,12 @@ void	MainWindow::timecheck() {
 	out << "and the server machine. Use the Configuration app to ";
 	out << "sync the time.";
 	message.setInformativeText(QString(out.str().c_str()));
+	QPushButton	*_configbutton = message.addButton(QString("Configure"),
+		QMessageBox::ButtonRole::AcceptRole);
+	connect(_configbutton, SIGNAL(clicked()),
+		this, SLOT(launchConfiguration()));
+	QPushButton	*_ignorebutton = message.addButton(QString("Ignore"),
+		QMessageBox::ButtonRole::RejectRole);
 	message.exec();
 }
 

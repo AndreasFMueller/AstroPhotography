@@ -1,6 +1,8 @@
 ChangeLog for the Qt GUI to Astrophotography
 
 2019093:
+	* allow to open configuration directly from message box warning
+	  about time descrepancy
 	* make sure only one configuration or events window can be created
 	  from the main window
 
