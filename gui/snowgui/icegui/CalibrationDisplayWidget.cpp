@@ -20,6 +20,7 @@ CalibrationDisplayWidget::CalibrationDisplayWidget(QWidget *parent)
 	_calibration.id = -1;
 	_calibration.complete = false;
 	_pointlabels = false;
+	setToolTip(QString("vectors show how stars move on the guider image when the corresponding guider pin is activated for 1 second"));
 }
 
 /**
@@ -80,6 +81,24 @@ void	CalibrationDisplayWidget::drawDisabled(QPainter& painter) {
 void	CalibrationDisplayWidget::drawEnabled(QPainter& painter) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "draw enabled state");
 	drawCommon(painter, _calibration.complete, false);
+}
+
+QPointF	CalibrationDisplayWidget::point(float xpxl, float ypxl) const {
+	QPointF	pf(xpxl * _scale + _center.x(), ypxl * _scale + _center.y());
+	return pf;
+}
+
+QPointF	CalibrationDisplayWidget::point(double xpxl, double ypxl) const {
+	QPointF	pf(xpxl * _scale + _center.x(), ypxl * _scale + _center.y());
+	return pf;
+}
+
+QPointF	CalibrationDisplayWidget::point(const QPointF& ppxl) const {
+	return point(ppxl.x(), ppxl.y());
+}
+
+QPointF	CalibrationDisplayWidget::point(const snowstar::Point& ppxl) const {
+	return point(ppxl.x, ppxl.y);
 }
 
 /**
@@ -209,20 +228,21 @@ void	CalibrationDisplayWidget::drawCommon(QPainter& painter,
 	maxx *= 1.2;
 	maxy *= 1.2;
 
+	// compute the scale for display
 	double	scalex = (width() / 2.) / maxx;	// px / calpixel
 	double	scaley = (height() / 2.) / maxy;
 	double	scale = (scalex < scaley) ? scalex : scaley;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "scale = %f", scale);
 	scalex = scale;
 	scaley = scale;
+	_scale = scale;
 
 	// center point
 	double	cx = width() / 2;
 	double	cy = height() / 2;
 	double	h = height() - 1;
 	h = height();
-	QPointF	center(cx, h - cy);
-
+	_center = QPointF(cx, h - cy);
 
 	// we are going to draw a few things, we need a pen for that
 	QPen	pen(Qt::SolidLine);
@@ -236,25 +256,33 @@ void	CalibrationDisplayWidget::drawCommon(QPainter& painter,
 	int	wm = floor(((width() / 2.) / scalex) / 10);
 	int	hm = floor(((height() / 2.) / scaley) / 10);
 	QColor	gridcolor(204, 204, 204);
-	pen.setColor(gridcolor);
+	QColor	gridlabelcolor(128, 128, 128);
 	pen.setWidth(1);
 	painter.setPen(pen);
 	for (int xi = -wm; xi <= wm; xi++) {
 		double	x = cx + 10 * xi * scalex;
+		pen.setColor(gridcolor);
+		painter.setPen(pen);
 		painter.drawLine(x, 0, x, height());
 		if (height() > 100) {
 			char	l[10];
-			snprintf(l, sizeof(l), "%dpx", 10 * xi);
+			pen.setColor(gridlabelcolor);
+			painter.setPen(pen);
+			snprintf(l, sizeof(l), "%dpx/s", 10 * xi);
 			painter.drawText(x - 20, height() - 18,
 				40, 18, Qt::AlignCenter, QString(l));
 		}
 	}
 	for (int yi = -hm; yi <= hm; yi++) {
 		double	y = cy + 10 * yi * scaley;
+		pen.setColor(gridcolor);
+		painter.setPen(pen);
 		painter.drawLine(0, y, width(), y);
 		if (width() > 100) {
 			char	l[10];
-			snprintf(l, sizeof(l), "%dpx", -10 * yi);
+			snprintf(l, sizeof(l), "%dpx/s", -10 * yi);
+			pen.setColor(gridlabelcolor);
+			painter.setPen(pen);
 			painter.drawText(width() - 42, y - 8,
 				40, 18, Qt::AlignRight, QString(l));
 		}
@@ -272,10 +300,9 @@ void	CalibrationDisplayWidget::drawCommon(QPainter& painter,
 		for (unsigned long i = 0; i < _calibration.points.size(); i++) {
 			// actual point
 			snowstar::CalibrationPoint	p = _calibration.points[i];
-			QPointF	pf((p.star.x - ref.x) * scale + cx,
-					h - ((p.star.y - ref.y) * scale + cy));
+			QPointF	pf = point(p.star.x - ref.x, p.star.y - ref.y);
 			snowstar::Point	q = _calibration * p;
-			QPointF	qf(q.x * scale + cx, h - (q.y * scale + cy));
+			QPointF	qf = point(q);
 			double	r = hypot(qf.x() - pf.x(), qf.y() - pf.y()) + 2;
 			QPainterPath	path;
 			path.addEllipse(qf, r, r);
@@ -289,7 +316,7 @@ void	CalibrationDisplayWidget::drawCommon(QPainter& painter,
 		snowstar::CalibrationPoint	p = _calibration.points[i];
 		QPointF	relpoint((p.star.x - ref.x) * scale,
 				(p.star.y - ref.y) * scale);
-		QPointF	pf(relpoint.x() + cx, h - (relpoint.y() + cy));
+		QPointF	pf = point(p.star.x - ref.x, p.star.y - ref.y);
 		painter.drawPoint(pf);
 
 		// display the label if the point is far enough away
@@ -299,7 +326,7 @@ void	CalibrationDisplayWidget::drawCommon(QPainter& painter,
 			pen.setColor(QColor(0, 0, 0));
 			painter.setPen(pen);
 			QPointF	labelpoint(s * relpoint.x() + cx - 10,
-					h - (s * relpoint.y() + cy) - 10);
+					s * relpoint.y() + cy - 10);
 			char	l[10];
 			snprintf(l, sizeof(l), "%lu", i);
 			painter.drawText(labelpoint.x(), labelpoint.y(),
@@ -320,29 +347,29 @@ void	CalibrationDisplayWidget::drawCommon(QPainter& painter,
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "draw R vector");
 	pen.setColor((dim) ? QColor(51., 51., 102.) : QColor(0., 0., 204.));
 	painter.setPen(pen);
-	QPointF	ra(rax * scale + cx, h - (ray * scale + cy));
-	painter.drawLine(center, ra);
+	QPointF	ra = point(rax, ray);
+	painter.drawLine(_center, ra);
 	double	r = hypot(rax, ray) * scale;
 	r = scale * (r + 10) / r;
-	painter.drawText(rax * r + cx - 10, h - (ray * r + cy) - 10, 20, 20,
+	painter.drawText(rax * r + cx - 10, ray * r + cy - 10, 20, 20,
 		Qt::AlignCenter, QString("R"));
 
 	// draw D vector
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "draw D vector");
 	pen.setColor((dim) ? QColor(102., 204., 153.) : QColor(0., 102., 51.));
 	painter.setPen(pen);
-	QPointF	dec(decx * scale + cx, h - (decy * scale + cy));
-	painter.drawLine(center, dec);
+	QPointF	dec = point(decx, decy);
+	painter.drawLine(_center, dec);
 	r = hypot(decx, decy) * scale;
 	r = scale * (r + 10) / r;
-	painter.drawText(decx * r + cx - 10, h - (decy * r + cy) - 10, 20, 20,
+	painter.drawText(decx * r + cx - 10, decy * r + cy - 10, 20, 20,
 		Qt::AlignCenter, QString("D"));
 
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "draw t vector");
 	pen.setColor((dim) ? QColor(204., 153., 102.) : QColor(255., 153., 51.));
 	painter.setPen(pen);
-	QPointF	drift(driftx * scale + cx, h - (drifty * scale + cy));
-	painter.drawLine(center, drift);
+	QPointF	drift = point(driftx, drifty);
+	painter.drawLine(_center, drift);
 	r = hypot(driftx, drifty) * scale;
 	r = scale * (r + 10) / r;
 	painter.drawText(driftx * r + cx - 10, h - (drifty * r + cy) - 10,

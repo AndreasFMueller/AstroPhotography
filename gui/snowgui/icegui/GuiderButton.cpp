@@ -14,8 +14,8 @@ namespace snowgui {
 
 static QString	northLabel("DEC+");
 static QString	southLabel("DEC-");
-static QString	westLabel("RA+");
-static QString	eastLabel("RA-");
+static QString	eastLabel("RA+");
+static QString	westLabel("RA-");
 
 GuiderButton::GuiderButton(QWidget *parent) : QWidget(parent) {
 	_northPressed = false;

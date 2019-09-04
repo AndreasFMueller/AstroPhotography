@@ -13,6 +13,9 @@
   <property name="windowTitle">
    <string>Calibration Calculator</string>
   </property>
+  <property name="toolTip">
+   <string notr="true"/>
+  </property>
   <layout class="QGridLayout" name="gridLayout">
    <property name="leftMargin">
     <number>6</number>
@@ -92,6 +95,9 @@
              <height>0</height>
             </size>
            </property>
+           <property name="toolTip">
+            <string notr="true" comment="Angle between north and the vertical axis of the guider image" extracomment="Angle between north and the vertical axis of the guider image"/>
+           </property>
            <property name="alignment">
             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
            </property>
@@ -130,6 +136,12 @@
              <width>64</width>
              <height>16777215</height>
             </size>
+           </property>
+           <property name="toolTip">
+            <string notr="true" comment="in units of siderial speed" extracomment="in units of siderial speed"/>
+           </property>
+           <property name="toolTipDuration">
+            <number>-1</number>
            </property>
            <property name="alignment">
             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -187,6 +199,9 @@
          </item>
          <item row="6" column="1">
           <widget class="QCheckBox" name="westCheckBox">
+           <property name="toolTip">
+            <string notr="true" extracomment="Orientation 'west' means that the telescope is placed west of the plar axis"/>
+           </property>
            <property name="text">
             <string>west</string>
            </property>
@@ -308,6 +323,9 @@
          </item>
          <item row="7" column="1">
           <widget class="QCheckBox" name="decinvertCheckBox">
+           <property name="toolTip">
+            <string notr="true" extracomment="If there is a mirror or a prism in the optical path to the guider, the direction is inverted. Enable this e.g. for off-axis guiding."/>
+           </property>
            <property name="text">
             <string>invert</string>
            </property>
@@ -348,6 +366,9 @@
              <height>0</height>
             </size>
            </property>
+           <property name="toolTip">
+            <string notr="true" extracomment="Declination rate relative to the guide rate"/>
+           </property>
            <property name="alignment">
             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
            </property>
@@ -362,6 +383,13 @@
            </property>
            <property name="value">
             <double>1.000000000000000</double>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="2">
+          <widget class="QLabel" name="label">
+           <property name="text">
+            <string>sidereal</string>
            </property>
           </widget>
          </item>

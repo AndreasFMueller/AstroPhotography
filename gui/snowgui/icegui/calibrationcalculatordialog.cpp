@@ -144,7 +144,7 @@ void	calibrationcalculatordialog::updateCalibration() {
 	int	westsign = (_telescopewest) ? 1 : -1;
 	_cal.coefficients[1] = -decsign * pixelspeed * sin(a) * _decrate;
 	_cal.coefficients[4] =  decsign * pixelspeed * cos(a) * _decrate;
-	pixelspeed = 2 * pixelspeed * cos(_declination * M_PI / 180);
+	pixelspeed = pixelspeed * cos(_declination * M_PI / 180);
 	_cal.coefficients[0] = pixelspeed * westsign * cos(a);
 	_cal.coefficients[3] = pixelspeed * westsign * sin(a);
 
