@@ -9,7 +9,7 @@
 # the -fuse-cxa-atexit seems to be necessary for dynamically loaded 
 # C++ modules, but I'm not convinced. The tests still crash when
 # unloading the modules
-CFLAGS="-Wall -Wextra -g -O2"
+CFLAGS="-Wall -Wextra -g -O2 -Wno-psabi"
 CXXFLAGS="-fuse-cxa-atexit ${CFLAGS}"
 export CFLAGS CXXFLAGS
 

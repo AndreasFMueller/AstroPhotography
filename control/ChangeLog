@@ -1,6 +1,7 @@
 ChangeLog for the Astro project.
 
 20190903:
+	* add -Wno-psabi option to silence GCC 7.1
 	* portability fixes for Raspbian/Debian 10
 	* fix ASI detection
 
