@@ -22,7 +22,7 @@ StarChartLegend::StarChartLegend(QWidget *parent) : QWidget(parent) {
 StarChartLegend::~StarChartLegend() {
 }
 
-void	StarChartLegend::closeEvent(QCloseEvent *event) {
+void	StarChartLegend::closeEvent(QCloseEvent * /* event */) {
 	deleteLater();
 }
 

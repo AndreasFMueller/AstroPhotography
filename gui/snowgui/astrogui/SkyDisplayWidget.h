@@ -16,6 +16,8 @@
 #include <QThread>
 #include <QTimer>
 #include <SkyDrawing.h>
+#include <OffsetDial.h>
+#include <RotateDial.h>
 
 namespace snowgui {
 
@@ -42,6 +44,9 @@ class SkyDisplayWidget : public QWidget, public SkyDrawing {
 	QTimer	_timer;
 	bool	_show_tooltip;
 	bool	_target_enabled;
+	RotateDial	*_rotate_dial;
+	OffsetDial	*_timeoffset_dial;
+	int	dialsize();
 public:
 	bool	show_tooltip() const { return _show_tooltip; }
 	void	show_tooltip(bool l) { _show_tooltip = l; }
@@ -60,6 +65,7 @@ protected:
 	void	mouseReleaseEvent(QMouseEvent *e);
 	void	mouseMoveEvent(QMouseEvent *e);
 	void	closeEvent(QCloseEvent *e);
+	void	resizeEvent(QResizeEvent *event);
 
 	// constructors
 public:
@@ -79,22 +85,29 @@ public slots:
 	void	setAltAzmGridVisible(bool);
 	void	setRaDecGridVisible(bool);
 	void	setConstellationsVisible(bool);
+	void	setConstellationLabelsVisible(bool);
 	void	setTargetVisible(bool);
 	void	setTelescopeVisible(bool);
 	void	setTooltipVisible(bool);
 	void	setLabelsVisible(bool);
 	void	setEclipticVisible(bool);
+	void	setMilkywayVisible(bool);
 
 	void	toggleAltAzmGridVisible();
 	void	toggleRaDecGridVisible();
 	void	toggleConstellationsVisible();
+	void	toggleConstellationLabelsVisible();
 	void	toggleTargetVisible();
 	void	toggleTelescopeVisible();
 	void	toggleTooltipVisible();
 	void	toggleLabelsVisible();
 	void	toggleEclipticVisible();
+	void	toggleMilkywayVisible();
 
 	void	showContextMenu(const QPoint& point);
+
+	void	rotationChanged(int angle);
+	void	timeoffsetChanged(int tens);
 
 signals:
 	void	pointSelected(astro::RaDec);

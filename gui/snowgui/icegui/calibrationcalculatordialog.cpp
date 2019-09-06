@@ -29,6 +29,11 @@ calibrationcalculatordialog::calibrationcalculatordialog(
 	ui->angleUnit->setText(QString("º"));
 	ui->declinationUnit->setText(QString("º"));
 
+	ui->buttonBox->addButton(QString("Use calibration"),
+                QDialogButtonBox::ButtonRole::AcceptRole);
+	ui->buttonBox->addButton(QString("Cancel"),
+                QDialogButtonBox::ButtonRole::RejectRole);
+
 	// get information from the guider
 	if (_guider) {
 		_focallength = _guider->getFocallength();
@@ -45,6 +50,7 @@ calibrationcalculatordialog::calibrationcalculatordialog(
 		_guiderate = _guider->getGuiderate();
 		ui->guiderateField->setText(QString(astro::stringprintf("%.3f",
 			_guiderate).c_str()));
+		_decrate = 1.0;
 	} else {
 		// we have no guider, so we have to provide some reasonable
 		// initial values
@@ -52,9 +58,9 @@ calibrationcalculatordialog::calibrationcalculatordialog(
 		_pixelsize = 0.005;
 		_angle = 0;
 		_guiderate = 0.5;
+		_decrate = 1.0;
 	}
 
-	_declination = ui->declinationSpinBox->value();
 
 	_decinvert = ui->decinvertCheckBox->isChecked();
 	_telescopewest = ui->westCheckBox->isChecked();
@@ -92,6 +98,8 @@ calibrationcalculatordialog::calibrationcalculatordialog(
 		this, SLOT(decinvertChanged(int)));
 	connect(ui->westCheckBox, SIGNAL(stateChanged(int)),
 		this, SLOT(orientationChanged(int)));
+	connect(ui->decrateSpinBox, SIGNAL(valueChanged(double)),
+		this, SLOT(decrateChanged(double)));
 
 	connect(ui->buttonBox, SIGNAL(accepted()),
 		this, SLOT(acceptCalibration()));
@@ -134,9 +142,9 @@ void	calibrationcalculatordialog::updateCalibration() {
 	double	a = _angle * M_PI / 180;
 	int	decsign = (_decinvert) ? -1 : 1;
 	int	westsign = (_telescopewest) ? 1 : -1;
-	_cal.coefficients[1] = -decsign * pixelspeed * sin(a);
-	_cal.coefficients[4] =  decsign * pixelspeed * cos(a);
-	pixelspeed = 2 * pixelspeed * cos(_declination * M_PI / 180);
+	_cal.coefficients[1] = -decsign * pixelspeed * sin(a) * _decrate;
+	_cal.coefficients[4] =  decsign * pixelspeed * cos(a) * _decrate;
+	pixelspeed = pixelspeed * cos(_declination * M_PI / 180);
 	_cal.coefficients[0] = pixelspeed * westsign * cos(a);
 	_cal.coefficients[3] = pixelspeed * westsign * sin(a);
 
@@ -207,6 +215,12 @@ void	calibrationcalculatordialog::setOrientation(bool west) {
 
 void	calibrationcalculatordialog::orientationChanged(int x) {
 	setOrientation(x > 0);
+}
+
+void	calibrationcalculatordialog::decrateChanged(double decrate) { 
+	_decrate = decrate;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "new dec rate: %f", decrate);
+	updateCalibration();
 }
 
 } // namespace snowgui

@@ -175,4 +175,14 @@ double	azimut(const Point& from, const Point& to) {
 	return atan2(to.y() - from.y(), to.x() - from.x());
 }
 
+void	Point::normalize() {
+	double	r = abs();
+	_x /= r; _y /= r;
+}
+
+Point	Point::normalized() const {
+	double	r = abs();
+	return Point(_x / r, _y / r);
+}
+
 } // namespace astro

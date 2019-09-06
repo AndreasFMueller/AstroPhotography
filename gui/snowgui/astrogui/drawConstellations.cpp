@@ -6,13 +6,12 @@
 #include "SkyDrawing.h"
 #include <AstroCoordinates.h>
 #include <AstroDebug.h>
+#include <ConstellationCatalog.h>
 
 namespace snowgui {
 
-#include "constellations.h"
-
 /**
- * \brief Draw constellation lines
+ * \brief Draw constellation lines
  */
 void	SkyDrawing::drawConstellations(QPainter& painter) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "draw constellation lines");
@@ -23,21 +22,17 @@ void	SkyDrawing::drawConstellations(QPainter& painter) {
 	pen.setColor(pink);
 	painter.setPen(pen);
 
-	// start processing the data
-	for (int i = 0; i < constellation_size - 1; i++) {
-		// skip nulls
-		if ((constellation_points[i].name == NULL) ||
-			(constellation_points[i+1].name == NULL))
-				continue;
-		// get data for a line
-		astro::RaDec	from;
-		from.ra().hours(constellation_points[i].ra);
-		from.dec().degrees(constellation_points[i].dec);
-		astro::RaDec	to;
-		to.ra().hours(constellation_points[i+1].ra);
-		to.dec().degrees(constellation_points[i+1].dec);
-		// draw the line
-		drawLine(painter, from, to);
+	// get the Constellations
+	astro::catalog::ConstellationCatalogPtr	consts
+		= astro::catalog::ConstellationCatalog::get();
+	for (auto c = consts->begin(); c != consts->end(); c++) {
+		// get the next constellation
+		astro::catalog::ConstellationPtr	constellation = c->second;
+		for (auto e = constellation->begin();
+			e != constellation->end(); e++) {
+			// go through all the edges
+			drawLine(painter, e->from(), e->to());
+		}
 	}
 }
 

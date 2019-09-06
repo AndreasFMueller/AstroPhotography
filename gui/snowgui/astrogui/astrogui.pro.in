@@ -47,7 +47,6 @@ SOURCES += 								\
 	ClockWidget.cpp							\
 	ColorArithmetic.cpp						\
 	ColorRectangles.cpp						\
-	drawConstellations.cpp						\
 	DeepSkyRetriever.cpp						\
 	FitsTable.cpp							\
 	FocusPoints.cpp							\
@@ -61,6 +60,8 @@ SOURCES += 								\
 	LocalSiderealTime.cpp						\
 	LocalTimeWidget.cpp						\
 	LogSpinBox.cpp							\
+	OffsetDial.cpp							\
+	RotateDial.cpp							\
 	Scaler.cpp							\
 	SelectableImage.cpp						\
 	SkyDisplayWidget.cpp						\
@@ -91,6 +92,8 @@ HEADERS  += 								\
 	LocalSiderealTime.h						\
 	LocalTimeWidget.h						\
 	LogSpinBox.h							\
+	OffsetDial.h							\
+	RotateDial.h							\
 	Scaler.h							\
 	SelectableImage.h						\
 	SkyDisplayWidget.h						\

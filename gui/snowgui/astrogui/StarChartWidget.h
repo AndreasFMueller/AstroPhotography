@@ -77,6 +77,7 @@ class StarChartWidget : public QWidget {
 	snowgui::ImagerRectangle	_guider_rectangle;
 	astro::RaDec	_direction;
 	astro::RaDec	_chartcenter;
+	astro::RaDec	_target;
 	astro::device::Mount::state_type	_state;
 	astro::ImageCoordinates	_converter;
 	float	_limit_magnitude;
@@ -85,6 +86,7 @@ class StarChartWidget : public QWidget {
 	bool	_show_grid;
 	bool	_show_crosshairs;
 	bool	_show_directions;
+	bool	_show_target;
 	bool	_show_deepsky;
 	bool	_show_tooltips;
 	bool	_show_cataloglabels;
@@ -144,6 +146,9 @@ public:
 	void	show_guider_rectangle(bool r) { _show_guider_rectangle = r; }
 	bool	show_guider_rectangle() const { return _show_guider_rectangle; }
 
+	void	show_target(bool t) { _show_target = t; }
+	bool	show_target() const { return _show_target; }
+
 	explicit StarChartWidget(QWidget *parent = NULL);
 	virtual ~StarChartWidget();
 
@@ -165,6 +170,7 @@ private:
 	void	drawRectangle(QPainter& painter,
 			const ImagerRectangle& rectangle,
 			const astro::Angle& resolution);
+	void	drawTarget(QPainter& painter);
 
 	void	mouseCommon(QMouseEvent *event);
 
@@ -181,6 +187,7 @@ protected:
 
 public slots:
 	void	directionChanged(astro::RaDec);
+	void	targetChanged(astro::RaDec);
 	void	orientationChanged(bool west);
 	void	stateChanged(astro::device::Mount::state_type);
 	void	useStars(astro::catalog::Catalog::starsetptr);
@@ -207,6 +214,7 @@ public slots:
 	void	setImagerRectangleVisible(bool);
 	void	setFinderRectangleVisible(bool);
 	void	setGuiderRectangleVisible(bool);
+	void	setTargetVisible(bool);
 	
 	void	toggleStarsVisible();
 	void	toggleGridVisible();
@@ -220,6 +228,7 @@ public slots:
 	void	toggleImagerRectangleVisible();
 	void	toggleFinderRectangleVisible();
 	void	toggleGuiderRectangleVisible();
+	void	toggleTargetVisible();
 
 	void	useFinderResolution();
 	void	useGuiderResolution();

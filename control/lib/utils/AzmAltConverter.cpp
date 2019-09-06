@@ -51,7 +51,7 @@ Angle	AzmAltConverter::hourangle(const RaDec& radec) const {
  *
  * \param radec	celestial coordinates to convert
  */
-AzmAlt	AzmAltConverter::operator()(const RaDec& radec) {
+AzmAlt	AzmAltConverter::operator()(const RaDec& radec) const {
 	Angle	_hourangle = hourangle(radec);
 	AzmAlt	result;
 	// compute the altitude
@@ -89,7 +89,7 @@ void	AzmAltConverter::update() {
 /**
  * \brief convert azimuth and altitude into right ascension and declination
  */
-RaDec	AzmAltConverter::inverse(const AzmAlt& azmalt) {
+RaDec	AzmAltConverter::inverse(const AzmAlt& azmalt) const {
 	// compute the nautic traingle
 	Angle	a = Angle::right_angle - azmalt.alt();
 	Angle	c = Angle::right_angle - _longlat.latitude();

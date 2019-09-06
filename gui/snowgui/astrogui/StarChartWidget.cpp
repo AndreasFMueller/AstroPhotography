@@ -85,6 +85,12 @@ StarChartWidget::StarChartWidget(QWidget *parent) : QWidget(parent),
 		debug(LOG_ERR, DEBUG_LOG, 0, "no outline catalog: %s",
 			x.what());
 	}
+
+	// make sure the target follows the pointer
+#if 0
+	connect(this, SIGNAL(pointSelected(astro::RaDec)),
+		this, SLOT(targetChanged(astro::RaDec)));
+#endif
 }
 
 /**
@@ -280,7 +286,10 @@ void	StarChartWidget::drawDeepSkyObject(QPainter& painter,
 	painter.drawText(p.x() - 40, p.y() - 10, 80, 20,
 		Qt::AlignCenter,
 		QString(deepskyobject.name.c_str()));
-	
+	if (deepskyobject.name.size() == 0) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "unnamed object %s",
+			deepskyobject.toString().c_str());
+	}
 }
 
 /**
@@ -424,6 +433,35 @@ void	StarChartWidget::drawCrosshairs(QPainter& painter) {
 }
 
 /**
+ * \brief Draw the current target position
+ *
+ * Draw the current target position
+ *
+ * \param painter	the QPainter to draw the target on
+ */
+void	StarChartWidget::drawTarget(QPainter& painter) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "draw target marker");
+
+	// set up drawing the target marker in green
+	QPainterPath    targetmarker;
+	QPen    pen(Qt::SolidLine);
+	pen.setWidth(2);
+	QColor  green(0, 255, 0);
+	pen.setColor(green);
+	painter.setPen(pen);
+
+	// find out where to draw the marker
+	QPointF	markerpoint = convert(_target);
+
+	// compose the path
+	targetmarker.addEllipse(markerpoint, 7, 7);
+
+	// draw the marker in red
+	painter.drawPath(targetmarker);
+
+}
+
+/**
  * \brief Method to draw the directions
  *
  * These are labels that indicate the directions north, south, east and west
@@ -504,6 +542,11 @@ void	StarChartWidget::draw() {
 	// draw the cross hairs
 	if (show_crosshairs()) {
 		drawCrosshairs(painter);
+	}
+
+	// draw the target
+	if (show_target()) {
+		drawTarget(painter);
 	}
 
 	// draw the direction labels
@@ -650,6 +693,16 @@ void	StarChartWidget::directionChanged(astro::RaDec direction) {
 	// let the repaint event handle the redrawing. Doing the repainting
 	// always allows the image to track the movement of the telescope
 	// which should make for a nice animation
+	repaint();
+}
+
+/**
+ * \brief Slot called when the target changes
+ *
+ * \param target	target marker position
+ */
+void	StarChartWidget::targetChanged(astro::RaDec target) {
+	_target = target;
 	repaint();
 }
 
@@ -869,6 +922,11 @@ void	StarChartWidget::setCrosshairsVisible(bool s) {
 	repaint();
 }
 
+void	StarChartWidget::setTargetVisible(bool s) {
+	show_target(s);
+	repaint();
+}
+
 void	StarChartWidget::setDirectionsVisible(bool s) {
 	show_directions(s);
 	repaint();
@@ -924,6 +982,10 @@ void	StarChartWidget::toggleGridVisible() {
 
 void	StarChartWidget::toggleCrosshairsVisible() {
 	setCrosshairsVisible(!show_crosshairs());
+}
+
+void	StarChartWidget::toggleTargetVisible() {
+	setTargetVisible(!show_target());
 }
 
 void	StarChartWidget::toggleDirectionsVisible() {
@@ -1010,6 +1072,13 @@ void	StarChartWidget::showContextMenu(const QPoint& point) {
 	contextMenu.addAction(&actionCrosshairs);
 	connect(&actionCrosshairs, SIGNAL(triggered()),
 		this, SLOT(toggleCrosshairsVisible()));
+
+	QAction	actionTarget(QString("Target"), this);
+	actionTarget.setCheckable(true);
+	actionTarget.setChecked(show_target());
+	contextMenu.addAction(&actionTarget);
+	connect(&actionTarget, SIGNAL(triggered()),
+		this, SLOT(toggleTargetVisible()));
 
 	QAction	actionDirections(QString("Directions"), this);
 	actionDirections.setCheckable(true);

@@ -16,6 +16,13 @@ class CalibrationDisplayWidget : public QWidget {
 
 	snowstar::Calibration	_calibration;
 	bool	_pointlabels;
+
+	double	_scale;
+	QPointF	_center;
+	QPointF	point(float xpxl, float ypxl) const;
+	QPointF	point(double xpxl, double ypxl) const;
+	QPointF	point(const QPointF& ppxl) const;
+	QPointF	point(const snowstar::Point& ppxl) const;
 public:
 	explicit CalibrationDisplayWidget(QWidget *parent = 0);
 	virtual ~CalibrationDisplayWidget();

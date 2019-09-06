@@ -1,0 +1,26 @@
+#! /bin/sh
+#
+# astrofg -- start a virtual frame buffer owned by the web server owner
+#            for astrosky to connect to to get the fonts
+#
+# (c) 2019 Prof 
+
+### BEGIN INIT INFO
+# Provides:		astrofb
+# Required-Start:	$remote_fs $syslog
+# Required-Stop:	$remote_fs $syslog
+# Default-Start:	2 3 4 5
+# Default-Stop:		
+# Short-Description:	frame buffer for astrosky
+### END INIT INFO
+
+case $1 in
+	start)
+		su --command "/usr/bin/Xvfb -screen 0 1024x768x8 :1 &" www-data
+		echo $! > /var/run/astrofb.pid
+		# xhost -display :1 +
+		;;
+	stop)
+		kill `cat /var/run/astrofb.pid`
+		;;
+esac

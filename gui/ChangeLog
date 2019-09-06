@@ -1,6 +1,46 @@
 ChangeLog for the Qt GUI to Astrophotography
 
-2019093:
+20190914:
+	* add target marker display to SkyChartWidget
+	* add target forwarding to mountcontrollerwidet
+	* remove some warnings
+	* fix bug in target drawing
+	* fix seg fault in SkyDrawing (caused by constellation labels)
+	* fix bug in SkyDisplayWidget where pointer tracking has to
+	  take the rotation into account
+
+20190913:
+	* add Button for time offset to SkyDisplayWidget
+	* create RotateButton and OffsetButton classes to display current
+	  values
+
+20190911:
+	* add a rotation dial to SkyDisplayWidget
+	* add rotation to SkyDrawing
+	* fix MilkyWay outlines for certain angles
+
+20190909:
+	* fix a bug in the milkyway drawing code
+	* add constellation labels
+	* reimplement constellation drawing
+	* fix display of milkyway
+	* add pole letter display
+
+20190908:
+	* add configurable labels to astrosky
+	* add --verbose to astrosky
+	* fix --help option in astrosky
+	* draw MilkyWay in the SkyDrawing class
+
+20190904:
+	* add tooltips (don't work when generated from QtCreator)
+	* fix orientation of CalibrationDisplay
+	* add Labels to guiderbuttons
+
+20190903:
+	* better buttons in calculator dialog
+	* add dec rate spinbox in CalibrationCalculatorDialog
+	* make scales of both axes equal in ClibrationDisplayWidget
 	* fix initialization of west button in calibrationcalculator
 	* allow to open configuration directly from message box warning
 	  about time descrepancy

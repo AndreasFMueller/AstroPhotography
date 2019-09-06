@@ -69,6 +69,7 @@ signals:
 	void	mountSelected(int);
 	void	stateChanged(astro::device::Mount::state_type);
 	void	telescopeChanged(astro::RaDec);
+	void	retarget(astro::RaDec);
 	void	orientationChanged(bool west);
 	void	updateTime(time_t);
 	void	radecCorrection(astro::RaDec,bool);
@@ -78,6 +79,7 @@ private:
 	QTimer	_statusTimer;
 
 	void	setupMount();
+	void	targetChangedCommon();
 
 public slots:
 	void	mountChanged(int);
@@ -88,6 +90,8 @@ public slots:
 	void	targetChanged(astro::RaDec);
 	void	catalogClicked();
 	void	catalogDestroyed();
+	void	targetRaChanged(const QString&);
+	void	targetDecChanged(const QString&);
 };
 
 } // namespace snowgui

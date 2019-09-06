@@ -1,5 +1,23 @@
 ChangeLog for the Astro project.
 
+20190914:
+	* make MilkyWay debugging less verbose
+
+20190911:
+	* fix const in AzmAltConverter class
+
+20190910:
+	* fix off-by-1 error in ConstellationCatalog.cpp
+
+20190909:
+	* add ConstellationCatalog to catalog library
+	* add normalization to Point class
+
+20190908:
+	* add start script for virtual frame buffer
+	* add gateway PHP scripts
+	* only call default MilkyWay constructor once
+
 20190903:
 	* add -Wno-psabi option to silence GCC 7.1
 	* portability fixes for Raspbian/Debian 10
@@ -20,6 +38,7 @@ ChangeLog for the Astro project.
 	  variable names in Stellarium.cpp
 
 20190822:
+	* add MilkyWay class
 	* add scalar product to RaDec
 	* add exp(), distance() methods to RaDec
 

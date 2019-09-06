@@ -6,5 +6,6 @@
 
 sbin_SCRIPTS = startastro
 
-noinst_SCRIPTS = snowstar.service
+noinst_SCRIPTS = snowstar.service sky.png.php status.php status.php astrofb
+
 
