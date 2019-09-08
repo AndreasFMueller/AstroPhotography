@@ -35,10 +35,13 @@ std::string	build_filename(unsigned long position) {
 	switch (format) {
 	case ImageWriter::FITS:
 		extension = std::string("fits");
+		break;
 	case ImageWriter::JPEG:
 		extension = std::string("jpg");
+		break;
 	case ImageWriter::PNG:
 		extension = std::string("png");
+		break;
 	}
 	return stringprintf("%s-%08lu.%s", prefix.c_str(), position,
 		extension.c_str());

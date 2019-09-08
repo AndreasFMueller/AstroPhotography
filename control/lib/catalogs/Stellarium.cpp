@@ -24,6 +24,10 @@ namespace catalog {
 		catalog.insert(std::make_pair(key, object.number));	\
 	}
 
+// these two macros are defined in debian, get rid of them
+#undef major
+#undef minor
+
 void	Stellarium::parse(const std::string& filename) {
 	// open the file
 	std::ifstream	in(filename.c_str());

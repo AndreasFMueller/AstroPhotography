@@ -310,7 +310,7 @@ static int	property_command(InstrumentsPrx instruments,
 		}
 		instrument->updateProperty(p);
 		return EXIT_SUCCESS;
-	} catch (NotFound x) {
+	} catch (const NotFound& x) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0,
 			"no property '%s', use add insetad", property.c_str());
 	}
@@ -322,6 +322,7 @@ static int	property_command(InstrumentsPrx instruments,
 	switch (arguments.size()) {
 	case 3:
 		p.value = arguments[2];
+		break;
 	case 2:
 		p.value = arguments[1];
 		break;

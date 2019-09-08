@@ -12,6 +12,11 @@
 
 namespace snowgui {
 
+static QString	northLabel("DEC+");
+static QString	southLabel("DEC-");
+static QString	eastLabel("RA+");
+static QString	westLabel("RA-");
+
 GuiderButton::GuiderButton(QWidget *parent) : QWidget(parent) {
 	_northPressed = false;
 	_southPressed = false;
@@ -92,6 +97,16 @@ void	GuiderButton::draw() {
 	bar.lineTo(width(), LEDDIM);
 	bar.closeSubpath();
 	painter.fillPath(bar, black);
+
+	// draw labels (RA+, RA-, DEC+, DEC-)
+	painter.drawText(center.x() - w/2 + 5, center.y() - 8, 40, 20,
+                Qt::AlignLeft, eastLabel);
+	painter.drawText(center.x() + w/2 - 45, center.y() - 8, 40, 20,
+                Qt::AlignRight, westLabel);
+	painter.drawText(center.x() - 20, center.y() - h/2 + 00, 40, 20,
+                Qt::AlignCenter, northLabel);
+	painter.drawText(center.x() - 20, center.y() + h/2 - 20, 40, 20,
+                Qt::AlignCenter, southLabel);
 
 	// display the active LEDs
 	if (_northActive) {

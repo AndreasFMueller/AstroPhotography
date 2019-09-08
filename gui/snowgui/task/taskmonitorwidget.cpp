@@ -106,6 +106,9 @@ void	taskmonitorwidget::taskUpdate(snowstar::TaskMonitorInfo info) {
 	case snowstar::TskCOMPLETE:
 		i = new QTableWidgetItem("complete");
 		break;
+	case snowstar::TskDELETED:
+		i = new QTableWidgetItem("deleted");
+		break;
 	}
 	i->setFlags(Qt::NoItemFlags);
 	ui->monitorTable->setItem(row, 3, i);

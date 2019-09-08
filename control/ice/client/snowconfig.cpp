@@ -102,7 +102,7 @@ static int	remove_command(ConfigurationPrx configuration,
 	key.name = *i++;
 	try {
 		configuration->remove(key);
-	} catch (const NotFound x) {
+	} catch (const NotFound& x) {
 		std::cerr << "not found: " << x.what() << std::endl;
 		return EXIT_FAILURE;
 	}

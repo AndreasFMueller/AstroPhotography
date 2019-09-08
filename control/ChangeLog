@@ -1,9 +1,30 @@
 ChangeLog for the Astro project.
 
+20190903:
+	* portability fixes for Raspbian/Debian 10
+	* fix ASI detection
+
+20190901:
+	* fix bug that prevented calculated from being saved
+	* add callback for deleted tasks
+	* add long exposure time to Atik cameras that only support short
+	  exposures
+	* add add() method to Image template
+	* fix wrong column name in taskqueue table
+
+20190823:
+	* fix ifstream.fail missing in catalogs
+	* fix bug that PGC data file open was not checked
+	* get rid of macros major/minor, as they conflict with member 
+	  variable names in Stellarium.cpp
+
 20190822:
 	* add MilkyWay class
 	* add scalar product to RaDec
 	* add exp(), distance() methods to RaDec
+
+20190729:
+	* fix ICE installation location
 
 20190807:
 	* database backend for PGC catalog implemented

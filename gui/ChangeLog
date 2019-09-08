@@ -1,5 +1,27 @@
 ChangeLog for the Qt GUI to Astrophotography
 
+20190904:
+	* add tooltips (don't work when generated from QtCreator)
+	* fix orientation of CalibrationDisplay
+	* add Labels to guiderbuttons
+
+20190903:
+	* better buttons in calculator dialog
+	* add dec rate spinbox in CalibrationCalculatorDialog
+	* make scales of both axes equal in ClibrationDisplayWidget
+	* fix initialization of west button in calibrationcalculator
+	* allow to open configuration directly from message box warning
+	  about time descrepancy
+	* make sure only one configuration or events window can be created
+	  from the main window
+
+20190902:
+	* fix center computation for crosshairs
+
+20190823:
+	* improve structure of textChanged in catalogdialog.cpp
+	* fix textChanged in catalogdialog.cpp
+
 20190822:
 	* fix data types for deep sky object catalogs
 	* fix bug that displayed objects from the other side of the

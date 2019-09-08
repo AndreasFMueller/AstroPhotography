@@ -81,6 +81,8 @@ astro::task::TaskInfo::taskstate	convert(const TaskState& state) {
 		return astro::task::TaskInfo::cancelled;
 	case TskCOMPLETE:
 		return astro::task::TaskInfo::complete;
+	case TskDELETED:
+		return astro::task::TaskInfo::deleted;
 	}
 	throw std::runtime_error("unknown task state");
 }
@@ -97,6 +99,8 @@ TaskState	convert(const astro::task::TaskInfo::taskstate& state) {
 		return TskCANCELLED;
 	case astro::task::TaskInfo::complete:
 		return TskCOMPLETE;
+	case astro::task::TaskInfo::deleted:
+		return TskDELETED;
 	}
 	throw std::runtime_error("unknown task state");
 }

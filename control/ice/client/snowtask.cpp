@@ -148,6 +148,9 @@ int	common_list(TaskQueuePrx tasks, const std::set<int> ids) {
 			std::cout << "C";
 			size = info.frame.size;
 			break;
+		case TskDELETED:
+			std::cout << "D";
+			break;
 		}
 		std::cout << astro::stringprintf("%-10.10s",
 			tasktype2string(parameters.type).c_str());
@@ -188,6 +191,7 @@ int	common_list(TaskQueuePrx tasks, const std::set<int> ids) {
 		switch (info.state) {
 		case TskPENDING:
 		case TskEXECUTING:
+		case TskDELETED:
 			break;
 		case TskFAILED:
 		case TskCANCELLED:

@@ -77,13 +77,16 @@ std::string	CatalogDialog::labelString(const std::string& name,
  * \param name		name of the object to search for
  */
 void	CatalogDialog::searchCommon(const std::string& name) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "searchCommon(\"%s\")", name.c_str());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "searchCommon(\"%s\") currentIndex=%d",
+		name.c_str(), ui->catalogBox->currentIndex());
 	astro::RaDec	targetpos;
 	std::string	targetname;
 	try {
 		// find out which catalog we are supposed to use
 		switch (ui->catalogBox->currentIndex()) {
 		case 0: {
+				debug(LOG_DEBUG, DEBUG_LOG, 0,
+					"searching NGC for '%s'", name.c_str());
 				DeepSkyCatalogFactory	factory;
 				DeepSkyCatalogPtr	catalog
 					= factory.get(DeepSkyCatalogFactory::NGCIC);
@@ -94,6 +97,8 @@ void	CatalogDialog::searchCommon(const std::string& name) {
 			}
 			break;
 		case 1: {
+				debug(LOG_DEBUG, DEBUG_LOG, 0,
+					"searching PGC for '%s'", name.c_str());
 				DeepSkyCatalogFactory	factory;
 				DeepSkyCatalogPtr	catalog
 					= factory.get(DeepSkyCatalogFactory::PGC);
@@ -104,6 +109,8 @@ void	CatalogDialog::searchCommon(const std::string& name) {
 			}
 			break;
 		case 2:	{
+				debug(LOG_DEBUG, DEBUG_LOG, 0,
+					"searching BSC for '%s'", name.c_str());
 				CatalogFactory	factory;
 				CatalogPtr	catalog
 					= factory.get(CatalogFactory::BSC);
@@ -113,6 +120,9 @@ void	CatalogDialog::searchCommon(const std::string& name) {
 			}
 			break;
 		case 3:	{
+				debug(LOG_DEBUG, DEBUG_LOG, 0,
+					"searching Hipparcos for '%s'",
+					name.c_str());
 				CatalogFactory	factory;
 				CatalogPtr	catalog
 					= factory.get(CatalogFactory::Hipparcos);
@@ -122,6 +132,9 @@ void	CatalogDialog::searchCommon(const std::string& name) {
 			}
 			break;
 		case 4:	{
+				debug(LOG_DEBUG, DEBUG_LOG, 0,
+					"searching Tycho2 for '%s'",
+					name.c_str());
 				CatalogFactory	factory;
 				CatalogPtr	catalog
 					= factory.get(CatalogFactory::Tycho2);
@@ -131,6 +144,9 @@ void	CatalogDialog::searchCommon(const std::string& name) {
 			}
 			break;
 		case 5:	{
+				debug(LOG_DEBUG, DEBUG_LOG, 0,
+					"searching UCAC4 for '%s'",
+					name.c_str());
 				CatalogFactory	factory;
 				CatalogPtr	catalog
 					= factory.get(CatalogFactory::Ucac4);
@@ -182,6 +198,111 @@ void	CatalogDialog::searchChanged(const QString& newtext) {
 }
 
 /**
+ * \brief Handle dso catalog prefix searches
+ *
+ * \param prefix	prefix of the dso name
+ */
+void	CatalogDialog::textEditedDSO(const std::string& prefix) {
+	// get a the correct catalog
+	DeepSkyCatalogFactory	factory;
+	DeepSkyCatalogPtr	catalog;
+	switch (ui->catalogBox->currentIndex()) {
+	case 0:	catalog = factory.get(DeepSkyCatalogFactory::NGCIC);
+		break;
+	case 1:	catalog = factory.get(DeepSkyCatalogFactory::PGC);
+		break;
+	}
+
+	// retrieve names
+	std::set<std::string>	names = catalog->findLike(prefix);
+	if (names.size() == 0) {
+		return;
+	}
+
+	// prepare to fill the list with object names
+	QFont	font = QFontDatabase::systemFont(QFontDatabase::FixedFont);
+	ui->listWidget->setFont(font);
+	for (auto i = names.begin(); i != names.end(); i++) {
+		DeepSkyObject	dso = catalog->find(*i);
+		astro::RaDec	rd = dso.position(2000);
+		std::string	l = astro::stringprintf("%-20.20s|  %s %s  |  %s",
+			i->c_str(),
+			rd.ra().hms(':', 1).substr(1).c_str(),
+			rd.dec().dms(':', 0).c_str(),
+			DeepSkyObject::classification2string(dso.classification).c_str());
+
+		QListWidgetItem	*item = new QListWidgetItem(QString(l.c_str()));
+		item->setFont(font);
+		ui->listWidget->addItem(item);
+	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "found %d matching names",
+		names.size());
+}
+
+/**
+ * \brief Handle star catalog prefix searches
+ *
+ * \param prefix	prefix of the star name
+ */
+void	CatalogDialog::textEditedStars(const std::string& prefix) {
+	// handle star catalogs
+	astro::catalog::Catalog::starsetptr	stars;
+	try {
+		astro::catalog::CatalogFactory	factory;
+		astro::catalog::CatalogPtr	catalog;
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "getting stars for prefix %s",
+			prefix.c_str());
+		switch (ui->catalogBox->currentIndex()) {
+		case 0:
+		case 1:
+			break;
+		case 2:	catalog = factory.get(CatalogFactory::BSC);
+			break;
+		case 3:	catalog = factory.get(CatalogFactory::Hipparcos);
+			break;
+		case 4:	catalog = factory.get(CatalogFactory::Tycho2);
+			break;
+		case 5:	catalog = factory.get(CatalogFactory::Ucac4);
+			break;
+		}
+		stars = catalog->findLike(prefix);
+	} catch (const std::exception& x) {
+		debug(LOG_ERR, DEBUG_LOG, 0,
+			"cannot get stars from catalog %d: %s",
+				ui->catalogBox->currentIndex(), x.what());
+		return;
+	}
+
+	// make sure we have some stars
+	if (!stars) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "no stars returned");
+		return;
+	}
+	if (stars->size() == 0) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "no stars returned");
+		return;
+	}
+
+	// get the font
+	QFont	font = QFontDatabase::systemFont(QFontDatabase::FixedFont);
+	ui->listWidget->setFont(font);
+
+	// list the star entries
+	std::set<std::string>	starstrings = Catalog::starlist(stars);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "%d star strings", starstrings.size());
+	QListWidget	*listWidget = ui->listWidget;
+	std::for_each(starstrings.begin(), starstrings.end(),
+		[listWidget,font](const std::string& s) mutable {
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "adding %s", s.c_str());
+			QListWidgetItem	*item = new QListWidgetItem(
+				QString(s.c_str()));
+			item->setFont(font);
+			listWidget->addItem(item);
+		}
+	);
+}
+
+/**
  * \brief Slot called when the text in the search box changes
  *
  * This method considers the text in the search box a prefix and searches
@@ -198,49 +319,42 @@ void	CatalogDialog::textEdited(const QString& newtext) {
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "search for prefix %s", prefix.c_str());
 	ui->listWidget->clear();
-	QFont	font = QFontDatabase::systemFont(QFontDatabase::FixedFont);
-	ui->listWidget->setFont(font);
 
 	// perform NGC catalog search
-	if (ui->catalogBox->currentIndex() == 0) {
-		std::set<std::string>	names = _catalog->findLike(prefix);
-		for (auto i = names.begin(); i != names.end(); i++) {
-			DeepSkyObject	dso = _catalog->find(*i);
-			astro::RaDec	rd = dso.position(2000);
-			std::string	l = astro::stringprintf("%-20.20s|  %s %s  |  %s",
-				i->c_str(),
-				rd.ra().hms(':', 1).substr(1).c_str(),
-				rd.dec().dms(':', 0).c_str(),
-				DeepSkyObject::classification2string(dso.classification).c_str());
-
-			QListWidgetItem	*item = new QListWidgetItem(QString(l.c_str()));
-			item->setFont(font);
-			ui->listWidget->addItem(item);
-		}
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "found %d matching names",
-			names.size());
-		return;
+	if (ui->catalogBox->currentIndex() < 2) {
+		textEditedDSO(prefix);
+	} else {
+		textEditedStars(prefix);
 	}
-
+	return;
+#if 0
 	// handle star catalogs
+	
 	astro::catalog::Catalog::starsetptr	stars;
 	try {
+		astro::catalog::CatalogFactory	factory;
+		astro::catalog::CatalogPtr	catalog;
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "getting stars for prefix %s",
 			prefix.c_str());
 		switch (ui->catalogBox->currentIndex()) {
-		case 1:	{
-			astro::catalog::CatalogFactory	factory;
-			astro::catalog::CatalogPtr	catalog
-				= factory.get(CatalogFactory::BSC);
-			stars = catalog->findLike(prefix);
-			}
+		case 0:
+		case 1:
 			break;
-		case 2:
-		case 3:
-		case 4:
+		case 2:	catalog = factory.get(CatalogFactory::BSC);
+			break;
+		case 3:	catalog = factory.get(CatalogFactory::Hipparcos);
+			break;
+		case 4:	catalog = factory.get(CatalogFactory::Tycho2);
+			break;
+		case 5:	catalog = factory.get(CatalogFactory::Ucac4);
 			break;
 		}
+		stars = catalog->findLike(prefix);
 	} catch (const std::exception& x) {
+		debug(LOG_ERR, DEBUG_LOG, 0,
+			"cannot get stars from catalog %d: %s",
+				ui->catalogBox->currentIndex(), x.what());
+		return;
 	}
 
 	if (stars) {
@@ -261,6 +375,7 @@ void	CatalogDialog::textEdited(const QString& newtext) {
 	} else {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "no stars returned");
 	}
+#endif
 }
 
 /**
@@ -269,7 +384,7 @@ void	CatalogDialog::textEdited(const QString& newtext) {
  * \param index		new current index
  */
 void	CatalogDialog::currentItemChanged(int index) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "new catalog selection");
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "new catalog selection: %d", index);
 	switch (index) {
 	case 0:
 		ui->objectField->setText("<font color='white'>NGC1234 or IC1234</font>");

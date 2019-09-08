@@ -39,6 +39,10 @@ private:
 signals:
 	void	objectSelected(astro::RaDec);
 
+private:
+	void	textEditedDSO(const std::string& name);
+	void	textEditedStars(const std::string& name);
+
 public slots:
 	void	searchClicked();
 	void	searchChanged(const QString&);

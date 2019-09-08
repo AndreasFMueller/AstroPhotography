@@ -40,7 +40,7 @@ std::string	TaskTableAdapter::createstatement() {
 	"    guiderccdindex int not null default -1,\n"
 	"    guiderccd varchar(256) not null default '',\n"
 	"    guideportindex int not null default -1,\n"
-	"    guiderport varchar(256) not null default '',\n"
+	"    guideport varchar(256) not null default '',\n"
 	"    adaptiveopticsindex int not null default -1,\n"
 	"    adaptiveoptics varchar(256) not null default '',\n"
 	"    originx integer not null default 0,\n"

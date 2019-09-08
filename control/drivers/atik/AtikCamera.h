@@ -34,6 +34,13 @@ public:
 	unsigned int	getSerialNumber() const { return _serial; }
 	virtual std::string	userFriendlyName() const;
 private:
+	ImagePtr	getImage(Exposure& exopsure);
+	ImagePtr	shortExposure(const ImagePoint& offset,
+				Exposure& exposure);
+	ImagePtr	longExposure(const ImagePoint& offset,
+				Exposure& exposure);
+	ImagePtr	multiExposure(const ImagePoint& offset,
+				Exposure& exposure);
 	void	exposureRun(Exposure& exposure, AtikCcd& atikccd);
 	void	abortExposure();
 	std::string	getLastError();

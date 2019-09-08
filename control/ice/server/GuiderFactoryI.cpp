@@ -213,7 +213,7 @@ int	GuiderFactoryI::addCalibration(const Calibration& calibration,
 	astro::discover::InstrumentPtr	instrument
 		= instruments.get(instrumentname);
 	astro::discover::InstrumentComponent	ccdComponent
-		= instrument->getCcd(calibration.guider.ccdIndex);
+		= instrument->getGuiderCcd(calibration.guider.ccdIndex);
 
 	pcal.instrument = instrumentname;
 	pcal.ccd = ccdComponent.deviceurl();

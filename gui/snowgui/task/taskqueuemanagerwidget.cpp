@@ -391,6 +391,9 @@ void	taskqueuemanagerwidget::setHeader(snowstar::TaskState state) {
 		top = ui->taskTree->topLevelItem(4);
 		tag = "pending";
 		break;
+        case snowstar::TskDELETED:
+		throw std::logic_error("cannot set header for deleted");
+		break;
 	}
 	count = top->childCount();
 	top->setText(2, QString(astro::stringprintf("%s (%d)",
@@ -646,6 +649,8 @@ void	taskqueuemanagerwidget::updateInfo(QTreeWidgetItem *item,
 	case snowstar::TskCOMPLETE:
 		item->setText(taskcol_filename, QString(info.filename.c_str()));
 		break;
+	case snowstar::TskDELETED:
+		return;
 	}
 	if ((info.frame.size.width != 0) && (info.frame.size.height != 0)) {
 		item->setText(taskcol_frame,
@@ -667,6 +672,7 @@ void	taskqueuemanagerwidget::updateInfo(QTreeWidgetItem *item,
  */
 void	taskqueuemanagerwidget::taskUpdate(snowstar::TaskMonitorInfo info) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "task udpate for %d", info.taskid);
+
 	// if the state is pending, then this is new entry and we have to
 	// add that entry to the pending section
 	if (info.newstate == snowstar::TskPENDING) {
@@ -706,10 +712,12 @@ void	taskqueuemanagerwidget::taskUpdate(snowstar::TaskMonitorInfo info) {
 				debug(LOG_DEBUG, DEBUG_LOG, 0, "found item");
 				tasksection = section;
 				child = top->takeChild(i);
-				if (hasinfo) {
-					updateInfo(child, tinfo);
+				if (info.newstate != snowstar::TskDELETED) {
+					if (hasinfo) {
+						updateInfo(child, tinfo);
+					}
+					this->parent(info.newstate)->addChild(child);
 				}
-				this->parent(info.newstate)->addChild(child);
 				goto summarize;
 			}
 		}
@@ -741,8 +749,11 @@ summarize:
 			_totaltimes.find(state)->second - exposuretime;
 
 		// add the time to the section to which we moved it
-		_totaltimes.find(tinfo.state)->second = 
-			_totaltimes.find(tinfo.state)->second + exposuretime;
+		if (info.newstate != snowstar::TskDELETED) {
+			_totaltimes.find(tinfo.state)->second = 
+				_totaltimes.find(tinfo.state)->second
+					+ exposuretime;
+		}
 	}
 
 	// display the headers
@@ -764,6 +775,8 @@ QTreeWidgetItem	*taskqueuemanagerwidget::parent(snowstar::TaskState state) {
 		return ui->taskTree->topLevelItem(3);
 	case snowstar::TskPENDING:
 		return ui->taskTree->topLevelItem(4);
+	case snowstar::TskDELETED:
+		return NULL;
 	}
 	throw std::range_error("bad state value");
 }

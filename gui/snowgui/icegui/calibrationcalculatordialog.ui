@@ -13,6 +13,9 @@
   <property name="windowTitle">
    <string>Calibration Calculator</string>
   </property>
+  <property name="toolTip">
+   <string notr="true"/>
+  </property>
   <layout class="QGridLayout" name="gridLayout">
    <property name="leftMargin">
     <number>6</number>
@@ -32,7 +35,7 @@
       <enum>Qt::Horizontal</enum>
      </property>
      <property name="standardButtons">
-      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+      <set>QDialogButtonBox::NoButton</set>
      </property>
     </widget>
    </item>
@@ -78,114 +81,6 @@
          <property name="bottomMargin">
           <number>6</number>
          </property>
-         <item row="1" column="0">
-          <widget class="QLabel" name="pixelsizeLabel">
-           <property name="text">
-            <string>Pixel size:</string>
-           </property>
-          </widget>
-         </item>
-         <item row="5" column="0">
-          <widget class="QLabel" name="invertRALabel">
-           <property name="text">
-            <string>Orientation:</string>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="2">
-          <widget class="QLabel" name="folcallengthUnit">
-           <property name="text">
-            <string>m</string>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="0">
-          <widget class="QLabel" name="focallengthLabel">
-           <property name="text">
-            <string>Focal length:</string>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="2">
-          <widget class="QLabel" name="pixelsizeUnit">
-           <property name="text">
-            <string>um</string>
-           </property>
-          </widget>
-         </item>
-         <item row="2" column="2">
-          <widget class="QLabel" name="angleUnit">
-           <property name="text">
-            <string>deg</string>
-           </property>
-          </widget>
-         </item>
-         <item row="4" column="2">
-          <widget class="QLabel" name="declinationUnit">
-           <property name="text">
-            <string>deg</string>
-           </property>
-          </widget>
-         </item>
-         <item row="6" column="1">
-          <widget class="QCheckBox" name="decinvertCheckBox">
-           <property name="text">
-            <string>invert</string>
-           </property>
-          </widget>
-         </item>
-         <item row="4" column="1">
-          <widget class="QDoubleSpinBox" name="declinationSpinBox">
-           <property name="maximumSize">
-            <size>
-             <width>64</width>
-             <height>16777215</height>
-            </size>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-           </property>
-           <property name="decimals">
-            <number>1</number>
-           </property>
-           <property name="minimum">
-            <double>-90.000000000000000</double>
-           </property>
-           <property name="maximum">
-            <double>90.000000000000000</double>
-           </property>
-          </widget>
-         </item>
-         <item row="3" column="1">
-          <widget class="QLineEdit" name="guiderateField">
-           <property name="maximumSize">
-            <size>
-             <width>64</width>
-             <height>16777215</height>
-            </size>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-           </property>
-           <property name="readOnly">
-            <bool>true</bool>
-           </property>
-          </widget>
-         </item>
-         <item row="3" column="0">
-          <widget class="QLabel" name="guiderateLabel">
-           <property name="text">
-            <string>Guide rate:</string>
-           </property>
-          </widget>
-         </item>
-         <item row="4" column="0">
-          <widget class="QLabel" name="declinationLabel">
-           <property name="text">
-            <string>Declination:</string>
-           </property>
-          </widget>
-         </item>
          <item row="2" column="1">
           <widget class="QDoubleSpinBox" name="angleSpinBox">
            <property name="maximumSize">
@@ -199,6 +94,9 @@
              <width>64</width>
              <height>0</height>
             </size>
+           </property>
+           <property name="toolTip">
+            <string notr="true" comment="Angle between north and the vertical axis of the guider image" extracomment="Angle between north and the vertical axis of the guider image"/>
            </property>
            <property name="alignment">
             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -217,7 +115,43 @@
            </property>
           </widget>
          </item>
-         <item row="7" column="0" colspan="3">
+         <item row="7" column="0">
+          <widget class="QLabel" name="invertDECLabel">
+           <property name="text">
+            <string>DEC:</string>
+           </property>
+          </widget>
+         </item>
+         <item row="5" column="2">
+          <widget class="QLabel" name="declinationUnit">
+           <property name="text">
+            <string>deg</string>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="1">
+          <widget class="QLineEdit" name="guiderateField">
+           <property name="maximumSize">
+            <size>
+             <width>64</width>
+             <height>16777215</height>
+            </size>
+           </property>
+           <property name="toolTip">
+            <string notr="true" comment="in units of siderial speed" extracomment="in units of siderial speed"/>
+           </property>
+           <property name="toolTipDuration">
+            <number>-1</number>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+           </property>
+           <property name="readOnly">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item row="8" column="0" colspan="3">
           <spacer name="verticalSpacer">
            <property name="orientation">
             <enum>Qt::Vertical</enum>
@@ -230,40 +164,10 @@
            </property>
           </spacer>
          </item>
-         <item row="6" column="0">
-          <widget class="QLabel" name="invertDECLabel">
+         <item row="0" column="2">
+          <widget class="QLabel" name="folcallengthUnit">
            <property name="text">
-            <string>DEC:</string>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="1">
-          <widget class="QLineEdit" name="pixelsizeField">
-           <property name="maximumSize">
-            <size>
-             <width>64</width>
-             <height>16777215</height>
-            </size>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-           </property>
-           <property name="readOnly">
-            <bool>true</bool>
-           </property>
-          </widget>
-         </item>
-         <item row="2" column="0">
-          <widget class="QLabel" name="angleLabel">
-           <property name="text">
-            <string>Angle:</string>
-           </property>
-          </widget>
-         </item>
-         <item row="5" column="1">
-          <widget class="QCheckBox" name="westCheckBox">
-           <property name="text">
-            <string>west</string>
+            <string>m</string>
            </property>
           </widget>
          </item>
@@ -286,12 +190,52 @@
            </property>
           </widget>
          </item>
-         <item row="8" column="0" colspan="3">
+         <item row="3" column="0">
+          <widget class="QLabel" name="guiderateLabel">
+           <property name="text">
+            <string>Guide rate:</string>
+           </property>
+          </widget>
+         </item>
+         <item row="6" column="1">
+          <widget class="QCheckBox" name="westCheckBox">
+           <property name="toolTip">
+            <string notr="true" extracomment="Orientation 'west' means that the telescope is placed west of the plar axis"/>
+           </property>
+           <property name="text">
+            <string>west</string>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="2">
+          <widget class="QLabel" name="angleUnit">
+           <property name="text">
+            <string>deg</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="1">
+          <widget class="QLineEdit" name="pixelsizeField">
+           <property name="maximumSize">
+            <size>
+             <width>64</width>
+             <height>16777215</height>
+            </size>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+           </property>
+           <property name="readOnly">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item row="9" column="0" colspan="3">
           <widget class="QTableWidget" name="coefficienttableWidget">
            <property name="minimumSize">
             <size>
              <width>200</width>
-             <height>30</height>
+             <height>66</height>
             </size>
            </property>
            <property name="maximumSize">
@@ -325,6 +269,128 @@
              <string>t</string>
             </property>
            </column>
+          </widget>
+         </item>
+         <item row="0" column="0">
+          <widget class="QLabel" name="focallengthLabel">
+           <property name="text">
+            <string>Focal length:</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="2">
+          <widget class="QLabel" name="pixelsizeUnit">
+           <property name="text">
+            <string>um</string>
+           </property>
+          </widget>
+         </item>
+         <item row="6" column="0">
+          <widget class="QLabel" name="invertRALabel">
+           <property name="text">
+            <string>Orientation:</string>
+           </property>
+          </widget>
+         </item>
+         <item row="5" column="1">
+          <widget class="QDoubleSpinBox" name="declinationSpinBox">
+           <property name="maximumSize">
+            <size>
+             <width>64</width>
+             <height>16777215</height>
+            </size>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+           </property>
+           <property name="decimals">
+            <number>1</number>
+           </property>
+           <property name="minimum">
+            <double>-90.000000000000000</double>
+           </property>
+           <property name="maximum">
+            <double>90.000000000000000</double>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="0">
+          <widget class="QLabel" name="pixelsizeLabel">
+           <property name="text">
+            <string>Pixel size:</string>
+           </property>
+          </widget>
+         </item>
+         <item row="7" column="1">
+          <widget class="QCheckBox" name="decinvertCheckBox">
+           <property name="toolTip">
+            <string notr="true" extracomment="If there is a mirror or a prism in the optical path to the guider, the direction is inverted. Enable this e.g. for off-axis guiding."/>
+           </property>
+           <property name="text">
+            <string>invert</string>
+           </property>
+          </widget>
+         </item>
+         <item row="5" column="0">
+          <widget class="QLabel" name="declinationLabel">
+           <property name="text">
+            <string>Declination:</string>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="0">
+          <widget class="QLabel" name="angleLabel">
+           <property name="text">
+            <string>Angle:</string>
+           </property>
+          </widget>
+         </item>
+         <item row="4" column="0">
+          <widget class="QLabel" name="decRateLabel">
+           <property name="text">
+            <string>DEC rate:</string>
+           </property>
+          </widget>
+         </item>
+         <item row="4" column="1">
+          <widget class="QDoubleSpinBox" name="decrateSpinBox">
+           <property name="maximumSize">
+            <size>
+             <width>63</width>
+             <height>16777215</height>
+            </size>
+           </property>
+           <property name="baseSize">
+            <size>
+             <width>63</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="toolTip">
+            <string notr="true" extracomment="Declination rate relative to the guide rate"/>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+           </property>
+           <property name="minimum">
+            <double>-2.000000000000000</double>
+           </property>
+           <property name="maximum">
+            <double>2.000000000000000</double>
+           </property>
+           <property name="singleStep">
+            <double>0.100000000000000</double>
+           </property>
+           <property name="value">
+            <double>1.000000000000000</double>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="2">
+          <widget class="QLabel" name="label">
+           <property name="text">
+            <string>sidereal</string>
+           </property>
           </widget>
          </item>
         </layout>

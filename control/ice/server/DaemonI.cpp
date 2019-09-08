@@ -318,7 +318,7 @@ void	DaemonI::setSystemTime(Ice::Long unixtime,
 #else /* BSD_DATE == 1 */
 	// GNU date command
 	// note that on Ubuntu this only works if ntp is disabled using
-	// 'timedatectl ntp-set false'
+	// 'timedatectl set-ntp false'
 	strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S", tp);
 	cmd = astro::stringprintf("sudo date --set='%s'", buffer);
 #endif /* BSD_DATE == 1 */

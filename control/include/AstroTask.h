@@ -150,7 +150,7 @@ public:
 	void	id(taskid_t i) { _id = i; }
 
 public:
-	typedef enum { pending, executing, failed, cancelled, complete } taskstate;
+	typedef enum { pending, executing, failed, cancelled, complete, deleted } taskstate;
 static std::string	state2string(taskstate t);
 static taskstate	string2state(const std::string& s);
 private:
@@ -429,9 +429,22 @@ public:
 };
 
 /**
+ * \brief Information about the task being deleted
+ */
+class TaskDeletedInfo {
+private:
+	long	_taskid;
+public:
+	long	taskid() const { return _taskid; }
+	void	taskid(long ti) { _taskid = ti; }
+	TaskDeletedInfo(long id) : _taskid(id) { }
+};
+
+/**
  * \brief Callback structure for the monitor
  */
 typedef callback::CallbackDataEnvelope<TaskMonitorInfo>	TaskMonitorCallbackData;
+typedef callback::CallbackDataEnvelope<TaskDeletedInfo>	TaskDeletedCallbackData;
 
 class CancellableWork;
 

@@ -3,10 +3,15 @@ How to compile ZeroC ICE for use with AstroPhotography
 Distributions usually come with old versions of ICE and
 it needs to be compiled for the current system.
 
+0. Debian: install additional dependencies
+
+	libmccp-dev
+	libbz2-dev
+	liblmdb-dev
+
 1. get the source
 
 	git clone https://github.com/zeroc-ice/ice
-	git clone https://github.com/zeroc-ice/ice-demos
 
 2. (Macos) The default make rules for Macos turn deprecation warnings
    into errors, which causes the build to fail. To fix this, remove
