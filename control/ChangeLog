@@ -1,6 +1,8 @@
 ChangeLog for the Astro project.
 
 20190908:
+	* add start script for virtual frame buffer
+	* add gateway PHP scripts
 	* only call default MilkyWay constructor once
 
 20190903:

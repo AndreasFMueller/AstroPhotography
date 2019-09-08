@@ -621,6 +621,7 @@ AC_CONFIG_FILES([Makefile include/Makefile
 	ice/server/Makefile ice/nice/Makefile
 	man/Makefile doc/Makefile doc/manual/Makefile
 	scripts/Makefile scripts/startastro scripts/snowstar.service
+	scripts/sky.png.php scripts/status.php
 	test/Makefile])
 AC_OUTPUT
 
