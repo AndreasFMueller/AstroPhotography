@@ -24,6 +24,7 @@ SkyDrawing::SkyDrawing() {
 	_show_telescope = false;
 	_show_target = false;
 	_show_labels = true;
+	_show_milkyway = true;
 	_converter = NULL;
 	_time = 0;
 }
@@ -60,6 +61,25 @@ astro::AzmAlt	SkyDrawing::convert(const astro::RaDec& radec) {
  */
 QPointF	SkyDrawing::convert(const astro::AzmAlt& azmalt) {
 	float	r = _radius * (1 - azmalt.alt().radians() / (M_PI / 2));
+	double	phi = azmalt.azm().radians();
+	QPointF	starcenter(_center.x() + r * sin(phi),
+			_center.y() + r * cos(phi));
+	return starcenter;
+}
+
+/**
+ * \brief convert celestial coordinates to a point
+ *
+ * This method makes sure points outside the circle are mapped to points
+ * on the circle
+ */
+QPointF	SkyDrawing::convertlimited(const astro::RaDec& radec) {
+	astro::AzmAlt	azmalt = convert(radec);
+	float	r = 1 - azmalt.alt().radians() / (M_PI / 2);
+	if (r > 1) {
+		r = 1;
+	}
+	r *= _radius;
 	double	phi = azmalt.azm().radians();
 	QPointF	starcenter(_center.x() + r * sin(phi),
 			_center.y() + r * cos(phi));
@@ -340,6 +360,16 @@ void	SkyDrawing::draw(QPainter& painter, QSize& size) {
 	QColor	black(0, 0, 0);
 	painter.fillPath(circle, black);
 
+	// first draw the milkyway
+	if (show_milkyway()) {
+		try {
+			drawMilkyWay(painter);
+		} catch (const std::exception& x) {
+			debug(LOG_ERR, DEBUG_LOG, 0, "cannot draw milkyway: %s",
+				x.what());
+		}
+	}
+
 	// draw the grids
 	if (show_altaz()) {
 		drawAltaz(painter);
@@ -432,6 +462,90 @@ void	SkyDrawing::targetChanged(astro::RaDec target) {
 	if (show_target()) {
 		redraw();
 	}
+}
+
+/**
+ * \brief Draw the Milkyway
+ *
+ * \param painter	painter to draw the milkyway with
+ */
+void	SkyDrawing::drawMilkyWay(QPainter& painter) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "draw the milkyway");
+	astro::catalog::MilkyWayPtr	milkyway = MilkyWay::get();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "found the milkyway");
+	drawMilkyWayLevel(painter, milkyway, astro::catalog::MilkyWay::L1);
+	drawMilkyWayLevel(painter, milkyway, astro::catalog::MilkyWay::L2);
+	drawMilkyWayLevel(painter, milkyway, astro::catalog::MilkyWay::L3);
+	drawMilkyWayLevel(painter, milkyway, astro::catalog::MilkyWay::L4);
+	drawMilkyWayLevel(painter, milkyway, astro::catalog::MilkyWay::L5);
+}
+
+/**
+ * \brief Draw the outlines for a given level
+ *
+ * There is a small problem with level L1 as the curves cannot individually
+ * be filled. This means that we treet level L1 differently and draw only
+ * the outline.
+ *
+ * \param painter	painter to draw the milkyway with
+ * \param milkyway	the milkyway structure to take the outlines from
+ * \param level		the level to draw
+ */
+void	SkyDrawing::drawMilkyWayLevel(QPainter& painter,
+		astro::catalog::MilkyWayPtr milkyway,
+		astro::catalog::MilkyWay::level_t level) {
+	int	l = 64 + 16 * (int)level;
+	QColor	brushcolor(l, l, l);
+	QBrush	brush(brushcolor);
+	int	L = l;
+	if (L < 128) {
+		L = 128;
+	}
+	QColor	pencolor(L, L, L);
+	QPen	pen;
+	pen.setColor(pencolor);
+	pen.setWidth(1);
+	painter.setPen(pen);
+	astro::catalog::OutlineListPtr	outlines = (*milkyway)[level];
+	// go through the outlines
+	SkyDrawing	*skydrawing = this;
+	for_each(outlines->begin(), outlines->end(),
+		[&painter,skydrawing,level,&brush](OutlinePtr& outline)
+			mutable {
+			skydrawing->drawMilkyWayOutline(painter, outline,
+				level, brush);
+		}
+	);
+}
+
+/**
+ * \brief Draw an outline
+ *
+ * note that the level is needed to decide whether to fill the outline or
+ * not. Only Levels above L1 can be filled.
+ *
+ * \param painter	painter to draw the milkyway with
+ * \param outline	the outline to be drawn
+ * \param level		the level of this outline
+ * \param brush		the brush to be used for filling
+ */
+void	SkyDrawing::drawMilkyWayOutline(QPainter& painter,
+		astro::catalog::OutlinePtr outline,
+		astro::catalog::MilkyWay::level_t level,
+		QBrush& brush) {
+	QPainterPath	path;
+	auto	i = outline->begin();
+	path.moveTo(convertlimited(*i));
+	int	counter = 0;
+	while (++i != outline->end()) {
+		path.lineTo(convertlimited(*i));
+		counter++;
+	}
+	path.closeSubpath();
+	if (level > 0) {
+		painter.fillPath(path, brush);
+	}
+	painter.drawPath(path);
 }
 
 } // namespace snowgui

@@ -18,6 +18,8 @@ std::string	MilkyWay::default_path(DATAROOTDIR
 
 /**
  * \brief Construct the MilkyWay from a stream
+ *
+ * \param in	the stream containing the milkyway JSON to parse
  */
 MilkyWay::MilkyWay(std::istream& in) {
 	parse(in);
@@ -25,6 +27,8 @@ MilkyWay::MilkyWay(std::istream& in) {
 
 /**
  * \brief Construct the MilkyWay from a file 
+ *
+ * \param filename	the full path of the milkyway json data file
  */
 MilkyWay::MilkyWay(const std::string& filename) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "opening file %s", filename.c_str());
@@ -45,7 +49,7 @@ MilkyWay::MilkyWay() {
 /**
  * \brief Parse a stream as a JSON file and then interpret it as outlines
  *
- * \param in	stream about 
+ * \param in	stream containing the milkyway data
  */
 void	MilkyWay::parse(std::istream& in) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "parse milkyway jason file");
@@ -86,16 +90,26 @@ void	MilkyWay::parse(std::istream& in) {
 	//std::cout << j.dump(4) << std::endl;
 }
 
+static MilkyWayPtr	milkywayptr(NULL);
+static struct std::once_flag	milkyway_once;
+static void	milkyway_initialize() {
+	milkywayptr = MilkyWayPtr(new MilkyWay());
+}
+
 /**
  * \brief Factory method for default file
+ *
+ * This method ensures that the default constructor is called only once.
  */
 MilkyWayPtr	MilkyWay::get() {
-	MilkyWayPtr	result(new MilkyWay());
-	return result;
+	std::call_once(milkyway_once, milkyway_initialize);
+	return milkywayptr;
 }
 
 /**
  * \brief Factory method from arbitrary path
+ *
+ * \param filename	the full path of the mw.json file
  */
 MilkyWayPtr	MilkyWay::get(const std::string& filename) {
 	MilkyWayPtr	result(new MilkyWay(filename));

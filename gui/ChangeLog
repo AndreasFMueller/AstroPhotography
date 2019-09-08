@@ -1,5 +1,8 @@
 ChangeLog for the Qt GUI to Astrophotography
 
+20190908:
+	* draw MilkyWay in the SkyDrawing class
+
 20190904:
 	* add tooltips (don't work when generated from QtCreator)
 	* fix orientation of CalibrationDisplay

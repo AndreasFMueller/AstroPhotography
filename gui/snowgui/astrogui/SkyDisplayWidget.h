@@ -84,6 +84,7 @@ public slots:
 	void	setTooltipVisible(bool);
 	void	setLabelsVisible(bool);
 	void	setEclipticVisible(bool);
+	void	setMilkywayVisible(bool);
 
 	void	toggleAltAzmGridVisible();
 	void	toggleRaDecGridVisible();
@@ -93,6 +94,7 @@ public slots:
 	void	toggleTooltipVisible();
 	void	toggleLabelsVisible();
 	void	toggleEclipticVisible();
+	void	toggleMilkywayVisible();
 
 	void	showContextMenu(const QPoint& point);
 

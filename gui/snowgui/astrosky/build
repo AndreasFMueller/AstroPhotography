@@ -3,11 +3,27 @@
 # 
 make -j 8
 
-options="--debug --cardinal --size=800 --longitude=9.75 --latitude=46.9167 --declination=56.57 --rightascension=0.87361 test.png"
+location1="--longitude=9.75 --latitude=46.9167"
+location2="--longitude=189.75 --latitude=-46.9167"
+point="--declination=56.57 --rightascension=0.87361"
+options="--debug --cardinal --size=800 ${point}"
+
+case `uname` in
+        Linux)
+                rm astrosky
+                ;;
+        Darwin)
+                rm -rf astrosky.app
+                ;;
+esac
+
+make -j 8
 
 if [ -d astrosky.app ]
 then
-	astrosky.app/Contents/MacOS/astrosky ${options} 2>&1 | tee build.log
+	astrosky.app/Contents/MacOS/astrosky ${options} ${location1} test1.png 2>&1 | tee build.log
+	astrosky.app/Contents/MacOS/astrosky ${options} ${location2} test2.png 2>&1 | tee build.log
 else
-	./astrosky ${options} 2>&1 | tee build.log
+	./astrosky ${options} ${location1} test1.png 2>&1 | tee build.log
+	./astrosky ${options} ${location2} test1.png 2>&1 | tee build.log
 fi

@@ -274,11 +274,28 @@ void	SkyDisplayWidget::toggleEclipticVisible() {
 	setEclipticVisible(!show_ecliptic());
 }
 
+void	SkyDisplayWidget::toggleMilkywayVisible() {
+	setMilkywayVisible(!show_milkyway());
+}
+
+void	SkyDisplayWidget::setMilkywayVisible(bool s) {
+	show_milkyway(s);
+	repaint();
+}
+
+
 void	SkyDisplayWidget::showContextMenu(const QPoint& point) {
 	_mouse_pressed = false;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "show context menu at %d/%d",
 		point.x(), point.y());
 	QMenu contextMenu("Options:", this);
+
+	QAction	actionMilkyway(QString("Milkyway"), this);
+	actionMilkyway.setCheckable(true);
+	actionMilkyway.setChecked(show_milkyway());
+	contextMenu.addAction(&actionMilkyway);
+	connect(&actionMilkyway, SIGNAL(triggered()),
+		this, SLOT(toggleMilkywayVisible()));
 
 	QAction	actionRaDec(QString("RA/DEC grid"), this);
 	actionRaDec.setCheckable(true);

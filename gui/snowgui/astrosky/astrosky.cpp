@@ -30,6 +30,7 @@ void	usage(char *progname) {
 	std::cout << "  -h,-?,--help                show this help message and exit" << std::endl;
 	std::cout << "  -L,--longitude=<long>       longitude of the observatory" << std::endl;
 	std::cout << "  -l,--latitude=<lat>         latitude of the observatory" << std::endl;
+	std::cout << "  -m,--milkyway               toggle milkyway display" << std::endl;
 	std::cout << "  -R,--rightascension=<ra>    RA of the telescope marker" << std::endl;
 	std::cout << "  -s,--size=<s>               generate a <s>x<s> image, default is 1024" << std::endl;
 	std::cout << "  -t,--time=<t>               time for which to draw the image" << std::endl;
@@ -48,6 +49,7 @@ static struct option	longopts[] = {
 { "help",		no_argument,		NULL,		'h' },
 { "longitude",		required_argument,	NULL,		'L' },
 { "latitude",		required_argument,	NULL,		'l' },
+{ "milkyway",		no_argument,		NULL,		'm' },
 { "size",		required_argument,	NULL,		's' },
 { "time",		required_argument,	NULL,		't' },
 { NULL,			0,			NULL,		 0  }
@@ -65,7 +67,7 @@ int	main(int argc, char *argv[]) {
 	int	longindex;
 	int	s = 1024;
 	time_t	t = 0;
-	while (EOF != (c = getopt_long(argc, argv, "acdegh?L:l:s:D:R:t:",
+	while (EOF != (c = getopt_long(argc, argv, "acdegh?L:l:ms:D:R:t:",
 		longopts, &longindex)))
 		switch (c) {
 		case 'a':
@@ -103,6 +105,9 @@ int	main(int argc, char *argv[]) {
 			position.latitude() = astro::Angle(std::stod(optarg),
 				astro::Angle::Degrees);
 			skydrawing.positionChanged(position);
+			break;
+		case 'm':
+			skydrawing.show_milkyway(!skydrawing.show_milkyway());
 			break;
 		case 'D':
 			telescope.dec() = astro::Angle(std::stod(optarg),

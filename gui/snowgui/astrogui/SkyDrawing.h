@@ -29,6 +29,7 @@ private:
 	bool	_show_telescope;
 	bool	_show_target;
 	bool	_show_labels;
+	bool	_show_milkyway;
 	astro::RaDec	_telescope;
 	astro::RaDec	_target;
 	astro::LongLat	_position;
@@ -50,6 +51,8 @@ public:
 	void	show_target(bool c) { _show_target = c; }
 	bool	show_labels() const { return _show_labels; }
 	void	show_labels(bool l) { _show_labels = l; }
+	bool	show_milkyway() const { return _show_milkyway; }
+	void	show_milkyway(bool s) { _show_milkyway = s; }
 	void	telescope(const astro::RaDec& t) { _telescope = t; }
 	const astro::RaDec&	telescope() const { return _telescope; }
 	void	target(const astro::RaDec& t) { _target = t; }
@@ -79,10 +82,19 @@ private:
 	void	drawTarget(QPainter& painter);
 	void	drawConstellations(QPainter& painter);
 	void	drawLabels(QPainter& painter);
+	void	drawMilkyWayOutline(QPainter& painter,
+			astro::catalog::OutlinePtr outline,
+			astro::catalog::MilkyWay::level_t level,
+			QBrush& brush);
+	void	drawMilkyWayLevel(QPainter& painter,
+			astro::catalog::MilkyWayPtr milkyway,
+			astro::catalog::MilkyWay::level_t level);
+	void	drawMilkyWay(QPainter& painter);
 protected:
 	virtual void	redraw();
 	astro::AzmAlt	convert(const astro::RaDec& radec);
 	QPointF	convert(const astro::AzmAlt& azmalt);
+	QPointF	convertlimited(const astro::RaDec& radec);
 public:
 	void	draw(QPainter& painter, QSize& size);
 };

@@ -1,5 +1,8 @@
 ChangeLog for the Astro project.
 
+20190908:
+	* only call default MilkyWay constructor once
+
 20190903:
 	* portability fixes for Raspbian/Debian 10
 	* fix ASI detection
