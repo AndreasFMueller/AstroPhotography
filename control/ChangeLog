@@ -1,6 +1,7 @@
 ChangeLog for the Astro project.
 
 20190822:
+	* add MilkyWay class
 	* add scalar product to RaDec
 	* add exp(), distance() methods to RaDec
 

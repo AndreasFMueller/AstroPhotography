@@ -68,6 +68,7 @@ libastrocatalogs_la_SOURCES =						\
 	MagnitudeRange.cpp						\
 	MappedFile.cpp							\
 	MessierCatalog.cpp						\
+	MilkyWay.cpp							\
 	NGCIC.cpp							\
 	NGCICCatalog.cpp						\
 	PGCDatabase.cpp							\

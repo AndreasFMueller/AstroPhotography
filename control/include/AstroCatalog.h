@@ -125,6 +125,28 @@ public:
 	std::string	toString() const;
 };
 
+typedef std::shared_ptr<Outline>	OutlinePtr;
+typedef std::list<OutlinePtr>	OutlineList;
+typedef std::shared_ptr<OutlineList>	OutlineListPtr;
+
+class MilkyWay;
+typedef std::shared_ptr<MilkyWay>	MilkyWayPtr;
+
+/**
+ * \brief class to parse the 
+ */
+class MilkyWay : public std::map<int, OutlineListPtr> {
+	static std::string	default_path;
+	void	parse(std::istream& in);
+public:
+	typedef enum { L1, L2, L3, L4, L5 } level_t;
+	MilkyWay(const std::string& filename);
+	MilkyWay(std::istream& in);
+	MilkyWay();
+	static MilkyWayPtr	get();
+	static MilkyWayPtr	get(const std::string& filename);
+};
+
 /**
  * \brief Deep Sky objects
  */

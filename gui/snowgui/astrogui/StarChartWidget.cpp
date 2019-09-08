@@ -280,7 +280,10 @@ void	StarChartWidget::drawDeepSkyObject(QPainter& painter,
 	painter.drawText(p.x() - 40, p.y() - 10, 80, 20,
 		Qt::AlignCenter,
 		QString(deepskyobject.name.c_str()));
-	
+	if (deepskyobject.name.size() == 0) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "unnamed object %s",
+			deepskyobject.toString().c_str());
+	}
 }
 
 /**
