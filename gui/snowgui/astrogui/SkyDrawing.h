@@ -27,13 +27,19 @@ private:
 	bool	_show_ecliptic;
 	bool	_show_constellations;
 	bool	_show_telescope;
+	bool	_show_telescope_coord;
 	bool	_show_target;
+	bool	_show_target_coord;
 	bool	_show_labels;
 	bool	_show_milkyway;
+	bool	_show_position;
+	bool	_show_copyright;
+	bool	_show_time;
 	astro::RaDec	_telescope;
 	astro::RaDec	_target;
 	astro::LongLat	_position;
 	time_t		_time;
+	QSize	_size;
 public:
 	explicit	SkyDrawing();
 	virtual ~SkyDrawing();
@@ -47,12 +53,22 @@ public:
 	void	show_constellations(bool c) { _show_constellations = c; }
 	bool	show_telescope() const { return _show_telescope; }
 	void	show_telescope(bool c) { _show_telescope = c; }
+	bool	show_telescope_coord() const { return _show_telescope_coord; }
+	void	show_telescope_coord(bool c) { _show_telescope_coord = c; }
 	bool	show_target() const { return _show_target; }
 	void	show_target(bool c) { _show_target = c; }
+	bool	show_target_coord() const { return _show_target_coord; }
+	void	show_target_coord(bool c) { _show_target_coord = c; }
 	bool	show_labels() const { return _show_labels; }
 	void	show_labels(bool l) { _show_labels = l; }
 	bool	show_milkyway() const { return _show_milkyway; }
 	void	show_milkyway(bool s) { _show_milkyway = s; }
+	bool	show_position() const { return _show_position; }
+	void	show_position(bool p) { _show_position = p; }
+	bool	show_copyright() const { return _show_copyright; }
+	void	show_copyright(bool c) { _show_copyright = c; }
+	bool	show_time() const { return _show_time; }
+	void	show_time(bool t) { _show_time = t; }
 	void	telescope(const astro::RaDec& t) { _telescope = t; }
 	const astro::RaDec&	telescope() const { return _telescope; }
 	void	target(const astro::RaDec& t) { _target = t; }
@@ -76,11 +92,16 @@ private:
 			const astro::RaDec& to);
 	void	drawStar(QPainter& painter, const astro::catalog::Star& star);
 	void	drawTelescope(QPainter& painter);
+	void	drawTelescopeCoord(QPainter& painter);
 	void	drawAltaz(QPainter& painter);
 	void	drawRadec(QPainter& painter);
 	void	drawEcliptic(QPainter& painter);
 	void	drawTarget(QPainter& painter);
+	void	drawTargetCoord(QPainter& painter);
 	void	drawConstellations(QPainter& painter);
+	void	drawPosition(QPainter& painter);
+	void	drawCopyright(QPainter& painter);
+	void	drawTime(QPainter& painter);
 	void	drawLabels(QPainter& painter);
 	void	drawMilkyWayOutline(QPainter& painter,
 			astro::catalog::OutlinePtr outline,
@@ -94,7 +115,7 @@ protected:
 	virtual void	redraw();
 	astro::AzmAlt	convert(const astro::RaDec& radec);
 	QPointF	convert(const astro::AzmAlt& azmalt);
-	QPointF	convertlimited(const astro::RaDec& radec);
+	std::pair<bool, QPointF>	convertlimited(const astro::RaDec& radec);
 public:
 	void	draw(QPainter& painter, QSize& size);
 };

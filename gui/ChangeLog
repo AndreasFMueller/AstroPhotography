@@ -1,6 +1,8 @@
 ChangeLog for the Qt GUI to Astrophotography
 
 20190908:
+	* add configurable labels to astrosky
+	* add --verbose to astrosky
 	* fix --help option in astrosky
 	* draw MilkyWay in the SkyDrawing class
 

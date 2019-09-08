@@ -4,6 +4,8 @@
  * (c) 2018 Prof Dr Andreas Müller, Hochschule Rapperswil
  */
 #include <SkyDrawing.h>
+#include <time.h>
+#include <sstream>
 
 using namespace astro::catalog;
 
@@ -23,8 +25,13 @@ SkyDrawing::SkyDrawing() {
 	_show_constellations = true;
 	_show_telescope = false;
 	_show_target = false;
-	_show_labels = true;
+	_show_telescope_coord = false;
+	_show_target_coord = false;
+	_show_labels = false;
 	_show_milkyway = true;
+	_show_position = false;
+	_show_time = false;
+	_show_copyright = false;
 	_converter = NULL;
 	_time = 0;
 }
@@ -73,17 +80,19 @@ QPointF	SkyDrawing::convert(const astro::AzmAlt& azmalt) {
  * This method makes sure points outside the circle are mapped to points
  * on the circle
  */
-QPointF	SkyDrawing::convertlimited(const astro::RaDec& radec) {
+std::pair<bool, QPointF>	SkyDrawing::convertlimited(const astro::RaDec& radec) {
 	astro::AzmAlt	azmalt = convert(radec);
 	float	r = 1 - azmalt.alt().radians() / (M_PI / 2);
+	bool	inside = true;
 	if (r > 1) {
+		inside = false;
 		r = 1;
 	}
 	r *= _radius;
 	double	phi = azmalt.azm().radians();
 	QPointF	starcenter(_center.x() + r * sin(phi),
 			_center.y() + r * cos(phi));
-	return starcenter;
+	return std::make_pair(inside, starcenter);
 }
 
 /**
@@ -217,6 +226,21 @@ void	SkyDrawing::drawTelescope(QPainter& painter) {
 }
 
 /**
+ * \brief Draw a telescope marker
+ *
+ * \param painter	the QPainter to use to draw the telescope marker
+ */
+void	SkyDrawing::drawTelescopeCoord(QPainter& painter) {
+	QPen	pen(Qt::SolidLine);
+	painter.setPen(pen);
+	QColor	red(255, 0, 0);
+	pen.setColor(red);
+	painter.setPen(pen);
+	painter.drawText(_center.x(), 0, _center.x(), 20,
+		Qt::AlignRight, QString(_telescope.toString().c_str()));
+}
+
+/**
  * \brief Draw a target marker
  *
  * \param painter	the QPainter to use to draw the telescope marker
@@ -246,7 +270,23 @@ void	SkyDrawing::drawTarget(QPainter& painter) {
 }
 
 /**
+ * \brief Draw the darget coordinates
+ *
+ * \param painter	the QPainter to use to draw the telescope marker
+ */
+void	SkyDrawing::drawTargetCoord(QPainter& painter) {
+	QPen	pen(Qt::SolidLine);
+	QColor	green(0, 255, 0);
+	pen.setColor(green);
+	painter.setPen(pen);
+	painter.drawText(0, 0, _center.x(), 20,
+		Qt::AlignLeft, QString(_target.toString().c_str()));
+}
+
+/**
  * \brief Draw the AltAz grid
+ *
+ * \param painter	the QPainter to use to draw the telescope marker
  */
 void	SkyDrawing::drawAltaz(QPainter& painter) {
 	// prepare a pen for drawing
@@ -275,6 +315,8 @@ void	SkyDrawing::drawAltaz(QPainter& painter) {
 
 /**
  * \brief Draw the RA/DEC grid
+ *
+ * \param painter	the QPainter to use to draw the telescope marker
  */
 void	SkyDrawing::drawRadec(QPainter& painter) {
 	// prepare a pen for drawing
@@ -313,6 +355,8 @@ static astro::RaDec	ecliptic_point(const astro::Angle ra) {
 
 /**
  * \brief Draw the Ecliptic
+ *
+ * \param painter	the QPainter to use to draw the telescope marker
  */
 void	SkyDrawing::drawEcliptic(QPainter& painter) {
 	// prepare green pen for drawing
@@ -334,7 +378,75 @@ void	SkyDrawing::drawEcliptic(QPainter& painter) {
 }
 
 /**
+ * \brief Draw the position label in the lower left corner
+ *
+ * \param painter	the QPainter to use to draw the telescope marker
+ */
+void	SkyDrawing::drawPosition(QPainter& painter) {
+	QPen	pen(Qt::SolidLine);
+	pen.setColor(Qt::white);
+	painter.setPen(pen);
+
+        astro::Angle   lo = _position.longitude();
+        while (lo > astro::Angle(M_PI)) { lo = lo - astro::Angle(M_PI); }
+        while (lo < astro::Angle(-M_PI)) { lo = lo + astro::Angle(M_PI); }
+        astro::Angle   la = _position.latitude();
+        std::ostringstream      out;
+        if (lo >= 0) {
+                out << "E ";
+        } else {
+                out << "W ";
+        }
+        out      << lo.dms(':', 0).substr(1);
+        if (la >= 0) {
+                out << " N ";
+        } else {
+                out << " S ";
+        }
+        out      << la.dms(':', 0).substr(1);
+
+	painter.drawText(0, _size.height() - 40, _radius, 40,
+		Qt::AlignLeft, QString(out.str().c_str()));
+}
+
+/**
+ * \brief show the time in the lower left corner
+ *
+ * \param painter	the QPainter to use to draw the telescope marker
+ */
+void	SkyDrawing::drawTime(QPainter& painter) {
+	time_t	t = _time;
+	if (!_time) {
+		::time(&t);
+	}
+	struct tm	*tmp = localtime(&t);
+	char	buffer[128];
+	strftime(buffer, sizeof(buffer), "%F %T", tmp);
+	QPen	pen(Qt::SolidLine);
+	pen.setColor(Qt::white);
+	painter.setPen(pen);
+	painter.drawText(0, _size.height() - 20, _radius, 20,
+		Qt::AlignLeft, QString(buffer));
+}
+
+/**
+ * \brief show the copyright in the lower right corner
+ *
+ * \param painter	the QPainter to use to draw the telescope marker
+ */
+void	SkyDrawing::drawCopyright(QPainter& painter) {
+	QPen	pen(Qt::SolidLine);
+	pen.setColor(Qt::white);
+	painter.setPen(pen);
+	painter.drawText(_center.x(), _size.height() - 20, _radius, 20,
+		Qt::AlignRight, QString("(c) 2019 AstroPhotography"));
+}
+
+/**
  * \brief paint the sky anew
+ *
+ * \param painter	the QPainter to use to draw the telescope marker
+ * \param size		size of the pixmap to draw on
  */
 void	SkyDrawing::draw(QPainter& painter, QSize& size) {
 	if (NULL != _converter) {
@@ -348,6 +460,7 @@ void	SkyDrawing::draw(QPainter& painter, QSize& size) {
 	}
 
 	// set up the parameters of drawing: radius and center
+	_size = size;
 	_radius = std::min<float>(size.width() / 2., size.height() / 2);
 	_center = QPointF(size.width() / 2, size.height() / 2);
 
@@ -396,12 +509,28 @@ void	SkyDrawing::draw(QPainter& painter, QSize& size) {
 	if (show_telescope()) {
 		drawTelescope(painter);
 	}
+	if (show_telescope_coord()) {
+		drawTelescopeCoord(painter);
+	}
 	if (show_target()) {
 		drawTarget(painter);
+	}
+	if (show_target_coord()) {
+		drawTargetCoord(painter);
 	}
 
 	if (show_labels()) {
 		drawLabels(painter);
+	}
+
+	if (show_copyright()) {
+		drawCopyright(painter);
+	}
+	if (show_position()) {
+		drawPosition(painter);
+	}
+	if (show_time()) {
+		drawTime(painter);
 	}
 }
 
@@ -535,10 +664,14 @@ void	SkyDrawing::drawMilkyWayOutline(QPainter& painter,
 		QBrush& brush) {
 	QPainterPath	path;
 	auto	i = outline->begin();
-	path.moveTo(convertlimited(*i));
+	std::pair<bool, QPointF>	pp = convertlimited(*i);
+	path.moveTo(pp.second);
 	int	counter = 0;
 	while (++i != outline->end()) {
-		path.lineTo(convertlimited(*i));
+		pp = convertlimited(*i);
+		if (pp.first) {
+			path.lineTo(pp.second);
+		}
 		counter++;
 	}
 	path.closeSubpath();

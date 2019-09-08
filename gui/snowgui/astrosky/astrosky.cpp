@@ -23,6 +23,7 @@ void	usage(char *progname) {
 	std::cout << "  -a,--altaz                  toggle display of altitude and azimut" << std::endl;
 	std::cout << "  -c,--constellations         toggle the display of constellations" << std::endl;
 	std::cout << "  -C,--cardinal               toggle labels for cardinal directions" << std::endl;
+	std::cout << "  --copyright                 display copyright string" << std::endl;
 	std::cout << "  -d,--debug                  increase debug level" << std::endl;
 	std::cout << "  -D,--declination=<dec>      DEC of the telescope marker" << std::endl;
 	std::cout << "  -e,--ecliptic               toggle display of the ecliptic" << std::endl;
@@ -31,9 +32,15 @@ void	usage(char *progname) {
 	std::cout << "  -L,--longitude=<long>       longitude of the observatory" << std::endl;
 	std::cout << "  -l,--latitude=<lat>         latitude of the observatory" << std::endl;
 	std::cout << "  -m,--milkyway               toggle milkyway display" << std::endl;
+	std::cout << "  -p,--position               display the position" << std::endl;
 	std::cout << "  -R,--rightascension=<ra>    RA of the telescope marker" << std::endl;
 	std::cout << "  -s,--size=<s>               generate a <s>x<s> image, default is 1024" << std::endl;
+	std::cout << "  -S,--timestamp              display a timestamp" << std::endl;
 	std::cout << "  -t,--time=<t>               time for which to draw the image" << std::endl;
+	std::cout << "  -T,--telescope-coord        draw the telescope coordinates" << std::endl;
+	std::cout << "  -X,--target-coord           draw the target coordinates" << std::endl;
+	std::cout << "  -Y,--target-ra=<ra>         right ascension of the target" << std::endl;
+	std::cout << "  -Z,--target-dec=<dec>       declination of the target" << std::endl;
 	std::cout << "  -v,--verbose                verbose display" << std::endl;
 	std::cout << std::endl;
 }
@@ -42,6 +49,7 @@ static struct option	longopts[] = {
 { "altaz",		no_argument,		NULL,		'a' },
 { "constellations",	no_argument,		NULL,		'c' },
 { "cardinal",		no_argument,		NULL,		'C' },
+{ "copyright",		no_argument,		NULL,		'f' },
 { "debug",		no_argument,		NULL,		'd' },
 { "declination",	required_argument,	NULL,		'D' },
 { "ecliptic",		no_argument,		NULL,		'e' },
@@ -51,8 +59,14 @@ static struct option	longopts[] = {
 { "longitude",		required_argument,	NULL,		'L' },
 { "latitude",		required_argument,	NULL,		'l' },
 { "milkyway",		no_argument,		NULL,		'm' },
+{ "position",		no_argument,		NULL,		'p' },
 { "size",		required_argument,	NULL,		's' },
+{ "timestamp",		no_argument,		NULL,		'S' },
 { "time",		required_argument,	NULL,		't' },
+{ "telescope-coord",	no_argument,		NULL,		'T' },
+{ "target-coord",	no_argument,		NULL,		'X' },
+{ "target-ra",		required_argument,	NULL,		'Y' },
+{ "target-dec",		required_argument,	NULL,		'Z' },
 { "verbose",		no_argument,		NULL,		'v' },
 { NULL,			0,			NULL,		 0  }
 };
@@ -66,14 +80,15 @@ int	main(int argc, char *argv[]) {
 
 	astro::LongLat	position;
 	astro::RaDec	telescope;
+	astro::RaDec	target;
 	SkyDrawing	skydrawing;
 
 	int	c;
 	int	longindex;
 	int	s = 1024;
 	time_t	t = 0;
-	while (EOF != (c = getopt_long(argc, argv, "acdegh?L:l:ms:D:R:t:v",
-		longopts, &longindex)))
+	while (EOF != (c = getopt_long(argc, argv,
+		"acdefgh?L:l:mps:SD:R:t:vTXY:Z:", longopts, &longindex)))
 		switch (c) {
 		case 'a':
 			skydrawing.show_altaz(
@@ -88,6 +103,9 @@ int	main(int argc, char *argv[]) {
 			break;
 		case 'd':
 			debuglevel = LOG_DEBUG;
+			break;
+		case 'f':
+			skydrawing.show_copyright(true);
 			break;
 		case 'g':
 			skydrawing.show_radec(
@@ -120,6 +138,9 @@ int	main(int argc, char *argv[]) {
 			skydrawing.telescopeChanged(telescope);
 			skydrawing.show_telescope(true);
 			break;
+		case 'p':
+			skydrawing.show_position(true);
+			break;
 		case 'R':
 			telescope.ra() = astro::Angle(std::stod(optarg),
 				astro::Angle::Hours);
@@ -129,8 +150,29 @@ int	main(int argc, char *argv[]) {
 		case 's':
 			s = std::stoi(optarg);
 			break;
+		case 'S':
+			skydrawing.show_time(true);
+			break;
 		case 't':
 			t = std::stoi(optarg);
+			break;
+		case 'T':
+			skydrawing.show_telescope_coord(true);
+			break;
+		case 'X':
+			skydrawing.show_target_coord(true);
+			break;
+		case 'Y':
+			target.ra() = astro::Angle(std::stod(optarg),
+				astro::Angle::Hours);
+			skydrawing.targetChanged(target);
+			skydrawing.show_target(true);
+			break;
+		case 'Z':
+			target.dec() = astro::Angle(std::stod(optarg),
+				astro::Angle::Degrees);
+			skydrawing.targetChanged(target);
+			skydrawing.show_target(true);
 			break;
 		case 'v':
 			verbose = true;
@@ -138,7 +180,12 @@ int	main(int argc, char *argv[]) {
 		}
 
 	QApplication	*app = NULL;
-	if (skydrawing.show_labels()) {
+	if (	skydrawing.show_labels() ||
+		skydrawing.show_telescope_coord() ||
+		skydrawing.show_target_coord() ||
+		skydrawing.show_copyright() ||
+		skydrawing.show_position() ||
+		skydrawing.show_time()) {
 		try {
 			app = new QApplication(argc, argv);
 		} catch (const std::exception& x) {
@@ -147,7 +194,13 @@ int	main(int argc, char *argv[]) {
 		}
 	}
 	if (NULL == app) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "cannot draw any text");
 		skydrawing.show_labels(false);
+		skydrawing.show_telescope_coord(false);
+		skydrawing.show_target_coord(false);
+		skydrawing.show_copyright(false);
+		skydrawing.show_position(false);
+		skydrawing.show_time(false);
 	}
 
 	// next argument must be a filename
@@ -186,10 +239,20 @@ int	main(int argc, char *argv[]) {
 			<< YESNO(skydrawing.show_ecliptic()) << std::endl;
 		std::cout << "Milkyway:            "
 			<< YESNO(skydrawing.show_milkyway()) << std::endl;
-		std::cout << "Telscope:            "
+		std::cout << "Telescope:           "
 			<< YESNO(skydrawing.show_telescope()) << std::endl;
-		std::cout << "Target:              "
+		std::cout << "Telescope coords:    "
 			<< telescope.toString() << std::endl;
+		std::cout << "Target:              "
+			<< YESNO(skydrawing.show_target()) << std::endl;
+		std::cout << "Target coords:       "
+			<< target.toString() << std::endl;
+		std::cout << "Position:            "
+			<< YESNO(skydrawing.show_position()) << std::endl;
+		std::cout << "Position coords:     "
+			<< position.toString() << std::endl;
+		std::cout << "Copyright:           "
+			<< YESNO(skydrawing.show_copyright()) << std::endl;
 	}
 
 	// create a QImage 

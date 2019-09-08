@@ -5,8 +5,12 @@ make -j 8
 
 location1="--longitude=9.75 --latitude=46.9167"
 location2="--longitude=189.75 --latitude=-46.9167"
-point="--declination=56.57 --rightascension=0.87361"
-options="--debug --cardinal --size=800 ${point}"
+
+telescope="--declination=56.57 --rightascension=0.87361"
+target="--target-dec=61.44333 --target-ra=2.55611"
+labels="--target-coord --telescope-coord"
+labels="--position --target-coord --telescope-coord --timestamp --copyright --cardinal"
+options="--debug --verbose --size=1280 ${labels} ${telescope} ${target}"
 
 case `uname` in
         Linux)
