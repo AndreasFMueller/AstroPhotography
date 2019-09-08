@@ -34,6 +34,7 @@ void	usage(char *progname) {
 	std::cout << "  -R,--rightascension=<ra>    RA of the telescope marker" << std::endl;
 	std::cout << "  -s,--size=<s>               generate a <s>x<s> image, default is 1024" << std::endl;
 	std::cout << "  -t,--time=<t>               time for which to draw the image" << std::endl;
+	std::cout << "  -v,--verbose                verbose display" << std::endl;
 	std::cout << std::endl;
 }
 
@@ -52,12 +53,16 @@ static struct option	longopts[] = {
 { "milkyway",		no_argument,		NULL,		'm' },
 { "size",		required_argument,	NULL,		's' },
 { "time",		required_argument,	NULL,		't' },
+{ "verbose",		no_argument,		NULL,		'v' },
 { NULL,			0,			NULL,		 0  }
 };
+
+#define	YESNO(b) ((b) ? "yes" : "no")
 
 int	main(int argc, char *argv[]) {
 	debug_set_ident("astrosky");
 	debugthreads = 1;
+	bool	verbose = false;
 
 	astro::LongLat	position;
 	astro::RaDec	telescope;
@@ -67,7 +72,7 @@ int	main(int argc, char *argv[]) {
 	int	longindex;
 	int	s = 1024;
 	time_t	t = 0;
-	while (EOF != (c = getopt_long(argc, argv, "acdegh?L:l:ms:D:R:t:",
+	while (EOF != (c = getopt_long(argc, argv, "acdegh?L:l:ms:D:R:t:v",
 		longopts, &longindex)))
 		switch (c) {
 		case 'a':
@@ -127,11 +132,22 @@ int	main(int argc, char *argv[]) {
 		case 't':
 			t = std::stoi(optarg);
 			break;
+		case 'v':
+			verbose = true;
+			break;
 		}
 
 	QApplication	*app = NULL;
 	if (skydrawing.show_labels()) {
-		app = new QApplication(argc, argv);
+		try {
+			app = new QApplication(argc, argv);
+		} catch (const std::exception& x) {
+			debug(LOG_ERR, DEBUG_LOG, 0,
+				"cannot create application: %s", x.what());
+		}
+	}
+	if (NULL == app) {
+		skydrawing.show_labels(false);
 	}
 
 	// next argument must be a filename
@@ -157,6 +173,24 @@ int	main(int argc, char *argv[]) {
 	astro::Precession       precession;
 	stars = precess(precession, stars);
 	skydrawing.useStars(stars);
+
+	// display information about what we are doing
+	if (verbose) {
+		std::cout << "Location:            "
+			<< position.toString() << std::endl;
+		std::cout << "Cardinal directions: "
+			<< YESNO(skydrawing.show_labels()) << std::endl;
+		std::cout << "RA/DEC grid:         "
+			<< YESNO(skydrawing.show_radec()) << std::endl;
+		std::cout << "Ecliptic:            "
+			<< YESNO(skydrawing.show_ecliptic()) << std::endl;
+		std::cout << "Milkyway:            "
+			<< YESNO(skydrawing.show_milkyway()) << std::endl;
+		std::cout << "Telscope:            "
+			<< YESNO(skydrawing.show_telescope()) << std::endl;
+		std::cout << "Target:              "
+			<< telescope.toString() << std::endl;
+	}
 
 	// create a QImage 
 	QSize	size(s, s);
