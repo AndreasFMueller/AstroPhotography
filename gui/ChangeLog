@@ -1,6 +1,7 @@
 ChangeLog for the Qt GUI to Astrophotography
 
 20190908:
+	* fix --help option in astrosky
 	* draw MilkyWay in the SkyDrawing class
 
 20190904:

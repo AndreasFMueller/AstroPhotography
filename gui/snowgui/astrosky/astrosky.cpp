@@ -95,7 +95,7 @@ int	main(int argc, char *argv[]) {
 		case 'h':
 		case '?':
 			usage(argv[0]);
-			break;
+			return EXIT_SUCCESS;
 		case 'L':
 			position.longitude() = astro::Angle(std::stod(optarg),
 				astro::Angle::Degrees);
