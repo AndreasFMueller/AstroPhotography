@@ -1,5 +1,9 @@
 ChangeLog for the Astro project.
 
+20190909:
+	* add ConstellationCatalog to catalog library
+	* add normalization to Point class
+
 20190908:
 	* add start script for virtual frame buffer
 	* add gateway PHP scripts

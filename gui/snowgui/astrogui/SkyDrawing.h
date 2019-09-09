@@ -9,13 +9,48 @@
 #include <QObject>
 #include <QPainter>
 #include <AstroUtils.h>
+#include <AstroTypes.h>
 #include <AstroCatalog.h>
 #include <AstroCoordinates.h>
 #include <set>
 #include <cmath>
+#include <deque>
 
 namespace snowgui {
 
+/**
+ * \brief Class representing a point on the Sky View
+ */
+class SkyPoint {
+	bool	_interior;
+	astro::Point	_point;
+public:
+	SkyPoint(float x, float y, bool normalize = true);
+	SkyPoint(const astro::Point& point, bool normalize = true);
+	SkyPoint(const astro::AzmAlt& azmalt, bool normalize = true);
+	bool	interior() const { return _interior; }
+	bool	boundary() const { return !_interior; }
+	void	interior(bool i) { _interior = i; }
+	const astro::Point&	point() const { return _point; }
+	void	point(const QPointF& p) { _point = astro::Point(p.x(), p.y()); }
+	QPointF	qpoint(float radius, const QPointF& center) const;
+	float	phi() const;
+};
+
+/**
+ * \brief class representing a path on the Sky View
+ */
+class SkyPath : public std::list<SkyPoint> {
+	bool	_hasInteriorPoints;
+public:
+	SkyPath(const astro::catalog::OutlinePtr outline,
+		astro::AzmAltConverter& _converter);
+	bool	hasInteriorPoints() const { return _hasInteriorPoints; }
+};
+
+/**
+ * \brief Class that does the drawing of a sky in the SkyView
+ */
 class SkyDrawing {
 	Q_GADGET
 	astro::catalog::Catalog::starsetptr	_stars;
@@ -24,8 +59,10 @@ protected:
 private:
 	bool	_show_altaz;
 	bool	_show_radec;
+	bool	_show_pole;
 	bool	_show_ecliptic;
 	bool	_show_constellations;
+	bool	_show_constellation_labels;
 	bool	_show_telescope;
 	bool	_show_telescope_coord;
 	bool	_show_target;
@@ -47,10 +84,14 @@ public:
 	void	show_altaz(bool a) { _show_altaz = a; }
 	bool	show_radec() const { return _show_radec; }
 	void	show_radec(bool r) { _show_radec = r; }
+	bool	show_pole() const { return _show_pole; }
+	void	show_pole(bool p) { _show_pole = p; }
 	bool	show_ecliptic() const { return _show_ecliptic; }
 	void	show_ecliptic(bool r) { _show_ecliptic = r; }
 	bool	show_constellations() const { return _show_constellations; }
 	void	show_constellations(bool c) { _show_constellations = c; }
+	bool	show_constellation_labels() const { return _show_constellation_labels; }
+	void	show_constellation_labels(bool l) { _show_constellation_labels = l; }
 	bool	show_telescope() const { return _show_telescope; }
 	void	show_telescope(bool c) { _show_telescope = c; }
 	bool	show_telescope_coord() const { return _show_telescope_coord; }
@@ -95,10 +136,12 @@ private:
 	void	drawTelescopeCoord(QPainter& painter);
 	void	drawAltaz(QPainter& painter);
 	void	drawRadec(QPainter& painter);
+	void	drawPole(QPainter& painter);
 	void	drawEcliptic(QPainter& painter);
 	void	drawTarget(QPainter& painter);
 	void	drawTargetCoord(QPainter& painter);
 	void	drawConstellations(QPainter& painter);
+	void	drawConstellationLabels(QPainter& painter);
 	void	drawPosition(QPainter& painter);
 	void	drawCopyright(QPainter& painter);
 	void	drawTime(QPainter& painter);

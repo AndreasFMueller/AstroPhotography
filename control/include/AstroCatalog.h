@@ -354,6 +354,47 @@ public:
 
 typedef std::shared_ptr<OutlineCatalog>	OutlineCatalogPtr;
 
+/**
+ * \brief Edge of a constellation
+ */
+class ConstellationEdge {
+	RaDec	_from;
+	RaDec	_to;
+public:
+	ConstellationEdge(const RaDec& from, const RaDec& to)
+		: _from(from), _to(to) {
+	}
+	const RaDec&	from() const { return _from; }
+	const RaDec&	to() const { return _to; }
+	bool	operator==(const ConstellationEdge& other) const;
+	bool	operator<(const ConstellationEdge& other) const;
+};
+
+/**
+ * \brief a single constellation
+ */
+class Constellation : public std::set<ConstellationEdge> {
+	std::string	_name;
+public:
+	Constellation(const std::string& name) : _name(name) { }
+	const std::string&	name() const { return _name; }
+	astro::RaDec	centroid() const;
+};
+
+typedef std::shared_ptr<Constellation>	ConstellationPtr;
+
+class ConstellationCatalog;
+typedef std::shared_ptr<ConstellationCatalog>	ConstellationCatalogPtr;
+
+/**
+ * \brief Constellation Catalog class
+ */
+class ConstellationCatalog : public std::map<std::string, ConstellationPtr> {
+public:
+	ConstellationCatalog();
+	static ConstellationCatalogPtr	get();
+};
+
 } // namespace catalog
 } // namespace astro
 

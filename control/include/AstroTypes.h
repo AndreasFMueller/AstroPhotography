@@ -64,6 +64,8 @@ public:
 	static Point	upperleft(const std::set<Point>& points);
 	static Point	upperright(const std::set<Point>& points);
 	static Point	centroid(const std::set<Point>& points);
+	void	normalize();
+	Point	normalized() const;
 };
 Point	operator*(double l, const Point& other);
 double	distance(const Point& p1, const Point& p2);

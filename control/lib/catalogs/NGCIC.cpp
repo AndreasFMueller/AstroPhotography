@@ -169,7 +169,7 @@ DeepSkyObject	NGCIC::find(const std::string& name) const {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "M24 found");
 		DeepSkyObject	object;
 		object.name = name;
-		object.constellation = std::string("Saggitarius");
+		object.constellation = std::string("Sagittarius");
 		object.mag(4.6);
 		object.ra() = Angle(18.28, Angle::Hours);
 		object.dec() = Angle(-18.55, Angle::Degrees);

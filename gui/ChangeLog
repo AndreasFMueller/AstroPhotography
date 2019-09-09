@@ -1,5 +1,11 @@
 ChangeLog for the Qt GUI to Astrophotography
 
+20190909:
+	* add constellation labels
+	* reimplement constellation drawing
+	* fix display of milkyway
+	* add pole letter display
+
 20190908:
 	* add configurable labels to astrosky
 	* add --verbose to astrosky

@@ -47,7 +47,6 @@ SOURCES += 								\
 	ClockWidget.cpp							\
 	ColorArithmetic.cpp						\
 	ColorRectangles.cpp						\
-	drawConstellations.cpp						\
 	DeepSkyRetriever.cpp						\
 	FitsTable.cpp							\
 	FocusPoints.cpp							\

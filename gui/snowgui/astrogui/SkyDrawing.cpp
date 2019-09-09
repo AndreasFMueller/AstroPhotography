@@ -11,6 +11,67 @@ using namespace astro::catalog;
 
 namespace snowgui {
 
+/**
+ * \brief Construct a SkyPoint
+ */
+SkyPoint::SkyPoint(const astro::AzmAlt& azmalt, bool normalize) {
+	float	r = 1 - azmalt.alt().radians() / (M_PI / 2);
+	_interior = (r < 1);
+	if ((normalize) && (r > 1)) {
+		r = 1;
+	}
+	float	phi = azmalt.azm().radians();
+	_point = astro::Point(r * sin(phi), r * cos(phi));
+}
+
+SkyPoint::SkyPoint(float x, float y, bool normalize) : _point(x, y) {
+	_interior = (hypot(x, y) < 1);
+	if ((normalize) && (!_interior)) {
+		_point.normalize();
+	}
+}
+
+SkyPoint::SkyPoint(const astro::Point& point, bool normalize) : _point(point) {
+	_interior = (hypot(point.x(), point.y()) < 1);
+	if ((normalize) && (!_interior)) {
+		_point.normalize();
+	}
+}
+
+QPointF	SkyPoint::qpoint(float radius, const QPointF& center) const {
+	return QPointF(center.x() + radius * _point.x(),
+		center.y() + radius * _point.y());
+}
+
+float	SkyPoint::phi() const {
+	return atan2(-_point.y(), _point.x());
+}
+
+SkyPath::SkyPath(const astro::catalog::OutlinePtr outline,
+	astro::AzmAltConverter& converter) {
+	_hasInteriorPoints = false;
+	for (auto i = outline->begin(); i != outline->end(); i++) {
+		SkyPoint	p(converter(*i));
+		push_back(p);
+		_hasInteriorPoints |= p.interior();
+	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "has%s interior points",
+		(_hasInteriorPoints) ? "" : " no");
+	// make sure the path starts with an interior point
+	int	counter = 0;
+	if (_hasInteriorPoints) {
+		while (!front().interior()) {
+			push_back(front());
+			pop_front();
+			counter++;
+		}
+		if (counter) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0,
+				"starting at interior point %d", counter);
+		}
+	}
+}
+
 static bool	visible(const astro::AzmAlt& a) {
 	return (a.alt().radians() > 0);
 }
@@ -21,8 +82,10 @@ static bool	visible(const astro::AzmAlt& a) {
 SkyDrawing::SkyDrawing() {
 	_show_altaz = true;
 	_show_radec = true;
+	_show_pole = false;
 	_show_ecliptic = true;
 	_show_constellations = true;
+	_show_constellation_labels = true;
 	_show_telescope = false;
 	_show_target = false;
 	_show_telescope_coord = false;
@@ -348,6 +411,38 @@ void	SkyDrawing::drawRadec(QPainter& painter) {
 	}
 }
 
+/**
+ * \brief Draw the pole
+ */
+void	SkyDrawing::drawPole(QPainter& painter) {
+	// prepare a pen for drawing
+	QPen	pen(Qt::SolidLine);
+	pen.setWidth(1);
+	QColor	blue(102,204,255);
+	pen.setColor(blue);
+	painter.setPen(pen);
+
+	// handle north and south point
+	std::pair<bool, QPointF>	N
+		= convertlimited(astro::RaDec::north_pole);
+	if (N.first) {
+		QPainterPath	painterpath;
+		painterpath.addEllipse(N.second.x() - 10, N.second.y() - 10, 20, 20);
+		painter.fillPath(painterpath, Qt::black);
+		painter.drawText(N.second.x() - 10, N.second.y() - 10,
+			20, 20, Qt::AlignCenter, QString("N"));
+	}
+	std::pair<bool, QPointF>	S
+		= convertlimited(astro::RaDec::south_pole);
+	if (S.first) {
+		QPainterPath	painterpath;
+		painterpath.addEllipse(S.second.x() - 10, S.second.y() - 10, 20, 20);
+		painter.fillPath(painterpath, Qt::black);
+		painter.drawText(S.second.x() - 10, S.second.y() - 10,
+			20, 20, Qt::AlignCenter, QString("S"));
+	}
+}
+
 static astro::RaDec	ecliptic_point(const astro::Angle ra) {
 	astro::Angle	dec = astro::arctan(sin(ra) * sin(astro::Angle::ecliptic_angle));
 	return astro::RaDec(ra, dec);
@@ -490,11 +585,17 @@ void	SkyDrawing::draw(QPainter& painter, QSize& size) {
 	if (show_radec()) {
 		drawRadec(painter);
 	}
+	if (show_pole()) {
+		drawPole(painter);
+	}
 	if (show_ecliptic()) {
 		drawEcliptic(painter);
 	}
 	if (show_constellations()) {
 		drawConstellations(painter);
+	}
+	if (show_constellation_labels()) {
+		drawConstellationLabels(painter);
 	}
 
 	// draw the stars
@@ -627,13 +728,13 @@ void	SkyDrawing::drawMilkyWayLevel(QPainter& painter,
 	QColor	brushcolor(l, l, l);
 	QBrush	brush(brushcolor);
 	int	L = l;
-	if (L < 128) {
-		L = 128;
-	}
+//	if (L < 128) {
+//		L = 128;
+//	}
 	QColor	pencolor(L, L, L);
 	QPen	pen;
 	pen.setColor(pencolor);
-	pen.setWidth(1);
+	pen.setWidth(2);
 	painter.setPen(pen);
 	astro::catalog::OutlineListPtr	outlines = (*milkyway)[level];
 	// go through the outlines
@@ -662,23 +763,93 @@ void	SkyDrawing::drawMilkyWayOutline(QPainter& painter,
 		astro::catalog::OutlinePtr outline,
 		astro::catalog::MilkyWay::level_t level,
 		QBrush& brush) {
-	QPainterPath	path;
-	auto	i = outline->begin();
-	std::pair<bool, QPointF>	pp = convertlimited(*i);
-	path.moveTo(pp.second);
+	// convert the outline into a SkyPath
+	SkyPath	path(outline, *_converter);
+	if (!path.hasInteriorPoints()) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0,
+			"path has no interior points, skipping");
+		return;
+	}
+
+	// now draw
+	QPainterPath	painterpath;
+	auto	i = path.begin();
+	SkyPoint	previous = *i;
+	painterpath.moveTo(previous.qpoint(_radius, _center));
 	int	counter = 0;
-	while (++i != outline->end()) {
-		pp = convertlimited(*i);
-		if (pp.first) {
-			path.lineTo(pp.second);
+	while (++i != path.end()) {
+		SkyPoint	next = *i;
+		if ((previous.boundary()) && (next.boundary())) {
+			float	start = previous.phi() * 180 / M_PI;
+			float	end = next.phi() * 180 / M_PI;
+			// draw an arc
+			painterpath.arcTo(0, 0,
+				2 * _center.x(), 2 * _center.y(),
+				start, end - start);
+		} else {
+			painterpath.lineTo(next.qpoint(_radius, _center));
 		}
 		counter++;
+		previous = next;
 	}
-	path.closeSubpath();
+	painterpath.closeSubpath();
 	if (level > 0) {
-		painter.fillPath(path, brush);
+		painter.fillPath(painterpath, brush);
 	}
-	painter.drawPath(path);
+	painter.drawPath(painterpath);
+}
+
+/**
+ * \brief Draw the constellation labels
+ */
+void	SkyDrawing::drawConstellationLabels(QPainter& painter) {
+	// set the constellation color
+	QPen	pen(Qt::SolidLine);
+	QColor	pink(255,0,204);
+	pen.setColor(pink);
+	painter.setPen(pen);
+
+	// the the constellation data
+	ConstellationCatalogPtr	consts = ConstellationCatalog::get();
+
+	// iterate through the constellations
+	for (auto i = consts->begin(); i != consts->end(); i++) {
+		std::string	name = i->first;
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "display label for %s",
+			name.c_str());
+		astro::RaDec	pos = i->second->centroid();
+		std::pair<bool, QPointF>	p = convertlimited(pos);
+		if (p.first) {
+			painter.drawText(p.second.x() - 15, p.second.y() - 15,
+				30, 20, Qt::AlignCenter, QString(name.c_str()));
+		}
+	}
+}
+
+/**
+ * \brief Draw constellation lines
+ */
+void	SkyDrawing::drawConstellations(QPainter& painter) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "draw constellation lines");
+	// set up the pen 
+	QPen	pen(Qt::SolidLine);
+	pen.setWidth(1);
+	QColor	pink(255,0,204);
+	pen.setColor(pink);
+	painter.setPen(pen);
+
+	// get the Constellations
+	astro::catalog::ConstellationCatalogPtr	consts
+		= astro::catalog::ConstellationCatalog::get();
+	for (auto c = consts->begin(); c != consts->end(); c++) {
+		// get the next constellation
+		astro::catalog::ConstellationPtr	constellation = c->second;
+		for (auto e = constellation->begin();
+			e != constellation->end(); e++) {
+			// go through all the edges
+			drawLine(painter, e->from(), e->to());
+		}
+	}
 }
 
 } // namespace snowgui

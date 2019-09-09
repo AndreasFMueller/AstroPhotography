@@ -33,6 +33,7 @@ void	usage(char *progname) {
 	std::cout << "  -l,--latitude=<lat>         latitude of the observatory" << std::endl;
 	std::cout << "  -m,--milkyway               toggle milkyway display" << std::endl;
 	std::cout << "  -p,--position               display the position" << std::endl;
+	std::cout << "  -P,--pole                   show the pole" << std::endl;
 	std::cout << "  -R,--rightascension=<ra>    RA of the telescope marker" << std::endl;
 	std::cout << "  -s,--size=<s>               generate a <s>x<s> image, default is 1024" << std::endl;
 	std::cout << "  -S,--timestamp              display a timestamp" << std::endl;
@@ -60,6 +61,7 @@ static struct option	longopts[] = {
 { "latitude",		required_argument,	NULL,		'l' },
 { "milkyway",		no_argument,		NULL,		'm' },
 { "position",		no_argument,		NULL,		'p' },
+{ "pole",		no_argument,		NULL,		'P' },
 { "size",		required_argument,	NULL,		's' },
 { "timestamp",		no_argument,		NULL,		'S' },
 { "time",		required_argument,	NULL,		't' },
@@ -88,7 +90,7 @@ int	main(int argc, char *argv[]) {
 	int	s = 1024;
 	time_t	t = 0;
 	while (EOF != (c = getopt_long(argc, argv,
-		"acdefgh?L:l:mps:SD:R:t:vTXY:Z:", longopts, &longindex)))
+		"acdefgh?L:l:mpPs:SD:R:t:vTXY:Z:", longopts, &longindex)))
 		switch (c) {
 		case 'a':
 			skydrawing.show_altaz(
@@ -141,6 +143,9 @@ int	main(int argc, char *argv[]) {
 		case 'p':
 			skydrawing.show_position(true);
 			break;
+		case 'P':
+			skydrawing.show_pole(true);
+			break;
 		case 'R':
 			telescope.ra() = astro::Angle(std::stod(optarg),
 				astro::Angle::Hours);
@@ -183,6 +188,7 @@ int	main(int argc, char *argv[]) {
 	if (	skydrawing.show_labels() ||
 		skydrawing.show_telescope_coord() ||
 		skydrawing.show_target_coord() ||
+		skydrawing.show_pole() ||
 		skydrawing.show_copyright() ||
 		skydrawing.show_position() ||
 		skydrawing.show_time()) {
@@ -198,6 +204,7 @@ int	main(int argc, char *argv[]) {
 		skydrawing.show_labels(false);
 		skydrawing.show_telescope_coord(false);
 		skydrawing.show_target_coord(false);
+		skydrawing.show_pole(false);
 		skydrawing.show_copyright(false);
 		skydrawing.show_position(false);
 		skydrawing.show_time(false);
@@ -235,6 +242,8 @@ int	main(int argc, char *argv[]) {
 			<< YESNO(skydrawing.show_labels()) << std::endl;
 		std::cout << "RA/DEC grid:         "
 			<< YESNO(skydrawing.show_radec()) << std::endl;
+		std::cout << "Poles:               "
+			<< YESNO(skydrawing.show_pole()) << std::endl;
 		std::cout << "Ecliptic:            "
 			<< YESNO(skydrawing.show_ecliptic()) << std::endl;
 		std::cout << "Milkyway:            "

@@ -16,8 +16,13 @@ catalogs_dependencies =							\
 
 noinst_PROGRAMS = listcatalog
 
+noinst_SCRIPTS = mkconstellations.sh
+
+EXTRA_DIST = ConstellationLinesAll2002.csv ConstellationLinesAll2002.xls
+
 noinst_HEADERS =							\
 	BSC.h								\
+	constellations.h						\
 	CatalogBackend.h						\
 	CatalogIterator.h						\
 	CutoverConditions.h						\
@@ -49,6 +54,7 @@ libastrocatalogs_la_SOURCES =						\
 	ChartFactory.cpp						\
 	ChartFactoryBase.cpp						\
 	ConditionIterator.cpp						\
+	ConstellationCatalog.cpp					\
 	CutoverConditions.cpp						\
 	DatabaseBackend.cpp						\
 	DatabaseBackendCreator.cpp					\
