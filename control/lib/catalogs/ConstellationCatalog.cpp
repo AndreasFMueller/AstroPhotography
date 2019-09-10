@@ -43,7 +43,7 @@ astro::RaDec	Constellation::centroid() const {
 ConstellationCatalog::ConstellationCatalog() {
 	// read the the constellation points
 	ConstellationPtr	constellation(NULL);
-	for (int i = 0; i < constellation_size; i++) {
+	for (int i = 0; i < constellation_size - 1; i++) {
 		if ((constellation_points[i].name == NULL)
 			|| (constellation_points[i+1].name == NULL)) {
 			constellation.reset();

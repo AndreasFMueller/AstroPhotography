@@ -1,5 +1,8 @@
 ChangeLog for the Astro project.
 
+20190910:
+	* fix off-by-1 error in ConstellationCatalog.cpp
+
 20190909:
 	* add ConstellationCatalog to catalog library
 	* add normalization to Point class
