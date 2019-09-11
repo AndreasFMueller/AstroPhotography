@@ -48,26 +48,21 @@ float	SkyPoint::phi() const {
 }
 
 SkyPath::SkyPath(const astro::catalog::OutlinePtr outline,
-	astro::AzmAltConverter& converter) {
+	const astro::AzmAltConverter& converter,
+	const SkyRotate& _rotate) {
 	_hasInteriorPoints = false;
 	for (auto i = outline->begin(); i != outline->end(); i++) {
 		SkyPoint	p(converter(*i));
-		push_back(p);
+		push_back(_rotate(p));
 		_hasInteriorPoints |= p.interior();
 	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "has%s interior points",
-		(_hasInteriorPoints) ? "" : " no");
+	//debug(LOG_DEBUG, DEBUG_LOG, 0, "has%s interior points",
+	//	(_hasInteriorPoints) ? "" : " no");
 	// make sure the path starts with an interior point
-	int	counter = 0;
 	if (_hasInteriorPoints) {
 		while (!front().interior()) {
 			push_back(front());
 			pop_front();
-			counter++;
-		}
-		if (counter) {
-			debug(LOG_DEBUG, DEBUG_LOG, 0,
-				"starting at interior point %d", counter);
 		}
 	}
 }
@@ -132,9 +127,9 @@ astro::AzmAlt	SkyDrawing::convert(const astro::RaDec& radec) {
 QPointF	SkyDrawing::convert(const astro::AzmAlt& azmalt) {
 	float	r = _radius * (1 - azmalt.alt().radians() / (M_PI / 2));
 	double	phi = azmalt.azm().radians();
-	QPointF	starcenter(_center.x() + r * sin(phi),
-			_center.y() + r * cos(phi));
-	return starcenter;
+	QPointF	starcenter(center().x() + r * sin(phi),
+			center().y() + r * cos(phi));
+	return _rotate(starcenter);
 }
 
 /**
@@ -153,9 +148,9 @@ std::pair<bool, QPointF>	SkyDrawing::convertlimited(const astro::RaDec& radec) {
 	}
 	r *= _radius;
 	double	phi = azmalt.azm().radians();
-	QPointF	starcenter(_center.x() + r * sin(phi),
-			_center.y() + r * cos(phi));
-	return std::make_pair(inside, starcenter);
+	QPointF	starcenter(center().x() + r * sin(phi),
+			center().y() + r * cos(phi));
+	return std::make_pair(inside, _rotate(starcenter));
 }
 
 /**
@@ -299,7 +294,7 @@ void	SkyDrawing::drawTelescopeCoord(QPainter& painter) {
 	QColor	red(255, 0, 0);
 	pen.setColor(red);
 	painter.setPen(pen);
-	painter.drawText(_center.x(), 0, _center.x(), 20,
+	painter.drawText(center().x(), 0, center().x(), 20,
 		Qt::AlignRight, QString(_telescope.toString().c_str()));
 }
 
@@ -342,7 +337,7 @@ void	SkyDrawing::drawTargetCoord(QPainter& painter) {
 	QColor	green(0, 255, 0);
 	pen.setColor(green);
 	painter.setPen(pen);
-	painter.drawText(0, 0, _center.x(), 20,
+	painter.drawText(0, 0, center().x(), 20,
 		Qt::AlignLeft, QString(_target.toString().c_str()));
 }
 
@@ -362,17 +357,17 @@ void	SkyDrawing::drawAltaz(QPainter& painter) {
 	// draw the circles
 	for (double r = 1./3; r < 1.1; r += 1./3) {
 		QPainterPath	path;
-		path.addEllipse(_center, r * _radius, r * _radius);
+		path.addEllipse(center(), r * _radius, r * _radius);
 		painter.drawPath(path);
 	}
 	
 	// draw the radial lines
 	for (double a = 0; a < M_PI; a += M_PI / 6) {
-		QPointF	p1(_center.x() + _radius * cos(a),
-				_center.y() + _radius * sin(a));
-		QPointF	p2(_center.x() - _radius * cos(a),
-				_center.y() - _radius * sin(a));
-		painter.drawLine(p1, p2);
+		QPointF	p1(center().x() + _radius * cos(a),
+				center().y() + _radius * sin(a));
+		QPointF	p2(center().x() - _radius * cos(a),
+				center().y() - _radius * sin(a));
+		painter.drawLine(_rotate(p1), _rotate(p2));
 	}
 }
 
@@ -533,7 +528,7 @@ void	SkyDrawing::drawCopyright(QPainter& painter) {
 	QPen	pen(Qt::SolidLine);
 	pen.setColor(Qt::white);
 	painter.setPen(pen);
-	painter.drawText(_center.x(), _size.height() - 20, _radius, 20,
+	painter.drawText(center().x(), _size.height() - 20, _radius, 20,
 		Qt::AlignRight, QString("(c) 2019 AstroPhotography"));
 }
 
@@ -557,14 +552,14 @@ void	SkyDrawing::draw(QPainter& painter, QSize& size) {
 	// set up the parameters of drawing: radius and center
 	_size = size;
 	_radius = std::min<float>(size.width() / 2., size.height() / 2);
-	_center = QPointF(size.width() / 2, size.height() / 2);
+	center(QPointF(size.width() / 2, size.height() / 2));
 
 	// set up a painter for drawing operations
 	painter.setRenderHint(QPainter::Antialiasing);
 
 	// draw a black circle
 	QPainterPath	circle;
-	circle.addEllipse(_center, _radius, _radius);
+	circle.addEllipse(center(), _radius, _radius);
 	QColor	black(0, 0, 0);
 	painter.fillPath(circle, black);
 
@@ -637,22 +632,32 @@ void	SkyDrawing::draw(QPainter& painter, QSize& size) {
 
 /**
  * \brief Draw direction labels
+ *
+ * \param painter	painter to draw the milkyway with
  */
 void	SkyDrawing::drawLabels(QPainter& painter) {
 	QPen	pen;
 	pen.setColor(Qt::green);
 	painter.setPen(pen);
 
-	painter.drawText(_center.x() - 10, _center.y() + _radius - 20,
+	QPointF	Spoint(center().x(), center().y() + _radius - 10);
+	Spoint = _rotate(Spoint);
+	painter.drawText(Spoint.x() - 10, Spoint.y() - 10,
 		20, 20, Qt::AlignCenter, QString("S"));
 
-	painter.drawText(_center.x() - 10, _center.y() - _radius,
+	QPointF	Npoint(center().x(), center().y() - _radius + 10);
+	Npoint = _rotate(Npoint);
+	painter.drawText(Npoint.x() - 10, Npoint.y() - 10,
 		20, 20, Qt::AlignCenter, QString("N"));
 
-	painter.drawText(_center.x() - _radius, _center.y() - 10,
+	QPointF	Epoint(center().x() - _radius + 10, center().y());
+	Epoint = _rotate(Epoint);
+	painter.drawText(Epoint.x() - 10, Epoint.y() - 10,
 		20, 20, Qt::AlignCenter, QString("E"));
 
-	painter.drawText(_center.x() + _radius - 20, _center.y() - 10,
+	QPointF	Wpoint(center().x() + _radius - 10, center().y());
+	Wpoint = _rotate(Wpoint);
+	painter.drawText(Wpoint.x() - 10, Wpoint.y() - 10,
 		20, 20, Qt::AlignCenter, QString("W"));
 }
 
@@ -700,9 +705,7 @@ void	SkyDrawing::targetChanged(astro::RaDec target) {
  * \param painter	painter to draw the milkyway with
  */
 void	SkyDrawing::drawMilkyWay(QPainter& painter) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "draw the milkyway");
 	astro::catalog::MilkyWayPtr	milkyway = MilkyWay::get();
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "found the milkyway");
 	drawMilkyWayLevel(painter, milkyway, astro::catalog::MilkyWay::L1);
 	drawMilkyWayLevel(painter, milkyway, astro::catalog::MilkyWay::L2);
 	drawMilkyWayLevel(painter, milkyway, astro::catalog::MilkyWay::L3);
@@ -728,9 +731,6 @@ void	SkyDrawing::drawMilkyWayLevel(QPainter& painter,
 	QColor	brushcolor(l, l, l);
 	QBrush	brush(brushcolor);
 	int	L = l;
-//	if (L < 128) {
-//		L = 128;
-//	}
 	QColor	pencolor(L, L, L);
 	QPen	pen;
 	pen.setColor(pencolor);
@@ -764,10 +764,10 @@ void	SkyDrawing::drawMilkyWayOutline(QPainter& painter,
 		astro::catalog::MilkyWay::level_t level,
 		QBrush& brush) {
 	// convert the outline into a SkyPath
-	SkyPath	path(outline, *_converter);
+	SkyPath	path(outline, *_converter, _rotate);
 	if (!path.hasInteriorPoints()) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0,
-			"path has no interior points, skipping");
+		//debug(LOG_DEBUG, DEBUG_LOG, 0,
+		//	"path has no interior points, skipping");
 		return;
 	}
 
@@ -775,7 +775,7 @@ void	SkyDrawing::drawMilkyWayOutline(QPainter& painter,
 	QPainterPath	painterpath;
 	auto	i = path.begin();
 	SkyPoint	previous = *i;
-	painterpath.moveTo(previous.qpoint(_radius, _center));
+	painterpath.moveTo(previous.qpoint(_radius, center()));
 	int	counter = 0;
 	while (++i != path.end()) {
 		SkyPoint	next = *i;
@@ -783,11 +783,18 @@ void	SkyDrawing::drawMilkyWayOutline(QPainter& painter,
 			float	start = previous.phi() * 180 / M_PI;
 			float	end = next.phi() * 180 / M_PI;
 			// draw an arc
-			painterpath.arcTo(0, 0,
-				2 * _center.x(), 2 * _center.y(),
-				start, end - start);
+			float	a = end - start;
+			while (a > 180) {
+				a -= 360;
+			}
+			while (a < -180) {
+				a += 360;
+			}
+			painterpath.arcTo(center().x() - _radius,
+				center().y() - _radius, 2 * _radius, 2 * _radius,
+				start, a);
 		} else {
-			painterpath.lineTo(next.qpoint(_radius, _center));
+			painterpath.lineTo(next.qpoint(_radius, center()));
 		}
 		counter++;
 		previous = next;
@@ -801,6 +808,8 @@ void	SkyDrawing::drawMilkyWayOutline(QPainter& painter,
 
 /**
  * \brief Draw the constellation labels
+ *
+ * \param painter	painter to draw the milkyway with
  */
 void	SkyDrawing::drawConstellationLabels(QPainter& painter) {
 	// set the constellation color
@@ -815,8 +824,8 @@ void	SkyDrawing::drawConstellationLabels(QPainter& painter) {
 	// iterate through the constellations
 	for (auto i = consts->begin(); i != consts->end(); i++) {
 		std::string	name = i->first;
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "display label for %s",
-			name.c_str());
+		//debug(LOG_DEBUG, DEBUG_LOG, 0, "display label for %s",
+		//	name.c_str());
 		astro::RaDec	pos = i->second->centroid();
 		std::pair<bool, QPointF>	p = convertlimited(pos);
 		if (p.first) {
@@ -830,7 +839,7 @@ void	SkyDrawing::drawConstellationLabels(QPainter& painter) {
  * \brief Draw constellation lines
  */
 void	SkyDrawing::drawConstellations(QPainter& painter) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "draw constellation lines");
+	//debug(LOG_DEBUG, DEBUG_LOG, 0, "draw constellation lines");
 	// set up the pen 
 	QPen	pen(Qt::SolidLine);
 	pen.setWidth(1);

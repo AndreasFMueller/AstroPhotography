@@ -42,6 +42,8 @@ class SkyDisplayWidget : public QWidget, public SkyDrawing {
 	QTimer	_timer;
 	bool	_show_tooltip;
 	bool	_target_enabled;
+	QDial	*_dial;
+	int	dialsize();
 public:
 	bool	show_tooltip() const { return _show_tooltip; }
 	void	show_tooltip(bool l) { _show_tooltip = l; }
@@ -60,6 +62,7 @@ protected:
 	void	mouseReleaseEvent(QMouseEvent *e);
 	void	mouseMoveEvent(QMouseEvent *e);
 	void	closeEvent(QCloseEvent *e);
+	void	resizeEvent(QResizeEvent *event);
 
 	// constructors
 public:
@@ -79,6 +82,7 @@ public slots:
 	void	setAltAzmGridVisible(bool);
 	void	setRaDecGridVisible(bool);
 	void	setConstellationsVisible(bool);
+	void	setConstellationLabelsVisible(bool);
 	void	setTargetVisible(bool);
 	void	setTelescopeVisible(bool);
 	void	setTooltipVisible(bool);
@@ -89,6 +93,7 @@ public slots:
 	void	toggleAltAzmGridVisible();
 	void	toggleRaDecGridVisible();
 	void	toggleConstellationsVisible();
+	void	toggleConstellationLabelsVisible();
 	void	toggleTargetVisible();
 	void	toggleTelescopeVisible();
 	void	toggleTooltipVisible();
@@ -97,6 +102,8 @@ public slots:
 	void	toggleMilkywayVisible();
 
 	void	showContextMenu(const QPoint& point);
+
+	void	rotationChanged(int angle);
 
 signals:
 	void	pointSelected(astro::RaDec);

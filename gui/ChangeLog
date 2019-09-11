@@ -1,6 +1,12 @@
 ChangeLog for the Qt GUI to Astrophotography
 
+20190911:
+	* add a rotation dial to SkyDisplayWidget
+	* add rotation to SkyDrawing
+	* fix MilkyWay outlines for certain angles
+
 20190909:
+	* fix a bug in the milkyway drawing code
 	* add constellation labels
 	* reimplement constellation drawing
 	* fix display of milkyway

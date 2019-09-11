@@ -8,6 +8,7 @@
 
 #include <QObject>
 #include <QPainter>
+#include <QDial>
 #include <AstroUtils.h>
 #include <AstroTypes.h>
 #include <AstroCatalog.h>
@@ -38,13 +39,55 @@ public:
 };
 
 /**
+ * \brief Class to perform rotation of the sky
+ */
+class SkyRotate {
+	QPointF	_center;
+	astro::Angle	_angle;
+	double	c;
+	double	s;
+public:
+	SkyRotate() { c = 1; s = 0; }
+	SkyRotate(const QPointF& center, const astro::Angle& angle)
+		: _center(center), _angle(angle) { }
+	const astro::Angle&	angle() const { return _angle; }
+	void	angle(const astro::Angle& a) {
+		_angle = a;
+		c = cos(_angle);
+		s = sin(_angle);
+	}
+	void	center(const QPointF& c) { _center = c; }
+	const QPointF&	center() const { return _center; }
+	QPointF	operator()(const QPointF& p) const {
+		double	x = p.x() - _center.x();
+		double	y = p.y() - _center.y();
+		return QPointF(
+			_center.x() + c * x + s * y,
+			_center.y() - s * x + c * y
+		);
+	}
+	astro::Point	operator()(const astro::Point& p) const {
+		return astro::Point(
+			+ c * p.x() + s * p.y(),
+			- s * p.x() + c * p.y()
+		);
+	}
+	SkyPoint	operator()(const SkyPoint& p) const {
+		SkyPoint	result((*this)(p.point()));
+		result.interior(p.interior());
+		return result;
+	}
+};
+
+/**
  * \brief class representing a path on the Sky View
  */
 class SkyPath : public std::list<SkyPoint> {
 	bool	_hasInteriorPoints;
 public:
 	SkyPath(const astro::catalog::OutlinePtr outline,
-		astro::AzmAltConverter& _converter);
+		const astro::AzmAltConverter& _converter,
+		const SkyRotate& _rotate);
 	bool	hasInteriorPoints() const { return _hasInteriorPoints; }
 };
 
@@ -56,6 +99,7 @@ class SkyDrawing {
 	astro::catalog::Catalog::starsetptr	_stars;
 protected:
 	astro::AzmAltConverter	*_converter;
+	SkyRotate	_rotate;
 private:
 	bool	_show_altaz;
 	bool	_show_radec;
@@ -80,6 +124,8 @@ private:
 public:
 	explicit	SkyDrawing();
 	virtual ~SkyDrawing();
+	SkyDrawing(const SkyDrawing& other) = delete;
+	SkyDrawing&	operator=(const SkyDrawing& other) = delete;
 	bool	show_altaz() const { return _show_altaz; }
 	void	show_altaz(bool a) { _show_altaz = a; }
 	bool	show_radec() const { return _show_radec; }
@@ -127,7 +173,8 @@ public:
 
 protected:
 	float	_radius;
-	QPointF	_center;
+	QPointF	center() const { return _rotate.center(); }
+	void	center(const QPointF& c) { _rotate.center(c); }
 private:
 	void	drawLine(QPainter& painter, const astro::RaDec& from,
 			const astro::RaDec& to);

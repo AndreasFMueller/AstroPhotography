@@ -347,9 +347,9 @@ public:
 	AzmAltConverter(time_t when, const LongLat& longlat);
 	AzmAltConverter(const LongLat& longlat);
 	virtual ~AzmAltConverter() { }
-	AzmAlt	operator()(const RaDec& radec);
+	AzmAlt	operator()(const RaDec& radec) const;
 	Angle	LMST() const { return _lmst; }
-	RaDec	inverse(const AzmAlt& azmalt);
+	RaDec	inverse(const AzmAlt& azmalt) const;
 	Angle	hourangle(const RaDec& radec) const;
 };
 

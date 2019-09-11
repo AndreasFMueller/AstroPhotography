@@ -11,6 +11,7 @@
 #include <QToolTip>
 #include <QAction>
 #include <QMenu>
+#include <unistd.h>
 
 using namespace astro::catalog;
 
@@ -20,6 +21,10 @@ static std::string	S(const astro::AzmAlt& a) {
 	return astro::stringprintf("azm=%.2f,alt=%.2f", a.azm().degrees(),
 		a.alt().degrees());
 }
+
+static const int	_dial_stepsize = 1;
+static const int	_dial_minsize = 50;
+static const int	_dial_maxsize = 100;
 
 /**
  * \brief Construct the SkyDisplay
@@ -48,6 +53,27 @@ SkyDisplayWidget::SkyDisplayWidget(QWidget *parent) : QWidget(parent) {
 	_mouse_pressed = false;
 	_target_enabled = false;
 
+	// set a few defaults
+	show_time(true);
+	show_position(true);
+	show_telescope_coord(true);
+	show_target_coord(true);
+	show_pole(true);
+	show_labels(true);
+
+	// configure the dial
+	_dial = new QDial(this);
+	_dial->setWrapping(true);
+	_dial->setNotchesVisible(false);
+	_dial->setMinimum(0);
+	_dial->setMaximum(360 / _dial_stepsize);
+	_dial->setSingleStep(1);
+	_dial->setValue(180 / _dial_stepsize);
+	_dial->resize(QSize(50, 50));
+
+	connect(_dial, SIGNAL(valueChanged(int)),
+		this, SLOT(rotationChanged(int)));
+
 	// start the update timer
 	_timer.setInterval(60000);
 	connect(&_timer, SIGNAL(timeout()),
@@ -63,6 +89,7 @@ SkyDisplayWidget::SkyDisplayWidget(QWidget *parent) : QWidget(parent) {
  */
 SkyDisplayWidget::~SkyDisplayWidget() {
 	_timer.stop();
+	delete _dial;
 }
 
 /**
@@ -74,9 +101,18 @@ void	SkyDisplayWidget::paintEvent(QPaintEvent * /* event */) {
 	draw(painter, s);
 }
 
+void	SkyDisplayWidget::resizeEvent(QResizeEvent *event) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "new size");
+	int	s = dialsize();
+	_dial->move(QPoint(size().width() - s, size().height() - s));
+	_dial->resize(QSize(s, s));
+	center(QPointF(size().width() / 2., size().height() / 2.));
+	QWidget::resizeEvent(event);
+}
+
 astro::RaDec	SkyDisplayWidget::convert(QMouseEvent *e) {
-	double	deltax = e->pos().x() - _center.x();
-	double	deltay = e->pos().y() - _center.y();
+	double	deltax = e->pos().x() - center().x();
+	double	deltay = e->pos().y() - center().y();
 
 	// compute the radius
 	double	f = hypot(deltax, deltay) / _radius;
@@ -217,6 +253,11 @@ void    SkyDisplayWidget::setConstellationsVisible(bool s) {
 	repaint();
 }
 
+void    SkyDisplayWidget::setConstellationLabelsVisible(bool s) {
+	show_constellation_labels(s);
+	repaint();
+}
+
 void    SkyDisplayWidget::setTargetVisible(bool s) {
 	show_target(s);
 	repaint();
@@ -252,6 +293,10 @@ void	SkyDisplayWidget::toggleAltAzmGridVisible() {
 
 void	SkyDisplayWidget::toggleConstellationsVisible() {
 	setConstellationsVisible(!show_constellations());
+}
+
+void	SkyDisplayWidget::toggleConstellationLabelsVisible() {
+	setConstellationLabelsVisible(!show_constellation_labels());
 }
 
 void	SkyDisplayWidget::toggleTargetVisible() {
@@ -325,6 +370,13 @@ void	SkyDisplayWidget::showContextMenu(const QPoint& point) {
 	connect(&actionConstellations, SIGNAL(triggered()),
 		this, SLOT(toggleConstellationsVisible()));
 
+	QAction	actionConstellationLabels(QString("Constellation labels"), this);
+	actionConstellationLabels.setCheckable(true);
+	actionConstellationLabels.setChecked(show_constellations());
+	contextMenu.addAction(&actionConstellationLabels);
+	connect(&actionConstellationLabels, SIGNAL(triggered()),
+		this, SLOT(toggleConstellationLabelsVisible()));
+
 	QAction	actionTelescope(QString("Telescope position"), this);
 	actionTelescope.setCheckable(true);
 	actionTelescope.setChecked(show_telescope());
@@ -349,6 +401,24 @@ void	SkyDisplayWidget::showContextMenu(const QPoint& point) {
 	contextMenu.exec(mapToGlobal(point));
 }
 
+void	SkyDisplayWidget::rotationChanged(int angle) {
+	angle = (180 - _dial_stepsize * angle) % 360;
+	_rotate.angle(astro::Angle((double)angle, astro::Angle::Degrees));
+	repaint();
+}
+
+int	SkyDisplayWidget::dialsize() {
+	int	r = (size().width() > size().height()) ? size().height() : size().width();
+	int	l = (size().width() < size().height()) ? size().height() : size().width();
+	int	s = l + 2 * r  - 2 * sqrt((l + r) * r);
+	if (s > _dial_maxsize) {
+		return _dial_maxsize;
+	}
+	if (s < _dial_minsize) {
+		return _dial_minsize;
+	}
+	return s;
+}
 
 } // namespace snowgui
 
