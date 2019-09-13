@@ -92,6 +92,7 @@ SkyDrawing::SkyDrawing() {
 	_show_copyright = false;
 	_converter = NULL;
 	_time = 0;
+	_timeoffset = 0;
 }
 
 /**
@@ -495,7 +496,9 @@ void	SkyDrawing::drawPosition(QPainter& painter) {
         }
         out      << la.dms(':', 0).substr(1);
 
-	painter.drawText(0, _size.height() - 40, _radius, 40,
+	//painter.drawText(0, _size.height() - 40, _radius, 40,
+	//	Qt::AlignLeft, QString(out.str().c_str()));
+	painter.drawText(0, +20, _radius, 20,
 		Qt::AlignLeft, QString(out.str().c_str()));
 }
 
@@ -509,13 +512,16 @@ void	SkyDrawing::drawTime(QPainter& painter) {
 	if (!_time) {
 		::time(&t);
 	}
+	t += timeoffset();
 	struct tm	*tmp = localtime(&t);
 	char	buffer[128];
 	strftime(buffer, sizeof(buffer), "%F %T", tmp);
 	QPen	pen(Qt::SolidLine);
 	pen.setColor(Qt::white);
 	painter.setPen(pen);
-	painter.drawText(0, _size.height() - 20, _radius, 20,
+	//painter.drawText(0, _size.height() - 20, _radius, 20,
+	//	Qt::AlignLeft, QString(buffer));
+	painter.drawText(0, +40, _radius, 20,
 		Qt::AlignLeft, QString(buffer));
 }
 
@@ -544,9 +550,11 @@ void	SkyDrawing::draw(QPainter& painter, QSize& size) {
 	}
 	_converter = new astro::AzmAltConverter(_position);
 	if (_time) {
-		_converter->update(_time);
+		_converter->update(_time + timeoffset());
 	} else {
-		_converter->update(); // updates to the current time
+		time_t	t;
+		::time(&t);
+		_converter->update(t + timeoffset()); // updates to the current time
 	}
 
 	// set up the parameters of drawing: radius and center

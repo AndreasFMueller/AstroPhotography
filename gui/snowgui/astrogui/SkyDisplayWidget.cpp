@@ -34,16 +34,6 @@ static const int	_dial_maxsize = 100;
 SkyDisplayWidget::SkyDisplayWidget(QWidget *parent) : QWidget(parent) {
 	qRegisterMetaType<astro::catalog::Catalog::starsetptr>("astro::catalog::Catalog::starsetptr");
 
-	// get all the stars from the BSC catalog
-	SkyStarThread	*_skystarthread = new SkyStarThread(this);
-	connect(_skystarthread,
-		SIGNAL(stars(astro::catalog::Catalog::starsetptr)),
-		this,
-		SLOT(useStars(astro::catalog::Catalog::starsetptr)));
-	connect(_skystarthread, SIGNAL(finished()),
-		_skystarthread, SLOT(deleteLater()));
-	_skystarthread->start();
-
 	// context menu
 	setContextMenuPolicy(Qt::CustomContextMenu);
 	connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), 
@@ -62,17 +52,15 @@ SkyDisplayWidget::SkyDisplayWidget(QWidget *parent) : QWidget(parent) {
 	show_labels(true);
 
 	// configure the dial
-	_dial = new QDial(this);
-	_dial->setWrapping(true);
-	_dial->setNotchesVisible(false);
-	_dial->setMinimum(0);
-	_dial->setMaximum(360 / _dial_stepsize);
-	_dial->setSingleStep(1);
-	_dial->setValue(180 / _dial_stepsize);
-	_dial->resize(QSize(50, 50));
+	_rotate_dial = new RotateDial(this);
 
-	connect(_dial, SIGNAL(valueChanged(int)),
+	connect(_rotate_dial, SIGNAL(valueChanged(int)),
 		this, SLOT(rotationChanged(int)));
+
+	_timeoffset_dial = new OffsetDial(this);
+
+	connect(_timeoffset_dial, SIGNAL(valueChanged(int)),
+		this, SLOT(timeoffsetChanged(int)));
 
 	// start the update timer
 	_timer.setInterval(60000);
@@ -82,6 +70,17 @@ SkyDisplayWidget::SkyDisplayWidget(QWidget *parent) : QWidget(parent) {
 
 	// enable mouse tracking
 	setMouseTracking(true);
+
+	// get all the stars from the BSC catalog
+	SkyStarThread	*_skystarthread = new SkyStarThread(this);
+	connect(_skystarthread,
+		SIGNAL(stars(astro::catalog::Catalog::starsetptr)),
+		this,
+		SLOT(useStars(astro::catalog::Catalog::starsetptr)));
+	connect(_skystarthread, SIGNAL(finished()),
+		_skystarthread, SLOT(deleteLater()));
+	_skystarthread->start();
+
 }
 
 /**
@@ -89,7 +88,12 @@ SkyDisplayWidget::SkyDisplayWidget(QWidget *parent) : QWidget(parent) {
  */
 SkyDisplayWidget::~SkyDisplayWidget() {
 	_timer.stop();
-	delete _dial;
+	if (_rotate_dial) {
+		delete _rotate_dial;
+	}
+	if (_timeoffset_dial) {
+		delete _timeoffset_dial;
+	}
 }
 
 /**
@@ -97,16 +101,25 @@ SkyDisplayWidget::~SkyDisplayWidget() {
  */
 void	SkyDisplayWidget::paintEvent(QPaintEvent * /* event */) {
 	QPainter	painter(this);
-	QSize	s = size();
-	draw(painter, s);
+	QSize	sz = size();
+	draw(painter, sz);
 }
 
 void	SkyDisplayWidget::resizeEvent(QResizeEvent *event) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "new size");
 	int	s = dialsize();
-	_dial->move(QPoint(size().width() - s, size().height() - s));
-	_dial->resize(QSize(s, s));
+
+	// fix the rotate dial
+	_rotate_dial->move(QPoint(size().width() - s, size().height() - s));
+	_rotate_dial->resize(QSize(s, s));
+
+	// fix the time offset dial
+	_timeoffset_dial->move(QPoint(0, size().height() - s));
+	_timeoffset_dial->resize(QSize(s, s));
+
+	// fix the center
 	center(QPointF(size().width() / 2., size().height() / 2.));
+
 	QWidget::resizeEvent(event);
 }
 
@@ -404,6 +417,12 @@ void	SkyDisplayWidget::showContextMenu(const QPoint& point) {
 void	SkyDisplayWidget::rotationChanged(int angle) {
 	angle = (180 - _dial_stepsize * angle) % 360;
 	_rotate.angle(astro::Angle((double)angle, astro::Angle::Degrees));
+	repaint();
+}
+
+void	SkyDisplayWidget::timeoffsetChanged(int tens) {
+	long	toff = 60 * tens;
+	timeoffset(toff);
 	repaint();
 }
 

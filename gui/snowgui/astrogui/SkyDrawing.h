@@ -120,6 +120,7 @@ private:
 	astro::RaDec	_target;
 	astro::LongLat	_position;
 	time_t		_time;
+	long	_timeoffset;
 	QSize	_size;
 public:
 	explicit	SkyDrawing();
@@ -164,6 +165,8 @@ public:
         const astro::LongLat&	position() const { return _position; }
 	void	time(time_t t) { _time = t; }
 	time_t	time() const { return _time; }
+	void	timeoffset(long t) { _timeoffset = t; }
+	long	timeoffset() const { return _timeoffset; }
 
 public:
 	virtual void	telescopeChanged(astro::RaDec);

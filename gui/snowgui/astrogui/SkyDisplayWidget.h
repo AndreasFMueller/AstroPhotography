@@ -16,6 +16,8 @@
 #include <QThread>
 #include <QTimer>
 #include <SkyDrawing.h>
+#include <OffsetDial.h>
+#include <RotateDial.h>
 
 namespace snowgui {
 
@@ -42,7 +44,8 @@ class SkyDisplayWidget : public QWidget, public SkyDrawing {
 	QTimer	_timer;
 	bool	_show_tooltip;
 	bool	_target_enabled;
-	QDial	*_dial;
+	RotateDial	*_rotate_dial;
+	OffsetDial	*_timeoffset_dial;
 	int	dialsize();
 public:
 	bool	show_tooltip() const { return _show_tooltip; }
@@ -104,6 +107,7 @@ public slots:
 	void	showContextMenu(const QPoint& point);
 
 	void	rotationChanged(int angle);
+	void	timeoffsetChanged(int tens);
 
 signals:
 	void	pointSelected(astro::RaDec);
