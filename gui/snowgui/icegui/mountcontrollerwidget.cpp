@@ -37,6 +37,11 @@ mountcontrollerwidget::mountcontrollerwidget(QWidget *parent)
 	connect(ui->catalogButton, SIGNAL(clicked()),
 		this, SLOT(catalogClicked()));
 
+	connect(ui->targetRaField, SIGNAL(textEdited(const QString&)),
+		this, SLOT(targetRaChanged(const QString &)));
+	connect(ui->targetDecField, SIGNAL(textEdited(const QString &)),
+		this, SLOT(targetDecChanged(const QString &)));
+
 	// create the update thread
 	_updatethread = new QThread(NULL);
 	connect(_updatethread, SIGNAL(finished()),
@@ -362,7 +367,11 @@ void	mountcontrollerwidget::setTarget(const astro::RaDec& target) {
 	astro::Angle	dec = target.dec();
 	ui->targetRaField->setText(QString(ra.hms(':', 1).c_str()));
 	ui->targetDecField->setText(QString(dec.dms(':', 0).c_str()));
-	_target = snowstar::convert(astro::RaDec(ra, dec));
+	astro::RaDec	newtarget(ra, dec);
+	_target = snowstar::convert(newtarget);
+
+	// make sure others learn about the new target
+	emit retarget(newtarget);
 
 	// if the _skyview is open also change the target there
 	if (_skydisplay) {
@@ -451,6 +460,37 @@ void	mountcontrollerwidget::catalogClicked() {
 		message.setInformativeText(QString(out.str().c_str()));
 		message.exec();
 	}
+}
+
+void	mountcontrollerwidget::targetChangedCommon() {
+	astro::RaDec	radec;
+	std::string	f(ui->targetRaField->text().toLatin1().data());
+	try {
+		radec.ra() = astro::Angle::hms_to_angle(f);
+	} catch (const std::exception& x) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "cannot parse '%s': %s",
+			f.c_str(), x.what());
+		return;
+	}
+	std::string	g(ui->targetDecField->text().toLatin1().data());
+	try {
+		radec.dec() = astro::Angle::dms_to_angle(g);
+	} catch (const std::exception& x) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "cannot parse '%s': %s",
+			g.c_str(), x.what());
+		return;
+	}
+	emit retarget(radec);
+}
+
+void	mountcontrollerwidget::targetRaChanged(const QString& value) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "RA change");
+	targetChangedCommon();
+}
+
+void	mountcontrollerwidget::targetDecChanged(const QString& value) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "DEC change");
+	targetChangedCommon();
 }
 
 } // namespace snowgui

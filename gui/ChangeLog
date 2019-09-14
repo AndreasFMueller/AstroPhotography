@@ -1,6 +1,8 @@
 ChangeLog for the Qt GUI to Astrophotography
 
 20190914:
+	* add target marker display to SkyChartWidget
+	* add target forwarding to mountcontrollerwidet
 	* remove some warnings
 	* fix bug in target drawing
 	* fix seg fault in SkyDrawing (caused by constellation labels)
