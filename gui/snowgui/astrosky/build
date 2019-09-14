@@ -29,6 +29,8 @@ then
 	astrosky.app/Contents/MacOS/astrosky ${options} ${location1} test1.png 2>&1 | tee build.log
 	astrosky.app/Contents/MacOS/astrosky ${options} ${location2} test2.png 2>&1 | tee build.log
 else
-	./astrosky ${options} ${location1} test1.png 2>&1 | tee build.log
-	./astrosky ${options} ${location2} test1.png 2>&1 | tee build.log
+	./astrosky ${options} ${location1} test1.png >build.log 2>&1
+	echo exit code $?
+	./astrosky ${options} ${location2} test2.png >>build.log 2>&1
+	echo exit code $?
 fi

@@ -23,7 +23,7 @@ void	usage(char *progname) {
 	std::cout << "  -a,--altaz                  toggle display of altitude and azimut" << std::endl;
 	std::cout << "  -c,--constellations         toggle the display of constellations" << std::endl;
 	std::cout << "  -C,--cardinal               toggle labels for cardinal directions" << std::endl;
-	std::cout << "  --copyright                 display copyright string" << std::endl;
+	std::cout << "  --copyright                 toggle display copyright string" << std::endl;
 	std::cout << "  -d,--debug                  increase debug level" << std::endl;
 	std::cout << "  -D,--declination=<dec>      DEC of the telescope marker" << std::endl;
 	std::cout << "  -e,--ecliptic               toggle display of the ecliptic" << std::endl;
@@ -32,14 +32,14 @@ void	usage(char *progname) {
 	std::cout << "  -L,--longitude=<long>       longitude of the observatory" << std::endl;
 	std::cout << "  -l,--latitude=<lat>         latitude of the observatory" << std::endl;
 	std::cout << "  -m,--milkyway               toggle milkyway display" << std::endl;
-	std::cout << "  -p,--position               display the position" << std::endl;
-	std::cout << "  -P,--pole                   show the pole" << std::endl;
+	std::cout << "  -p,--position               toggle display the position" << std::endl;
+	std::cout << "  -P,--pole                   toggle showing the pole" << std::endl;
 	std::cout << "  -R,--rightascension=<ra>    RA of the telescope marker" << std::endl;
 	std::cout << "  -s,--size=<s>               generate a <s>x<s> image, default is 1024" << std::endl;
-	std::cout << "  -S,--timestamp              display a timestamp" << std::endl;
+	std::cout << "  -S,--timestamp              toggle display of a timestamp" << std::endl;
 	std::cout << "  -t,--time=<t>               time for which to draw the image" << std::endl;
-	std::cout << "  -T,--telescope-coord        draw the telescope coordinates" << std::endl;
-	std::cout << "  -X,--target-coord           draw the target coordinates" << std::endl;
+	std::cout << "  -T,--telescope-coord        toggle printing the telescope coordinates" << std::endl;
+	std::cout << "  -X,--target-coord           toggle printing the target coordinates" << std::endl;
 	std::cout << "  -Y,--target-ra=<ra>         right ascension of the target" << std::endl;
 	std::cout << "  -Z,--target-dec=<dec>       declination of the target" << std::endl;
 	std::cout << "  -v,--verbose                verbose display" << std::endl;
@@ -107,7 +107,7 @@ int	main(int argc, char *argv[]) {
 			debuglevel = LOG_DEBUG;
 			break;
 		case 'f':
-			skydrawing.show_copyright(true);
+			skydrawing.show_copyright(!skydrawing.show_copyright());
 			break;
 		case 'g':
 			skydrawing.show_radec(
@@ -141,10 +141,10 @@ int	main(int argc, char *argv[]) {
 			skydrawing.show_telescope(true);
 			break;
 		case 'p':
-			skydrawing.show_position(true);
+			skydrawing.show_position(!skydrawing.show_position());
 			break;
 		case 'P':
-			skydrawing.show_pole(true);
+			skydrawing.show_pole(!skydrawing.show_pole());
 			break;
 		case 'R':
 			telescope.ra() = astro::Angle(std::stod(optarg),
@@ -156,16 +156,18 @@ int	main(int argc, char *argv[]) {
 			s = std::stoi(optarg);
 			break;
 		case 'S':
-			skydrawing.show_time(true);
+			skydrawing.show_time(!skydrawing.show_time());
 			break;
 		case 't':
 			t = std::stoi(optarg);
 			break;
 		case 'T':
-			skydrawing.show_telescope_coord(true);
+			skydrawing.show_telescope_coord(
+				!skydrawing.show_telescope_coord());
 			break;
 		case 'X':
-			skydrawing.show_target_coord(true);
+			skydrawing.show_target_coord(
+				!skydrawing.show_target_coord());
 			break;
 		case 'Y':
 			target.ra() = astro::Angle(std::stod(optarg),
@@ -186,6 +188,7 @@ int	main(int argc, char *argv[]) {
 
 	QApplication	*app = NULL;
 	if (	skydrawing.show_labels() ||
+		skydrawing.show_constellation_labels() ||
 		skydrawing.show_telescope_coord() ||
 		skydrawing.show_target_coord() ||
 		skydrawing.show_pole() ||
@@ -202,6 +205,7 @@ int	main(int argc, char *argv[]) {
 	if (NULL == app) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "cannot draw any text");
 		skydrawing.show_labels(false);
+		skydrawing.show_constellation_labels(false);
 		skydrawing.show_telescope_coord(false);
 		skydrawing.show_target_coord(false);
 		skydrawing.show_pole(false);
@@ -242,6 +246,10 @@ int	main(int argc, char *argv[]) {
 			<< YESNO(skydrawing.show_labels()) << std::endl;
 		std::cout << "RA/DEC grid:         "
 			<< YESNO(skydrawing.show_radec()) << std::endl;
+		std::cout << "constellations:      "
+			<< YESNO(skydrawing.show_constellations()) << std::endl;
+		std::cout << "constellation labels:"
+			<< YESNO(skydrawing.show_constellation_labels()) << std::endl;
 		std::cout << "Poles:               "
 			<< YESNO(skydrawing.show_pole()) << std::endl;
 		std::cout << "Ecliptic:            "
@@ -258,8 +266,8 @@ int	main(int argc, char *argv[]) {
 			<< target.toString() << std::endl;
 		std::cout << "Position:            "
 			<< YESNO(skydrawing.show_position()) << std::endl;
-		std::cout << "Position coords:     "
-			<< position.toString() << std::endl;
+		std::cout << "Time:                "
+			<< YESNO(skydrawing.show_time()) << std::endl;
 		std::cout << "Copyright:           "
 			<< YESNO(skydrawing.show_copyright()) << std::endl;
 	}

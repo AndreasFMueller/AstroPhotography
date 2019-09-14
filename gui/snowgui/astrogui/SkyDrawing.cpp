@@ -257,6 +257,7 @@ void	SkyDrawing::drawStar(QPainter& painter, const Star& star) {
  * \param painter	the QPainter to use to draw the telescope marker
  */
 void	SkyDrawing::drawTelescope(QPainter& painter) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "draw telescope marker");
 	// find out where to draw the marker
 	astro::AzmAlt	azmalt = convert(telescope());
 	if (!visible(azmalt)) {
@@ -290,6 +291,7 @@ void	SkyDrawing::drawTelescope(QPainter& painter) {
  * \param painter	the QPainter to use to draw the telescope marker
  */
 void	SkyDrawing::drawTelescopeCoord(QPainter& painter) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "print telescope position");
 	QPen	pen(Qt::SolidLine);
 	painter.setPen(pen);
 	QColor	red(255, 0, 0);
@@ -305,6 +307,7 @@ void	SkyDrawing::drawTelescopeCoord(QPainter& painter) {
  * \param painter	the QPainter to use to draw the telescope marker
  */
 void	SkyDrawing::drawTarget(QPainter& painter) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "draw target marker");
 	// find out where to draw the marker
 	astro::AzmAlt	t = convert(_target);
 	if (!visible(t)) {
@@ -334,6 +337,7 @@ void	SkyDrawing::drawTarget(QPainter& painter) {
  * \param painter	the QPainter to use to draw the telescope marker
  */
 void	SkyDrawing::drawTargetCoord(QPainter& painter) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "print target coordinates");
 	QPen	pen(Qt::SolidLine);
 	QColor	green(0, 255, 0);
 	pen.setColor(green);
@@ -348,6 +352,7 @@ void	SkyDrawing::drawTargetCoord(QPainter& painter) {
  * \param painter	the QPainter to use to draw the telescope marker
  */
 void	SkyDrawing::drawAltaz(QPainter& painter) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "draw AltAz grid");
 	// prepare a pen for drawing
 	QPen	pen(Qt::SolidLine);
 	pen.setWidth(1);
@@ -378,6 +383,7 @@ void	SkyDrawing::drawAltaz(QPainter& painter) {
  * \param painter	the QPainter to use to draw the telescope marker
  */
 void	SkyDrawing::drawRadec(QPainter& painter) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "draw RaDec grid");
 	// prepare a pen for drawing
 	QPen	pen(Qt::SolidLine);
 	pen.setWidth(1);
@@ -411,6 +417,7 @@ void	SkyDrawing::drawRadec(QPainter& painter) {
  * \brief Draw the pole
  */
 void	SkyDrawing::drawPole(QPainter& painter) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "draw pole");
 	// prepare a pen for drawing
 	QPen	pen(Qt::SolidLine);
 	pen.setWidth(1);
@@ -450,6 +457,7 @@ static astro::RaDec	ecliptic_point(const astro::Angle ra) {
  * \param painter	the QPainter to use to draw the telescope marker
  */
 void	SkyDrawing::drawEcliptic(QPainter& painter) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "draw ecliptic");
 	// prepare green pen for drawing
 	QPen	pen(Qt::SolidLine);
 	pen.setWidth(1);
@@ -474,6 +482,7 @@ void	SkyDrawing::drawEcliptic(QPainter& painter) {
  * \param painter	the QPainter to use to draw the telescope marker
  */
 void	SkyDrawing::drawPosition(QPainter& painter) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "print position");
 	QPen	pen(Qt::SolidLine);
 	pen.setColor(Qt::white);
 	painter.setPen(pen);
@@ -508,6 +517,7 @@ void	SkyDrawing::drawPosition(QPainter& painter) {
  * \param painter	the QPainter to use to draw the telescope marker
  */
 void	SkyDrawing::drawTime(QPainter& painter) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "print time");
 	time_t	t = _time;
 	if (!_time) {
 		::time(&t);
@@ -531,6 +541,7 @@ void	SkyDrawing::drawTime(QPainter& painter) {
  * \param painter	the QPainter to use to draw the telescope marker
  */
 void	SkyDrawing::drawCopyright(QPainter& painter) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "print copyright");
 	QPen	pen(Qt::SolidLine);
 	pen.setColor(Qt::white);
 	painter.setPen(pen);
@@ -602,10 +613,13 @@ void	SkyDrawing::draw(QPainter& painter, QSize& size) {
 	}
 
 	// draw the stars
-	if (_stars) {
-		Catalog::starset::const_iterator	i;
-		for (i = _stars->begin(); i != _stars->end(); i++) {
-			drawStar(painter, *i);
+	{
+		std::lock_guard<std::recursive_mutex>	lock(_mutex);
+		if (_stars) {
+			Catalog::starset::const_iterator	i;
+			for (i = _stars->begin(); i != _stars->end(); i++) {
+				drawStar(painter, *i);
+			}
 		}
 	}
 
@@ -694,6 +708,7 @@ void	SkyDrawing::positionChanged(astro::LongLat longlat) {
  */
 void	SkyDrawing::useStars(Catalog::starsetptr stars) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "got stars");
+	std::lock_guard<std::recursive_mutex>	lock(_mutex);
 	_stars = stars;
 	redraw();
 }
@@ -713,6 +728,7 @@ void	SkyDrawing::targetChanged(astro::RaDec target) {
  * \param painter	painter to draw the milkyway with
  */
 void	SkyDrawing::drawMilkyWay(QPainter& painter) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "draw milkyway");
 	astro::catalog::MilkyWayPtr	milkyway = MilkyWay::get();
 	drawMilkyWayLevel(painter, milkyway, astro::catalog::MilkyWay::L1);
 	drawMilkyWayLevel(painter, milkyway, astro::catalog::MilkyWay::L2);
@@ -820,6 +836,7 @@ void	SkyDrawing::drawMilkyWayOutline(QPainter& painter,
  * \param painter	painter to draw the milkyway with
  */
 void	SkyDrawing::drawConstellationLabels(QPainter& painter) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "draw constellation labels");
 	// set the constellation color
 	QPen	pen(Qt::SolidLine);
 	QColor	pink(255,0,204);
@@ -847,7 +864,7 @@ void	SkyDrawing::drawConstellationLabels(QPainter& painter) {
  * \brief Draw constellation lines
  */
 void	SkyDrawing::drawConstellations(QPainter& painter) {
-	//debug(LOG_DEBUG, DEBUG_LOG, 0, "draw constellation lines");
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "draw constellation lines");
 	// set up the pen 
 	QPen	pen(Qt::SolidLine);
 	pen.setWidth(1);

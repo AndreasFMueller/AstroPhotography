@@ -97,6 +97,7 @@ public:
 class SkyDrawing {
 	Q_GADGET
 	astro::catalog::Catalog::starsetptr	_stars;
+	std::recursive_mutex	_mutex;
 protected:
 	astro::AzmAltConverter	*_converter;
 	SkyRotate	_rotate;
