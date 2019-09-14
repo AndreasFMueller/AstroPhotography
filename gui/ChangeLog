@@ -1,5 +1,8 @@
 ChangeLog for the Qt GUI to Astrophotography
 
+20190914:
+	* remove some warnings
+
 20190913:
 	* add Button for time offset to SkyDisplayWidget
 	* create RotateButton and OffsetButton classes to display current
