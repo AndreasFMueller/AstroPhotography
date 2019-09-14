@@ -298,7 +298,7 @@ void	SkyDrawing::drawTelescopeCoord(QPainter& painter) {
 	pen.setColor(red);
 	painter.setPen(pen);
 	painter.drawText(center().x(), 0, center().x(), 20,
-		Qt::AlignRight, QString(_telescope.toString().c_str()));
+		Qt::AlignRight, QString(telescope().toString().c_str()));
 }
 
 /**
@@ -309,7 +309,7 @@ void	SkyDrawing::drawTelescopeCoord(QPainter& painter) {
 void	SkyDrawing::drawTarget(QPainter& painter) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "draw target marker");
 	// find out where to draw the marker
-	astro::AzmAlt	t = convert(_target);
+	astro::AzmAlt	t = convert(target());
 	if (!visible(t)) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "target below horizon");
 		return;
@@ -342,8 +342,8 @@ void	SkyDrawing::drawTargetCoord(QPainter& painter) {
 	QColor	green(0, 255, 0);
 	pen.setColor(green);
 	painter.setPen(pen);
-	painter.drawText(0, 0, center().x(), 20,
-		Qt::AlignLeft, QString(_target.toString().c_str()));
+	painter.drawText(center().x(), 20, center().x(), 20,
+		Qt::AlignRight, QString(target().toString().c_str()));
 }
 
 /**
@@ -507,7 +507,7 @@ void	SkyDrawing::drawPosition(QPainter& painter) {
 
 	//painter.drawText(0, _size.height() - 40, _radius, 40,
 	//	Qt::AlignLeft, QString(out.str().c_str()));
-	painter.drawText(0, +20, _radius, 20,
+	painter.drawText(0, 0, _radius, 20,
 		Qt::AlignLeft, QString(out.str().c_str()));
 }
 
@@ -531,7 +531,7 @@ void	SkyDrawing::drawTime(QPainter& painter) {
 	painter.setPen(pen);
 	//painter.drawText(0, _size.height() - 20, _radius, 20,
 	//	Qt::AlignLeft, QString(buffer));
-	painter.drawText(0, +40, _radius, 20,
+	painter.drawText(0, 20, _radius, 20,
 		Qt::AlignLeft, QString(buffer));
 }
 
@@ -716,7 +716,7 @@ void	SkyDrawing::useStars(Catalog::starsetptr stars) {
 void	SkyDrawing::targetChanged(astro::RaDec target) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "new target: %s",
 		target.toString().c_str());
-	_target = target;
+	SkyDrawing::target(target);
 	if (show_target()) {
 		redraw();
 	}
