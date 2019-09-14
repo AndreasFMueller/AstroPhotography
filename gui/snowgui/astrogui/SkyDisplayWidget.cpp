@@ -17,10 +17,12 @@ using namespace astro::catalog;
 
 namespace snowgui {
 
+#if 0
 static std::string	S(const astro::AzmAlt& a) {
 	return astro::stringprintf("azm=%.2f,alt=%.2f", a.azm().degrees(),
 		a.alt().degrees());
 }
+#endif
 
 static const int	_dial_stepsize = 1;
 static const int	_dial_minsize = 50;
