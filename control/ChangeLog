@@ -1,5 +1,8 @@
 ChangeLog for the Astro project.
 
+20190914:
+	* make MilkyWay debugging less verbose
+
 20190911:
 	* fix const in AzmAltConverter class
 

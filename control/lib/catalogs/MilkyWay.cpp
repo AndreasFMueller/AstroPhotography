@@ -79,8 +79,8 @@ void	MilkyWay::parse(std::istream& in) {
 				Angle	dec((*pi)[1], Angle::Degrees);
 				outline->push_back(RaDec(ra, dec));
 			}
-			debug(LOG_DEBUG, DEBUG_LOG, 0, "outline %s: %d points",
-				outline->name().c_str(), outline->size());
+			//debug(LOG_DEBUG, DEBUG_LOG, 0, "outline %s: %d points",
+			//	outline->name().c_str(), outline->size());
 		}
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "level %d: %d outlines", level,
 			outlinelist->size());
