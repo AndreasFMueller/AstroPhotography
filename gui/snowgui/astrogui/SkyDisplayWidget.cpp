@@ -126,8 +126,10 @@ void	SkyDisplayWidget::resizeEvent(QResizeEvent *event) {
 }
 
 astro::RaDec	SkyDisplayWidget::convert(QMouseEvent *e) {
-	double	deltax = e->pos().x() - center().x();
-	double	deltay = e->pos().y() - center().y();
+	QPointF	where(e->pos().x(), e->pos().y());
+	where = _rotate.inverse(where);
+	double	deltax = where.x() - center().x();
+	double	deltay = where.y() - center().y();
 
 	// compute the radius
 	double	f = hypot(deltax, deltay) / _radius;

@@ -66,6 +66,14 @@ public:
 			_center.y() - s * x + c * y
 		);
 	}
+	QPointF	inverse(const QPointF& p) const {
+		double	x = p.x() - _center.x();
+		double	y = p.y() - _center.y();
+		return QPointF(
+			_center.x() + c * x - s * y,
+			_center.y() + s * x + c * y
+		);
+	}
 	astro::Point	operator()(const astro::Point& p) const {
 		return astro::Point(
 			+ c * p.x() + s * p.y(),
@@ -76,6 +84,12 @@ public:
 		SkyPoint	result((*this)(p.point()));
 		result.interior(p.interior());
 		return result;
+	}
+	astro::Point	inverse(const astro::Point& p) const {
+		return astro::Point(
+			+ c * p.x() - s * p.y(),
+			+ s * p.x() + c * p.y()
+		);
 	}
 };
 

@@ -4,6 +4,8 @@ ChangeLog for the Qt GUI to Astrophotography
 	* remove some warnings
 	* fix bug in target drawing
 	* fix seg fault in SkyDrawing (caused by constellation labels)
+	* fix bug in SkyDisplayWidget where pointer tracking has to
+	  take the rotation into account
 
 20190913:
 	* add Button for time offset to SkyDisplayWidget
