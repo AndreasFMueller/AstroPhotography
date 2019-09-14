@@ -626,8 +626,7 @@ void	MainWindow::timecheck() {
 		QMessageBox::ButtonRole::AcceptRole);
 	connect(_configbutton, SIGNAL(clicked()),
 		this, SLOT(launchConfiguration()));
-	QPushButton	*_ignorebutton = message.addButton(QString("Ignore"),
-		QMessageBox::ButtonRole::RejectRole);
+	message.addButton(QString("Ignore"), QMessageBox::ButtonRole::RejectRole);
 	message.exec();
 }
 
