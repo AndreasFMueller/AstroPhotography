@@ -1,2 +1,19 @@
 Qt based GUI for the astrophotography project
 
+Upgrading the Qt version
+------------------------
+
+When upgradeing the Qt version on MacOS, do the following:
+
+1. udpate configureit and environment to set the path to the new
+directory, typically /Applications/Qt5/Qt5.14
+
+2. remove all the Makefiles generated from .pro files. They still
+contain the path to the old version of qmake and will not be
+regenerated automatically. 
+
+3. run configureit. This will rebuild all the .pro files. Run make,
+this will rebuild all the Makefiles 
+
+
+

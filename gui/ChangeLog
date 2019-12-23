@@ -1,5 +1,11 @@
 ChangeLog for the Qt GUI to Astrophotography
 
+20191223:
+	* add Qt5.14
+
+20190922:
+	* add Qt5.13
+
 20190914:
 	* add target marker display to SkyChartWidget
 	* add target forwarding to mountcontrollerwidet
