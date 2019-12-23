@@ -244,14 +244,17 @@ void	MainWindow::launchConfiguration() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "launch configuration window");
 	try {
 		if (_configurationdialog) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "raise existing window");
 			_configurationdialog->raise();
 			_configurationdialog->activateWindow();
 		} else {
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "create new dialog");
 			_configurationdialog = new configurationdialog(NULL,
 				_serviceobject);
 			_configurationdialog->show();
 			windowsMenu->add(_configurationdialog,
 				QString("Configuration"));
+			// when the dialog is closed, forget it
 			connect(_configurationdialog, SIGNAL(destroyed()),
                 		this, SLOT(forgetConfiguration()));
 		}
@@ -271,6 +274,7 @@ void	MainWindow::launchConfiguration() {
 }
 
 void	MainWindow::forgetConfiguration() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "forget configuration window");
 	_configurationdialog = NULL;
 }
 
@@ -594,6 +598,7 @@ void	MainWindow::launchEvents() {
 }
 
 void	MainWindow::forgetEvents() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "forget event window");
 	_eventdisplaywidget = NULL;
 }
 

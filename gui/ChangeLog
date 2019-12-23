@@ -1,6 +1,8 @@
 ChangeLog for the Qt GUI to Astrophotography
 
 20191223:
+	* fix background color for skydisplaywidget
+	* fix bug of configuration dialog not being able to be reopened
 	* add Qt5.14
 
 20190922:
