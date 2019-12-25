@@ -81,6 +81,8 @@ private:
 	AsiCamera(const AsiCamera& other);
 	AsiCamera&	operator=(const AsiCamera& other);
 
+	std::vector<std::string>	_capability_names;
+
 protected:
 	virtual CcdPtr	getCcd0(size_t id);
 

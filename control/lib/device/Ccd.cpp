@@ -519,6 +519,12 @@ void	Ccd::addTemperatureMetadata(ImageBase& image) {
 	if (hasCooler()) {
 		CoolerPtr	cooler = getCooler();
 		cooler->addTemperatureMetadata(image);
+	} else {
+		if (hasTemperature()) {
+			float	temperature = getTemperature() - 273.1;
+			image.setMetadata(FITSKeywords::meta(
+				std::string("CCD-TEMP"), temperature));
+		}
 	}
 }
 

@@ -20,8 +20,8 @@ typedef struct {
 	bool	unique;
 } FITSKeyword;
 
-#define	Nkeywors	103
-FITSKeyword	keywors[Nkeywors] = {
+#define	Nkeywords	104
+FITSKeyword	keywords[Nkeywords] = {
 // standard keywords
 { // 0
 	std::string("APERTURE"),
@@ -642,6 +642,12 @@ FITSKeyword	keywors[Nkeywors] = {
 	std::type_index(typeid(double)),
 	true
 },
+{ // 103
+	std::string("GAIN"),
+	std::string("amplifier gain"),
+	std::type_index(typeid(double)),
+	true
+},
 };
 
 int	FITSKeywords::type(std::type_index idx) {
@@ -721,10 +727,10 @@ static std::map<std::string, FITSKeyword>	keywordmap;
  * nameset_once object and the std::call_once method for this purpose
  */
 static void	build_nameset() {
-	for (int i = 0; i < Nkeywors; i++) {
-		nameset.insert(keywors[i].name);
-		keywordmap.insert(std::make_pair(keywors[i].name,
-			keywors[i]));
+	for (int i = 0; i < Nkeywords; i++) {
+		nameset.insert(keywords[i].name);
+		keywordmap.insert(std::make_pair(keywords[i].name,
+			keywords[i]));
 	}
 }
 

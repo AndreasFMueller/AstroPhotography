@@ -71,6 +71,12 @@ void	Exposure::addToImage(ImageBase& image) const {
 			FITSKeywords::meta(std::string("DATAMAX"), _limit));
 	}
 
+	// add the gain
+	if (_gain != 1.0) {
+		image.setMetadata(
+			FITSKeywords::meta(std::string("GAIN"), _gain));
+	}
+
 	// purpose information
 	image.setMetadata(FITSKeywords::meta(std::string("PURPOSE"),
 		purpose2string(_purpose)));

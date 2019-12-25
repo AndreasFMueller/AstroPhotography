@@ -42,6 +42,13 @@ public:
 	// image retrieval
 	virtual astro::image::ImagePtr	getRawImage();
 
+	virtual bool	hasGain() { return true; }
+	virtual float	getGain();
+	virtual std::pair<float, float>	gainInterval();
+
+	virtual bool	hasTemperature();
+	virtual float	getTemperature();
+
 protected:
 	virtual CoolerPtr	getCooler0();
 public:

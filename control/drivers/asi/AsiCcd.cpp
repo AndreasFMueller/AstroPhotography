@@ -138,6 +138,9 @@ void	AsiCcd::setExposure(const Exposure& e) {
 	_camera.setControlValue(value);
 
 	// XXX set the gain
+	exposure.gain(_camera.getControlValue(AsiGain).value);
+
+	// that's it
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "exposure settings complete");
 }
 
@@ -443,6 +446,40 @@ void    AsiCcd::stopStream() {
 
 bool	AsiCcd::streaming() {
 	return (NULL != stream);
+}
+
+/**
+ * \brief Get the gain
+ */
+float	AsiCcd::getGain() {
+	return (float)_camera.getControlValue(AsiGain).value;
+}
+
+/**
+ * \brief Retrieve interval of valid gain values
+ */
+std::pair<float, float>	AsiCcd::gainInterval() {
+	return std::make_pair(  (float)_camera.controlMin(AsiGain),
+				(float)_camera.controlMax(AsiGain));
+}
+
+/**
+ * \brief Find out whether the camera knows the temperature
+ */
+bool	AsiCcd::hasTemperature() {
+	try {
+		_camera.controlIndex("Temperature");
+		return true;
+	} catch (const std::exception& x) {
+	}
+	return false;
+}
+
+/**
+ * \brief Get the temperature
+ */
+float	AsiCcd::getTemperature() {
+	return 273.1 + _camera.getControlValue(AsiTemperature).value / 10.;
 }
 
 } // namespace asi

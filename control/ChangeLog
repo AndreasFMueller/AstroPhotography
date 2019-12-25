@@ -1,6 +1,9 @@
 ChangeLog for the Astro project.
 
 20191225:
+	* add temperature retrieval to ASI Ccd class
+	* add Temperature metadata to Ccd class
+	* add Gain retrieval to ASI Ccd class
 	* increase temperature stable interval from +-1 degree to +-3 degrees
 
 20191224:

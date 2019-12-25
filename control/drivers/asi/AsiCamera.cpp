@@ -160,6 +160,42 @@ AsiCamera::AsiCamera(AsiCameraLocator& locator, int index)
 		}
 	}
 	
+	// scan the valid capabilities names
+	int	n;
+	rc = ASIGetNumOfControls(_id, &n);
+	if (Asi_Debug_Apicalls) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0,
+			"%d = ASIGetNumOfControls(%d, %d)",
+			rc, _id, n);
+	}
+	if (ASI_SUCCESS != rc) {
+		std::string	msg = stringprintf("%s cannot get controls: %s",
+			name().toString().c_str(),
+			AsiCamera::error(rc).c_str());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw std::runtime_error(msg);
+	}
+	for (int i = 0; i < n; i++) {
+		ASI_CONTROL_CAPS	caps;
+		int	rc;
+		rc = ASIGetControlCaps(_id, i, &caps);
+		if (Asi_Debug_Apicalls) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0,
+				"%d = ASIGetControlCaps(%d, %d, %d)",
+				rc, _id, i, caps);
+		}
+		if (ASI_SUCCESS != rc) {
+			std::string	msg = stringprintf("%s: cannot get "
+				"capability %d: %s", name().toString().c_str(),
+				i, AsiCamera::error(rc).c_str());
+			debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+			throw std::runtime_error(msg);
+		}
+		std::string	controlname(caps.Name);
+		_capability_names.push_back(controlname);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "found capability %d: %s",
+			i, controlname.c_str());
+	}
 }
 
 /**
@@ -227,38 +263,9 @@ bool	AsiCamera::isColor() const {
  */
 int	AsiCamera::controlIndex(const std::string& controlname) {
 	std::unique_lock<std::recursive_mutex>	lock(_api_mutex);
-	int	n;
-	int	rc;
-	rc = ASIGetNumOfControls(_id, &n);
-	if (Asi_Debug_Apicalls) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0,
-			"%d = ASIGetNumOfControls(%d, %d)",
-			rc, _id, n);
-	}
-	if (ASI_SUCCESS != rc) {
-		std::string	msg = stringprintf("%s cannot get controls: %s",
-			name().toString().c_str(),
-			AsiCamera::error(rc).c_str());
-		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
-		throw std::runtime_error(msg);
-	}
+	int	n = _capability_names.size();
 	for (int i = 0; i < n; i++) {
-		ASI_CONTROL_CAPS	caps;
-		int	rc;
-		rc = ASIGetControlCaps(_id, i, &caps);
-		if (Asi_Debug_Apicalls) {
-			debug(LOG_DEBUG, DEBUG_LOG, 0,
-				"%d = ASIGetControlCaps(%d, %d, %d)",
-				rc, _id, i, caps);
-		}
-		if (ASI_SUCCESS != rc) {
-			std::string	msg = stringprintf("%s: cannot get "
-				"capability %d: %s", name().toString().c_str(),
-				i, AsiCamera::error(rc).c_str());
-			debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
-			throw std::runtime_error(msg);
-		}
-		if (controlname == std::string(caps.Name)) {
+		if (_capability_names[i] == controlname) {
 			return i;
 		}
 	}
@@ -301,7 +308,7 @@ long    AsiCamera::controlMax(int control_index) {
  * \brief get the maximum value of a control by name
  */
 long    AsiCamera::controlMax(const std::string& controlname) {
-	return controlMin(controlIndex(controlname));
+	return controlMax(controlIndex(controlname));
 }
 
 /**
