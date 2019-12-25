@@ -29,6 +29,7 @@ int	command_help(const std::string& progname) {
 	std::cout << p << " [ options ] <server> time" << std::endl;
 	std::cout << p << " [ options ] <server> sync" << std::endl;
 	std::cout << p << " [ options ] <server> shutdown [ delay ]" << std::endl;
+	std::cout << p << " [ options ] <server> restart [ delay ]" << std::endl;
 	std::cout << p << " [ options ] <server> system [ delay ]" << std::endl;
 	std::cout << std::endl;
 	std::cout << "Options:" << std::endl;
@@ -79,6 +80,21 @@ int	command_sync(DaemonPrx daemon) {
 int	command_shutdown(DaemonPrx daemon, float delay) {
 	try {
 		daemon->shutdownServer(delay);
+		return EXIT_SUCCESS;
+	} catch (const std::exception& x) {
+		std::cerr << "cannot shutdown the server: ";
+		std::cerr << x.what();
+		std::cerr << std::endl;
+	}
+	return EXIT_FAILURE;
+}
+
+/**
+ * \brief The "restart" command, restarts the server
+ */
+int	command_restart(DaemonPrx daemon, float delay) {
+	try {
+		daemon->restartServer(delay);
 		return EXIT_SUCCESS;
 	} catch (const std::exception& x) {
 		std::cerr << "cannot shutdown the server: ";
@@ -175,6 +191,9 @@ int	main(int argc, char *argv[]) {
 	}
 	if (command == "shutdown") {
 		return command_shutdown(daemon, delay);
+	}
+	if (command == "restart") {
+		return command_restart(daemon, delay);
 	}
 	if (command == "system") {
 		return command_system(daemon, delay);

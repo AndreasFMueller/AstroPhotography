@@ -1,6 +1,8 @@
 ChangeLog for the Astro project.
 
 20191224:
+	* add restart command in snowdaemon client
+	* improve systemd service file
 	* add wait option to snowstar
 
 20190914:
