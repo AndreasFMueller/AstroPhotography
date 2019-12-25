@@ -262,7 +262,7 @@ void	taskqueuemanagerwidget::addTask(QTreeWidgetItem *parent,
 	// 10 temperature
 	if (parameters.type == snowstar::TaskEXPOSURE) {
 		list << QString(astro::stringprintf("%.1f°C",
-			parameters.ccdtemperature - 273.15).c_str());
+			parameters.ccdtemperature - astro::Temperature::zero).c_str());
 	} else {
 		list << QString();
 	}

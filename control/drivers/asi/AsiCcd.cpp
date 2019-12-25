@@ -479,7 +479,7 @@ bool	AsiCcd::hasTemperature() {
  * \brief Get the temperature
  */
 float	AsiCcd::getTemperature() {
-	return 273.1 + _camera.getControlValue(AsiTemperature).value / 10.;
+	return Temperature::zero + _camera.getControlValue(AsiTemperature).value / 10.;
 }
 
 } // namespace asi

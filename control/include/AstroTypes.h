@@ -118,6 +118,19 @@ public:
 	Point	operator()(const Point& p) const;
 };
 
+/**
+ * \brief Temperature conversion class
+ */
+class Temperature {
+	float	_temperature;
+public:
+	typedef enum { KELVIN, CELSIUS } temperature_scale;
+	const static float	zero;
+	Temperature(float temperature, temperature_scale scale = KELVIN);
+	float	celsius() const;
+	float	temperature() const { return _temperature; }
+};
+
 } // namespace astro
 
 #endif /* _AstroTypes_h */

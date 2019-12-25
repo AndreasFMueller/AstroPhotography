@@ -46,7 +46,7 @@ void	SimCoolerTest::testName() {
 void	SimCoolerTest::testCooler() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "Start cooler test");
 	CoolerPtr	cooler = locator->getCooler("cooler:simulator/cooler");
-	double	ambient = 273 + 13.2;
+	double	ambient = Temperature::zero + 13.2;
 	CPPUNIT_ASSERT(fabs(ambient - cooler->getActualTemperature()) < 0.01);
 	CPPUNIT_ASSERT(cooler->getActualTemperature()
 				== cooler->getSetTemperature());

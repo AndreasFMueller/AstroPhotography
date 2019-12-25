@@ -14,6 +14,7 @@
 #include <AstroFormat.h>
 #include <AstroConfig.h>
 #include <AstroProject.h>
+#include <AstroTypes.h>
 
 namespace snowstar {
 namespace app {
@@ -171,7 +172,7 @@ int	common_list(TaskQueuePrx tasks, const std::set<int> ids) {
 			std::cout << "      ";
 		} else {
 			std::cout << astro::stringprintf(" %5.1f",
-				parameters.ccdtemperature - 273.15);
+				parameters.ccdtemperature - astro::Temperature::zero);
 		}
 		std::cout << astro::stringprintf(" %-7.7s",
 			astro::camera::Exposure::purpose2string(
@@ -646,7 +647,7 @@ int	main(int argc, char *argv[]) {
 			repeats = std::stoi(optarg);
 			break;
 		case 't':
-			temperature = 273.15 + std::stod(optarg);
+			temperature = astro::Temperature::zero + std::stod(optarg);
 			break;
 		case 'v':
 			verbose = true;

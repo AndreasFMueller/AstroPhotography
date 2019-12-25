@@ -4,6 +4,7 @@
  * (c) 2015 Prof Dr Andreas Mueller
  */
 #include <AstroAdapter.h>
+#include <AstroTypes.h>
 #include <AstroDebug.h>
 #include <cmath>
 
@@ -13,7 +14,7 @@ namespace adapter {
 DarkNoiseAdapter::DarkNoiseAdapter(const ImageSize& size, double temperature,
 	double darkcurrent, int electrons_per_pixel)
 	: NoiseAdapter(size), _electrons_per_pixel(electrons_per_pixel) {
-	_lambda = darkcurrent * pow(2, (temperature - 273.13) / 7.);
+	_lambda = darkcurrent * pow(2, (temperature - Temperature::zero) / 7.);
 	setup();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "lambda = %f, nlevels = %d", _lambda,
 		nlevels);

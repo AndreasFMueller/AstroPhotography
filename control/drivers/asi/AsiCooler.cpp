@@ -50,7 +50,7 @@ float	AsiCooler::getSetTemperature() {
  * \brief Get the current temperature
  */
 float	AsiCooler::getActualTemperature() {
-	return 273.1 + _camera.getControlValue(AsiTemperature).value / 10.;
+	return Temperature::zero + _camera.getControlValue(AsiTemperature).value / 10.;
 }
 
 /**
@@ -60,7 +60,7 @@ void	AsiCooler::setCoolerTemperature() {
 	AsiControlValue	value;
 	value.type = AsiTargetTemp;
 	// must not be multiplied by 10!
-	value.value = _camera.settemperature() - 273.1;
+	value.value = _camera.settemperature() - Temperature::zero;
 	value.isauto = false;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "setting temperature to %.1f -> %d",
 		_camera.settemperature(), value.value);

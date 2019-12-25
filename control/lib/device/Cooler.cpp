@@ -33,7 +33,7 @@ DeviceName	Cooler::defaultname(const DeviceName& parent,
 Cooler::Cooler(const DeviceName& name) : Device(name, DeviceName::Cooler) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "create cooler named %s",
 		Device::name().name().c_str());
-	temperature = 25 + 273.1;
+	temperature = 25 + Temperature::zero;
 }
 
 /**
@@ -42,7 +42,7 @@ Cooler::Cooler(const DeviceName& name) : Device(name, DeviceName::Cooler) {
 Cooler::Cooler(const std::string& name) : Device(name, DeviceName::Cooler) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "create cooler named %s",
 		Device::name().name().c_str());
-	temperature = 25 + 273.1;
+	temperature = 25 + Temperature::zero;
 }
 
 /**
@@ -111,14 +111,14 @@ void	Cooler::addTemperatureMetadata(ImageBase& image) {
 		// add set temperature information to the image (SET-TEMP)
 		image.setMetadata(
 			FITSKeywords::meta(std::string("SET-TEMP"),
-				this->getSetTemperature() - 273.1));
+				this->getSetTemperature() - Temperature::zero));
 	}
 	
 	// add actual temperature info to the image (CCD-TEMP)
 	try {
 		image.setMetadata(
 			FITSKeywords::meta(std::string("CCD-TEMP"),
-				getActualTemperature() - 273.1));
+				getActualTemperature() - Temperature::zero));
 	} catch (std::exception& x) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "actual temperature unknown: %s",
 			x.what());

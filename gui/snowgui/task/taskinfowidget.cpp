@@ -90,7 +90,7 @@ void	taskinfowidget::updateTask(int taskid) {
 		ui->coolerField->setText(
 			QString::number(parameters.coolerIndex));
 		ui->temperatureField->setText(QString(astro::stringprintf("%.1f°C",
-			parameters.ccdtemperature - 273.15).c_str()));
+			parameters.ccdtemperature - astro::Temperature::zero).c_str()));
 	} else {
 		ui->coolerField->setText(QString());
 		ui->temperatureField->setText(QString());

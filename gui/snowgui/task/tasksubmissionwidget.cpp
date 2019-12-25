@@ -344,7 +344,7 @@ void	tasksubmissionwidget::submitExposure(
 	}
 
 	// set the ccd temperature
-	parameters.ccdtemperature = ui->temperatureBox->value() + 273.15;
+	parameters.ccdtemperature = ui->temperatureBox->value() + astro::Temperature::zero;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "ccd temperature: %f",
 		parameters.ccdtemperature);
 

@@ -313,10 +313,10 @@ void	PreviewWindow::setupFilterwheel() {
 
 void	PreviewWindow::setupCooler() {
 	if (_cooler) {
-		float	t = _cooler->getActualTemperature() - 273.15;
+		float	t = _cooler->getActualTemperature() - astro::Temperature::zero;
 		ui->actualTempField->setText(
 			QString(astro::stringprintf("%.1f", t).c_str()));
-		t = _cooler->getSetTemperature() - 273.15;
+		t = _cooler->getSetTemperature() - astro::Temperature::zero;
 		ui->setTempSpinBox->setValue(t);
 		ui->coolerOnButton->setEnabled(true);
 		if (_cooler->isOn()) {
@@ -364,10 +364,10 @@ void	PreviewWindow::setupGuideport() {
 
 void	PreviewWindow::statusUpdate() {
 	if (_cooler) {
-		float	t = _cooler->getActualTemperature() - 273.15;
+		float	t = _cooler->getActualTemperature() - astro::Temperature::zero;
 		ui->actualTempField->setText(
 			QString(astro::stringprintf("%.1f", t).c_str()));
-		t = _cooler->getSetTemperature() - 273.15;
+		t = _cooler->getSetTemperature() - astro::Temperature::zero;
 		ui->setTempSpinBox->setValue(t);
 		ui->coolerOnButton->setEnabled(true);
 	}
@@ -556,7 +556,7 @@ void	PreviewWindow::coolerTemperatureChanged(double settemperature) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "set temperature to %.1f",
 		settemperature);
 	try {
-		_cooler->setTemperature(settemperature + 273.15);
+		_cooler->setTemperature(settemperature + astro::Temperature::zero);
 	} catch (const std::exception& x) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "cannot change temperature: %s",
 			x.what());

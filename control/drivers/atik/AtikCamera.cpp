@@ -445,7 +445,7 @@ float	AtikCamera::getSetTemperature(AtikCooler& cooler) {
 	//debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieve cooler temperature: %.1f, "
 	//	"power %.2f, state %d", targetTemp, power, state);
 	if ((state == COOLING_ON) || (state == COOLING_SETPOINT)) {
-		cooler.Cooler::setTemperature(targetTemp + 273.15);
+		cooler.Cooler::setTemperature(targetTemp + Temperature::zero);
 	}
 	return cooler.Cooler::getSetTemperature();
 }
@@ -465,7 +465,7 @@ float	AtikCamera::getActualTemperature(AtikCooler& cooler) {
 		_camera->getTemperatureSensorStatus(1, &currentTemp);
 		//debug(LOG_DEBUG, DEBUG_LOG, 0, "current Temp: %.1f",
 		//	currentTemp);
-		return _last_actual_temperature = currentTemp + 273.15;
+		return _last_actual_temperature = currentTemp + Temperature::zero;
 	};
 	COOLING_STATE	state;
 	float	targetTemp = 0;
@@ -475,7 +475,7 @@ float	AtikCamera::getActualTemperature(AtikCooler& cooler) {
 	case COOLING_ON:
 	case COOLING_INACTIVE:
 	case WARMING_UP:
-		return _last_actual_temperature = 273.15 + 20;
+		return _last_actual_temperature = Temperature::zero + 20;
 	case COOLING_SETPOINT:
 		return _last_actual_temperature
 				= cooler.Cooler::getSetTemperature();
@@ -495,8 +495,8 @@ void	AtikCamera::setTemperature(const float temperature, AtikCooler& cooler) {
 	cooler.Cooler::setTemperature(temperature);
 	if (isOn(cooler)) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "setCooling(%f)",
-			temperature - 273.15);
-		_camera->setCooling(temperature - 273.15);
+			temperature - Temperature::zero);
+		_camera->setCooling(temperature - Temperature::zero);
 	}
 }
 
@@ -522,7 +522,7 @@ void	AtikCamera::setOn(bool onoff, AtikCooler& cooler) {
 	std::unique_lock<std::recursive_mutex>	lock(_mutex);
 	if (onoff) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "turn cooling on");
-		_camera->setCooling(cooler.Cooler::getSetTemperature() - 273.15);
+		_camera->setCooling(cooler.Cooler::getSetTemperature() - Temperature::zero);
 	} else {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "turn cooling off");
 		_camera->initiateWarmUp();

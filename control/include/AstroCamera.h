@@ -431,7 +431,7 @@ public:
 
 	// has temperature information
 	virtual bool	hasTemperature() { return false; }
-	virtual float	getTemperature() { return 273.1; }
+	virtual float	getTemperature() { return Temperature::zero; }
 
 	// image retrievel functions
 private:

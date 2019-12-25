@@ -549,11 +549,11 @@ void	ImageRepo::remove(const UUID& uuid) {
 }
 
 static float	temperature_min(float temperature) {
-	return 0.99 * (273.15 + temperature) - 273.15;
+	return 0.99 * (Temperature::zero + temperature) - Temperature::zero;
 }
 
 static float	temperature_max(float temperature) {
-	return 1.01 * (273.15 + temperature) - 273.15;
+	return 1.01 * (Temperature::zero + temperature) - Temperature::zero;
 }
 
 class condition : public std::string {
@@ -601,7 +601,7 @@ std::set<ImageEnvelope>	ImageRepo::get(const ImageSpec& spec) {
 	}
 
 	// add temperature condition
-	if (spec.temperature() > -273.15) {
+	if (spec.temperature() > -Temperature::zero) {
 		conditions.push_back(condition(stringprintf(
 			"%f <= temperature and temperature < %f",
 			temperature_min(spec.temperature()),

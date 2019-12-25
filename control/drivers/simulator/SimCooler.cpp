@@ -14,7 +14,7 @@ namespace astro {
 namespace camera {
 namespace simulator {
 
-#define AMBIENT_TEMPERATURE     (273 + 13.2)
+#define AMBIENT_TEMPERATURE     (Temperature::zero + 13.2)
 
 /**
  *  \brief Construct a new cooler object

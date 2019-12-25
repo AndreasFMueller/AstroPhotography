@@ -7,6 +7,7 @@
 #include <includes.h>
 #include <AstroIO.h>
 #include <AstroUtils.h>
+#include <AstroTypes.h>
 
 namespace snowstar {
 
@@ -254,7 +255,7 @@ astro::gateway::TaskUpdate convert(const StatusUpdate& statusupdate) {
 	astro::gateway::TaskUpdate	result(statusupdate.instrument);
 	result.updatetime = converttime(statusupdate.updatetimeago);
         result.avgguideerror = statusupdate.avgguideerror;
-        result.ccdtemperature = statusupdate.ccdtemperature + 273.15;
+        result.ccdtemperature = statusupdate.ccdtemperature + astro::Temperature::zero;
         result.lastimagestart = converttime(statusupdate.lastimagestartago);
         result.exposuretime = statusupdate.exposuretime;
         result.currenttaskid = statusupdate.currenttaskid;
@@ -280,7 +281,7 @@ StatusUpdate    convert(const astro::gateway::TaskUpdate& taskupdate) {
 	result.instrument = taskupdate.instrument();
 	result.updatetimeago = converttime(taskupdate.updatetime);
 	result.avgguideerror = taskupdate.avgguideerror;
-	result.ccdtemperature = taskupdate.ccdtemperature - 273.15;
+	result.ccdtemperature = taskupdate.ccdtemperature - astro::Temperature::zero;
 	result.lastimagestartago = converttime(taskupdate.lastimagestart);
 	result.exposuretime = taskupdate.exposuretime;
 	result.currenttaskid = taskupdate.currenttaskid;

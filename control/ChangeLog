@@ -1,6 +1,7 @@
 ChangeLog for the Astro project.
 
 20191225:
+	* add temperature class, unify absolute zero value
 	* add temperature retrieval to ASI Ccd class
 	* add Temperature metadata to Ccd class
 	* add Gain retrieval to ASI Ccd class

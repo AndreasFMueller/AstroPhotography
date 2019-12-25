@@ -8,6 +8,7 @@
 #include <QTimer>
 #include <sstream>
 #include <QMessageBox>
+#include <AstroTypes.h>
 
 namespace snowgui {
 
@@ -127,8 +128,8 @@ void	coolercontrollerwidget::setupCooler() {
 		float	settemperature = 0;
 		bool	ison = false;
 		try {
-			actual = _cooler->getActualTemperature() - 273.15;
-			settemperature = _cooler->getSetTemperature() - 273.15;
+			actual = _cooler->getActualTemperature() - astro::Temperature::zero;
+			settemperature = _cooler->getSetTemperature() - astro::Temperature::zero;
 			ison = _cooler->isOn();
 		} catch (const std::exception& x) {
 			coolerFailed(x);
@@ -186,7 +187,7 @@ void	coolercontrollerwidget::displayActualTemperature(float actual) {
  */
 void	coolercontrollerwidget::setActual() {
 	if (_cooler) {
-		displayActualTemperature(_cooler->getActualTemperature() - 273.15);
+		displayActualTemperature(_cooler->getActualTemperature() - astro::Temperature::zero);
 	}
 }
 
@@ -203,7 +204,7 @@ void	coolercontrollerwidget::displaySetTemperature(float settemp) {
 		return;
 	}
 	ui->setTemperatureSpinBox->blockSignals(true);
-	ui->setTemperatureSpinBox->setValue(settemp + 273.15);
+	ui->setTemperatureSpinBox->setValue(settemp + astro::Temperature::zero);
 	ui->setTemperatureSpinBox->blockSignals(false);
 }
 
@@ -226,8 +227,8 @@ void	coolercontrollerwidget::statusUpdate() {
 	}
 	try {
 		// get the information about the cooler
-		float	actual = _cooler->getActualTemperature() - 273.15;
-		float	settemp = _cooler->getSetTemperature() - 273.15;
+		float	actual = _cooler->getActualTemperature() - astro::Temperature::zero;
+		float	settemp = _cooler->getSetTemperature() - astro::Temperature::zero;
 		bool	is_on = _cooler->isOn();
 
 		// emit the information to the active
@@ -289,14 +290,14 @@ void	coolercontrollerwidget::editingFinished() {
  * \param temp	temperature in degress Celsius
  */
 void	coolercontrollerwidget::sendSetTemperature(double temp) {
-	double	t = temp + 273.15; // in kelvin
+	double	t = temp + astro::Temperature::zero; // in kelvin
 	if (_cooler) {
 		try {
 			_cooler->setTemperature(t);
 		} catch (const std::exception& x) {
 			coolerFailed(x);
 			//displaySetTemperature(_cooler->getSetTemperature()
-			//	- 273.15);
+			//	- astro::Temperature::zero);
 		}
 	}
 }

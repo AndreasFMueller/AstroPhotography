@@ -38,6 +38,7 @@ libastroutils_la_SOURCES = 						\
 	SphericalCoordinates.cpp					\
 	Sun.cpp								\
 	TaskUpdate.cpp							\
+	Temperature.cpp							\
 	Timer.cpp							\
 	timeformat.cpp							\
 	ThreadBase.cpp							\

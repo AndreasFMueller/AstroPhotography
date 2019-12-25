@@ -4,6 +4,7 @@
  * (c) 2018 Prof Dr Andreas Müller, Hochschule Rapperswil
  */
 #include <AstroGateway.h>
+#include <AstroCamera.h>
 #include <sstream>
 
 namespace astro {
@@ -75,7 +76,7 @@ std::string	TaskUpdate::toString(std::string separator) const {
 	out << stringprintf("guide error=%.1farcsec", avgguideerror);
 	out << separator;
 
-	out << stringprintf("ccd temperature=%.1fºC", ccdtemperature - 273.15);
+	out << stringprintf("ccd temperature=%.1fºC", ccdtemperature - Temperature::zero);
 	out << separator;
 
 	tmp = localtime(&lastimagestart);
@@ -119,7 +120,7 @@ TaskUpdate::operator	PostData() const {
 	result.insert(std::make_pair(std::string("avgguideerror"), 
 		stringprintf("%.3f", avgguideerror)));
 	result.insert(std::make_pair(std::string("ccdtemperature"), 
-		stringprintf("%.1f", ccdtemperature - 273.15)));
+		stringprintf("%.1f", ccdtemperature - Temperature::zero)));
 	tmp = localtime(&lastimagestart);
 	strftime(buffer, sizeof(buffer), "%F %T", tmp);
 	result.insert(std::make_pair(std::string("lastimagestart"), 

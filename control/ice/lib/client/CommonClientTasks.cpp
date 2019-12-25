@@ -6,6 +6,7 @@
 #include <CommonClientTasks.h>
 #include <AstroDebug.h>
 #include <AstroFormat.h>
+#include <AstroTypes.h>
 #include <math.h>
 #include <IceConversions.h>
 #include <IceUtil/UUID.h>
@@ -121,7 +122,7 @@ void	CoolerTask::setup(double temperature) {
 	// initialize member variables
 	_stop_on_exit = false;
 	we_turned_cooler_on = false;
-	_absolute = 273.15 + temperature;
+	_absolute = astro::Temperature::zero + temperature;
 
 	// check whether there is something to do
 	if (!_cooler) {
