@@ -137,7 +137,7 @@ bool	Cooler::stable() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0,
 		"T_act = %.1f, T_set = %.1f, delta = %.1f",
 		actualtemperature, temperature, delta);
-	return (delta < 1);
+	return (delta < 3);
 }
 
 /**

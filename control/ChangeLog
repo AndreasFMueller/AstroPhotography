@@ -1,5 +1,8 @@
 ChangeLog for the Astro project.
 
+20191225:
+	* increase temperature stable interval from +-1 degree to +-3 degrees
+
 20191224:
 	* add restart command in snowdaemon client
 	* improve systemd service file
