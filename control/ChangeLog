@@ -1,5 +1,8 @@
 ChangeLog for the Astro project.
 
+20191224:
+	* add wait option to snowstar
+
 20190914:
 	* make MilkyWay debugging less verbose
 

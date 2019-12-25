@@ -43,7 +43,8 @@ static struct option	longopts[] = {
 { "name",		required_argument,	NULL,	'n' }, /* 14 */
 { "user",		required_argument,	NULL,	'u' }, /* 15 */
 { "USB",		no_argument,		NULL,	'U' }, /* 16 */
-{ NULL,			0,			NULL,	 0  }, /* 17 */
+{ "wait",		required_argument,	NULL,	'w' }, /* 17 */
+{ NULL,			0,			NULL,	 0  }, /* 18 */
 };
 
 static void	usage(const char *progname) {
@@ -84,6 +85,7 @@ static void	usage(const char *progname) {
 		<< std::endl;
 	std::cout << " -u,--user=<user>          user to run as" << std::endl;
 	std::cout << " -U,--USB                  enable USB debugging" << std::endl;
+	std::cout << " -w,--wait=<seconds>       wait for a few sections before starting the service" << std::endl;
 }
 
 /**
@@ -142,8 +144,9 @@ int	snowstar_main(int argc, char *argv[]) {
 	// parse the command line
 	int	c;
 	int	longindex;
+	int	waittime = 0;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "start parsing the command line");
-	while (EOF != (c = getopt_long(argc, argv, "b:Cc:dD:fghl:Ln:p:P:s:u:UN:F:",
+	while (EOF != (c = getopt_long(argc, argv, "b:Cc:dD:fghl:Ln:p:P:s:u:UN:F:w:",
 		longopts, &longindex))) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "found option '%c': %s",
 			c, optarg);
@@ -271,6 +274,12 @@ int	snowstar_main(int argc, char *argv[]) {
 		case 'U':
 			astro::usb::USBdebugEnable();
 			break;
+		case 'w':
+			waittime = atoi(optarg);
+			if (waittime < 0) {
+				waittime = 0;
+			}
+			break;
 		default:
 			std::string	msg = astro::stringprintf("unknown "
 				"option %c (0x%02x)", c, c);
@@ -299,6 +308,12 @@ int	snowstar_main(int argc, char *argv[]) {
 			return EXIT_FAILURE;
 		}
 		umask(027);
+	}
+
+	// if waittime was specified, wait before starting discovery services
+	if (waittime > 0) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "wait for %d seconds", waittime);
+		sleep(waittime);
 	}
 
 	// make sure service discover is available
