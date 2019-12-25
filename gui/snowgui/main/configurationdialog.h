@@ -78,6 +78,8 @@ public slots:
 	// shutdown
 	void	shutdownClicked();
 	void	systemClicked();
+
+	void	closeEvent(QCloseEvent *);
 private:
 	Ui::configurationdialog *ui;
 	astro::discover::ServiceObject	_serviceobject;

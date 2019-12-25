@@ -136,6 +136,7 @@ configurationdialog::configurationdialog(QWidget *parent,
  * \brief destroy the configuration dialog
  */
 configurationdialog::~configurationdialog() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "configuration dialog being destroyed");
 	delete ui;
 }
 
@@ -627,6 +628,13 @@ message.setDefaultButton(QMessageBox::Cancel);
 		_daemon->shutdownSystem(0);
 		break;
 	}
+}
+
+/**
+ * \brief Handle the close event for the window
+ */
+void    configurationdialog::closeEvent(QCloseEvent * /* event */) {
+        deleteLater();
 }
 
 } // namespace snowgui

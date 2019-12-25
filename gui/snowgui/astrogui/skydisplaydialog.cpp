@@ -19,6 +19,12 @@ SkyDisplayDialog::SkyDisplayDialog(QWidget *parent)
 
 	connect(ui->skydisplayWidget, SIGNAL(pointSelected(astro::RaDec)),
 		this, SLOT(targetSelected(astro::RaDec)));
+
+	// set the background color
+	// (from https://wiki.qt.io/How_to_Change_the_Background_Color_of_QWidget/de
+	QPalette	pal;
+	pal.setColor(QPalette::Background, Qt::black);
+	this->setPalette(pal);
 }
 
 SkyDisplayDialog::~SkyDisplayDialog() {

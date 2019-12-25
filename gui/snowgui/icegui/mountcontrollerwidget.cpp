@@ -483,12 +483,12 @@ void	mountcontrollerwidget::targetChangedCommon() {
 	emit retarget(radec);
 }
 
-void	mountcontrollerwidget::targetRaChanged(const QString& value) {
+void	mountcontrollerwidget::targetRaChanged(const QString& /* value */) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "RA change");
 	targetChangedCommon();
 }
 
-void	mountcontrollerwidget::targetDecChanged(const QString& value) {
+void	mountcontrollerwidget::targetDecChanged(const QString& /* value */) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "DEC change");
 	targetChangedCommon();
 }

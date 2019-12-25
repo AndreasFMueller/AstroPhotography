@@ -505,7 +505,7 @@ void	LiveView::showFocuserStepsMenu(const QPoint& p) {
 	QAction	action1(QString("1"), this);
 	action1.setCheckable(true);
 	action1.setChecked(stepsize == 1);
-	action1.setData(qVariantFromValue((int)1));
+	action1.setData(QVariant::fromValue((int)1));
 	contextMenu.addAction(&action1);
 	connect(&action1, SIGNAL(triggered()),
 		this, SLOT(stepsizeChanged()));
@@ -513,7 +513,7 @@ void	LiveView::showFocuserStepsMenu(const QPoint& p) {
 	QAction	action10(QString("10"), this);
 	action10.setCheckable(true);
 	action10.setChecked(stepsize == 10);
-	action10.setData(qVariantFromValue((int)10));
+	action10.setData(QVariant::fromValue((int)10));
 	contextMenu.addAction(&action10);
 	connect(&action10, SIGNAL(triggered()),
 		this, SLOT(stepsizeChanged()));
@@ -521,7 +521,7 @@ void	LiveView::showFocuserStepsMenu(const QPoint& p) {
 	QAction	action100(QString("100"), this);
 	action100.setCheckable(true);
 	action100.setChecked(stepsize == 100);
-	action100.setData(qVariantFromValue((int)100));
+	action100.setData(QVariant::fromValue((int)100));
 	if (ui->focuserSpinBox->maximum() >= 100) {
 		contextMenu.addAction(&action100);
 		connect(&action100, SIGNAL(triggered()),
@@ -531,7 +531,7 @@ void	LiveView::showFocuserStepsMenu(const QPoint& p) {
 	QAction	action1000(QString("1000"), this);
 	action1000.setCheckable(true);
 	action1000.setChecked(stepsize == 1000);
-	action1000.setData(qVariantFromValue((int)1000));
+	action1000.setData(QVariant::fromValue((int)1000));
 	if (ui->focuserSpinBox->maximum() >= 1000) {
 		contextMenu.addAction(&action1000);
 		connect(&action1000, SIGNAL(triggered()),
@@ -541,7 +541,7 @@ void	LiveView::showFocuserStepsMenu(const QPoint& p) {
 	QAction	action10000(QString("10000"), this);
 	action10000.setCheckable(true);
 	action10000.setChecked(stepsize == 10000);
-	action10000.setData(qVariantFromValue((int)10000));
+	action10000.setData(QVariant::fromValue((int)10000));
 	if (ui->focuserSpinBox->maximum() >= 10000) {
 		contextMenu.addAction(&action10000);
 		connect(&action10000, SIGNAL(triggered()),
@@ -551,7 +551,7 @@ void	LiveView::showFocuserStepsMenu(const QPoint& p) {
 	QAction	action100000(QString("100000"), this);
 	action100000.setCheckable(true);
 	action100000.setChecked(stepsize == 100000);
-	action100000.setData(qVariantFromValue((int)100000));
+	action100000.setData(QVariant::fromValue((int)100000));
 	if (ui->focuserSpinBox->maximum() >= 100000) {
 		contextMenu.addAction(&action100000);
 		connect(&action100000, SIGNAL(triggered()),
