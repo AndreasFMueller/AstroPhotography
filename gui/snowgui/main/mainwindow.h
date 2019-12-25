@@ -29,6 +29,8 @@ class MainWindow : public QMainWindow
 
 	astro::image::ImagePtr	_image;
 	std::string	_imagestring;
+public:
+	const std::string&	servername() const { return _serviceobject.name(); }
 
 	configurationdialog	*_configurationdialog = NULL;
 	EventDisplayWidget	*_eventdisplaywidget = NULL;
@@ -75,9 +77,14 @@ private:
 
 	QAction	*raiseAction;
 	void	raiseMainwindow();
-
+	
 	void	createActions();
 	void	createMenus();
+
+	QMenu	*systemMenu;
+
+	QAction	*restartAction;
+	void	restartServer();
 };
 
 } // namespace snowgui

@@ -465,6 +465,25 @@ void	MainWindow::raiseMainwindow() {
 }
 
 /**
+ * \brief restart the server
+ */
+void	MainWindow::restartServer() {
+	try {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "restart server");
+		Ice::CommunicatorPtr    ic = snowstar::CommunicatorSingleton::get();
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "got communicator");
+		Ice::ObjectPrx  base = ic->stringToProxy(_serviceobject.connect("Daemon"));
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "got Daemon base");
+		snowstar::DaemonPrx       daemon = snowstar::DaemonPrx::checkedCast(base);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "got Daemon");
+		daemon->restartServer(0);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "restart sent");
+	} catch (const std::exception& x) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "restart failed: %s", x.what());
+	}
+}
+
+/**
  * \brief Create the actions in the menu
  */
 void	MainWindow::createActions() {
@@ -488,17 +507,28 @@ void	MainWindow::createActions() {
 	raiseAction = new QAction(QString("Main Window"), this);
 	connect(raiseAction, &QAction::triggered, this,
 		&MainWindow::raiseMainwindow);
+
+	restartAction = new QAction(QString("Restart Server"), this);
+	connect(restartAction, &QAction::triggered, this,
+		&MainWindow::restartServer);
 }
 
 /**
  * \brief Create the menus of the main window
  */
 void	MainWindow::createMenus() {
+	// file menu
 	fileMenu = menuBar()->addMenu(QString("File"));
 	fileMenu->addAction(connectAction);
 	fileMenu->addAction(openAction);
 	fileMenu->addAction(browseAction);
 	fileMenu->addAction(saveAction);
+
+	// system menu
+	systemMenu = menuBar()->addMenu(QString("System"));
+	systemMenu->addAction(restartAction);
+
+	// window menu
 	QMenu	*_windowsmenu = menuBar()->addMenu(QString("Windows"));
 	_windowsmenu->addAction(raiseAction);
 	windowsMenu = new WindowsMenu(_windowsmenu);
