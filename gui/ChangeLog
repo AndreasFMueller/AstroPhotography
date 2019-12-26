@@ -1,5 +1,8 @@
 ChangeLog for the Qt GUI to Astrophotography
 
+20191226:
+	* fix bug in date display in astrobrowser
+
 20191223:
 	* fix qVariantFromValue deprecation in snowlife.cpp
 	* fix background color for skydisplaywidget

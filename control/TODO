@@ -50,6 +50,8 @@ Image:
 Tasks:
       -	deadlock in the task manager thread startup
       - dark images on atik camera are take with shutter open
+      - cannot use tasks when imaging with instrument without imager
+      - mount failure should not fail exposure
 
 URLs:
 

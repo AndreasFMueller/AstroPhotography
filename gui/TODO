@@ -64,9 +64,16 @@ exposewidget:
       - progess indicator during image download
       - naming of downloaded files
 
-imagecontrollerwidget
+imagecontrollerwidget:
       -	controls to turn on/off use of dark, interpolation
       - ability to retrieve dark image and to view it
+
+browser:
+      - add a file menu 
+      - add a reload button
+      - add an option to export a filelist.xml containing only the good files
+      - add an option to read a filelist.xml to preselect the accepted files
+ 	in a directory
 
 
 Okt 15 00:44:39 snowgui[11133/16] TrackingMonitorController.cpp:063: new tracking point received (timeago = 0.0)

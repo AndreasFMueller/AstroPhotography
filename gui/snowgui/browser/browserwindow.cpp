@@ -76,7 +76,7 @@ void	browserwindow::setDirectory(const std::string& d) {
 		list << "";
 		list << info.fileName();
 		list << QString::number(info.size());
-		list << info.lastModified().toString("yyyy-MM-dd hh:mm::s");
+		list << info.lastModified().toString("yyyy-MM-dd HH:mm:ss");
 		QTreeWidgetItem	*item = new QTreeWidgetItem(list,
 			QTreeWidgetItem::Type);
 		item->setTextAlignment(0, Qt::AlignLeft);
