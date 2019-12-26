@@ -73,6 +73,9 @@ ccdcontrollerwidget::ccdcontrollerwidget(QWidget *parent) :
 	connect(ui->frameOriginY, SIGNAL(valueChanged(int)),
 		this, SLOT(subframeOriginY(int)));
 
+	connect(ui->gainSlider, SIGNAL(valueChanged(int)),
+		this, SLOT(gainChanged(int)));
+
 	// setup and connect the timer
 	ourexposure = false;
 	_guiderccdonly = false;
@@ -107,6 +110,8 @@ ccdcontrollerwidget::ccdcontrollerwidget(QWidget *parent) :
 	// initialize the update timer
 	connect(&_statemonitoringTimer, SIGNAL(timeout()),
 		_statemonitoringwork, SLOT(updateStatus()));
+	connect(&_statemonitoringTimer, SIGNAL(timeout()),
+		this, SLOT(checkGain()));
 
 	_statemonitoringTimer.setInterval(100);
 	_statemonitoringTimer.start();
@@ -356,6 +361,22 @@ void	ccdcontrollerwidget::setupCcd() {
 		int	dec = round(log10(ccdinfo.minexposuretime()));
 		if (dec > 0) { dec = 0; } else { dec = -dec; }
 		ui->exposureSpinBox->setDecimals(dec);
+
+		// set the gain range
+		if (_ccd->hasGain()) {
+			snowstar::Interval	i = _ccd->gainInterval();
+			_gaininterval = std::make_pair(i.min, i.max);
+			float	m = (ui->gainSlider->maximum() - ui->gainSlider->minimum())
+				/ (i.max - i.min);
+			float	g = _ccd->getGain();
+			int	v = m * (g - i.min) + ui->gainSlider->minimum();
+			ui->gainSlider->setValue(v);
+			ui->gainSlider->setEnabled(true);
+			ui->gainValue->setHidden(false);
+		} else {
+			ui->gainSlider->setEnabled(false);
+			ui->gainValue->setHidden(true);
+		}
 
 		// query the status
 		statusUpdate(_ccd->exposureStatus());
@@ -1008,6 +1029,10 @@ void	ccdcontrollerwidget::statusUpdate(snowstar::ExposureState newstate) {
 		ui->cancelButton->setEnabled(false);
 		ui->streamButton->setEnabled(true);
 		ui->streamButton->setText(QString("Stream"));
+		if (_ccd->hasGain()) {
+			float	g = _ccd->getGain();
+			setGainSlider(g);
+		}
 		break;
 	case snowstar::EXPOSING:
 		ui->captureButton->setText(QString("Capture"));
@@ -1042,7 +1067,7 @@ void	ccdcontrollerwidget::statusUpdate(snowstar::ExposureState newstate) {
 		ui->streamButton->setText(QString("Stop"));
 		break;
 	case snowstar::BROKEN:
-		// desable the device
+		// disable the device
 		break;
 	}
 }
@@ -1123,6 +1148,37 @@ void	ccdcontrollerwidget::subframeOriginY(int y) {
 	r.setOrigin(ImagePoint(r.origin().x(), y));
 	ui->frameSizeHeight->setMaximum(_ccdinfo.size.height - y);
 	_exposure.frame(r);
+}
+
+void	ccdcontrollerwidget::gainChanged(int newvalue) {
+	float	m = (_gaininterval.second - _gaininterval.first) /
+			(ui->gainSlider->maximum() - ui->gainSlider->minimum());
+	float	g = _gaininterval.first
+			+ m * (newvalue - ui->gainSlider->minimum());
+	setGain(g);
+}
+
+void	ccdcontrollerwidget::setGain(float gain) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "gain changed to %.3f", gain);
+	_exposure.gain(gain);
+	ui->gainValue->setText(QString(astro::stringprintf("%.1f", gain).c_str()));
+	emit exposureChanged(_exposure);
+}
+
+void	ccdcontrollerwidget::setGainSlider(float gain) {
+	if (!_ccd) {
+		return;
+	}
+	if (_ccd->hasGain()) {
+		snowstar::Interval	i = _ccd->gainInterval();
+		_gaininterval = std::make_pair(i.min, i.max);
+		float	m = (ui->gainSlider->maximum() - ui->gainSlider->minimum())
+			/ (i.max - i.min);
+		float	g = _ccd->getGain();
+		setGain(gain);
+		int	v = m * (g - i.min) + ui->gainSlider->minimum();
+		ui->gainSlider->setValue(v);
+	}
 }
 
 } // namespace snowgui

@@ -425,9 +425,7 @@ public:
 	// gain related methods
 	virtual bool	hasGain() { return false; }
 	virtual float	getGain() { return 1.; }
-	virtual std::pair<float, float>	gainInterval() {
-		return std::make_pair((float)0, (float)0);
-	}
+	virtual std::pair<float, float>	gainInterval();
 
 	// has temperature information
 	virtual bool	hasTemperature() { return false; }

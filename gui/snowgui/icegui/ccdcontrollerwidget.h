@@ -93,6 +93,8 @@ class ccdcontrollerwidget : public InstrumentWidget {
 	snowstar::CcdInfo	_ccdinfo;
 	astro::camera::Exposure	_exposure;
 
+	std::pair<float,float>	_gaininterval;
+
 	std::recursive_mutex	_mutex;	// mutex to protect image state
 	astro::image::ImagePtr	_image;
 	astro::camera::Exposure	_imageexposure;
@@ -187,6 +189,7 @@ public slots:
 	void	cancelClicked();
 	void	streamClicked();
 	void	ccdChanged(int);
+	void	gainChanged(int);
 	void	hideSubframe(bool);
 	void	hideButtons(bool);
 
@@ -205,6 +208,10 @@ public slots:
 	void	subframeHeight(int);
 	void	subframeOriginX(int);
 	void	subframeOriginY(int);
+
+	// set the gain
+	void	setGainSlider(float gain);
+	void	setGain(float gain);
 
 	// test slot
 	void	testSlot();

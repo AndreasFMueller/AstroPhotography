@@ -534,6 +534,7 @@ static void	usage(const char *progname) {
 	std::cout << " -d,--debug         increase debug level" << std::endl;
 	std::cout << " -e,--exposure=t    set exposure time to t" << std::endl;
 	std::cout << " -f,--filter=f      use filter named <f>" << std::endl;
+	std::cout << " -g,--gain=g        use gain value <g>" << std::endl;
 	std::cout << " -h,--help          show this help and exit" << std::endl;
 	std::cout << " -i,--instrument=i  use instrument named <i>"
 		<< std::endl;
@@ -570,16 +571,17 @@ static struct option	longopts[] = {
 { "dryrun",	no_argument,		NULL,		'n' }, /*  3 */
 { "exposure",	required_argument,	NULL,		'e' }, /*  4 */
 { "filter",	required_argument,	NULL,		'F' }, /*  5 */
-{ "dither",	required_argument,	NULL,		'D' },
-{ "frame",	required_argument,	NULL,		'f' }, /*  6 */
-{ "help",	no_argument,		NULL,		'h' }, /*  7 */
-{ "instrument",	required_argument,	NULL,		'i' }, /*  8 */
-{ "purpose",	required_argument,	NULL,		'p' }, /*  9 */
-{ "project",	required_argument,	NULL,		'P' }, /* 10 */
-{ "repeat",	required_argument,	NULL,		'r' }, /* 11 */
-{ "sleep",	required_argument,	NULL,		's' },
-{ "temperature",required_argument,	NULL,		't' }, /* 13 */
-{ "verbose",	no_argument,		NULL,		'v' }, /* 14 */
+{ "dither",	required_argument,	NULL,		'D' }, /*  6 */
+{ "frame",	required_argument,	NULL,		'f' }, /*  7 */
+{ "gain",	required_argument,	NULL,		'g' }, /*  8 */
+{ "help",	no_argument,		NULL,		'h' }, /*  9 */
+{ "instrument",	required_argument,	NULL,		'i' }, /* 10 */
+{ "purpose",	required_argument,	NULL,		'p' }, /* 11 */
+{ "project",	required_argument,	NULL,		'P' }, /* 12 */
+{ "repeat",	required_argument,	NULL,		'r' }, /* 13 */
+{ "sleep",	required_argument,	NULL,		's' }, /* 14 */
+{ "temperature",required_argument,	NULL,		't' }, /* 15 */
+{ "verbose",	no_argument,		NULL,		'v' }, /* 16 */
 { NULL,		0,			NULL,		0   }
 };
 
@@ -595,7 +597,7 @@ int	main(int argc, char *argv[]) {
 	// parse command line options
 	int	c;
 	int	longindex;
-	while (EOF != (c = getopt_long(argc, argv, "b:c:dD:e:F:f:h?i:p:P:r:s:t:v",
+	while (EOF != (c = getopt_long(argc, argv, "b:c:dD:e:F:f:g:h?i:p:P:r:s:t:v",
 			longopts, &longindex)))
 		switch (c) {
 		case 'b':
@@ -616,6 +618,9 @@ int	main(int argc, char *argv[]) {
 			break;
 		case 'f':
 			exposure.frame(astro::image::ImageRectangle(optarg));
+			break;
+		case 'g':
+			exposure.gain(std::stod(optarg));
 			break;
 		case 'D':
 			temperature = std::stod(optarg);

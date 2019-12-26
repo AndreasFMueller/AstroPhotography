@@ -1,6 +1,9 @@
 ChangeLog for the Qt GUI to Astrophotography
 
 20191226:
+	* fix border of takeimagewindow
+	* synchronize gain settings across different instances of the
+	  ccdcontrollerwidet
 	* fix bug in date display in astrobrowser
 
 20191223:

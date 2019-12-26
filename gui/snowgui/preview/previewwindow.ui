@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>snowgui::PreviewWindow</class>
+ <class>PreviewWindow</class>
  <widget class="QWidget" name="PreviewWindow">
   <property name="geometry">
    <rect>
@@ -14,6 +14,18 @@
    <string>Form</string>
   </property>
   <layout class="QHBoxLayout" name="horizontalLayout">
+   <property name="leftMargin">
+    <number>6</number>
+   </property>
+   <property name="topMargin">
+    <number>6</number>
+   </property>
+   <property name="rightMargin">
+    <number>6</number>
+   </property>
+   <property name="bottomMargin">
+    <number>6</number>
+   </property>
    <item>
     <widget class="QFrame" name="imageFrame">
      <property name="frameShape">
@@ -270,13 +282,12 @@
         <widget class="QWidget" name="scrollAreaWidgetContents">
          <property name="geometry">
           <rect>
-           <x>0</x>
+           <x>1</x>
            <y>0</y>
            <width>767</width>
            <height>727</height>
           </rect>
          </property>
-         <zorder>imageOptions</zorder>
         </widget>
        </widget>
       </item>

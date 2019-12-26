@@ -14,13 +14,13 @@ using namespace astro::io;
 namespace astro {
 namespace camera {
 
-Exposure::Exposure() : _exposuretime(1.), _gain(1.), _limit(INFINITY),
+Exposure::Exposure() : _exposuretime(1.), _gain(-1.), _limit(INFINITY),
 	_mode(1,1), _shutter(Shutter::OPEN), _purpose(Exposure::light) {
 }
 
 Exposure::Exposure(const ImageRectangle& frame,
 	float exposuretime)
-                : _frame(frame), _exposuretime(exposuretime), _gain(1.),
+                : _frame(frame), _exposuretime(exposuretime), _gain(-1.),
 		  _limit(INFINITY), _shutter(Shutter::OPEN),
 		  _purpose(Exposure::light) {
 }
@@ -72,7 +72,7 @@ void	Exposure::addToImage(ImageBase& image) const {
 	}
 
 	// add the gain
-	if (_gain != 1.0) {
+	if (_gain != -1.0) {
 		image.setMetadata(
 			FITSKeywords::meta(std::string("GAIN"), _gain));
 	}

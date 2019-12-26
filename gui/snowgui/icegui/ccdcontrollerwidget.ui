@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>344</width>
-    <height>261</height>
+    <height>281</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -19,7 +19,7 @@
   <property name="maximumSize">
    <size>
     <width>16777215</width>
-    <height>261</height>
+    <height>281</height>
    </size>
   </property>
   <property name="windowTitle">
@@ -46,13 +46,13 @@
      <property name="minimumSize">
       <size>
        <width>0</width>
-       <height>91</height>
+       <height>101</height>
       </size>
      </property>
      <property name="maximumSize">
       <size>
        <width>16777215</width>
-       <height>91</height>
+       <height>101</height>
       </size>
      </property>
      <layout class="QGridLayout" name="gridLayout">
@@ -68,72 +68,8 @@
       <property name="bottomMargin">
        <number>0</number>
       </property>
-      <item row="2" column="1">
-       <widget class="snowgui::LogSpinBox" name="exposureSpinBox">
-        <property name="alignment">
-         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-        </property>
-        <property name="decimals">
-         <number>3</number>
-        </property>
-        <property name="minimum">
-         <double>0.001000000000000</double>
-        </property>
-        <property name="maximum">
-         <double>3600.000000000000000</double>
-        </property>
-        <property name="value">
-         <double>1.000000000000000</double>
-        </property>
-       </widget>
-      </item>
-      <item row="4" column="1">
-       <widget class="QCheckBox" name="shutterOpenBox">
-        <property name="text">
-         <string>open</string>
-        </property>
-        <property name="checked">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-      <item row="4" column="0">
-       <widget class="QLabel" name="shutterLabel">
-        <property name="text">
-         <string>Shutter:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="2">
-       <widget class="QLabel" name="binningLabel">
-        <property name="text">
-         <string>Binning:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="0">
-       <widget class="QLabel" name="sizeLabel">
-        <property name="text">
-         <string>Size:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="0">
-       <widget class="QLabel" name="exposureLabel">
-        <property name="text">
-         <string>Exposure:</string>
-        </property>
-       </widget>
-      </item>
       <item row="2" column="3">
        <widget class="QComboBox" name="binningSelectionBox"/>
-      </item>
-      <item row="4" column="2">
-       <widget class="QLabel" name="purposeLabel">
-        <property name="text">
-         <string>Purpose:</string>
-        </property>
-       </widget>
       </item>
       <item row="4" column="3">
        <widget class="QComboBox" name="purposeBox">
@@ -206,6 +142,100 @@
         </property>
        </widget>
       </item>
+      <item row="2" column="1">
+       <widget class="snowgui::LogSpinBox" name="exposureSpinBox">
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+        <property name="decimals">
+         <number>3</number>
+        </property>
+        <property name="minimum">
+         <double>0.001000000000000</double>
+        </property>
+        <property name="maximum">
+         <double>3600.000000000000000</double>
+        </property>
+        <property name="value">
+         <double>1.000000000000000</double>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="1">
+       <widget class="QCheckBox" name="shutterOpenBox">
+        <property name="text">
+         <string>open</string>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="0">
+       <widget class="QLabel" name="shutterLabel">
+        <property name="text">
+         <string>Shutter:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="2">
+       <widget class="QLabel" name="purposeLabel">
+        <property name="text">
+         <string>Purpose:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="0">
+       <widget class="QLabel" name="sizeLabel">
+        <property name="text">
+         <string>Size:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="2">
+       <widget class="QLabel" name="binningLabel">
+        <property name="text">
+         <string>Binning:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0">
+       <widget class="QLabel" name="exposureLabel">
+        <property name="text">
+         <string>Exposure:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="0">
+       <widget class="QLabel" name="gainLabel">
+        <property name="text">
+         <string>Gain:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="1" colspan="2">
+       <widget class="QSlider" name="gainSlider">
+        <property name="maximum">
+         <number>100</number>
+        </property>
+        <property name="value">
+         <number>100</number>
+        </property>
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="3">
+       <widget class="QLabel" name="gainValue">
+        <property name="text">
+         <string/>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+      </item>
      </layout>
     </widget>
    </item>
@@ -236,6 +266,13 @@
       <property name="bottomMargin">
        <number>0</number>
       </property>
+      <item row="1" column="0">
+       <widget class="QLabel" name="frameOriginLabel">
+        <property name="text">
+         <string>Subframe Origin:</string>
+        </property>
+       </widget>
+      </item>
       <item row="1" column="2">
        <widget class="QSpinBox" name="frameOriginY">
         <property name="maximum">
@@ -246,17 +283,33 @@
         </property>
        </widget>
       </item>
-      <item row="1" column="0">
-       <widget class="QLabel" name="frameOriginLabel">
-        <property name="text">
-         <string>Subframe Origin:</string>
+      <item row="0" column="2">
+       <widget class="QSpinBox" name="frameSizeHeight">
+        <property name="maximum">
+         <number>99999</number>
+        </property>
+        <property name="singleStep">
+         <number>100</number>
         </property>
        </widget>
       </item>
-      <item row="0" column="0">
-       <widget class="QLabel" name="frameSizeLabel">
-        <property name="text">
-         <string>Subframe Size:</string>
+      <item row="1" column="1">
+       <widget class="QSpinBox" name="frameOriginX">
+        <property name="maximum">
+         <number>99999</number>
+        </property>
+        <property name="singleStep">
+         <number>100</number>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QSpinBox" name="frameSizeWidth">
+        <property name="maximum">
+         <number>99999</number>
+        </property>
+        <property name="singleStep">
+         <number>100</number>
         </property>
        </widget>
       </item>
@@ -285,33 +338,10 @@
         </property>
        </widget>
       </item>
-      <item row="0" column="2">
-       <widget class="QSpinBox" name="frameSizeHeight">
-        <property name="maximum">
-         <number>99999</number>
-        </property>
-        <property name="singleStep">
-         <number>100</number>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="1">
-       <widget class="QSpinBox" name="frameSizeWidth">
-        <property name="maximum">
-         <number>99999</number>
-        </property>
-        <property name="singleStep">
-         <number>100</number>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="1">
-       <widget class="QSpinBox" name="frameOriginX">
-        <property name="maximum">
-         <number>99999</number>
-        </property>
-        <property name="singleStep">
-         <number>100</number>
+      <item row="0" column="0">
+       <widget class="QLabel" name="frameSizeLabel">
+        <property name="text">
+         <string>Subframe Size:</string>
         </property>
        </widget>
       </item>

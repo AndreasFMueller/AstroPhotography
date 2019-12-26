@@ -137,8 +137,20 @@ void	AsiCcd::setExposure(const Exposure& e) {
 	value.isauto = false;
 	_camera.setControlValue(value);
 
-	// XXX set the gain
-	exposure.gain(_camera.getControlValue(AsiGain).value);
+	// set the gain
+	if (exposure.gain() != -1.) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "set gain to %.1f",
+			exposure.gain());
+		AsiControlValue	controlvalue;
+		controlvalue.type = AsiGain;
+		controlvalue.value = exposure.gain();
+		controlvalue.isauto = false;
+		_camera.setControlValue(controlvalue);
+	} else {
+		float	g = _camera.getControlValue(AsiGain).value;
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "using current gain %.1f", g);
+		exposure.gain(g);
+	}
 
 	// that's it
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "exposure settings complete");
@@ -459,8 +471,11 @@ float	AsiCcd::getGain() {
  * \brief Retrieve interval of valid gain values
  */
 std::pair<float, float>	AsiCcd::gainInterval() {
-	return std::make_pair(  (float)_camera.controlMin(AsiGain),
-				(float)_camera.controlMax(AsiGain));
+	float	minGain = (float)_camera.controlMin(AsiGain);
+	float	maxGain = (float)_camera.controlMax(AsiGain);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "gain interval: [%.1f, %.1f]",
+		minGain, maxGain);
+	return std::make_pair(minGain, maxGain);
 }
 
 /**

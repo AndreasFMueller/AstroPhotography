@@ -191,6 +191,10 @@ module snowstar {
 		 */
 		bool	hasGain();
 		/**
+		 * \brief Retrieve the current Gain setting
+		 */
+		float	getGain();
+		/**
 		 * \brief get the interval of valid gain values
 		 */
 		Interval	gainInterval();

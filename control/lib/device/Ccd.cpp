@@ -545,5 +545,12 @@ void	Ccd::addMetadata(ImageBase& image) {
 		this->userFriendlyName()));
 }
 
+/**
+ * \brief Get the interval of valid gain values
+ */
+std::pair<float, float>	Ccd::gainInterval() {
+	return std::make_pair((float)1., (float)1.);
+}
+
 } // namespace camera
 } // namespace astro

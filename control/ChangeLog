@@ -1,6 +1,9 @@
 ChangeLog for the Astro project.
 
 20191226:
+	* add proper handling of gain in AsiCcd class
+	* change default gain value to -1, which means that the current
+	  gain of the camera should be used
 	* fix set temperature bug in AsiCooler class
 	* make task wait times configurable
 	* make cooler stable limit configurable

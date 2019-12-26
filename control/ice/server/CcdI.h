@@ -52,6 +52,7 @@ static	CcdPrx	createProxy(const std::string& ccdname,
 	Exposure	getExposure(const Ice::Current& current);
 	ImagePrx	getImage(const Ice::Current& current);
 	bool	hasGain(const Ice::Current& current);
+	float	getGain(const Ice::Current& current);
 	Interval	gainInterval(const Ice::Current& current);
 	bool	hasShutter(const Ice::Current& current);
 	ShutterState	getShutterState(const Ice::Current& current);

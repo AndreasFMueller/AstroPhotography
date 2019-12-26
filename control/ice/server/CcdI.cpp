@@ -159,6 +159,10 @@ bool	CcdI::hasGain(const Ice::Current& /* current */) {
 	return _ccd->hasGain();
 }
 
+float	CcdI::getGain(const Ice::Current& /* current */) {
+	return _ccd->getGain();
+}
+
 Interval	CcdI::gainInterval(const Ice::Current& /* current */) {
 	return convert(_ccd->gainInterval());
 }

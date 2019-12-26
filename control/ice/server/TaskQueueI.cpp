@@ -117,8 +117,9 @@ void TaskQueueI::stop(const Ice::Current& /* current */) {
  */
 int TaskQueueI::submit(const TaskParameters& parameters,
 		const Ice::Current& /* current */) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "submit a new task on '%s', purpose = %d",
-		parameters.instrument.c_str(), parameters.exp.purpose);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "submit a new task on '%s', purpose = %d, gain = %.1f",
+		parameters.instrument.c_str(), parameters.exp.purpose,
+		parameters.exp.gain);
 	TaskParameters	tp = parameters;
 	// add the repository path information
 	tp.repodb = ImageRepo::configdb();
