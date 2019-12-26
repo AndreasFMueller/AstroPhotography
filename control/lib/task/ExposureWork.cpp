@@ -346,17 +346,32 @@ void	ExposureWork::run() {
 
 	// add temperature metadata
 	if (cooler) {
-		cooler->addTemperatureMetadata(*image);
+		try {
+			cooler->addTemperatureMetadata(*image);
+		} catch (const std::exception& x) {
+			debug(LOG_ERR, DEBUG_LOG, 0,
+				"failed to add cooler info: %s", x.what());
+		}
 	}
 
 	// add focus metadata
 	if (focuser) {
-		focuser->addFocusMetadata(*image);
+		try {
+			focuser->addFocusMetadata(*image);
+		} catch (const std::exception& x) {
+			debug(LOG_ERR, DEBUG_LOG, 0,
+				"failed to add filterwheel info: %s", x.what());
+		}
 	}
 
 	// position information from the mount
 	if (mount) {
-		mount->addPositionMetadata(*image);
+		try {
+			mount->addPositionMetadata(*image);
+		} catch (const std::exception& x) {
+			debug(LOG_ERR, DEBUG_LOG, 0,
+				"failed to add mount info: %s", x.what());
+		}
 	}
 
 	// project inforamtion

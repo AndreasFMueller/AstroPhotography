@@ -72,8 +72,6 @@ Drivers:
 	Can we have persistent names for these devices?
       -	It should be possible to reread the devices of a module, just in
 	case a new device was added during runtime.
-      - NICE driver cannot talk from Ubuntu 16.04 to other systems (ICE
-	help request pending)
 
 ICE client/server:
       - USB Timeout in a driver should always be converted to a decent timeout
