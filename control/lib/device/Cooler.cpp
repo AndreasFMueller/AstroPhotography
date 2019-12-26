@@ -9,6 +9,7 @@
 #include <unistd.h>
 #include <AstroDebug.h>
 #include <AstroIO.h>
+#include <AstroConfig.h>
 
 using namespace astro::image;
 using namespace astro::io;
@@ -132,12 +133,23 @@ bool	Cooler::stable() {
 	if (!isOn()) {
 		return true;
 	}
+	config::ConfigurationPtr	config = config::Configuration::get();
+	config::ConfigurationKey	key("device", "cooler", "stable");
+	float	stablelimit = 3.;
+	if (config->has(key)) {
+		stablelimit = std::stof(config->get(key));
+		if (stablelimit <= 0) {
+			stablelimit = 3.;
+		}
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "stable limit config: %.1f",
+			stablelimit);
+	}
 	float	actualtemperature = this->getActualTemperature();
 	float	delta = fabs(actualtemperature - temperature);
 	debug(LOG_DEBUG, DEBUG_LOG, 0,
-		"T_act = %.1f, T_set = %.1f, delta = %.1f",
-		actualtemperature, temperature, delta);
-	return (delta < 3);
+		"T_act = %.1f, T_set = %.1f, delta = %.1f, limit = %.1f",
+		actualtemperature, temperature, delta, stablelimit);
+	return (delta < stablelimit);
 }
 
 /**

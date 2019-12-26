@@ -1,5 +1,10 @@
 ChangeLog for the Astro project.
 
+20191226:
+	* fix set temperature bug in AsiCooler class
+	* make task wait times configurable
+	* make cooler stable limit configurable
+
 20191225:
 	* add temperature class, unify absolute zero value
 	* add temperature retrieval to ASI Ccd class

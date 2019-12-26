@@ -71,6 +71,7 @@ void	AsiCooler::setCoolerTemperature() {
  * \brief Set the target temperature of the cooler
  */
 void	AsiCooler::setTemperature(float temperature) {
+	Cooler::setTemperature(temperature);
 	_camera.settemperature(temperature);
 	setCoolerTemperature();
 }

@@ -222,9 +222,17 @@ void	ExposureWork::run() {
 
 	// wait for the cooler, if present, but at most 30 seconds
 	if (cooler) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "wait for cooler");
+		config::ConfigurationPtr	config
+			= config::Configuration::get();
+		float	waittime = 10.;
+		config::ConfigurationKey	key("tasks", "cooler", "wait");
+		if (config->has(key)) {
+			waittime = std::stof(config->get(key));
+		}
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "wait for cooler: %.1f",
+			waittime);
 		CoolerCondition	coolercondition(cooler);
-		if (!wait(30., coolercondition)) {
+		if (!wait(waittime, coolercondition)) {
 			debug(LOG_DEBUG, DEBUG_LOG, 0,
 				"cannot stabilize temperature");
 			// XXX what do we do when the cooler cannot stabilize?
@@ -236,12 +244,21 @@ void	ExposureWork::run() {
 
 	// wait for the filterwheel if present
 	if (filterwheel) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "wait for filterwheel");
+		config::ConfigurationPtr	config
+			= config::Configuration::get();
+		float	waittime = 10.;
+		config::ConfigurationKey	key("tasks", "filterwheel",
+			"wait");
+		if (config->has(key)) {
+			waittime = std::stof(config->get(key));
+		}
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "wait for filterwheel: %.1f",
+			waittime);
 
 		// wait once more for the filterwheel to become ready
 		FilterwheelCondition	filterwheelcondition(filterwheel,
 			camera::FilterWheel::idle);
-		if (!wait(30., filterwheelcondition)) {
+		if (!wait(waittime, filterwheelcondition)) {
 			throw std::runtime_error("filter wheel does not idle");
 		}
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "filterwheel now idle");
