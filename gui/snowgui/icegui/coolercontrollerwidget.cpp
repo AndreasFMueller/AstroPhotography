@@ -40,6 +40,10 @@ coolercontrollerwidget::coolercontrollerwidget(QWidget *parent) :
 	connect(this, SIGNAL(newActualTemperature(float)),
 		this, SLOT(displayActualTemperature(float)));
 
+	// connect the dew heater slider
+	connect(ui->dewHeaterSlider, SIGNAL(valueChanged(int)),
+		this, SLOT(dewHeaterChanged(int)));
+
 	// set up the update thread
 	_updatethread = new QThread(NULL);
 	connect(_updatethread, SIGNAL(finished()),
@@ -143,6 +147,24 @@ void	coolercontrollerwidget::setupCooler() {
 
 		// display whether the cooler is on
 		ui->activeWidget->setActive(ison);
+
+		// check the 
+		if (_cooler->hasDewHeater()) {
+			snowstar::Interval	i = _cooler->dewHeaterRange();
+			_dewheaterinterval = std::make_pair(i.min, i.max);
+			float   m = (ui->dewHeaterSlider->maximum()
+					- ui->dewHeaterSlider->minimum())
+					/ (i.max - i.min);
+                        float   g = _cooler->getDewHeater();
+                        int     v = m * (g - i.min)
+					+ ui->dewHeaterSlider->minimum();
+                        ui->dewHeaterSlider->setValue(v);
+			ui->dewHeaterSlider->setEnabled(true);
+			ui->dewHeaterValue->setHidden(false);
+		} else {
+			ui->dewHeaterSlider->setEnabled(false);
+			ui->dewHeaterValue->setHidden(true);
+		}
 
 		// enable the status update timer
 		statusTimer.start();
@@ -316,5 +338,61 @@ void	coolercontrollerwidget::activeToggled(bool active) {
 		}
 	}
 }
+
+/**
+ * \brief Slot to change the dew heater value
+ */
+void	coolercontrollerwidget::dewHeaterChanged(int newvalue) {
+        float   m = (_dewheaterinterval.second - _dewheaterinterval.first) /
+                        (ui->dewHeaterSlider->maximum()
+				- ui->dewHeaterSlider->minimum());
+        float   g = _dewheaterinterval.first
+                        + m * (newvalue - ui->dewHeaterSlider->minimum());
+        setDewHeater(g);
+
+}
+
+/**
+ * \brief Set the dew heater value
+ *
+ * \param dewheatervalue	the value of the dew heater
+ */
+void    coolercontrollerwidget::setDewHeater(float dewheatervalue) {
+	if (!_cooler) {
+		return;
+	}
+	if (!_cooler->hasDewHeater()) {
+		return;
+	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "dewheater changed to %.3f",
+		dewheatervalue);
+	_cooler->setDewHeater(dewheatervalue);
+	ui->dewHeaterValue->setText(QString(
+		astro::stringprintf("%.1f", dewheatervalue).c_str()));
+}
+
+/**
+ * \brief Set the position of the dew heater slider
+ *
+ * \param dewheatervalue	the value of the dew heater
+ */
+void    coolercontrollerwidget::setDewHeaterSlider(float dewheatervalue) {
+	if (!_cooler) {
+		return;
+	}
+	if (!_cooler->hasDewHeater()) {
+		return;
+	}
+	snowstar::Interval      i = _cooler->dewHeaterRange();
+	_dewheaterinterval = std::make_pair(i.min, i.max);
+	float   m = (ui->dewHeaterSlider->maximum()
+			- ui->dewHeaterSlider->minimum()) / (i.max - i.min);
+	float   d = _cooler->getDewHeater();
+	setDewHeater(dewheatervalue);
+	int     v = m * (d - i.min) + ui->dewHeaterSlider->minimum();
+	ui->dewHeaterSlider->setValue(v);
+
+}
+
 
 } // namespace snowgui

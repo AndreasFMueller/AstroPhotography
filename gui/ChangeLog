@@ -1,5 +1,8 @@
 ChangeLog for the Qt GUI to Astrophotography
 
+20191227:
+	* add dew heater stuff
+
 20191226:
 	* fix border of takeimagewindow
 	* synchronize gain settings across different instances of the

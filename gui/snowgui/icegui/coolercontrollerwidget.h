@@ -43,6 +43,7 @@ class coolercontrollerwidget : public InstrumentWidget {
 	std::vector<std::string>	_cooler_names;
 	QThread			*_updatethread;
 	coolerupdatework	*_updatework;
+	std::pair<float,float>	_dewheaterinterval;
 public:
 	explicit coolercontrollerwidget(QWidget *parent = 0);
 	~coolercontrollerwidget();
@@ -74,9 +75,14 @@ public slots:
 	void	setSetTemperature(double t);
 	void	displayActualTemperature(float actual);
 	void	guiChanged();
+	void	dewHeaterChanged(int);
 	void	coolerChanged(int index);
 	void	editingFinished();
 	void	activeToggled(bool);
+
+	// set the dewheater state
+	void	setDewHeater(float dewheatervalue);
+	void	setDewHeaterSlider(float dewheatervalue);
 };
 
 } // namespace snowgui

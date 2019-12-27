@@ -1,5 +1,9 @@
 ChangeLog for the Astro project.
 
+20191227:
+	* add dew heater stuff to Cooler class
+	* add dew heater to ASI driver and Simulator
+
 20191226:
 	* add operator*() to the YUV<P> template
 	* ensure that a failure to get mount data does not invalidate an
