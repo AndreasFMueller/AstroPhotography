@@ -61,6 +61,10 @@ bool	NiceCcd::hasGain() {
 	return _ccd->hasGain();
 }
 
+float	NiceCcd::getGain() {
+	return _ccd->getGain();
+}
+
 std::pair<float, float>	NiceCcd::gainInterval() {
 	return snowstar::convert(_ccd->gainInterval());
 }
@@ -73,6 +77,7 @@ CoolerPtr	NiceCcd::getCooler0() {
 	snowstar::CoolerPrx	cooler = _ccd->getCooler();
 	return CoolerPtr(new NiceCooler(cooler, nice(cooler->getName())));
 }
+
 
 } // namespace nice
 } // namespace camera

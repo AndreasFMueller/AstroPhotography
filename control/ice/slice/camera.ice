@@ -267,6 +267,22 @@ module snowstar {
 		 * set the temperature AND set the it on.
 		 */
 		void	setOn(bool onoff);
+		/**
+		 * \brief Check whether the cooler has a dew heater
+		 */
+		bool	hasDewHeater();
+		/**
+		 * \brief Get the current dew heater value
+		 */
+		float	getDewHeater();
+		/**
+		 * \brief set the dew heater value
+		 */
+		void	setDewHeater(float dewheatervalue);
+		/**
+		 * \brief Retrieve the range of valid dew heater values
+		 */
+		Interval	dewHeaterRange();
 	};
 
 	/**

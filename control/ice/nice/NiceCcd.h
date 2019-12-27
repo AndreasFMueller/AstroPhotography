@@ -36,6 +36,7 @@ public:
 
 	virtual bool	hasCooler() const;
 	virtual CoolerPtr	getCooler0();
+	virtual float	getGain();
 };
 
 

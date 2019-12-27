@@ -110,6 +110,38 @@ void	AsiCooler::setOn(bool onoff) {
 	setCoolerTemperature();
 }
 
+bool	AsiCooler::hasDewHeater() {
+	try {
+		_camera.controlIndex("AntiDewHeater");
+		return true;
+	} catch (const std::exception& x) {
+	}
+	return false;
+}
+
+float	AsiCooler::dewHeater() {
+	return (float)_camera.getControlValue(AsiAntiDewHeater).value;
+}
+
+void	AsiCooler::dewHeater(float dewheatervalue) {
+	AsiControlValue controlvalue;
+	controlvalue.type = AsiAntiDewHeater;
+	controlvalue.value = dewheatervalue;
+	controlvalue.isauto = false;
+	_camera.setControlValue(controlvalue);
+}
+
+std::pair<float, float>	AsiCooler::dewHeaterRange() {
+	if (!hasDewHeater()) {
+		throw std::runtime_error("device has no dew heater");
+	}
+	float   minDewHeater = (float)_camera.controlMin(AsiAntiDewHeater);
+	float   maxDewHeater = (float)_camera.controlMax(AsiAntiDewHeater);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "dew heater interval: [%.2f, %.2f]",
+		minDewHeater, maxDewHeater);
+	return std::make_pair(minDewHeater, maxDewHeater);
+}
+
 } // namespace asi
 } // namespace camera
 } // namespade astro

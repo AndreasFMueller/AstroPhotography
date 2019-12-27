@@ -555,6 +555,11 @@ public:
 	virtual void	addTemperatureMetadata(astro::image::ImageBase& image);
 	bool	stable();
 	bool	wait(float timeout);
+	// dew heater stuff useful for ASI cameras
+	virtual bool	hasDewHeater();
+	virtual std::pair<float, float>	dewHeaterRange();
+	virtual float	dewHeater();
+	virtual void	dewHeater(float d);
 };
 
 /**

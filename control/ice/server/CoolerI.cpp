@@ -42,5 +42,26 @@ CoolerPrx	CoolerI::createProxy(const std::string& coolername,
 		NameConverter::urlencode(coolername), current);
 }
 
+bool	CoolerI::hasDewHeater(const Ice::Current& current) {
+	return _cooler->hasDewHeater();
+}
+
+float	CoolerI::getDewHeater(const Ice::Current& /* current */) {
+	return _cooler->dewHeater();
+}
+
+void	CoolerI::setDewHeater(float dewheatervalue,
+		const Ice::Current& /* current */) {
+	_cooler->dewHeater(dewheatervalue);
+}
+
+Interval	CoolerI::dewHeaterRange(const Ice::Current& current) {
+	std::pair<float, float>	i = _cooler->dewHeaterRange();
+	Interval	result;
+	result.min = i.first;
+	result.max = i.second;
+	return result;
+}
+
 } // namespace snowstar
 

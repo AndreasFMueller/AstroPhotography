@@ -26,6 +26,11 @@ public:
 	
 	virtual bool	isOn();
 	virtual void	setOn(bool onoff);
+
+	virtual bool	hasDewHeater();
+	virtual float	dewHeater();
+	virtual void	dewHeater(float dewheatervalue);
+	virtual std::pair<float, float>	dewHeaterRange();
 };
 
 } // namespace nice

@@ -24,6 +24,13 @@ public:
 	virtual void	setOn(bool onoff);
 	virtual bool	isOn() { return on; }
 	int	belowambient();
+private:
+	float	_dewheatervalue;
+public:
+	virtual bool	hasDewHeater();
+	virtual float	dewHeater();
+	virtual void	dewHeater(float d);
+	virtual std::pair<float, float>	dewHeaterRange();
 };
 
 } // namespace simulator

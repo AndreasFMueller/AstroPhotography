@@ -25,6 +25,7 @@ SimCooler::SimCooler(SimLocator& locator)
 	lasttemperature = AMBIENT_TEMPERATURE;
 	laststatechange = simtime();
 	on = false;
+	_dewheatervalue = 0.;
 }
 
 /**
@@ -75,6 +76,22 @@ void	SimCooler::setOn(bool onoff) {
 int	SimCooler::belowambient() {
 	int	result = (AMBIENT_TEMPERATURE - getActualTemperature()) / 7.;
 	return result;
+}
+
+bool	SimCooler::hasDewHeater() {
+	return true;
+}
+
+float	SimCooler::dewHeater() {
+	return _dewheatervalue;
+}
+
+void	SimCooler::dewHeater(float d) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "new dew heater value: %.2f", d);
+	_dewheatervalue = d;
+}
+std::pair<float, float>	SimCooler::dewHeaterRange() {
+	return std::make_pair((float)0., (float)1.);
 }
 
 } // namespace simulator

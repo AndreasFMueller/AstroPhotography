@@ -36,6 +36,23 @@ void	NiceCooler::setOn(bool onoff) {
 	_cooler->setOn(onoff);
 }
 
+bool	NiceCooler::hasDewHeater() {
+	return _cooler->hasDewHeater();
+}
+
+float	NiceCooler::dewHeater() {
+	return _cooler->getDewHeater();
+}
+
+void	NiceCooler::dewHeater(float dewheatervalue) {
+	_cooler->setDewHeater(dewheatervalue);
+}
+
+std::pair<float, float>	NiceCooler::dewHeaterRange() {
+	snowstar::Interval	i = _cooler->dewHeaterRange();
+	return std::make_pair((float)i.min, (float)i.max);
+}
+
 } // namespace nice
 } // namespace camera
 } // namespace astro

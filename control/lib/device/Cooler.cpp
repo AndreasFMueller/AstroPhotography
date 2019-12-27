@@ -164,5 +164,38 @@ bool	Cooler::wait(float timeout) {
 	return (timeout < 0) ? false : true;
 }
 
+/**
+ * \brief Does this cooler have a dew heater?
+ */
+bool	Cooler::hasDewHeater() {
+	return false;
+}
+
+/**
+ * \brief Retrieve the range for the dew heater
+ */
+std::pair<float, float>	Cooler::dewHeaterRange() {
+	return std::make_pair((float)0., (float)1.);
+}
+
+/**
+ * \brief Retreive the current dew heater value
+ */
+float	Cooler::dewHeater() {
+	return 0.;
+}
+
+/**
+ * \brief Set the dew heater value
+ *
+ * Just ignores the input
+ *
+ * \param d	the dew heater value
+ */
+void	Cooler::dewHeater(float d) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "ignoring dew heater value");
+}
+
+
 } // namespace camera
 } // namespace astro

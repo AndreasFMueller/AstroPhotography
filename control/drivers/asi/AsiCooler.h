@@ -28,6 +28,11 @@ public:
 	virtual void	setTemperature(const float temperature);
 	virtual bool	isOn();
 	virtual void	setOn(bool onoff);
+	// dew heater stuff
+	virtual bool	hasDewHeater();
+	virtual float	dewHeater();
+	virtual void	dewHeater(float dewheatervalue);
+	virtual std::pair<float, float>	dewHeaterRange();
 };
 
 } // namespace asi
