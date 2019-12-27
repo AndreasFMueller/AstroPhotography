@@ -17,11 +17,15 @@ template<typename Pixel>
 class GammaAdapter : public ConstImageAdapter<Pixel> {
 	const ConstImageAdapter<Pixel>&	image;
 	float	_gamma;
+	float	_min;
+	float	_max;
 public:
 	GammaAdapter(const ConstImageAdapter<Pixel>& image, const float gamma = 1);
 	virtual Pixel	pixel(int x, int y) const;
 	float	gamma() const { return _gamma; }
 	void	gamma(float gamma) { _gamma = gamma; }
+	void	min(float m) { _min = m; }
+	void	max(float m) { _max = m; }
 };
 
 template<typename Pixel>
@@ -29,17 +33,19 @@ GammaAdapter<Pixel>::GammaAdapter(const ConstImageAdapter<Pixel>& _image,
 	const float gamma)
 	: ConstImageAdapter<Pixel>(_image.getSize()), image(_image) {
 	_gamma = gamma;
+	_min = 0.;
+	_max = 1.;
 }
 
 template<typename Pixel>
-Pixel	GammaAdapter<Pixel>::pixel(int x, int y)
-			const {
-	Pixel	v = image.pixel(x, y);
-	if (v < 0) {
-		return 0;
+Pixel	GammaAdapter<Pixel>::pixel(int x, int y) const {
+	Pixel	p = image.pixel(x, y);
+	double	v = p;
+	if (v < _min) {
+		return Pixel(0);
 	}
-	return pow(v, _gamma);
-
+	double	s = _max - _min;
+	return p * s *  pow((v - _min) / s, _gamma);
 }
 
 /**

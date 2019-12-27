@@ -19,6 +19,7 @@ libastroprocessing_la_SOURCES =						\
 	DestarStep.cpp							\
 	FileImageStep.cpp						\
 	FlatImageStep.cpp						\
+	GammaStep.cpp							\
 	GroupStep.cpp							\
 	HDRStep.cpp							\
 	ImageCalibrationStep.cpp					\
@@ -36,6 +37,7 @@ libastroprocessing_la_SOURCES =						\
 	ParseDestarStep.cpp						\
 	ParseFileimageStep.cpp						\
 	ParseFlatimageStep.cpp						\
+	ParseGammaStep.cpp						\
 	ParseGroupStep.cpp						\
 	ParseHDRStep.cpp						\
 	ParseImage.cpp							\

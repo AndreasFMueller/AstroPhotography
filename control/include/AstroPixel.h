@@ -539,6 +539,9 @@ public:
 	P	luminance() const {
 		return y;
 	}
+	YUV<P>	operator*(double value) {
+		return YUV<P>(y * value, u, v);
+	}
 	operator	double() {
 		return (double)luminance();
 	}

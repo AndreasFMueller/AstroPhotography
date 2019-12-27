@@ -687,6 +687,17 @@ public:
 };
 
 /**
+ * \rief Step to gamma correct an image
+ */
+class GammaStep : public ImageStep, public adapter::GammaTransformBase {
+public:
+	GammaStep(NodePaths& parent);
+	virtual ProcessingStep::state	do_work();
+	virtual std::string	what() const;
+	virtual ImagePtr	image();
+};
+
+/**
 * \brief Network Class to manage a complete network of interdependen steps
 */
 class ProcessorNetwork : public NodePaths {

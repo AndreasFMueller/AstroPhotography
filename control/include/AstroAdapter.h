@@ -2687,6 +2687,54 @@ Image<T>	*destar(const ConstImageAdapter<T>& image, int radius) {
 ImagePtr	destarptr(ImagePtr image, int radius);
 
 //////////////////////////////////////////////////////////////////////
+// Gamma correcton adapter
+//////////////////////////////////////////////////////////////////////
+class GammaTransformBase {
+protected:
+	double	_minimum;
+	double	_maximum;
+	double	_gamma;
+public:
+	double	minimum() const { return _minimum; }
+	double	maximum() const { return _maximum; }
+	double	gamma() const { return _gamma; }
+	void	minimum(double m) { _minimum = m; }
+	void	maximum(double m) { _maximum = m; }
+	void	gamma(double g) { _gamma = g; }
+	GammaTransformBase();
+	GammaTransformBase(const GammaTransformBase& other);
+	double	value(double x) const;
+};
+
+template<typename Pixel>
+class GammaTransformAdapter : public ConstImageAdapter<Pixel>,
+			public GammaTransformBase {
+	const ConstImageAdapter<Pixel>&	_image;
+public:
+	GammaTransformAdapter(const ConstImageAdapter<Pixel>& image)
+		: ConstImageAdapter<Pixel>(image.getSize()), _image(image) {
+	}
+	GammaTransformAdapter(const ConstImageAdapter<Pixel>& image,
+		const GammaTransformBase& gammasettings)
+		: ConstImageAdapter<Pixel>(image.getSize()),
+		  GammaTransformBase(gammasettings), _image(image) {
+	}
+	virtual Pixel	pixel(int x, int y) const {
+		Pixel	p = _image.pixel(x, y);
+		double	v = p;
+		return p * value(v);
+	}
+	static ImagePtr	corrected(const ConstImageAdapter<Pixel>& image,
+		const GammaTransformBase& gammasettings) {
+		GammaTransformAdapter	gta(image, gammasettings);
+		return ImagePtr(new Image<Pixel>(gta));
+	}
+};
+
+ImagePtr	gammatransform(ImagePtr image,
+			const GammaTransformBase& gammasettings);
+
+//////////////////////////////////////////////////////////////////////
 // Color correction adapter
 //////////////////////////////////////////////////////////////////////
 
@@ -2728,7 +2776,7 @@ class ColorTransformAdapter : public ConstImageAdapter<RGB<T> >,
 	const ConstImageAdapter<RGB<T> >&	_image;
 public:
 	ColorTransformAdapter(const ConstImageAdapter<RGB<T> >& image)
-		: ConstImageAdapter<RGB<T> >(image.getString()), _image(image) {
+		: ConstImageAdapter<RGB<T> >(image.getSize()), _image(image) {
 	}
 	ColorTransformAdapter(const ConstImageAdapter<RGB<T> >& image,
 			const ColorTransformBase& colorbase)

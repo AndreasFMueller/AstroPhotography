@@ -82,6 +82,8 @@ libastroimage_la_SOURCES = 						\
 	FourierImage.cpp						\
 	Functions.cpp							\
 	FWHM.cpp							\
+	GammaTransformBase.cpp						\
+	GammaTransform.cpp						\
 	GaussImage.cpp							\
 	GaussNoiseAdapter.cpp						\
 	HDR.cpp								\

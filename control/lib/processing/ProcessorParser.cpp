@@ -95,6 +95,10 @@ void	ProcessorParser::startElement(const std::string& name,
 		startRescale(attrs);
 		return;
 	}
+	if (name == std::string("gamma")) {
+		startGamma(attrs);
+		return;
+	}
 	if (name == std::string("color")) {
 		startColor(attrs);
 		return;

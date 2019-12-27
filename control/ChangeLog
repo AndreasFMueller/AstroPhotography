@@ -1,6 +1,7 @@
 ChangeLog for the Astro project.
 
 20191226:
+	* add operator*() to the YUV<P> template
 	* ensure that a failure to get mount data does not invalidate an
 	  exposure in the task queue
 	* add proper handling of gain in AsiCcd class
