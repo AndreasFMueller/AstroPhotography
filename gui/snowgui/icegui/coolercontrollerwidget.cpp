@@ -149,9 +149,11 @@ void	coolercontrollerwidget::setupCooler() {
 		ui->activeWidget->setActive(ison);
 
 		// check the 
+try {
 		if (_cooler->hasDewHeater()) {
 			snowstar::Interval	i = _cooler->dewHeaterRange();
 			_dewheaterinterval = std::make_pair(i.min, i.max);
+debug(LOG_DEBUG, DEBUG_LOG, 0, "dew heater interval: %f %f", i.min, i.max);
 			float   m = (ui->dewHeaterSlider->maximum()
 					- ui->dewHeaterSlider->minimum())
 					/ (i.max - i.min);
@@ -165,6 +167,9 @@ void	coolercontrollerwidget::setupCooler() {
 			ui->dewHeaterSlider->setEnabled(false);
 			ui->dewHeaterValue->setHidden(true);
 		}
+} catch (std::exception& x) {
+	debug(LOG_ERR, DEBUG_LOG, 0, "dew heater problem: %s", x.what());
+}
 
 		// enable the status update timer
 		statusTimer.start();
@@ -274,6 +279,7 @@ void	coolercontrollerwidget::statusUpdate() {
  * \brief Slot called when the gui changes
  */
 void	coolercontrollerwidget::guiChanged() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "gui changed");
 	if (sender() == ui->setTemperatureSpinBox) {
 		double	t = ui->setTemperatureSpinBox->value();
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "temperature changed to %f", t);
@@ -300,6 +306,7 @@ void	coolercontrollerwidget::coolerChanged(int index) {
  */
 void	coolercontrollerwidget::editingFinished() {
 	double	temp = ui->setTemperatureSpinBox->value();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "new tempeature value: %f", temp);
 	sendSetTemperature(temp);
 }
 

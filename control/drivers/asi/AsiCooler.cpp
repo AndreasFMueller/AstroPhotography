@@ -135,8 +135,9 @@ std::pair<float, float>	AsiCooler::dewHeaterRange() {
 	if (!hasDewHeater()) {
 		throw std::runtime_error("device has no dew heater");
 	}
-	float   minDewHeater = (float)_camera.controlMin(AsiAntiDewHeater);
-	float   maxDewHeater = (float)_camera.controlMax(AsiAntiDewHeater);
+	int	control_index = _camera.controlIndex("AntiDewHeater");
+	float   minDewHeater = (float)_camera.controlMin(control_index);
+	float   maxDewHeater = (float)_camera.controlMax(control_index);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "dew heater interval: [%.2f, %.2f]",
 		minDewHeater, maxDewHeater);
 	return std::make_pair(minDewHeater, maxDewHeater);
