@@ -1,0 +1,24 @@
+AstroPlanner
+
+The astroplanner application helps plan astrophotographic campaigns.
+It needs the following information:
+
+1. Location of the user or observatory.
+
+2. Planned observation time.
+
+3. Information about telescopes and cameras, in particular about focal length
+of the telescope and the sensor sizes.
+
+3. (optional) information about the horizon at the location of the 
+observatory.
+
+The following information can then be obtained from the planner:
+
+- rise and set time, taking the horizon into account
+- culmination time
+- maximum elevation
+- what can be seen on a chip?
+- print charts of environment of the target in various devices, e.g. the
+finder, the guider and the imager, even a telrad image
+
