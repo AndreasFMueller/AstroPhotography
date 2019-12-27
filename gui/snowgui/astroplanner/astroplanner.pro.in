@@ -1,0 +1,42 @@
+#
+# astroplanner.pro -- qt configuration file for the observation planner
+#
+# (c) 2019 Prof Dr Andreas Mueller, Hochschule Rapperswil
+#
+
+QT       += core gui widgets
+
+TARGET = astroplanner
+TEMPLATE = app
+
+QMAKE_MAC_SDK = @MACSDK@
+
+QMAKE_CXXFLAGS += @EXTRA_CXXFLAGS@
+QMAKE_LFLAGS += @EXTRA_LDFLAGS@
+
+# Directories for the astrophotography library
+ASTROPATH = @ASTROPATH@
+ASTROLIBDIR = @ASTROLIBDIR@
+
+LIBS += -L../astrogui -lastrogui 
+LIBS += -L$${ASTROLIBDIR} -Wl,-rpath,$${ASTROLIBDIR} -lastro
+LIBS += @EXTRA_LIBS@
+
+INCLUDEPATH += /usr/local/include
+INCLUDEPATH += $${ASTROPATH}/include
+INCLUDEPATH += ../astrogui
+
+ASTROGUISOURCES =
+
+ASTROGUIHEADERS =
+
+FORMS    +=								\
+
+SOURCES += astroplanner.cpp $${ASTROGUISOURCES}
+
+HEADERS  += $${ASTROGUIHEADERS}
+
+target.path = $${ASTROPATH}/bin
+
+INSTALLS += target
+

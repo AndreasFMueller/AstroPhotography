@@ -232,6 +232,7 @@ AC_CONFIG_FILES([Makefile snowgui/snowgui.pro
 	snowgui/astroviewer/astroviewer.pro
 	snowgui/astrosky/astrosky.pro
 	snowgui/astrobrowser/astrobrowser.pro
+	snowgui/astroplanner/astroplanner.pro
 	snowgui/snowlife/snowlife.pro
 	snowgui/build])
 AC_OUTPUT
