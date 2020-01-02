@@ -1,24 +1,20 @@
 /*
- * astrotime.cpp -- Time utility
+ * astrohorizon.cpp
  *
- * (c) 2018 Prof Dr Andreas Müller, Hochschule Rapperswil
+ * (c) 2020 Prof Dr Andreas Müller, Hochschule Rapperswil
  */
 #include <AstroUtils.h>
-#include <AstroCoordinates.h>
-#include <AstroDebug.h>
-#include <AstroConfig.h>
-#include <AstroFormat.h>
-#include <iostream>
-#include <sstream>
-#include <getopt.h>
-#include <string>
+#include <AstroHorizon.h>
+#include <includes.h>
+
+using namespace astro::horizon;
 
 namespace astro {
 namespace app {
-namespace time {
+namespace horizon {
 
 /**
- * \brief Table of options for the astrotime program
+ * \brief Table of options for the astrofocus program
  */
 static struct option	longopts[] = {
 { "debug",	no_argument,		NULL,		'd' },
@@ -33,7 +29,7 @@ static void	usage(const std::string& progname) {
 	std::string	prg = std::string("    ") + Path(progname).basename();
 	std::cout << "Usage:" << std::endl;
 	std::cout << std::endl;
-	std::cout << prg << " [ options ] <longitude> <latitude>" << std::endl;
+	std::cout << prg << " [ options ] <filename>" << std::endl;
 	std::cout << "Options:" << std::endl;
 	std::cout << " -d,--debug           enter debug mode"
 		<< std::endl;
@@ -42,13 +38,13 @@ static void	usage(const std::string& progname) {
 }
 
 /**
- * \brief Main function for the astrotime program
+ * \brief Main function for the astrofocus program
  *
  * \param argc	number of arguments
  * \param argv	vector of arguments
  */
 int	main(int argc, char *argv[]) {
-	debug_set_ident("astrotime");
+	debug_set_ident("astrohorizon");
 	debugthreads = 1;
 	int	c;
 	int	longindex;
@@ -66,34 +62,42 @@ int	main(int argc, char *argv[]) {
 		}
 	}
 
+	// if three are no further arguments, send an error message
+	HorizonPtr	horizon;
 	if (optind >= argc) {
-		std::cerr << "longitude missing" << std::endl;
-		return EXIT_FAILURE;
+		horizon = Horizon::get();
+	} else {
+		std::string	filename(argv[optind++]);
+		horizon = HorizonPtr(new Horizon(filename));
 	}
-	astro::Angle	longitude(std::stod(argv[optind++]), Angle::Degrees);
-	if (optind >= argc) {
-		std::cerr << "latitude missing" << std::endl;
-		return EXIT_FAILURE;
+
+	// display all the points
+	int	counter = 0;
+	Horizon::const_iterator	i;
+	for (i = horizon->begin(), counter = 0; i != horizon->end();
+		i++, counter++) {
+		std::cout << stringprintf("[%3d]  ", counter);
+		std::cout << i->azm().dms();
+		std::cout << " ";
+		std::cout << i->alt().dms();
+		std::cout << std::endl;
 	}
-	astro::Angle	latitude(std::stod(argv[optind++]), Angle::Degrees);
-	astro::LongLat	longlat(longitude, latitude);
-
-	astro::AzmAltConverter	azmaltconverter(longlat);
-	std::cout << azmaltconverter.LMST().hms() << std::endl;
-
+	
+	// done
 	return EXIT_SUCCESS;
 }
 
-} // namespace time
+} // namespace horizon
 } // namespace app
 } // namespace astro
 
 int	main(int argc, char *argv[]) {
 	try {
-		return astro::main_function<astro::app::time::main>(argc, argv);
+		return astro::main_function<astro::app::horizon::main>(argc, argv);
 	} catch (const std::exception& x) {
-		std::cerr << "astrotime filed due to exception: " << x.what();
+		std::cerr << "cannot process horizon file: " << x.what();
 		std::cerr << std::endl;
 	}
-	return EXIT_FAILURE;
 }
+
+

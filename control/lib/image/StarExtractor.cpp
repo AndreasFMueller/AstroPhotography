@@ -14,23 +14,42 @@ namespace image {
 namespace transform {
 
 /**
+ * \brief Constructor for the StarExtractor class
+ */
+StarExtractor::StarExtractor(int numberofstars, int searchradius)
+	: _numberofstars(numberofstars), _searchradius(searchradius), 
+	  _saturation(1.0) {
+}
+
+StarExtractor::StarExtractor(const StarExtractor& other)
+	: _numberofstars(other._numberofstars),
+	  _searchradius(other._searchradius), 
+	  _saturation(other._saturation) {
+}
+
+
+/**
  * \brief Main star extractor method
  *
  * This method looks for large values in an image and determines their
  * properties of a star.
  */
 std::vector<Star>	StarExtractor::stars(
-				const ConstImageAdapter<double>& image) const {
+			const ConstImageAdapter<double>& image,
+			const StarAcceptanceCriterion& criterion) const {
 	std::vector<Star>	result;
 	// find the maximum value in the image
 	double	m = filter::Max<double, double>().filter(image);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "maximum value: %f", m);
 
-	// create a level extractor
+	// create a level extractor that looks for stars with a brightness
+	// at a certain level
 	LevelExtractor	extractor(m);
 	do {
+		// while we don't have enough stars, lower the level at which
+		// we are looking for stars
 		extractor.level(extractor.level() / 2);
-		extractor.analyze(image);
+		extractor.analyze(image, criterion);
 	} while (_numberofstars > extractor.nstars());
 	return extractor.stars(_numberofstars);
 }
@@ -51,36 +70,38 @@ std::vector<Point> StarExtractor::stars2points(const std::vector<Star>& stars) {
  * \brief Extract a set of star points from an image
  */
 std::vector<Point>	StarExtractor::points(
-				const ConstImageAdapter<double>& image) const {
-	return stars2points(stars(image));
+				const ConstImageAdapter<double>& image,
+				const StarAcceptanceCriterion& criterion) const {
+	return stars2points(stars(image, criterion));
 }
 
-#define do_extract(image, Pixel)					\
+#define do_extract(image, criterion, Pixel)				\
 	{								\
 		Image<Pixel >	*imagep					\
 			= dynamic_cast<Image<Pixel >*>(&*image);	\
 		if (NULL != imagep) {					\
 			TypedStarExtractor<Pixel>	tsa(*this);	\
-			return tsa.stars(*imagep);			\
+			return tsa.stars(*imagep, criterion);		\
 		}							\
 	}
 
 /**
  * \brief Extract a set of stars from an ImagePtr
  */
-std::vector<Star>	StarExtractor::stars(ImagePtr image) const {
-	do_extract(image, unsigned char)
-	do_extract(image, unsigned short)
-	do_extract(image, unsigned int)
-	do_extract(image, unsigned long)
-	do_extract(image, float)
-	do_extract(image, double)
-	do_extract(image, RGB<unsigned char>)
-	do_extract(image, RGB<unsigned short>)
-	do_extract(image, RGB<unsigned int>)
-	do_extract(image, RGB<unsigned long>)
-	do_extract(image, RGB<float>)
-	do_extract(image, RGB<double>)
+std::vector<Star>	StarExtractor::stars(ImagePtr image,
+				const StarAcceptanceCriterion& criterion) const {
+	do_extract(image, criterion, unsigned char)
+	do_extract(image, criterion, unsigned short)
+	do_extract(image, criterion, unsigned int)
+	do_extract(image, criterion, unsigned long)
+	do_extract(image, criterion, float)
+	do_extract(image, criterion, double)
+	do_extract(image, criterion, RGB<unsigned char>)
+	do_extract(image, criterion, RGB<unsigned short>)
+	do_extract(image, criterion, RGB<unsigned int>)
+	do_extract(image, criterion, RGB<unsigned long>)
+	do_extract(image, criterion, RGB<float>)
+	do_extract(image, criterion, RGB<double>)
 	std::string	msg = stringprintf("cannot find stars in image %s "
 		"pixels", demangle(image->pixel_type().name()).c_str());
 	debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
@@ -90,8 +111,9 @@ std::vector<Star>	StarExtractor::stars(ImagePtr image) const {
 /**
  * \brief Extract a set of points from an ImagePtr
  */
-std::vector<Point>	StarExtractor::points(ImagePtr image) const {
-	return stars2points(stars(image));
+std::vector<Point>	StarExtractor::points(ImagePtr image,
+		const StarAcceptanceCriterion& criterion) const {
+	return stars2points(stars(image, criterion));
 }
 
 } // namespace transform

@@ -21,8 +21,10 @@ LevelExtractor::LevelExtractor(double level) : _level(level) {
 
 /**
  * \brief Accessor for the n brightest stars
+ *
+ * \param n	number of stars to extract
  */
-std::vector<Star>	LevelExtractor::stars(int n) {
+std::vector<Star>	LevelExtractor::stars(unsigned int n) {
 	if (n > _stars.size()) {
 		std::string	msg = stringprintf("have not enough stars: "
 			"%d < %d", _stars.size(), n);
@@ -40,9 +42,11 @@ std::vector<Star>	LevelExtractor::stars(int n) {
 
 /**
  * \brief inspect a point of an image
+ *
+ * \return	number of pixels to skip after this point 
  */
 int	LevelExtractor::inspectpoint(const ConstImageAdapter<double>& image,
-		int x, int y) {
+		int x, int y, const StarAcceptanceCriterion& criterion) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "inspect point %d,%d", x, y);
 	// make sure this point is far enough from all previous points
 	for (auto ptr = _stars.begin(); ptr != _stars.end(); ptr++) {
@@ -71,7 +75,17 @@ int	LevelExtractor::inspectpoint(const ConstImageAdapter<double>& image,
 		Star	star(p.first, p.second);
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "found star: %s",
 			star.toString().c_str());
-		_stars.insert(_stars.begin(), star);
+
+		// check whether the star is acceptable
+		if (criterion.accept(star)) {
+			_stars.insert(_stars.begin(), star);
+		} else {
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "star %s rejected",
+				star.toString().c_str());
+		}
+
+		// even we rejected a star, we still keep away from this
+		// maximum
 
 		// number of points we can skip after adding a star
 		int	skip = _radius;
@@ -85,7 +99,8 @@ int	LevelExtractor::inspectpoint(const ConstImageAdapter<double>& image,
 /**
  * \brief inspect an image
  */
-void	LevelExtractor::analyze(const ConstImageAdapter<double>& image) {
+void	LevelExtractor::analyze(const ConstImageAdapter<double>& image,
+		const StarAcceptanceCriterion& criterion) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "analyzing %s image, at level %f",
 		image.getSize().toString().c_str(), _level);
 	// clear the current star set
@@ -113,7 +128,8 @@ void	LevelExtractor::analyze(const ConstImageAdapter<double>& image) {
 				y++;
 				continue;
 			}
-			int	skip = inspectpoint(reducedimage, x, y);
+			int	skip = inspectpoint(reducedimage, x, y,
+					criterion);
 			y += skip;
 		}
 	}

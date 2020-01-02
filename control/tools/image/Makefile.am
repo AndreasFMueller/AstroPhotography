@@ -9,7 +9,7 @@ bin_PROGRAMS = imageinfo makedark makeflat calibrate \
 	transform clamp logscale stack fitsheader imagerepo rescale \
 	gammacorrect convolve background crop radon backprojection \
 	colorbalance stars findtransform luminance unsharp color \
-	colorclamp hdr destar jpg2fits png2fits nan rgb2xyz
+	colorclamp hdr destar jpg2fits png2fits nan rgb2xyz psf
 
 color_SOURCES = color.cpp
 color_DEPENDENCIES = $(top_builddir)/lib/libastro.la
@@ -131,6 +131,10 @@ rgb2xyz_SOURCES = rgb2xyz.cpp
 rgb2xyz_DEPENDENCIES = $(top_builddir)/lib/libastro.la
 rgb2xyz_LDADD = -L$(top_builddir)/lib -lastro
 
+psf_SOURCES = psf.cpp
+psf_DEPENDENCIES = $(top_builddir)/lib/libastro.la
+psf_LDADD = -L$(top_builddir)/lib -lastro
+
 fitsheadertest:	fitsheader
 	cp andromeda-chart.fits headertest.fits
 	./fitsheader -d add headertest.fits \
@@ -153,3 +157,6 @@ orion:
 test:	png2fits
 	rm -f t.fits
 	./png2fits --debug ~/t.png t.fits
+
+psftest:	psf
+	./psf --debug /usr/local/astrophoto/antonius/projects/M1/stacked/stacked2.fits psf.fits 2>&1 | tee psf.log

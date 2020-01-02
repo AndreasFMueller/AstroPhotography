@@ -23,6 +23,7 @@ libastroutils_la_SOURCES = 						\
 	Exceptions.cpp							\
 	Format.cpp							\
 	Gateway.cpp							\
+	Horizon.cpp							\
 	ImageCoordinates.cpp						\
 	JulianDate.cpp							\
 	LongLat.cpp							\

@@ -882,7 +882,7 @@ Pixel	UpSamplingAdapter<Pixel>::pixel(int x, int y) const {
 ImagePtr	upsample(ImagePtr image, const ImageSize& sampling);
 
 //////////////////////////////////////////////////////////////////////
-// Luminance Adapter
+// Luminance Adapter and Extractor
 //////////////////////////////////////////////////////////////////////
 template<typename Pixel, typename T>
 class LuminanceAdapter : public ConstImageAdapter<T> {
@@ -911,6 +911,16 @@ Image<T>	*luminance(const ConstImageAdapter<Pixel>& image) {
 }
 
 ImagePtr	luminanceptr(ImagePtr image);
+
+class LuminanceExtractor : public ConstImageAdapter<double> {
+	ConstImageAdapter<double>	*_luminance;
+public:
+	LuminanceExtractor(const LuminanceExtractor&) = delete;
+	LuminanceExtractor&	operator=(const LuminanceExtractor&) = delete;
+	LuminanceExtractor(ImagePtr image);
+	virtual ~LuminanceExtractor();
+	double	pixel(int x, int y) const { return _luminance->pixel(x, y); }
+};
 
 //////////////////////////////////////////////////////////////////////
 // Y-Adapter for YUV images

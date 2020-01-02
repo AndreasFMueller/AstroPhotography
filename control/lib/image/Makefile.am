@@ -111,6 +111,7 @@ libastroimage_la_SOURCES = 						\
 	LinearLogLuminanceFactor.cpp					\
 	LogImage.cpp							\
 	Luminance.cpp							\
+	LuminanceExtractor.cpp						\
 	LuminanceStretchingAdapter.cpp					\
 	Masks.cpp							\
 	Maxima.cpp							\
@@ -125,6 +126,7 @@ libastroimage_la_SOURCES = 						\
 	PNG.cpp								\
 	Projection.cpp							\
 	ProjectionCorrector.cpp						\
+	PsfExtractor.cpp						\
 	Radon.cpp							\
 	Rescale.cpp							\
 	Residual.cpp							\

@@ -57,4 +57,14 @@ std::string	TwoAngles::toString() const {
 	return out.str();
 }
 
+bool	TwoAngles::operator<(const TwoAngles& other) const {
+	if (a1() < other.a1()) {
+		return true;
+	}
+	if (a1() > other.a1()) {
+		return false;
+	}
+	return a2() < other.a2();
+}
+
 } // namespace astro

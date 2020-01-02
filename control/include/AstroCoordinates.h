@@ -101,6 +101,7 @@ public:
 	TwoAngles	operator*(double t) const;
 	bool	operator==(const TwoAngles& other) const;
 	bool	operator!=(const TwoAngles& other) const;
+	bool	operator<(const TwoAngles& other) const;
 	std::string	toString() const;
 };
 

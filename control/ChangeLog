@@ -1,5 +1,10 @@
 ChangeLog for the Astro project.
 
+20200102:
+	* add Horizon class and sample horizon file
+	* added the astrohorizon program
+	* make TwoAngles class comparable so it can be used in a set
+
 20191227:
 	* add dew heater stuff to Cooler class
 	* add dew heater to ASI driver and Simulator

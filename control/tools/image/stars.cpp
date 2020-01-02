@@ -81,11 +81,13 @@ int	main(int argc, char *argv[]) {
 	io::FITSin	in(filename);
 	ImagePtr	image = in.read();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "image size: %s",
-	image->size().toString().c_str());
+		image->size().toString().c_str());
 
 	// find the stars
 	StarExtractor	starextractor(numberofstars, searchradius);
-	std::vector<Star>	stars = starextractor.stars(image);
+	adapter::LuminanceExtractor	luminance(image);
+	StarAcceptanceCriterion	criterion(luminance);
+	std::vector<Star>	stars = starextractor.stars(image, criterion);
 	for (auto ptr = stars.begin(); ptr != stars.end(); ptr++) {
 		std::cout << ptr->toString() << std::endl;
 	}

@@ -45,9 +45,13 @@ TriangleSet	TriangleSetFactory::get(ImagePtr image) const {
 	double	limit = (image->size().width() + image->size().height()) / 20;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "lengthlimit: %f", limit);
 
+	// construct a LuminanceExtractor to build the criterion on
+	adapter::LuminanceExtractor	luminance(image);
+	StarAcceptanceCriterion	criterion(luminance);
+
 	// first lets get a set of stars
 	StarExtractor	extractor(_numberofstars, _radius);
-	std::vector<Star>	stars = extractor.stars(image);
+	std::vector<Star>	stars = extractor.stars(image, criterion);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "constructing triangles from %d stars",
 		stars.size());
 
@@ -59,8 +63,11 @@ TriangleSet	TriangleSetFactory::get(const ConstImageAdapter<double>& image) cons
 	double	limit = (image.getSize().width() + image.getSize().height()) / 20;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "lengthlimit: %f", limit);
 
+	// construct a LuminanceExtractor to build the criterion on
+	StarAcceptanceCriterion	criterion(image);
+
 	StarExtractor	extractor(_numberofstars, _radius);
-	std::vector<Star>	stars = extractor.stars(image);
+	std::vector<Star>	stars = extractor.stars(image, criterion);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "constructing triangles from %d stars",
 		stars.size());
 

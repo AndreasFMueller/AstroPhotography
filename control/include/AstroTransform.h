@@ -545,31 +545,69 @@ public:
 };
 
 /**
+ * \brief A criterion for a star to be acceptable
+ */
+class StarAcceptanceCriterion {
+protected:
+	// derived classes may want to inspect the image to decide whether
+	// a star is acceptable. The base class accepts all stars, but
+	// derived classes may reject some
+	const ConstImageAdapter<double>&	_image;
+public:
+	StarAcceptanceCriterion(const ConstImageAdapter<double>& image)
+		: _image(image) { }
+	virtual bool	accept(const Star& /* star */) const { return true; }
+};
+
+/**
  * \brief Star extractor class
  */
 class StarExtractor {
+	/**
+	 * \brief The number of stars to extract from an image
+	 */
 	int	_numberofstars;
 public:
 	int	numberofstars() const { return _numberofstars; }
 	void	numberofstars(int n) { _numberofstars = n; }
 private:
+	/**
+	 * \brief The search radius
+	 * When looking for a star, we don't want any other stars within the
+	 * search radius.
+	 */
 	int	_searchradius;
 public:
 	int	searchradius() const { return _searchradius; }
 	void	searchradius(int s) { _searchradius = s; }
+private:
+	/**
+	 * \brief The saturation of acceptable stars
+	 *
+	 * By default, stars are the brightest points in an image, i.e. their
+	 * pixel values close to the maximum pixel values of an images. To
+	 * avoid hot pixels and clipped stars, the saturation parameter can
+	 * be set to a value smaller than 1 which indicates the maximum value
+	 * an acceptable star can have.
+	 */
+	double	_saturation;
 public:
-	StarExtractor(int numberofstars = 10, int searchradius = 10)
-		: _numberofstars(numberofstars), _searchradius(searchradius) { }
-	StarExtractor(const StarExtractor& other)
-		: _numberofstars(other._numberofstars),
-		  _searchradius(other._searchradius) { }
+	double	saturation() const { return _saturation; }
+	void	saturation(double s) { _saturation = s; }
+public:
+	StarExtractor(int numberofstars = 10, int searchradius = 10);
+	StarExtractor(const StarExtractor& other);
 protected:
 static std::vector<Point>	stars2points(const std::vector<Star>& stars);
 public:
-	std::vector<Star> 	stars(const ConstImageAdapter<double>& image) const;
-	std::vector<Point>  	points(const ConstImageAdapter<double>& image) const;
-	std::vector<Star>	stars(ImagePtr image) const;
-	std::vector<Point>	points(ImagePtr image) const;
+	std::vector<Star> 	stars(const ConstImageAdapter<double>& image,
+		const StarAcceptanceCriterion& criterion) const;
+	std::vector<Point>  	points(const ConstImageAdapter<double>& image,
+		const StarAcceptanceCriterion& criterion) const;
+	std::vector<Star>	stars(ImagePtr image,
+		const StarAcceptanceCriterion& criterion) const;
+	std::vector<Point>	points(ImagePtr image,
+		const StarAcceptanceCriterion& criterion) const;
 };
 
 template<typename T>
@@ -579,30 +617,44 @@ public:
 		: StarExtractor(numberofstars, searchradius) { }
 	TypedStarExtractor(const StarExtractor& other)
 		: StarExtractor(other) { }
-	std::vector<Star>	stars(const ConstImageAdapter<T>& image) const;
-	std::vector<Point>	points(const ConstImageAdapter<T>& image) const;
+	std::vector<Star>	stars(const ConstImageAdapter<T>& image,
+		const StarAcceptanceCriterion& criterion) const;
+	std::vector<Point>	points(const ConstImageAdapter<T>& image,
+		const StarAcceptanceCriterion& criterion) const;
 };
 
 template<typename T>
-std::vector<Star>	TypedStarExtractor<T>::stars(const ConstImageAdapter<T>& image) const {
+std::vector<Star>	TypedStarExtractor<T>::stars(
+			const ConstImageAdapter<T>& image,
+			const StarAcceptanceCriterion& criterion) const {
 	adapter::LuminanceAdapter<T, double>	luminanceadapter(image);
-	return StarExtractor::stars(luminanceadapter);
+	return StarExtractor::stars(luminanceadapter, criterion);
 }
 
 template<typename T>
-std::vector<Point>	TypedStarExtractor<T>::points(const ConstImageAdapter<T>& image) const {
+std::vector<Point>	TypedStarExtractor<T>::points(
+			const ConstImageAdapter<T>& image,
+			const StarAcceptanceCriterion& criterion) const {
 	adapter::LuminanceAdapter<T, double>	luminanceadapter(image);
-	return StarExtractor::points(luminanceadapter);
+	return StarExtractor::points(luminanceadapter, criterion);
 }
+
+/**
+ * \brief Extractor that extracts truely isolated stars
+ */
+class IsolatedStarExtractor : public StarExtractor {
+public:
+	IsolatedStarExtractor(int numberofstars = 10, int searchradius = 10);
+};
 
 /**
  * \brief Extract a set of triangles from an image
  */
 class TriangleSetFactory {
-	int	_numberofstars;
+	unsigned int	_numberofstars;
 public:
-	int	numberofstars() const { return _numberofstars; }
-	void	numberofstars(int n) { _numberofstars = n; }
+	unsigned int	numberofstars() const { return _numberofstars; }
+	void	numberofstars(unsigned int n) { _numberofstars = n; }
 private:
 	double	_radius;
 public:

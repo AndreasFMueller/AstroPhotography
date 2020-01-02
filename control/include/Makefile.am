@@ -28,6 +28,7 @@ include_HEADERS =							\
 	AstroFormat.h							\
 	AstroGateway.h							\
 	AstroGuiding.h							\
+	AstroHorizon.h							\
 	AstroIO.h							\
 	AstroImage.h							\
 	AstroImageops.h							\
@@ -44,6 +45,7 @@ include_HEADERS =							\
 	AstroProcess.h							\
 	AstroProject.h							\
 	AstroProjection.h						\
+	AstroPsf.h							\
 	AstroTask.h							\
 	AstroTonemapping.h						\
 	AstroTransform.h						\
