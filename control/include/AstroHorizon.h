@@ -22,7 +22,9 @@ typedef std::shared_ptr<Horizon>	HorizonPtr;
 class Horizon : public std::set<AzmAlt> {
 public:
 	Horizon();
+	Horizon(const Angle& alt);
 	Horizon(const std::string& filename);
+	void	addgrid(const Angle& gridconstant);
 	static HorizonPtr	get();
 };
 

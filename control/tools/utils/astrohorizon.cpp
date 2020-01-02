@@ -17,9 +17,10 @@ namespace horizon {
  * \brief Table of options for the astrofocus program
  */
 static struct option	longopts[] = {
-{ "debug",	no_argument,		NULL,		'd' },
-{ "help",	no_argument,		NULL,		'h' },
-{ NULL,		0,			NULL,		 0  }
+{ "debug",		no_argument,		NULL,		'd' },
+{ "help",		no_argument,		NULL,		'h' },
+{ "interpolate",	required_argument,	NULL,		'i' },
+{ NULL,			0,			NULL,		 0  }
 };
 
 /**
@@ -35,6 +36,8 @@ static void	usage(const std::string& progname) {
 		<< std::endl;
 	std::cout << " -h,--help            display this help message and exit"
 		<< std::endl;
+	std::cout << " -i,--interpolate=<i> interpolate the horizon at grid points spaced <i>" << std::endl;
+	std::cout << "                      degrees appart" << std::endl;
 }
 
 /**
@@ -48,12 +51,16 @@ int	main(int argc, char *argv[]) {
 	debugthreads = 1;
 	int	c;
 	int	longindex;
+	Angle	gridconstant(0.);
 	putenv((char *)"POSIXLY_CORRECT=1");    // cast to silence compiler
-	while (EOF != (c = getopt_long(argc, argv, "dh?",
+	while (EOF != (c = getopt_long(argc, argv, "dh?i:",
 		longopts, &longindex))) {
 		switch (c) {
 		case 'd':
 			debuglevel = LOG_DEBUG;
+			break;
+		case 'i':
+			gridconstant = Angle(std::stod(optarg), Angle::Degrees);
 			break;
 		case 'h':
 		case '?':
@@ -69,6 +76,11 @@ int	main(int argc, char *argv[]) {
 	} else {
 		std::string	filename(argv[optind++]);
 		horizon = HorizonPtr(new Horizon(filename));
+	}
+
+	// if we have a grid constant
+	if (gridconstant.degrees() > 0) {
+		horizon->addgrid(gridconstant);
 	}
 
 	// display all the points
