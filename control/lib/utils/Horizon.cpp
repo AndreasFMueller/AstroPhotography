@@ -5,12 +5,32 @@
  */
 #include <AstroHorizon.h>
 #include <AstroDebug.h>
+#include <AstroConfig.h>
 #include <iostream>
 #include <fstream>
 #include <string>
 
 namespace astro {
 namespace horizon {
+
+/**
+ * \brief Add a base point with azimuth 0
+ */
+void	Horizon::addbasepoint() {
+	// find out whether adding a base point is necessary
+	AzmAlt	first = *begin();
+	if (first.azm() == Angle(0.)) {
+		return;
+	}
+
+	// build the base point
+	AzmAlt	last = *rbegin();
+	double	u = first.azm().degrees();
+	double	v = 360 - last.azm().degrees();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "weights: u = %f, v = %f", u, v);
+	Angle	alt = (last.alt() * u + first.alt() * v) * (1 / (u + v));
+	insert(AzmAlt(Angle(0.), alt));
+}
 
 /**
  * \brief Construct a null horizon
@@ -53,8 +73,16 @@ Horizon::Horizon(const std::string& csvfilename) {
 			split<std::vector<std::string> >(line, ",", l);
 
 			// extract the fields
-			std::string	azifield = l[7];
-			std::string	altfield = l[10];
+			std::string	azifield;
+			std::string	altfield;
+
+			if (l.size() > 2) {
+				azifield = l[7];
+				altfield = l[10];
+			} else {
+				azifield = l[0];
+				altfield = l[1];
+			}
 			debug(LOG_DEBUG, DEBUG_LOG, 0, "azi = %s, alt = %s",
 				azifield.c_str(), altfield.c_str());
 			try {
@@ -85,19 +113,21 @@ Horizon::Horizon(const std::string& csvfilename) {
 		return;
 	}
 
-	// find out whether adding a base point is necessary
-	AzmAlt	first = *begin();
-	if (first.azm() == Angle(0.)) {
-		return;
-	}
+	addbasepoint();
+}
 
-	// build the base point
-	AzmAlt	last = *rbegin();
-	double	u = first.azm().degrees();
-	double	v = 360 - last.azm().degrees();
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "weights: u = %f, v = %f", u, v);
-	Angle	alt = (last.alt() * u + first.alt() * v) * (1 / (u + v));
-	insert(AzmAlt(Angle(0.), alt));
+/**
+ * \brief Construct a rotated horizon
+ *
+ * \param other		the horizon to rotate
+ * \param angle		the rotation angle
+ */
+Horizon::Horizon(const Horizon& other, const Angle& angle) {
+	for (auto i = other.begin(); i != other.end(); i++) {
+		AzmAlt	point((i->azm() + angle).reduced(), i->alt());
+		insert(point);
+	}
+	addbasepoint();
 }
 
 /**
@@ -162,10 +192,19 @@ void	Horizon::addgrid(const Angle& gridconstant) {
 	}
 }
 
+/**
+ * \brief Get a new rotated 
+ *
+ * \param angle		the rotation angle
+ */
+HorizonPtr	Horizon::rotate(const Angle& angle) const {
+	return HorizonPtr(new Horizon(*this, angle));
+}
+
 static HorizonPtr	default_horizon;
 
 /**
- * \brief get the default horizon
+ * \brief Get the default horizon
  *
  * This method expects the horizon to be found in ~/.astro/horizon.csv
  */
@@ -173,18 +212,46 @@ HorizonPtr	Horizon::get() {
 	if (default_horizon) {
 		return default_horizon;
 	}
-	
-	// check the home directory
-	char	*home = getenv("HOME");
-	if (NULL == home) {
-		std::string	msg = stringprintf("HOME not set");
-		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
-		throw std::runtime_error(msg);
+	Angle	rotationangle;
+
+	// check the default configuration for a rotation angle
+	config::ConfigurationPtr	config = config::Configuration::get();
+	config::ConfigurationKey	anglekey("gui", "horizon", "rotation");
+	if (config->has(anglekey)) {
+		std::string	anglestring = config->get(anglekey);
+		rotationangle = Angle(std::stod(anglestring), Angle::Degrees);
 	}
-	std::string	filename = stringprintf("%s/.astro/horizon.csv", home);
+
+	// first check whether we have a configuration
+	std::string	filename;
+	config::ConfigurationKey	key("gui", "horizon", "filename");
+	if (config->has(key)) {
+		filename = config->get(key);
+	} else {
+		// check the home directory
+		char	*home = getenv("HOME");
+		if (NULL == home) {
+			std::string	msg = stringprintf("HOME not set");
+			debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+			throw std::runtime_error(msg);
+		}
+		filename = stringprintf("%s/.astro/horizon.csv", home);
+	}
+
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "try %s as horizon file",
 		filename.c_str());
 
+	// remember this horizon object
+	default_horizon = get(filename);
+	return default_horizon;
+}
+
+/**
+ * \brief Get the horizon of the file
+ *
+ * \param filename	the name of the file
+ */
+HorizonPtr	Horizon::get(const std::string& filename) {
 	// create the new Horizon object
 	Horizon	*horizonp = NULL;
 	try {
@@ -194,10 +261,18 @@ HorizonPtr	Horizon::get() {
 			filename.c_str(), x.what());
 		throw x;
 	}
+	return HorizonPtr(horizonp);
+}
 
-	// remember this horizon object
-	default_horizon = HorizonPtr(horizonp);
-	return default_horizon;
+/**
+ * \brief Construct a rotated horizon 
+ *
+ * \param filename	the file name of the horizon file
+ * \param angle		the rotation angle
+ */
+HorizonPtr	Horizon::get(const std::string& filename, const Angle& angle) {
+	HorizonPtr	horizon = get(filename);
+	return horizon->rotate(angle);
 }
 
 } // namespace horizon

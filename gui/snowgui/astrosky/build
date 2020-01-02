@@ -10,7 +10,8 @@ telescope="--declination=56.57 --rightascension=0.87361"
 target="--target-dec=61.44333 --target-ra=2.55611"
 labels="--target-coord --telescope-coord"
 labels="--position --target-coord --telescope-coord --timestamp --copyright --cardinal"
-extra="--pole "
+extra="--pole --horizon=horizon.csv"
+extra="--pole --horizon=/Users/afm/.astro/horizon.csv"
 options="--debug --verbose --size=1280 ${labels} ${telescope} ${target} ${extra}"
 
 case `uname` in

@@ -30,7 +30,7 @@ static std::string	configfilename() {
 	// get the path in the home directory
 	char	*home = getenv("HOME");
 	if (NULL != home) {
-		filename = std::string(home) + "/.astrophoto.db";
+		filename = std::string(home) + "/.astro/config.db";
 	}
 
 	// first check whether the environment variable is set

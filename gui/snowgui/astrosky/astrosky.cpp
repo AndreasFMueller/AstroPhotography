@@ -6,6 +6,7 @@
 #include <AstroUtils.h>
 #include <AstroDebug.h>
 #include <AstroCoordinates.h>
+#include <AstroHorizon.h>
 #include <getopt.h>
 #include <SkyDrawing.h>
 #include <QImage>
@@ -29,6 +30,7 @@ void	usage(char *progname) {
 	std::cout << "  -e,--ecliptic               toggle display of the ecliptic" << std::endl;
 	std::cout << "  -g,--grid                   toggle the RA/DEC grid" << std::endl;
 	std::cout << "  -h,-?,--help                show this help message and exit" << std::endl;
+	std::cout << "  -H,--horizon=<horizon>      show the horizon from the horizon file <horizon>" << std::endl;
 	std::cout << "  -L,--longitude=<long>       longitude of the observatory" << std::endl;
 	std::cout << "  -l,--latitude=<lat>         latitude of the observatory" << std::endl;
 	std::cout << "  -m,--milkyway               toggle milkyway display" << std::endl;
@@ -57,6 +59,7 @@ static struct option	longopts[] = {
 { "grid",		no_argument,		NULL,		'g' },
 { "rightascension",	required_argument,	NULL,		'R' },
 { "help",		no_argument,		NULL,		'h' },
+{ "horizon",		required_argument,	NULL,		'H' },
 { "longitude",		required_argument,	NULL,		'L' },
 { "latitude",		required_argument,	NULL,		'l' },
 { "milkyway",		no_argument,		NULL,		'm' },
@@ -90,7 +93,7 @@ int	main(int argc, char *argv[]) {
 	int	s = 1024;
 	time_t	t = 0;
 	while (EOF != (c = getopt_long(argc, argv,
-		"acdefgh?L:l:mpPs:SD:R:t:vTXY:Z:", longopts, &longindex)))
+		"acdefgh?H:L:l:mpPs:SD:R:t:vTXY:Z:", longopts, &longindex)))
 		switch (c) {
 		case 'a':
 			skydrawing.show_altaz(
@@ -121,6 +124,18 @@ int	main(int argc, char *argv[]) {
 		case '?':
 			usage(argv[0]);
 			return EXIT_SUCCESS;
+		case 'H':
+			{
+			astro::horizon::HorizonPtr	horizon
+				= astro::horizon::HorizonPtr(
+					new astro::horizon::Horizon(optarg));
+			horizon = horizon->rotate(astro::Angle(-15,
+					astro::Angle::Degrees));
+			horizon->addgrid(astro::Angle(1, astro::Angle::Degrees));
+			skydrawing.horizon(horizon);
+			skydrawing.show_horizon(true);
+			}
+			break;
 		case 'L':
 			position.longitude() = astro::Angle(std::stod(optarg),
 				astro::Angle::Degrees);

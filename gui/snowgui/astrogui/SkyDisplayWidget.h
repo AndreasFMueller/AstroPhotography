@@ -13,6 +13,7 @@
 #include <AstroUtils.h>
 #include <AstroCatalog.h>
 #include <AstroCoordinates.h>
+#include <AstroHorizon.h>
 #include <QThread>
 #include <QTimer>
 #include <SkyDrawing.h>
@@ -92,6 +93,7 @@ public slots:
 	void	setLabelsVisible(bool);
 	void	setEclipticVisible(bool);
 	void	setMilkywayVisible(bool);
+	void	setHorizonVisible(bool);
 
 	void	toggleAltAzmGridVisible();
 	void	toggleRaDecGridVisible();
@@ -103,6 +105,7 @@ public slots:
 	void	toggleLabelsVisible();
 	void	toggleEclipticVisible();
 	void	toggleMilkywayVisible();
+	void	toggleHorizonVisible();
 
 	void	showContextMenu(const QPoint& point);
 

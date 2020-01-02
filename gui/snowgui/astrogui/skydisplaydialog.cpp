@@ -6,6 +6,7 @@
 #include "skydisplaydialog.h"
 #include "ui_skydisplaydialog.h"
 #include "SkyDisplayWidget.h"
+#include <AstroHorizon.h>
 #include <QKeyEvent>
 
 namespace snowgui {
@@ -19,6 +20,13 @@ SkyDisplayDialog::SkyDisplayDialog(QWidget *parent)
 
 	connect(ui->skydisplayWidget, SIGNAL(pointSelected(astro::RaDec)),
 		this, SLOT(targetSelected(astro::RaDec)));
+
+	astro::horizon::HorizonPtr	horizon
+		= astro::horizon::Horizon::get();
+	if (horizon) {
+		ui->skydisplayWidget->horizon(horizon);
+		ui->skydisplayWidget->show_horizon(true);
+	}
 
 	// set the background color
 	// (from https://wiki.qt.io/How_to_Change_the_Background_Color_of_QWidget/de

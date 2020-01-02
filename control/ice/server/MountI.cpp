@@ -40,7 +40,10 @@ AzmAlt	MountI::getAzmAlt(const Ice::Current& /* current */) {
 
 LongLat	MountI::getLocation(const Ice::Current& /* current */) {
 	try {
-		return convert(_mount->location());
+		astro::LongLat	loc = _mount->location();
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "got location: %s",
+			loc.toString().c_str());
+		return convert(loc);
 	} catch (std::exception x) {
 		DeviceException	except;
 		except.cause = astro::stringprintf("cannot call location(): %s",

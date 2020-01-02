@@ -13,6 +13,7 @@
 #include <AstroTypes.h>
 #include <AstroCatalog.h>
 #include <AstroCoordinates.h>
+#include <AstroHorizon.h>
 #include <set>
 #include <cmath>
 #include <deque>
@@ -131,9 +132,11 @@ private:
 	bool	_show_position;
 	bool	_show_copyright;
 	bool	_show_time;
+	bool	_show_horizon;
 	astro::RaDec	_telescope;
 	astro::RaDec	_target;
 	astro::LongLat	_position;
+	astro::horizon::HorizonPtr	_horizon;
 	time_t		_time;
 	long	_timeoffset;
 	QSize	_size;
@@ -172,12 +175,23 @@ public:
 	void	show_copyright(bool c) { _show_copyright = c; }
 	bool	show_time() const { return _show_time; }
 	void	show_time(bool t) { _show_time = t; }
+	bool	show_horizon() const { return _show_horizon; }
+	void	show_horizon(bool h) { _show_horizon = h; }
 	void	telescope(const astro::RaDec& t) { _telescope = t; }
 	const astro::RaDec&	telescope() const { return _telescope; }
 	void	target(const astro::RaDec& t) { _target = t; }
 	const astro::RaDec&	target() const { return _target; }
 	void	position(const astro::LongLat& p) { _position = p; }
         const astro::LongLat&	position() const { return _position; }
+	const astro::horizon::HorizonPtr	horizon() const {
+							return _horizon;
+	}
+	void	horizon(const astro::horizon::HorizonPtr h) {
+		_horizon = h;
+		if (!_horizon) {
+			_show_horizon = false;
+		}
+	}
 	void	time(time_t t) { _time = t; }
 	time_t	time() const { return _time; }
 	void	timeoffset(long t) { _timeoffset = t; }
@@ -219,6 +233,7 @@ private:
 			astro::catalog::MilkyWayPtr milkyway,
 			astro::catalog::MilkyWay::level_t level);
 	void	drawMilkyWay(QPainter& painter);
+	void	drawHorizon(QPainter& painter);
 protected:
 	virtual void	redraw();
 	astro::AzmAlt	convert(const astro::RaDec& radec);

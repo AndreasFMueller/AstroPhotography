@@ -90,6 +90,7 @@ SkyDrawing::SkyDrawing() {
 	_show_position = false;
 	_show_time = false;
 	_show_copyright = false;
+	_show_horizon = false;
 	_converter = NULL;
 	_time = 0;
 	_timeoffset = 0;
@@ -415,6 +416,8 @@ void	SkyDrawing::drawRadec(QPainter& painter) {
 
 /**
  * \brief Draw the pole
+ *
+ * \param painter	the QPinter to use fro drawing
  */
 void	SkyDrawing::drawPole(QPainter& painter) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "draw pole");
@@ -444,6 +447,76 @@ void	SkyDrawing::drawPole(QPainter& painter) {
 		painter.drawText(S.second.x() - 10, S.second.y() - 10,
 			20, 20, Qt::AlignCenter, QString("S"));
 	}
+}
+
+/**
+ * \brief Draw the horizon
+ *
+ * \param painter	the QPinter to use fro drawing
+ */
+void	SkyDrawing::drawHorizon(QPainter& painter) {
+	if (!_horizon) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "no horizon present");
+		return;
+	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "draw the horizon");
+
+	// build a path
+	QPainterPath	horizonpath;
+
+	// start point
+	astro::AzmAlt	startpoint = *_horizon->begin();
+	startpoint = astro::AzmAlt(
+		astro::Angle(startpoint.azm() + astro::Angle(M_PI)),
+		startpoint.alt());
+
+	// start the path from the 0/0 point
+	astro::AzmAlt	basepoint(astro::Angle(M_PI), astro::Angle(0.));
+	horizonpath.moveTo(convert(basepoint));
+
+	// first go around the circle along the horizon
+	for (auto i = _horizon->begin(); i != _horizon->end(); i++) {
+		astro::AzmAlt	a = *i;
+		astro::AzmAlt	b(a.azm() + astro::Angle(M_PI), a.alt());
+		horizonpath.lineTo(convert(b));
+	}
+	horizonpath.lineTo(convert(startpoint));
+	horizonpath.lineTo(convert(basepoint));
+
+	// go around the outer diameter in the opposite direction
+	for (double angle = 359; angle > 0; angle--) {
+		horizonpath.lineTo(convert(astro::AzmAlt(
+			astro::Angle(angle + 180, astro::Angle::Degrees),
+			astro::Angle(0.))));
+	}
+	horizonpath.closeSubpath();;
+
+	// fill the path
+	QColor	terrain(64, 64, 64, 196);
+	painter.fillPath(horizonpath, terrain);
+
+	// draw a dark grey line for the horizon
+	QPainterPath	horizonline;
+	horizonline.moveTo(convert(startpoint));
+
+	// prepare a pen for the horizon line
+	QPen	pen(Qt::SolidLine);
+	pen.setWidth(2);
+	QColor	darkgray(32, 32, 32);
+	pen.setColor(darkgray);
+	painter.setPen(pen);
+
+	// go around the horizon for the horizon line
+	auto	i = _horizon->begin();
+	for (i++; i != _horizon->end(); i++) {
+		astro::AzmAlt	a = *i;
+		astro::AzmAlt	b(a.azm() + astro::Angle(M_PI), a.alt());
+		horizonline.lineTo(convert(b));
+	}
+	horizonline.closeSubpath();;
+
+	// draw the horizon line
+	painter.drawPath(horizonline);
 }
 
 static astro::RaDec	ecliptic_point(const astro::Angle ra) {
@@ -621,6 +694,11 @@ void	SkyDrawing::draw(QPainter& painter, QSize& size) {
 				drawStar(painter, *i);
 			}
 		}
+	}
+
+	// draw the horizon
+	if (show_horizon()) {
+		drawHorizon(painter);
 	}
 
 	// draw the telescope marker

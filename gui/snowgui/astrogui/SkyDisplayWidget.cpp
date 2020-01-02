@@ -300,6 +300,19 @@ void    SkyDisplayWidget::setEclipticVisible(bool s) {
 	repaint();
 }
 
+void	SkyDisplayWidget::setMilkywayVisible(bool s) {
+	show_milkyway(s);
+	repaint();
+}
+
+void	SkyDisplayWidget::setHorizonVisible(bool h) {
+	if (!horizon()) {
+		return;
+	}
+	show_horizon(h);
+	repaint();
+}
+
 void	SkyDisplayWidget::toggleRaDecGridVisible() {
 	setRaDecGridVisible(!show_radec());
 }
@@ -340,11 +353,9 @@ void	SkyDisplayWidget::toggleMilkywayVisible() {
 	setMilkywayVisible(!show_milkyway());
 }
 
-void	SkyDisplayWidget::setMilkywayVisible(bool s) {
-	show_milkyway(s);
-	repaint();
+void	SkyDisplayWidget::toggleHorizonVisible() {
+	setHorizonVisible(!show_horizon());
 }
-
 
 void	SkyDisplayWidget::showContextMenu(const QPoint& point) {
 	_mouse_pressed = false;
@@ -387,12 +398,20 @@ void	SkyDisplayWidget::showContextMenu(const QPoint& point) {
 	connect(&actionConstellations, SIGNAL(triggered()),
 		this, SLOT(toggleConstellationsVisible()));
 
-	QAction	actionConstellationLabels(QString("Constellation labels"), this);
+	QAction	actionConstellationLabels(QString("Constellation labels"),
+		this);
 	actionConstellationLabels.setCheckable(true);
 	actionConstellationLabels.setChecked(show_constellations());
 	contextMenu.addAction(&actionConstellationLabels);
 	connect(&actionConstellationLabels, SIGNAL(triggered()),
 		this, SLOT(toggleConstellationLabelsVisible()));
+
+	QAction	actionHorizon(QString("Horizon"), this);
+	actionHorizon.setCheckable((bool)horizon());
+	actionHorizon.setChecked(show_horizon());
+	contextMenu.addAction(&actionHorizon);
+	connect(&actionHorizon, SIGNAL(triggered()),
+		this, SLOT(toggleHorizonVisible()));
 
 	QAction	actionTelescope(QString("Telescope position"), this);
 	actionTelescope.setCheckable(true);

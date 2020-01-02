@@ -63,6 +63,7 @@ void	Mount::propertySetup() {
  * \brief Get current mount position in RA and DEC
  */
 RaDec	Mount::getRaDec() {
+	debug(LOG_ERR, DEBUG_LOG, 0, "base mount has no getRaDec");
 	throw std::runtime_error("getRaDec not implemented");
 }
 
@@ -70,6 +71,7 @@ RaDec	Mount::getRaDec() {
  * \brief Get current mount position in azimut and eleveation
  */
 AzmAlt	Mount::getAzmAlt() {
+	debug(LOG_ERR, DEBUG_LOG, 0, "base mount has not getAzmAlt");
 	throw std::runtime_error("getAzmAlt not implemented");
 }
 
@@ -77,6 +79,7 @@ AzmAlt	Mount::getAzmAlt() {
  * \brief Move mount to new position in RA and DEC
  */
 void	Mount::Goto(const RaDec& /* radec */) {
+	debug(LOG_ERR, DEBUG_LOG, 0, "base Mount cannot Goto");
 	throw std::runtime_error("Goto not implemented");
 }
 
@@ -84,6 +87,7 @@ void	Mount::Goto(const RaDec& /* radec */) {
  * \brief Move mount to new position in azimut and elevation
  */	
 void	Mount::Goto(const AzmAlt& /* azmalt */) {
+	debug(LOG_ERR, DEBUG_LOG, 0, "base Mount cannot Goto");
 	throw std::runtime_error("Goto not implemented");
 }
 
@@ -111,6 +115,7 @@ LongLat	Mount::location() {
 	if (_has_location) {
 		return _location;
 	}
+	debug(LOG_ERR, DEBUG_LOG, 0, "called Mount::location without location");
 	throw std::runtime_error("position not available");
 }
 

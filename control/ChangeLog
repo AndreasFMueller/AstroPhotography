@@ -1,6 +1,10 @@
 ChangeLog for the Astro project.
 
 20200102:
+	* add basic horizon format consisting only on azimuth and altitude
+	  angles instead of the full format used by the Theodolite app 
+	* add default paths to horizon into the configuration database
+	* move default configuration to ~/.astro/config.db
 	* add Horizon class and sample horizon file
 	* added the astrohorizon program
 	* make TwoAngles class comparable so it can be used in a set
