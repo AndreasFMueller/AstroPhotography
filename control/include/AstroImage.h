@@ -159,7 +159,9 @@ public:
 	ImageRectangle(const ImageRectangle& rectangle,
 		const ImageRectangle& subrectangle);
 	ImageRectangle(const std::string& rectanglespec);
+	ImageRectangle&	operator=(const ImageRectangle& other);
 	// operators
+	bool	contains(int x, int y) const;
 	bool	contains(const ImagePoint& point) const;
 	bool	contains(const ImageRectangle& rectangle) const;
 	bool	fits(const ImageSize& size) const;
@@ -187,6 +189,11 @@ public:
 	ImagePoint	subimage(int x, int y) const;
 	// border distance
 	int	borderDistance(const ImagePoint& point) const;
+	// limits of the ranges
+	int	xmin() const;
+	int	ymin() const;
+	int	xmax() const;
+	int	ymax() const;
 };
 
 std::ostream&	operator<<(std::ostream& out, const ImageRectangle& rectangle);
@@ -598,7 +605,7 @@ public:
 	virtual ~ConstImageAdapter() { }
 
 	virtual Pixel	pixel(int x, int y) const = 0;
-	Pixel	pixel(ImagePoint p) const {
+	Pixel	pixel(const ImagePoint& p) const {
 		return pixel(p.x(), p.y());
 	}
 
@@ -619,6 +626,9 @@ class ImageAdapter : public ConstImageAdapter<Pixel> {
 public:
 	ImageAdapter(const ImageSize& size) : ConstImageAdapter<Pixel>(size) {}
 	virtual Pixel&	writablepixel(int x, int y) = 0;
+	Pixel&	writablepixel(const ImagePoint& p) {
+		return writablepixel(p.x(), p.y());
+	}
 };
 
 
@@ -1406,16 +1416,150 @@ ImageRectangle	operator*(const ImageRectangle& rect, const Binning& mode);
 ImageRectangle	operator/(const ImageRectangle& rect, const Binning& mode);
 
 /**
- * \brief Compute the connected component of a point
+ * \brief An Image that only has a partial backing store
+ *
+ * The idea of this type of image is to only bacu up part of an image
  */
-class ConnectedComponent {
-	ImagePoint	_point;
-	unsigned char	growpixel(Image<unsigned char>& image,
-				unsigned int x, unsigned int y) const;
-	int	grow(Image<unsigned char>& image) const;
+template<typename Pixel>
+class WindowedImage : public ImageAdapter<Pixel> {
+	Image<Pixel>	_backing;
+	ImageRectangle	_roi;
+	Pixel	_dummy;
 public:
-	ConnectedComponent(const ImagePoint& point) : _point(point) { }
-	ImagePtr	operator()(const ImagePtr image) const;
+	WindowedImage(const ImageSize& size, const ImageRectangle& roi)
+		: ImageAdapter<Pixel>(size),
+		  _backing(roi.size()), _roi(roi) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "backing has size: %s",
+			_backing.size().toString().c_str());
+		_dummy = 0;
+	}
+	virtual Pixel&	writablepixel(int x, int y) {
+		if (!_roi.contains(x, y)) {
+			return _dummy;
+		}
+		return _backing.writablepixel(x - _roi.origin().x(),
+					y - _roi.origin().y());
+	}
+	virtual Pixel	pixel(int x, int y) const {
+		if (!_roi.contains(x, y)) {
+			return 0;
+		}
+		return _backing.pixel(x - _roi.origin().x(),
+			y - _roi.origin().y());
+	}
+};
+
+/**
+ * \brief connected component criterion
+ *
+ * predicate for pixels to decide whether a pixel should be considered for
+ * the connected component of a point.
+ */
+template<typename Pixel>
+class PixelCriterion {
+public:
+	PixelCriterion() { }
+	virtual bool	operator()(const ImagePoint&, const Pixel&) {
+		return false;
+	}
+};
+
+/**
+ * \brief Compute the connected component of a point
+ *
+ * The base class handles image consisting of unsigned char pixels.
+ * Pixels belong to the connected component if the value in the
+ * image returned by the operator() is 255.
+ */
+class ConnectedComponentBase {
+protected:
+	ImagePoint	_point;
+	ImageRectangle	_roi;
+	void	setupRoi(const ImageRectangle& roi);
+	unsigned char	growpixel(ImageAdapter<unsigned char>& image,
+				int x, int y) const;
+	int	grow(ImageAdapter<unsigned char>& image) const;
+public:
+	ConnectedComponentBase(const ImagePoint& point);
+	ConnectedComponentBase(const ImagePoint& point,
+		const ImageRectangle& roi);
+	WindowedImage<unsigned char>	*component(
+			const ConstImageAdapter<unsigned char>& image);
+	static unsigned long	count(
+			const ConstImageAdapter<unsigned char>& connected);
+	static unsigned long	count(
+			const ConstImageAdapter<unsigned char>& connected,
+			const ImageRectangle& roi);
+};
+
+/**
+ * \brief General connected component class for an arbitrarily typed image
+ *
+ * The _criterion member decides whether points should at all be considered
+ * for the connected component, these points then are iteratively grown into
+ * a connected component.
+ */
+template<typename Pixel>
+class ConnectedComponent : public ConnectedComponentBase {
+	PixelCriterion<Pixel>&	_criterion;
+public:
+	/**
+	 * \brief Constructor, just remembers the defining parameters
+ 	 */
+	ConnectedComponent(const ImagePoint& point,
+		PixelCriterion<Pixel>& criterion)
+		: ConnectedComponentBase(point), _criterion(criterion) {
+	}
+	ConnectedComponent(const ImagePoint& point,
+		const ImageRectangle& roi,
+		PixelCriterion<Pixel>& criterion)
+		: ConnectedComponentBase(point, roi), _criterion(criterion) {
+	}
+	/**
+ 	 * \brief Compute the connected component
+	 */
+	WindowedImage<unsigned char>	*operator()(const ConstImageAdapter<Pixel>& image) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "start CC determination");
+		// make sure we have the _roi set
+		setupRoi(ImageRectangle(image.getSize()));
+
+		// build an image with unsigned char pixels of the same size
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "build standardized image");
+		WindowedImage<unsigned char>	*standardized
+			= new WindowedImage<unsigned char>(image.getSize(), _roi);
+		//standardized->fill(0);
+
+		// initialize the image with 1 for pixels accepted by the
+		// criterion and 0 otherwise
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "standardize roi pixels");
+		int	xmin = _roi.xmin();
+		int	ymin = _roi.ymin();
+		int	xmax = _roi.xmax();
+		int	ymax = _roi.ymax();
+		int	counter = 0;
+		for (int x = xmin; x < xmax; x++) {
+			for (int y = ymin; y < ymax; y++) {
+				ImagePoint	p(x, y);
+				Pixel	v = image.pixel(x, y);
+				if (_criterion(p, v)) {
+					standardized->writablepixel(x, y) = 1;
+					counter++;
+				} else {
+					standardized->writablepixel(x, y) = 0;
+				}
+			}
+		}
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "standardized image %d pixels",
+			counter);
+
+		//  now use the method of the base class to compute the
+		// connected component
+		WindowedImage<unsigned char>	*component
+			= ConnectedComponentBase::component(*standardized);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "destroy standardized image");
+		delete standardized;
+		return component;
+	}
 };
 
 /**

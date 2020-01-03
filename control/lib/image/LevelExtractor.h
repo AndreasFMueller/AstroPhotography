@@ -43,8 +43,11 @@ public:
 private:
 	std::set<Star>	_stars;
 
+	int	close(int x, int y) const;
+
 	int	inspectpoint(const ConstImageAdapter<double>& image,
-			int x, int y, const StarAcceptanceCriterion& criterion);
+			int x, int y, double limit,
+			const StarAcceptanceCriterion& criterion);
 public:
 
 	const std::set<Star>&	stars() const { return _stars; }

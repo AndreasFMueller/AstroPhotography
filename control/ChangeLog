@@ -1,5 +1,11 @@
 ChangeLog for the Astro project.
 
+20200103:
+	* improve the PeakFinder and the ConnectedComponent class
+	* add the WindowedImage class that reduces the backing store
+	  requirements in the PeakFinder and the ConnectedComponent
+	  classes
+
 20200102:
 	* add basic horizon format consisting only on azimuth and altitude
 	  angles instead of the full format used by the Theodolite app 

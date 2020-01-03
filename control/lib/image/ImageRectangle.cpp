@@ -68,6 +68,17 @@ ImageRectangle::ImageRectangle(const std::string& rectanglespec) {
 }
 
 /**
+ * \brief Assignment operator for ImageRectangles
+ *
+ * \param other		the other rectangle to asign to this one
+ */
+ImageRectangle&	ImageRectangle::operator=(const ImageRectangle& other) {
+	_origin = other.origin();
+	_size = other.size();
+	return *this;
+}
+
+/**
  * \brief Rectangle comparison
  *
  * rectangles are considered equal if the have the same origin and the same
@@ -95,6 +106,16 @@ bool	ImageRectangle::contains(const ImagePoint& point) const {
 		(point.x() < _origin.x() + _size.width()) &&
 		(_origin.y() <= point.y()) &&
 		(point.y() < _origin.y() + _size.height());
+}
+
+/**
+ * \brief check whether coordinates are inside the rectangle
+ */
+bool	ImageRectangle::contains(int x, int y) const {
+	return	(_origin.x() <= x) &&
+		(x < _origin.x() + _size.width()) &&
+		(_origin.y() <= y) &&
+		(y < _origin.y() + _size.height());
 }
 
 /**
@@ -237,6 +258,22 @@ int	ImageRectangle::borderDistance(const ImagePoint& point) const {
 ImagePoint	ImageRectangle::centerWithinFrame(const ImageSize& frame) const {
 	ImagePoint	p = frame.center() - origin();
 	return p;
+}
+
+int	ImageRectangle::xmin() const {
+	return _origin.x();
+}
+
+int	ImageRectangle::ymin() const {
+	return _origin.y();
+}
+
+int	ImageRectangle::xmax() const {
+	return _origin.x() + _size.width();
+}
+
+int	ImageRectangle::ymax() const {
+	return _origin.y() + _size.height();
 }
 
 } // namespace image

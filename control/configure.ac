@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.57)
-AC_REVISION([1.0])
+AC_REVISION([1.1])
 AC_INIT([astro], [1.0], [andreas.mueller@hsr.ch])
 m4_ifdef([AM_PROG_AR], [AM_PROG_AR])
 LT_INIT

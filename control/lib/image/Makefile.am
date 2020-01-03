@@ -40,7 +40,7 @@ libastroimage_la_SOURCES = 						\
 	ColorTransform.cpp						\
 	ColorScaling.cpp						\
 	ComponentBase.cpp						\
-	ConnectedComponent.cpp						\
+	ConnectedComponentBase.cpp					\
 	ConvolutionOperator.cpp						\
 	ConvolutionResult.cpp						\
 	Corrector.cpp							\

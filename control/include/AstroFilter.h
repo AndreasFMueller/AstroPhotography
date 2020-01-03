@@ -686,23 +686,23 @@ FWHMInfo	FWHM2<Pixel>::filter_extended(const ConstImageAdapter<Pixel>& image) {
 
 	// collect points that have pixel value > half maximum
 	astro::adapter::LevelMaskAdapter<Pixel>	lma(image, maxvalue / 2.);
-	ImagePtr	levelmask(new Image<unsigned char>(lma));
+	Image<unsigned char>	levelmask(lma);
 
 	// extract the connected component of this levelmask
-	ImagePtr	connected = ConnectedComponent(target)(levelmask);
-	result.mask = connected;
-	Image<unsigned char>	*conn
-		= dynamic_cast<Image<unsigned char> *>(&*connected);
+	WindowedImage<unsigned char>	*connected
+		= ConnectedComponentBase(target).component(levelmask);
+	result.mask = ImagePtr(new Image<unsigned char>(*connected));
 
 	// add points in connected component to the list
 	std::list<ImagePoint>	points;
 	for (int x = 0; x < width; x++) {
 		for (int y = 0; y < height; y++) {
-			if (conn->pixel(x, y)) {
+			if (connected->pixel(x, y)) {
 				points.push_back(ImagePoint(x, y));
 			}
 		}
 	}
+	delete connected;
 
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "found %d points", points.size());
 	
@@ -797,18 +797,44 @@ public:
 
 /**
  * \brief Find the peak in an image
+ *
+ * This class can find a peak that is within an image at least _radius
+ * pixels away from the boundary. The class finds a candidate (unless
+ * one is provided in the approximate member) and if it is far enough
+ * away from the boundary, it uses that candidate. It then computes the
+ * connected component of pixels within radius _radius that also have
+ * a sufficiently large value. 
  */
 class PeakFinder : public GeneralFilter<double, Point> {
 	ImagePoint	_approximate;
 	int	_radius;
-	int	above(const ConstImageAdapter<double>& image, double v);
-	double	threshold(const ConstImageAdapter<double>& image,
-			double minvalue, double maxvalue);
+	double	_maximum;
+	void	setup();
+	// some methods used internally
+	ImageRectangle	roi(const ConstImageAdapter<double>& image,
+				const ImagePoint& candidate) const;
+	void	checkBoundary(const ConstImageAdapter<double>& image,
+			const ImagePoint& candidate) const;
+	std::pair<ImagePoint,double>	globalcandidate(
+				const ConstImageAdapter<double>& image) const;
+	std::pair<ImagePoint,double>	closecandidate(
+				const ConstImageAdapter<double>& image,
+				const ImagePoint& candidate) const;
+	WindowedImage<unsigned char>	*above(
+				const ConstImageAdapter<double>& image,
+				const ImagePoint& candidate, double v);
+	std::pair<WindowedImage<unsigned char>*,double>	threshold(
+			const ConstImageAdapter<double>& image,
+			const ImagePoint& candidate,
+			double minvalue, double maxvalue, int count);
 	std::pair<Point, double>	centroid(
 			const ConstImageAdapter<double>& image,
-			double threshold);
+			const ImagePoint& candidate,
+			ConstImageAdapter<unsigned char> *component);
 public:
-	PeakFinder(const ImagePoint& approximate, int radius);
+	PeakFinder(const ImagePoint& approximate, int radius,
+		double maximum = 0);
+	PeakFinder(int radius, double maximum = 0);
 	virtual Point	operator()(const ConstImageAdapter<double>& image);
 	std::pair<Point, double>	peak(const ConstImageAdapter<double>& image);
 };
@@ -823,10 +849,12 @@ template<typename T>
 class CentroidFilter : public GeneralFilter<T, Point> {
 	ImagePoint	_approximate;
 	double		_r;
+	void	setup();
 public:
 	CentroidFilter(ImagePoint approximate, double r)
 		: _approximate(approximate), _r(r) {
 	}
+	CentroidFilter(double r) : _r(r) { }
 	virtual Point	operator()(const ConstImageAdapter<T>& image) {
 		adapter::TypeConversionAdapter<T>	da(image);
 		PeakFinder	pf(_approximate, ceil(_r));

@@ -15,6 +15,9 @@ namespace transform {
 
 /**
  * \brief Constructor for the StarExtractor class
+ *
+ * \param numberofstars		the number of stars to extract
+ * \param searchradius		the minimum radius between points
  */
 StarExtractor::StarExtractor(int numberofstars, int searchradius)
 	: _numberofstars(numberofstars), _searchradius(searchradius), 
@@ -33,6 +36,9 @@ StarExtractor::StarExtractor(const StarExtractor& other)
  *
  * This method looks for large values in an image and determines their
  * properties of a star.
+ *
+ * \param image		the image to extract stars from
+ * \param criterion	the criterion to use to accept a star
  */
 std::vector<Star>	StarExtractor::stars(
 			const ConstImageAdapter<double>& image,
@@ -45,6 +51,8 @@ std::vector<Star>	StarExtractor::stars(
 	// create a level extractor that looks for stars with a brightness
 	// at a certain level
 	LevelExtractor	extractor(m);
+	extractor.radius(searchradius());
+	extractor.maxstars(numberofstars());
 	do {
 		// while we don't have enough stars, lower the level at which
 		// we are looking for stars
@@ -56,6 +64,8 @@ std::vector<Star>	StarExtractor::stars(
 
 /**
  * \brief auxiliary function to convert a set of of stars into a set of points
+ *
+ * \param stars		a vector of stars to convert into points
  */
 std::vector<Point> StarExtractor::stars2points(const std::vector<Star>& stars) {
 	std::vector<Point>	result;
@@ -68,6 +78,9 @@ std::vector<Point> StarExtractor::stars2points(const std::vector<Star>& stars) {
 
 /**
  * \brief Extract a set of star points from an image
+ *
+ * \param image		the image to analyze
+ * \param criterion	the criterion to decide whether to accept a star
  */
 std::vector<Point>	StarExtractor::points(
 				const ConstImageAdapter<double>& image,

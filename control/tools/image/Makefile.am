@@ -159,4 +159,4 @@ test:	png2fits
 	./png2fits --debug ~/t.png t.fits
 
 psftest:	psf
-	./psf --debug /usr/local/astrophoto/antonius/projects/M1/stacked/stacked2.fits psf.fits 2>&1 | tee psf.log
+	./psf --debug --radius=128 stacked2.fits psf.fits 2>&1 | tee psf.log
