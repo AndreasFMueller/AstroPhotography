@@ -9,7 +9,8 @@ bin_PROGRAMS = imageinfo makedark makeflat calibrate \
 	transform clamp logscale stack fitsheader imagerepo rescale \
 	gammacorrect convolve background crop radon backprojection \
 	colorbalance stars findtransform luminance unsharp color \
-	colorclamp hdr destar jpg2fits png2fits nan rgb2xyz psf
+	colorclamp hdr destar jpg2fits png2fits nan rgb2xyz psf \
+	deconvolve
 
 color_SOURCES = color.cpp
 color_DEPENDENCIES = $(top_builddir)/lib/libastro.la
@@ -135,6 +136,10 @@ psf_SOURCES = psf.cpp
 psf_DEPENDENCIES = $(top_builddir)/lib/libastro.la
 psf_LDADD = -L$(top_builddir)/lib -lastro
 
+deconvolve_SOURCES = deconvolve.cpp
+deconvolve_DEPENDENCIES = $(top_builddir)/lib/libastro.la
+deconvolve_LDADD = -L$(top_builddir)/lib -lastro
+
 fitsheadertest:	fitsheader
 	cp andromeda-chart.fits headertest.fits
 	./fitsheader -d add headertest.fits \
@@ -159,4 +164,7 @@ test:	png2fits
 	./png2fits --debug ~/t.png t.fits
 
 psftest:	psf
-	./psf --debug --radius=128 stacked2.fits psf.fits 2>&1 | tee psf.log
+	./psf --debug --radius=50 --crop stacked2.fits psf.fits 2>&1 | tee psf.log
+
+deconvolvetest:	deconvolve
+	./deconvolve --debug --psf=psf.fits --method=vancittert luminance.fits deconvolved.fits

@@ -38,8 +38,16 @@ public:
 		debug(LOG_DEBUG, DEBUG_LOG, 0,
 			"checking %s, value=%f, brightness %.1f",
 			star.toString().c_str(), v, _brightness);
-		return (_minimum < star.brightness())
-				&& (star.brightness() < _brightness);
+		if (_minimum >= star.brightness()) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0,
+				"star not bright enough");
+			return false;
+		}
+		if (star.brightness() >= _brightness) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "star is too bright");
+			return false;
+		}
+		return true;
 	}
 };
 
@@ -86,6 +94,7 @@ image::Image<double>	*PsfExtractor::extract(image::ImagePtr image) {
 	}
 
 	// 2. draw the stars into the report image
+	double	maxvalue = 0;
 	for (auto i = stars.begin(); i != stars.end(); i++) {
 		int	x0 = i->x();
 		int	y0 = i->y();
@@ -95,6 +104,9 @@ image::Image<double>	*PsfExtractor::extract(image::ImagePtr image) {
 		}
 		for (int y = y0 - 10; y <= y0 + 10; y++) {
 			report.pixel(x0, y) = red;
+		}
+		if (i->brightness() > maxvalue) {
+			maxvalue = i->brightness();
 		}
 	}
 	io::FITSoutfile<RGB<double> >	reportout("report.fits");
@@ -106,6 +118,10 @@ image::Image<double>	*PsfExtractor::extract(image::ImagePtr image) {
 	psf->fill(0.);
 
 	// 4. add all images 
+	int	xmin = c.x() - _radius;
+	int	xmax = c.x() + _radius;
+	int	ymin = c.y() - _radius;
+	int	ymax = c.y() + _radius;
 	for (auto i = stars.begin(); i != stars.end(); i++) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "add star %s",
 			i->toString().c_str());
@@ -113,9 +129,8 @@ image::Image<double>	*PsfExtractor::extract(image::ImagePtr image) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "translating by %s",
 			p.toString().c_str());
 		image::transform::TranslationAdapter<double>	ta(luminance, p);
-		for (int x = c.x() - _radius; x < c.x() + _radius; x++) {
-			for (int y = c.y() - _radius; y < c.y() + _radius;
-				y++) {
+		for (int x = xmin; x < xmax; x++) {
+			for (int y = ymin; y < ymax; y++) {
 				double	v = psf->pixel(x, y);
 				v = v + ta.pixel(x, y);
 				psf->pixel(x, y) = v;
@@ -123,9 +138,45 @@ image::Image<double>	*PsfExtractor::extract(image::ImagePtr image) {
 		}
 	}
 
-	// 3. Extract an image of 
+	// 5. find the value that is smaller than more than 99% of the pixels
+	// XXX currently we just take the minium
+	double	minvalue = maxvalue;
+	for (int x = xmin; x < xmax; x++) {
+		for (int y = ymin; y < ymax; y++) {
+			double	v = psf->pixel(x, y);
+			if (v < minvalue) {
+				minvalue = v;
+			}
+		}
+	}
 
-	
+	// 6. subtract the minimum and flatten the residual
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "subtracting floor %f", minvalue);
+	double	sigma = _radius / 6.;
+	sigma = sigma * sigma;
+	double	pedestal = 0.01 * (maxvalue - minvalue) + minvalue;
+	double	sum = 0;
+	for (int x = xmin; x < xmax; x++) {
+		for (int y = ymin; y < ymax; y++) {
+			double	d = hypot(x - c.x(), y - c.y()) - _radius / 2;
+			if (d < 0) { d = 0; }
+			double	v = psf->pixel(x, y) - pedestal;
+			if (v < 0) {
+				v = 0;
+			}
+			v *= exp(-d * d / sigma);
+			psf->pixel(x, y) = v;
+			sum += v;
+		}
+	}
+
+	// 7. Normalize the image
+	for (int x = xmin; x < xmax; x++) {
+		for (int y = ymin; y < ymax; y++) {
+			double	v = psf->pixel(x, y) / sum;
+			psf->pixel(x, y) = v;
+		}
+	}
 
 	// done
 	return psf;

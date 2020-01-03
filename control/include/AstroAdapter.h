@@ -2327,7 +2327,7 @@ ConvolutionAdapter<Pixel>::ConvolutionAdapter(
 	const ConstImageAdapter<double>& psf)
 	: ConstImageAdapter<Pixel>(image.getSize()), _psf(psf),
 	  _embedded(image),
-	  _offset(psf.getSize().width() / 2, psf.getSize().height() / 2) {
+	  _offset(psf.getSize().center()) {
 }
 
 template<typename Pixel>

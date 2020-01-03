@@ -45,6 +45,8 @@ VanCittertOperator::VanCittertOperator(ImagePtr psf)
 	if (!copied) {
 		throw std::runtime_error("no acceptable pixel type");
 	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "got a psf %s",
+		psf->size().toString().c_str());
 
 	// ensure that the sum of all elements of the PSF is 1
 	double	sum = 0;
@@ -58,9 +60,11 @@ VanCittertOperator::VanCittertOperator(ImagePtr psf)
 			_psf.pixel(x, y) = -_psf.pixel(x, y) / sum;
 		}
 	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "normalized");
 	int	w2 = _psf.getSize().width() / 2;
 	int	h2 = _psf.getSize().height() / 2;
 	_psf.pixel(w2, h2) = 1 + _psf.pixel(w2, h2);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "van Cittert kernel ready");
 }
 
 #define summand_typed(Pixel) 						\
@@ -105,17 +109,16 @@ static ImagePtr	operator+(ImagePtr a1, ImagePtr a2) {
 }
 
 ImagePtr	VanCittertOperator::operator()(ImagePtr image) const {
-// implementation currently missing
-#if 0
-	Image<double>	*psf = dynamic_cast<Image<double> *>(*&_psf);
-	ImagePtr	g = f;
-	int	i = 0;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "deconvolving %s image",
+		image->size().toString().c_str());
+	ImagePtr	g = image;
+	int	i = _iterations;
 	while (i--) {
-		g = image + smallConvolve(*psf, g);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "iteration %d",
+			_iterations - i);
+		g = image + smallConvolve(_psf, g);
 	}
 	return g;
-#endif
-	return image;
 }
 
 } // namespace astro

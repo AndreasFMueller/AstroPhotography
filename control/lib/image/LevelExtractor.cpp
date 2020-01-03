@@ -94,11 +94,14 @@ int	LevelExtractor::inspectpoint(const ConstImageAdapter<double>& image,
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "inspecting rectangle %s",
 		rectangle.toString().c_str());
 	adapter::WindowAdapter<double>	window(image, rectangle);
-	filter::PeakFinder	pf(ImagePoint(x, y), _radius, limit);
+	//filter::PeakFinder	pf(ImagePoint(x, y), _radius/2, limit);
+	filter::PeakFinder	pf(_radius/2, limit);
 	try {
 		std::pair<Point,double>	p = pf.peak(window);
-		//Star	star(p.first + Point(rectangle.origin()), p.second);
-		Star	star(p.first, p.second);
+		Point	center = p.first + Point(rectangle.origin());
+		ImagePoint	ip(center.x(), center.y());
+		Star	star(center, image.pixel(ip));
+		//Star	star(p.first, p.second);
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "found star: %s",
 			star.toString().c_str());
 
