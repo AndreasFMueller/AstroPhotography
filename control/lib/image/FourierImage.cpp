@@ -374,6 +374,11 @@ FourierImagePtr	pseudo(const FourierImage& a, const FourierImage& b,
 	return FourierImagePtr(result);
 }
 
+FourierImagePtr	pseudo(const FourierImagePtr a, const FourierImagePtr b,
+			double epsilon) {
+	return pseudo(*a, *b, epsilon);
+}
+
 /**
  * \brief Compute the pseudoinverse of the deconvolution the the PSF b
  *
@@ -411,8 +416,8 @@ FourierImagePtr	wiener(const FourierImage& a, const FourierImage& b,
 }
 
 FourierImagePtr	wiener(const FourierImagePtr a, const FourierImagePtr b,
-			double epsilon) {
-	return wiener(*a, *b, epsilon);
+			double K) {
+	return wiener(*a, *b, K);
 }
 
 } // namespace image
