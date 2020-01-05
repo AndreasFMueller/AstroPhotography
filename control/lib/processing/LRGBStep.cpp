@@ -41,6 +41,7 @@ ProcessingStep::state	LRGBStep::do_work() {
 	}
 
 	// build the adapters
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "set up color extraction");
 	adapter::ColorExtractionAdapter<float>	cea(*RGBimg);
 	double	w = byid(*precursors().begin())->weight();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "saturation: %f", w);
@@ -48,9 +49,11 @@ ProcessingStep::state	LRGBStep::do_work() {
 	adapter::LuminanceColorAdapter<float>	lca(*Limg, cea);
 
 	// build the result image
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "build result image");
 	Image<RGB<float> >	*resultimg = new Image<RGB<float> >(lca);
 	_image = ImagePtr(resultimg);
 
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "done");
 	return ProcessingStep::complete;
 }
 

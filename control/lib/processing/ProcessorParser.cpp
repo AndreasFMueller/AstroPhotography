@@ -139,6 +139,10 @@ void	ProcessorParser::startElement(const std::string& name,
 		startImage(attrs);
 		return;
 	}
+	if (name == std::string("deconvolution")) {
+		startDeconvolution(attrs);
+		return;
+	}
 	std::string	msg = stringprintf("don't know how to handle <%s>",
 		name.c_str());
 	throw std::runtime_error(msg);

@@ -47,6 +47,7 @@ ImageSequence	ImageStep::precursorimages(std::vector<int> exclude) const {
 				j->id());
 		}
 	);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "found %d precursors", images.size());
 	return images;
 }
 
@@ -57,6 +58,7 @@ ImageSequence	ImageStep::precursorimages(std::vector<int> exclude) const {
  * otherwise return the unique precursor image
  */
 ImagePtr	ImageStep::precursorimage(std::vector<int> exclude) const {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "getting single precursor image");
 	// get the image from the precursor
 	ImageSequence	p = precursorimages(exclude);
 	if (p.size() != 1) {

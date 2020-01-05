@@ -687,7 +687,7 @@ public:
 };
 
 /**
- * \rief Step to gamma correct an image
+ * \brief Step to gamma correct an image
  */
 class GammaStep : public ImageStep, public adapter::GammaTransformBase {
 public:
@@ -695,6 +695,47 @@ public:
 	virtual ProcessingStep::state	do_work();
 	virtual std::string	what() const;
 	virtual ImagePtr	image();
+};
+
+/**
+ * \brief Deconvolution step
+ */
+class DeconvolutionStep : public ImageStep {
+	ProcessingStepPtr	_psf;
+	std::string	_method;
+	int	_iterations;
+	double	_epsilon;
+	double	_K;
+	double	_stddev;
+
+	ProcessingStep::state	do_fourier(ImagePtr psf, ImagePtr img);
+	ProcessingStep::state	do_pseudo(ImagePtr psf, ImagePtr img);
+	ProcessingStep::state	do_wiener(ImagePtr psf, ImagePtr img);
+	ProcessingStep::state	do_vancittert(ImagePtr psf, ImagePtr img);
+	ProcessingStep::state	do_fastvancittert(ImagePtr psf, ImagePtr img);
+	ProcessingStep::state	do_gold(ImagePtr psf, ImagePtr img);
+public:
+	ProcessingStepPtr	psf() const { return _psf; }
+	void	psf(ProcessingStepPtr p) { _psf = p; }
+
+	const std::string&	method() const { return _method; }
+	void	method(const std::string& m) { _method = m; }
+
+	int	iterations() const { return _iterations; }
+	void	iterations(int i) { _iterations = i; }
+
+	double	epsilon() const { return _epsilon; }
+	void	epsilon(double e) { _epsilon = e; }
+
+	double	K() const { return _K; }
+	void	K(double k) { _K = k; }
+
+	double	stddev() const { return _stddev; }
+	void	stddev(double s) { _stddev = s; }
+
+	DeconvolutionStep(NodePaths& parent);
+	virtual ProcessingStep::state	do_work();
+	virtual std::string	what() const;
 };
 
 /**

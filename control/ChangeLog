@@ -1,5 +1,9 @@
 ChangeLog for the Astro project.
 
+20200104:
+	* add Pseudo, Wiener and constrained VanCittert deconvolution
+	* add processing step for deconvolution
+
 20200103:
 	* improve the PeakFinder and the ConnectedComponent class
 	* add the WindowedImage class that reduces the backing store

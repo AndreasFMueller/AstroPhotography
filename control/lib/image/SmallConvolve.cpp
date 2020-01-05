@@ -11,35 +11,70 @@
 namespace astro {
 namespace image {
 
-#define	convolve_typed(image, Pixel)					\
-{									\
-	Image<Pixel >	*img = dynamic_cast<Image<Pixel > *>(&*image);	\
-	if (NULL != img) {						\
-		adapter::ConvolutionAdapter<Pixel >	ca(*img, small);\
-		return ImagePtr(new Image<Pixel >(ca));			\
+/**
+ * \brief template function to perform the convolution
+ *
+ * \param small		the small image to convolve, typically the PSF
+ * \param image		the image to convolve
+ */
+template<typename Pixel>
+ImagePtr	convolve(const ConstImageAdapter<double>& small,
+			ImagePtr image) {
+	Image<Pixel >	*img = dynamic_cast<Image<Pixel > *>(&*image);
+	if (NULL == img) {
+		std::string	msg = stringprintf("pixel type %s does not "
+			"match image", demangle(typeid(Pixel).name()).c_str());
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw std::runtime_error(msg);
+	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "convolving a %s %s with a %s %s",
+		small.getSize().toString().c_str(),
+		demangle(typeid(small).name()).c_str(),
+		image->size().toString().c_str(),
+		demangle(typeid(*img).name()).c_str());
+	adapter::ConvolutionAdapter<Pixel >	ca(*img, small);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "perform the convolution");
+	return ImagePtr(new Image<Pixel >(ca));
+}
+
+#define convolve_typed(small, image, Pixel)				\
+try {									\
+	return convolve<Pixel>(small, image);				\
+} catch (const std::exception& x) {					\
+	if (false) {							\
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "exception: %s", x.what());\
 	}								\
 }
 
+/**
+ * \brief Convolution with a small image
+ *
+ * \param small		the small image to convolute with
+ * \param image		the image to convolve with small
+ */
 ImagePtr	smallConvolve(const ConstImageAdapter<double>& small,
 			ImagePtr image) {
-	convolve_typed(image, unsigned char)
-	convolve_typed(image, unsigned short)
-	convolve_typed(image, unsigned int)
-	convolve_typed(image, unsigned long)
-	convolve_typed(image, float)
-	convolve_typed(image, double)
-	convolve_typed(image, RGB<unsigned char>)
-	convolve_typed(image, RGB<unsigned short>)
-	convolve_typed(image, RGB<unsigned int>)
-	convolve_typed(image, RGB<unsigned long>)
-	convolve_typed(image, RGB<float>)
-	convolve_typed(image, RGB<double>)
-	convolve_typed(image, YUYV<unsigned char>)
-	convolve_typed(image, YUYV<unsigned short>)
-	convolve_typed(image, YUYV<unsigned int>)
-	convolve_typed(image, YUYV<unsigned long>)
-	convolve_typed(image, YUYV<float>)
-	convolve_typed(image, YUYV<double>)
+	// construct a convolution adapter from the image
+	convolve_typed(small, image, unsigned char)
+	convolve_typed(small, image, unsigned short)
+	convolve_typed(small, image, unsigned int)
+	convolve_typed(small, image, unsigned long)
+	convolve_typed(small, image, float)
+	convolve_typed(small, image, double)
+	convolve_typed(small, image, RGB<unsigned char>)
+	convolve_typed(small, image, RGB<unsigned short>)
+	convolve_typed(small, image, RGB<unsigned int>)
+	convolve_typed(small, image, RGB<unsigned long>)
+	convolve_typed(small, image, RGB<float>)
+	convolve_typed(small, image, RGB<double>)
+	convolve_typed(small, image, YUYV<unsigned char>)
+	convolve_typed(small, image, YUYV<unsigned short>)
+	convolve_typed(small, image, YUYV<unsigned int>)
+	convolve_typed(small, image, YUYV<unsigned long>)
+	convolve_typed(small, image, YUYV<float>)
+	convolve_typed(small, image, YUYV<double>)
+	// if we get to this point, we were not able to convolute because
+	// of an unknown Pixel type
 	std::string	cause = stringprintf("unknown pixel type %s",
 		demangle(typeid(*image).name()).c_str());
 	debug(LOG_ERR, DEBUG_LOG, 0, "%s", cause.c_str());

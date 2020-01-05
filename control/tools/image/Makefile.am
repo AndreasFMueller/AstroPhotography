@@ -167,4 +167,12 @@ psftest:	psf
 	./psf --debug --radius=50 --crop stacked2.fits psf.fits 2>&1 | tee psf.log
 
 deconvolvetest:	deconvolve
-	./deconvolve --debug --psf=psf.fits --method=vancittert luminance.fits deconvolved.fits
+	./deconvolve --debug --iterations=20 --constrained --prefix=vc --psf=psf.fits --method=vancittert \
+		small.fits deconvolved.fits
+
+
+gausstest:	deconvolve
+	./deconvolve --debug --iterations=20 --constrained --prefix=fast --psf=psf.fits --method=fastvancittert \
+		luminance.fits gauss.fits
+
+

@@ -521,7 +521,7 @@ Pixel&	SubgridAdapter<Pixel>::writablepixel(int x, int y) {
  * \brief Base class for arithmetic operation adapters
  */ 
 template<typename Pixel>
-class ArithmeticAdapter : public ConstImageAdapter<double> {
+class ArithmeticAdapter : public ConstImageAdapter<Pixel> {
 protected:
 	const ConstImageAdapter<Pixel>&	operand1;
 	const ConstImageAdapter<Pixel>&	operand2;
@@ -557,7 +557,7 @@ class AddAdapter : public ArithmeticAdapter<Pixel> {
 public:
 	AddAdapter(const ConstImageAdapter<Pixel>& summand1,
 		const ConstImageAdapter<Pixel>& summand2);
-	virtual double	pixel(int x, int y) const;
+	virtual Pixel	pixel(int x, int y) const;
 };
 
 /**
@@ -573,10 +573,9 @@ AddAdapter<Pixel>::AddAdapter(const ConstImageAdapter<Pixel>& summand1,
  * \brief Perform the addition
  */
 template<typename Pixel>
-double	AddAdapter<Pixel>::pixel(int x, int y) const {
-	double	result = 0;
-	result += ArithmeticAdapter<Pixel>::operand1.pixel(x, y);
-	result += ArithmeticAdapter<Pixel>::operand2.pixel(x, y);
+Pixel	AddAdapter<Pixel>::pixel(int x, int y) const {
+	Pixel	result = ArithmeticAdapter<Pixel>::operand1.pixel(x, y)
+			+ ArithmeticAdapter<Pixel>::operand2.pixel(x, y);
 	return result;
 }
 
@@ -585,7 +584,7 @@ class MultiplyAdapter : public ArithmeticAdapter<Pixel> {
 public:
 	MultiplyAdapter(const ConstImageAdapter<Pixel>& operand1,
 		const ConstImageAdapter<Pixel>& operand2);
-	virtual double	pixel(int x, int y) const;
+	virtual Pixel	pixel(int x, int y) const;
 };
 
 template<typename Pixel>
@@ -596,10 +595,9 @@ MultiplyAdapter<Pixel>::MultiplyAdapter(
 }
 
 template<typename Pixel>
-double	MultiplyAdapter<Pixel>::pixel(int x, int y) const {
-	double	result = 1;
-	result *= ArithmeticAdapter<Pixel>::operand1.pixel(x, y);
-	result *= ArithmeticAdapter<Pixel>::operand2.pixel(x, y);
+Pixel	MultiplyAdapter<Pixel>::pixel(int x, int y) const {
+	Pixel	result = ArithmeticAdapter<Pixel>::operand1.pixel(x, y)
+		* luminance(ArithmeticAdapter<Pixel>::operand2.pixel(x, y));
 	return result;
 }
 
@@ -2333,12 +2331,16 @@ ConvolutionAdapter<Pixel>::ConvolutionAdapter(
 template<typename Pixel>
 Pixel	ConvolutionAdapter<Pixel>::pixel(int x, int y) const {
 	Pixel	result = 0;
-	for (int xx = 0; xx < _psf.getSize().width(); xx++) {
-		for (int yy = 0; yy < _psf.getSize().height(); yy++) {
-			int	xi = x + xx - _offset.x();
-			int	yi = y + yy - _offset.y();
-			result = result
-				+ _embedded.pixel(xi, yi) * _psf.pixel(xx, yy);
+	int	w = _psf.getSize().width();
+	int	h = _psf.getSize().height();
+	for (int xx = 0; xx < w; xx++) {
+		for (int yy = 0; yy < h; yy++) {
+			double	p = _psf.pixel(xx, yy);
+			int	dx = xx - _offset.x();
+			int	dy = yy - _offset.y();
+			int	xi = x - dx;
+			int	yi = y - dy;
+			result = result + _embedded.pixel(xi, yi) * p;
 		}
 	}
 	return result;
@@ -2867,6 +2869,22 @@ public:
 	}
 	virtual	T	pixel(int x, int y) const {
 		return nanzero(_image.pixel(x, y));
+	}
+};
+
+//////////////////////////////////////////////////////////////////////
+// absolute value adapter
+//////////////////////////////////////////////////////////////////////
+template<typename T>
+class AbsoluteValueAdapter : public ConstImageAdapter<T> {
+	const ConstImageAdapter<T>&     _image;
+public:
+	AbsoluteValueAdapter(const ConstImageAdapter<T>& image)
+		: ConstImageAdapter<T>(image.getSize()), _image(image) {
+	}
+	virtual T	pixel(int x, int y) const {
+		T	v = _image.pixel(x, y);
+		return (v < 0) ? -v : v;
 	}
 };
 

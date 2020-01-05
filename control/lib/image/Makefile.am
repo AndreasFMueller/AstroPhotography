@@ -17,6 +17,7 @@ noinst_HEADERS =							\
 noinst_LTLIBRARIES = libastroimage.la
 
 libastroimage_la_SOURCES = 						\
+	absolute.cpp							\
 	Adapters.cpp							\
 	AffineTransformBuilder.cpp					\
 	AiryImage.cpp							\
@@ -25,7 +26,6 @@ libastroimage_la_SOURCES = 						\
 	Background.cpp							\
 	BackProjection.cpp						\
 	BasicAdapter.cpp						\
-	BasicDeconvolutionOperator.cpp					\
 	Binning.cpp							\
 	Blurr.cpp							\
 	CalibrationFrameFactory.cpp					\
@@ -58,6 +58,7 @@ libastroimage_la_SOURCES = 						\
 	duplicate.cpp							\
 	EuclideanDisplacement.cpp					\
 	EuclideanDisplacementConvolve.cpp				\
+	FastVanCittertOperator.cpp					\
 	FITS.cpp							\
 	FITShdu.cpp							\
 	FITSKeywords.cpp						\
@@ -79,6 +80,7 @@ libastroimage_la_SOURCES = 						\
 	FormatReductionBase.cpp						\
 	FormatReduction.cpp						\
 	FormatReductionRGB.cpp						\
+	FourierDeconvolutionOperator.cpp				\
 	FourierImage.cpp						\
 	Functions.cpp							\
 	FWHM.cpp							\
@@ -118,14 +120,17 @@ libastroimage_la_SOURCES = 						\
 	Metavalue.cpp							\
 	MinRadius.cpp							\
 	MosaicType.cpp							\
+	negative.cpp							\
 	NoiseAdapter.cpp						\
 	NormFilterfunc.cpp						\
 	PhaseCorrelator.cpp						\
 	PeakFinder.cpp							\
 	Pixel.cpp							\
+	positive.cpp							\
 	PNG.cpp								\
 	Projection.cpp							\
 	ProjectionCorrector.cpp						\
+	PseudoDeconvolutionOperator.cpp					\
 	PsfExtractor.cpp						\
 	Radon.cpp							\
 	Rescale.cpp							\
@@ -155,6 +160,7 @@ libastroimage_la_SOURCES = 						\
 	VectorField.cpp							\
 	Viewer.cpp							\
 	ViewerPipeline.cpp						\
+	WienerDeconvolutionOperator.cpp					\
 	WeightingAdapter.cpp
 
 libastroimage_la_CPPFLAGS = -DPKGLIBDIR=\"$(pkglibdir)\" \

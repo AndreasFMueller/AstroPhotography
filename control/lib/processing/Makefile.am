@@ -16,6 +16,7 @@ libastroprocessing_la_SOURCES =						\
 	ColorStep.cpp							\
 	ColorclampStep.cpp						\
 	DarkImageStep.cpp						\
+	DeconvolutionStep.cpp						\
 	DestarStep.cpp							\
 	FileImageStep.cpp						\
 	FlatImageStep.cpp						\
@@ -34,6 +35,7 @@ libastroprocessing_la_SOURCES =						\
 	ParseColorStep.cpp						\
 	ParseColorclampStep.cpp						\
 	ParseDarkimageStep.cpp						\
+	ParseDeconvolutionStep.cpp					\
 	ParseDestarStep.cpp						\
 	ParseFileimageStep.cpp						\
 	ParseFlatimageStep.cpp						\

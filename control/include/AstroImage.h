@@ -1176,6 +1176,48 @@ public:
 			}
 		}
 	}
+
+	/**
+	 * \brief Make the image positive
+	 */
+	void	absolute() {
+		for (int x = 0; x < size().width(); x++) {
+			for (int y = 0; y < size().height(); y++) {
+				Pixel	p = pixel(x, y);
+				if (p < 0) {
+					pixel(x, y) = -p;
+				}
+			}
+		}
+	}
+
+	/**
+	 * \brief Make the positive part of an image 
+	 */
+	void	positive() {
+		for (int x = 0; x < size().width(); x++) {
+			for (int y = 0; y < size().height(); y++) {
+				Pixel	p = pixel(x, y);
+				if (p < 0) {
+					pixel(x, y) = 0;
+				}
+			}
+		}
+	}
+
+	/**
+	 * \brief Make the negative part of an image
+	 */
+	void	negative() {
+		for (int x = 0; x < size().width(); x++) {
+			for (int y = 0; y < size().height(); y++) {
+				Pixel	p = pixel(x, y);
+				if (p > 0) {
+					pixel(x, y) = 0;
+				}
+			}
+		}
+	}
 };
 
 /**

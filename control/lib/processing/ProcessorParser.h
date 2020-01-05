@@ -60,6 +60,7 @@ class ProcessorParser {
 	void	startSum(const attr_t& attrs);
 	void	startLRGB(const attr_t& attrs);
 	void	startGamma(const attr_t& attrs);
+	void	startDeconvolution(const attr_t& attrs);
 public:
 	ProcessorParser();
 	void	startElement(const std::string& name, const attr_t& attrs);

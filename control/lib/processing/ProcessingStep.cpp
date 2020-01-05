@@ -306,6 +306,7 @@ void	ProcessingStep::work() {
 	}
 	Timer	timer;
 	timer.start();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "timer started");
 
 	// if there is need for work, do the work
 	try {

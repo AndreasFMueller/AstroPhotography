@@ -66,7 +66,10 @@ static ConstImageAdapter<double>	*type_convert(const ImagePtr image) {
 	type_convert_typed(image, unsigned long);
 	type_convert_typed(image, float);
 	type_convert_typed(image, double);
-	throw std::runtime_error("cannot convert this image to double pixel");
+	std::string	msg = stringprintf("cannot convert %s image to double "
+		"pixels", image->size().toString().c_str());
+	debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+	throw std::runtime_error(msg);
 }
 
 DoubleAdapter::DoubleAdapter(const ImagePtr image) :

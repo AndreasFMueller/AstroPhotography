@@ -115,15 +115,18 @@ FourierImage::FourierImage(const ImagePtr image)
 	// first handle the case where the image in fact already is a double
 	// image
 	const Image<double>	*img = dynamic_cast<Image<double>*>(&*image);
-	if (NULL != image) {
+	if (NULL != img) {
 		fourier(*img);
 		return;
 	}
 
 	// All other cases need an adapter to convert the image into a
 	// double image first
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "build a double adapter");
 	adapter::DoubleAdapter	a(image);
 	Image<double>	in(a);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "double image of size %s constructed",
+		in.size().toString().c_str());
 	fourier(in);
 }
 
@@ -134,7 +137,7 @@ FourierImage::FourierImage(const ImagePtr image)
  * of the domain, which explains why we do all this only for float valued
  * pixels.
  */
-ImagePtr	FourierImage::inverse() const {
+ImagePtr	FourierImage::inverse(bool absolute) const {
 	Image<double>	*image = new Image<double>(_orig);
 	int	n0 = _orig.height();
 	int	n1 = _orig.width();
@@ -152,7 +155,13 @@ ImagePtr	FourierImage::inverse() const {
 	int	h = _orig.height();
 	for (int x = 0; x < w; x++) {
 		for (int y = 0; y < h; y++) {
-			image->pixel(x, y) = image->pixel(x, y) * value;
+			double	v = image->pixel(x, y) * value;
+			if (absolute) {
+				if (v < 0) {
+					v = -v;
+				}
+			}
+			image->pixel(x, y) = v;
 		}
 	}
 	return ImagePtr(image);
@@ -322,6 +331,88 @@ FourierImagePtr	operator*(const FourierImagePtr a, const FourierImagePtr b) {
  */
 FourierImagePtr	operator/(const FourierImagePtr a, const FourierImagePtr b) {
 	return (*a) / (*b);
+}
+
+/**
+ * \brief Compute the pseudoinverse of the deconvolution the the PSF b
+ *
+ * \param a		the fourier transform of the image
+ * \param b		the fourier transform of the psf
+ * \param epsilon	the limit of small coefficients to ignore
+ */
+FourierImagePtr	pseudo(const FourierImage& a, const FourierImage& b,
+			double epsilon) {
+	if (a.size() != b.size()) {
+		std::string	msg = stringprintf(
+			"image size mismatch: %s != %s",
+			a.orig().toString().c_str(),
+			b.orig().toString().c_str());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw std::runtime_error(msg);
+	}
+
+	// construct the result image
+	FourierImage	*result = new FourierImage(a.orig());
+
+	// compute the product
+	fftw_complex	*af = (fftw_complex *)a.pixels;
+	fftw_complex	*bf = (fftw_complex *)b.pixels;
+	fftw_complex	*cf = (fftw_complex *)result->pixels;
+	size_t	nc = result->size().getPixels() / 2;
+	for (unsigned int i = 0; i < nc; i++) {
+		double	d = bf[i][0] * bf[i][0] + bf[i][1] * bf[i][1];
+		if (d < epsilon) {
+			cf[i][0] = 0;
+			cf[i][1] = 0;
+			continue;
+		}
+		cf[i][0] = (af[i][0] * bf[i][0] + af[i][1] * bf[i][1]) / d;
+                cf[i][1] = (af[i][1] * bf[i][0] - af[i][0] * bf[i][1]) / d;
+	}
+
+	// return the new image
+	return FourierImagePtr(result);
+}
+
+/**
+ * \brief Compute the pseudoinverse of the deconvolution the the PSF b
+ *
+ * \param a		the fourier transform of the image
+ * \param b		the fourier transform of the psf
+ * \param K		the limit of small coefficients to ignore
+ */
+FourierImagePtr	wiener(const FourierImage& a, const FourierImage& b,
+			double K) {
+	if (a.size() != b.size()) {
+		std::string	msg = stringprintf(
+			"image size mismatch: %s != %s",
+			a.orig().toString().c_str(),
+			b.orig().toString().c_str());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw std::runtime_error(msg);
+	}
+
+	// construct the result image
+	FourierImage	*result = new FourierImage(a.orig());
+
+	// compute the product
+	fftw_complex	*af = (fftw_complex *)a.pixels;
+	fftw_complex	*bf = (fftw_complex *)b.pixels;
+	fftw_complex	*cf = (fftw_complex *)result->pixels;
+	size_t	nc = result->size().getPixels() / 2;
+	for (unsigned int i = 0; i < nc; i++) {
+		double	d = bf[i][0] * bf[i][0] + bf[i][1] * bf[i][1] + K;
+		cf[i][0] = (af[i][0] * bf[i][0] + af[i][1] * bf[i][1]) / d;
+                cf[i][1] = (af[i][1] * bf[i][0] - af[i][0] * bf[i][1]) / d;
+	}
+
+	// return the new image
+	return FourierImagePtr(result);
+}
+
+FourierImagePtr	wiener(const FourierImagePtr a, const FourierImagePtr b,
+			double epsilon) {
+	return wiener(*a, *b, epsilon);
 }
 
 } // namespace image

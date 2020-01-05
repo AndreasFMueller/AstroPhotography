@@ -60,6 +60,10 @@ ImagePtr	cut(ImagePtr source, const ImageRectangle& rect);
 
 ImagePtr	duplicate(ImagePtr image);
 
+void	absolute(ImagePtr image);
+void	positive(ImagePtr image);
+void	negative(ImagePtr image);
+
 } // namespace ops
 } // namespace image
 } // namespace astro

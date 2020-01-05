@@ -34,7 +34,7 @@ static ImageSize	fsize(const ImageSize&);
 	FourierImage(const Image<double>& image);
 	FourierImage(const ConstImageAdapter<double>& image);
 	FourierImage(const ImagePtr image);
-	ImagePtr	inverse() const;
+	ImagePtr	inverse(bool absolute = false) const;
 	ImagePtr	abs() const;
 	ImagePtr	phase() const;
 	ImagePtr	color() const;
@@ -47,6 +47,15 @@ FourierImagePtr	operator*(const FourierImage& a, const FourierImage& b);
 FourierImagePtr	operator*(const FourierImagePtr a, const FourierImagePtr b);
 FourierImagePtr	operator/(const FourierImage& a, const FourierImage& b);
 FourierImagePtr	operator/(const FourierImagePtr a, const FourierImagePtr b);
+
+FourierImagePtr	pseudo(const FourierImage& a, const FourierImage& b,
+			double epsilon);
+FourierImagePtr	pseudo(const FourierImagePtr a, const FourierImagePtr b,
+			double epsilon);
+
+FourierImagePtr	wiener(const FourierImage& a, const FourierImage& b, double K);
+FourierImagePtr	wiener(const FourierImagePtr a, const FourierImagePtr b,
+			double K);
 
 class ConvolutionResult;
 typedef std::shared_ptr<ConvolutionResult>	ConvolutionResultPtr;
@@ -95,37 +104,90 @@ public:
  * \brief Deconvolution algorithms all use the same base class
  */
 class DeconvolutionOperator {
+protected:
+	Image<double>	_psf;
+	FourierImagePtr	fourierpsf(const ImageSize& size) const;
 public:
-	virtual ImagePtr	operator()(ImagePtr image) const;
-	virtual ImagePtr	operator()(FourierImagePtr image) const;
+	DeconvolutionOperator(ImagePtr psf);
+	DeconvolutionOperator(const ConstImageAdapter<double>& psf);
+
+	virtual ImagePtr	operator()(ImagePtr image) const = 0;
 };
 
 /**
- * \brief Basic deconvolution algorithm
+ * \brief Fourier deconvolution algorithm
  *
  * This algorithm works for any point spread function, but it requires lots
  * of Fourier transforms and thus is rather expensive.
  */
-class BasicDeconvolutionOperator {
-	FourierImagePtr	_psf;
-private:
-	BasicDeconvolutionOperator(const BasicDeconvolutionOperator& other);
-	BasicDeconvolutionOperator&	operator=(const BasicDeconvolutionOperator& other);
+class FourierDeconvolutionOperator : public DeconvolutionOperator {
 public:
-	BasicDeconvolutionOperator(ImagePtr psf);
-	BasicDeconvolutionOperator(const ConstImageAdapter<double>& image);
+	FourierDeconvolutionOperator(ImagePtr psf)
+		: DeconvolutionOperator(psf) { }
+	FourierDeconvolutionOperator(const ConstImageAdapter<double>& psf)
+		: DeconvolutionOperator(psf) { }
+	virtual ImagePtr	operator()(ImagePtr image) const;
+};
+
+/**
+ * \brief Image deconvolution using the pseudoinverse
+ */
+class PseudoDeconvolutionOperator : public FourierDeconvolutionOperator {
+	double		_epsilon;
+public:
+	PseudoDeconvolutionOperator(ImagePtr psf)
+		: FourierDeconvolutionOperator(psf) { }
+	PseudoDeconvolutionOperator(const ConstImageAdapter<double>& psf)
+		: FourierDeconvolutionOperator(psf) { }
+	double	epsilon() const { return _epsilon; }
+	void	epsilon(double e) { _epsilon = e; }
+	virtual ImagePtr	operator()(ImagePtr image) const;
+};
+
+/**
+ * \brief Image deconvolution using the Wiener filter
+ */
+class WienerDeconvolutionOperator : public FourierDeconvolutionOperator {
+	double	_K;
+public:
+	WienerDeconvolutionOperator(ImagePtr psf)
+		: FourierDeconvolutionOperator(psf) { }
+	WienerDeconvolutionOperator(const ConstImageAdapter<double>& psf)
+		: FourierDeconvolutionOperator(psf) { }
+	double	K() const { return _K; }
+	void	K(double K) { _K = K; }
 	virtual ImagePtr	operator()(ImagePtr image) const;
 };
 
 ImagePtr	smallConvolve(const ConstImageAdapter<double>& small, ImagePtr image);
 
-class VanCittertOperator {
-	Image<double>	_psf;
+/**
+ * \brief A Class implementing the VanCittert deconvolution algorithm
+ */
+class VanCittertOperator : public DeconvolutionOperator {
+protected:
+	ImagePtr	add(ImagePtr a1, ImagePtr a2) const;
+private:
 	int	_iterations;
+	std::string	_prefix;
+	bool	_constrained;
 public:
 	int	iterations() const { return _iterations; }
 	void	iterations(int i) { _iterations = i; }
+	const std::string&	prefix() const { return _prefix; }
+	void	prefix(const std::string& p) { _prefix = p; }
+	bool	constrained() const { return _constrained; }
+	void	constrained(bool c) { _constrained = c; }
 	VanCittertOperator(ImagePtr psf);
+	virtual ImagePtr	operator()(ImagePtr image) const;
+};
+
+/**
+ * \brief VanCittert deconvolution using Fourier for the convolution
+ */
+class FastVanCittertOperator : public VanCittertOperator {
+public:
+	FastVanCittertOperator(ImagePtr psf) : VanCittertOperator(psf) { }
 	virtual ImagePtr	operator()(ImagePtr image) const;
 };
 

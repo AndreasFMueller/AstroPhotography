@@ -42,14 +42,86 @@ static void     usage(const char *progname) {
 }
 
 static struct option    longopts[] = {
-{ "debug",		no_argument,		NULL,	'd' }, /* 0 */
-{ "help",		no_argument,		NULL,	'h' }, /* 1 */
-{ "psf",		required_argument,	NULL,	'p' }, /* 2 */
-{ "method",		required_argument,	NULL,	'm' }, /* 3 */
-{ "iterations",		required_argument,	NULL,	'i' }, /* 4 */
+{ "constrained",	no_argument,		NULL,	'c' }, /* 0 */
+{ "debug",		no_argument,		NULL,	'd' }, /* 1 */
+{ "epsilon", 		required_argument,	NULL,	'e' }, /* 2 */
+{ "gauss",		no_argument,		NULL,	'g' }, /* 2 */
+{ "help",		no_argument,		NULL,	'h' }, /* 3 */
+{ "psf",		required_argument,	NULL,	'p' }, /* 4 */
+{ "prefix",		required_argument,	NULL,	'P' }, /* 5 */
+{ "stddev",		required_argument,	NULL,	's' }, /* 6 */
+{ "method",		required_argument,	NULL,	'm' }, /* 7 */
+{ "iterations",		required_argument,	NULL,	'i' }, /* 8 */
+{ "k",			required_argument,	NULL,	'k' },
 { NULL,			0,			NULL,	 0  }
 };
 
+/**
+ * \brief Find the center point of an image
+ *
+ * \param psf	the image to analyze
+ */
+static Point	findcenter(const ConstImageAdapter<double>& psf) {
+	double	xs = 0;
+	double	ys = 0;
+	double	t = 0;
+	int	w = psf.getSize().width();
+	int	h = psf.getSize().height();
+	for (int x = 0; x < w; x++) {
+		for (int y = 0; y < h; y++) {
+			double	m = psf.pixel(x, y);
+			t += m;
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "pixel(%d,%d) = %g", x, y, m);
+			xs += m * x;
+			ys += m * y;
+		}
+	}
+	return Point(xs / t, ys / t);
+}
+
+/**
+ * \brief Find the standard deviation of the image
+ *
+ * \param psf	the image to analyze
+ */
+static double	findstddev(const ConstImageAdapter<double>& psf) {
+	Point	center = findcenter(psf);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "center: %s",
+		center.toString().c_str());
+	int	counter = 0;
+	int	w = psf.getSize().width();
+	int	h = psf.getSize().height();
+	double	s = 0;
+	for (int x = 0; x < w; x++) {
+		for (int y = 0; y < h; y++) {
+			double	d = (center - Point(x, y)).abs();
+			s += d * d;
+			counter++;
+		}
+	}
+	double	stddev = sqrt(s / counter);
+	stddev /= sqrt(2);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "stddev found: %f", stddev);
+	return stddev;
+}
+
+/**
+ * \brief Construct a gaussian image with a given standard deviation
+ *
+ * \param stddev	the standard deviation to use for the gaussian
+ */
+static ImagePtr	gausspsf(float stddev) {
+	Image<double>	*psf = new Image<double>(ImageSize(100, 100));
+	ImagePtr	result(psf);
+	double	n = 2 * stddev * stddev;
+	for (int x = 0; x < 100; x++) {
+		for (int y = 0; y < 100; y++) {
+			double	d = hypot(x - 50, y - 50);
+			psf->pixel(x, y) = exp(-d * d / n);
+		}
+	}
+	return result;
+}
 
 /**
  * \brief main function of the deconvolve program
@@ -64,29 +136,69 @@ int	main(int argc, char *argv[]) {
 	int	iterations = 10;
 	ImagePtr	psf;
 	std::string	method("vancittert");
-	while (EOF != (c = getopt_long(argc, argv, "dh?pm:i:",
+	std::string	prefix;
+	bool	gauss = false;
+	double	stddev = 0;
+	bool	constrained = false;
+	double	epsilon = 0;
+	double	K = 0;
+	while (EOF != (c = getopt_long(argc, argv, "cdgh?i:mp:P:s:k:",
 		longopts, &longindex)))
 		switch (c) {
+		case 'c':
+			constrained = true;
+			break;
 		case 'd':
 			debuglevel = LOG_DEBUG;
+			break;
+		case 'e':
+			epsilon = std::stod(optarg);
+			break;
+		case 'g':
+			gauss = true;
 			break;
 		case 'h':
 		case '?':
 			usage(argv[0]);
 			return EXIT_SUCCESS;
+		case 'i':
+			iterations = std::stoi(optarg);
+			break;
+		case 'k':
+			K = std::stod(optarg);
+			break;
+		case 'm':
+			method = std::string(optarg);
+			break;
 		case 'p':
 			{
 			io::FITSin	psffile(optarg);
 			psf = psffile.read();
 			}
 			break;
-		case 'm':
-			method = std::string(optarg);
+		case 'P':
+			prefix = std::string(optarg);
 			break;
-		case 'i':
-			iterations = std::stoi(optarg);
+		case 's':
+			stddev = std::stod(optarg);
 			break;
 		}
+
+	// if we have a stddev we can generate a psf
+	if (gauss) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "using gaussian psf");
+		if (psf) {
+			Image<double>	*img = dynamic_cast<Image<double>*>(&*psf);
+			if (NULL == img) {
+				std::string msg = stringprintf("can only process double psf");
+				throw std::runtime_error(msg);
+			}
+			stddev = findstddev(*img);
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "using stddev = %f", stddev);
+		}
+		psf = gausspsf(stddev);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "using gaussian psf");
+	}
 
 	// make sure we have a psf
 	if (!psf) {
@@ -110,13 +222,34 @@ int	main(int argc, char *argv[]) {
 	// perform the deconvolution
 	ImagePtr	outimage(NULL);
 	if (method == std::string("fourier")) {
-		throw std::runtime_error("fourier not implemented");
+		FourierDeconvolutionOperator	fdco(psf);
+		outimage = fdco(image);
+	}
+	if (method == std::string("pseudo")) {
+		PseudoDeconvolutionOperator	pdco(psf);
+		pdco.epsilon(epsilon);
+		outimage = pdco(image);
+	}
+	if (method == std::string("wiener")) {
+		WienerDeconvolutionOperator	wdco(psf);
+		wdco.K(K);
+		outimage = wdco(image);
 	}
 	if (method == std::string("vancittert")) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "performing vancittert deconvolution");
 		VanCittertOperator	vc(psf);
 		vc.iterations(iterations);
+		vc.prefix(prefix);
+		vc.constrained(constrained);
 		outimage = vc(image);
+	}
+	if (method == std::string("fastvancittert")) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "performing fastvancittert deconvolution");
+		FastVanCittertOperator	fvc(psf);
+		fvc.iterations(iterations);
+		fvc.prefix(prefix);
+		fvc.constrained(constrained);
+		outimage = fvc(image);
 	}
 	if (!outimage) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "unknown method '%s'", method.c_str());
