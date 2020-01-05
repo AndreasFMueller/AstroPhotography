@@ -1,5 +1,8 @@
 ChangeLog for the Astro project.
 
+20200105:
+	* fix missing function in FourierImage.cpp
+
 20200104:
 	* add Pseudo, Wiener and constrained VanCittert deconvolution
 	* add processing step for deconvolution
