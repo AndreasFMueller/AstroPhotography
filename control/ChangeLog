@@ -1,6 +1,7 @@
 ChangeLog for the Astro project.
 
 20200105:
+	* add missing psf.cpp tool
 	* fix missing function in FourierImage.cpp
 
 20200104:
