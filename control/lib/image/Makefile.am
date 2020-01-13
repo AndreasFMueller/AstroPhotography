@@ -12,7 +12,8 @@ noinst_HEADERS =							\
 	TransformBuilder.h						\
 	LowerBoundDegreeNFunction.h					\
 	LowerBoundLinearFunction.h					\
-	LowerBoundQuadraticFunction.h
+	LowerBoundQuadraticFunction.h					\
+	LuminanceFunctions.h
 
 noinst_LTLIBRARIES = libastroimage.la
 
@@ -114,6 +115,9 @@ libastroimage_la_SOURCES = 						\
 	LogImage.cpp							\
 	Luminance.cpp							\
 	LuminanceExtractor.cpp						\
+	LuminanceFunction.cpp						\
+	LuminanceFunctionFactory.cpp					\
+	LuminanceFunctions.cpp						\
 	LuminanceStretchingAdapter.cpp					\
 	Masks.cpp							\
 	Maxima.cpp							\
