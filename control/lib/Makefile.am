@@ -4,7 +4,7 @@
 # (c) 2012 Prof Dr Andreas Mueller, Hochschule Rapperswil
 #
 SUBDIRS = utils persistence event discovery image processing device config \
-	catalogs guiding focusing task usb unicap . test
+	catalogs guiding focusing task usb unicap solarsystem . test
 
 noinst_HEADERS = Version.h
 
@@ -26,4 +26,5 @@ libastro_la_LIBADD =							\
 	task/libastrotask.la						\
 	unicap/libastrounicap.la					\
 	usb/libastrousb.la						\
-	utils/libastroutils.la
+	utils/libastroutils.la						\
+	solarsystem/libastrsolarsystem.la

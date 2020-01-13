@@ -82,6 +82,21 @@ Vector	Vector::normalized() const {
 	return (*this) * (1. / abs());
 }
 
+Vector	Vector::Ex() {
+	double	x[3] = { 1., 0., 0. };
+	return Vector(x);
+}
+
+Vector	Vector::Ey() {
+	double	x[3] = { 0., 1., 0. };
+	return Vector(x);
+}
+
+Vector	Vector::Ez() {
+	double	x[3] = { 0., 0., 1. };
+	return Vector(x);
+}
+
 //////////////////////////////////////////////////////////////////////
 // UnitVector implementation
 //////////////////////////////////////////////////////////////////////
@@ -127,6 +142,21 @@ Angle	UnitVector::angle(const UnitVector& other) const {
 
 Vector	UnitVector::operator()(const Vector& other) const {
 	return (*this) * ((*this) * other);
+}
+
+UnitVector	UnitVector::Ex() {
+	double	x[3] = { 1., 0., 0. };
+	return UnitVector(x);
+}
+
+UnitVector	UnitVector::Ey() {
+	double	x[3] = { 0., 1., 0. };
+	return UnitVector(x);
+}
+
+UnitVector	UnitVector::Ez() {
+	double	x[3] = { 0., 0., 1. };
+	return UnitVector(x);
 }
 
 } // namespace astro
