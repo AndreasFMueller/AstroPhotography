@@ -2,6 +2,7 @@ ChangeLog for the Astro project.
 
 20200113:
 	* add LuminanceFunction infrastructure to the adapter framework
+	* add LuminanceMapping function to the processing system
 
 20200105:
 	* add missing psf.cpp tool

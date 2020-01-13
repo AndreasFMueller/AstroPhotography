@@ -118,6 +118,7 @@ libastroimage_la_SOURCES = 						\
 	LuminanceFunction.cpp						\
 	LuminanceFunctionFactory.cpp					\
 	LuminanceFunctions.cpp						\
+	luminancemapping.cpp						\
 	LuminanceStretchingAdapter.cpp					\
 	Masks.cpp							\
 	Maxima.cpp							\

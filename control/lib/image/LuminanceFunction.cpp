@@ -4,6 +4,7 @@
  * (c) 2020 Prof Dr Andreas Müller, Hochschule Rapperswil
  */
 #include <AstroTonemapping.h>
+#include <AstroFormat.h>
 
 namespace astro {
 namespace adapter {
@@ -17,7 +18,7 @@ LuminanceFunction::~LuminanceFunction() {
 /**
  * \brief Default constructor of a LuminanceFunction
  */
-LuminanceFunction::LuminanceFunction() {
+LuminanceFunction::LuminanceFunction(const std::string& name) : _name(name) {
 	_x1 = 0;
 	_x2 = 1;
 	_y1 = 0;
@@ -48,8 +49,8 @@ static double	convert_to_double(const std::pair<std::string, std::string>& p) {
  *
  * \param parameters	parameter to construct basic parameters from
  */
-LuminanceFunction::LuminanceFunction(
-	const LuminanceFunction::parameters_t& parameters) {
+LuminanceFunction::LuminanceFunction(const std::string& name,
+	const LuminanceFunction::parameters_t& parameters) : _name(name) {
 	parameters_t::const_iterator	i = parameters.find("x1");
 	if (i != parameters.end()) {
 		_x1 = convert_to_double(*i);
@@ -101,6 +102,17 @@ double	LuminanceFunction::x(double l) const {
  */
 double	LuminanceFunction::y(double x) const {
 	return y1() + (y2() - y1()) * x;
+}
+
+/**
+ * \brief  Information about the luminance function in use
+ */
+std::string	LuminanceFunction::info() const {
+	return stringprintf("%s mapping, (x1,y1) = (%.3f,%.3f), "
+		"(x2,y2) = (%.3f,%.3f), use_absolute=%s, truncate_negative=%s",
+		name().c_str(), x1(), y1(), x2(), y2(),
+		(use_absolute()) ? "yes" : "no",
+		(truncate_negative()) ? "yes" : "no");
 }
 
 } // namespace adapter

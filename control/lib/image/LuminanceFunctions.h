@@ -20,6 +20,7 @@ class GammaFunction : public LuminanceFunction {
 public:
 	GammaFunction(const LuminanceFunction::parameters_t& parameters);
 	virtual double	operator()(double l);
+	virtual std::string	info() const;
 };
 
 /**

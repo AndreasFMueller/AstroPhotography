@@ -131,6 +131,10 @@ void	ProcessorParser::startElement(const std::string& name,
 		startImagePlane(attrs);
 		return;
 	}
+	if (name == std::string("luminancemapping")) {
+		startLuminanceMapping(attrs);
+		return;
+	}
 	if (name == std::string("luminancestretching")) {
 		startLuminanceStretching(attrs);
 		return;

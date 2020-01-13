@@ -159,6 +159,7 @@ Pixel	LuminanceFunctionAdapter<Pixel, LuminanceFunction>::pixel(int x, int y)
  * \brief Base class for Luminance Functions
  */
 class LuminanceFunction	{
+	std::string	_name;
 	double	_x1;
 	double	_y1;
 	double	_x2;
@@ -166,6 +167,7 @@ class LuminanceFunction	{
 	bool	_use_absolute;
 	bool	_truncate_negative;
 public:
+	const std::string& 	name() const { return _name; }
 	double	x1() const { return _x1; }
 	double	x2() const { return _x2; }
 	void	x1(double l) { _x1 = l; }
@@ -183,10 +185,12 @@ protected:
 	double	y(double x) const;
 public:
 	typedef std::map<std::string, std::string>	parameters_t;
-	LuminanceFunction();
-	LuminanceFunction(const parameters_t& parameters);
+	LuminanceFunction(const std::string& name);
+	LuminanceFunction(const std::string& name,
+		const parameters_t& parameters);
 	virtual ~LuminanceFunction();
 	virtual double	operator()(double l) = 0;
+	virtual std::string	info() const;
 };
 
 typedef std::shared_ptr<LuminanceFunction>	LuminanceFunctionPtr;
@@ -196,7 +200,7 @@ typedef std::shared_ptr<LuminanceFunction>	LuminanceFunctionPtr;
  */
 template<typename Pixel>
 class LuminanceFunctionPtrAdapter : public ConstImageAdapter<Pixel> {
-	const ConstImageAdapter<Pixel>	_image;
+	const ConstImageAdapter<Pixel>&	_image;
 	LuminanceFunctionPtr		_luminancefunctionptr;
 public:
 	LuminanceFunctionPtrAdapter(const ConstImageAdapter<Pixel>& image,
@@ -210,6 +214,9 @@ public:
 		return p * _luminancefunctionptr->operator()(l);
 	}
 };
+
+ImagePtr	luminancemapping(ImagePtr image,
+			LuminanceFunctionPtr luminancefunctionptr);
 
 /**
  * \brief A factory for LuminanceFunctions

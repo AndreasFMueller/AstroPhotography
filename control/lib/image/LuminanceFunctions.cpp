@@ -14,7 +14,7 @@ namespace adapter {
  * \param parameters	The parameters used for the construction
  */
 GammaFunction::GammaFunction(const LuminanceFunction::parameters_t& parameters)
-	: LuminanceFunction(parameters) {
+	: LuminanceFunction("gamma", parameters) {
 	_gamma = 1.;
 	LuminanceFunction::parameters_t::const_iterator	i
 		= parameters.find("gamma");
@@ -49,16 +49,27 @@ double	GammaFunction::operator()(double l) {
 }
 
 /**
+ * \brief Information function for the gamma function
+ *
+ * This function ist necessary because the gamma function has an additional 
+ * parameter
+ */
+std::string	GammaFunction::info() const {
+	return stringprintf("%s, gamma=%.4f, %s",
+		LuminanceFunction::info().c_str(), _gamma);
+}
+
+/**
  * \brief Construct a inverse hyperbolic sine mapping
  *
  * \param parameters	The parameters used for the construction
  */
 AsinhFunction::AsinhFunction(const LuminanceFunction::parameters_t& parameters)
-	: LuminanceFunction(parameters) {
+	: LuminanceFunction("asinh", parameters) {
 }
 
 /**
- * \brief The asinh function implementation
+ * \brief The asinh function implemetation
  *
  * \param l	the argument for the asinh function
  */
@@ -72,7 +83,7 @@ double	AsinhFunction::operator()(double l) {
  * \param parameters	The parameteres used for construction
  */
 AtanFunction::AtanFunction(const LuminanceFunction::parameters_t& parameters)
-	: LuminanceFunction(parameters) {
+	: LuminanceFunction("atan", parameters) {
 }
 
 /**
@@ -90,7 +101,7 @@ double	AtanFunction::operator()(double l) {
  * \param parameters	The parameteres used for construction
  */
 AtanhFunction::AtanhFunction(const LuminanceFunction::parameters_t& parameters)
-	: LuminanceFunction(parameters) {
+	: LuminanceFunction("atanh", parameters) {
 }
 
 /**
@@ -108,7 +119,7 @@ double	AtanhFunction::operator()(double l) {
  * \param parameters	The parameteres used for construction
  */
 LogFunction::LogFunction(const LuminanceFunction::parameters_t& parameters)
-	: LuminanceFunction(parameters) {
+	: LuminanceFunction("log", parameters) {
 	// by default, we have to truncate negative numbers
 	LuminanceFunction::parameters_t::const_iterator	i
 		= parameters.find("truncate_negative");
