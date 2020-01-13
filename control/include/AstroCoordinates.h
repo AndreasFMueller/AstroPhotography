@@ -23,9 +23,8 @@ namespace astro {
  */
 class Angle {
 	double	_angle; // in radians
-protected:
-	virtual void	reduce(double base = 0);
 public:
+	virtual void	reduce(double base = 0);
 	typedef enum { Radians, Degrees, Hours, Revolutions, ArcMinutes, ArcSeconds } unit;
 	Angle(double angle = 0, unit u = Radians);
 	virtual ~Angle() { }

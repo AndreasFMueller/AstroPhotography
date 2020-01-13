@@ -601,7 +601,7 @@ AC_CONFIG_FILES([Makefile include/Makefile
 	lib/focusing/Makefile lib/focusing/test/Makefile
 	lib/usb/Makefile lib/usb/test/Makefile
 	lib/unicap/Makefile lib/unicap/test/Makefile
-	lib/solarsystem/Makefile
+	lib/solarsystem/Makefile lib/solarsystem/test/Makefile
 	lib/test/Makefile
 	tools/Makefile tools/config/Makefile tools/mount/Makefile
 	tools/devices/Makefile tools/image/Makefile tools/guiding/Makefile
