@@ -313,6 +313,14 @@ void	SkyDisplayWidget::setHorizonVisible(bool h) {
 	repaint();
 }
 
+void	SkyDisplayWidget::setSunVisible(bool s) {
+	show_sun(s);
+}
+
+void	SkyDisplayWidget::setMoonVisible(bool m) {
+	show_moon(m);
+}
+
 void	SkyDisplayWidget::toggleRaDecGridVisible() {
 	setRaDecGridVisible(!show_radec());
 }
@@ -357,6 +365,14 @@ void	SkyDisplayWidget::toggleHorizonVisible() {
 	setHorizonVisible(!show_horizon());
 }
 
+void	SkyDisplayWidget::toggleSunVisible() {
+	setSunVisible(!show_sun());
+}
+
+void	SkyDisplayWidget::toggleMoonVisible() {
+	setMoonVisible(!show_moon());
+}
+
 void	SkyDisplayWidget::showContextMenu(const QPoint& point) {
 	_mouse_pressed = false;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "show context menu at %d/%d",
@@ -369,6 +385,20 @@ void	SkyDisplayWidget::showContextMenu(const QPoint& point) {
 	contextMenu.addAction(&actionMilkyway);
 	connect(&actionMilkyway, SIGNAL(triggered()),
 		this, SLOT(toggleMilkywayVisible()));
+
+	QAction	actionMoon(QString("Moon"), this);
+	actionMoon.setCheckable(true);
+	actionMoon.setChecked(show_moon());
+	contextMenu.addAction(&actionMoon);
+	connect(&actionMoon, SIGNAL(triggered()),
+		this, SLOT(toggleMoonVisible()));
+
+	QAction	actionSun(QString("Sun"), this);
+	actionSun.setCheckable(true);
+	actionSun.setChecked(show_moon());
+	contextMenu.addAction(&actionSun);
+	connect(&actionSun, SIGNAL(triggered()),
+		this, SLOT(toggleSunVisible()));
 
 	QAction	actionRaDec(QString("RA/DEC grid"), this);
 	actionRaDec.setCheckable(true);

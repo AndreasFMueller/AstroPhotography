@@ -1,5 +1,8 @@
 ChangeLog for the Qt GUI to Astrophotography
 
+20200114:
+	* add display of Sun and Moon to SkyDisplayWidget
+
 20200102:
 	* add Horizon to SkyDrawing and SkyDisplayWidget classes
 

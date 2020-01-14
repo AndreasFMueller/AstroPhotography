@@ -4,6 +4,7 @@
  * (c) 2018 Prof Dr Andreas Müller, Hochschule Rapperswil
  */
 #include <SkyDrawing.h>
+#include <AstroSolarsystem.h>
 #include <time.h>
 #include <sstream>
 
@@ -91,6 +92,8 @@ SkyDrawing::SkyDrawing() {
 	_show_time = false;
 	_show_copyright = false;
 	_show_horizon = false;
+	_show_sun = true;
+	_show_moon = true;
 	_converter = NULL;
 	_time = 0;
 	_timeoffset = 0;
@@ -696,6 +699,14 @@ void	SkyDrawing::draw(QPainter& painter, QSize& size) {
 		}
 	}
 
+	// draw solar system objects
+	if (show_sun()) {
+		drawSun(painter);
+	}
+	if (show_moon()) {
+		drawMoon(painter);
+	}
+
 	// draw the horizon
 	if (show_horizon()) {
 		drawHorizon(painter);
@@ -963,5 +974,65 @@ void	SkyDrawing::drawConstellations(QPainter& painter) {
 		}
 	}
 }
+
+/**
+ * \brief Draw a solar system body as a circle
+ *
+ * \param painter	Pointer to use for drawing
+ * \param position	position of the object
+ * \param radius	radius of the circle to draw
+ * \param color		color of the object
+ */
+void	SkyDrawing::drawSolarsystemBody(QPainter& painter,
+		const astro::RaDec& position,
+		double radius, QColor color) {
+	astro::AzmAlt	Position = convert(position);
+	if (Position.alt().radians() < 0) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "object not visible");
+		return;
+	}
+
+	// draw the moon
+	QPointF	center = convert(Position);
+	QPainterPath	circle;
+	circle.addEllipse(center, radius, radius);
+	painter.fillPath(circle, color);
+}
+
+/**
+ * \brief Draw the moon
+ *
+ * \param painter	QPainter to draw on
+ */
+void	SkyDrawing::drawMoon(QPainter& painter) {
+	astro::solarsystem::Moon	moon;
+	astro::RaDec	moonposition = moon.ephemeris(_time + _timeoffset);
+
+	// prepare for drawing
+	QColor	moonblue(0,204,255);
+	double	mr = _radius / 180.;
+	if (mr < 7) { mr = 7.; }
+
+	drawSolarsystemBody(painter, moonposition, mr, moonblue);
+}
+
+/**
+ * \brief Draw the sun
+ *
+ * \param painter	QPainter to draw on
+ */
+void	SkyDrawing::drawSun(QPainter& painter) {
+	astro::solarsystem::Sun	sun;
+	astro::RaDec	sunposition = sun.ephemeris(_time + _timeoffset);
+
+	// prepare for drawing
+	QColor	sunyellow(255,255,0);
+	double	sr = _radius / 180.;
+	if (sr < 7) { sr = 7.; }
+
+	drawSolarsystemBody(painter, sunposition, sr, sunyellow);
+}
+
+
 
 } // namespace snowgui

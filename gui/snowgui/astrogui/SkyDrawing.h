@@ -133,6 +133,8 @@ private:
 	bool	_show_copyright;
 	bool	_show_time;
 	bool	_show_horizon;
+	bool	_show_moon;
+	bool	_show_sun;
 	astro::RaDec	_telescope;
 	astro::RaDec	_target;
 	astro::LongLat	_position;
@@ -183,6 +185,10 @@ public:
 	const astro::RaDec&	target() const { return _target; }
 	void	position(const astro::LongLat& p) { _position = p; }
         const astro::LongLat&	position() const { return _position; }
+	bool	show_moon() const { return _show_moon; }
+	void	show_moon(bool s) { _show_moon = s; }
+	bool	show_sun() const { return _show_sun; }
+	void	show_sun(bool s) { _show_sun = s; }
 	const astro::horizon::HorizonPtr	horizon() const {
 							return _horizon;
 	}
@@ -234,6 +240,11 @@ private:
 			astro::catalog::MilkyWay::level_t level);
 	void	drawMilkyWay(QPainter& painter);
 	void	drawHorizon(QPainter& painter);
+	void	drawSolarsystemBody(QPainter& painter,
+			const astro::RaDec& position,
+			double radius, QColor color);
+	void	drawSun(QPainter& painter);
+	void	drawMoon(QPainter& painter);
 protected:
 	virtual void	redraw();
 	astro::AzmAlt	convert(const astro::RaDec& radec);
