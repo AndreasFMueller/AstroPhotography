@@ -2,8 +2,8 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.57)
-AC_REVISION([1.2])
-AC_INIT([astro], [1.2], [andreas.mueller@hsr.ch])
+AC_REVISION([1.3])
+AC_INIT([astro], [1.0], [andreas.mueller@hsr.ch])
 m4_ifdef([AM_PROG_AR], [AM_PROG_AR])
 LT_INIT
 AC_CONFIG_SRCDIR([include/AstroImage.h])
@@ -601,6 +601,7 @@ AC_CONFIG_FILES([Makefile include/Makefile
 	lib/focusing/Makefile lib/focusing/test/Makefile
 	lib/usb/Makefile lib/usb/test/Makefile
 	lib/unicap/Makefile lib/unicap/test/Makefile
+	lib/solarsystem/Makefile lib/solarsystem/test/Makefile
 	lib/test/Makefile
 	tools/Makefile tools/config/Makefile tools/mount/Makefile
 	tools/devices/Makefile tools/image/Makefile tools/guiding/Makefile

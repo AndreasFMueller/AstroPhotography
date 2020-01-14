@@ -29,6 +29,7 @@ libastroprocessing_la_SOURCES =						\
 	ImageTransformationStep.cpp					\
 	LRGBStep.cpp							\
 	LayerImageStep.cpp						\
+	LuminanceMappingStep.cpp					\
 	LuminanceStretchingStep.cpp					\
 	NodePaths.cpp							\
 	ParseCalibrateStep.cpp						\
@@ -46,6 +47,7 @@ libastroprocessing_la_SOURCES =						\
 	ParseImagePlaneStep.cpp						\
 	ParseLayerImageStep.cpp						\
 	ParseLRGBStep.cpp						\
+	ParseLuminanceMappingStep.cpp					\
 	ParseLuminanceStretchingStep.cpp				\
 	ParseRGBStep.cpp						\
 	ParseRescaleStep.cpp						\

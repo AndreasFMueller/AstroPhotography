@@ -34,6 +34,7 @@ libastroutils_la_SOURCES = 						\
 	RaDec.cpp							\
 	Rectangle.cpp							\
 	Rotation.cpp							\
+	Rotation3D.cpp							\
 	stacktrace.cpp							\
 	Size.cpp							\
 	SphericalCoordinates.cpp					\

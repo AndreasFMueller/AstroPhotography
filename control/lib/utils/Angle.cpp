@@ -69,8 +69,17 @@ Angle::Angle(double angle, unit u) : _angle(angle) {
 	case Degrees:
 		degrees(angle);
 		return;
+	case ArcMinutes:
+		arcminutes(angle);
+		return;
+	case ArcSeconds:
+		arcseconds(angle);
+		return;
 	case Hours:
 		hours(angle);
+		return;
+	case Revolutions:
+		revolutions(angle - trunc(angle));
 		return;
 	}
 }
@@ -113,6 +122,14 @@ void	Angle::hours(double hours) {
 
 std::string	Angle::hms(const char separator, int precision) const {
 	return xms(hours(), separator, precision);
+}
+
+double	Angle::revolutions() const {
+	return _angle / (2 * M_PI);
+}
+
+void	Angle::revolutions(double revolutions) {
+	radians(2 * M_PI * revolutions);
 }
 
 Angle	Angle::operator+(const Angle& other) const {

@@ -99,6 +99,136 @@ Pixel	LuminanceScalingAdapter<Pixel>::pixel(int x, int y) const {
 }
 
 /**
+ * \brief Adapter for an arbitrary pixel function
+ */
+template<typename Pixel, typename PixelFunction>
+class PixelFunctionAdapter : public ConstImageAdapter<Pixel> {
+	const ConstImageAdapter<Pixel>&	_image;
+	PixelFunction	_pixelfunction;
+public:
+	PixelFunctionAdapter(const ConstImageAdapter<Pixel>& image,
+		const PixelFunction& pixelfunction);
+	virtual Pixel	pixel(int x, int y) const;
+};
+
+template<typename Pixel, typename PixelFunction>
+PixelFunctionAdapter<Pixel, PixelFunction>::PixelFunctionAdapter(
+	const ConstImageAdapter<Pixel>& image,
+	const PixelFunction& pixelfunction)
+	: ConstImageAdapter<Pixel>(image.getSize()),
+	  _image(image), _pixelfunction(pixelfunction) {
+}
+	
+template<typename Pixel, typename PixelFunction>
+Pixel	PixelFunctionAdapter<Pixel, PixelFunction>::pixel(int x, int y) const {
+	Pixel	result = _pixelfunction(_image.pixel(x, y));
+}
+
+/**
+ * \brief Adapter for a pixel function that affects only the luminance
+ */
+template<typename Pixel, typename LuminanceFunction>
+class LuminanceFunctionAdapter : public ConstImageAdapter<Pixel> {
+	const ConstImageAdapter<Pixel>&	_image;
+	LuminanceFunction	_luminancefunction;
+public:
+	LuminanceFunctionAdapter(const ConstImageAdapter<Pixel>& image,
+		const LuminanceFunction& luminancefunction);
+	virtual Pixel	pixel(int x, int y) const;
+};
+
+template<typename Pixel, typename LuminanceFunction>
+LuminanceFunctionAdapter<Pixel, LuminanceFunction>::LuminanceFunctionAdapter(
+	const ConstImageAdapter<Pixel>& image,
+	const LuminanceFunction& luminancefunction)
+	: ConstImageAdapter<Pixel>(image.getSize()),
+	  _image(image), _luminancefunction(luminancefunction) {
+}
+	
+template<typename Pixel, typename LuminanceFunction>
+Pixel	LuminanceFunctionAdapter<Pixel, LuminanceFunction>::pixel(int x, int y)
+	const {
+	Pixel	p = _image.pixel(x, y);
+	double	l = p;
+	_luminancefunction(l);
+	Pixel	result = p * l;
+	return result;
+}
+
+/**
+ * \brief Base class for Luminance Functions
+ */
+class LuminanceFunction	{
+	std::string	_name;
+	double	_x1;
+	double	_y1;
+	double	_x2;
+	double	_y2;
+	bool	_use_absolute;
+	bool	_truncate_negative;
+public:
+	const std::string& 	name() const { return _name; }
+	double	x1() const { return _x1; }
+	double	x2() const { return _x2; }
+	void	x1(double l) { _x1 = l; }
+	void	x2(double l) { _x2 = l; }
+	double	y1() const { return _y1; }
+	double	y2() const { return _y2; }
+	void	y1(double l) { _y1 = l; }
+	void	y2(double l) { _y2 = l; }
+	bool	use_absolute() const { return _use_absolute; }
+	void	use_absolute(bool u) { _use_absolute = u; }
+	bool	truncate_negative() const { return _truncate_negative; }
+	void	truncate_negative(bool t) { _truncate_negative = t; }
+protected:
+	double	x(double l) const;
+	double	y(double x) const;
+public:
+	typedef std::map<std::string, std::string>	parameters_t;
+	LuminanceFunction(const std::string& name);
+	LuminanceFunction(const std::string& name,
+		const parameters_t& parameters);
+	virtual ~LuminanceFunction();
+	virtual double	operator()(double l) = 0;
+	virtual std::string	info() const;
+};
+
+typedef std::shared_ptr<LuminanceFunction>	LuminanceFunctionPtr;
+
+/**
+ * \brief A variant of the LuminanceFunctionAdapter class for smart pointers
+ */
+template<typename Pixel>
+class LuminanceFunctionPtrAdapter : public ConstImageAdapter<Pixel> {
+	const ConstImageAdapter<Pixel>&	_image;
+	LuminanceFunctionPtr		_luminancefunctionptr;
+public:
+	LuminanceFunctionPtrAdapter(const ConstImageAdapter<Pixel>& image,
+		LuminanceFunctionPtr luminancefunctionptr)
+		: ConstImageAdapter<Pixel>(image.getSize()), _image(image),
+		  _luminancefunctionptr(luminancefunctionptr) {
+	}
+	virtual Pixel	pixel(int x, int y) const {
+		Pixel	p = _image.pixel(x, y);
+		double	l = p;
+		return p * _luminancefunctionptr->operator()(l);
+	}
+};
+
+ImagePtr	luminancemapping(ImagePtr image,
+			LuminanceFunctionPtr luminancefunctionptr);
+
+/**
+ * \brief A factory for LuminanceFunctions
+ */
+class LuminanceFunctionFactory {
+public:
+	static LuminanceFunctionPtr	get(const std::string& name);
+	static LuminanceFunctionPtr	get(const std::string& name,
+		const LuminanceFunction::parameters_t& parameters);
+};
+
+/**
  * \brief Luminance extraction
  */
 template<typename Pixel>

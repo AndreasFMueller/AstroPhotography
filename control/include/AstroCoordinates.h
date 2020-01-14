@@ -23,10 +23,9 @@ namespace astro {
  */
 class Angle {
 	double	_angle; // in radians
-protected:
-	virtual void	reduce(double base = 0);
 public:
-	typedef enum { Radians, Degrees, Hours } unit;
+	virtual void	reduce(double base = 0);
+	typedef enum { Radians, Degrees, Hours, Revolutions, ArcMinutes, ArcSeconds } unit;
 	Angle(double angle = 0, unit u = Radians);
 	virtual ~Angle() { }
 	double	degrees() const;
@@ -41,6 +40,8 @@ public:
 	std::string	hms(const char separator = ':', int precision = 3) const;
 	double	radians() const { return _angle; }
 	void	radians(double radians) { _angle = radians; }
+	double	revolutions() const;
+	void	revolutions(double revolutions);
 	Angle	operator+(const Angle& other) const;
 	Angle	operator-(const Angle& other) const;
 	Angle	operator*(const double& other) const;
@@ -199,6 +200,8 @@ public:
 	RaDec	operator()(const RaDec& radec) const;
 };
 
+class Rotation3D;
+
 //class	UnitVector;
 /**
  * \brief vector pointing from the center of the sphere to a point
@@ -221,6 +224,10 @@ public:
 	Vector	operator*(double l) const;
 	std::string	toString() const;
 	Vector	normalized() const;
+friend class Rotation3D;
+	static Vector Ex();
+	static Vector Ey();
+	static Vector Ez();
 };
 
 /**
@@ -236,6 +243,23 @@ public:
 	UnitVector&	operator=(const Vector& other);
 	Angle	angle(const UnitVector& other) const;
 	Vector	operator()(const Vector& other) const;
+	static UnitVector Ex();
+	static UnitVector Ey();
+	static UnitVector Ez();
+};
+
+/**
+ * \brief Class implementation rotation around an axis
+ */
+class	Rotation3D {
+	double	m[3][3];
+	void	setup(const UnitVector& u, const Angle& a);
+public:
+	Rotation3D(const Vector& a);
+	Rotation3D(const UnitVector& u, const Angle& a);
+	Rotation3D(char axis, const Angle& a);
+	Vector	operator()(const Vector& v) const;
+	UnitVector	operator()(const UnitVector& v) const;
 };
 
 /**

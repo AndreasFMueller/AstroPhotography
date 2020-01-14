@@ -698,6 +698,20 @@ public:
 };
 
 /**
+ * \brief Step
+ */
+class LuminanceMappingStep : public ImageStep {
+	adapter::LuminanceFunctionPtr	_luminancefunctionptr;
+public:
+	adapter::LuminanceFunctionPtr	luminancefunctionptr() const;
+	void	luminancefunctionptr(adapter::LuminanceFunctionPtr l);
+	LuminanceMappingStep(NodePaths& parent);
+	virtual ProcessingStep::state	do_work();
+	virtual std::string	what() const;
+	virtual ImagePtr	image();
+};
+
+/**
  * \brief Deconvolution step
  */
 class DeconvolutionStep : public ImageStep {
