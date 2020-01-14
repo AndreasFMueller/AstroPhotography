@@ -27,4 +27,4 @@ libastro_la_LIBADD =							\
 	unicap/libastrounicap.la					\
 	usb/libastrousb.la						\
 	utils/libastroutils.la						\
-	solarsystem/libastrsolarsystem.la
+	solarsystem/libastrosolarsystem.la
