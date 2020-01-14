@@ -46,6 +46,7 @@ include_HEADERS =							\
 	AstroProject.h							\
 	AstroProjection.h						\
 	AstroPsf.h							\
+	AstroSolarsystem.h						\
 	AstroTask.h							\
 	AstroTonemapping.h						\
 	AstroTransform.h						\
