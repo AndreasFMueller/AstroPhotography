@@ -3,7 +3,7 @@
 
 AC_PREREQ(2.57)
 AC_REVISION([1.2])
-AC_INIT([astro], [1.0], [andreas.mueller@hsr.ch])
+AC_INIT([astro], [1.2], [andreas.mueller@hsr.ch])
 m4_ifdef([AM_PROG_AR], [AM_PROG_AR])
 LT_INIT
 AC_CONFIG_SRCDIR([include/AstroImage.h])
