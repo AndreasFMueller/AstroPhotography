@@ -128,37 +128,52 @@ void	mountcontrollerwidget::setupMount() {
 	_previousstate = snowstar::MountIDLE;
 	if (_mount) {
 		// read longitude and latitude from the mount
-		_position = convert(_mount->getLocation());
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "mount location: %s",
-			_position.toString().c_str());
+		try {
+			_position = convert(_mount->getLocation());
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "mount location: %s",
+				_position.toString().c_str());
 
-		// make sure the star chart knows the orientation
-		_previouswest = _mount->telescopePositionWest();
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "sending orientation: %s",
-			(_previouswest) ? "west" : "east");
-		emit orientationChanged(_previouswest);
+			// write the position to the position label
+			std::string	pl;
+			pl += _position.longitude().dms(':', 0).substr(1);
+			pl += (_position.longitude().degrees() < 0) ? "W" : "E";
+			pl += " ";
+			pl += _position.latitude().dms(':', 0).substr(1);
+			pl += (_position.longitude().degrees() < 0) ? "S" : "N";
+			ui->observatoryField->setText(QString(pl.c_str()));
 
-		// make sure everybody knows our direction
-		_telescope = _mount->getRaDec();
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "sending telescope: %s",
-			convert(_telescope).toString().c_str());
-		emit telescopeChanged(convert(_telescope));
+			// write the position to the LMST widget
+			ui->siderealTime->position(_position);
+			ui->hourangleWidget->position(_position);
+		} catch (const std::exception& x) {
+			debug(LOG_ERR, DEBUG_LOG, 0,
+				"cannot get location from mount: %s", x.what());
+		}
 
-		// initially, telescope and target are identical
-		targetChanged(convert(_telescope));
+		try {
+			// make sure the star chart knows the orientation
+			_previouswest = _mount->telescopePositionWest();
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "sending orientation: %s",
+				(_previouswest) ? "west" : "east");
+			emit orientationChanged(_previouswest);
+		} catch (const std::exception& x) {
+			debug(LOG_ERR, DEBUG_LOG, 0, "cannot get whether "
+				"telescope is east or west: %s", x.what());
+		}
 
-		// write the position to the position label
-		std::string	pl;
-		pl += _position.longitude().dms(':', 0).substr(1);
-		pl += (_position.longitude().degrees() < 0) ? "W" : "E";
-		pl += " ";
-		pl += _position.latitude().dms(':', 0).substr(1);
-		pl += (_position.longitude().degrees() < 0) ? "S" : "N";
-		ui->observatoryField->setText(QString(pl.c_str()));
+		try {
+			// make sure everybody knows our direction
+			_telescope = _mount->getRaDec();
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "sending telescope: %s",
+				convert(_telescope).toString().c_str());
+			emit telescopeChanged(convert(_telescope));
 
-		// write the position to the LMST widget
-		ui->siderealTime->position(_position);
-		ui->hourangleWidget->position(_position);
+			// initially, telescope and target are identical
+			targetChanged(convert(_telescope));
+		} catch (const std::exception& x) {
+			debug(LOG_ERR, DEBUG_LOG, 0, "cannot get telescope: %s",
+				x.what());
+		}
 
 		// try to get the time
 		try {
