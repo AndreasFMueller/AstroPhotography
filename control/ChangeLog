@@ -1,5 +1,8 @@
 ChangeLog for the Astro project.
 
+20200115:
+	* add error messaging
+
 20200113:
 	* add Sun and Moon coordinate computation
 	* add LuminanceFunction infrastructure to the adapter framework

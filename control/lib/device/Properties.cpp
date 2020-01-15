@@ -14,6 +14,8 @@ namespace astro {
 
 /**
  * \brief Properties Constructor
+ *
+ * \param devicename	The device name to use while scanning the properties
  */
 Properties::Properties(const std::string& devicename) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "create properties for device '%s'",
@@ -22,18 +24,27 @@ Properties::Properties(const std::string& devicename) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "trying system file: %s",
 			DEVICEPROPERTIES);
 		setup(devicename, DEVICEPROPERTIES);
-	} catch (...) { }
+	} catch (const std::exception& x) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "system file %s not usable: %s",
+			DEVICEPROPERTIES, x.what());
+	}
 	try {
 		debug(LOG_DEBUG, DEBUG_LOG, 0,
 			"trying local file: device.properties");
 		setup(devicename, "device.properties");
-	} catch (...) { }
+	} catch (const std::exception& x) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "system file %s not usable: %s",
+			"device.properties", x.what());
+	}
 	try {
 		char	*filename = getenv("DEVICEPROPERTIES");
 		if (NULL != filename) {
 			setup(devicename, filename);
 		}
-	} catch (...) { }
+	} catch (const std::exception& x) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "system file %s not usable: %s",
+			getenv("DEVICEPROPERTIES"), x.what());
+	}
 }
 
 Properties::~Properties() {
