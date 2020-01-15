@@ -9,6 +9,7 @@
 #include <AstroDebug.h>
 #include <stdexcept>
 #include <AstroUtils.h>
+#include <includes.h>
 
 namespace astro {
 
@@ -20,26 +21,43 @@ namespace astro {
 Properties::Properties(const std::string& devicename) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "create properties for device '%s'",
 		devicename.c_str());
+	// try system file
 	try {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "trying system file: %s",
 			DEVICEPROPERTIES);
 		setup(devicename, DEVICEPROPERTIES);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "read %s", DEVICEPROPERTIES);
 	} catch (const std::exception& x) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "system file %s not usable: %s",
 			DEVICEPROPERTIES, x.what());
 	}
+	// system directory
+	try {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "trying system directory: %s",
+			DEVICEPROPERTYDIR);
+		setupDir(devicename, DEVICEPROPERTYDIR);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "read directory %s",
+			DEVICEPROPERTYDIR);
+	} catch (const std::exception& x) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "error in directory %s: %s",
+			DEVICEPROPERTYDIR, x.what());
+	}
+	// device.properties in the present directory (what for?)
 	try {
 		debug(LOG_DEBUG, DEBUG_LOG, 0,
 			"trying local file: device.properties");
 		setup(devicename, "device.properties");
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "read device.properties");
 	} catch (const std::exception& x) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "system file %s not usable: %s",
 			"device.properties", x.what());
 	}
+	// file from environment
 	try {
 		char	*filename = getenv("DEVICEPROPERTIES");
 		if (NULL != filename) {
 			setup(devicename, filename);
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "read %s", filename);
 		}
 	} catch (const std::exception& x) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "system file %s not usable: %s",
@@ -143,6 +161,51 @@ void	Properties::setup(const std::string& name, const std::string& filename) {
 	}
 	in.close();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "properties read");
+}
+
+/**
+ * \brief Set up properties from a directory
+ *
+ * \param name		device name to look for
+ * \param dirname	directory path to scan
+ */
+void	Properties::setupDir(const std::string& name,
+		const std::string& dirname) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "scanning directory %s",
+		dirname.c_str());
+	// open the directory
+	DIR     *dir = opendir(dirname.c_str());
+	if (NULL == dir) {
+		std::string	msg = stringprintf("cannot open directory %s: %s",
+			dirname.c_str(), strerror(errno));
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw std::runtime_error(msg);
+	}
+
+	// scan the directory
+	struct dirent	*dirent;
+	std::list<std::string>	files;
+	while (NULL != (dirent = readdir(dir))) {
+		int     namelen = strlen(dirent->d_name);
+		if (namelen < 12)
+			continue;
+		if (0 == strcmp(".properties", dirent->d_name + namelen - 11)) {
+			std::string     filename = dirname + "/"
+						+ std::string(dirent->d_name);
+			files.push_back(filename);
+		}
+	}
+	closedir(dir);
+
+	// now read all files
+	for (auto i = files.begin(); i != files.end(); i++) {
+		try {
+			setup(name, *i);
+		} catch (const std::exception& x) {
+			debug(LOG_ERR, DEBUG_LOG, 0, "error in file %s: %s",
+				i->c_str(), x.what());
+		}
+	}
 }
 
 /**

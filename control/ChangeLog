@@ -2,6 +2,7 @@ ChangeLog for the Astro project.
 
 20200115:
 	* add error messaging for devices.properties
+	* add capability to read a property directory
 
 20200113:
 	* add Sun and Moon coordinate computation

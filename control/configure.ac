@@ -569,6 +569,8 @@ AC_CHECK_FUNCS([memset strdup strerror trunc])
 # device property file location
 DEVICEPROPERTIES=${sysconfdir}/device.properties
 AC_SUBST(DEVICEPROPERTIES)
+DEVICEPROPERTYDIR=${sysconfdir}/device.d
+AC_SUBST(DEVICEPROPERTYDIR)
 
 # default pid file location
 PIDDIR=${localstatedir}/run

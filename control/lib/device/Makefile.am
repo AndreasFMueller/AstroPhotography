@@ -50,5 +50,6 @@ libastrodevice_la_SOURCES =						\
 	Shutter.cpp							\
 	ThreadCcd.cpp
 
-libastrodevice_la_CPPFLAGS = -DPKGLIBDIR=\"$(pkglibdir)\" \
-	-DDEVICEPROPERTIES=\"@DEVICEPROPERTIES@\"
+libastrodevice_la_CPPFLAGS = -DPKGLIBDIR=\"$(pkglibdir)\"		\
+	-DDEVICEPROPERTIES=\"@DEVICEPROPERTIES@\"			\
+	-DDEVICEPROPERTYDIR=\"@DEVICEPROPERTYDIR@\"

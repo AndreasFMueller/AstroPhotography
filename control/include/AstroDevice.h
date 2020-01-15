@@ -60,6 +60,7 @@ public:
 private:
 	propertymap_type	properties;
 	void	setup(const std::string& name, const std::string& filename);
+	void	setupDir(const std::string& name, const std::string& dirname);
 public:
 	Properties(const std::string& devicename);
 	virtual ~Properties();
