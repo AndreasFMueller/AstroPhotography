@@ -7,6 +7,13 @@ EXTRA_DIST = 80-othello.rules
 
 if ENABLE_OTHELLO
 
+if USE_UDEV
+
+udevdir = /etc/udev/rules.d
+udev_DATA = 80-othello.rules
+
+endif
+
 pkglib_LTLIBRARIES = othello.la
 
 noinst_HEADERS = OthelloUtil.h OthelloLocator.h OthelloGuidePort.h \

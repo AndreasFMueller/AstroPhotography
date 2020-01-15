@@ -43,6 +43,12 @@ public:
 	virtual std::string	userFriendlyName() const {
 		return _camera.userFriendlyName();
 	}
+private:
+	bool	_cansetgain;
+public:
+	virtual bool	hasGain() { return _cansetgain; }
+	virtual float	getGain();
+	virtual std::pair<float, float>	gainInterval();
 };
 
 } // namespace qsi

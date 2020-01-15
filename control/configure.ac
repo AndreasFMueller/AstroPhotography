@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.57)
-AC_REVISION([1.3])
+AC_REVISION([1.4])
 AC_INIT([astro], [1.0], [andreas.mueller@hsr.ch])
 m4_ifdef([AM_PROG_AR], [AM_PROG_AR])
 LT_INIT
@@ -571,6 +571,9 @@ DEVICEPROPERTIES=${sysconfdir}/device.properties
 AC_SUBST(DEVICEPROPERTIES)
 DEVICEPROPERTYDIR=${sysconfdir}/device.d
 AC_SUBST(DEVICEPROPERTYDIR)
+
+# find out whether UDEV exists
+AM_CONDITIONAL(USE_UDEV, test ! -d /etc/udev/rules.d)
 
 # default pid file location
 PIDDIR=${localstatedir}/run

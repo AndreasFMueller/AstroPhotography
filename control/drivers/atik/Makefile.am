@@ -11,6 +11,13 @@ noinst_HEADERS = AtikLocator.h AtikUtils.h AtikCamera.h AtikCcd.h	\
 	AtikCooler.h AtikFilterwheel.h AtikGuideport.h
 pkglib_LTLIBRARIES = atik.la 
 
+if USE_UDEV
+
+udevdir = /etc/udev/rules.d
+udev_DATA = 80-atik.rules
+
+endif
+
 if ENABLE_UNITTESTS
 
 noinst_LTLIBRARIES = libatik.la

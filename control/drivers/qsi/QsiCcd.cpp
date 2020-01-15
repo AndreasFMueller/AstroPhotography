@@ -28,6 +28,10 @@ QsiCcd::QsiCcd(const CcdInfo& info, QsiCamera& camera)
 	std::lock_guard<std::recursive_mutex>	lock(_camera.mutex);
 	_last_state = CcdState::idle;
 	_thread = NULL;
+
+	// find out whether we can set the gain
+	_cansetgain = false;
+	_camera.camera().get_CanSetGain(&_cansetgain);
 }
 
 /**
@@ -114,6 +118,19 @@ void	QsiCcd::startExposure(const Exposure& exposure) {
 		START_STOPWATCH;
 		_camera.camera().put_StartY(origin.y());
 		END_STOPWATCH("put_StartY()");
+
+		// see whether we need to set the gain
+		if (exposure.gain() >= 0) {
+			QSICamera::CameraGain	gainvalue;
+			if (exposure.gain() <= 0.25) {
+				gainvalue = QSICamera::CameraGainLow;
+			} else if (exposure.gain() <= 0.75) {
+				gainvalue = QSICamera::CameraGainHigh;
+			} else {
+				gainvalue = QSICamera::CameraGainAuto;
+			}
+			_camera.camera().put_CameraGain(gainvalue);
+		}
 
 		// turn off the led
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "turn LED off");
@@ -293,6 +310,30 @@ ImagePtr	QsiCcd::getRawImage() {
 CoolerPtr	QsiCcd::getCooler0() {
 	QsiCooler	*cooler = new QsiCooler(_camera);
 	return CoolerPtr(cooler);
+}
+
+/**
+ * \brief Retrieve the current gain value
+ */
+float	QsiCcd::getGain() {
+	std::lock_guard<std::recursive_mutex>	lock(_camera.mutex);
+	QSICamera::CameraGain	gainvalue;
+	_camera.camera().get_CameraGain(&gainvalue);
+	switch (gainvalue) {
+	case QSICamera::CameraGainHigh:
+		return 1;
+	case QSICamera::CameraGainLow:
+		return 0;
+	case QSICamera::CameraGainAuto:
+		return 0.5;
+	}
+}
+
+/**
+ * \brief Get the interval of valid gain values
+ */
+std::pair<float, float>	QsiCcd::gainInterval() {
+	return std::make_pair((float)0, (float)1);
 }
 
 } // namespace qsi

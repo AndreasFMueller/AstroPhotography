@@ -1,6 +1,7 @@
 ChangeLog for the Astro project.
 
 20200115:
+	* always install device property files
 	* add error messaging for devices.properties
 	* add capability to read a property directory
 

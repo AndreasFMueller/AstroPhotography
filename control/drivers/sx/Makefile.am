@@ -12,6 +12,26 @@ noinst_HEADERS = sx.h SxUtils.h SxLocator.h SxCamera.h SxCcd.h SxDemux.h \
 
 sbin_SCRIPTS = sxusbmemory
 
+deviceconfdir = $(sysconfdir)/device.d
+deviceconf_DATA = sx.properties-dist
+
+sx.properties-dist:	device.properties
+	cp device.properties sx.properties-dist
+
+install-data-hook:
+	if [ ! -f $(deviceconfdir)/sx.properties ]; 			\
+	then 								\
+		cp $(deviceconfdir)/sx.properties-dist 			\
+			$(deviceconfdir)/sx.properties; 		\
+	fi
+
+if USE_UDEV
+
+udevdir = /etc/udev/rules.d
+udev_DATA = 80-sx.rules
+
+endif
+
 if ENABLE_UNITTESTS
 
 noinst_LTLIBRARIES = libsx.la

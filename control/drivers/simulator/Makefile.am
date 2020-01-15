@@ -14,6 +14,19 @@ SRCFILES = SimUtil.cpp SimLocator.cpp SimCamera.cpp SimCcd.cpp \
 	SimFocuser.cpp SimMount.cpp SimAdaptiveOptics.cpp \
 	Stars.cpp Starfield.cpp StarCamera.cpp
 
+deviceconfdir = $(sysconfdir)/device.d
+deviceconf_DATA = simulator.properties-dist
+
+simulator.properties-dist:	device.properties
+	cp device.properties simulator.properties-dist
+
+install-data-hook:
+	if [ ! -f $(deviceconfdir)/simulator.properties ];		\
+	then								\
+		cp $(deviceconfdir)/simulator.properties-dist		\
+			$(deviceconfdir)/simulator.properties;		\
+	fi
+
 if ENABLE_UNITTESTS
 
 noinst_LTLIBRARIES = libsimulator.la

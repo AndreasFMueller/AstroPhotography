@@ -11,6 +11,13 @@ noinst_HEADERS = utils.h SbigLocator.h SbigCamera.h SbigFilterWheel.h \
 	SbigCooler.h SbigGuidePort.h SbigLock.h SbigDevice.h
 pkglib_LTLIBRARIES = sbig.la 
 
+if USE_UDEV
+
+udevdir = /etc/udev/rules.d
+udev_DATA = 80-sbig.rules
+
+endif
+
 if ENABLE_UNITTESTS
 
 noinst_LTLIBRARIES = libsbig.la

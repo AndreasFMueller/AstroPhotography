@@ -3,13 +3,33 @@
 #
 # (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
 #
-EXTRA_DIST = 80-asi.rules
+EXTRA_DIST = 80-asi.rules device.properties
 
 if ENABLE_ASI
 
 noinst_HEADERS = AsiLocator.h utils.h AsiCamera.hh AsiCcd.h AsiGuidePort.h \
 	AsiCooler.h AsiStream.h
 pkglib_LTLIBRARIES = asi.la 
+
+deviceconfdir = $(sysconfdir)/device.d
+deviceconf_DATA = asi.properties-dist
+
+asi.properties-dist:	device.properties
+	cp device.properties asi.properties-dist
+
+install-data-hook:
+	if [ ! -f $(deviceconfdir)/asi.properties ]; \
+	then \
+		cp $(deviceconfdir)/asi.properties-dist \
+			$(deviceconfdir)/asi.properties; \
+	fi
+
+if USE_UDEV
+
+udevdir = /etc/udev/rules.d
+udev_DATA = 80-asi.rules
+
+endif
 
 if ENABLE_UNITTESTS
 
@@ -34,3 +54,5 @@ asi_la_DEPENDENCIES = ../../lib/libastro.la
 asi_la_LIBADD = ../../lib/libastro.la @ASILIBPATH@ @ASILIBS@
 
 endif
+
+
