@@ -26,7 +26,8 @@ SimMount::SimMount(SimLocator& locator)
 			location().toString().c_str());
 	} catch (const std::exception& x) {
 		debug(LOG_ERR, DEBUG_LOG, 0,
-			"ERROR: define location for simulated mount");
+			"ERROR: must define location for simulated mount in %s",
+			DEVICEPROPERTIES);
 	}
 }
 
