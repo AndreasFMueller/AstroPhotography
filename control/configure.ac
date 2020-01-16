@@ -573,7 +573,7 @@ DEVICEPROPERTYDIR=${sysconfdir}/device.d
 AC_SUBST(DEVICEPROPERTYDIR)
 
 # find out whether UDEV exists
-AM_CONDITIONAL(USE_UDEV, test ! -d /etc/udev/rules.d)
+AM_CONDITIONAL(USE_UDEV, test -d /etc/udev/rules.d)
 
 # default pid file location
 PIDDIR=${localstatedir}/run

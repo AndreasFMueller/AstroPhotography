@@ -134,7 +134,14 @@ int main(int argc, char *argv[]) {
 
 // wrapper used to catch and log any exceptions
 int	main(int argc, char *argv[]) {
-	int	rc = astro::main_function<snowgui::main>(argc, argv);
-	snowstar::CommunicatorSingleton::release();
+	int	rc = EXIT_FAILURE;
+	try {
+		rc = astro::main_function<snowgui::main>(argc, argv);
+		snowstar::CommunicatorSingleton::release();
+		return rc;
+	} catch (const std::exception& x) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "main throws exception: %s",
+			x.what());
+	}
 	return rc;
 }
