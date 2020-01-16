@@ -34,7 +34,7 @@ class guidercontrollerwidget : public InstrumentWidget {
 
 	astro::camera::Exposure		_exposure;
 	astro::image::ImagePoint	_star;
-	double	_windowradius;
+	int	_windowradius;
 
 	snowstar::GuiderState	_previousstate;
 	QTimer	statusTimer;
@@ -89,7 +89,7 @@ public slots:
 
 	void	gpupdateintervalChanged(double);
 	void	aoupdateintervalChanged(double);
-	void	windowradiusChanged(double);
+	void	windowradiusChanged(int);
 
 	void	statusUpdate();
 

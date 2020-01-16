@@ -28,13 +28,15 @@ void	ImageCallbackI::stop(const Ice::Current& /* current */) {
 /**
  * \brief Handle the update method of the ImageCallback interface
  */
-void	ImageCallbackI::update(const SimpleImage& image,
+void	ImageCallbackI::update(const ImageBuffer& imagebuffer,
 		const Ice::Current& /* current */) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "image callback update: %d x %d",
-		image.size.width, image.size.height);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "image callback size: %ld",
+		imagebuffer.data.size());
+
+	// convert image into a file
 	std::string	filename = astro::stringprintf("%s/%s%05d.fits",
 				_path.c_str(), _prefix.c_str(), imagecount++);
-	astro::image::ImagePtr	imageptr = convertsimple(image);
+	astro::image::ImagePtr	imageptr = convertimage(imagebuffer);
 
 	// write the image. These images are incomplete, they have no
 	// useful FITS headers, so they are certainly not precious

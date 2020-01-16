@@ -148,8 +148,7 @@ void	ImageRepo::scan_file(const std::string& filename) {
 			= (int)infile.getMetadata("FOCUSPOS");
 	} catch (...) { }
 	imageinfo.observation = "1970-01-01T00:00:00.000";
-	imageinfo.uuid = "";
-	try {
+	imageinfo.uuid = ""; try {
 		imageinfo.uuid = (std::string)(infile.getMetadata("UUID"));
 	} catch (...) { }
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "adding image %s, uuid=%s",
@@ -199,14 +198,28 @@ void	ImageRepo::scan_directory(bool recurse) {
 	// open the directory
 	DIR     *dir = opendir(_directory.c_str());
 	if (NULL == dir) {
-		throw std::runtime_error("cannot open directory");
+		std::string	msg = stringprintf("cannot open image repo "
+			"dir %s: %s", _directory.c_str(), strerror(errno));
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw std::runtime_error(msg);
 	}
 	struct dirent	*d;
-	while (NULL != (d = readdir(dir))) {
+	struct dirent	direntry;
+	do {
+		int	rc = readdir_r(dir, &direntry, &d);
+		if (rc) {
+			std::string	msg = stringprintf("cannot read dir "
+				"%s: %s", _directory.c_str(), strerror(errno));
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "%s", msg.c_str());
+			closedir(dir);
+			throw std::runtime_error(msg);
+		}
+		if (NULL == d)
+			continue;
 		std::string     filename(d->d_name);
 		scan_file(filename);
 		counter++;
-	}
+	} while (NULL != d);
 
 	// close the directory
 	closedir(dir);

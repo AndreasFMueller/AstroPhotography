@@ -21,7 +21,7 @@ class ImageCallbackI : public ImageMonitor {
 public:
 	ImageCallbackI(const std::string& path, const std::string& prefix);
 	void	stop(const Ice::Current& current);
-	void	update(const SimpleImage& image, const Ice::Current& current);
+	void	update(const ImageBuffer& image, const Ice::Current& current);
 };
 
 } // namespace snowstar

@@ -128,4 +128,28 @@ mountstate	MountI::state(const Ice::Current& /* current */) {
 	}
 }
 
+bool	MountI::hasGuideRates(const Ice::Current& /* current */) {
+	try {
+		return _mount->hasGuideRates();
+	} catch (std::exception x) {
+		DeviceException	except;
+		except.cause = astro::stringprintf(
+			"cannot call hasGuideRates(): %s", x.what());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", except.cause.c_str());
+		throw except;
+	}
+}
+
+RaDec	MountI::getGuideRates(const Ice::Current& /* current */) {
+	try {
+		return convert(_mount->getGuideRates());
+	} catch (std::exception x) {
+		DeviceException	except;
+		except.cause = astro::stringprintf(
+			"cannot call getGuideRates(): %s", x.what());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", except.cause.c_str());
+		throw except;
+	}
+}
+
 } // namespace snowstar

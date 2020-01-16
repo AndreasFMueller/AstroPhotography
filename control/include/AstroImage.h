@@ -151,7 +151,7 @@ public:
 	void	setSize(const ImageSize& size) { _size = size; }
 	// constructors
 	ImageRectangle(unsigned int w = 0, unsigned int h = 0) : _size(w, h) { }
-	ImageRectangle(const ImageSize& size) : _size(size) { }
+	ImageRectangle(const ImageSize& size, int boundarydistance = 0);
 	ImageRectangle(const ImagePoint& origin, const ImageSize& size)
 		: _origin(origin), _size(size) { }
 	ImageRectangle(const ImageRectangle& rectangle,

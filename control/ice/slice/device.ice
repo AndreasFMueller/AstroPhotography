@@ -26,6 +26,8 @@ module snowstar {
 		void	cancel() throws DeviceException;
 		LongLat	getLocation() throws DeviceException;
 		long	getTime() throws DeviceException;
+		bool	hasGuideRates() throws DeviceException;
+		RaDec	getGuideRates() throws DeviceException;
 	};
 
 	// device related stuff

@@ -90,13 +90,30 @@ void	ModuleRepositoryTest::setUp() {
 void	ModuleRepositoryTest::tearDown() {
 	// remove everything below the path
 	DIR	*dir = opendir(path.c_str());
-	struct dirent	*dirent;
-	while (NULL != (dirent = readdir(dir))) {
+	if (NULL == dir) {
+		std::string	msg = stringprintf("cannot open %s: %s",
+			path.c_str(), strerror(errno));
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw std::runtime_error(msg);
+	}
+	struct dirent	*direntp = NULL;
+	struct dirent	direntry;
+	do {
+		int	rc = readdir_r(dir, &direntry, &direntp);
+		if (rc) {
+			std::string	msg = stringprintf("cannot read dir "
+				"%s: %s", path.c_str(), strerror(errno));
+			debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+			closedir(dir);
+			throw std::runtime_error(msg);
+		}
+		if (NULL == direntp)
+			continue;
 		char	filename[1024];
 		snprintf(filename, sizeof(filename), "%s/%s", path.c_str(),
-			dirent->d_name);
+			direntp->d_name);
 		unlink(filename);
-	}
+	} while (NULL != direntp);
 	if (rmdir(path.c_str()) < 0) {
 		fprintf(stderr, "cannot remove directory %s: %s\n",
 			path.c_str(), strerror(errno));;

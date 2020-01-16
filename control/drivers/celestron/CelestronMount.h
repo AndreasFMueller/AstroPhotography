@@ -64,6 +64,9 @@ public:
 	virtual void	Goto(const AzmAlt& azmalt);
 	virtual bool	telescopePositionWest();
 	virtual void	cancel();
+
+	virtual bool	hasGuideRates();
+	virtual RaDec	getGuideRates();
 };
 
 } // namepace celestron

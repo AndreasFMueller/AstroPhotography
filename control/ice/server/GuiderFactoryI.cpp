@@ -13,6 +13,7 @@
 #include <CalibrationSource.h>
 #include <AstroUtils.h>
 #include <AstroEvent.h>
+#include <AstroDevaccess.h>
 
 namespace snowstar {
 
@@ -78,47 +79,7 @@ GuiderPrx	GuiderFactoryI::get(const GuiderDescriptor& descriptor,
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "guider '%s' already exists",
 			gn.c_str());
 	} else {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "building new guider for '%s'",
-			gn.c_str());
-		// get an GuiderPtr from the original factory
-		astro::guiding::GuiderPtr	guider = guiderfactory()->get(d);
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "got the guider");
-
-		// get the focallength from the instrument properties
-		astro::discover::InstrumentPtr	instrument
-			= astro::discover::InstrumentBackend::get(
-				descriptor.instrumentname);
-		try {
-			double	focallength
-				= instrument->getDouble("guiderfocallength");
-			guider->focallength(focallength);
-			debug(LOG_DEBUG, DEBUG_LOG, 0, "focallength: %.3f",
-				focallength);
-		} catch (...) {
-			debug(LOG_ERR, DEBUG_LOG, 0, "no 'guiderfocallength' "
-				"property found, using default %f",
-				guider->focallength());
-		}
-		try {
-			double	guiderate = instrument->getDouble("guiderate");
-			guider->guiderate(guiderate);
-			debug(LOG_DEBUG, DEBUG_LOG, 0, "guiderate: %.3f",
-				guiderate);
-		} catch (...) {
-			debug(LOG_ERR, DEBUG_LOG, 0, "no 'guiderate' property "
-				"found, using default %f", guider->guiderate());
-		}
-
-		// create a GuiderI object
-		Ice::ObjectPtr	guiderptr = new GuiderI(guider, database);
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "got the guiderptr");
-
-		// add the guider we have constructed to the D
-		locator->add(gn, guiderptr);
-		astro::event(EVENT_CLASS, astro::events::INFO,
-			astro::events::Event::GUIDE,
-			astro::stringprintf("new guider: %s", gn.c_str()));
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "guider servant activated");
+		buildnewguider(descriptor);
 	}
 
 	// create a proxy
@@ -132,6 +93,124 @@ GuiderPrx	GuiderFactoryI::get(const GuiderDescriptor& descriptor,
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "failed to construct GuiderPrx");
 	}
 	return guiderprx;
+}
+
+/**
+ * \brief Build a new guider
+ *
+ * \param descriptor	the descriptor for the guider
+ */
+void	GuiderFactoryI::buildnewguider(const GuiderDescriptor& descriptor) {
+	std::string	gn = guiderdescriptor2name(descriptor).c_str();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "building new guider for '%s'",
+		gn.c_str());
+
+	// get a GuiderPtr from the original factory
+	astro::guiding::GuiderPtr	guider
+		= guiderfactory()->get(convert(descriptor));
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "got the guider");
+
+	// query the instrument for a guide rate
+	astro::discover::InstrumentPtr	instrument
+		= astro::discover::InstrumentBackend::get(
+			descriptor.instrumentname);
+
+	// find the local service name 
+	std::string	localservice
+		= astro::discover::ServiceLocation::get().servicename();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "local service: %s",
+		localservice.c_str());
+
+	// find out whether the insttrument has a Mount
+	double	guiderate = -1;
+	if (instrument->nComponentsOfType(
+		astro::discover::InstrumentComponentKey::Mount) > 0) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "instrument has a mount");
+		// get the mount
+		astro::discover::InstrumentComponent    mount
+			= instrument->getMount(0);
+		std::string	mountname;
+		if (localservice == mount.servicename()) {
+			mountname = mount.deviceurl();
+		} else {
+			mountname = mount.remoteName().toString();
+		}
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "found mount %s",
+			mountname.c_str());
+
+		try {
+			// try to get the mount
+			astro::module::ModuleRepositoryPtr	repository
+				= astro::module::getModuleRepository();
+			astro::device::DeviceAccessor<astro::device::MountPtr>
+					df(repository);
+			astro::device::MountPtr	mountptr = df.get(mountname);
+
+			// get the guide rate
+			if (mountptr->hasGuideRates()) {
+				astro::RaDec	guiderates
+					= mountptr->getGuideRates();
+				guiderate = guiderates.ra().degrees()
+					/ (360. / 86400);
+				debug(LOG_DEBUG, DEBUG_LOG, 0,
+					"%s has guiderate %f",
+					mountname.c_str(), guiderate);
+			} else {
+				debug(LOG_DEBUG, DEBUG_LOG, 0,
+					"%s does not have guiderates", 
+					mountname.c_str());
+			}
+		} catch (const std::exception& x) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "failed to get guide "
+				"rate from mount %s: %s", mountname.c_str(),
+				x.what());
+		}
+	} else {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "no mount components");
+	}
+
+	// get the guide from the instrument properties
+	try {
+		guiderate = instrument->getDouble("guiderate");
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "guiderate property: %.3f",
+			guiderate);
+	} catch (...) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "no 'guiderate' property found");
+	}
+
+	// at this point we should have a reasonable guide rate
+	if (guiderate > 0) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "using guiderate %.2f",
+			guiderate);
+		guider->guiderate(guiderate);
+	} else {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "setting default guiderate %f",
+			guider->guiderate());
+	}
+
+	// get the focallength from the instrument properties
+	try {
+		double	focallength
+			= instrument->getDouble("guiderfocallength");
+		guider->focallength(focallength);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "focallength: %.3f",
+			focallength);
+	} catch (...) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "no 'guiderfocallength' "
+			"property found, using default %f",
+			guider->focallength());
+	}
+
+	// create a GuiderI object
+	Ice::ObjectPtr	guiderptr = new GuiderI(guider, database);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "got the guiderptr");
+
+	// add the guider we have constructed to the D
+	locator->add(gn, guiderptr);
+	astro::event(EVENT_CLASS, astro::events::INFO,
+		astro::events::Event::GUIDE,
+		astro::stringprintf("new guider: %s", gn.c_str()));
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "guider servant activated");
 }
 
 /**

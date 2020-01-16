@@ -2888,6 +2888,59 @@ public:
 	}
 };
 
+//////////////////////////////////////////////////////////////////////
+// HotPixelInterpolationAdapter
+//////////////////////////////////////////////////////////////////////
+class HotPixelInfo {
+public:
+	double	mean;
+	double	stddev;
+	bool	is_hot;
+};
+
+class HotPixelBase {
+	ImageSize	_size;
+	double		_stddev_multiplier;
+	int		_search_radius;
+	std::list<ImagePoint>	_bad_pixels;
+public:
+	double	stddev_multiplier() const { return _stddev_multiplier; }
+	void	stddev_multiplier(double m) { _stddev_multiplier = m; }
+	int	search_radius() const { return _search_radius; }
+	void	search_radius(int s) { _search_radius = s; }
+	const std::list<ImagePoint>&	bad_pixels() const {
+		return _bad_pixels;
+	}
+	HotPixelBase(const ImageSize& size) : _size(size) {
+		_stddev_multiplier = 5;
+		_search_radius = 3;
+	}
+	virtual double	luminance(int x, int y) const = 0;
+	HotPixelInfo	meanstddev(int x, int y) const;
+};
+
+template<typename T>
+class HotPixelInterpolationAdapter : public ConstImageAdapter<T>, public HotPixelBase {
+	const ConstImageAdapter<T>&	_image;
+public:
+	HotPixelInterpolationAdapter(const ConstImageAdapter<T>& image)
+		: ConstImageAdapter<T>(image.getSize()),
+		  HotPixelBase(image.getSize()), _image(image) {
+	}
+	virtual T	pixel(int x, int y) const {
+		HotPixelInfo	info = meanstddev(x, y);
+		if (!info.is_hot) {
+			return _image.pixel(x, y);
+		}
+		return T(info.mean);
+	}
+	virtual double	luminance(int x, int y) const {
+		double	l = _image.pixel(x, y);
+		return l;
+	}
+};
+
+
 } // namespace adapter
 } // namespace astro
 

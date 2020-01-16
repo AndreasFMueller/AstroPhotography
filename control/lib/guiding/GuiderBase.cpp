@@ -40,6 +40,12 @@ ImagePtr	GuiderBase::getImage() {
 	return image;
 }
 
+void	GuiderBase::updateImage(ImagePtr image) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "got image update: %s",
+		image->info().c_str());
+	callback(image);
+}
+
 /**
  * \brief Constructor for the guider base
  */

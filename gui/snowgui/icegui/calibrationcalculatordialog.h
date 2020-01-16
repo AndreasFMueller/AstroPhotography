@@ -52,6 +52,7 @@ public:
 	bool	telescopewest() const { return _telescopewest; }
 	bool	decinvert() const { return _decinvert; }
 
+#if 0
 	void	focallength(double f);
 	void	pixelsize(double s);
 	void	angle(double a);
@@ -60,6 +61,7 @@ public:
 	void	declination(double d);
 	void	telescopewest(bool w);
 	void	decinvert(bool i);
+#endif
 
 private:
 	Ui::calibrationcalculatordialog *ui;

@@ -142,10 +142,15 @@ void	calibrationwidget::displayCalibration() {
 	ui->numberField->setText(QString::number(_calibration.points.size()));
 	ui->qualityField->setText(QString(astro::stringprintf("%.1f%%",
 		_calibration.quality * 100).c_str()));
-	ui->intervalField->setText(QString(astro::stringprintf("%.1fs",
-		_calibration.interval).c_str()));
 	ui->resolutionField->setText(QString(astro::stringprintf("%.0f\"/px",
 		_calibration.masPerPixel / 1000.).c_str()));
+
+	// compute the number of pixels offset we expect from the interval
+	double	speed = _calibration.guiderate * (360 * 3600 / 86400.); // as/s
+	double	offset = _calibration.interval * speed;	// arcsec
+	int	pixeloffset = offset / (_calibration.masPerPixel / 1000.);
+	ui->intervalField->setText(QString(astro::stringprintf("%.1fs/%dpx",
+		_calibration.interval, pixeloffset).c_str()));
 }
 
 /**

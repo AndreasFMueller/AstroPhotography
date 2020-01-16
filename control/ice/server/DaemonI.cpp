@@ -110,6 +110,14 @@ DirectoryInfo	DaemonI::statDirectory(const std::string& dirname,
 
 	// get all file names
 	DIR	*dirp = opendir(dirname.c_str());
+	if (NULL == dirp) {
+		std::string	msg = astro::stringprintf("cannot open "
+			"directory %s: %s", dirname.c_str(), strerror(errno));
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		IOException	error;
+		error.cause = msg;
+		throw error;
+	}
 	struct dirent	direntry;
 	struct dirent	*direntryp;
 	do {
@@ -123,6 +131,8 @@ DirectoryInfo	DaemonI::statDirectory(const std::string& dirname,
 			closedir(dirp);
 			throw error;
 		}
+		if (NULL == direntryp)
+			continue;
 		std::string	entryname(direntry.d_name);
 		if (direntry.d_type == DT_REG) {
 			info.files.push_back(entryname);

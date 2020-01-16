@@ -42,6 +42,13 @@ Point	GPCalibrationProcess::starAt(double ra, double dec) {
 	Point	star = (*tracker())(image);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "tracker found star at %s",
 		star.toString().c_str());
+
+	// update the 
+	if (tracker()->processedImage()) {
+                guider()->updateImage(tracker()->processedImage());
+        }
+
+	// return the star
 	return star;
 }
 
@@ -126,31 +133,47 @@ void	GPCalibrationProcess::measure(int ra, int dec) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "processing grid point %d/%d", ra, dec);
 
 	// move the telescope to the grid point corresponding to ra/dec
-	Point	star = starAt(ra, dec);
-	double	t = Timer::gettime() - starttime;
-	CalibrationPoint	calibrationpoint(t,
-					Point(grid * ra, grid * dec), star);
+	try {
+		Point	star = starAt(ra, dec);
+		double	t = Timer::gettime() - starttime;
+		CalibrationPoint	calibrationpoint(t,
+						Point(grid * ra, grid * dec), star);
 
-	// add the calibration point to the calibrator
-	calibration()->add(calibrationpoint);
-	addCalibrationPoint(calibrationpoint);
+		// add the calibration point to the calibrator
+		calibration()->add(calibrationpoint);
+		addCalibrationPoint(calibrationpoint);
 
-	// give the point to the callback
-	callback(calibrationpoint);
+		// give the point to the callback
+		callback(calibrationpoint);
 
-	// move the telescope back
-	star = starAt(-ra, -dec);
-	t = Timer::gettime() - starttime;
-	CalibrationPoint	zeropoint(t, Point(0, 0), star);
+		// count the point
+		pointcount++;
+	} catch (const std::exception& x) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "failed point %d,%d: %s",
+			ra, dec, x.what());
+	}
 
-	// also add the new zero point to the calibrator
-	calibration()->add(zeropoint);
-	addCalibrationPoint(zeropoint);
+	try {
+		// move the telescope back
+		Point	star = starAt(-ra, -dec);
+		double	t = Timer::gettime() - starttime;
+		CalibrationPoint	zeropoint(t, Point(0, 0), star);
 
-	// give this point to the callback
-	callback(zeropoint);
+		// also add the new zero point to the calibrator
+		calibration()->add(zeropoint);
+		addCalibrationPoint(zeropoint);
 
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "measure %.0f/%.0f complete", ra, dec);
+		// give this point to the callback
+		callback(zeropoint);
+
+		// count the point
+		pointcount++;
+	} catch (const std::exception& x) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "failed at origin: %s",
+			x.what());
+	}
+
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "measure %d/%d complete", ra, dec);
 }
 
 /**
@@ -246,6 +269,9 @@ void	GPCalibrationProcess::main2(astro::thread::Thread<GPCalibrationProcess>& _t
 	addCalibrationPoint(initialpoint);	// to database
 	callback(initialpoint);
 
+	// initialize the counter
+	pointcount = 0;
+
 	// perform a grid search
 	try {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "perform grid scan");
@@ -271,8 +297,20 @@ void	GPCalibrationProcess::main2(astro::thread::Thread<GPCalibrationProcess>& _t
 		callback(pi);
 		return;
 	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "calibration measurements complete");
-	
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "calibration measurements complete: "
+		"%d points", pointcount);
+
+	// if then number of points is too small (less than half the points)
+	// then we give up
+	int	gridpointcount = (2 * range + 1);
+	gridpointcount = gridpointcount * gridpointcount - 1;
+	if (pointcount < gridpointcount) {
+		std::string	msg = stringprintf("only %d points from %d",
+			pointcount, 2 * gridpointcount + 1);
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw std::runtime_error(msg);
+	}
+
 	// now compute the calibration data, and fix the time constant
 	calibration()->calibrate();
 	//cal.rescale(1. / grid);

@@ -33,8 +33,9 @@ SimGuidePort::SimGuidePort(SimLocator& locator)
 	dec = 0;
 	// compute the speed at which a star image would move over the
 	// CCD at standard guide rate. We assume a focal length of 0.6m
-	//              15"/sec   * radians/degree/  radians per pixel
-	pixelspeed = ((15. / 3600.) * (M_PI / 180.)) / (0.000010 / 0.6);
+	// and a guide rate of 0.5 similar to the Celestron mount 
+	//           rate     15"/sec   * radians/degree/  radians per pixel
+	pixelspeed = 0.5 * ((15. / 3600.) * (M_PI / 180.)) / (0.000010 / 0.6);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "pixelspeed = %f", pixelspeed);
 }
 

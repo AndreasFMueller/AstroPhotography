@@ -31,6 +31,8 @@ public:
 	void	Goto(const AzmAlt& azmalt);
 	void	cancel();
 	RaDec	direction();
+	virtual bool	hasGuideRates();
+	virtual RaDec	getGuideRates();
 };
 
 } // namespace simulator

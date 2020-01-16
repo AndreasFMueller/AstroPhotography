@@ -2,7 +2,6 @@
  * ImageRectangle.cpp -- ImageRectangle implementation
  *
  * (c) 2012 Prof Dr Andreas Mueller, Hochschule Rapperswil
- * $id$
  */
 #include <AstroImage.h>
 #include <AstroFormat.h>
@@ -11,6 +10,18 @@
 
 namespace astro {
 namespace image {
+
+/**
+ * \brief Construct an ImageRectangle with a given boundary distance
+ *
+ * \param size			the size of the original image
+ * \param boundarydistance	the distance to the boundary
+ */
+ImageRectangle::ImageRectangle(const ImageSize& size, int boundarydistance)
+	: _origin(boundarydistance, boundarydistance),
+	  _size(size.width() - 2 * boundarydistance,
+		size.height() - 2 * boundarydistance) {
+}
 
 /**
  * \brief Construct a translated rectangle

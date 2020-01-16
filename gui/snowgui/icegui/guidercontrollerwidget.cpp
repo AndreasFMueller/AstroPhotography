@@ -120,9 +120,9 @@ guidercontrollerwidget::guidercontrollerwidget(QWidget *parent)
 		this, SLOT(gpupdateintervalChanged(double)));
 	connect(ui->aoupdateintervalSpinBox, SIGNAL(valueChanged(double)),
 		this, SLOT(aoupdateintervalChanged(double)));
-	connect(ui->windowradiusSpinBox, SIGNAL(valueChanged(double)),
-		this, SLOT(windowradiusChanged(double)));
-	_windowradius = 32;
+	connect(ui->windowradiusSpinBox, SIGNAL(valueChanged(int)),
+		this, SLOT(windowradiusChanged(int)));
+	_windowradius = 50;
 
 	connect(ui->guideButton, SIGNAL(clicked()),
 		this, SLOT(startGuiding()));
@@ -456,7 +456,7 @@ void	guidercontrollerwidget::setAdaptiveoptics(int index) {
  * \brief Set up the tracker
  */
 void	guidercontrollerwidget::setupTracker() {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "window radius: %f", _windowradius);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "window radius: %d", _windowradius);
 	// get the current exposure
 	Exposure	exposure = snowstar::convert(_guider->getExposure());
 
@@ -682,8 +682,8 @@ void	guidercontrollerwidget::aoupdateintervalChanged(double r) {
 /**
  * \brief update the window radius
  */
-void	guidercontrollerwidget::windowradiusChanged(double r) {
-	_windowradius = r;
+void	guidercontrollerwidget::windowradiusChanged(int w) {
+	_windowradius = w;
 }
 
 

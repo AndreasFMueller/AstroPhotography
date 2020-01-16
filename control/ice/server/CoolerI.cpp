@@ -42,7 +42,7 @@ CoolerPrx	CoolerI::createProxy(const std::string& coolername,
 		NameConverter::urlencode(coolername), current);
 }
 
-bool	CoolerI::hasDewHeater(const Ice::Current& current) {
+bool	CoolerI::hasDewHeater(const Ice::Current& /* current */) {
 	return _cooler->hasDewHeater();
 }
 
@@ -55,7 +55,7 @@ void	CoolerI::setDewHeater(float dewheatervalue,
 	_cooler->dewHeater(dewheatervalue);
 }
 
-Interval	CoolerI::dewHeaterRange(const Ice::Current& current) {
+Interval	CoolerI::dewHeaterRange(const Ice::Current& /* current */) {
 	std::pair<float, float>	i = _cooler->dewHeaterRange();
 	Interval	result;
 	result.min = i.first;

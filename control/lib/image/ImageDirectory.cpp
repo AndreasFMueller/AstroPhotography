@@ -190,10 +190,25 @@ std::list<std::string>	ImageDirectory::fileList() {
 	std::list<std::string>	names;
 	DIR	*dir = opendir(_basedir.c_str());
 	if (NULL == dir) {
-		throw std::runtime_error("cannot open directory");
+		std::string	msg = stringprintf("cannot open image dir %s: "
+			"%s", _basedir.c_str(), strerror(errno));
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw std::runtime_error(msg);
 	}
-	struct dirent	*d;
-	while (NULL != (d = readdir(dir))) {
+	struct dirent	*d = NULL;
+	struct dirent	direntry;
+	do {
+		int	rc = readdir_r(dir, &direntry, &d);
+		if (rc) {
+			std::string	msg = stringprintf("cannot read image "
+				"dir %s: %s", _basedir.c_str(),
+				strerror(errno));
+			debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+			closedir(dir);
+			throw std::runtime_error(msg);
+		}
+		if (d == NULL)
+			continue;
 		std::string	filename(d->d_name);
 		if (filename[0] == '.') {
 			// skip files that start with a .
@@ -202,7 +217,7 @@ std::list<std::string>	ImageDirectory::fileList() {
 		if (isFile(filename)) {
 			names.push_back(filename);
 		}
-	}
+	} while (NULL != d);
 	closedir(dir);
 
 	// now convert this into a corba list

@@ -176,25 +176,37 @@ void	Properties::setupDir(const std::string& name,
 	// open the directory
 	DIR     *dir = opendir(dirname.c_str());
 	if (NULL == dir) {
-		std::string	msg = stringprintf("cannot open directory %s: %s",
-			dirname.c_str(), strerror(errno));
+		std::string	msg = stringprintf("cannot open property file "
+			"directory %s: %s", dirname.c_str(), strerror(errno));
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "%s", msg.c_str());
 		throw std::runtime_error(msg);
 	}
 
 	// scan the directory
-	struct dirent	*dirent;
+	struct dirent	*direntp = NULL;
+	struct dirent	direntry;
 	std::list<std::string>	files;
-	while (NULL != (dirent = readdir(dir))) {
-		int     namelen = strlen(dirent->d_name);
+	do {
+		int	rc = readdir_r(dir, &direntry, &direntp);
+		if (rc) {
+			std::string	msg = stringprintf("cannt read "
+				"property directory %s: %s", dirname.c_str(),
+				strerror(errno));
+			debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+			closedir(dir);
+			throw std::runtime_error(msg);
+		}
+		if (NULL == direntp)
+			continue;
+		int     namelen = strlen(direntp->d_name);
 		if (namelen < 12)
 			continue;
-		if (0 == strcmp(".properties", dirent->d_name + namelen - 11)) {
+		if (0 == strcmp(".properties", direntp->d_name + namelen - 11)) {
 			std::string     filename = dirname + "/"
-						+ std::string(dirent->d_name);
+						+ std::string(direntp->d_name);
 			files.push_back(filename);
 		}
-	}
+	} while (direntp != NULL);
 	closedir(dir);
 
 	// now read all files

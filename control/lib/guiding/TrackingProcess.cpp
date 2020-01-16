@@ -275,6 +275,11 @@ void	TrackingProcess::step(thread::Thread<TrackingProcess>& thread,
 		offset.toString().c_str());
 	_summary.addPoint(offset);
 
+	// ask the tracker for a processed image
+	if (tracker()->processedImage()) {
+		guider()->updateImage(tracker()->processedImage());
+	}
+
 	// find out whether the tracker can still track, terminate
 	// if not
 	if ((offset.x() != offset.x()) || (offset.y() != offset.y())) {

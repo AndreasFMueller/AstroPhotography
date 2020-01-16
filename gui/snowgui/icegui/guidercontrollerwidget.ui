@@ -122,25 +122,6 @@
         </property>
        </widget>
       </item>
-      <item row="2" column="2" colspan="2">
-       <widget class="snowgui::LogSpinBox" name="windowradiusSpinBox">
-        <property name="alignment">
-         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-        </property>
-        <property name="decimals">
-         <number>0</number>
-        </property>
-        <property name="minimum">
-         <double>16.000000000000000</double>
-        </property>
-        <property name="maximum">
-         <double>10000.000000000000000</double>
-        </property>
-        <property name="value">
-         <double>32.000000000000000</double>
-        </property>
-       </widget>
-      </item>
       <item row="3" column="1">
        <widget class="QDoubleSpinBox" name="gpupdateintervalSpinBox">
         <property name="alignment">
@@ -361,6 +342,25 @@
         </layout>
        </widget>
       </item>
+      <item row="2" column="2" colspan="2">
+       <widget class="QSpinBox" name="windowradiusSpinBox">
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+        <property name="minimum">
+         <number>30</number>
+        </property>
+        <property name="maximum">
+         <number>300</number>
+        </property>
+        <property name="singleStep">
+         <number>10</number>
+        </property>
+        <property name="value">
+         <number>50</number>
+        </property>
+       </widget>
+      </item>
      </layout>
     </widget>
    </item>
@@ -512,7 +512,7 @@
            <x>0</x>
            <y>0</y>
            <width>350</width>
-           <height>239</height>
+           <height>242</height>
           </rect>
          </property>
         </widget>
@@ -586,11 +586,6 @@
   </layout>
  </widget>
  <customwidgets>
-  <customwidget>
-   <class>snowgui::LogSpinBox</class>
-   <extends>QDoubleSpinBox</extends>
-   <header location="global">LogSpinBox.h</header>
-  </customwidget>
   <customwidget>
    <class>snowgui::calibrationwidget</class>
    <extends>QWidget</extends>

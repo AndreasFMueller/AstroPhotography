@@ -212,9 +212,6 @@ mountstate	string2mountstate(const std::string& s);
 // Image
 astro::image::ImagePtr	convert(ImagePrx image);
 
-astro::image::ImagePtr	convertsimple(SimpleImage image);
-SimpleImage	convertsimple(astro::image::ImagePtr image);
-
 astro::image::ImagePtr	convertfile(ImageFile imagefile);
 ImageFile	convertfile(astro::image::ImagePtr imageptr);
 

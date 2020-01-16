@@ -95,7 +95,7 @@ Guide::state	Guider::state() {
 		if ((adaptiveOpticsDevice) && (adaptiveOpticsDevice->calibrating())) {
 			return result;
 		}
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "apparaently the calibration "
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "apparently the calibration "
 			"process has gone away");
 		_state.failCalibration();
 		break;
@@ -126,7 +126,8 @@ Guide::state	Guider::state() {
  * This is not the only possible tracker to use with the guiding process,
  * but it works currently quite well.
  *
- * \param point		start to track, in absolute coordinates
+ * \param point		start to track, in absolute coordinates, this is
+ *			where the star is supposed to be
  */
 TrackerPtr	Guider::getTracker(const Point& point) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "get Tracker for star at %s",
@@ -135,24 +136,26 @@ TrackerPtr	Guider::getTracker(const Point& point) {
 	astro::camera::Exposure exp = exposure();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "origin: %s",
 		exp.origin().toString().c_str());
-#if 0
-	astro::Point    difference = point - exp.origin();
-	int	x = difference.x();
-	int	y = difference.y();
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "relative coordinates of star: (%d,%d)",
-		x, y);
-#else
+
+	// round the point coordinates to integer so we can build the
+	// trackerstar, which is supposed to be an ImagePoint
 	int	x = point.x();
 	int	y = point.y();
-#endif
 	astro::image::ImagePoint        trackerstar(x, y);
-	astro::image::ImageRectangle    trackerrectangle(exp.size());
-	astro::guiding::TrackerPtr      tracker(
+
+	// construct the rectangle within which to look for stars
+	// this used to be the full rectangle, but that does not work 
+	// well because of boundary effects. So for a better rectangle
+	// we use a slightly smaller rectangle.
+	astro::image::ImageRectangle    trackerrectangle(exp.size(), 5);
+
+	// now build the tracker
+	astro::guiding::TrackerPtr      trackerptr(
 		new astro::guiding::StarTracker(trackerstar,
-			trackerrectangle, 10));
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "tracker constructed: %p",
-		tracker.get());
-	return tracker;
+			trackerrectangle));
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "tracker constructed: %p, %s",
+		trackerptr.get(), trackerptr->toString().c_str());
+	return trackerptr;
 }
 
 TrackerPtr	Guider::getNullTracker() {

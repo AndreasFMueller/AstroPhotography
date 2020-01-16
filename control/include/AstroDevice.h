@@ -299,6 +299,10 @@ public:
 	// Whether the telescope is on the west side of the mount
 	virtual bool	telescopePositionWest();
 
+	// find guide rates
+	virtual bool	hasGuideRates();
+	virtual RaDec	getGuideRates();
+
 	// add position metadata to an image
 	void	addPositionMetadata(astro::image::ImageBase& image);
 };

@@ -844,6 +844,8 @@ public:
  *
  * This filter requires that the Pixel type T can be converted to double
  * (all scalar pixels as well as the RGB and YUYV pixels have this property)
+ * It finds the centroid of pixels close to the point _approximate and
+ * uses a the PeakFinder class to do so.
  */
 template<typename T>
 class CentroidFilter : public GeneralFilter<T, Point> {
@@ -864,6 +866,9 @@ public:
 
 /**
  * \brief Find center of gravity
+ *
+ * This filter is much less sophisiticated, it just takes the center
+ * of gravity of all the pixels, not just the ones closeby.
  */
 class CGFilter : public GeneralFilter<double, Point> {
 	double	_radius;

@@ -84,6 +84,12 @@ void	AOCalibrationProcess::main(thread::Thread<AOCalibrationProcess>& thread) {
 			ImagePtr	image = guider()->getImage();
 			Point	star = (*tracker())(image);
 
+			// update the image after analysis
+			if (tracker()->processedImage()) {
+				guider()->updateImage(
+					tracker()->processedImage());
+			}
+
 			// add the calibration point
 			double	t = Timer::gettime() - starttime;
 			CalibrationPoint	calpoint(t, offset, star);

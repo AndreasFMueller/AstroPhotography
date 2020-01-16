@@ -20,7 +20,7 @@ calibrationdetaildialog::calibrationdetaildialog(QWidget *parent) :
 	// initialize the calibration data
 	_calibration.id = -1;
 
-	// headers for the table
+	// headers for the point table
 	QStringList	headerlist;
         headerlist << "Time" << "RA" << "DEC" << "Star x" << "Star y";
         ui->calibrationpointsTable->setHorizontalHeaderLabels(headerlist);
@@ -33,6 +33,26 @@ calibrationdetaildialog::calibrationdetaildialog(QWidget *parent) :
 	ui->calibrationpointsTable->setColumnWidth(4, 55);
 
 	ui->calibrationdisplayWidget->pointlabels(true);
+
+	// configure the coefficient
+	QStringList	coefficientlist;
+	coefficientlist << "RA" << "DEC" << "t";
+
+        ui->coefficientTable->setHorizontalHeaderLabels(coefficientlist);
+
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "setting up coefficient table");
+	for (int column = 0; column < 3; column++) {
+		ui->coefficientTable->setColumnWidth(column, 60);
+		for (int row = 0; row < 2; row++) {
+			QTableWidgetItem        *item =
+				new QTableWidgetItem(QString("0.00"));
+			item->setTextAlignment(Qt::AlignRight);
+			ui->coefficientTable->setItem(row, column, item);
+		}
+	}
+	ui->coefficientTable->setRowHeight(0, 18);
+	ui->coefficientTable->setRowHeight(1, 18);
+
 }
 
 calibrationdetaildialog::~calibrationdetaildialog() {
@@ -113,6 +133,26 @@ void	calibrationdetaildialog::setCalibration(snowstar::Calibration calibration) 
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "%d points", row);
 
 	//ui->calibrationpointsTable->resizeColumnsToContents();
+
+	// set the calibration coefficients
+	ui->coefficientTable->item(0,0)->setText(
+		QString(astro::stringprintf("%.2f",
+			_calibration.coefficients[0]).c_str()));
+	ui->coefficientTable->item(0,1)->setText(
+		QString(astro::stringprintf("%.2f",
+			_calibration.coefficients[1]).c_str()));
+	ui->coefficientTable->item(0,2)->setText(
+		QString(astro::stringprintf("%.2f",
+			_calibration.coefficients[2]).c_str()));
+	ui->coefficientTable->item(1,0)->setText(
+		QString(astro::stringprintf("%.2f",
+			_calibration.coefficients[3]).c_str()));
+	ui->coefficientTable->item(1,1)->setText(
+		QString(astro::stringprintf("%.2f",
+			_calibration.coefficients[4]).c_str()));
+	ui->coefficientTable->item(1,2)->setText(
+		QString(astro::stringprintf("%.2f",
+			_calibration.coefficients[5]).c_str()));
 }
 
 } // namespace snowgui

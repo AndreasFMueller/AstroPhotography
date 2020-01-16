@@ -230,13 +230,13 @@ int	main(int argc, char *argv[]) {
 	ccd->startExposure(exposure);
 	ImagePtr	image = ccd->getImage();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "starwindow: %s", starwindow.toString().c_str());
-	Point	guidestar = findstar(image, starwindow, k);
+	Point	guidestar = findstar(image, starwindow);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "found guide star at %s",
 		guidestar.toString().c_str());
 
 	// create a tracker based on this guide star 
 	StarTracker	*startracker = new StarTracker(guidestar,
-		ccd->getInfo().getFrame(), k);
+		ccd->getInfo().getFrame());
 	TrackerPtr	tracker(startracker);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "tracker created");
 

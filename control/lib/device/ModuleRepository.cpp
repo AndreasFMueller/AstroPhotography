@@ -177,17 +177,31 @@ std::vector<std::string>	ModuleRepositoryBackend::moduleNames() const {
 	// search the directory for files ending in la
 	DIR	*dir = opendir(path().c_str());
 	if (NULL == dir) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "cannot open module dir %s: %s",
+			path().c_str(), strerror(errno));
 		return result;
 	}
-	struct dirent	*dirent;
-	while (NULL != (dirent = readdir(dir))) {
-		int	namelen = strlen(dirent->d_name);
-		if (0 == strcmp(".la", dirent->d_name + namelen - 3)) {
+	struct dirent	*direntp = NULL;
+	struct dirent	direntry;
+	do {
+		int	rc = readdir_r(dir, &direntry, &direntp);
+		if (rc) {
+			std::string	msg = stringprintf("cannot read module "
+				"dir %s: %s", path().c_str(), strerror(errno));
+			debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+			closedir(dir);
+			throw std::runtime_error(msg);
+		}
+		if (NULL == direntp)
+			continue;
+		int	namelen = strlen(direntp->d_name);
+		if (0 == strcmp(".la", direntp->d_name + namelen - 3)) {
 			std::string	modulename
-				= std::string(dirent->d_name).substr(0, namelen - 3);
+				= std::string(direntp->d_name).substr(0,
+					namelen - 3);
 			result.push_back(modulename);
 		}
-	}
+	} while (direntp != NULL);
 	closedir(dir);
 	return result;
 	
@@ -205,22 +219,37 @@ std::vector<ModulePtr>	ModuleRepositoryBackend::modules() const {
 	// search the directory for files ending in la
 	DIR	*dir = opendir(path().c_str());
 	if (NULL == dir) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "cannot open module dir %s: %s",
+			path().c_str(), strerror(errno));
 		return result;
 	}
-	struct dirent	*dirent;
-	while (NULL != (dirent = readdir(dir))) {
-		int	namelen = strlen(dirent->d_name);
-		if (0 == strcmp(".la", dirent->d_name + namelen - 3)) {
+	struct dirent	*direntp = NULL;
+	struct dirent	direntry;
+	do {
+		int	rc = readdir_r(dir, &direntry, &direntp);
+		if (rc) {
+			std::string	msg = stringprintf("cannot read module "
+				"dir %s: %s", path().c_str(), strerror(errno));
+			debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+			closedir(dir);
+			throw std::runtime_error(msg);
+		}
+		if (NULL == direntp)
+			continue;
+		int	namelen = strlen(direntp->d_name);
+		if (0 == strcmp(".la", direntp->d_name + namelen - 3)) {
 			std::string	modulename
-				= std::string(dirent->d_name).substr(0, namelen - 3);
+				= std::string(direntp->d_name).substr(0,
+					namelen - 3);
 			try {
-				result.push_back(ModulePtr(new Module(path(), modulename)));
+				result.push_back(ModulePtr(new Module(path(),
+					modulename)));
 			} catch (std::exception) {
 				std::cerr << "module " << modulename <<
 					" corrupt" << std::endl;
 			}
 		}
-	}
+	} while (direntp != NULL);
 	closedir(dir);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "found %d modules", result.size());
 	return result;

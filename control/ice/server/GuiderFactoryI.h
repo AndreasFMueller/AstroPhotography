@@ -51,6 +51,8 @@ public:
 		const Ice::Current& current);
 	void	deleteTrackingHistory(int id, const Ice::Current& current);
 	astro::guiding::GuiderFactoryPtr	guiderfactory();
+private:
+	void	buildnewguider(const GuiderDescriptor& descriptor);
 };
 
 } // namespace snowstar

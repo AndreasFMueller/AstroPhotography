@@ -91,6 +91,7 @@ libastroimage_la_SOURCES = 						\
 	GaussNoiseAdapter.cpp						\
 	HDR.cpp								\
 	Histogram.cpp							\
+	HotPixelBase.cpp						\
 	HSLBase.cpp							\
 	Image.cpp							\
 	ImageBase.cpp							\

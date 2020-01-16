@@ -28,6 +28,8 @@ public:
 	virtual bool	telescopePositionWest(const Ice::Current& current);
 	virtual void	cancel(const Ice::Current& current);
 	virtual mountstate	state(const Ice::Current& current);
+	virtual bool	hasGuideRates(const Ice::Current& current);
+	virtual RaDec	getGuideRates(const Ice::Current& current);
 };
 
 } // namespace snowstar

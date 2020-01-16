@@ -1,5 +1,11 @@
 ChangeLog for the Qt GUI to Astrophotography
 
+20200116:
+	* eliminate SimpleImage
+	* make window radius increment in steps of 10 instead of exponentially
+	* use Image2Pixmap in MonitorImage
+	* calibration calculator gets guide rate from mount
+
 20200114:
 	* add display of Sun and Moon to SkyDisplayWidget
 

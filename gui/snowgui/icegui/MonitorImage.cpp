@@ -7,7 +7,10 @@
 #include <AstroDebug.h>
 #include <CommunicatorSingleton.h>
 #include <CommonClientTasks.h>
+#include <IceConversions.h>
 #include <QImage>
+#include <Image2Pixmap.h>
+#include <AstroFilterfunc.h>
 
 namespace snowgui {
 
@@ -21,8 +24,6 @@ MonitorImage::MonitorImage(QObject *parent, QLabel *label)
 		Qt::QueuedConnection);
 	_scale = 0;
 	_freeze = false;
-	_image.size.width = 0;
-	_image.size.height = 0;
 	_inverse = false;
 }
 
@@ -50,6 +51,15 @@ void	MonitorImage::setScale(int s) {
 	} else {
 		_scale = s;
 	}
+	rebuildImage();
+	refreshImage();
+}
+
+/**
+ * \brief Set the inverse flag
+ */
+void	MonitorImage::setInverse(bool i) {
+	_inverse = i;
 	rebuildImage();
 	refreshImage();
 }
@@ -90,15 +100,17 @@ struct conversion_parameters {
  * done on the main thread. It then emits the imageUpdated() signal, and the
  * refreshImage() slot will make sure the new image is displayd
  */
-void	MonitorImage::update(const snowstar::SimpleImage& image,
+void	MonitorImage::update(const snowstar::ImageBuffer& image,
 		const Ice::Current& /* current */) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "new %dx%d image received",
-		image.size.width, image.size.height);
 	if (_freeze) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "monitor frozen, image lost");
 		return;
 	}
-	_image = image;
+
+	// convert the image from the buffer into an ImagePtr
+	_image = convertimage(image);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "new %s image received",
+		_image->size().toString().c_str());
 	rebuildImage();
 
 	// emit the signal
@@ -110,64 +122,30 @@ void	MonitorImage::update(const snowstar::SimpleImage& image,
  * \brief Convert to a displayable image
  */
 void	MonitorImage::rebuildImage() {
-	if ((0 == _image.size.width) || (0 == _image.size.height)) {
+	if (!_image) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "no image, giving up");
 	}
-	// first find maximum and minimum value
-	unsigned short	min = std::numeric_limits<unsigned short>::max();
-	unsigned short	max = std::numeric_limits<unsigned short>::min();
-	std::for_each(_image.imagedata.begin(), _image.imagedata.end(),
-		[&min,&max](unsigned short pixel) {
-			if (pixel < min) {
-				min = pixel;
-			}
-			if (pixel > max) {
-				max = pixel;
-			}
-		}
-	);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "minimum = %hu, maximum = %hu",
-		min, max);
-	struct conversion_parameters	cp;
-	cp.scale = 255. / (max - min);
-	if (_inverse) {
-		cp.offset = max;
-		cp.scale = -cp.scale;
-		cp.limit = 1 << _scale;
-	} else {
-		cp.offset = min;
-		cp.limit = 1 << _scale;
-	}
 
-	// convert the SimpleImage received into a QImage
-	cp.width = _image.size.width;
-	cp.height = _image.size.height;
-	QImage  *qimage = new QImage(cp.limit * cp.width, cp.limit * cp.height,
-		QImage::Format_RGB32);
-	int	counter = 0;
-	std::for_each(_image.imagedata.begin(), _image.imagedata.end(),
-		[qimage,cp,&counter](unsigned short pixel) mutable {
-			int	x = cp.limit * (counter % cp.width);
-			int	y = cp.limit * (cp.height - 1 - counter / cp.width);
-			unsigned char	v = (pixel - cp.offset) * cp.scale;
-			unsigned long	value = 0xff000000 | (v << 16) | (v << 8) | v;
-			for (int xi = 0; xi < cp.limit; xi++)  {
-				for (int yi = 0; yi < cp.limit; yi++) {
-					qimage->setPixel(x + xi, y + yi, value);
-				}
-			}
-			counter++;
-		}
-	);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "%d pixels processed", counter);
+	std::unique_lock<std::recursive_mutex>	lock(_mutex);
 
-	// convert the QImage to a pixmap
-	QPixmap *result = new QPixmap(cp.limit * cp.width, cp.limit * cp.height);
-	result->convertFromImage(*qimage);
 	if (_pixmap) {
 		delete _pixmap;
+		_pixmap = NULL;
 	}
-	_pixmap = result;
+	Image2Pixmap	i2p;
+	i2p.scale(_scale);
+	i2p.negative(_inverse);
+	if (_image->bytesPerPlane() > 1) {
+		// find the maximum and minimum values and compute the
+		// gain and brightness from this
+		double	max = astro::image::filter::max_luminance(_image);
+		double	min = astro::image::filter::min_luminance(_image);
+		double	gain = 256 / (max - min);
+		i2p.gain(gain);
+		double	brightness = -min * gain;
+		i2p.brightness(brightness);
+	}
+	_pixmap = i2p(_image);
 }
 
 /**

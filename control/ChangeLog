@@ -1,5 +1,15 @@
 ChangeLog for the Astro project.
 
+20200116:
+	* create an analysis image in the StarTracker
+	* eliminate SimpleImage and replace by ImageBuffer
+	* add hot pixel interpolation adapter
+	* make calibration process more tolerant
+	* fix StarTracker
+	* add guide rates to the mount	
+	* allow server to build guider using guide rates from mount
+	* replace all occurencies of readdir by readdir_r for reentrancy
+
 20200115:
 	* always install device property files
 	* add error messaging for devices.properties

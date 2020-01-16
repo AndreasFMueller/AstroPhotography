@@ -9,6 +9,8 @@
 #include <QObject>
 #include <QLabel>
 #include <guider.h>
+#include <AstroImage.h>
+#include <thread>
 
 namespace snowgui {
 
@@ -27,8 +29,9 @@ class MonitorImage : public QObject, public snowstar::ImageMonitor {
 	int	_scale;
 	bool	_freeze;
 	bool	_inverse;
-	snowstar::SimpleImage	_image;
+	astro::image::ImagePtr	_image;
 	void	rebuildImage();
+	std::recursive_mutex	_mutex;
 protected:
 	Ice::Identity	_myidentity;
 public:
@@ -37,7 +40,7 @@ public:
 	
 	// interface methods for the callback
 	virtual void	stop(const Ice::Current& current);
-	virtual void	update(const snowstar::SimpleImage& image,
+	virtual void	update(const snowstar::ImageBuffer& image,
 				const Ice::Current& current);
 
 	// registering the callback with the adapter
@@ -49,13 +52,13 @@ public:
 	int	scale() const { return _scale; }
 	bool	freeze() const { return _freeze; }
 	bool	inverse() const { return _inverse; }
-	void	setInverse(bool i) { _inverse = i; }
 signals:
 	void	streamStopped();
 	void	imageUpdated();
 public slots:
 	void	refreshImage();
 	void	setScale(int s);
+	void	setInverse(bool i);
 	void	setFreeze(bool f);
 };
 

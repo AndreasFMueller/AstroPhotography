@@ -128,6 +128,23 @@ void	SimMount::cancel() {
 	_target = _direction;
 }
 
+/**
+ * \brief Find out whether the mount can provide guide rates
+ */
+bool	SimMount::hasGuideRates() {
+	return true;
+}
+
+/**
+ * \brief Get the guide rates
+ */
+RaDec	SimMount::getGuideRates() {
+	double	rate = 0.5;
+	double	frequency = 1/86400.;
+	Angle	guiderate = rate * frequency * 4 * Angle::right_angle;
+	return RaDec(guiderate, guiderate);
+}
+
 } // namespace simulator
 } // namespace camera
 } // namespace astro

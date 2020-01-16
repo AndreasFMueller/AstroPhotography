@@ -37,6 +37,7 @@ calibrationcalculatordialog::calibrationcalculatordialog(
 	// get information from the guider
 	if (_guider) {
 		_focallength = _guider->getFocallength();
+		_guiderate = _guider->getGuiderate();
 		ui->focallengthField->setText(QString(
 			astro::stringprintf("%.3f", _focallength).c_str()));
 

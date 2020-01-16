@@ -178,20 +178,12 @@ module snowstar {
 	};
 
 	/**
-	 * \brief Small image for callbacks
-	 */
-	struct SimpleImage {
-		ImageSize	size;
-		ShortSequence	imagedata;
-	};
-
-	/**
 	 * \brief Callback to send images in a sequence to clients
 	 *
 	 * The guider and the focusing process both send image updates to
 	 * a monitoring client. They share the callback interface below
 	 */
 	interface ImageMonitor extends Callback {
-		void	update(SimpleImage image);
+		void	update(ImageBuffer image);
 	};
 };

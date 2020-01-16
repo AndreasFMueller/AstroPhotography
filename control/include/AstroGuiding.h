@@ -67,10 +67,20 @@ class StarDetectorBase {
 				const ImageRectangle& areaOfInterest) const;
 	double	radius(const image::ConstImageAdapter<double>& _image,
 				const ImagePoint& where) const;
+	Image<RGB<unsigned char> >	*_analysis;
+	ImagePtr	_analysis_ptr;
+	// auxiliary methods to fill in the analysis image
+	void	drawImage(const ConstImageAdapter<double>& image);
+	void	drawCentroid(const Point& centroid, double length);
+	void	drawRadius(const ImagePoint& approximage, double radius);
+	void	drawHotpixels(const std::list<ImagePoint>& hotpixels);
+	void	drawCross(const ImagePoint& point, int length,
+			const RGB<unsigned char>& pixel);
 public:
 	StarDetectorBase() { }
 	Point	operator()(const image::ConstImageAdapter<double>& _image,
-			const image::ImageRectangle& rectangle) const;
+			const image::ImageRectangle& rectangle);
+	ImagePtr	analysis() const { return _analysis_ptr; }
 };
 
 /**
@@ -85,7 +95,7 @@ class StarDetector : public StarDetectorBase {
 	adapter::TypeConversionAdapter<Pixel>	tca;
 public:
 	StarDetector(const image::ConstImageAdapter<Pixel>& _image);
-	Point	operator()(const image::ImageRectangle& rectangle) const;
+	Point	operator()(const image::ImageRectangle& rectangle);
 }; 
 
 /**
@@ -112,12 +122,12 @@ StarDetector<Pixel>::StarDetector(
  */
 template<typename Pixel>
 Point	StarDetector<Pixel>::operator()(
-		const image::ImageRectangle& rectangle) const {
+		const image::ImageRectangle& rectangle) {
 	return StarDetectorBase::operator()(tca, rectangle);
 }
 
 Point	findstar(image::ImagePtr image,
-	const image::ImageRectangle& rectangle, int k);
+	const image::ImageRectangle& rectangle);
 
 /**
  * \brief Tracker class
@@ -144,6 +154,11 @@ public:
 	void	dither(const Point& dither) { _dither = dither; }
 protected:
 	Point	dithered(const Point& point) { return point + dither(); }
+	ImagePtr	_processedImage;
+public:
+	virtual ImagePtr	processedImage() const {
+		return _processedImage;
+	}
 };
 
 typedef std::shared_ptr<Tracker>	TrackerPtr;
@@ -164,38 +179,34 @@ public:
 /**
  * \brief StarDetector based Tracker
  *
- * This Tracker uses the StarTracker 
+ * This Tracker uses the StarDetector class to track the brightest star
  */
 class StarTracker : public Tracker {
-	Point	_point;
-	image::ImageRectangle _rectangle;
-	int	_k;
+	Point	_trackingpoint;
+	image::ImageRectangle _searcharea;
+	Point	findstar(ImagePtr image, const ImageRectangle& searcharea);
 public:
 	// constructor
 	StarTracker(const Point& point,
-		const image::ImageRectangle& rectangle,
-		int k);
+		const image::ImageRectangle& searcharea);
 	virtual ~StarTracker() { }
 
 	// find the displacement
 	virtual Point	operator()(image::ImagePtr newimage);
 
-	// accessors for teh tracker configuration data
-	const image::ImageRectangle&	rectangle() const {
-		return _rectangle;
+	// accessors for the tracker configuration data
+	const image::ImageRectangle&	searcharea() const {
+		return _searcharea;
 	}
-	image::ImageRectangle&	rectangle() { return _rectangle; }
-	void	rectangle(const image::ImageRectangle& r) {
-		_rectangle = r;
+	image::ImageRectangle&	searcharea() { return _searcharea; }
+	void	searcharea(const image::ImageRectangle& r) {
+		_searcharea = r;
 	}
 
-	const Point&	point() const { return _point; }
-	Point&	point() { return _point; }
-	void	point(const Point& p) { _point = p; }
+	const Point&	trackingpoint() const { return _trackingpoint; }
+	Point&	trackingpoint() { return _trackingpoint; }
+	void	trackingpoint(const Point& p) { _trackingpoint = p; }
 
-	int	k() const { return _k; }
-	void	k(const int k) { _k = k; }
-	
 	// find a string representation
 	virtual std::string	toString() const;
 };
@@ -794,6 +805,7 @@ public:
 	// previously defined exposure structure.
 	void	startExposure();
 	ImagePtr	getImage();
+	void	updateImage(ImagePtr image);
 private:
 	// remember the most recent image
 	ImagePtr	_mostRecentImage;

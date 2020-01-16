@@ -150,6 +150,20 @@ void	Mount::cancel() {
 }
 
 /**
+ * \brief The default mount does not have guide rates
+ */
+bool	Mount::hasGuideRates() {
+	return false;
+}
+
+/**
+ * \brief Get the (useless) guide rates
+ */
+RaDec	Mount::getGuideRates() {
+	return RaDec(Angle(0), Angle(0));
+}
+
+/**
  * \brief Convert mount state type into a string
  *
  * \param	state code

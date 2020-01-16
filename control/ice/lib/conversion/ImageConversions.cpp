@@ -62,20 +62,6 @@ astro::image::ImagePtr	convert(ImagePrx image) {
 
 
 /**
- * \brief Convert a simple image to a astro::image::Image
- */
-astro::image::ImagePtr	convertsimple(SimpleImage image) {
-	astro::image::ImageSize	size(image.size.width, image.size.height);
-	astro::image::Image<unsigned short>	*imageptr
-		= new astro::image::Image<unsigned short>(size);
-	long	length = image.size.width * image.size.height;
-	for (int offset = 0; offset < length; offset++) {
-		(*imageptr)[offset] = image.imagedata[offset];
-	}
-	return astro::image::ImagePtr(imageptr);
-}
-
-/**
  * \brief An adapter template class to convert to unsigned short pixels
  */
 template<typename Pixel>
@@ -124,61 +110,6 @@ unsigned short	UnsignedShortAdapter<Pixel>::pixel(int x, int y) const {
 		}
 	}
 	return value;
-}
-
-#define	get_reduction(Pixel)						\
-{									\
-	astro::image::Image<Pixel >	*dimage				\
-		= dynamic_cast<astro::image::Image<Pixel > *>(&*image);	\
-	if (NULL != dimage) {						\
-		reduction = new UnsignedShortAdapter<Pixel >(*dimage);	\
-	}								\
-}
-
-
-/**
- * \brief Convert an astro::image::Image to a SimpleImage
- */
-SimpleImage	convertsimple(astro::image::ImagePtr image) {
-	SimpleImage	result;
-
-	// convert the size
-	result.size = convert(image->size());
-
-	// try to convert directly
-	astro::image::Image<unsigned short>	*im
-		= dynamic_cast<astro::image::Image<unsigned short> *>(&*image);
-	if (NULL != im) {
-		for (int x = 0; x < result.size.width; x++) {
-			for (int y = 0; y < result.size.width; y++) {
-				unsigned short	value = im->pixel(x, y);
-				result.imagedata.push_back(value);
-			}
-		}
-		return result;
-	}
-
-	// create an image adapter that allows us to read unsigned short
-	// values from the image
-	astro::image::ConstImageAdapter<unsigned short>	*reduction = NULL;
-	get_reduction(unsigned char)
-	get_reduction(unsigned long)
-
-	// convert the image data
-	if (NULL == reduction) {
-		throw std::runtime_error("no reduction found");
-	}
-
-	// if we get to this point, then a suitable reduction exists and
-	// we can use it to convert pixel values to unsigned short
-	for (int x = 0; x < result.size.width; x++) {
-		for (int y = 0; y < result.size.width; y++) {
-			unsigned short	value = reduction->pixel(x, y);
-			result.imagedata.push_back(value);
-		}
-	}
-
-	return result;
 }
 
 /**

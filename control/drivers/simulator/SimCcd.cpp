@@ -278,7 +278,8 @@ CcdState::State	SimCcd::exposureStatus() {
 	}
 	// this exception is mainly thrown to silence the compiler, it should
 	// never happen
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "unknown status");
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "unknown status (time past: %f)",
+		timepast);
 	throw std::runtime_error("unknown state");
 }
 
@@ -300,6 +301,8 @@ void    SimCcd::setShuterState(const Shutter::state& state) {
 	shutter = state;
 }
 
+static int	imagecounter = 0;
+
 /**
  * \brief Retrieve an image
  */
@@ -307,6 +310,19 @@ ImagePtr  SimCcd::getRawImage() {
 	// wait for the thread 
 	_thread->join();
 	delete _thread;
+
+	// if the debug directory is present, write the image there
+	struct stat	sb;
+	if ((stat("./debug", &sb) == 0) && (sb.st_mode & S_IFDIR)) {
+		// write the image to the debug directory
+		std::string	filename = stringprintf(
+			"./debug/simulator-%05d.fits", imagecounter++);
+		io::FITSout	outfile(filename);
+		outfile.setPrecious(false);
+		outfile.write(_image);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "image written to %s",
+			filename.c_str());
+	}
 
 	return _image;
 }
