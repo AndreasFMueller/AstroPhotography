@@ -2,6 +2,7 @@ ChangeLog for the Astro project.
 
 20200117:
 	* addd USE_SYSTEMD conditional
+	* add getent script
 
 20200116:
 	* create an analysis image in the StarTracker
