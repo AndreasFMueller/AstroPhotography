@@ -10,6 +10,7 @@
 #include <AstroCallback.h>
 #include <AstroUtils.h>
 #include "GridConstant.h"
+#include <AstroConfig.h>
 
 using namespace astro::image;
 using namespace astro::camera;
@@ -231,6 +232,8 @@ void	GPCalibrationProcess::main(astro::thread::Thread<GPCalibrationProcess>& _th
 	}
 }
 
+#define	DEFAULT_GRIDSPACING	20;
+
 /**
  * \brief private part of the main method
  */
@@ -252,13 +255,26 @@ void	GPCalibrationProcess::main2(astro::thread::Thread<GPCalibrationProcess>& _t
 	// grid range we want to scan
 	range = 1;
 
+	// check the configuration for the suggested pixel displacement
+	int	gridspacing = DEFAULT_GRIDSPACING;
+	config::Configuration	config = config::Configuration::get();
+	config::ConfiguraitonKey	key("guiding", "calibration",
+						"gridspacing");
+	if (config->has(key)) {
+		gridspacing = std::stoi(config->get(key));
+		if (gridspacing <= 0) {
+			gridspacing = DEFAULT_GRIDSPACING;
+		}
+	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "grid spacing: %d", gridspacing);
+
 	// the grid constant normally depends on the focallength and the
 	// pixels size. We expect to move about 20 pixels, which is 
 	// well measurable
 	calibration()->guiderate(guiderate());
 	GridConstant	gridconstant(_focallength, guider()->pixelsize());
 	gridconstant.guiderate(guiderate());
-	grid = gridconstant(20); // suggested displacement in pixels
+	grid = gridconstant(gridspacing); // suggested displacement in pixels
 	calibration()->interval(grid);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "grid constant: %f", grid);
 
@@ -338,104 +354,6 @@ void	GPCalibrationProcess::main2(astro::thread::Thread<GPCalibrationProcess>& _t
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "calibration complete");
 }
 
-#if 0
-/**
- * \brief compute the grid constant
- *
- * the grid constant normally depends on the focallength and the
- * pixels size. Smaller pixels are larger focallength allow to
- * use a smaller grid constant.
- *
- * The grid constant is chosen so as to generate an offset of at least 10
- * pixels on the guide CCD, but also one of at least 15 arc seconds.
- */
-double	GPCalibrationProcess::gridconstant(double focallength,
-	double pixelsize, double guiderate) const {
-	// if we don't have the focal length, there is no way we can compute
-	// reasonable grid constant, so we just use 5 seconds, which should
-	// at least be larger to compensate for backlash
-	if (focallength <= 0) {
-		return 0;
-	}
-
-	// not having a pixel size is an error
-	if (pixelsize <= 0) {
-		debug(LOG_ERR, DEBUG_LOG, 0, "pixel size is required");
-		throw std::runtime_error("no pixel size specified");
-	}
-
-	// compute the conversion factor from pixels to arc seconds
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "find grid constant [s] for "
-		"pixelsize=%.1fμm focallength=%.1fmm", pixelsize * 1e6,
-		focallength * 1e3);
-	double arcsecperpixel = (180 * 3600 / M_PI) * (pixelsize / focallength);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "arcsec/px = %.2f[arcsec/px]",
-		arcsecperpixel);
-
-	// the default guide rate is just half the rate of rotation of
-	// the earth this is the default guide rate of 15" per second
-	double	siderial_rate = 15 / arcsecperpixel;		// [pixel/s]
-	if (0 == guiderate) {
-		// the default guide rate is just half the rotation of the earth
-		// this is the default guide rate on celestron telescopes
-		guiderate = 0.5;
-	}
-	guiderate *= siderial_rate;				// [pixel/s]
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "guiderate: %.2f[px/s]", guiderate);
- 
-	// what we compute the grid constant for
-	debug(LOG_DEBUG, DEBUG_LOG, 0,
-		"grid constant for focallength = %.0fmm, pixelsize = %.1fum, "
-		"guiderate %.1f*siderial rate, %.1f pixel/sec",
-		1000 * focallength, 1000000 * pixelsize,
-		guiderate / siderial_rate, guiderate);
-
-	// we want a displacement of at least 10 pixels (this makes sure 
-	// we get enough discernible displacement when the focal length
-	// is short)
-	static double	pixelgridsize = 30;			// [pixel]
-	double	pixelgridconstant = pixelgridsize / guiderate;	// [s]
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "pixelgridsize = %.1f[px], "
-		"pixelgridconstant = %.1f[s]", pixelgridsize,
-		pixelgridconstant);
-
-	// computing the grid constant (seconds displacement of calibration
-	// points). Default grid constant is 5 seconds, which should be
-	// good enough for most guiders.
-	static double	anglegridsize = 60 / arcsecperpixel;	// [pixel]
-	double	anglegridconstant = anglegridsize / guiderate;	// [s]
-
-	// now get the larger of the two
-	debug(LOG_DEBUG, DEBUG_LOG, 0,
-		"time for displacement of 30arcsec: %.1f[s], 15 pixel: %.1f[s]",
-		pixelgridconstant, anglegridconstant);
-	double	gridconstant = (pixelgridconstant > anglegridconstant)
-			? pixelgridconstant : anglegridconstant;
-
-	// make sure it is at least 5 seconds
-	if (gridconstant < 5) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0,
-			"grid constant %.1f too small, using 5", gridconstant);
-		gridconstant = 5;
-	}
-	if (gridconstant > 60) {
-		std::string	msg = stringprintf(
-				"grid constant %.1f is excessive",
-				gridconstant);
-		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
-		throw std::runtime_error(msg);
-	}
-	if (gridconstant > 15) {
-		debug(LOG_ERR, DEBUG_LOG, 0,
-			"grid constant %.1f is rather large, reduce to 15",
-			gridconstant);
-		gridconstant = 15;
-	}
-
-	return gridconstant;
-}
-#endif
-
 /**
  * \brief Construct a guider from guider, guideport, tracker and a database
  */
@@ -446,6 +364,18 @@ GPCalibrationProcess::GPCalibrationProcess(GuiderBase *_guider,
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "construct a new calibration process");
 	_focallength = 0.600;
 	calibrated = false;
+
+	// find out whether we have to move sequentially
+	config::ConfigurationPtr	config = config::Configuration::get();
+	config::ConfigurationKey	key("guiding", "calibration",
+						"sequential");
+	if (config->has(key)) {
+		sequential = (config->get(key) == "yes");
+	} else {
+		sequential = false;
+	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "sequential moves in calibration: %s",
+		(sequential) ? "yes" : "no");
 
 	// prepare a BasicCalibrator class that does the actual computation
 	ControlDeviceNamePtr	gpname = guider()->guidePortDeviceName();
@@ -516,12 +446,16 @@ void	GPCalibrationProcess::moveto(double ra, double dec) {
 	if (raminus > t) {
 		t = raminus;
 	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "RA: raplus = %f, raminus = %f, t = %f",
-		raplus, raminus, t);
-	guideport()->activate(raplus, raminus, 0, 0);
-	Timer::sleep(t);
 
-	t = 0;
+	if (sequential) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0,
+			"RA: raplus = %f, raminus = %f, t = %f",
+			raplus, raminus, t);
+		guideport()->activate(raplus, raminus, 0, 0);
+		Timer::sleep(t);
+		t = 0;
+	}
+
 	if (dec > 0) {
 		decplus = dec;
 	} else {
@@ -533,9 +467,14 @@ void	GPCalibrationProcess::moveto(double ra, double dec) {
 	if (decplus > t) {
 		t = decplus;
 	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "DEC: decplus = %f, decminus = %f, t = %f",
+	debug(LOG_DEBUG, DEBUG_LOG, 0,
+		"DEC: decplus = %f, decminus = %f, t = %f",
 		decplus, decminus, t);
-	guideport()->activate(0, 0, decplus, decminus);
+	if (sequential) {
+		guideport()->activate(0, 0, decplus, decminus);
+	} else {
+		guideport()->activate(raplus, raminus, decplus, decminus);
+	}
 	Timer::sleep(t);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "moveto complete");
 }

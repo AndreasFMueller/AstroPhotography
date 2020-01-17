@@ -38,6 +38,7 @@ class GPCalibrationProcess : public GuidePortProcess {
 	 */
 	double	starttime;
 	int	pointcount;
+	bool	sequential;
 private:
 	Point	starAt(double ra, double dec);
 	void	moveto(double ra, double dec);

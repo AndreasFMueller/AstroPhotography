@@ -80,6 +80,7 @@ double	StarDetectorBase::radius(const ConstImageAdapter<double>& _image,
 	// focused star, so we only consider points sufficiently close
 	int	maxradius = bd;
 	if (maxradius > 20) {
+		// XXX magic number 20?
 		maxradius = 20;
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "using maxradius=%d", maxradius);
@@ -149,6 +150,20 @@ Point	StarDetectorBase::operator()(const ConstImageAdapter<double>& image,
 	adapter::HotPixelInterpolationAdapter<double>	hpia(image);
 	Image<double>	coolimage(hpia);
 
+	// check whether we have special configuration for the hot pixel
+	// detecter
+	config::ConfigurationPtr	config = config::Configuration::get();
+	config::ConfigurationKey	radiuskey("guiding", "hotpixel",
+						"radius");
+	if (config->has(radiuskey)) {
+		coolimage.search_radius(std::stoi(config->get(radiuskey)));
+	}
+	config::ConfigurationKey	stddevkey("guiding", "hotpixel",
+						"stddev_multiplier");
+	if (config->has(stddevkey)) {
+		coolimage.stddev_multiplier(std::stoi(config->get(stddevkey)));
+	}
+
 	// first find the approximate position inside the area of interest
 	StarDetectorBase::findResult	location = findStar(coolimage,
 						areaofinterest);
@@ -174,6 +189,7 @@ Point	StarDetectorBase::operator()(const ConstImageAdapter<double>& image,
 		(r > 15) ? ", very large! no star found?" : "");
 
 	// make the radius large engough for the PeakFinder to work
+	// XXX magic number 5?
 	if (r < 5) {
 		r = 5;
 		debug(LOG_DEBUG, DEBUG_LOG, 0,

@@ -245,8 +245,7 @@ void	TrackingProcess::step(thread::Thread<TrackingProcess>& thread,
 	Timer	timer;
 	timer.start();
 
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "TRACK %d: start new exposure",
-		_id);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "TRACK %d: start new exposure", _id);
 
 	// now retrieve the image. This method has as a side
 	// effect that the image is sent to the image callback
@@ -283,7 +282,8 @@ void	TrackingProcess::step(thread::Thread<TrackingProcess>& thread,
 	// find out whether the tracker can still track, terminate
 	// if not
 	if ((offset.x() != offset.x()) || (offset.y() != offset.y())) {
-		std::string	cause = stringprintf("TRACK %d: loss of tracking, give up", _id);
+		std::string	cause = stringprintf("TRACK %d: loss of "
+			"tracking, give up", _id);
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", cause.c_str());
 		throw std::runtime_error(cause);
 	}
