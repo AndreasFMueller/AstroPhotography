@@ -18,10 +18,33 @@ then
 	exit 1
 fi
 
-user=${2}
+db=${1}
+key=${2}
 
-case ${1} in
-passwd)	if dscl . -read /Users/${user} > /dev/null 2>&1
+# find out whether the user is numeric
+if expr ${key} : '[0-9]*' > /dev/null
+then
+	case ${db} in
+	passwd)	key=`dscl . -search /Users UniqueID ${key} | \
+			head -1 | sed -e 's/	 *.*//'`
+		;;
+	group)	key=`dscl . -search /Groups PrimaryGroupID ${key} | \
+			head -1 | sed -e 's/	 *.*//'`
+		;;
+	esac
+fi
+
+# make sure we really have a user or group key
+if [ -z "${key}" ]
+then
+	echo "'${2}' not found"
+	exit 1
+fi
+
+# now resolve the key
+case ${db} in
+passwd)	user=${key}
+	if dscl . -read /Users/${user} > /dev/null 2>&1
 	then
 		:
 	else
@@ -40,7 +63,7 @@ passwd)	if dscl . -read /Users/${user} > /dev/null 2>&1
 	echo "${user}:*:${uidNumber}:${gidNumber}:${gecos}:${home}:${shell}"
 	exit 0
 	;;
-group)	group=${user}
+group)	group=${key}
 	if dscl . -read /Groups/${group} > /dev/null 2>&1
 	then
 		:
