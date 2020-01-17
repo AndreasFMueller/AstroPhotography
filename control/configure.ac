@@ -575,9 +575,43 @@ AC_SUBST(DEVICEPROPERTYDIR)
 # find out whether UDEV exists
 AM_CONDITIONAL(USE_UDEV, test -d /etc/udev/rules.d)
 
+# Do we use sysatemd?
+AM_CONDITIONAL(USE_SYSTEMD, test -d /etc/systemd)
+
 # default pid file location
 PIDDIR=${localstatedir}/run
 AC_SUBST(PIDDIR)
+
+# find out 
+AC_ARG_WITH([user],
+[AS_HELP_STRING([--with-user=user], [runtime user for the daemon])],
+[
+	ASTROUSER=${with_user}
+],[
+	ASTROUSER=astro
+])
+if bash scripts/getent passwd ${ASTROUSER}
+then
+	:
+else
+	AC_MSG_ERROR([user ${ASTROUSER} does not exist])
+fi
+AC_SUBST(ASTROUSER)
+
+AC_ARG_WITH([group],
+[AS_HELP_STRING([--with-group=group], [runtime group for the daemon])],
+[
+	ASTROGROUP=${with_group}
+],[
+	ASTROGROUP=astro
+])
+if bash scripts/getent group ${ASTROGROUP}
+then
+	:
+else
+	AC_MSG_ERROR([group ${ASTROGROUP} does not exist])
+fi
+AC_SUBST(ASTROGROUP);
 
 # definitions for the extension for shared libraries
 case `uname` in
