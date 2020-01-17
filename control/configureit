@@ -170,14 +170,14 @@ else
 fi
 
 # check whether we should use 
-if bash scripts/getent passwd astro
+if bash scripts/getent passwd astro >/dev/null
 then
 	user=astro
 else
 	user=`whoami`
 fi
 useroptions="--with-user=${user}"
-if bash scripts/getent group astro
+if bash scripts/getent group astro >/dev/null
 then
 	group=astro
 else
@@ -186,6 +186,13 @@ else
 fi
 useroptions="${useroptions} --with-group=${group}"
 commonflags="${commonflags} ${useroptions}"
+
+# we install the systemd script only on Linux and only if user=astro
+# and group=astro because then we know that install will be done as root
+if [ "${user}" = astro -a "${group}" = astro -a `uname -s` = Linux ]
+then
+	commonflags="${commonflags} --enable-systemd"
+fi
 
 # now that we have all the information, run the configure script
 case ${systemtype} in
@@ -198,8 +205,10 @@ Debian)
 	CXXFLAGS="${CXXFLAGS} --std=c++11"
 	LDFLAGS="${LDFLAGS} -Wl,-rpath -Wl,/usr/local/lib"
 	export CXXFLAGS LDFLAGS
+	set -x
 	./configure --prefix=${prefix} ${commonflags} \
 		${sbigoption} ${sliceoption} ${icelibdiroption}
+	set +x
 	;;
 SuSE)
 	LDFLAGS="-L/usr/local/lib64 -lusb-1.0 -lefence"
@@ -224,8 +233,10 @@ Darwin)
 	CXXFLAGS="${CFLAGS} --std=c++11"
 	export CFLAGS CXXFLAGS LDFLAGS
 	CXXFLAGS="${CXXFLAGS} -stdlib=libc++"
+	set -x
 	./configure --prefix=${prefix} ${commonflags} --enable-unittests \
 		--enable-uvc ${sbigoption}
+	set +x
 	;;
 esac
 

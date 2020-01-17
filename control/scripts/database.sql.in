@@ -1,0 +1,100 @@
+--
+-- database.sql ++ basic configuration of the system
+--
+-- (c) 2020 Prof Dr Andreas Müller, Hochschule Rapperswil
+--
+
+CREATE TABLE instrumentcomponents (
+    id integer not null,
+    name varchar(32) not null,
+    type integer not null,
+    idx integer not null,
+    servicename varchar(128) not null,
+    deviceurl varchar(255) not null,
+    primary key(id)
+);
+CREATE UNIQUE INDEX instrumentcomponents_idx1
+on instrumentcomponents(name, type, idx);
+
+insert into instrumentcomponents(id, name, type, idx, servicename, deviceurl)
+values (1, 'SIMULATOR', '1', '0', '@server@', 'camera:simulator/camera');
+insert into instrumentcomponents(id, name, type, idx, servicename, deviceurl)
+values (2, 'SIMULATOR', '2', '0', '@server@', 'ccd:simulator/camera/ccd');
+insert into instrumentcomponents(id, name, type, idx, servicename, deviceurl)
+values (3, 'SIMULATOR', '3', '0', '@server@', 'cooler:simulator/cooler');
+insert into instrumentcomponents(id, name, type, idx, servicename, deviceurl)
+values (4, 'SIMULATOR', '7', '0', '@server@', 'filterwheel:simulator/filterwheel');
+insert into instrumentcomponents(id, name, type, idx, servicename, deviceurl)
+values (5, 'SIMULATOR', '8', '0', '@server@', 'focuser:simulator/focuser');
+insert into instrumentcomponents(id, name, type, idx, servicename, deviceurl)
+values (6, 'SIMULATOR', '6', '0', '@server@', 'guideport:simulator/guideport');
+insert into instrumentcomponents(id, name, type, idx, servicename, deviceurl)
+values (7, 'SIMULATOR', '9', '0', '@server@', 'mount:simulator/mount');
+insert into instrumentcomponents(id, name, type, idx, servicename, deviceurl)
+values (8, 'SIMULATOR', '5', '0', '@server@', 'ccd:simulator/camera/finder');
+insert into instrumentcomponents(id, name, type, idx, servicename, deviceurl)
+values (9, 'SIMULATOR', '4', '0', '@server@', 'ccd:simulator/camera/guideccd');
+
+CREATE TABLE instrumentproperties (
+    id integer not null,
+    instrument varchar(32) not null,
+    property varchar(256) not null,
+    value varchar(1024) not null,
+    description varchar(1024) not null,
+    primary key(id)
+);
+
+insert into instrumentproperties (id, instrument, property, value, description)
+values (1, 'SIMULATOR', 'focallength', '1',
+	'Focal length of main camera');
+insert into instrumentproperties (id, instrument, property, value, description)
+values (2, 'SIMULATOR', 'guiderfocallength', '0.2',
+	'Focal length of guide camera');
+insert into instrumentproperties (id, instrument, property, value, description)
+values (3, 'SIMULATOR', 'guiderate', '0.5',
+	'mount rate wrt. siderial rate');
+insert into instrumentproperties (id, instrument, property, value, description)
+values (4, 'SIMULATOR', 'guiderazimuth', '30',
+	'Azimuth of guider ccd [degrees]');
+insert into instrumentproperties (id, instrument, property, value, description)
+values (5, 'SIMULATOR', 'finderfocallength', '0.05',
+	'Focal length [m] of finder');
+insert into instrumentproperties (id, instrument, property, value, description)
+values (6, 'SIMULATOR', 'finderazimuth', '0.0',
+	'Azimuth of finder ccd [degrees]');
+insert into instrumentproperties (id, instrument, property, value, description)
+values (7, 'SIMULATOR', 'azimuth', '0.0',
+	'Azimuth of imager ccd [degrees]');
+
+CREATE TABLE configuration (
+    id int not null,
+    domain varchar(128) not null default 'global',
+    section varchar(128) not null default '.',
+    name varchar(128) not null,
+    value varchar(1024) not null,
+    primary key(id)
+);
+CREATE UNIQUE INDEX configuration_idx1
+on configuration(domain, section, name);
+
+insert into configuration(id, domain, section, name, value)
+values (1, 'snowstar', 'service', 'instruments', 'yes');
+insert into configuration(id, domain, section, name, value)
+values (2, 'snowstar', 'service', 'guiding', 'yes');
+insert into configuration(id, domain, section, name, value)
+values (3, 'snowstar', 'service', 'focusing', 'yes');
+insert into configuration(id, domain, section, name, value)
+values (4, 'snowstar', 'service', 'repository', 'yes');
+insert into configuration(id, domain, section, name, value)
+values (5, 'snowstar', 'service', 'tasks', 'yes');
+insert into configuration(id, domain, section, name, value)
+values (6, 'snowstar', 'repositories', 'directory', 'test2.db');
+insert into configuration(id, domain, section, name, value)
+values (7, 'snowstar', 'service', 'gateway', 'yes');
+insert into configuration(id, domain, section, name, value)
+values (8, 'device', 'cooler', 'stable', '1.5');
+insert into configuration(id, domain, section, name, value)
+values (9, 'tasks', 'cooler', 'wait', '5');
+insert into configuration(id, domain, section, name, value)
+values (10, 'tasks', 'filterwheel', 'wait', '7.5');
+

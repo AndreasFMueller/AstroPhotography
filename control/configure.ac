@@ -575,14 +575,17 @@ AC_SUBST(DEVICEPROPERTYDIR)
 # find out whether UDEV exists
 AM_CONDITIONAL(USE_UDEV, test -d /etc/udev/rules.d)
 
-# Do we use sysatemd?
-AM_CONDITIONAL(USE_SYSTEMD, test -d /etc/systemd)
+# Do we install systemd service file?
+AC_ARG_ENABLE([systemd],
+[AS_HELP_STRING([--enable-systemd], [install systemd service file])],
+[enable_systemd=yes], [enable_systemd=no])
+AM_CONDITIONAL(ENABLE_SYSTEMD, test ${enable_systemd} = yes)
 
 # default pid file location
 PIDDIR=${localstatedir}/run
 AC_SUBST(PIDDIR)
 
-# find out 
+# find out how to edit the user
 AC_ARG_WITH([user],
 [AS_HELP_STRING([--with-user=user], [runtime user for the daemon])],
 [
@@ -590,7 +593,7 @@ AC_ARG_WITH([user],
 ],[
 	ASTROUSER=astro
 ])
-if bash scripts/getent passwd ${ASTROUSER}
+if bash scripts/getent passwd ${ASTROUSER} >/dev/null
 then
 	:
 else
@@ -605,13 +608,17 @@ AC_ARG_WITH([group],
 ],[
 	ASTROGROUP=astro
 ])
-if bash scripts/getent group ${ASTROGROUP}
+if bash scripts/getent group ${ASTROGROUP} >/dev/null
 then
 	:
 else
 	AC_MSG_ERROR([group ${ASTROGROUP} does not exist])
 fi
-AC_SUBST(ASTROGROUP);
+AC_SUBST(ASTROGROUP)
+
+# find the current hostname
+server=`hostname`
+AC_SUBST(server)
 
 # definitions for the extension for shared libraries
 case `uname` in
@@ -661,7 +668,7 @@ AC_CONFIG_FILES([Makefile include/Makefile
 	ice/server/Makefile ice/nice/Makefile
 	man/Makefile doc/Makefile doc/manual/Makefile
 	scripts/Makefile scripts/startastro scripts/snowstar.service
-	scripts/sky.png.php scripts/status.php
+	scripts/sky.png.php scripts/status.php scripts/database.sql
 	test/Makefile])
 AC_OUTPUT
 

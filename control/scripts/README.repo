@@ -1,0 +1,7 @@
+README.repo
+
+This directory is a mount point for a USB stick containing the image
+repository. It is suggested that automount be configured in such a way
+that a USB stick is mounted automatically here.
+
+

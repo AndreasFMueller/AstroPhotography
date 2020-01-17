@@ -1,7 +1,14 @@
 ChangeLog for the Astro project.
 
 20200117:
-	* addd USE_SYSTEMD conditional
+	* add a default configuration database that already contains
+	  the SIMULATOR instrumetn
+	* add README files to all the directoryies needed for a running
+	  installation
+	* add user/group options. If astro/astro exist, they are used
+	  otherwise the user running the config script is used
+	* add options to automaically install systemd start script
+	* addd ENABLE_SYSTEMD conditional
 	* add getent script
 
 20200116:

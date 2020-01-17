@@ -1,0 +1,5 @@
+This directory contains the configuration database. The database-dist.db
+is a sample database that can be used as the initial database with some
+basic configuration, in particular the SIMULATOR instrument is defined
+there.
+

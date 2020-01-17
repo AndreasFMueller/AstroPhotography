@@ -1,0 +1,3 @@
+This directory is used for temporary storage of images by the server
+(all images not stored in a repository are stored here). Ensure that
+this directory is writable by the server
