@@ -181,7 +181,7 @@ if bash scripts/getent group astro >/dev/null
 then
 	group=astro
 else
-	groupid=`bash scripts/getent passwd ${user} | awk -F: '{ print $4 }'`
+	groupid=`bash scripts/getent passwd ${user} | awk -F: '{ print $4 }'`
 	group=`bash scripts/getent group ${groupid} | awk -F: '{ print $1 }'`
 fi
 useroptions="${useroptions} --with-group=${group}"
