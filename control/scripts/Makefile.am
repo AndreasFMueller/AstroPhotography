@@ -27,7 +27,11 @@ databasedir = ${prefix}/var
 database_DATA = README.database database-dist.db
 
 database-dist.db:	database.sql
+	if [ -f database-dist.db ];  then rm -f database-dist.db; fi
 	sqlite3 database-dist.db < database.sql
+
+sharedir = ${prefix}/share
+share_DATA = README.starcatalogs
 
 endif
 

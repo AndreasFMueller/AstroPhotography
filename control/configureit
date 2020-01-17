@@ -176,7 +176,7 @@ then
 else
 	user=`whoami`
 fi
-useroptions="--with-user=${user}"
+useroptions="--with-owner=${user}"
 if bash scripts/getent group astro >/dev/null
 then
 	group=astro
