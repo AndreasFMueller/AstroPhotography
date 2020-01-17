@@ -161,15 +161,33 @@ Linux)	if [ -r /etc/debian_version ]
 	;;
 esac
 
-set -x
-
-# now that we have all the information, run the configure script
+# find out where to install all the stuff
 if [ -d /usr/local/astro ]
 then
 	prefix=/usr/local/astro
 else
 	prefix=`pwd`/root
 fi
+
+# check whether we should use 
+if bash scripts/getent passwd astro
+then
+	user=astro
+else
+	user=`whoami`
+fi
+useroptions="--with-user=${user}"
+if bash scripts/getent group astro
+then
+	group=astro
+else
+	groupid=`bash scripts/getent passwd ${user} | awk -F: '{ print $4 }'`
+	group=`bash scripts/getent group ${groupid} | awk -F: '{ print $1 }'`
+fi
+useroptions="${useroptions} --with-group=${group}"
+commonflags="${commonflags} ${useroptions}"
+
+# now that we have all the information, run the configure script
 case ${systemtype} in
 Linux)
 	CXXFLAGS="${CFLAGS} --std=c++11"
