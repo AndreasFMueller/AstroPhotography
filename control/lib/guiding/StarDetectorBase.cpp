@@ -9,6 +9,7 @@
 #include <AstroTonemapping.h>
 #include <AstroFilterfunc.h>
 #include <AstroIO.h>
+#include <AstroConfig.h>
 
 using namespace astro::image;
 
@@ -148,7 +149,6 @@ Point	StarDetectorBase::operator()(const ConstImageAdapter<double>& image,
 
 	// elimineate hot pixels
 	adapter::HotPixelInterpolationAdapter<double>	hpia(image);
-	Image<double>	coolimage(hpia);
 
 	// check whether we have special configuration for the hot pixel
 	// detecter
@@ -156,13 +156,16 @@ Point	StarDetectorBase::operator()(const ConstImageAdapter<double>& image,
 	config::ConfigurationKey	radiuskey("guiding", "hotpixel",
 						"radius");
 	if (config->has(radiuskey)) {
-		coolimage.search_radius(std::stoi(config->get(radiuskey)));
+		hpia.search_radius(std::stoi(config->get(radiuskey)));
 	}
 	config::ConfigurationKey	stddevkey("guiding", "hotpixel",
 						"stddev_multiplier");
 	if (config->has(stddevkey)) {
-		coolimage.stddev_multiplier(std::stoi(config->get(stddevkey)));
+		hpia.stddev_multiplier(std::stoi(config->get(stddevkey)));
 	}
+
+	// now build an image without hot pixels
+	Image<double>	coolimage(hpia);
 
 	// first find the approximate position inside the area of interest
 	StarDetectorBase::findResult	location = findStar(coolimage,

@@ -257,8 +257,8 @@ void	GPCalibrationProcess::main2(astro::thread::Thread<GPCalibrationProcess>& _t
 
 	// check the configuration for the suggested pixel displacement
 	int	gridspacing = DEFAULT_GRIDSPACING;
-	config::Configuration	config = config::Configuration::get();
-	config::ConfiguraitonKey	key("guiding", "calibration",
+	config::ConfigurationPtr	config = config::Configuration::get();
+	config::ConfigurationKey	key("guiding", "calibration",
 						"gridspacing");
 	if (config->has(key)) {
 		gridspacing = std::stoi(config->get(key));
