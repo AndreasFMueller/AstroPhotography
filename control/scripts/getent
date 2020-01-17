@@ -1,0 +1,58 @@
+#! /bin/bash
+#
+# getent wrapper that works an both Linux and MacOS
+#
+# (c) 2020 Prof Dr Andreas Müller, Hochschule Rapperswil
+#
+
+if [ `uname -s` = Darwin ]
+then
+	:
+else
+	exec getent $@
+fi
+
+if [ $# -lt 2 ]
+then
+	echo "usage: getent { passwd | group } id"
+	exit 1
+fi
+
+user=${2}
+
+case ${1} in
+passwd)	if dscl . -read /Users/${user} > /dev/null 2>&1
+	then
+		:
+	else
+		echo user ${2} not found
+		exit 1
+	fi
+	uidNumber=`dscl . -read /Users/${user} UniqueID | \
+		sed -e 's/UniqueID: //'`
+	gidNumber=`dscl . -read /Users/${user} PrimaryGroupID | \
+		sed -e 's/PrimaryGroupID: //'`
+	gecos=`dscl . -read /Users/${user} RealName | tail +2`
+	shell=`dscl . -read /Users/${user} UserShell | \
+		sed -e 's/UserShell: //' `
+	home=`dscl . -read /Users/${user} NFSHomeDirectory | \
+		sed -e 's/NFSHomeDirectory: //'`
+	echo "${user}:*:${uidNumber}:${gidNumber}:${gecos}:${home}:${shell}"
+	exit 0
+	;;
+group)	group=${user}
+	if dscl . -read /Groups/${group} > /dev/null 2>&1
+	then
+		:
+	else
+		echo group ${group} not found
+		exit 1
+	fi
+	gidNumber=`dscl . -read /Groups/${group} PrimaryGroupID | \
+		sed -e 's/PrimaryGroupID: //'`
+	echo "${group}:x:${gidNumber}:"
+	;;
+*)	echo unknown db ${1}
+	exit 1
+	;;
+esac
