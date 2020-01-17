@@ -1,6 +1,7 @@
 ChangeLog for the Astro project.
 
 20200117:
+	* set default servicename equal to the hostname
 	* add a default configuration database that already contains
 	  the SIMULATOR instrumetn
 	* add README files to all the directoryies needed for a running

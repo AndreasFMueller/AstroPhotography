@@ -141,6 +141,21 @@ int	snowstar_main(int argc, char *argv[]) {
 	std::string	servicename("server");
 	std::string	pidfilename(PIDDIR "/snowstar.pid");
 
+	// the default service name is the hostname
+	char	hn[1024];
+	if (gethostname(hn, sizeof(hn))) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "cannot get hostname: %s",
+			strerror(errno));
+		strcpy(hn, "server");
+	}
+	std::string	hostname(hn);
+	auto i = hostname.find('.');
+	if (std::string::npos != i) {
+		hostname = hostname.substr(0, i);
+	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "default service name: %s",
+		hostname.c_str());
+
 	// parse the command line
 	int	c;
 	int	longindex;
@@ -226,7 +241,8 @@ int	snowstar_main(int argc, char *argv[]) {
 			debugmaxlines = std::stoi(optarg);
 			break;
 		case 'n':
-			astro::discover::ServiceLocation::get().servicename(std::string(optarg));
+			hostname = std::string(optarg);
+
 			break;
 		case 'p':
 			astro::discover::ServiceLocation::get().port(std::stoi(optarg));
@@ -288,6 +304,9 @@ int	snowstar_main(int argc, char *argv[]) {
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "command line parsed");
 
+	// set the service name
+	astro::discover::ServiceLocation::get().servicename(hostname);
+
 	// go into the background
 	if (!foreground) {
 		pid_t	pid = fork();
@@ -317,7 +336,10 @@ int	snowstar_main(int argc, char *argv[]) {
 	}
 
 	// make sure service discover is available
-	astro::discover::ServiceDiscoveryPtr	sd = astro::discover::ServiceDiscovery::get();
+	astro::discover::ServiceDiscoveryPtr	sd
+		= astro::discover::ServiceDiscovery::get();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "service keys published: %d",
+		sd->list().size());
 
 	{
 		// by opening a new brace we ensure that the pdifile will

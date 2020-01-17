@@ -23,7 +23,7 @@ repo_DATA = README.repo
 imagesdir = ${prefix}/var/images
 images_DATA = README.images
 
-databasedir = ${prefix}/var/images
+databasedir = ${prefix}/var
 database_DATA = README.database database-dist.db
 
 database-dist.db:	database.sql
