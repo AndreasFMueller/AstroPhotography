@@ -586,10 +586,10 @@ PIDDIR=${localstatedir}/run
 AC_SUBST(PIDDIR)
 
 # find out how to edit the user
-AC_ARG_WITH([user],
-[AS_HELP_STRING([--with-user=user], [runtime user for the daemon])],
+AC_ARG_WITH([owner],
+[AS_HELP_STRING([--with-owner=user], [runtime user for the daemon])],
 [
-	ASTROUSER=${with_user}
+	ASTROUSER=${with_owner}
 ],[
 	ASTROUSER=astro
 ])

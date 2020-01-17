@@ -1,0 +1,11 @@
+This directory must contain a directory or a symbolic to a directory
+named starcatalogs containing the star catalog hierarchy. The following
+catalogs are required for the simulator to work:
+
+- bsc: Bright Star Catalog
+- hipparcos:  Hipparcos
+- tycho2: Tycho2
+
+These catalogs are used by the simulator device to simulate an image.
+
+
