@@ -4,4 +4,15 @@ This directory is a mount point for a USB stick containing the image
 repository. It is suggested that automount be configured in such a way
 that a USB stick is mounted automatically here.
 
+Here is suggested content of the /etc/auto.astro file:
+
+	/usr/local/astro/repo	-fstype=vfat,rw,uid=1002,gid=100
+
+The file /etc/auto.astro must be referenced from /etc/auto.master
+
+	/-	/etc/auto.astro
+
+Note that you need to turn of autofs during 'make install' because
+without a USB stick available, the install will fail.
+
 

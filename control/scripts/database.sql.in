@@ -88,7 +88,8 @@ values (4, 'snowstar', 'service', 'repository', 'yes');
 insert into configuration(id, domain, section, name, value)
 values (5, 'snowstar', 'service', 'tasks', 'yes');
 insert into configuration(id, domain, section, name, value)
-values (6, 'snowstar', 'repositories', 'directory', 'test2.db');
+values (6, 'snowstar', 'repositories', 'directory',
+        '/usr/local/astro/repo/repos.db');
 insert into configuration(id, domain, section, name, value)
 values (7, 'snowstar', 'service', 'gateway', 'yes');
 insert into configuration(id, domain, section, name, value)

@@ -194,6 +194,10 @@ Ubuntu:
    Optional:
 	zeroc-ice35
 	libunicap2-dev
+   needed for Ice-3.7.2 compile:
+	libbz2-dev
+	liblmdb-dev
+	libmcpp-dev
 
 --
 $Id$
