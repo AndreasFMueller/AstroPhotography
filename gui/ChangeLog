@@ -1,5 +1,9 @@
 ChangeLog for the Qt GUI to Astrophotography
 
+20200121:
+	* fix bug: guiding interval not read from server
+	* more usage of auto types
+
 20200116:
 	* eliminate SimpleImage
 	* make window radius increment in steps of 10 instead of exponentially

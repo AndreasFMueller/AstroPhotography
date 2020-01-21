@@ -325,6 +325,8 @@ void	guidercontrollerwidget::setupGuider() {
 		break;
 	}
 	ui->trackingMethodBox->blockSignals(false);
+
+	// get the exposure information
 	_exposure = snowstar::convert(_guider->getExposure());
 	astro::Point	ps = snowstar::convert(_guider->getStar());
 	_star = ImagePoint((int)ps.x(), (int)ps.y());
@@ -347,6 +349,18 @@ void	guidercontrollerwidget::setupGuider() {
 	}
 	setupFilter();
 	ui->filterMethodBox->blockSignals(false);
+
+	// get the guiding interval
+	try {
+		float	interval = _guider->getGuidingInterval();
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "got guide interval %.3f",
+			interval);
+		ui->gpupdateintervalSpinBox->blockSignals(true);
+		ui->gpupdateintervalSpinBox->setValue(interval);
+		ui->gpupdateintervalSpinBox->blockSignals(false);
+	} catch (const std::exception& x) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "cannot get the guide interval");
+	}
 
 	// gain
 	GuiderParameterConverter	gpc(_guider->getFilterMethod());
