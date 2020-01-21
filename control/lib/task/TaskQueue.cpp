@@ -274,11 +274,10 @@ TaskQueue::~TaskQueue() {
  * \brief Check whether any executor blocks a given new task
  */
 bool	TaskQueue::blocks(const TaskQueueEntry& entry) {
-	executormap::iterator	i;
-	for (i = executors.begin(); i != executors.end(); i++) {
-		if (i->second->blocks(entry)) {
+	for (auto p : executors) {
+		if (p.second->blocks(entry)) {
 			debug(LOG_DEBUG, DEBUG_LOG, 0, "%d blocks %d",
-				i->first, entry.id());
+				p.first, entry.id());
 			return true;
 		}
 	}
@@ -335,9 +334,7 @@ void	TaskQueue::launch() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "found %d pending ids", idlist.size());
 
 	// go through the list of ids
-	std::list<long>::const_iterator	i;
-	for (i = idlist.begin(); i != idlist.end(); i++) {
-		long	id = *i;
+	for (long id : idlist) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "checking id %d", id);
 		TaskQueueEntry	entry = tasktable.byid(id);
 		if (!blocks(entry)) {
@@ -701,9 +698,8 @@ void	TaskQueue::cancel() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "--> cancel all executors "
 		"LOCK(TaskQueue::queue_mutex)");
 	std::unique_lock<std::recursive_mutex>	lock(queue_mutex);
-	executormap::iterator	emapp;
-	for (emapp = executors.begin(); emapp != executors.end(); emapp++) {
-		cancel(emapp->first);
+	for (auto& emap : executors) {
+		cancel(emap.first);
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "<-- cancel all executors "
 		"UNLOCK(TaskQueue::queue_mutex)");

@@ -123,8 +123,8 @@ Horizon::Horizon(const std::string& csvfilename) {
  * \param angle		the rotation angle
  */
 Horizon::Horizon(const Horizon& other, const Angle& angle) {
-	for (auto i = other.begin(); i != other.end(); i++) {
-		AzmAlt	point((i->azm() + angle).reduced(), i->alt());
+	for (auto& i : other) {
+		AzmAlt	point((i.azm() + angle).reduced(), i.alt());
 		insert(point);
 	}
 	addbasepoint();
