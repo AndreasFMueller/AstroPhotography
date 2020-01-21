@@ -258,6 +258,9 @@ bool	Guider::waitGuiding(double timeout) {
  * \brief retrieve the interval from the guider process
  */
 double	Guider::getInterval() {
+	if (!trackingprocess) {
+		return 10;
+	}
 	TrackingProcess	*tp
 		= dynamic_cast<TrackingProcess *>(&*trackingprocess);
 	if (NULL == tp) {

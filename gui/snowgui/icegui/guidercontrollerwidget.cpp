@@ -334,6 +334,11 @@ void	guidercontrollerwidget::setupGuider() {
 	ui->starxField->setText(QString::number(_star.x()));
 	ui->staryField->setText(QString::number(_star.y()));
 
+	ui->windowradiusSpinBox->blockSignals(true);
+	_windowradius = _exposure.frame().size().width()/2;
+	ui->windowradiusSpinBox->setValue(_windowradius);
+	ui->windowradiusSpinBox->blockSignals(false);
+
 	// get the filter method
 	ui->filterMethodBox->blockSignals(true);
 	switch (_guider->getFilterMethod()) {
