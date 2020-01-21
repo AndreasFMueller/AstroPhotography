@@ -344,8 +344,7 @@ void	taskqueuemanagerwidget::addTasks(QTreeWidgetItem *parent,
 		debug(LOG_ERR, DEBUG_LOG, 0, "cannot get task list: %s",
 			x.what());
 	}
-	snowstar::taskidsequence::const_iterator	i;
-	for (i = s.begin(); i != s.end(); i++) {
+	for (auto i = s.begin(); i != s.end(); i++) {
 		try {
 			snowstar::TaskInfo	info = _tasks->info(*i);
 			snowstar::TaskParameters	parameters
@@ -498,8 +497,7 @@ void	taskqueuemanagerwidget::infoClicked() {
 void	taskqueuemanagerwidget::cancelClicked() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "cancelClicked()");
 	std::list<int>	taskids = selectedids();
-	std::list<int>::const_iterator	idptr;
-	for (idptr = taskids.begin(); idptr != taskids.end(); idptr++) {
+	for (auto idptr = taskids.begin(); idptr != taskids.end(); idptr++) {
 		int	taskid = *idptr;
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "cancel task %d", taskid);
 		try {
@@ -599,8 +597,7 @@ void	taskqueuemanagerwidget::deleteClicked() {
 	QList<QTreeWidgetItem*>	todelete = ui->taskTree->selectedItems();
 	std::list<int>	taskids = selectedids();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "%d items to delete", todelete.size());
-	std::list<int>::const_iterator	j;
-	for (j = taskids.begin(); j != taskids.end(); j++) {
+	for (auto j = taskids.begin(); j != taskids.end(); j++) {
 		try {
 			_tasks->remove(*j);
 			deleteTask(*j);
@@ -621,8 +618,7 @@ void	taskqueuemanagerwidget::resubmitClicked() {
 	QList<QTreeWidgetItem*>	todelete = ui->taskTree->selectedItems();
 	std::list<int>	taskids = selectedids();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "%d items to delete", todelete.size());
-	std::list<int>::const_iterator	j;
-	for (j = taskids.begin(); j != taskids.end(); j++) {
+	for (auto j = taskids.begin(); j != taskids.end(); j++) {
 		try {
 			_tasks->resubmit(*j);
 		} catch (const std::exception& x) {
@@ -911,8 +907,7 @@ void	taskqueuemanagerwidget::forgetInfoWidget() {
 std::list<int>	taskqueuemanagerwidget::selectedids() {
 	QList<QTreeWidgetItem*>	selected = ui->taskTree->selectedItems();
 	std::list<int>	taskids;
-	QList<QTreeWidgetItem*>::const_iterator	i;
-	for (i = selected.begin(); i != selected.end(); i++) {
+	for (auto i = selected.begin(); i != selected.end(); i++) {
 		taskids.push_back(std::stoi((*i)->text(0).toLatin1().data()));
 	}
 	return taskids;

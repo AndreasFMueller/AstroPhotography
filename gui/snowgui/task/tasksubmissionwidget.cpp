@@ -116,8 +116,7 @@ void	tasksubmissionwidget::instrumentSetup(
  */
 void	tasksubmissionwidget::setupComplete() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "main thread initializations");
-	std::vector<std::string>::const_iterator	i;
-	for (i = _camera_names.begin(); i != _camera_names.end(); i++) {
+	for (auto i = _camera_names.begin(); i != _camera_names.end(); i++) {
 		QString	cameraname(i->c_str());
 		ui->cameraBox->addItem(cameraname);
 	}
@@ -147,8 +146,7 @@ void	tasksubmissionwidget::setRepositories(
 	// add all the repository names found in the list
 	ui->repositoryBox->blockSignals(true);
 	snowstar::reponamelist	repos = _repositories->list();
-	snowstar::reponamelist::const_iterator	i;
-	for (i = repos.begin(); i != repos.end(); i++) {
+	for (auto i = repos.begin(); i != repos.end(); i++) {
 		std::string	reponame = *i;
 		ui->repositoryBox->addItem(QString(reponame.c_str()));
 	}
