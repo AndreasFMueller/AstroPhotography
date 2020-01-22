@@ -1,6 +1,7 @@
 [Unit]
 Description=snowstar astrophotography service
-After=network.target autofs.service
+After=network-online.target autofs.service
+Wants=network-online.target
 
 [Service]
 Type=simple
@@ -14,6 +15,7 @@ WorkingDirectory=@prefix@
 ExecStart=@prefix@/sbin/snowstar --debug --base=@prefix@/var/images --database=@prefix@/var/database.db --config=@prefix@/var/database.db --logfile=@prefix@/var/log/snowstar.log --lines=100000 --files=10 --foreground
 StandardOutput=syslog
 StandardError=syslog
+ExecStartPre=/bin/sleep 10
 
 [Install]
 WantedBy=multi-user.target
