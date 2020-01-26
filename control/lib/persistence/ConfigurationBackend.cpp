@@ -38,7 +38,7 @@ bool    ConfigurationBackend::has(const std::string& domain,
 }
 
 std::string	ConfigurationBackend::get(const ConfigurationKey& key) {
-	return _configurationtable[key].value;
+	return _configurationtable[key].value();
 }
 
 std::string     ConfigurationBackend::get(const std::string& domain,
@@ -70,7 +70,7 @@ void    ConfigurationBackend::set(const std::string& domain,
 	if (has(key)) {
 		long	id = _configurationtable.key2id(key);
 		ConfigurationEntry	entry = _configurationtable.byid(id);
-		entry.value = value;
+		entry.value(value);
 		_configurationtable.update(id, entry);
 	} else {
 		ConfigurationEntry	entry(key, value);
@@ -80,7 +80,7 @@ void    ConfigurationBackend::set(const std::string& domain,
 
 void	ConfigurationBackend::set(const ConfigurationKey& key,
 	const std::string& value) {
-	set(key.domain, key.section, key.name, value);
+	set(key.domain(), key.section(), key.name(), value);
 }
 
 void    ConfigurationBackend::remove(const std::string& domain,
@@ -116,7 +116,8 @@ Database	ConfigurationBackend::database() {
 	return _database;
 }
 
-ConfigurationRegister	_media_key("system", "configuration", "media",
+ConfigurationKey	_media_key("system", "configuration", "media");
+ConfigurationRegister	_media_registration(_media_key,
 				"path to the media directory/mount point");
 
 /**

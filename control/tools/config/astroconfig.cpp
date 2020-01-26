@@ -168,11 +168,24 @@ int	command_list(const std::vector<std::string>& arguments) {
 		[](const ConfigurationEntry& entry) {
 			std::cout << entry.toString();
 			std::cout << "\t";
-			std::cout << entry.value;
+			std::cout << entry.value();
 			std::cout << "\n";
 		}
 	);
 	return EXIT_SUCCESS;
+}
+
+/**
+ * \brief Implementation of the listkeys command
+ */
+int	command_listkeys(const std::vector<std::string>& arguments) {
+	auto	l = Configuration::listRegistered();
+	std::for_each(l.begin(), l.end(), [](ConfigurationKey key) {
+			std::cout << key.toString() << ": ";
+			std::cout << Configuration::describe(key);
+			std::cout << std::endl;
+		}
+	);
 }
 
 /**
@@ -302,6 +315,9 @@ int	main(int argc, char *argv[]) {
 	}
 	if (verb == "list") {
 		return command_list(arguments);
+	}
+	if (verb == "listkeys") {
+		return command_listkeys(arguments);
 	}
 	if (verb == "imagerepo") {
 		return command_imagerepo(arguments);

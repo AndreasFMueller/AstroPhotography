@@ -203,6 +203,21 @@ HorizonPtr	Horizon::rotate(const Angle& angle) const {
 
 static HorizonPtr	default_horizon;
 
+// horizon file name
+static config::ConfigurationKey		_horizon_file_name_key(
+		"gui", "horizon", "filename");
+static config::ConfigurationRegister    _horizon_file_name_registration(
+	_horizon_file_name_key, 
+	"file name of the horizon file to use in the sky display");
+
+// rotation key
+static config::ConfigurationKey		_horizon_rotation_key(
+		"gui", "horizon", "rotation");
+static config::ConfigurationRegister    _horizon_rotation_registration(
+	_horizon_rotation_key,
+	"angle in degrees the horizon file needs to be rotated");
+
+
 /**
  * \brief Get the default horizon
  *
@@ -216,17 +231,15 @@ HorizonPtr	Horizon::get() {
 
 	// check the default configuration for a rotation angle
 	config::ConfigurationPtr	config = config::Configuration::get();
-	config::ConfigurationKey	anglekey("gui", "horizon", "rotation");
-	if (config->has(anglekey)) {
-		std::string	anglestring = config->get(anglekey);
+	if (config->has(_horizon_rotation_key)) {
+		std::string anglestring = config->get(_horizon_rotation_key);
 		rotationangle = Angle(std::stod(anglestring), Angle::Degrees);
 	}
 
 	// first check whether we have a configuration
 	std::string	filename;
-	config::ConfigurationKey	key("gui", "horizon", "filename");
-	if (config->has(key)) {
-		filename = config->get(key);
+	if (config->has(_horizon_file_name_key)) {
+		filename = config->get(_horizon_file_name_key);
 	} else {
 		// check the home directory
 		char	*home = getenv("HOME");

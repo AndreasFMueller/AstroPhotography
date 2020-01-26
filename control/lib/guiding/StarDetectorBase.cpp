@@ -16,6 +16,20 @@ using namespace astro::image;
 namespace astro {
 namespace guiding {
 
+// search radius for hot pixel detection
+config::ConfigurationKey	_hotpixel_radius_key(
+	"guiding", "hotpixel", "radius");
+config::ConfigurationRegister	_hotpixel_radius_registration(
+	_hotpixel_radius_key,
+	"radius in pixels to consider around a potential hot pixel");
+
+// amplitude threshold for hot pixel detection
+config::ConfigurationKey	_hotpixel_stddev_key(
+	"guiding", "hotpixel", "stddev_multiplier");
+config::ConfigurationRegister	_hotpixel_stddev_registration(
+	_hotpixel_stddev_key,
+	"number of std deviations of a value from the average for a pixel to be considered hot");
+
 /**
  * \brief Find the star withing the area of Interest
  *
@@ -153,15 +167,11 @@ Point	StarDetectorBase::operator()(const ConstImageAdapter<double>& image,
 	// check whether we have special configuration for the hot pixel
 	// detecter
 	config::ConfigurationPtr	config = config::Configuration::get();
-	config::ConfigurationKey	radiuskey("guiding", "hotpixel",
-						"radius");
-	if (config->has(radiuskey)) {
-		hpia.search_radius(std::stoi(config->get(radiuskey)));
+	if (config->has(_hotpixel_radius_key)) {
+		hpia.search_radius(std::stoi(config->get(_hotpixel_radius_key)));
 	}
-	config::ConfigurationKey	stddevkey("guiding", "hotpixel",
-						"stddev_multiplier");
-	if (config->has(stddevkey)) {
-		hpia.stddev_multiplier(std::stoi(config->get(stddevkey)));
+	if (config->has(_hotpixel_stddev_key)) {
+		hpia.stddev_multiplier(std::stoi(config->get(_hotpixel_stddev_key)));
 	}
 
 	// now build an image without hot pixels

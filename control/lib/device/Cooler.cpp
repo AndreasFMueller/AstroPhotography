@@ -18,6 +18,12 @@ using namespace astro::device;
 namespace astro {
 namespace camera {
 
+config::ConfigurationKey	_cooler_stable_key(
+	"device", "cooler", "stable");
+config::ConfigurationRegister	_cooler_stable_registration(
+	_cooler_stable_key,
+	"tolerance in degrees K for the temperature to consider the cooler stable");
+
 DeviceName::device_type	Cooler::devicetype = DeviceName::Cooler;
 
 /**
@@ -134,10 +140,9 @@ bool	Cooler::stable() {
 		return true;
 	}
 	config::ConfigurationPtr	config = config::Configuration::get();
-	config::ConfigurationKey	key("device", "cooler", "stable");
 	float	stablelimit = 3.;
-	if (config->has(key)) {
-		stablelimit = std::stof(config->get(key));
+	if (config->has(_cooler_stable_key)) {
+		stablelimit = std::stof(config->get(_cooler_stable_key));
 		if (stablelimit <= 0) {
 			stablelimit = 3.;
 		}

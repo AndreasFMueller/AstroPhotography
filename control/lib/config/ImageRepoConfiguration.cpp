@@ -76,7 +76,8 @@ ImageRepoPtr	ImageRepoConfigurationBackend::repo(const std::string& name) {
 	return ImageRepoPtr(new ImageRepo(repos.get(name)));
 }
 
-static ConfigurationRegister	_topdir_key("global", "repository", "topdir",
+static ConfigurationKey	_topdir_key("global", "repository", "topdir");
+static ConfigurationRegister	_topdir_registration(_topdir_key,
 	"top directory for an image repository database");
 
 /**

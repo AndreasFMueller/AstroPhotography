@@ -33,11 +33,11 @@ std::string	ConfigurationTableAdapter::createstatement() {
 
 ConfigurationRecord	ConfigurationTableAdapter::row_to_object(int objectid,
 				const Row& row) {
-	ConfigurationRecord	record(objectid);
-	record.domain = row["domain"]->stringValue();
-	record.section = row["section"]->stringValue();
-	record.name = row["name"]->stringValue();
-	record.value = row["value"]->stringValue();
+	ConfigurationEntry	entry(	row["domain"]->stringValue(),
+					row["section"]->stringValue(),
+					row["name"]->stringValue(),
+					row["value"]->stringValue());
+	ConfigurationRecord	record(entry, objectid);
 	return record;
 }
 
@@ -45,10 +45,10 @@ UpdateSpec	ConfigurationTableAdapter::object_to_updatespec(
 			const ConfigurationRecord& configrec) {
 	UpdateSpec	spec;
 	FieldValueFactory	factory;
-	spec.insert(Field("domain", factory.get(configrec.domain)));
-	spec.insert(Field("section", factory.get(configrec.section)));
-	spec.insert(Field("name", factory.get(configrec.name)));
-	spec.insert(Field("value", factory.get(configrec.value)));
+	spec.insert(Field("domain", factory.get(configrec.domain())));
+	spec.insert(Field("section", factory.get(configrec.section())));
+	spec.insert(Field("name", factory.get(configrec.name())));
+	spec.insert(Field("value", factory.get(configrec.value())));
 	return spec;
 }
 
@@ -73,7 +73,7 @@ std::string	ConfigurationTable::condition(const std::string& domain,
 }
 
 std::string	ConfigurationTable::condition(const ConfigurationKey& key) const {
-	return condition(key.domain, key.section, key.name);
+	return condition(key.domain(), key.section(), key.name());
 }
 
 long	ConfigurationTable::key2id(const ConfigurationKey& key) {

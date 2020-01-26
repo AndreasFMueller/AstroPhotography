@@ -9,45 +9,46 @@ namespace astro {
 namespace config {
 
 ConfigurationKey::ConfigurationKey() {
-	domain = "global";
+	_domain = "global";
 }
 
-ConfigurationKey::ConfigurationKey(const std::string& _domain,
-	const std::string& _section, const std::string& _name)
-	: domain(_domain), section(_section), name(_name) {
+ConfigurationKey::ConfigurationKey(const std::string& domain,
+	const std::string& section, const std::string& name)
+	: _domain(domain), _section(section), _name(name) {
 }
 
 ConfigurationKey::ConfigurationKey(const ConfigurationKey& other)
-	: domain(other.domain), section(other.section), name(other.name) {
+	: _domain(other.domain()), _section(other.section()),
+	  _name(other.name()) {
 }
 
 ConfigurationKey&	ConfigurationKey::operator=(
 				const ConfigurationKey& other) {
-	domain = other.domain;
-	section = other.section;
-	name = other.name;
+	_domain = other.domain();
+	_section = other.section();
+	_name = other.name();
 	return *this;
 }
 
 bool	ConfigurationKey::operator==(const ConfigurationKey& other) const {
-	return (domain == other.domain) && (section == other.section)
-		&& (name == other.name);
+	return (_domain == other.domain()) && (_section == other.section())
+		&& (_name == other.name());
 }
 
 bool	ConfigurationKey::operator<(const ConfigurationKey& other) const {
-	if (domain < other.domain) {
+	if (domain() < other.domain()) {
 		return true;
 	}
-	if (domain > other.domain) {
+	if (domain() > other.domain()) {
 		return false;
 	}
-	if (section < other.section) {
+	if (section() < other.section()) {
 		return true;
 	}
-	if (section > other.section) {
+	if (section() > other.section()) {
 		return false;
 	}
-	if (name < other.name) {
+	if (name() < other.name()) {
 		return true;
 	}
 	return false;
@@ -55,12 +56,12 @@ bool	ConfigurationKey::operator<(const ConfigurationKey& other) const {
 
 std::string	ConfigurationKey::condition() const {
 	return stringprintf("domain = '%s' and section = '%s' and name = '%s'",
-		domain.c_str(), section.c_str(), name.c_str());
+		domain().c_str(), section().c_str(), name().c_str());
 }
 
 std::string	ConfigurationKey::toString() const {
-	return stringprintf("%s.%s.%s", domain.c_str(), section.c_str(),
-		name.c_str());
+	return stringprintf("%s.%s.%s", domain().c_str(), section().c_str(),
+		name().c_str());
 }
 
 } // namespace config

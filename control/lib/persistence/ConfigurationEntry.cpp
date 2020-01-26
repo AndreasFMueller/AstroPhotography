@@ -11,16 +11,22 @@ namespace config {
 ConfigurationEntry::ConfigurationEntry() {
 }
 
-ConfigurationEntry::ConfigurationEntry(const std::string& _domain,
-	const std::string& _section,
-	const std::string& _name, const std::string& _value)
-	: ConfigurationKey(_domain, _section, _name), value(_value) {
+ConfigurationEntry::ConfigurationEntry(const std::string& domain,
+	const std::string& section,
+	const std::string& name, const std::string& value)
+	: ConfigurationKey(domain, section, name), _value(value) {
 }
 
 ConfigurationEntry::ConfigurationEntry(const ConfigurationKey& key,
-	const std::string& _value) {
+	const std::string& value) {
 	ConfigurationKey::operator=(key);
-	value = _value;
+	_value = value;
+}
+
+ConfigurationEntry&	ConfigurationEntry::operator=(const ConfigurationEntry& other) {
+	ConfigurationKey::operator=(other);
+	_value = other.value();
+	return *this;
 }
 
 bool	ConfigurationEntry::operator==(const ConfigurationEntry& other) const {

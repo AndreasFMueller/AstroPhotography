@@ -19,6 +19,20 @@ using namespace astro::thread;
 namespace astro {
 namespace guiding {
 
+// grid spacing configuration for the calibration
+config::ConfigurationKey	_guiding_gridspacing_key(
+	"guiding", "calibration", "gridspacing");
+config::ConfigurationRegister	_guiding_gridspacing_registration(
+	_guiding_gridspacing_key,
+	"The grid spacing in pixels to be used for guiding calibration");
+
+// sequential movements during calibration
+config::ConfigurationKey	_guiding_sequential_key(
+	"guiding", "calibration", "sequential");
+config::ConfigurationRegister	_guiding_sequential_registration(
+	_guiding_sequential_key,
+	"whether or not moving during calibration should be done sequential or simultaneous");
+
 /**
  * \brief Analyze a single grid point
  *
@@ -258,10 +272,8 @@ void	GPCalibrationProcess::main2(astro::thread::Thread<GPCalibrationProcess>& _t
 	// check the configuration for the suggested pixel displacement
 	int	gridspacing = DEFAULT_GRIDSPACING;
 	config::ConfigurationPtr	config = config::Configuration::get();
-	config::ConfigurationKey	key("guiding", "calibration",
-						"gridspacing");
-	if (config->has(key)) {
-		gridspacing = std::stoi(config->get(key));
+	if (config->has(_guiding_gridspacing_key)) {
+		gridspacing = std::stoi(config->get(_guiding_gridspacing_key));
 		if (gridspacing <= 0) {
 			gridspacing = DEFAULT_GRIDSPACING;
 		}
@@ -367,10 +379,8 @@ GPCalibrationProcess::GPCalibrationProcess(GuiderBase *_guider,
 
 	// find out whether we have to move sequentially
 	config::ConfigurationPtr	config = config::Configuration::get();
-	config::ConfigurationKey	key("guiding", "calibration",
-						"sequential");
-	if (config->has(key)) {
-		sequential = (config->get(key) == "yes");
+	if (config->has(_guiding_sequential_key)) {
+		sequential = (config->get(_guiding_sequential_key) == "yes");
 	} else {
 		sequential = false;
 	}

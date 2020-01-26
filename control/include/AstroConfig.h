@@ -111,10 +111,13 @@ typedef std::shared_ptr<Configuration>	ConfigurationPtr;
  * \brief Key class for configuration entries
  */
 class ConfigurationKey {
+	std::string	_domain;
+	std::string	_section;
+	std::string	_name;
 public:
-	std::string	domain;
-	std::string	section;
-	std::string	name;
+	const std::string&	domain() const { return _domain; }
+	const std::string&	section() const { return _section; }
+	const std::string&	name() const { return _name; }
 	ConfigurationKey();
 	ConfigurationKey(const std::string& _domain,
 		const std::string& _section, const std::string& _name);
@@ -132,14 +135,17 @@ public:
  * This is a holder class for configuration data.
  */
 class ConfigurationEntry : public ConfigurationKey {
+	std::string	_value;
 public:
-	std::string	value;
+	const std::string&	value() const { return _value; }
+	void	value(const std::string& v) { _value = v; }
 	ConfigurationEntry();
 	ConfigurationEntry(const std::string& _domain,
 		const std::string& _section,
 		const std::string& _name, const std::string& _value);
 	ConfigurationEntry(const ConfigurationKey& key,
 		const std::string& _value);
+	ConfigurationEntry&	operator=(const ConfigurationEntry& other);
 	bool	operator==(const ConfigurationEntry& other) const;
 	bool	operator<(const ConfigurationEntry& other) const;
 };
@@ -151,6 +157,7 @@ class NoSuchEntry : public std::runtime_error {
 public:
 	NoSuchEntry(const std::string& domain, const std::string& section,
 		const std::string& name);
+	NoSuchEntry(const ConfigurationKey& key);
 	NoSuchEntry(const std::string& cause);
 	NoSuchEntry();
 };
@@ -276,6 +283,8 @@ class ConfigurationRegister : public ConfigurationKey {
 public:
 	ConfigurationRegister(const std::string& domain,
 		const std::string& section, const std::string& name,
+		const std::string& description);
+	ConfigurationRegister(const ConfigurationKey& key,
 		const std::string& description);
 };
 

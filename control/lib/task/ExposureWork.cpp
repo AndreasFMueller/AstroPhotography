@@ -27,6 +27,19 @@ using namespace astro::io;
 namespace astro {
 namespace task {
 
+static config::ConfigurationKey	_cooler_wait_key(
+	"tasks", "cooler", "wait");
+static config::ConfigurationRegister	_cooler_wait_registration(
+	_cooler_wait_key,
+	"wait time in seconds for the cooler to settle on the set temperature");
+
+
+static config::ConfigurationKey	_filterwheel_wait_key(
+	"tasks", "filterwheel", "wait");
+static config::ConfigurationRegister	_filterwheel_wait_registration(
+	_filterwheel_wait_key,
+	"wait time in seconds for the filterwheel to settle");
+
 /**
  * \brief Create a work object
  *
@@ -225,9 +238,8 @@ void	ExposureWork::run() {
 		config::ConfigurationPtr	config
 			= config::Configuration::get();
 		float	waittime = 10.;
-		config::ConfigurationKey	key("tasks", "cooler", "wait");
-		if (config->has(key)) {
-			waittime = std::stof(config->get(key));
+		if (config->has(_cooler_wait_key)) {
+			waittime = std::stof(config->get(_cooler_wait_key));
 		}
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "wait for cooler: %.1f",
 			waittime);
@@ -247,10 +259,8 @@ void	ExposureWork::run() {
 		config::ConfigurationPtr	config
 			= config::Configuration::get();
 		float	waittime = 10.;
-		config::ConfigurationKey	key("tasks", "filterwheel",
-			"wait");
-		if (config->has(key)) {
-			waittime = std::stof(config->get(key));
+		if (config->has(_filterwheel_wait_key)) {
+			waittime = std::stof(config->get(_filterwheel_wait_key));
 		}
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "wait for filterwheel: %.1f",
 			waittime);

@@ -23,6 +23,11 @@ NoSuchEntry::NoSuchEntry(const std::string& domain, const std::string& section,
 	: std::runtime_error(nosuchmessage_format(domain, section, name)) {
 }
 
+NoSuchEntry::NoSuchEntry(const ConfigurationKey& key)
+	: std::runtime_error(stringprintf("no entry %s",
+		key.toString().c_str())) {
+}
+
 NoSuchEntry::NoSuchEntry(const std::string& msg) : std::runtime_error(msg) {
 }
 

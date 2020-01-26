@@ -12,12 +12,16 @@
 namespace astro {
 namespace discover {
 
-static config::ConfigurationRegister	_name_key("global", "service", "name",
+static config::ConfigurationKey	_name_key("global", "service", "name");
+static config::ConfigurationRegister	_name_registration(_name_key,
 	"name of the service");
-static config::ConfigurationRegister	_port_key("global", "service", "port",
+
+static config::ConfigurationKey	_port_key("global", "service", "port");
+static config::ConfigurationRegister	_port_registration(_port_key,
 	"port for the service");
-static config::ConfigurationRegister	_sslport_key("global", "service",
-						"sslport",
+
+static config::ConfigurationKey	_sslport_key("global", "service", "sslport");
+static config::ConfigurationRegister	_sslport_registration(_sslport_key,
 	"port for the SSL encrypted  service");
 
 /**
