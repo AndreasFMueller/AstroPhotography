@@ -241,12 +241,18 @@ void	configurationwidget::valueChanged(int row, int column) {
 
 	// get the value
 	item = ui->configTable->item(row, 3);
-	std::string	value(	item->text().toLatin1().data());
+	std::string	value = astro::trim(
+				std::string(item->text().toLatin1().data()));
 
-	// set the key
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "set %s -> %s", key.toString().c_str(),
-		value.c_str());
-	set(key, value);
+	// if the value is empty, remove the key
+	if (0 == value.size()) {
+		remove(key);
+	} else {
+		// set the key
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "set %s -> %s",
+			key.toString().c_str(), value.c_str());
+		set(key, value);
+	}
 }
 
 /**
