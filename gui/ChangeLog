@@ -1,5 +1,9 @@
 ChangeLog for the Qt GUI to Astrophotography
 
+20200126:
+	* add new class configurationwidget
+	* add new application astroconfig
+
 20200121:
 	* fix bug: guiding interval not read from server
 	* more usage of auto types

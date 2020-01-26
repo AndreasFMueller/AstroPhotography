@@ -10,7 +10,7 @@ TEMPLATE = subdirs
 SUBDIRS = astrogui icegui image test focusing guiding pointing
 SUBDIRS += instruments
 SUBDIRS += images repository expose task browser main
-SUBDIRS += astrobrowser astroviewer snowlife
+SUBDIRS += astroconfig astrobrowser astroviewer snowlife
 SUBDIRS += astrosky astroplanner
 CONFIG += ordered
 

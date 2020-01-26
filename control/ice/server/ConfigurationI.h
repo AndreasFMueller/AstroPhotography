@@ -30,6 +30,9 @@ public:
 					const Ice::Current& current);
 	void	shutdownServer(Ice::Float delay, const Ice::Current& current);
 	void	restartServer(Ice::Float delay, const Ice::Current& current);
+	ConfigurationKeyList	registeredKeys(const Ice::Current& current);
+	std::string	description(const ConfigurationKey& key,
+			const Ice::Current& current);
 };
 
 } // namespace snowstar

@@ -8,6 +8,7 @@
 #include <types.h>
 #include <includes.h>
 #include <AstroConfig.h>
+#include <IceConversions.h>
 
 namespace snowstar {
 namespace app {
@@ -25,6 +26,7 @@ static void	short_usage(const char *progname) {
 	std::cout << p << " [ options ] <server> set <domain> <section> <name> <value>" << std::endl;
 	std::cout << p << " [ options ] <server> remove <domain> <section> <name>" << std::endl;
 	std::cout << p << " [ options ] <server> list [ <domain> [ <section> ] ]" << std::endl;
+	std::cout << p << " [ options ] <server> listkeys" << std::endl;
 	std::cout << p << " [ options ] <server> shutdown [ <delay> ]" << std::endl;
 	std::cout << p << " [ options ] <server> restart [ <delay> ]" << std::endl;
 }
@@ -150,6 +152,19 @@ static int	list_command(ConfigurationPrx configuration,
 	return EXIT_SUCCESS;
 }
 
+static int	listkeys_command(ConfigurationPrx configuration,
+			const std::list<std::string>& /* arguments */) {
+	ConfigurationKeyList	keys = configuration->registeredKeys();
+	std::for_each(keys.begin(), keys.end(),
+		[&configuration](const ConfigurationKey& key) mutable {
+			std::cout << convert(key).toString() << ": ";
+			std::cout << configuration->description(key);
+			std::cout << std::endl;
+		}
+	);
+	return EXIT_SUCCESS;
+}
+
 int	restart_command(DaemonPrx daemon,
 			const std::list<std::string>& arguments) {
 	float	delay = 0;
@@ -265,6 +280,9 @@ int	main(int argc, char *argv[]) {
 	}
 	if ("list" == command) {
 		return list_command(configuration, arguments);
+	}
+	if ("listkeys" == command) {
+		return listkeys_command(configuration, arguments);
 	}
 	if ("shutdown" == command) {
 		return shutdown_command(daemon, arguments);

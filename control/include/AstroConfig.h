@@ -230,24 +230,31 @@ static void	set_default(const std::string& filename);
 	virtual bool	has(const std::string& domain,
 				const std::string& section,
 				const std::string& name) = 0;
+
 	virtual std::string	get(const ConfigurationKey& key) = 0;
 	virtual std::string	get(const std::string& domain,
 					const std::string& section,
 					const std::string& name) = 0;
+
+	virtual std::string	get(const ConfigurationKey& key,
+					const std::string& def) = 0;
 	virtual std::string	get(const std::string& domain,
 					const std::string& section,
 					const std::string& name,
 					const std::string& def) = 0;
+
+	virtual void	set(const ConfigurationKey& key,
+				const std::string& value) = 0;
 	virtual void	set(const std::string& domain,
 				const std::string& section,
 				const std::string& name,
 				const std::string& value) = 0;
-	virtual void	set(const ConfigurationKey& key,
-				const std::string& value) = 0;
+
+	virtual void	remove(const ConfigurationKey& key) = 0;
 	virtual void	remove(const std::string& domain,
 				const std::string& section,
 				const std::string& name) = 0;
-	virtual void	remove(const ConfigurationKey& key) = 0;
+
 	virtual std::list<ConfigurationEntry>	list() = 0;
 	virtual std::list<ConfigurationEntry>	list(const std::string& domain) = 0;
 	virtual std::list<ConfigurationEntry>	list(const std::string& domain,

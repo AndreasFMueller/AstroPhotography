@@ -25,16 +25,19 @@ INCLUDEPATH += /usr/local/include
 
 FORMS    +=								\
 	catalogdialog.ui						\
+	configurationwidget.ui						\
 	imagedisplaywidget.ui						\
 	skydisplaydialog.ui
 
 WIDGETSOURCES =								\
 	catalogdialog.cpp						\
+	configurationwidget.cpp						\
 	imagedisplaywidget.cpp						\
 	skydisplaydialog.cpp
 
 WIDGETHEADERS =								\
 	catalogdialog.h							\
+	configurationwidget.h						\
 	imagedisplaywidget.h						\
 	skydisplaydialog.h
 

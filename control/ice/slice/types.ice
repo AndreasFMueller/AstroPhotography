@@ -94,6 +94,7 @@ module snowstar {
 		string	section;
 		string	name;
 	};
+	sequence<ConfigurationKey>	ConfigurationKeyList;
 	struct ConfigurationItem {
 		string	domain;
 		string	section;
@@ -115,6 +116,8 @@ module snowstar {
 		ConfigurationList	listDomain(string domain);
 		ConfigurationList	listSection(string domain,
 						string section);
+		ConfigurationKeyList	registeredKeys();
+		string	description(ConfigurationKey key) throws NotFound;
 	};
 
 	struct FileInfo {

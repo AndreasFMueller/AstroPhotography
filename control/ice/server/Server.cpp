@@ -42,6 +42,63 @@
 
 namespace snowstar {
 
+// name of the service
+static astro::config::ConfigurationKey	_service_instruments_key(
+	"global", "service", "name");
+static astro::config::ConfigurationRegister
+	_service_instruments_registration(
+	_service_instruments_key,
+        "name of the service");
+
+// devices service
+static astro::config::ConfigurationKey	_service_devices_key(
+	"snowstar", "service", "devices");
+static astro::config::ConfigurationRegister	_service_devices_registration(
+	_service_devices_key,
+	"whether or not the devices service is offered");
+
+// tasks service
+static astro::config::ConfigurationKey	_service_tasks_key(
+	"snowstar", "service", "tasks");
+static astro::config::ConfigurationRegister	_service_tasks_registration(
+	_service_tasks_key,
+	"whether or not the tasks service is offered");
+
+// guiding service
+static astro::config::ConfigurationKey	_service_guiding_key(
+	"snowstar", "service", "guiding");
+static astro::config::ConfigurationRegister	_service_guiding_registration(
+	_service_guiding_key,
+	"whether or not guiding services are offered");
+
+// focusing service
+static astro::config::ConfigurationKey	_service_focusing_key(
+	"snowstar", "service", "focusing");
+static astro::config::ConfigurationRegister	_service_focusing_registration(
+	_service_focusing_key,
+	"whether or not focusing services is offered");
+
+// images service
+static astro::config::ConfigurationKey	_service_images_key(
+	"snowstar", "service", "images");
+static astro::config::ConfigurationRegister	_service_images_registration(
+	_service_images_key,
+	"whether or not images service is offered");
+
+// repository service
+static astro::config::ConfigurationKey	_service_repository_key(
+	"snowstar", "service", "repository");
+static astro::config::ConfigurationRegister	_service_repository_registration(
+	_service_repository_key,
+	"whether or not repository service is offered");
+
+// gateway service
+static astro::config::ConfigurationKey	_service_gateway_key(
+	"snowstar", "service", "gateway");
+static astro::config::ConfigurationRegister	_service_gateway_registration(
+	_service_gateway_key,
+	"whether or not gateway service is offered");
+
 /**
  * \brief Get the services to be activated from the configuration
  */
@@ -51,28 +108,28 @@ void	Server::get_configured_services(astro::discover::ServicePublisherPtr sp) {
 	}
 	astro::config::ConfigurationPtr configuration
 		= astro::config::Configuration::get();
-	if (configuration->get("snowstar", "service", "instruments", "no") == "yes") {
+	if (configuration->get(_service_instruments_key, "no") == "yes") {
 		sp->set(astro::discover::ServiceSubset::INSTRUMENTS);
 	}
-	if (configuration->get("snowstar", "service", "devices", "yes") == "yes") {
+	if (configuration->get(_service_devices_key, "yes") == "yes") {
 		sp->set(astro::discover::ServiceSubset::DEVICES);
 	}
-	if (configuration->get("snowstar", "service", "tasks", "no") == "yes") {
+	if (configuration->get(_service_tasks_key, "no") == "yes") {
 		sp->set(astro::discover::ServiceSubset::TASKS);
 	}
-	if (configuration->get("snowstar", "service", "guiding", "no") == "yes") {
+	if (configuration->get(_service_guiding_key, "no") == "yes") {
 		sp->set(astro::discover::ServiceSubset::GUIDING);
 	}
-	if (configuration->get("snowstar", "service", "focusing", "no") == "yes") {
+	if (configuration->get(_service_focusing_key, "no") == "yes") {
 		sp->set(astro::discover::ServiceSubset::FOCUSING);
 	}
-	if (configuration->get("snowstar", "service", "images", "yes") == "yes") {
+	if (configuration->get(_service_images_key, "yes") == "yes") {
 		sp->set(astro::discover::ServiceSubset::IMAGES);
 	}
-	if (configuration->get("snowstar", "service", "repository", "no") == "yes") {
+	if (configuration->get(_service_repository_key, "no") == "yes") {
 		sp->set(astro::discover::ServiceSubset::REPOSITORY);
 	}
-	if (configuration->get("snowstar", "service", "gateway", "no") == "yes") {
+	if (configuration->get(_service_gateway_key, "no") == "yes") {
 		sp->set(astro::discover::ServiceSubset::GATEWAY);
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "configured services: %s",

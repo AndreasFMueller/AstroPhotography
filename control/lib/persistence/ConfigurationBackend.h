@@ -35,22 +35,26 @@ public:
 	virtual bool    has(const std::string& domain,
 				const std::string& section,
 				const std::string& name);
+
 	virtual std::string	get(const ConfigurationKey& key);
+	virtual std::string     get(const std::string& domain,
+					const std::string& section,
+					const std::string& name);
+
 	virtual std::string	get(const ConfigurationKey& key,
 					const std::string& def);
 	virtual std::string     get(const std::string& domain,
 					const std::string& section,
-					const std::string& name);
-	virtual std::string     get(const std::string& domain,
-					const std::string& section,
 					const std::string& name,
 					const std::string& def);
+
 	virtual void    set(const std::string& domain,
 				const std::string& section,
 				const std::string& name,
 				const std::string& value);
 	virtual void	set(const ConfigurationKey& key,
 				const std::string& value);
+
 	virtual void	setMediaPath(const std::string& path);
 	virtual std::string	getMediaPath();
 	virtual void	remove(const ConfigurationKey& key);

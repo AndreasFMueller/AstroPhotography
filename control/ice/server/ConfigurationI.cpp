@@ -96,4 +96,22 @@ ConfigurationList	ConfigurationI::listSection(const std::string& domain,
 	return result;
 }
 
+ConfigurationKeyList	ConfigurationI::registeredKeys(
+				const Ice::Current& /* current */) {
+	std::list<astro::config::ConfigurationKey>	keys
+		= astro::config::Configuration::listRegistered();
+	ConfigurationKeyList	result;
+	std::for_each(keys.begin(), keys.end(),
+		[&result](astro::config::ConfigurationKey& key) mutable {
+			result.push_back(convert(key));
+		}
+	);
+	return result;
+}
+
+std::string	ConfigurationI::description(const ConfigurationKey& key,
+			const Ice::Current& /* current */) {
+	return astro::config::Configuration::describe(convert(key));
+}
+
 } // namespace snowstar

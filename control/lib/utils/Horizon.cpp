@@ -211,10 +211,10 @@ static config::ConfigurationRegister    _horizon_file_name_registration(
 	"file name of the horizon file to use in the sky display");
 
 // rotation key
-static config::ConfigurationKey		_horizon_rotation_key(
-		"gui", "horizon", "rotation");
-static config::ConfigurationRegister    _horizon_rotation_registration(
-	_horizon_rotation_key,
+static config::ConfigurationKey		_horizon_rotate_key(
+		"gui", "horizon", "rotate");
+static config::ConfigurationRegister    _horizon_rotate_registration(
+	_horizon_rotate_key,
 	"angle in degrees the horizon file needs to be rotated");
 
 
@@ -231,8 +231,8 @@ HorizonPtr	Horizon::get() {
 
 	// check the default configuration for a rotation angle
 	config::ConfigurationPtr	config = config::Configuration::get();
-	if (config->has(_horizon_rotation_key)) {
-		std::string anglestring = config->get(_horizon_rotation_key);
+	if (config->has(_horizon_rotate_key)) {
+		std::string anglestring = config->get(_horizon_rotate_key);
 		rotationangle = Angle(std::stod(anglestring), Angle::Degrees);
 	}
 
