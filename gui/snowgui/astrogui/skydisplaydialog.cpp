@@ -21,11 +21,16 @@ SkyDisplayDialog::SkyDisplayDialog(QWidget *parent)
 	connect(ui->skydisplayWidget, SIGNAL(pointSelected(astro::RaDec)),
 		this, SLOT(targetSelected(astro::RaDec)));
 
-	astro::horizon::HorizonPtr	horizon
-		= astro::horizon::Horizon::get();
-	if (horizon) {
-		ui->skydisplayWidget->horizon(horizon);
-		ui->skydisplayWidget->show_horizon(true);
+	try {
+		astro::horizon::HorizonPtr	horizon
+			= astro::horizon::Horizon::get();
+		if (horizon) {
+			ui->skydisplayWidget->horizon(horizon);
+			ui->skydisplayWidget->show_horizon(true);
+		}
+	} catch (const std::exception& x) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "failed to build horizon: %s",
+			x.what());
 	}
 
 	// set the background color

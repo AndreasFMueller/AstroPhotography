@@ -194,6 +194,7 @@ public:
 	}
 	void	horizon(const astro::horizon::HorizonPtr h) {
 		_horizon = h;
+		_horizon->flatten();
 		if (!_horizon) {
 			_show_horizon = false;
 		}

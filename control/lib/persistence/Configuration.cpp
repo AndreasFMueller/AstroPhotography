@@ -25,13 +25,17 @@ namespace config {
 typedef std::map<std::string, ConfigurationPtr>	configurationmap_t;
 static configurationmap_t	configurationmap;
 
-static std::string	configfilename() {
-	std::string	filename;
+std::string	Configuration::configDir() {
 	// get the path in the home directory
 	char	*home = getenv("HOME");
 	if (NULL != home) {
-		filename = std::string(home) + "/.astro/config.db";
+		return std::string(home) + "/.astro/";
 	}
+	return std::string("./");
+}
+
+static std::string	configfilename() {
+	std::string	filename = Configuration::configDir() + "config.db";
 
 	// first check whether the environment variable is set
 	char	*apconfig = getenv("AstroPhotoConfig");

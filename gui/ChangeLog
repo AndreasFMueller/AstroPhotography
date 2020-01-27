@@ -1,6 +1,7 @@
 ChangeLog for the Qt GUI to Astrophotography
 
 20200127:
+	* add selection of horizon files to the SkyDisplayWidget
 	* add local and remote configuration variables interface
 	* rebuild the configuration interface for the main gui
 

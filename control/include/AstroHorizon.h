@@ -31,6 +31,8 @@ public:
 	Horizon(const Horizon& other, const Angle& angle);
 	void	addgrid(const Angle& gridconstant);
 	HorizonPtr	rotate(const Angle& angle) const;
+	void	flatten();
+
 	static HorizonPtr	get();
 	static HorizonPtr	get(const std::string& filename);
 	static HorizonPtr	get(const std::string& filename,

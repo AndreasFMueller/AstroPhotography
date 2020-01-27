@@ -4,14 +4,19 @@
  * (c) 2018 Prof Dr Andreas Müller, Hochschule Rapperswil
  */
 #include "SkyDisplayWidget.h"
+#include <AstroConfig.h>
 #include <AstroFormat.h>
+#include <AstroConfig.h>
 #include <algorithm>
 #include <QMouseEvent>
 #include <QTimer>
 #include <QToolTip>
 #include <QAction>
 #include <QMenu>
+#include <QFileDialog>
+#include <QMessageBox>
 #include <unistd.h>
+#include <sstream>
 
 using namespace astro::catalog;
 
@@ -443,6 +448,11 @@ void	SkyDisplayWidget::showContextMenu(const QPoint& point) {
 	connect(&actionHorizon, SIGNAL(triggered()),
 		this, SLOT(toggleHorizonVisible()));
 
+	QAction actionSelectHorizon(QString("Select Horizon"), this);
+	contextMenu.addAction(&actionSelectHorizon);
+	connect(&actionSelectHorizon, SIGNAL(triggered()),
+		this, SLOT(selectHorizon()));
+
 	QAction	actionTelescope(QString("Telescope position"), this);
 	actionTelescope.setCheckable(true);
 	actionTelescope.setChecked(show_telescope());
@@ -480,8 +490,10 @@ void	SkyDisplayWidget::timeoffsetChanged(int tens) {
 }
 
 int	SkyDisplayWidget::dialsize() {
-	int	r = (size().width() > size().height()) ? size().height() : size().width();
-	int	l = (size().width() < size().height()) ? size().height() : size().width();
+	int	r = (size().width() > size().height())	? size().height()
+							: size().width();
+	int	l = (size().width() < size().height())	? size().height()
+							: size().width();
 	int	s = l + 2 * r  - 2 * sqrt((l + r) * r);
 	if (s > _dial_maxsize) {
 		return _dial_maxsize;
@@ -490,6 +502,43 @@ int	SkyDisplayWidget::dialsize() {
 		return _dial_minsize;
 	}
 	return s;
+}
+
+/**
+ * \brief 
+ */
+void	SkyDisplayWidget::selectHorizon() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "Horizon selection clicked");
+	// create a File selection dialog to select a horizon file
+	QFileDialog	filedialog(this);
+	filedialog.setAcceptMode(QFileDialog::AcceptOpen);
+	filedialog.setFileMode(QFileDialog::ExistingFile);
+	filedialog.setViewMode(QFileDialog::Detail);
+	filedialog.setNameFilter(QString("Horizon files (*.horizon);;All"));
+	filedialog.setOption(QFileDialog::DontUseNativeDialog);
+	filedialog.setDirectory(QString(astro::config::Configuration::configDir().c_str()));
+	if (!filedialog.exec()) {
+		return;
+	}
+	QStringList	files = filedialog.selectedFiles();
+	std::string	filename(files.begin()->toLatin1().data());
+	try {
+		horizon(astro::horizon::Horizon::get(filename));
+		astro::config::ConfigurationPtr	config
+			= astro::config::Configuration::get();
+		astro::config::ConfigurationKey	key("gui", "horizon",
+			"filename");
+		config->set(key, filename);
+	} catch (const std::exception& x) {
+		QMessageBox	message(this);
+		message.setText(QString("Error while opening horizon file"));
+		std::ostringstream	out;
+		out << "Failed to open the horizon file ";
+		out << filename;
+		out << ". Cause: " << x.what();
+		message.setInformativeText(QString(out.str().c_str()));
+		message.exec();
+	}
 }
 
 } // namespace snowgui

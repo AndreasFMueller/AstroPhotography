@@ -116,6 +116,8 @@ public slots:
 	void	rotationChanged(int angle);
 	void	timeoffsetChanged(int tens);
 
+	void	selectHorizon();
+
 signals:
 	void	pointSelected(astro::RaDec);
 };

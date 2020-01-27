@@ -60,6 +60,16 @@ Horizon::Horizon(const std::string& csvfilename) {
 		csvfilename.c_str());
 	// open the file for reading
 	std::ifstream	in(csvfilename.c_str());
+	if (in.fail()) {
+		std::string	msg = stringprintf("cannot open file %s",
+			csvfilename.c_str());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw std::runtime_error(msg);
+	}
+
+	// read the file
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "start reading file %s",
+		csvfilename.c_str());
 	while (!in.eof()) {
 		char	buf[1024];
 		// read the file line by line (skipping the first line)
@@ -286,6 +296,47 @@ HorizonPtr	Horizon::get(const std::string& filename) {
 HorizonPtr	Horizon::get(const std::string& filename, const Angle& angle) {
 	HorizonPtr	horizon = get(filename);
 	return horizon->rotate(angle);
+}
+
+/**
+ * \brief Interpolate points where the angle changes sign
+ */
+void	Horizon::flatten() {
+	// got through all points and add an intermediate point whenever
+	// a point is below flat the horizon
+	auto	i = begin();
+	AzmAlt	previous = *i;
+	while (++i != end()) {
+		AzmAlt	next = *i;
+
+		// is it necessary to add an intermediate point?
+		if (((previous.a2() < 0) && (next.a2() > 0)) || 
+		 	((previous.a2() > 0) && (next.a2() < 0))) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0,
+				"interpolate between %s and %s",
+				previous.toString().c_str(),
+				next.toString().c_str());
+			double	x1 = previous.a1().radians();
+			double	x2 = next.a1().radians();
+			double	y1 = fabs(previous.a2().radians());
+			double	y2 = fabs(next.a2().radians());
+			double	l = x2 - x1;
+			double	x = x1 + l * y1 / (y1 + y2);
+			AzmAlt	intermediate(Angle(x), 0);
+			insert(intermediate);
+		}
+
+		previous = next;
+	}
+
+	// remove all entries with negative 
+	for (i = begin(); i != end(); i++) {
+		if (i->a2() < 0) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "remove %s",
+				i->toString().c_str());
+			erase(i);
+		}
+	}
 }
 
 } // namespace horizon
