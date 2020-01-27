@@ -1,6 +1,8 @@
 ChangeLog for the Astro project.
 
 20200127:
+	* add display of target point in processed image of StarTracker
+	* add SAO star catalog
 	* add flattening function to Horizon class
 	* fix some bugs in the horizon parser
 	* multiple bug fixes

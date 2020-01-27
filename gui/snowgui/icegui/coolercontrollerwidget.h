@@ -59,9 +59,9 @@ signals:
 	void	coolerSelected(int);
 	void	newCoolerState(float, float, bool);
 	void	newActualTemperature(float);
+	void	newSetTemperature(float);
 
 private:
-	void	displaySetTemperature(float settemperature);
 
 	void	setupCooler();
 	void	coolerFailed(const std::exception&);
@@ -74,6 +74,7 @@ public slots:
 	void	setActual();
 	void	setSetTemperature(double t);
 	void	displayActualTemperature(float actual);
+	void	displaySetTemperature(float settemperature);
 	void	guiChanged();
 	void	dewHeaterChanged(int);
 	void	coolerChanged(int index);

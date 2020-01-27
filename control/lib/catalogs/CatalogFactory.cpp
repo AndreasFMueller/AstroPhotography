@@ -6,6 +6,7 @@
 #include <AstroCatalog.h>
 #include <Hipparcos.h>
 #include <BSC.h>
+#include <SAO.h>
 #include <Tycho2.h>
 #include <Ucac4.h>
 #include <CatalogBackend.h>
@@ -18,6 +19,8 @@ CatalogPtr	CatalogFactory::get(BackendType type,
 	switch (type) {
 	case BSC:
 		return CatalogPtr(new catalog::BSC(parameter));
+	case SAO:
+		return CatalogPtr(new catalog::SAO(parameter));
 	case Hipparcos:
 		return CatalogPtr(new catalog::Hipparcos(parameter));
 	case Tycho2:
@@ -37,6 +40,8 @@ CatalogPtr	CatalogFactory::get(BackendType type) {
 	switch (type) {
 	case BSC:
 		return CatalogPtr(new catalog::BSC(pathbase + "/bsc"));
+	case SAO:
+		return CatalogPtr(new catalog::SAO(pathbase + "/sao"));
 	case Hipparcos:
 		return CatalogPtr(new catalog::Hipparcos(pathbase + "/hipparcos"));
 	case Tycho2:

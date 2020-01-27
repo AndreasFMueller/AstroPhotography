@@ -230,7 +230,8 @@ int	main(int argc, char *argv[]) {
 	ccd->startExposure(exposure);
 	ImagePtr	image = ccd->getImage();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "starwindow: %s", starwindow.toString().c_str());
-	Point	guidestar = findstar(image, starwindow);
+	Point	dither;
+	Point	guidestar = findstar(image, starwindow, dither);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "found guide star at %s",
 		guidestar.toString().c_str());
 

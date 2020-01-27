@@ -293,11 +293,12 @@ class CatalogFactory {
 public:
 	typedef enum {
 		BSC = 0,
-		Tycho2 = 1,
+		SAO = 1,
 		Hipparcos = 2,
-		Ucac4 = 3,
-		Combined = 4,
-		Database = 5
+		Tycho2 = 3,
+		Ucac4 = 4,
+		Combined = 5,
+		Database = 6
 	} BackendType;
 	static CatalogPtr	get(BackendType type,
 					const std::string& parameter);

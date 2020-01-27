@@ -46,7 +46,7 @@ test:	tests
 
 # single test
 singletest_SOURCES = singletest.cpp 					\
-	MilkyWayTest.cpp
+	SAOTest.cpp
 singletest_LDADD = $(catalogs_ldadd)
 singletest_DEPENDENCIES = $(catalogs_dependencies)
 

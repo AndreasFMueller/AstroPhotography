@@ -210,6 +210,13 @@ Point	StarDetectorBase::operator()(const ConstImageAdapter<double>& image,
 	}
 	drawRadius(approximate, r);
 
+	// draw the target cross
+	double	l = image.getSize().width();
+	if (image.getSize().height() > l) {
+		l = image.getSize().height();
+	}
+	drawTarget(target(), l);
+
 	// get the border distance
 	int	bd = bgimage.getSize().borderDistance(approximate);
 	if ((radius_multiplier * r) > bd) {
@@ -231,6 +238,12 @@ Point	StarDetectorBase::operator()(const ConstImageAdapter<double>& image,
 
 	// draw the centroid
 	drawCentroid(centroid, 2 * r);
+
+	// add metadata
+	analysis()->setMetadata(
+		io::FITSKeywords::meta(std::string("TARGETX"), target().x()));
+	analysis()->setMetadata(
+		io::FITSKeywords::meta(std::string("TARGETY"), target().y()));
 
 	// for debugging, write image to debug directory
 	try {
@@ -286,11 +299,15 @@ void	StarDetectorBase::drawCross(const ImagePoint& point, int length,
 	int	xmax = x + length; if (xmax >= w) { xmax = w - 1; }
 	int	ymin = y - length; if (ymin < 0) { ymin = 0; }
 	int	ymax = y + length; if (ymax >= h) { ymax = h - 1; }
-	for (int xx = xmin; xx <= xmax; xx++) {
-		_analysis->pixel(xx, y) = pixel;
+	if ((0 <= x) && (x <= w-1)) {
+		for (int xx = xmin; xx <= xmax; xx++) {
+			_analysis->pixel(xx, y) = pixel;
+		}
 	}
-	for (int yy = ymin; yy <= ymax; yy++) {
-		_analysis->pixel(x, yy) = pixel;
+	if ((0 <= y) && (y <= h-1)) {
+		for (int yy = ymin; yy <= ymax; yy++) {
+			_analysis->pixel(x, yy) = pixel;
+		}
 	}
 }
 
@@ -344,13 +361,25 @@ void	StarDetectorBase::drawRadius(const ImagePoint& approximate,
 /**
  * \brief Draw the centroid
  *
- * \param centroid
+ * \param centroid	the point
  */
 void	StarDetectorBase::drawCentroid(const Point& centroid, double length) {
 	int	l = length;
 	ImagePoint	icentroid(centroid.x(), centroid.y());
 	RGB<unsigned char>	green(0, (unsigned char)204, 0);
 	drawCross(icentroid, l, green);
+}
+
+/**
+ * \brief Draw the target cross in 
+ *
+ * \param target	target point to mark
+ */
+void	StarDetectorBase::drawTarget(const Point& target, double length) {
+	int	l = length;
+	ImagePoint	itarget(target.x(), target.y());
+	RGB<unsigned char>  violett((unsigned char)204, 0, (unsigned char)204);
+	drawCross(itarget, l, violett);
 }
 
 } // namespace guiding

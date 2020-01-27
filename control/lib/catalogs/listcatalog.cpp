@@ -46,6 +46,9 @@ CatalogFactory::BackendType	gettype(const std::string& type) {
 	if (type == "Hipparcos") {
 		return CatalogFactory::Hipparcos;
 	}
+	if (type == "SAO") {
+		return CatalogFactory::SAO;
+	}
 	if (type == "Tycho2") {
 		return CatalogFactory::Tycho2;
 	}

@@ -26,6 +26,7 @@ CatalogDialog::CatalogDialog(QWidget *parent)
 	ui->catalogBox->addItem(QString("NGC/IC"));
 	ui->catalogBox->addItem(QString("PGC"));
 	ui->catalogBox->addItem(QString("Bright Star Catalog"));
+	ui->catalogBox->addItem(QString("SAO"));
 	ui->catalogBox->addItem(QString("Hipparcos"));
 	ui->catalogBox->addItem(QString("Tycho2"));
 	ui->catalogBox->addItem(QString("UCAC4"));
@@ -121,6 +122,17 @@ void	CatalogDialog::searchCommon(const std::string& name) {
 			break;
 		case 3:	{
 				debug(LOG_DEBUG, DEBUG_LOG, 0,
+					"searching SAO for '%s'", name.c_str());
+				CatalogFactory	factory;
+				CatalogPtr	catalog
+					= factory.get(CatalogFactory::SAO);
+				Star	object = catalog->find(name);
+				targetpos = object.position(2000);
+				targetname = object.name();
+			}
+			break;
+		case 4:	{
+				debug(LOG_DEBUG, DEBUG_LOG, 0,
 					"searching Hipparcos for '%s'",
 					name.c_str());
 				CatalogFactory	factory;
@@ -131,7 +143,7 @@ void	CatalogDialog::searchCommon(const std::string& name) {
 				targetname = object.name();
 			}
 			break;
-		case 4:	{
+		case 5:	{
 				debug(LOG_DEBUG, DEBUG_LOG, 0,
 					"searching Tycho2 for '%s'",
 					name.c_str());
@@ -143,7 +155,7 @@ void	CatalogDialog::searchCommon(const std::string& name) {
 				targetname = object.name();
 			}
 			break;
-		case 5:	{
+		case 6:	{
 				debug(LOG_DEBUG, DEBUG_LOG, 0,
 					"searching UCAC4 for '%s'",
 					name.c_str());
@@ -258,11 +270,13 @@ void	CatalogDialog::textEditedStars(const std::string& prefix) {
 			break;
 		case 2:	catalog = factory.get(CatalogFactory::BSC);
 			break;
-		case 3:	catalog = factory.get(CatalogFactory::Hipparcos);
+		case 3:	catalog = factory.get(CatalogFactory::SAO);
 			break;
-		case 4:	catalog = factory.get(CatalogFactory::Tycho2);
+		case 4:	catalog = factory.get(CatalogFactory::Hipparcos);
 			break;
-		case 5:	catalog = factory.get(CatalogFactory::Ucac4);
+		case 5:	catalog = factory.get(CatalogFactory::Tycho2);
+			break;
+		case 6:	catalog = factory.get(CatalogFactory::Ucac4);
 			break;
 		}
 		stars = catalog->findLike(prefix);
@@ -396,12 +410,15 @@ void	CatalogDialog::currentItemChanged(int index) {
 		ui->objectField->setText("<font color='white'>BSC12345</font>");
 		break;
 	case 3:
-		ui->objectField->setText("<font color='white'>HIP123456</font>");
+		ui->objectField->setText("<font color='white'>SAO123456</font>");
 		break;
 	case 4:
-		ui->objectField->setText("<font color='white'>T1234 12345 1</font>");
+		ui->objectField->setText("<font color='white'>HIP123456</font>");
 		break;
 	case 5:
+		ui->objectField->setText("<font color='white'>T1234 12345 1</font>");
+		break;
+	case 6:
 		ui->objectField->setText("<font color='white'>UCAC4-123-123456</font>");
 		break;
 	}

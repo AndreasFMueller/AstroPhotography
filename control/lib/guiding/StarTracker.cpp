@@ -9,6 +9,7 @@
 #include <AstroUtils.h>
 #include <sstream>
 #include <AstroDebug.h>
+#include <AstroIO.h>
 
 using namespace astro::image;
 using namespace astro::image::transform;
@@ -23,6 +24,7 @@ namespace guiding {
 		= dynamic_cast<Image<Pixel > *>(&*image);		\
 	if (NULL != imagep) {						\
 		StarDetector<Pixel >	sd(*imagep);			\
+		sd.target(trackingpoint() - dither() - frame.origin());	\
 		Point	result = sd(searcharea);			\
 		_processedImage = sd.analysis();			\
 		return result;						\
@@ -37,6 +39,7 @@ namespace guiding {
  */
 Point	StarTracker::findstar(ImagePtr image,
 		const ImageRectangle& searcharea) {
+	ImageRectangle	frame = image->getFrame();
 	findstar_typed(unsigned char);
 	findstar_typed(unsigned short);
 	findstar_typed(unsigned int);
@@ -59,37 +62,39 @@ Point	StarTracker::findstar(ImagePtr image,
 }
 
 #undef findstar_typed
-#define	findstar_typed(Pixel)						\
+#define	findstar_typed(Pixel, target)					\
 {									\
 	Image<Pixel >	*imagep						\
 		= dynamic_cast<Image<Pixel > *>(&*image);		\
 	if (NULL != imagep) {						\
 		StarDetector<Pixel >	sd(*imagep);			\
+		sd.target(target);					\
 		Point	result = sd(searcharea);			\
 		return result;						\
 	}								\
 }
 
 
-Point	findstar(ImagePtr image, const ImageRectangle& searcharea) {
-	findstar_typed(unsigned char);
-	findstar_typed(unsigned short);
-	findstar_typed(unsigned int);
-	findstar_typed(unsigned long);
-	findstar_typed(float);
-	findstar_typed(double);
-	findstar_typed(RGB<unsigned char>);
-	findstar_typed(RGB<unsigned short>);
-	findstar_typed(RGB<unsigned int>);
-	findstar_typed(RGB<unsigned long>);
-	findstar_typed(RGB<float>);
-	findstar_typed(RGB<double>);
-	findstar_typed(YUYV<unsigned char>);
-	findstar_typed(YUYV<unsigned short>);
-	findstar_typed(YUYV<unsigned int>);
-	findstar_typed(YUYV<unsigned long>);
-	findstar_typed(YUYV<float>);
-	findstar_typed(YUYV<double>);
+Point	findstar(ImagePtr image, const ImageRectangle& searcharea,
+		const Point& target) {
+	findstar_typed(unsigned char, target);
+	findstar_typed(unsigned short, target);
+	findstar_typed(unsigned int, target);
+	findstar_typed(unsigned long, target);
+	findstar_typed(float, target);
+	findstar_typed(double, target);
+	findstar_typed(RGB<unsigned char>, target);
+	findstar_typed(RGB<unsigned short>, target);
+	findstar_typed(RGB<unsigned int>, target);
+	findstar_typed(RGB<unsigned long>, target);
+	findstar_typed(RGB<float>, target);
+	findstar_typed(RGB<double>, target);
+	findstar_typed(YUYV<unsigned char>, target);
+	findstar_typed(YUYV<unsigned short>, target);
+	findstar_typed(YUYV<unsigned int>, target);
+	findstar_typed(YUYV<unsigned long>, target);
+	findstar_typed(YUYV<float>, target);
+	findstar_typed(YUYV<double>, target);
 	throw std::runtime_error("cannot find star in this image type");
 }
 
@@ -126,6 +131,9 @@ Point	StarTracker::operator()(ImagePtr newimage) {
 		"origin: %s",
 		newpoint.toString().c_str(), _trackingpoint.toString().c_str(),
 		newimage->getFrame().origin().toString().c_str());
+
+	// copy the metadata from the image to the analysis image
+	io::copy_metadata(*newimage, *_processedImage);
 
 	// now we have to check whether the image is actually only a
 	// subframe, and correct newpoint for its offset. This way we

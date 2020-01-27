@@ -8,6 +8,7 @@
 #include <AstroDebug.h>
 #include <AstroFormat.h>
 #include "BSC.h"
+#include "SAO.h"
 #include "Hipparcos.h"
 #include "Tycho2.h"
 #include "Ucac4.h"
@@ -32,6 +33,8 @@ FileBackend::FileBackend(const std::string& basedir) : _basedir(basedir) {
 					+ std::string("/bsc")));
 	hipparcos_catalog = CatalogPtr(new Hipparcos(_basedir
 					+ std::string("/hipparcos")));
+	sao_catalog = CatalogPtr(new SAO(_basedir
+					+ std::string("/sao")));
 	tycho2_catalog = CatalogPtr(new Tycho2(_basedir
 					+ std::string("/tycho2")));
 	ucac4_catalog = CatalogPtr(new Ucac4(_basedir
@@ -174,6 +177,12 @@ Star	FileBackend::find(const std::string& name) {
 		return star;
 	}
 
+	// check for Hipparcos stars
+	if (name.substr(0, 3) == "SAO") {
+		Star	star = sao_catalog->find(name);
+		return star;
+	}
+
 	// check for Tycho2 star
 	if (name.substr(0, 1) == "T") {
 		Star	star = tycho2_catalog->find(name);
@@ -192,6 +201,7 @@ unsigned long	FileBackend::numberOfStars() {
 	unsigned long	result = 0;
 	result += bsc_catalog->numberOfStars();
 	result += hipparcos_catalog->numberOfStars();
+	result += sao_catalog->numberOfStars();
 	result += tycho2_catalog->numberOfStars();
 	result += ucac4_catalog->numberOfStars();
 	return result;

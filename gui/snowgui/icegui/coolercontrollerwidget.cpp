@@ -39,6 +39,8 @@ coolercontrollerwidget::coolercontrollerwidget(QWidget *parent) :
 		ui->activeWidget, SLOT(update(float,float,bool)));
 	connect(this, SIGNAL(newActualTemperature(float)),
 		this, SLOT(displayActualTemperature(float)));
+	connect(this, SIGNAL(newSetTemperature(float)),
+		this, SLOT(displaySetTemperature(float)));
 
 	// connect the dew heater slider
 	connect(ui->dewHeaterSlider, SIGNAL(valueChanged(int)),
@@ -75,7 +77,8 @@ void	coolercontrollerwidget::instrumentSetup(
 	int	index = 0;
 	while (_instrument.has(snowstar::InstrumentCooler, index)) {
 		try {
-			snowstar::CoolerPrx	cooler = _instrument.cooler(index);
+			snowstar::CoolerPrx	cooler
+						= _instrument.cooler(index);
 			std::string	sn = _instrument.displayname(
 					snowstar::InstrumentCooler, index,
 					serviceobject.name());
@@ -85,7 +88,8 @@ void	coolercontrollerwidget::instrumentSetup(
 				emit coolerSelected(index);
 			}
 		} catch (const std::exception& x) {
-			debug(LOG_DEBUG, DEBUG_LOG, 0, "ignore cooler %d", index);
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "ignore cooler %d",
+				index);
 		}
 		index++;
 	}
@@ -132,8 +136,10 @@ void	coolercontrollerwidget::setupCooler() {
 		float	settemperature = 0;
 		bool	ison = false;
 		try {
-			actual = _cooler->getActualTemperature() - astro::Temperature::zero;
-			settemperature = _cooler->getSetTemperature() - astro::Temperature::zero;
+			actual = _cooler->getActualTemperature()
+					- astro::Temperature::zero;
+			settemperature = _cooler->getSetTemperature()
+					- astro::Temperature::zero;
 			ison = _cooler->isOn();
 		} catch (const std::exception& x) {
 			coolerFailed(x);
@@ -149,27 +155,32 @@ void	coolercontrollerwidget::setupCooler() {
 		ui->activeWidget->setActive(ison);
 
 		// check the 
-try {
-		if (_cooler->hasDewHeater()) {
-			snowstar::Interval	i = _cooler->dewHeaterRange();
-			_dewheaterinterval = std::make_pair(i.min, i.max);
-debug(LOG_DEBUG, DEBUG_LOG, 0, "dew heater interval: %f %f", i.min, i.max);
-			float   m = (ui->dewHeaterSlider->maximum()
+		try {
+			if (_cooler->hasDewHeater()) {
+				snowstar::Interval	i
+					= _cooler->dewHeaterRange();
+				_dewheaterinterval
+					= std::make_pair(i.min, i.max);
+				debug(LOG_DEBUG, DEBUG_LOG, 0,
+					"dew heater interval: %f %f",
+					i.min, i.max);
+				float   m = (ui->dewHeaterSlider->maximum()
 					- ui->dewHeaterSlider->minimum())
-					/ (i.max - i.min);
-                        float   g = _cooler->getDewHeater();
-                        int     v = m * (g - i.min)
+						/ (i.max - i.min);
+				float   g = _cooler->getDewHeater();
+				int     v = m * (g - i.min)
 					+ ui->dewHeaterSlider->minimum();
-                        ui->dewHeaterSlider->setValue(v);
-			ui->dewHeaterSlider->setEnabled(true);
-			ui->dewHeaterValue->setHidden(false);
-		} else {
-			ui->dewHeaterSlider->setEnabled(false);
-			ui->dewHeaterValue->setHidden(true);
+				ui->dewHeaterSlider->setValue(v);
+				ui->dewHeaterSlider->setEnabled(true);
+				ui->dewHeaterValue->setHidden(false);
+			} else {
+				ui->dewHeaterSlider->setEnabled(false);
+				ui->dewHeaterValue->setHidden(true);
+			}
+		} catch (std::exception& x) {
+			debug(LOG_ERR, DEBUG_LOG, 0, "dew heater problem: %s",
+				x.what());
 		}
-} catch (std::exception& x) {
-	debug(LOG_ERR, DEBUG_LOG, 0, "dew heater problem: %s", x.what());
-}
 
 		// enable the status update timer
 		statusTimer.start();
@@ -213,9 +224,11 @@ void	coolercontrollerwidget::displayActualTemperature(float actual) {
  * \brief Set the actual temperature 
  */
 void	coolercontrollerwidget::setActual() {
-	if (_cooler) {
-		displayActualTemperature(_cooler->getActualTemperature() - astro::Temperature::zero);
+	if (!_cooler) {
+		return;
 	}
+	displayActualTemperature(_cooler->getActualTemperature()
+		- astro::Temperature::zero);
 }
 
 /**
@@ -231,7 +244,7 @@ void	coolercontrollerwidget::displaySetTemperature(float settemp) {
 		return;
 	}
 	ui->setTemperatureSpinBox->blockSignals(true);
-	ui->setTemperatureSpinBox->setValue(settemp + astro::Temperature::zero);
+	ui->setTemperatureSpinBox->setValue(settemp);
 	ui->setTemperatureSpinBox->blockSignals(false);
 }
 
@@ -254,8 +267,10 @@ void	coolercontrollerwidget::statusUpdate() {
 	}
 	try {
 		// get the information about the cooler
-		float	actual = _cooler->getActualTemperature() - astro::Temperature::zero;
-		float	settemp = _cooler->getSetTemperature() - astro::Temperature::zero;
+		float	actual = _cooler->getActualTemperature()
+					- astro::Temperature::zero;
+		float	settemp = _cooler->getSetTemperature()
+					- astro::Temperature::zero;
 		bool	is_on = _cooler->isOn();
 
 		// emit the information to the active
@@ -263,6 +278,10 @@ void	coolercontrollerwidget::statusUpdate() {
 
 		// emit the information about the new actual temperature
 		emit newActualTemperature(actual);
+		float	setsettemp = ui->setTemperatureSpinBox->value();
+		if (fabs(settemp - setsettemp) > 0.1) {
+			emit newSetTemperature(settemp);
+		}
 
 		// have we already reached the temperature?
 		bool	actualreached = (actual == settemp);
@@ -356,7 +375,6 @@ void	coolercontrollerwidget::dewHeaterChanged(int newvalue) {
         float   g = _dewheaterinterval.first
                         + m * (newvalue - ui->dewHeaterSlider->minimum());
         setDewHeater(g);
-
 }
 
 /**
@@ -398,8 +416,6 @@ void    coolercontrollerwidget::setDewHeaterSlider(float dewheatervalue) {
 	setDewHeater(dewheatervalue);
 	int     v = m * (d - i.min) + ui->dewHeaterSlider->minimum();
 	ui->dewHeaterSlider->setValue(v);
-
 }
-
 
 } // namespace snowgui

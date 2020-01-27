@@ -31,6 +31,7 @@ noinst_HEADERS =							\
 	MappedFile.h							\
 	NGCIC.h								\
 	PGC.h								\
+	SAO.h								\
 	Stellarium.h							\
 	Tycho2.h							\
 	Ucac4.h
@@ -84,6 +85,9 @@ libastrocatalogs_la_SOURCES =						\
 	OutlineCatalog.cpp						\
 	PointSpreadFunctionAdapter.cpp					\
 	PointSpreadFunction.cpp						\
+	SAO.cpp								\
+	SAOStar.cpp							\
+	SAOIterator.cpp							\
 	SkyRectangle.cpp						\
 	SkyWindow.cpp							\
 	Star.cpp							\

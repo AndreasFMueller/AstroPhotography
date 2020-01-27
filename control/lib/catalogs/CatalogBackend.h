@@ -38,6 +38,7 @@ class FileBackendIterator;
 class FileBackend : public Catalog {
 	std::string	_basedir;
 	CatalogPtr	bsc_catalog;
+	CatalogPtr	sao_catalog;
 	CatalogPtr	hipparcos_catalog;
 	CatalogPtr	tycho2_catalog;
 	CatalogPtr	ucac4_catalog;

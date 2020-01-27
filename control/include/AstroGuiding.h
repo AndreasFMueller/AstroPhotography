@@ -72,11 +72,15 @@ class StarDetectorBase {
 	// auxiliary methods to fill in the analysis image
 	void	drawImage(const ConstImageAdapter<double>& image);
 	void	drawCentroid(const Point& centroid, double length);
+	void	drawTarget(const Point& target, double length);
 	void	drawRadius(const ImagePoint& approximage, double radius);
 	void	drawHotpixels(const std::list<ImagePoint>& hotpixels);
 	void	drawCross(const ImagePoint& point, int length,
 			const RGB<unsigned char>& pixel);
+	Point	_target;
 public:
+	Point	target() const { return _target; }
+	void	target(const Point& t) { _target = t; }
 	StarDetectorBase() { }
 	Point	operator()(const image::ConstImageAdapter<double>& _image,
 			const image::ImageRectangle& rectangle);
@@ -127,7 +131,8 @@ Point	StarDetector<Pixel>::operator()(
 }
 
 Point	findstar(image::ImagePtr image,
-	const image::ImageRectangle& rectangle);
+	const image::ImageRectangle& rectangle,
+	const Point& dither);
 
 /**
  * \brief Tracker class
