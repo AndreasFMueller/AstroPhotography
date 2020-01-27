@@ -50,8 +50,13 @@ FORMS    +=								\
 	guideportcontrollerwidget.ui					\
 	guidercontrollerwidget.ui					\
 	imagercontrollerwidget.ui					\
+	localconfigurationwidget.ui					\
 	mountcontrollerwidget.ui					\
+	remoteconfigurationpanel.ui					\
+	repositoryconfigurationwidget.ui				\
+	serverconfigurationwidget.ui					\
 	singletrackwidget.ui						\
+	systemconfigurationwidget.ui					\
 	trackingmonitordialog.ui					\
 	trackselectiondialog.ui						\
 	trackviewdialog.ui
@@ -77,8 +82,13 @@ WIDGETSOURCES =								\
 	guideportcontrollerwidget.cpp					\
 	guidercontrollerwidget.cpp					\
 	imagercontrollerwidget.cpp					\
+	localconfigurationwidget.cpp					\
 	mountcontrollerwidget.cpp					\
+	remoteconfigurationpanel.cpp					\
+	repositoryconfigurationwidget.cpp				\
+	serverconfigurationwidget.cpp					\
 	singletrackwidget.cpp						\
+	systemconfigurationwidget.cpp					\
 	trackingmonitordialog.cpp					\
 	trackselectiondialog.cpp					\
 	trackviewdialog.cpp
@@ -104,8 +114,13 @@ WIDGETHEADERS =								\
 	guideportcontrollerwidget.h					\
 	guidercontrollerwidget.h					\
 	imagercontrollerwidget.h					\
+	localconfigurationwidget.h					\
 	mountcontrollerwidget.h						\
+	remoteconfigurationpanel.h					\
+	repositoryconfigurationwidget.h					\
+	serverconfigurationwidget.h					\
 	singletrackwidget.h						\
+	systemconfigurationwidget.h					\
 	trackingmonitordialog.h						\
 	trackselectiondialog.h						\
 	trackviewdialog.h
@@ -132,6 +147,8 @@ SOURCES += 								\
 	InstrumentWidget.cpp						\
 	MonitorImage.cpp						\
 	mountupdatework.cpp						\
+	remoteconfigurationwidget.cpp					\
+	repoenablebox.cpp						\
 	StateMonitoringWork.cpp						\
 	TrackingMonitorImage.cpp					\
 	TrackingMonitorController.cpp					\
@@ -153,6 +170,8 @@ HEADERS  += 								\
 	ImageForwarder.h						\
 	InstrumentWidget.h						\
 	MonitorImage.h							\
+	remoteconfigurationwidget.h					\
+	repoenablebox.h							\
 	TrackingMonitorImage.h						\
 	TrackingMonitorController.h					\
 	$${WIDGETHEADERS}

@@ -1,5 +1,9 @@
 ChangeLog for the Qt GUI to Astrophotography
 
+20200127:
+	* add local and remote configuration variables interface
+	* rebuild the configuration interface for the main gui
+
 20200126:
 	* add new class configurationwidget
 	* add new application astroconfig

@@ -14,7 +14,8 @@
 #include <guidingwindow.h>
 #include <pointingwindow.h>
 #include <instrumentswindow.h>
-#include "configurationdialog.h"
+//#include "configurationdialog.h"
+#include <systemconfigurationwidget.h>
 #include <imageswindow.h>
 #include <repositorywindow.h>
 #include <taskwindow.h>
@@ -243,19 +244,21 @@ void	MainWindow::launchInstruments() {
 void	MainWindow::launchConfiguration() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "launch configuration window");
 	try {
-		if (_configurationdialog) {
+		if (_configurationwidget) {
 			debug(LOG_DEBUG, DEBUG_LOG, 0, "raise existing window");
-			_configurationdialog->raise();
-			_configurationdialog->activateWindow();
+			_configurationwidget->raise();
+			_configurationwidget->activateWindow();
 		} else {
-			debug(LOG_DEBUG, DEBUG_LOG, 0, "create new dialog");
-			_configurationdialog = new configurationdialog(NULL,
-				_serviceobject);
-			_configurationdialog->show();
-			windowsMenu->add(_configurationdialog,
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "create new SystemConfigurationWidget");
+			_configurationwidget = new SystemConfigurationWidget();
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "widget created");
+			astro::discover::ServiceObjectPtr	so(new astro::discover::ServiceObject(_serviceobject));
+			_configurationwidget->setServiceObject(so);
+			_configurationwidget->show();
+			windowsMenu->add(_configurationwidget,
 				QString("Configuration"));
 			// when the dialog is closed, forget it
-			connect(_configurationdialog, SIGNAL(destroyed()),
+			connect(_configurationwidget, SIGNAL(destroyed()),
                 		this, SLOT(forgetConfiguration()));
 		}
 	} catch (const std::exception& x) {
@@ -275,7 +278,7 @@ void	MainWindow::launchConfiguration() {
 
 void	MainWindow::forgetConfiguration() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "forget configuration window");
-	_configurationdialog = NULL;
+	_configurationwidget = NULL;
 }
 
 /**

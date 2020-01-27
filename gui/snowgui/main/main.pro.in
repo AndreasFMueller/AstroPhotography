@@ -49,31 +49,23 @@ ICON = snowgui.icns
 ASTROGUISOURCES = 							\
 	Application.cpp							\
         mainwindow.cpp 							\
-	configurationdialog.cpp						\
 	connectiondialog.cpp 						\
 	serverselectiondialog.cpp 					\
-	repositoryconfigurationwidget.cpp				\
-	repoenablebox.cpp						\
 	instrumentselectiondialog.cpp					\
 	WindowsMenu.cpp
 
 ASTROGUIHEADERS =							\
 	Application.h							\
 	mainwindow.h							\
-	configurationdialog.h						\
 	connectiondialog.h						\
 	serverselectiondialog.h						\
-	repositoryconfigurationwidget.h					\
-	repoenablebox.h							\
 	instrumentselectiondialog.h					\
 	WindowsMenu.h
 
 FORMS    +=								\
 	mainwindow.ui							\
-	configurationdialog.ui						\
 	connectiondialog.ui						\
 	serverselectiondialog.ui					\
-	repositoryconfigurationwidget.ui				\
 	instrumentselectiondialog.ui
 
 SOURCES += main.cpp $${ASTROGUISOURCES} 				\

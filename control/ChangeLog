@@ -1,5 +1,9 @@
 ChangeLog for the Astro project.
 
+20200127:
+	* multiple bug fixes
+	* add ServiceObjectPtr type
+
 20200126:
 	* add configuration documentation to the ICE interface
 	* add config docu options to the snowconfig client

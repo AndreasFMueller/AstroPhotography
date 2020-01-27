@@ -26,7 +26,7 @@ configurationwidget::configurationwidget(QWidget *parent)
 	connect(ui->deleteButton, SIGNAL(clicked()),
 		this, SLOT(deleteClicked()));
 	connect(ui->refreshButton, SIGNAL(clicked()),
-		this, SLOT(refreshButton()));
+		this, SLOT(refreshClicked()));
 	connect(ui->configTable, SIGNAL(cellChanged(int, int)),
 		this, SLOT(valueChanged(int, int)));
 	connect(ui->configTable, SIGNAL(itemSelectionChanged()),

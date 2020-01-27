@@ -11,8 +11,9 @@
 #include <QLabel>
 #include <AstroImage.h>
 #include "WindowsMenu.h"
-#include "configurationdialog.h"
+//#include "configurationdialog.h"
 #include <eventdisplaywidget.h>
+#include <systemconfigurationwidget.h>
 
 namespace snowgui {
 
@@ -32,7 +33,7 @@ class MainWindow : public QMainWindow
 public:
 	const std::string&	servername() const { return _serviceobject.name(); }
 
-	configurationdialog	*_configurationdialog = NULL;
+	SystemConfigurationWidget	*_configurationwidget = NULL;
 	EventDisplayWidget	*_eventdisplaywidget = NULL;
 public:
 	explicit MainWindow(QWidget *parent,

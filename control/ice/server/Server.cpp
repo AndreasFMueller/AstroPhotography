@@ -43,12 +43,17 @@
 namespace snowstar {
 
 // name of the service
-static astro::config::ConfigurationKey	_service_instruments_key(
+static astro::config::ConfigurationKey	_service_name_key(
 	"global", "service", "name");
 static astro::config::ConfigurationRegister
-	_service_instruments_registration(
+	_service_name_registration(_service_name_key, "name of the service");
+
+// instruments service
+static astro::config::ConfigurationKey	_service_instruments_key(
+	"snowstar", "service", "instruments");
+static astro::config::ConfigurationRegister	_service_instruments_registration(
 	_service_instruments_key,
-        "name of the service");
+	"whether or not the instruments service is offered");
 
 // devices service
 static astro::config::ConfigurationKey	_service_devices_key(
@@ -109,6 +114,7 @@ void	Server::get_configured_services(astro::discover::ServicePublisherPtr sp) {
 	astro::config::ConfigurationPtr configuration
 		= astro::config::Configuration::get();
 	if (configuration->get(_service_instruments_key, "no") == "yes") {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "instruments enabled");
 		sp->set(astro::discover::ServiceSubset::INSTRUMENTS);
 	}
 	if (configuration->get(_service_devices_key, "yes") == "yes") {
