@@ -207,6 +207,8 @@ public:
 
 std::ostream&	operator<<(std::ostream& out, const ServiceObject& o);
 
+typedef std::shared_ptr<ServiceObject>	ServiceObjectPtr;
+
 /**
  * \brief Resolver base class
  */
