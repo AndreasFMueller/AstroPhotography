@@ -2,13 +2,12 @@ general:
       - should be able to close windows with cmd-w in Mac OS X
 
 ccdcontrollerwidget:
-      -	add gain and offset controls
+      -	add offset controls
       -	add controls for image quality and other special properties that
 	depend on the camera. They should only be visible for cameras that
 	have them
 
 guidercontrollerwidget:
-      - Display calibration after calibration completes
       - Allow to view calibration details during guiding, e.g. by letting
 	the Points button enabled
       - "Points" -> "Details", create a dialog that shows the calibration

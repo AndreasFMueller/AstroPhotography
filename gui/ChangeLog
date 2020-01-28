@@ -1,5 +1,9 @@
 ChangeLog for the Qt GUI to Astrophotography
 
+20200128:
+	* use RoundingSpinBox in coolercontrollerwidget
+	* add RoundingSpinBox widget
+
 20200127:
 	* fix an update bug in coolercontrollerwidget (still not quite
 	  sattisfying)

@@ -65,6 +65,7 @@ SOURCES += 								\
 	LogSpinBox.cpp							\
 	OffsetDial.cpp							\
 	RotateDial.cpp							\
+	RoundingSpinBox.cpp						\
 	Scaler.cpp							\
 	SelectableImage.cpp						\
 	SkyDisplayWidget.cpp						\
@@ -97,6 +98,7 @@ HEADERS  += 								\
 	LogSpinBox.h							\
 	OffsetDial.h							\
 	RotateDial.h							\
+	RoundingSpinBox.h						\
 	Scaler.h							\
 	SelectableImage.h						\
 	SkyDisplayWidget.h						\

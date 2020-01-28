@@ -80,7 +80,7 @@
        </widget>
       </item>
       <item row="1" column="2">
-       <widget class="QDoubleSpinBox" name="setTemperatureSpinBox">
+       <widget class="snowgui::RoundingSpinBox" name="setTemperatureSpinBox">
         <property name="alignment">
          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
         </property>
@@ -150,6 +150,11 @@
    <extends>QWidget</extends>
    <header location="global">CoolerActive.h</header>
    <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>snowgui::RoundingSpinBox</class>
+   <extends>QDoubleSpinBox</extends>
+   <header location="global">RoundingSpinBox.h</header>
   </customwidget>
  </customwidgets>
  <resources/>
