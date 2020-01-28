@@ -28,7 +28,24 @@ config::ConfigurationKey	_hotpixel_stddev_key(
 	"guiding", "hotpixel", "stddev_multiplier");
 config::ConfigurationRegister	_hotpixel_stddev_registration(
 	_hotpixel_stddev_key,
-	"number of std deviations of a value from the average for a pixel to be considered hot");
+	"number of std deviations of a value from the average for a pixel "
+	"to be considered hot");
+
+// maximum radius for averaging a star
+config::ConfigurationKey	_stardetector_maxradius_key(
+	"guiding", "stardetector", "maxradius");
+config::ConfigurationRegister	_stardetector_maxradius_registration(
+	_stardetector_maxradius_key,
+	"maximum radius of pixels to average to find the centroid of a "
+	"pixel (default 20 pixel)");
+
+// minimum radius for fwhm stars
+config::ConfigurationKey	_stardetector_minradius_key(
+	"guiding", "stardetector", "minradius");
+config::ConfigurationRegister	_stardetector_minradius_registration(
+	_stardetector_minradius_key,
+	"minimum radius of pixels to average to find the centroid of a "
+	"pixel (5 pixel)");
 
 /**
  * \brief Find the star withing the area of Interest
@@ -93,10 +110,13 @@ double	StarDetectorBase::radius(const ConstImageAdapter<double>& _image,
 
 	// radius larger than 20 is almost surely a insufficiently
 	// focused star, so we only consider points sufficiently close
-	int	maxradius = bd;
-	if (maxradius > 20) {
-		// XXX magic number 20?
-		maxradius = 20;
+	int	maxradius = 20;
+	config::ConfigurationPtr	config = config::Configuration::get();
+	if (config->has(_stardetector_maxradius_key)) {
+		maxradius = std::stoi(config->get(_stardetector_maxradius_key));
+	}
+	if (bd < maxradius) {
+		maxradius = bd;
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "using maxradius=%d", maxradius);
 
@@ -202,11 +222,14 @@ Point	StarDetectorBase::operator()(const ConstImageAdapter<double>& image,
 		(r > 15) ? ", very large! no star found?" : "");
 
 	// make the radius large engough for the PeakFinder to work
-	// XXX magic number 5?
-	if (r < 5) {
-		r = 5;
+	int	minradius = 5;
+	if (config->has(_stardetector_minradius_key)) {
+		minradius = std::stoi(config->get(_stardetector_minradius_key));
+	}
+	if (r < minradius) {
+		r = minradius;
 		debug(LOG_DEBUG, DEBUG_LOG, 0,
-			"increased radius from %f to 5", r);
+			"increased radius from %f to %d", r, minradius);
 	}
 	drawRadius(approximate, r);
 

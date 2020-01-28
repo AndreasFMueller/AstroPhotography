@@ -1,5 +1,9 @@
 ChangeLog for the Astro project.
 
+20200128:
+	* more configurable variables
+	* get more information about kalman filter in the debug log
+
 20200127:
 	* add display of target point in processed image of StarTracker
 	* add SAO star catalog

@@ -8,9 +8,18 @@
 #include <AstroDebug.h>
 #include <AstroFormat.h>
 #include <stdexcept>
+#include <AstroConfig.h>
 
 namespace astro {
 namespace guiding {
+
+// default focal length configuration key
+config::ConfigurationKey	_guiding_default_focallength_key(
+	"guiding", "default", "focallength");
+config::ConfigurationRegister	_guiding_default_focallength_registration(
+	_guiding_default_focallength_key,
+	"default focallength to use other than 0.24[m] for calibration if "
+	"not defined");
 
 static const double	siderial_rate = 2 * M_PI / 86400;
 static const double	arcsec_per_radian = 180 * 3600 / M_PI;
@@ -85,7 +94,14 @@ GridConstant::GridConstant(double focallength, double pixelsize)
 		throw std::runtime_error(msg);
 	}
 	if (_focallength == 0) {
-		_focallength = 0.24;
+		config::ConfigurationPtr	config
+			= config::Configuration::get();
+		if (config->has(_guiding_default_focallength_key))  {
+			_focallength = std::stod(config->get(
+					_guiding_default_focallength_key));
+		} else {
+			_focallength = 0.24;
+		}
 		debug(LOG_WARNING, DEBUG_LOG, 0,
 			"focal length undefined, using %.3f", _focallength);
 	}

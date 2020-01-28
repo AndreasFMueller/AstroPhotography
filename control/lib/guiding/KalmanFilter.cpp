@@ -50,7 +50,7 @@ KalmanFilter::KalmanFilter(double deltat) : phi(1) {
  * \brief Retrieve the measurement error
  */
 double	KalmanFilter::measurementerror() const {
-	return R(0,0);
+	return sqrt(R(0,0));
 }
 
 /**
@@ -60,15 +60,15 @@ double	KalmanFilter::measurementerror() const {
  */
 void	KalmanFilter::measurementerror(double m) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "new measurement error: %.3f", m);
-	R(0,0) = m;
-	R(1,1) = m;
+	R(0,0) = m * m;
+	R(1,1) = m * m;
 }
 
 /**
  * \brief Retrieve the system error
  */
 double	KalmanFilter::systemerror() const {
-	return Q(0,0);
+	return sqrt(Q(0,0));
 }
 
 /**
@@ -78,6 +78,7 @@ double	KalmanFilter::systemerror() const {
  */
 void	KalmanFilter::systemerror(double s) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "new system error: %.3f", s);
+	s = s * s;
 	Q(0,0) = s;
 	Q(0,1) = s /  _deltat;
 	Q(1,0) = s /  _deltat;

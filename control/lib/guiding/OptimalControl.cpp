@@ -32,6 +32,8 @@ Point	OptimalControl::correct(const Point& offset) {
 
 	// get the filtered offset
 	Point	filtered_offset = _kalmanfilter->offset();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "Kalman: offset=%s, filtered=%s",
+		offset.toString().c_str(), filtered_offset.toString().c_str());
 
 	// correct the filtered offset
 	return ControlBase::correct(filtered_offset);

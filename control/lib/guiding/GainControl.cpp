@@ -15,7 +15,11 @@ GainControl::~GainControl() {
 }
 
 Point	GainControl::correct(const Point& offset) {
-	return ControlBase::correct(offset) * Point(gain(0), gain(1));
+	Point	corrected = ControlBase::correct(offset)
+				* Point(gain(0), gain(1));
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "gain corrected: %s -> %s",
+		offset.toString().c_str(), corrected.toString().c_str());
+	return corrected;
 }
 
 } // namespace guiding
