@@ -47,7 +47,7 @@ TrackingProcess::TrackingProcess(GuiderBase *guider, TrackerPtr tracker,
 	: BasicProcess(guider, tracker, database),
 	  _guidePortDevice(guidePortDevice),
 	  _adaptiveOpticsDevice(adaptiveOpticsDevice),
-	  _summary(guider->name(), guider->instrument(), guider->ccdname()) {
+	  _summary(guider->instrument()) {
 	_filter_parameters[0] = 1;
 	_filter_parameters[1] = 1;
 	_guideportInterval = 10;
@@ -72,14 +72,6 @@ TrackingProcess::TrackingProcess(GuiderBase *guider, TrackerPtr tracker,
 		_control->filter_parameter(1, filter_parameter(1));
 	}
 
-	// additional fields in the summary
-	if (guidePortDevice) {
-		_summary.descriptor.guideport(guidePortDevice->devicename());
-	}
-	if (adaptiveOpticsDevice) {
-		_summary.descriptor.guideport(adaptiveOpticsDevice->devicename());
-	}
-	
 	// install the callback
 	TrackingProcessCallback	*trackingprocesscallback
 		= new TrackingProcessCallback(this);
@@ -164,7 +156,6 @@ void	TrackingProcess::main(thread::Thread<TrackingProcess>& thread) {
 	if (database()) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "TRACK: have database");
 		Track      track;
-		track.name = guider()->name();
 		track.instrument = guider()->instrument();
 		track.ccd = guider()->ccdname();
 		if (guidePortUsable()) {

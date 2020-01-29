@@ -200,16 +200,8 @@ int	main(int argc, char *argv[]) {
 	// build the guider descriptor
 	GuiderDescriptor	descriptor;
 	descriptor.instrumentname = instrumentname;
-	descriptor.ccdIndex = ccdIndex;
-	descriptor.guideportIndex = guideportIndex;
-	descriptor.adaptiveopticsIndex = adaptiveopticsIndex;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "instrument: %s",
 		descriptor.instrumentname.c_str());
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "ccd: %d", descriptor.ccdIndex);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "guideport: %d",
-		descriptor.guideportIndex);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "adaptiveoptics: %d",
-		descriptor.adaptiveopticsIndex);
 
 	// connect to the guider factory of a remote server
 	Ice::CommunicatorPtr	ic = CommunicatorSingleton::get();

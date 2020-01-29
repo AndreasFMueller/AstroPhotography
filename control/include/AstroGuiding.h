@@ -308,35 +308,15 @@ typedef std::shared_ptr<ControlDeviceName>	ControlDeviceNamePtr;
  */
 class GuiderName {
 	// identification of the guider
-	std::string	_name;
 	std::string	_instrument;
-	int	_ccdIndex;
-	int	_guideportIndex;
-	int	_adaptiveopticsIndex;
-	void	parse(const std::string&);
-	std::string	buildname() const;
 public:
-	GuiderName(const std::string& n, int ccdIndex = -1,
-		int guideportIndex = -1, int adaptiveopticsIndex = -1);
+	GuiderName(const std::string& n);
 	GuiderName(const GuiderName& other);
 
-	const std::string&	name() const { return _name; }
-	void	name(const std::string& n);
-
 	const std::string&	instrument() const { return _instrument; }
-	void	instrument(const std::string& i);
 
-	int	ccdIndex() const { return _ccdIndex; }
-	void	ccdIndex(int c);
-
-	int	guideportIndex() const { return _guideportIndex; }
-	void	guideportIndex(int g);
-
-	int	adaptiveopticsIndex() const { return _adaptiveopticsIndex; }
-	void	adaptiveopticsIndex(int a);
-
-	bool	hasGuidePort() const { return _guideportIndex >= 0; }
-	bool	hasAdaptiveOptics() const { return _adaptiveopticsIndex >= 0; }
+	bool	hasGuidePort() const;
+	bool	hasAdaptiveOptics() const;
 
 	ControlDeviceNamePtr	guidePortDeviceName();
 	ControlDeviceNamePtr	adaptiveOpticsDeviceName();
@@ -568,28 +548,29 @@ public:
  * \brief The GuiderDescriptor is the key to Guiders in the GuiderFactory
  */
 class GuiderDescriptor {
-	std::string	_name;
 	std::string	_instrument;
 	std::string	_ccd;
 	std::string	_guideport;
 	std::string	_adaptiveoptics;
+	void	setup(const std::string& instrumentname);
 public:
-	GuiderDescriptor(const std::string& name, const std::string& instrument,
+	GuiderDescriptor(const std::string& instrument,
 		const std::string& ccd, const std::string& guideport,
 		const std::string& adaptiveoptics)
-		: _name(name), _instrument(instrument), _ccd(ccd),
+		: _instrument(instrument), _ccd(ccd),
 		  _guideport(guideport), _adaptiveoptics(adaptiveoptics) { }
+	GuiderDescriptor(const std::string& instrument);
+	void	refresh();
 	bool	operator==(const GuiderDescriptor& other) const;
 	bool	operator<(const GuiderDescriptor& other) const;
-	std::string	name() const { return _name; }
 	std::string	instrument() const { return _instrument; }
 	std::string	ccd() const { return _ccd; }
 	std::string	guideport() const { return _guideport; }
-	void	guideport(const std::string& g) { _guideport = g; }
+	//void	guideport(const std::string& g) { _guideport = g; }
 	std::string	adaptiveoptics() const { return _adaptiveoptics; }
-	void	adaptiveoptics(const std::string& a) {
-		_adaptiveoptics = a;
-	}
+	//void	adaptiveoptics(const std::string& a) {
+	//	_adaptiveoptics = a;
+	//}
 	std::string	toString() const;
 };
 
@@ -623,11 +604,7 @@ public:
 	int	guideportcalid;
 	int	adaptiveopticscalid;
 	GuiderDescriptor	descriptor;
-	TrackingSummary(const std::string& name, const std::string& instrument,
-		const std::string& ccd, const std::string& guideport,
-		const std::string& adaptiveoptics);
-	TrackingSummary(const std::string& name, const std::string& instrument,
-		const std::string& ccd);
+	TrackingSummary(const std::string& instrument);
 	virtual void	addPoint(const Point& offset);
 };
 
@@ -884,7 +861,6 @@ protected:
 protected:
 	GuiderBase	*_guider;
 public:
-	const std::string&	name() const;
 	const std::string&	instrument() const;
 	camera::Imager&		imager();
 	std::string	ccdname() const;
@@ -968,7 +944,7 @@ public:
 		persistence::Database database = NULL)
 		: ControlDeviceBase(guider, database), _device(dev) {
 		_calibration = CalibrationPtr(new devicecalibration(
-			ControlDeviceName(guider->name(), type)));
+			ControlDeviceName(guider->instrument(), type)));
 	}
 	virtual ~ControlDevice() {
 	}
@@ -1254,7 +1230,6 @@ class Track {
 public:
 	int	trackid;
 	time_t	whenstarted;
-	std::string	name;
 	std::string	instrument;
 	std::string	ccd;
 	std::string	guideport;
@@ -1262,11 +1237,11 @@ public:
 	int	guideportcalid;
 	int	adaptiveopticscalid;
 	Track() { }
-	Track(time_t _whenstarted, const std::string& _name,
+	Track(time_t _whenstarted,
 		const std::string& _instrument, const std::string& _ccd,
 		const std::string& _guideport,
 		const std::string& _adaptiveoptics)
-		: whenstarted(_whenstarted), name(_name),
+		: whenstarted(_whenstarted),
 		  instrument(_instrument), ccd(_ccd), guideport(_guideport),
 		  adaptiveoptics(_adaptiveoptics) {
 		trackid = -1;
@@ -1293,7 +1268,6 @@ public:
 class PersistentCalibration {
 public:
 	time_t	when;
-	std::string	name;
 	std::string	instrument;
 	std::string	ccd;
 	std::string	controldevice;
@@ -1326,6 +1300,7 @@ class CalibrationStore {
 public:
 	CalibrationStore(astro::persistence::Database database)
 		: _database(database) { }
+	CalibrationStore();
 	std::list<long>	getAllCalibrations();
 	std::list<long>	getAllCalibrations(ControlDeviceType);
 	std::list<long>	getCalibrations(const GuiderDescriptor& guider,
@@ -1364,6 +1339,7 @@ class TrackingStore {
 public:
 	TrackingStore(astro::persistence::Database database)
 		: _database(database) { }
+	TrackingStore();
 	std::list<long>	getAllTrackings();
 	std::list<long>	getTrackings(const GuiderDescriptor& guider);
 	std::list<TrackingPointRecord>	getHistory(long id);

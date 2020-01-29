@@ -38,7 +38,7 @@ void	GuiderFactoryTest::tearDown() {
 void	GuiderFactoryTest::test() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "test() begin");
 	GuiderFactory	guiderfactory;
-	GuiderDescriptor	guiderdescriptor("test", "TEST",
+	GuiderDescriptor	guiderdescriptor("TEST",
 		"ccd:simulator/Imaging", "guideport:simulator/guideport", "");
 	GuiderPtr	guider = guiderfactory.get(guiderdescriptor);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "guider constructed");

@@ -1,5 +1,10 @@
 ChangeLog for the Qt GUI to Astrophotography
 
+20200129:
+	* remove selection of device in device controllers that cannot have
+	  multiple devices: mount, adaptiveoptics, guideport
+	* remove dependency on GuiderDescriptor classes
+
 20200128:
 	* use RoundingSpinBox in coolercontrollerwidget
 	* add RoundingSpinBox widget

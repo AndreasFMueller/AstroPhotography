@@ -21,16 +21,12 @@ namespace snowstar {
  * \brief Create a GuiderFactory implementation object
  *
  * There will usually be only one instance of the factory. 
- * \param _database		the persistence database to use for calibrations
- *				and tracking histories
  * \param _locator		Locator for guiders, used to store a guider
  *				requested by a guider (the factory only
  *				returns a proxy, which will be converted to
  *				to an actual object by the locator)
  */
-GuiderFactoryI::GuiderFactoryI(astro::persistence::Database _database,
-		GuiderLocator *_locator)
-	: database(_database), locator(_locator) {
+GuiderFactoryI::GuiderFactoryI(GuiderLocator *_locator) : locator(_locator) {
 }
 
 /**
@@ -202,7 +198,7 @@ void	GuiderFactoryI::buildnewguider(const GuiderDescriptor& descriptor) {
 	}
 
 	// create a GuiderI object
-	Ice::ObjectPtr	guiderptr = new GuiderI(guider, database);
+	Ice::ObjectPtr	guiderptr = new GuiderI(guider);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "got the guiderptr");
 
 	// add the guider we have constructed to the D
@@ -217,7 +213,7 @@ void	GuiderFactoryI::buildnewguider(const GuiderDescriptor& descriptor) {
  * \brief Get all calibrations stored in the database
  */
 idlist	GuiderFactoryI::getAllCalibrations(const Ice::Current& /* current */) {
-	astro::guiding::CalibrationStore	store(database);
+	astro::guiding::CalibrationStore	store;
 	std::list<long> calibrations = store.getAllCalibrations();
 	idlist	result;
 	std::copy(calibrations.begin(), calibrations.end(),
@@ -231,7 +227,7 @@ idlist	GuiderFactoryI::getAllCalibrations(const Ice::Current& /* current */) {
 idlist	GuiderFactoryI::getCalibrations(const GuiderDescriptor& guider,
 			ControlType type, const Ice::Current& /* current */) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "get calibrations");
-	astro::guiding::CalibrationStore	store(database);
+	astro::guiding::CalibrationStore	store;
 	std::list<long> calibrations = store.getCalibrations(convert(guider),
 						convertcontroltype(type));
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "got %d calibrations",
@@ -248,7 +244,7 @@ idlist	GuiderFactoryI::getCalibrations(const GuiderDescriptor& guider,
 Calibration	GuiderFactoryI::getCalibration(int id,
 			const Ice::Current& /* current */) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieve calibration %d", id);
-	CalibrationSource	source(database);
+	CalibrationSource	source;
 	return source.get(id);
 }
 
@@ -257,7 +253,7 @@ Calibration	GuiderFactoryI::getCalibration(int id,
  */
 void	GuiderFactoryI::deleteCalibration(int id,
 			const Ice::Current& /* current */) {
-	astro::guiding::CalibrationStore	store(database);
+	astro::guiding::CalibrationStore	store;
 	if (!store.contains(id)) {
 		NotFound	exception;
 		exception.cause = astro::stringprintf("calibration %d not found", id);
@@ -273,7 +269,7 @@ void	GuiderFactoryI::deleteCalibration(int id,
 int	GuiderFactoryI::addCalibration(const Calibration& calibration,
 			const Ice::Current& /* current */) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "storing a calibration");
-	astro::guiding::CalibrationStore	store(database);
+	astro::guiding::CalibrationStore	store;
 	// convert the calibration to a persistent calibration
 	astro::guiding::CalibrationPtr	cal = convert(calibration);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "new calibration: %s",
@@ -282,7 +278,7 @@ int	GuiderFactoryI::addCalibration(const Calibration& calibration,
 
 	// get the Instrument Backend
 	std::string	instrumentname = calibration.guider.instrumentname;
-	astro::discover::InstrumentBackend	instruments(database);
+	astro::discover::InstrumentBackend	instruments;
 	if (!instruments.has(instrumentname)) {
 		std::string	msg = astro::stringprintf("no instrument '%s'",
 			instrumentname.c_str());
@@ -292,7 +288,7 @@ int	GuiderFactoryI::addCalibration(const Calibration& calibration,
 	astro::discover::InstrumentPtr	instrument
 		= instruments.get(instrumentname);
 	astro::discover::InstrumentComponent	ccdComponent
-		= instrument->getGuiderCcd(calibration.guider.ccdIndex);
+		= instrument->getGuiderCcd(0);
 
 	pcal.instrument = instrumentname;
 	pcal.ccd = ccdComponent.deviceurl();
@@ -301,16 +297,14 @@ int	GuiderFactoryI::addCalibration(const Calibration& calibration,
 	case snowstar::ControlGuidePort:
 		{
 		astro::discover::InstrumentComponent	guideportComponent
-			= instrument->getGuidePort(
-				calibration.guider.guideportIndex);
+			= instrument->getGuidePort(0);
 		pcal.controldevice = guideportComponent.deviceurl();
 		}
 		break;
 	case snowstar::ControlAdaptiveOptics:
 		{
 		astro::discover::InstrumentComponent	adaptiveopticsComponent
-			= instrument->getAdaptiveOptics(
-				calibration.guider.adaptiveopticsIndex);
+			= instrument->getAdaptiveOptics(0);
 		pcal.controldevice = adaptiveopticsComponent.deviceurl();
 		}
 		break;
@@ -319,14 +313,10 @@ int	GuiderFactoryI::addCalibration(const Calibration& calibration,
 		pcal.controldevice.c_str());
 
 	// parsing the name
-	astro::guiding::GuiderName	guidername(instrumentname,
-		calibration.guider.ccdIndex,
-		calibration.guider.guideportIndex,
-		calibration.guider.adaptiveopticsIndex);
-	pcal.name = guidername.name();
+	astro::guiding::GuiderName	guidername(instrumentname);
+	pcal.instrument = guidername.instrument();
 
 	// convert the calibration name
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "name=%s", pcal.name.c_str());
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "instrument=%s", pcal.instrument.c_str());
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "ccd=%s", pcal.ccd.c_str());
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "controldevice=%s", pcal.controldevice.c_str());
@@ -339,7 +329,7 @@ int	GuiderFactoryI::addCalibration(const Calibration& calibration,
  * \brief Get all guide run ids available in the database
  */
 idlist	GuiderFactoryI::getAllTracks(const Ice::Current& /* current */) {
-	astro::guiding::TrackingStore	store(database);
+	astro::guiding::TrackingStore	store;
 	std::list<long>	trackings = store.getAllTrackings();
 	idlist	result;
 	std::copy(trackings.begin(), trackings.end(), back_inserter(result));
@@ -351,7 +341,7 @@ idlist	GuiderFactoryI::getAllTracks(const Ice::Current& /* current */) {
  */
 idlist	GuiderFactoryI::getTracks(const GuiderDescriptor& guider,
 			const Ice::Current& /* current */) {
-	astro::guiding::TrackingStore	store(database);
+	astro::guiding::TrackingStore	store;
 	std::list<long>	trackings = store.getTrackings(convert(guider));
 	idlist	result;
 	std::copy(trackings.begin(), trackings.end(), back_inserter(result));
@@ -370,7 +360,7 @@ TrackingHistory	GuiderFactoryI::getTrackingHistory(int id,
 			const Ice::Current& /* current */) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieve history %d", id);
 	try {
-		astro::guiding::TrackingStore	store(database);
+		astro::guiding::TrackingStore	store;
 		TrackingHistory	history = convert(store.get(id));
 		return history;
 	} catch (const astro::persistence::NotFound& ex) {
@@ -402,7 +392,7 @@ TrackingHistory	GuiderFactoryI::getTrackingHistoryType(int id,
 	ControlType type, const Ice::Current& /* current */) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieve history %d", id);
 	try {
-		astro::guiding::TrackingStore	store(database);
+		astro::guiding::TrackingStore	store;
 		switch (type) {
 		case ControlGuidePort: {
 			TrackingHistory	history = convert(store.get(id,
@@ -443,7 +433,7 @@ TrackingHistory	GuiderFactoryI::getTrackingHistoryType(int id,
 TrackingSummary	GuiderFactoryI::getTrackingSummary(int id,
 			const Ice::Current& /* current */) {
 	try {
-		astro::guiding::TrackingStore	store(database);
+		astro::guiding::TrackingStore	store;
 		return convert(store.getSummary(id));
 	} catch (const astro::persistence::NotFound& ex) {
 		std::string	msg = astro::stringprintf(
@@ -467,7 +457,7 @@ TrackingSummary	GuiderFactoryI::getTrackingSummary(int id,
  */
 void	GuiderFactoryI::deleteTrackingHistory(int id,
 		const Ice::Current& /* current */) {
-	astro::guiding::TrackingStore	store(database);
+	astro::guiding::TrackingStore	store;
 	if (!store.contains(id)) {
 		NotFound	exception;
 		exception.cause = astro::stringprintf("tracking history %d not "

@@ -15,21 +15,7 @@
 namespace snowstar {
 
 std::string	guiderdescriptor2name(const GuiderDescriptor& descriptor) {
-	std::ostringstream	out;
-	out << descriptor.instrumentname;
-	out << "|";
-	if (descriptor.ccdIndex >= 0) {
-		out << descriptor.ccdIndex;
-	}
-	out << "|";
-	if (descriptor.guideportIndex >= 0) {
-		out << descriptor.guideportIndex;
-	}
-	out << "|";
-	if (descriptor.adaptiveopticsIndex >= 0) {
-		out << descriptor.adaptiveopticsIndex;
-	}
-	std::string	guidername = out.str();
+	std::string	guidername = descriptor.instrumentname;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "guidername: %s", guidername.c_str());
 	return guidername;
 }
@@ -38,49 +24,7 @@ GuiderDescriptor	guiderdescriptorParse(const std::string& name) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "parsing guider name '%s'",
 		name.c_str());
 	GuiderDescriptor	descriptor;
-	descriptor.ccdIndex = -1;
-	descriptor.guideportIndex = -1;
-	descriptor.adaptiveopticsIndex = -1;
-	std::vector<std::string>	v;
-	astro::split(name, "|", v);
-	if (4 != v.size()) {
-		std::string	cause = astro::stringprintf(
-			"'%s' has %d != 4 cmponents", name.c_str(), v.size());
-		debug(LOG_ERR, DEBUG_LOG, 0, "%s", cause.c_str());
-		throw std::runtime_error(cause);
-	}
-	descriptor.instrumentname = v[0];
-	if (0 != v[1].size()) {
-		try {
-			descriptor.ccdIndex = std::stoi(v[1]);
-		} catch (const std::exception& x) {
-			debug(LOG_ERR, DEBUG_LOG, 0,
-				"cannot parse ccd index %s", v[1].c_str());
-		}
-	}
-	if (0 != v[2].size()) {
-		try {
-			descriptor.guideportIndex = std::stoi(v[2]);
-		} catch (const std::exception& x) {
-			debug(LOG_ERR, DEBUG_LOG, 0,
-				"cannot parse guideport index %s",
-				v[2].c_str());
-		}
-	}
-	if (0 != v[3].size()) {
-		try {
-			descriptor.adaptiveopticsIndex = std::stoi(v[3]);
-		} catch (const std::exception& x) {
-			debug(LOG_ERR, DEBUG_LOG, 0,
-				"cannot parse adaptiveoptics index %s",
-				v[3].c_str());
-		}
-	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0,
-		"parsed descriptor: %s, ccd=%d, guideport=%d, "
-		"adaptiveoptics = %d", descriptor.instrumentname.c_str(),
-		descriptor.ccdIndex, descriptor.guideportIndex,
-		descriptor.adaptiveopticsIndex);
+	descriptor.instrumentname = name;
 	return descriptor;
 }
 
@@ -143,6 +87,7 @@ std::string	guiderstate2string(GuiderState state) {
 GuiderDescriptor        convert(const astro::guiding::GuiderDescriptor& gd) {
 	GuiderDescriptor	result;
 	result.instrumentname = gd.instrument();
+#if 0
 	result.ccdIndex = -1;
 	result.ccdIndex = instrumentName2index(gd.instrument(),
 				InstrumentGuiderCCD, gd.ccd());
@@ -157,6 +102,7 @@ GuiderDescriptor        convert(const astro::guiding::GuiderDescriptor& gd) {
 			= instrumentName2index(gd.instrument(),
 				InstrumentGuidePort, gd.adaptiveoptics());
 	}
+#endif
 	return result;
 }
 
@@ -164,6 +110,7 @@ GuiderDescriptor        convert(const astro::guiding::GuiderDescriptor& gd) {
  * \brief Convert a guider descriptor into a locally useful guider name
  */
 astro::guiding::GuiderDescriptor        convert(const GuiderDescriptor& gd) {
+#if 0
 	// convert ccd index into a name
 	std::string	ccdname = instrumentIndex2name(gd.instrumentname,
 				InstrumentGuiderCCD, gd.ccdIndex);
@@ -180,25 +127,25 @@ astro::guiding::GuiderDescriptor        convert(const GuiderDescriptor& gd) {
 			gd.instrumentname,
 			InstrumentAdaptiveOptics, gd.adaptiveopticsIndex);
 	}
+#endif
 	// construct the guider descriptor
-	astro::guiding::GuiderDescriptor	result(
-			guiderdescriptor2name(gd), gd.instrumentname,
-			ccdname, guideportname, adaptiveopticsname);
+	astro::guiding::GuiderDescriptor	result(gd.instrumentname);
 	return result;
 }
 
 GuiderDescriptor        convertname(const astro::guiding::GuiderName& name) {
 	GuiderDescriptor	result;
 	result.instrumentname = name.instrument();
+#if 0
 	result.ccdIndex = name.ccdIndex();
 	result.guideportIndex = name.guideportIndex();
 	result.adaptiveopticsIndex = name.adaptiveopticsIndex();
+#endif
 	return result;
 }
 
 astro::guiding::GuiderName      convertname(const GuiderDescriptor& name) {
-	return astro::guiding::GuiderName(name.instrumentname, name.ccdIndex,
-		name.guideportIndex, name.adaptiveopticsIndex);
+	return astro::guiding::GuiderName(name.instrumentname);
 }
 
 TrackingPoint   convert(const astro::guiding::TrackingPoint& trackingpoint) {
@@ -238,7 +185,8 @@ astro::guiding::TrackingHistory	convert(const TrackingHistory& history) {
 	result.instrument = history.guider.instrumentname;
 	result.guideportcalid = history.guideportcalid;
 	result.adaptiveopticscalid = history.adaptiveopticscalid;
-	result.ccd = instrumentIndex2name(result.instrument,
+#if 0
+	result.ccd = instrumentIndex2name(result.instrument)
 		InstrumentGuiderCCD, history.guider.ccdIndex);
 	if (history.guider.guideportIndex >= 0) {
 		result.guideport = instrumentIndex2name(result.instrument,
@@ -250,6 +198,7 @@ astro::guiding::TrackingHistory	convert(const TrackingHistory& history) {
 			InstrumentAdaptiveOptics,
 			history.guider.adaptiveopticsIndex);
 	}
+#endif
 	result.whenstarted = converttime(history.timeago);
 	for (auto ptr = history.points.begin(); ptr != history.points.end();
 		ptr++) {
@@ -265,6 +214,7 @@ TrackingHistory	convert(const astro::guiding::TrackingHistory& history) {
 	result.guideportcalid = history.guideportcalid;
 	result.adaptiveopticscalid = history.adaptiveopticscalid;
 	result.guider.instrumentname = history.instrument;
+#if 0
 	result.guider.ccdIndex = instrumentName2index(history.instrument,
 		InstrumentGuiderCCD, history.ccd);
 	result.guider.guideportIndex = -1;
@@ -279,6 +229,7 @@ TrackingHistory	convert(const astro::guiding::TrackingHistory& history) {
 			history.instrument, InstrumentAdaptiveOptics,
 			history.adaptiveoptics);
 	}
+#endif
 	result.timeago = converttime(history.whenstarted);
 	for (auto ptr = history.points.begin(); ptr != history.points.end();
 		ptr++) {
@@ -387,24 +338,6 @@ astro::guiding::CalibrationPtr	convert(const Calibration& cal) {
 struct TrackingSummary	convert(const astro::guiding::TrackingSummary& summary) {
 	struct TrackingSummary	result;
 	result.guider.instrumentname = summary.descriptor.instrument();
-	result.guider.ccdIndex = instrumentName2index(
-		summary.descriptor.instrument(), InstrumentGuiderCCD,
-		summary.descriptor.ccd());
-	if (summary.descriptor.guideport().size()) {
-		result.guider.guideportIndex = instrumentName2index(
-			summary.descriptor.instrument(), InstrumentGuidePort,
-			summary.descriptor.guideport());
-	} else {
-		result.guider.guideportIndex = -1;
-	}
-	if (summary.descriptor.adaptiveoptics().size()) {
-		result.guider.adaptiveopticsIndex = instrumentName2index(
-			summary.descriptor.instrument(),
-			InstrumentAdaptiveOptics,
-			summary.descriptor.adaptiveoptics());
-	} else {
-		result.guider.adaptiveopticsIndex = -1;
-	}
 	result.since = converttime(summary.starttime);
 	result.guideportcalid = summary.guideportcalid;
 	result.adaptiveopticscalid = summary.adaptiveopticscalid;
@@ -417,25 +350,7 @@ struct TrackingSummary	convert(const astro::guiding::TrackingSummary& summary) {
 }
 
 astro::guiding::TrackingSummary	convert(const struct TrackingSummary& summary) {
-	std::string	name = guiderdescriptor2name(summary.guider);
-	std::string	ccdname = instrumentIndex2name(
-		summary.guider.instrumentname, InstrumentGuiderCCD,
-		summary.guider.ccdIndex);
-	std::string	guideportname;
-	if (summary.guider.guideportIndex >= 0) {
-		guideportname = instrumentIndex2name(
-			summary.guider.instrumentname, InstrumentGuidePort,
-			summary.guider.guideportIndex);
-	}
-	std::string	adaptiveopticsname;
-	if (summary.guider.adaptiveopticsIndex >= 0) {
-		adaptiveopticsname = instrumentIndex2name(
-			summary.guider.instrumentname, InstrumentAdaptiveOptics,
-			summary.guider.adaptiveopticsIndex);
-	}
-	astro::guiding::TrackingSummary	result(name,
-		summary.guider.instrumentname,
-		ccdname, guideportname, adaptiveopticsname);
+	astro::guiding::TrackingSummary	result(summary.guider.instrumentname);
 	result.starttime = converttime(summary.since);
 	result.trackingid = summary.trackid;
 	result.guideportcalid = summary.guideportcalid;

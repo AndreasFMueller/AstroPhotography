@@ -41,7 +41,7 @@ void GuiderI::startGuiding(Ice::Float gpinterval, Ice::Float aointerval,
 	astro::event(EVENT_CLASS, astro::events::INFO,
 		astro::events::Event::GUIDE,
 		astro::stringprintf("start guiding %s",
-		guider->name().c_str()));
+		guider->instrument().c_str()));
 }
 
 /**
@@ -83,7 +83,7 @@ void GuiderI::stopGuiding(const Ice::Current& /* current */) {
 	astro::event(EVENT_CLASS, astro::events::INFO,
 		astro::events::Event::GUIDE,
 		astro::stringprintf("stop guiding %s",
-		guider->name().c_str()));
+		guider->instrument().c_str()));
 }
 
 /**
@@ -132,7 +132,7 @@ TrackingPoint GuiderI::mostRecentTrackingPoint(const Ice::Current& /* current */
 TrackingHistory GuiderI::getTrackingHistory(Ice::Int id,
 	const Ice::Current& /* current */) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "get tracking history %d", id);
-	astro::guiding::TrackingStore	store(database);
+	astro::guiding::TrackingStore	store;
 	return convert(store.get(id));
 }
 
@@ -142,7 +142,7 @@ TrackingHistory GuiderI::getTrackingHistory(Ice::Int id,
 TrackingHistory GuiderI::getTrackingHistoryType(Ice::Int id,
 	ControlType type, const Ice::Current& /* current */) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "get tracking history %d", id);
-	astro::guiding::TrackingStore	store(database);
+	astro::guiding::TrackingStore	store;
 	switch (type) {
 	case ControlGuidePort:
 		return convert(store.get(id,

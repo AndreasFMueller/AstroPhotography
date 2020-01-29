@@ -1,5 +1,12 @@
 ChangeLog for the Astro project.
 
+20200129:
+	* simplify the InstrumentBackend classes
+	* ensure that an instrument can have only one mount, guideport,
+	  adaptiveoptics and guideccd. This makes construction of guiders
+	  from the instrument name simpler
+	* reduce GuiderDescriptor to the instrument name in ICE protocol
+
 20200128:
 	* more configurable variables
 	* get more information about kalman filter in the debug log

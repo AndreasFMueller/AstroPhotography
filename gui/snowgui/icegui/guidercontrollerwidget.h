@@ -74,9 +74,6 @@ private:
 public slots:
 	void	setExposure(astro::camera::Exposure);
 	void	setStar(astro::image::ImagePoint);
-	void	setCcd(int);
-	void	setGuideport(int);
-	void	setAdaptiveoptics(int);
 
 	void	startGuiding();
 	void	stopGuiding();

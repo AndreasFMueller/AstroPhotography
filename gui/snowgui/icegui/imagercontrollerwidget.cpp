@@ -87,7 +87,7 @@ void	imagercontrollerwidget::instrumentSetup(
 
 	// read information about CCDs available on this instrument, and 
 	// remember the first ccd you can find
-	_guider = instrument.guider(0, 0, 0);
+	_guider = instrument.guider();
 	debug(LOG_DEBUG, DEBUG_LOG, 0,
 		"end imagercontrollerwidget::instrumentSetup()");
 }
@@ -406,7 +406,7 @@ void	imagercontrollerwidget::darkClicked() {
 	out << "dark image for ";
 	astro::guiding::GuiderDescriptor	gd
 		= convert(_guider->getDescriptor());
-	out << gd.name();
+	out << gd.instrument();
 	
 	_darkwidget->setWindowTitle(QString(out.str().c_str()));
 	_darkwidget->exposuretime(_exposure.exposuretime());
@@ -442,7 +442,7 @@ void	imagercontrollerwidget::flatClicked() {
 	std::ostringstream	out;
 	out << "flat image for ";
 	astro::guiding::GuiderDescriptor	gd = convert(_guider->getDescriptor());
-	out << gd.name();
+	out << gd.instrument();
 	
 	_flatwidget->setWindowTitle(QString(out.str().c_str()));
 	_flatwidget->exposuretime(_exposure.exposuretime());

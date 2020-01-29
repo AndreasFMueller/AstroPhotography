@@ -291,7 +291,7 @@ static int	commands(const std::vector<std::string>& arguments) {
 	}
 
 	ConfigurationPtr	configuration = Configuration::get();
-	InstrumentBackend	instrumentbackend(configuration->database());
+	InstrumentBackend	instrumentbackend;//(configuration->database());
 
 	// generic list command
 	if (command == "list") {

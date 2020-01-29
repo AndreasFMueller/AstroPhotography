@@ -5,6 +5,7 @@
  */
 #include <AstroGuiding.h>
 #include <AstroDebug.h>
+#include <AstroConfig.h>
 #include <TrackingPersistence.h>
 #include <sstream>
 
@@ -12,6 +13,13 @@ using namespace astro::persistence;
 
 namespace astro {
 namespace guiding {
+
+/**
+ * \brief Construct a tracking store that uses the default dataase
+ */
+TrackingStore::TrackingStore() {
+	_database = config::Configuration::get()->database();
+}
 
 /**
  * \brief Retrieve a list of all guide run ids
@@ -141,8 +149,7 @@ TrackingSummary	TrackingStore::getSummary(long id) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieveing track %ld summary", id);
 	TrackTable	table(_database);
 	TrackRecord	track = table.byid(id);
-	TrackingSummary	summary(track.name, track.instrument, track.ccd,
-		track.guideport, track.adaptiveoptics);
+	TrackingSummary	summary(track.instrument);
 	summary.trackingid = id;
 	summary.starttime = track.whenstarted;
 	summary.guideportcalid = track.guideportcalid;

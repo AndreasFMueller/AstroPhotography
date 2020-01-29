@@ -26,9 +26,6 @@ guideportcontrollerwidget::guideportcontrollerwidget(QWidget *parent)
 	_guiderate = 0.5;
 
 	// connect signals
-	connect(ui->guideportSelectionBox, SIGNAL(currentIndexChanged(int)),
-		this, SLOT(guideportChanged(int)));
-
 	connect(ui->guiderButton, SIGNAL(westClicked()),
 		this, SLOT(activateRAplus()));
 	connect(ui->guiderButton, SIGNAL(eastClicked()),
@@ -81,7 +78,7 @@ void	guideportcontrollerwidget::instrumentSetup(
 		std::string	dn = instrument.displayname(
 			snowstar::InstrumentGuidePort,
 			index, serviceobject.name());
-		ui->guideportSelectionBox->addItem(QString(dn.c_str()));
+		ui->guideportField->setText(QString(dn.c_str()));
 		index++;
 	}
 

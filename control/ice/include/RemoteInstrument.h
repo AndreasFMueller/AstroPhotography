@@ -50,9 +50,7 @@ public:
 	FocuserPrx		focuser(unsigned int index = 0);
 	GuidePortPrx		guideport(unsigned int index = 0);
 	MountPrx		mount(unsigned int index = 0);
-	GuiderPrx		guider(unsigned int ccdindex = 0,
-					unsigned int guideportindex = 0,
-					unsigned int aoindex = 0);
+	GuiderPrx		guider();
 	// property access
 	bool	hasProperty(const std::string& name);
 	std::string	property(const std::string& name);

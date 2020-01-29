@@ -425,7 +425,7 @@ void Guider::lastAction(double& actiontime, Point& offset, Point& activation) {
  * \brief Retrieve a descriptor
  */
 GuiderDescriptor	Guider::getDescriptor() const {
-	GuiderDescriptor	descriptor(name(), instrument(), ccdname(),
+	GuiderDescriptor	descriptor(instrument(), ccdname(),
 		guideportname(), adaptiveopticsname());
 	return descriptor;
 }

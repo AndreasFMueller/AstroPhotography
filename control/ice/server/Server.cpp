@@ -264,7 +264,7 @@ void	Server::add_repository_servant() {
 
 void	Server::add_guiding_servant() {
 	GuiderLocator	*guiderlocator = new GuiderLocator();
-	Ice::ObjectPtr	object = new GuiderFactoryI(database, guiderlocator);
+	Ice::ObjectPtr	object = new GuiderFactoryI(guiderlocator);
 	adapter->add(object, STRING_TO_IDENTITY("Guiders"));
 	adapter->addServantLocator(guiderlocator, "guider");
 	astro::event(EVENT_GLOBAL, astro::events::INFO,

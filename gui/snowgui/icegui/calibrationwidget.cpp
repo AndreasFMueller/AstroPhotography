@@ -33,10 +33,6 @@ calibrationwidget::calibrationwidget(QWidget *parent) :
 
 	_state = snowstar::GuiderUNCONFIGURED;
 
-	_guiderdescriptor.ccdIndex = -1;
-	_guiderdescriptor.guideportIndex = -1;
-	_guiderdescriptor.adaptiveopticsIndex = -1;
-
 	_guidercontroller = NULL;
 	_calibration.id = -1;
 
@@ -61,11 +57,8 @@ void	calibrationwidget::setGuider(snowstar::ControlType controltype,
 		snowstar::GuiderPrx guider,
 		snowstar::GuiderFactoryPrx guiderfactory,
 		guidercontrollerwidget *guidercontroller) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "set up the guider %s|%d|%d|%d",
-		_guiderdescriptor.instrumentname.c_str(),
-		_guiderdescriptor.ccdIndex,
-		_guiderdescriptor.guideportIndex,
-		_guiderdescriptor.adaptiveopticsIndex);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "set up the guider %s",
+		_guiderdescriptor.instrumentname.c_str());
 	_controltype = controltype;
 	_guiderdescriptor = guiderdescriptor;
 	_guider = guider;

@@ -20,9 +20,8 @@ namespace snowstar {
 /**
  * \brief Constructor for the Guider servant
  */
-GuiderI::GuiderI(astro::guiding::GuiderPtr _guider,
-	astro::persistence::Database _database)
-	: guider(_guider), database(_database) {
+GuiderI::GuiderI(astro::guiding::GuiderPtr _guider)
+	: guider(_guider) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "guider at %p", &*_guider);
 	// set point to an invalid value to allow us to detect that it 
 	// has not been set

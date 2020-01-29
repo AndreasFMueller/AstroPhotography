@@ -44,7 +44,6 @@ void	callback_adapter<CalibrationImageMonitorPrx>(
  */
 class GuiderI : virtual public Guider, virtual public RepositoryUser {
 	astro::guiding::GuiderPtr	guider;
-	astro::persistence::Database	database;
 	// some infrastructure members we need 
 	Point	_point;
 	TrackerMethod	_tracker_method;
@@ -61,8 +60,7 @@ class GuiderI : virtual public Guider, virtual public RepositoryUser {
 	// public interface starts here
 public:
 	// construction and destruction
-	GuiderI(astro::guiding::GuiderPtr _guider,
-		astro::persistence::Database database);
+	GuiderI(astro::guiding::GuiderPtr _guider);
 	virtual ~GuiderI();
 
 	// get current state of the guider

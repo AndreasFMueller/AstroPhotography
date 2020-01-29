@@ -95,10 +95,6 @@ guidercontrollerwidget::guidercontrollerwidget(QWidget *parent)
 	: InstrumentWidget(parent), ui(new Ui::guidercontrollerwidget) {
 	ui->setupUi(this);
 
-	_guiderdescriptor.ccdIndex = 0;
-	_guiderdescriptor.guideportIndex = 0;
-	_guiderdescriptor.adaptiveopticsIndex = 0;
-
 	// adding items to the tracking method combo box
 	ui->trackingMethodBox->addItem(QString("Star"));
 	ui->trackingMethodBox->addItem(QString("Phase"));
@@ -210,15 +206,6 @@ void	guidercontrollerwidget::instrumentSetup(
 
 	// now build a GuiderDescriptor for the guider
 	_guiderdescriptor.instrumentname = _instrument.name();
-	_guiderdescriptor.ccdIndex
-		= (_instrument.has(snowstar::InstrumentGuiderCCD)) ? 0 : -1;
-	_guiderdescriptor.guideportIndex
-		= (_instrument.has(snowstar::InstrumentGuidePort)) ? 0 : -1;
-	_guiderdescriptor.adaptiveopticsIndex
-		= (_instrument.has(snowstar::InstrumentAdaptiveOptics))
-			? 0 : -1;
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "guiderdescriptor: '%s'",
-		convert(_guiderdescriptor).toString().c_str());
 }
 
 /**
@@ -233,10 +220,8 @@ void	guidercontrollerwidget::setupComplete() {
  * \brief Setup a guider
  */
 void	guidercontrollerwidget::setupGuider() {
-	std::string	guidername = astro::stringprintf("%s|%d|%d|%d",
-		_guiderdescriptor.instrumentname.c_str(),
-		_guiderdescriptor.ccdIndex, _guiderdescriptor.guideportIndex,
-		_guiderdescriptor.adaptiveopticsIndex);
+	std::string	guidername = astro::stringprintf("%s",
+		_guiderdescriptor.instrumentname.c_str());
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "setting up the guider %s",
 		guidername.c_str());
 	statusTimer.stop();
@@ -277,7 +262,7 @@ void	guidercontrollerwidget::setupGuider() {
 
 	// also propagate the information to the calibration widgets
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "setting guider '%s' in calwidgets",
-		convert(_guiderdescriptor).toString().c_str());
+		_guiderdescriptor.instrumentname.c_str());
 	ui->gpcalibrationWidget->setGuider(snowstar::ControlGuidePort,
 		_guiderdescriptor, _guider, _guiderfactory, this);
 	ui->aocalibrationWidget->setGuider(snowstar::ControlAdaptiveOptics,
@@ -443,32 +428,6 @@ void	guidercontrollerwidget::selectPoint(astro::image::ImagePoint p) {
 	setStar(ip);
 	ui->starxField->setText(QString::number(ip.x()));
 	ui->staryField->setText(QString::number(ip.y()));
-}
-
-/**
- * \brief Select the CCD
- *
- * only GuiderCCD devices are considered
- */
-void	guidercontrollerwidget::setCcd(int index) {
-	_guiderdescriptor.ccdIndex = index;
-	setupGuider();
-}
-
-/**
- * \brief Select the Guideport
- */
-void	guidercontrollerwidget::setGuideport(int index) {
-	_guiderdescriptor.guideportIndex = index;
-	setupGuider();
-}
-
-/**
- * \brief Select the adaptive optics 
- */
-void	guidercontrollerwidget::setAdaptiveoptics(int index) {
-	_guiderdescriptor.adaptiveopticsIndex = index;
-	setupGuider();
 }
 
 /**

@@ -57,14 +57,14 @@ GuiderPtr	GuiderFactory::get(const GuiderDescriptor& guiderdescriptor) {
 	if (i != guiders.end()) {
 		GuiderPtr	guider = i->second;
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "found guider '%s' in cache",
-			guider->name().c_str());
+			guider->instrument().c_str());
 		// XXX we should update the parameters, because they
 		// XXX  might have changed
 		return guider;
 	}
 
 	// construct the name of the guider
-	GuiderName	guidername(guiderdescriptor.name());
+	GuiderName	guidername(guiderdescriptor.instrument());
 
 	// first get a module repository
 	ModuleRepositoryPtr	repository = getModuleRepository();
@@ -78,7 +78,7 @@ GuiderPtr	GuiderFactory::get(const GuiderDescriptor& guiderdescriptor) {
 	if (guiderdescriptor.ccd().size()) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "get CCD %s for guider %s",
 			guiderdescriptor.ccd().c_str(),
-			guidername.name().c_str());
+			guidername.instrument().c_str());
 		DeviceAccessor<CcdPtr>	da(repository);
 		ccd = da.get(DeviceName(guiderdescriptor.ccd()));
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "ccd constructed");
@@ -92,7 +92,7 @@ GuiderPtr	GuiderFactory::get(const GuiderDescriptor& guiderdescriptor) {
 	if (guiderdescriptor.guideport().size()) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "get GuidePort %s for guider %s",
 			guiderdescriptor.guideport().c_str(),
-			guidername.name().c_str());
+			guidername.instrument().c_str());
 		DeviceAccessor<GuidePortPtr>	da(repository);
 		guideport = da.get(DeviceName(guiderdescriptor.guideport()));
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "guideport constructed");
@@ -105,7 +105,7 @@ GuiderPtr	GuiderFactory::get(const GuiderDescriptor& guiderdescriptor) {
 	if (guiderdescriptor.adaptiveoptics().size()) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "get AO %s for guider %s",
 			guiderdescriptor.adaptiveoptics().c_str(),
-			guidername.name().c_str());
+			guidername.instrument().c_str());
 		DeviceAccessor<AdaptiveOpticsPtr>	da(repository);
 		adaptiveoptics = da.get(DeviceName(guiderdescriptor.adaptiveoptics()));
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "adaptiveoptics constructed");
@@ -120,7 +120,7 @@ GuiderPtr	GuiderFactory::get(const GuiderDescriptor& guiderdescriptor) {
 				ccd, guideport, adaptiveoptics, database));
 	guiders.insert(std::make_pair(guiderdescriptor, guider));
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "return guider '%s'",
-		guider->name().c_str());
+		guider->instrument().c_str());
 	return guider;
 }
 

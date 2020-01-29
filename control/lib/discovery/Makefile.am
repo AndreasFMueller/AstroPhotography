@@ -9,7 +9,9 @@ SUBDIRS = . test
 noinst_HEADERS =							\
 	AvahiDiscovery.h						\
 	BonjourDiscovery.h						\
+	InstrumentBackendImpl.h						\
 	InstrumentComponentTable.h					\
+	InstrumentImpl.h						\
 	InstrumentPropertyTable.h
 
 noinst_LTLIBRARIES = libastrodiscovery.la
@@ -33,9 +35,13 @@ endif
 
 libastrodiscovery_la_SOURCES = 						\
 	Instrument.cpp							\
+	InstrumentBackend.cpp						\
+	InstrumentBackendImpl.cpp					\
 	InstrumentComponent.cpp						\
 	InstrumentComponentKey.cpp					\
 	InstrumentComponentTable.cpp					\
+	InstrumentImpl.cpp						\
+	InstrumentList.cpp						\
 	InstrumentProperty.cpp						\
 	InstrumentPropertyTable.cpp					\
 	PostData.cpp							\

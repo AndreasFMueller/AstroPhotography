@@ -120,7 +120,7 @@ int	main(int argc, char *argv[]) {
 	ConfigurationPtr	config = Configuration::get();
 
 	// backend for instruments
-	InstrumentBackend	instrumentbackend(config->database());
+	InstrumentBackend	instrumentbackend;
         InstrumentPtr   instrument = instrumentbackend.get(instrumentname);
 
 	// get the image repository

@@ -17,12 +17,8 @@ adaptiveopticscontrollerwidget::adaptiveopticscontrollerwidget(QWidget *parent)
 	  ui(new Ui::adaptiveopticscontrollerwidget) {
 	ui->setupUi(this);
 	ui->adaptiveopticsWidget->setEnabled(false);
-	ui->adaptiveopticsSelectionBox->setEnabled(false);
 
 	// connect signals
-	connect(ui->adaptiveopticsSelectionBox,
-		SIGNAL(currentIndexChanged(int)),
-		this, SLOT(adaptiveopticsChanged(int)));
 	connect(ui->adaptiveopticsWidget, SIGNAL(pointSelected(QPointF)),
 		this, SLOT(setPoint(QPointF)));
 
@@ -59,7 +55,7 @@ void	adaptiveopticscontrollerwidget::instrumentSetup(
 		std::string	sn = instrument.displayname(
 					snowstar::InstrumentAdaptiveOptics,
 					index, serviceobject.name());
-		ui->adaptiveopticsSelectionBox->addItem(QString(sn.c_str()));
+		ui->adaptiveopticsField->setText(QString(sn.c_str()));
 		index++;
 	}
 }
@@ -78,12 +74,10 @@ void	adaptiveopticscontrollerwidget::setupComplete() {
 void	adaptiveopticscontrollerwidget::setupAdaptiveOptics() {
 	if (_adaptiveoptics) {
 		ui->adaptiveopticsWidget->setEnabled(true);
-		ui->adaptiveopticsSelectionBox->setEnabled(true);
 		statusTimer.start();
 		statusUpdate();
 	} else {
 		ui->adaptiveopticsWidget->setEnabled(false);
-		ui->adaptiveopticsSelectionBox->setEnabled(false);
 	}
 }
 

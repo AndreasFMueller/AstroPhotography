@@ -20,11 +20,9 @@ namespace snowstar {
  * but it needs some support structure, e.g. the database for persistence.
  */
 class GuiderFactoryI : virtual public GuiderFactory {
-	astro::persistence::Database	database;
 	GuiderLocator	*locator;
 public:
-	GuiderFactoryI(astro::persistence::Database database,
-		GuiderLocator *locator);
+	GuiderFactoryI(GuiderLocator *locator);
 	virtual ~GuiderFactoryI();
 	// conversions
 

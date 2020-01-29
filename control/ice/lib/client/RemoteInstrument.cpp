@@ -238,20 +238,17 @@ MountPrx                RemoteInstrument::mount(unsigned int index) {
 /**
  * \brief Retrieve a Guider
  */
-GuiderPrx	RemoteInstrument::guider(unsigned int ccdindex,
-			unsigned int guideportindex, unsigned int aoindex) {
+GuiderPrx	RemoteInstrument::guider() {
 	// make sure we have enough 
-	if (ccdindex >= _instrument->nComponentsOfType(InstrumentGuiderCCD)) {
+	if (0 == _instrument->nComponentsOfType(InstrumentGuiderCCD)) {
 		throw std::runtime_error("now guider CCD found");
 	}
 
 	// we ask for the component of the GuiderCCD, because that is
 	// where the guider will reside
 	InstrumentComponent	component
-			= getComponent(InstrumentGuiderCCD, ccdindex);
+			= getComponent(InstrumentGuiderCCD, 0);
 	astro::ServerName	servername(component.servicename);
-
-	// make sure we can get all those devices
 
 	// get a communicator ptr (singleton?)
 	Ice::CommunicatorPtr	ic = CommunicatorSingleton::get();
@@ -267,8 +264,8 @@ GuiderPrx	RemoteInstrument::guider(unsigned int ccdindex,
 	// now build the descriptor
 	GuiderDescriptor	guiderdescriptor;
 	guiderdescriptor.instrumentname = name();
-	guiderdescriptor.ccdIndex = ccdindex;
 
+#if 0
 	// check guideport
 	guiderdescriptor.guideportIndex = guideportindex;
 	unsigned int	n = _instrument->nComponentsOfType(InstrumentGuidePort);
@@ -287,6 +284,7 @@ GuiderPrx	RemoteInstrument::guider(unsigned int ccdindex,
 		guiderdescriptor.ccdIndex,
 		guiderdescriptor.guideportIndex,
 		guiderdescriptor.adaptiveopticsIndex);
+#endif
 
 	// retrieve the guider factory
 	GuiderPrx	guider;

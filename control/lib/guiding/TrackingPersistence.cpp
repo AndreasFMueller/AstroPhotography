@@ -18,7 +18,6 @@ std::string	TrackTableAdapter::createstatement() {
 	return std::string(
 	"create table track (\n"
 	"    id integer not null,\n"
-	"    name varchar(32) not null,\n"
 	"    instrument varchar(32) not null,\n"
 	"    ccd varchar(256) not null default 0,\n"
 	"    guideport varchar(256) not null,\n"
@@ -35,7 +34,6 @@ TrackRecord	TrackTableAdapter::row_to_object(int objectid,
 			const Row& row) {
 	Persistent<Track>	result(objectid);
 	result.whenstarted = row["whenstarted"]->timeValue();
-	result.name = row["name"]->stringValue();
 	result.instrument = row["instrument"]->stringValue();
 	result.ccd = row["ccd"]->stringValue();
 	result.guideport = row["guideport"]->stringValue();
@@ -48,7 +46,6 @@ TrackRecord	TrackTableAdapter::row_to_object(int objectid,
 UpdateSpec	TrackTableAdapter::object_to_updatespec(const TrackRecord& track) {
 	UpdateSpec	spec;
 	FieldValueFactory	factory;
-	spec.insert(Field("name", factory.get(track.name)));
 	spec.insert(Field("instrument", factory.get(track.instrument)));
 	spec.insert(Field("ccd", factory.get(track.ccd)));
 	spec.insert(Field("guideport", factory.get(track.guideport)));

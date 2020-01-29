@@ -15,9 +15,6 @@ module snowstar {
 	 */
 	struct GuiderDescriptor {
 		string	instrumentname;
-		int	ccdIndex;
-		int	guideportIndex;
-		int	adaptiveopticsIndex;
 	};
 
 	/**

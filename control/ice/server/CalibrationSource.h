@@ -18,6 +18,7 @@ class CalibrationSource {
 	astro::persistence::Database	_database;
 public:
 	CalibrationSource(astro::persistence::Database database);
+	CalibrationSource();
 	Calibration	get(int id);
 };
 

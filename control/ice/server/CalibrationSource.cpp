@@ -7,6 +7,7 @@
 #include <AstroFormat.h>
 #include <AstroGuiding.h>
 #include <IceConversions.h>
+#include <AstroConfig.h>
 #include "CalibrationSource.h"
 
 namespace snowstar {
@@ -16,6 +17,10 @@ namespace snowstar {
  */
 CalibrationSource::CalibrationSource(astro::persistence::Database database)
 	: _database(database) {
+}
+
+CalibrationSource::CalibrationSource() {
+	_database = astro::config::Configuration::get()->database();
 }
 
 /**

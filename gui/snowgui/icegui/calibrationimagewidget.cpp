@@ -110,7 +110,7 @@ void	calibrationimagewidget::viewClicked() {
 		std::string     title
 			= astro::stringprintf("%s image for %s",
 				imagetype().c_str(),
-				convert(_guider->getDescriptor()).name()
+				convert(_guider->getDescriptor()).instrument()
 					.c_str());
 		_imagedisplaywidget->setWindowTitle(QString(title.c_str()));
 		_imagedisplaywidget->show();

@@ -105,7 +105,7 @@ void	mountcontrollerwidget::instrumentSetup(
 		std::string	sn = _instrument.displayname(
 					snowstar::InstrumentMount, index,
 					serviceobject.name());
-		ui->mountSelectionBox->addItem(QString(sn.c_str()));
+		ui->mountField->setText(QString(sn.c_str()));
 		index++;
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "found total of %d mounts", index);

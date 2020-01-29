@@ -6,9 +6,17 @@
 #include "CalibrationPersistence.h"
 #include <sstream>
 #include <AstroDebug.h>
+#include <AstroConfig.h>
 
 namespace astro {
 namespace guiding {
+
+/**
+ * \brief Use the default configuration database for calibration data
+ */
+CalibrationStore::CalibrationStore() {
+	_database = config::Configuration::get()->database();
+}
 
 /**
  * \brief Get a list of all calibrations
@@ -49,7 +57,7 @@ std::list<long>	CalibrationStore::getCalibrations(
 			const GuiderDescriptor& guider,
 			ControlDeviceType type) {
 	std::ostringstream	out;
-	out << " name = '" << guider.name() << "'";
+	out << " name = '" << guider.instrument() << "'";
 	out << " and controltype = ";
 	switch (type) {
 	case GP:	out << 0; break;
@@ -260,7 +268,7 @@ void	CalibrationStore::saveCalibration(const CalibrationPtr cal) {
  */
 ControlDeviceName	CalibrationStore::nameFromRecord(
 		const CalibrationRecord& record) const {
-	GuiderName	guidername(record.name);
+	GuiderName	guidername(record.instrument);
 	switch (record.controltype) {
 	case 0: return ControlDeviceName(guidername, GP);
 	case 1: return ControlDeviceName(guidername, AO);

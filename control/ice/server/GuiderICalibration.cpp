@@ -35,7 +35,7 @@ void GuiderI::useCalibration(Ice::Int calid, bool /* flipped */,
 		astro::event(EVENT_CLASS, astro::events::INFO,
 			astro::events::Event::GUIDE,
 			astro::stringprintf("%s now uses calibration %d",
-			guider->name().c_str(), calid));
+			guider->instrument().c_str(), calid));
 	} catch (const astro::guiding::BadState x) {
 		throw BadState(x.what());
 	} catch (const astro::guiding::NotFound x) {
@@ -74,14 +74,14 @@ void	GuiderI::unCalibrate(ControlType calibrationtype,
 			astro::event(EVENT_CLASS, astro::events::INFO,
 				astro::events::Event::GUIDE,
 				astro::stringprintf("GP %s uncalibrated",
-				guider->name().c_str()));
+				guider->instrument().c_str()));
 			guider->unCalibrate(astro::guiding::GP);
 			break;
 		case ControlAdaptiveOptics:
 			astro::event(EVENT_CLASS, astro::events::INFO,
 				astro::events::Event::GUIDE,
 				astro::stringprintf("AO %s uncalibrated",
-				guider->name().c_str()));
+				guider->instrument().c_str()));
 			guider->unCalibrate(astro::guiding::AO);
 			break;
 		}
@@ -156,13 +156,13 @@ Ice::Int GuiderI::startCalibration(ControlType caltype,
 		astro::event(EVENT_CLASS, astro::events::INFO,
 			astro::events::Event::GUIDE,
 			astro::stringprintf("start GP %s calibration",
-			guider->name().c_str()));
+			guider->instrument().c_str()));
 		return guider->startCalibration(astro::guiding::GP, tracker);
 	case ControlAdaptiveOptics:
 		astro::event(EVENT_CLASS, astro::events::INFO,
 			astro::events::Event::GUIDE,
 			astro::stringprintf("start AO %s calibration",
-			guider->name().c_str()));
+			guider->instrument().c_str()));
 		return guider->startCalibration(astro::guiding::AO, tracker);
 	}
 	debug(LOG_ERR, DEBUG_LOG, 0,

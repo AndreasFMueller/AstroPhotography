@@ -100,10 +100,6 @@ void	ControlDeviceBase::flip() {
 	}
 }
 
-const std::string&	ControlDeviceBase::name() const {
-	return _guider->name();
-}
-
 const std::string&	ControlDeviceBase::instrument() const {
 	return _guider->instrument();
 }
@@ -173,7 +169,6 @@ int	ControlDeviceBase::startCalibration(TrackerPtr /* tracker */) {
 		CalibrationRecord	record(0, *_calibration);
 
 		// set data describing the device
-		record.name = _guider->name();
 		record.instrument = _guider->instrument();
 		record.ccd = _guider->ccdname();
 		record.controldevice = devicename();

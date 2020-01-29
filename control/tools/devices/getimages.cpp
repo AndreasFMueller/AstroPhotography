@@ -205,7 +205,7 @@ int	main(int argc, char *argv[]) {
 
 	// get the configuration
 	ConfigurationPtr	config = Configuration::get();
-	InstrumentBackend	instrumentbackend(config->database());
+	InstrumentBackend	instrumentbackend;
 	InstrumentPtr	instrument = instrumentbackend.get(instrumentname);
 
 	// make sure we have a repository, because we would not know
