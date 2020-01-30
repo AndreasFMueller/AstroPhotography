@@ -1,5 +1,9 @@
 ChangeLog for the Qt GUI to Astrophotography
 
+20200130:
+	* add system info widget
+	* integrate systeminfo widget into main window
+
 20200129:
 	* remove selection of device in device controllers that cannot have
 	  multiple devices: mount, adaptiveoptics, guideport

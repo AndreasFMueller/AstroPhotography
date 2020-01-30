@@ -295,6 +295,12 @@ Server::Server(Ice::CommunicatorPtr _ic, const std::string& dbfilename)
 	  database(getdatabase(dbfilename)),
 	  taskqueue(database) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "creating a server");
+
+	// get the times
+	time(&_start_time);
+	struct tms	t;
+	_start_clock = times(&t);
+
 	// activate the event log
 	astro::events::EventHandler::active(true);
 	astro::event(EVENT_GLOBAL, astro::events::INFO,

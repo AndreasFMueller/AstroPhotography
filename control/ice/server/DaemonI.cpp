@@ -15,6 +15,7 @@
 #include <version.h>
 #include <AstroUtils.h>
 #include <sys/utsname.h>
+#include <sys/times.h>
 
 namespace snowstar {
 
@@ -359,6 +360,67 @@ std::string	DaemonI::astroVersion(const Ice::Current& /* current */) {
 std::string	DaemonI::snowstarVersion(const Ice::Current& /* current */) {
 	return astro::stringprintf("%s - %s %s", snowstar::version.c_str(),
 		__DATE__ ,__TIME__);
+}
+
+Sysinfo	DaemonI::getSysinfo(const Ice::Current& current) {
+#if __APPLE__
+	NotImplemented	notimplemented;
+	notimplemented.cause = std::string("sysinfo not available");
+	throw notimplemented;
+#endif
+	Sysinfo	result;
+#if __linux__
+	struct sysinfo	info;
+	if (sysinfo(&info) < 0) {
+		std::string	msg = stringprintf("no sysinfo: %s",
+			strerror(errno));
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		NotImplemented	notimplemented;
+		notimplemented.cause = msg;
+		throw notimplemented;
+	}
+	result.uptime = info.uptime;
+	result.load1min = info.loads[0];
+	result.load5min = info.loads[1];
+	result.load15min = info.loads[2];
+	result.totalram = info.totalram * info.mem_unit;
+	result.freeram = info.freeram * info.mem_unit;
+	result.sharedram = info.sharedram * info.mem_unit;
+	result.bufferram = info.bufferram * info.mem_unit;
+	result.totalswap = info.totalswap * info.mem_unit;
+	result.freeswap = info.freeswap * info.mem_unit;
+	result.processes = info.procs;
+#endif
+	return result;
+}
+
+float	DaemonI::daemonUptime(const Ice::Current& current) {
+	long	ticks = sysconf(_SC_CLK_TCK);
+	struct tms	t;
+	return (times(&t) - _server.start_clock()) / (float)ticks;
+}
+
+float	DaemonI::cputime(const Ice::Current& current) {
+	long	ticks = sysconf(_SC_CLK_TCK);
+	struct tms	t;
+	times(&t);
+	return (t.tms_utime + t.tms_stime) / (float)ticks;
+}
+
+/**
+ * \brief Retrieve the core temperature
+ */
+float	DaemonI::getTemperature(const Ice::Current& current) {
+	try {
+		astro::Temperature	t = astro::Temperature::core();
+		return t.temperature();
+	} catch (const std::exception& x) {
+		NotImplemented	notimplemented;
+		notimplemented.cause = std::string(x.what());
+		throw notimplemented;
+		debug(LOG_ERR, DEBUG_LOG, 0, "cannot get temperature");
+	}
+	return astro::Temperature::zero;
 }
 
 } // namespace snowstar

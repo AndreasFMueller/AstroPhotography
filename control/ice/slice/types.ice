@@ -133,6 +133,20 @@ module snowstar {
 		FilenameList	directories;
 	};
 
+	struct Sysinfo {
+		long	uptime;
+		long	load1min;
+		long	load5min;
+		long	load15min;
+		float	totalram;
+		float	freeram;
+		float	sharedram;
+		float	bufferram;
+		float	totalswap;
+		float	freeswap;
+		int	proccesses;
+	};
+
 	/**
 	 * \brief Interface to the server functions
 	 *
@@ -169,6 +183,13 @@ module snowstar {
 		string	osVersion();
 		string	astroVersion();
 		string	snowstarVersion();
+		/**
+		 * \brief Access to some system information
+		 */
+		float	daemonUptime();
+		float	getTemperature() throws NotImplemented;
+		float	cputime();
+		Sysinfo	getSysinfo() throws NotImplemented;
 	};
 
 	/**

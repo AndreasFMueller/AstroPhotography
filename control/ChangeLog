@@ -1,5 +1,10 @@
 ChangeLog for the Astro project.
 
+20200130:
+	* system information interface
+	* add core temperature to Temperature class
+	* add system info to DaemonI class
+
 20200129:
 	* simplify the InstrumentBackend classes
 	* ensure that an instrument can have only one mount, guideport,

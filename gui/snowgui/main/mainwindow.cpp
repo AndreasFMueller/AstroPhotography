@@ -117,6 +117,14 @@ MainWindow::MainWindow(QWidget *parent,
 	createActions();
 	createMenus();
 
+	// create a daemon proxy for the systeminfowidget
+	Ice::CommunicatorPtr	ic = snowstar::CommunicatorSingleton::get();
+	Ice::ObjectPrx	base = ic->stringToProxy(
+		_serviceobject.connect("Daemon"));
+	snowstar::DaemonPrx	daemon
+		= snowstar::DaemonPrx::checkedCast(base);
+	ui->systeminfoWidget->setDaemon(daemon);
+
 	// create a 
 	QTimer::singleShot(1000, this, SLOT(timecheck()));
 }

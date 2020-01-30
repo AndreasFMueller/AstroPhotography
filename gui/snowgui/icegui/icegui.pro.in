@@ -57,6 +57,7 @@ FORMS    +=								\
 	serverconfigurationwidget.ui					\
 	singletrackwidget.ui						\
 	systemconfigurationwidget.ui					\
+	systeminfowidget.ui						\
 	trackingmonitordialog.ui					\
 	trackselectiondialog.ui						\
 	trackviewdialog.ui
@@ -89,6 +90,7 @@ WIDGETSOURCES =								\
 	serverconfigurationwidget.cpp					\
 	singletrackwidget.cpp						\
 	systemconfigurationwidget.cpp					\
+	systeminfowidget.cpp						\
 	trackingmonitordialog.cpp					\
 	trackselectiondialog.cpp					\
 	trackviewdialog.cpp
@@ -121,6 +123,7 @@ WIDGETHEADERS =								\
 	serverconfigurationwidget.h					\
 	singletrackwidget.h						\
 	systemconfigurationwidget.h					\
+	systeminfowidget.h						\
 	trackingmonitordialog.h						\
 	trackselectiondialog.h						\
 	trackviewdialog.h

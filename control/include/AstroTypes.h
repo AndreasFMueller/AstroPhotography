@@ -129,6 +129,7 @@ public:
 	Temperature(float temperature, temperature_scale scale = KELVIN);
 	float	celsius() const;
 	float	temperature() const { return _temperature; }
+	static Temperature	core();
 };
 
 } // namespace astro

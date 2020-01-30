@@ -10,7 +10,7 @@
     <x>0</x>
     <y>0</y>
     <width>259</width>
-    <height>494</height>
+    <height>571</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -44,7 +44,7 @@
    <property name="locale">
     <locale language="C" country="AnyCountry"/>
    </property>
-   <layout class="QHBoxLayout" name="horizontalLayout">
+   <layout class="QGridLayout" name="gridLayout_2">
     <property name="leftMargin">
      <number>0</number>
     </property>
@@ -57,7 +57,7 @@
     <property name="bottomMargin">
      <number>0</number>
     </property>
-    <item>
+    <item row="0" column="0">
      <widget class="QWidget" name="servicesWidget" native="true">
       <layout class="QVBoxLayout" name="verticalLayout">
        <property name="leftMargin">
@@ -176,14 +176,7 @@
       </layout>
      </widget>
     </item>
-    <item>
-     <widget class="Line" name="servicesseparatorLine">
-      <property name="orientation">
-       <enum>Qt::Vertical</enum>
-      </property>
-     </widget>
-    </item>
-    <item>
+    <item row="0" column="2">
      <widget class="QWidget" name="appsWidget" native="true">
       <layout class="QGridLayout" name="gridLayout">
        <property name="leftMargin">
@@ -321,6 +314,23 @@
       </layout>
      </widget>
     </item>
+    <item row="0" column="1">
+     <widget class="Line" name="servicesseparatorLine">
+      <property name="orientation">
+       <enum>Qt::Vertical</enum>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="0" colspan="3">
+     <widget class="snowgui::SystemInfoWidget" name="systeminfoWidget" native="true">
+      <property name="minimumSize">
+       <size>
+        <width>0</width>
+        <height>80</height>
+       </size>
+      </property>
+     </widget>
+    </item>
    </layout>
   </widget>
   <widget class="QMenuBar" name="menuBar">
@@ -344,6 +354,14 @@
   <widget class="QStatusBar" name="statusBar"/>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
+ <customwidgets>
+  <customwidget>
+   <class>snowgui::SystemInfoWidget</class>
+   <extends>QWidget</extends>
+   <header location="global">systeminfowidget.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
  <slots>

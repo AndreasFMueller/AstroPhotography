@@ -14,6 +14,7 @@
 #include <AstroTask.h>
 #include <AstroGuiding.h>
 #include <Ice/Ice.h>
+#include <sys/times.h>
 
 namespace snowstar {
 
@@ -35,6 +36,9 @@ class Server {
 
 	RepositoriesI	*_repositories;
 
+	time_t	_start_time;
+	clock_t	_start_clock;
+
 	void	get_configured_services(astro::discover::ServicePublisherPtr sp);
 
 	void	add_devices_servant();
@@ -52,6 +56,8 @@ public:
 	Server(Ice::CommunicatorPtr ic, const std::string& dbfilename);
 
 	void	waitForShutdown();
+	time_t	start_time() const { return _start_time; }
+	clock_t	start_clock() const { return _start_clock; }
 
 	// cross servant methods
 	void	reloadRepositories();

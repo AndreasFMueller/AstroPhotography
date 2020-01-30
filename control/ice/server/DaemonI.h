@@ -35,6 +35,10 @@ public:
 	std::string	osVersion(const Ice::Current& current);
 	std::string	astroVersion(const Ice::Current& current);
 	std::string	snowstarVersion(const Ice::Current& current);
+	Sysinfo	getSysinfo(const Ice::Current& current);
+	float	daemonUptime(const Ice::Current& current);
+	float	getTemperature(const Ice::Current& current);
+	float	cputime(const Ice::Current& current);
 };
 
 } // namespace snowstar
