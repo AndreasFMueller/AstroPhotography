@@ -362,7 +362,7 @@ std::string	DaemonI::snowstarVersion(const Ice::Current& /* current */) {
 		__DATE__ ,__TIME__);
 }
 
-Sysinfo	DaemonI::getSysinfo(const Ice::Current& current) {
+Sysinfo	DaemonI::getSysinfo(const Ice::Current& /* current */) {
 #if __APPLE__
 	NotImplemented	notimplemented;
 	notimplemented.cause = std::string("sysinfo not available");
@@ -394,13 +394,13 @@ Sysinfo	DaemonI::getSysinfo(const Ice::Current& current) {
 	return result;
 }
 
-float	DaemonI::daemonUptime(const Ice::Current& current) {
+float	DaemonI::daemonUptime(const Ice::Current& /* current */) {
 	long	ticks = sysconf(_SC_CLK_TCK);
 	struct tms	t;
 	return (times(&t) - _server.start_clock()) / (float)ticks;
 }
 
-float	DaemonI::cputime(const Ice::Current& current) {
+float	DaemonI::cputime(const Ice::Current& /* current */) {
 	long	ticks = sysconf(_SC_CLK_TCK);
 	struct tms	t;
 	times(&t);
@@ -410,7 +410,7 @@ float	DaemonI::cputime(const Ice::Current& current) {
 /**
  * \brief Retrieve the core temperature
  */
-float	DaemonI::getTemperature(const Ice::Current& current) {
+float	DaemonI::getTemperature(const Ice::Current& /* current */) {
 	try {
 		astro::Temperature	t = astro::Temperature::core();
 		return t.temperature();
