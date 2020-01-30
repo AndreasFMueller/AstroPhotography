@@ -86,6 +86,25 @@ module snowstar {
 		void	stop();
 	};
 
+	sequence<string>	InterfaceNameSequence;
+	sequence<string>	ServantNameSequence;
+
+	/**
+	 * \brief Interface statistics
+	 *
+	 * Some interfaces inherit from this and thus can be queried about
+	 * the number of calls that were done against this interface
+	 */
+	interface Statistics {
+		InterfaceNameSequence	interfaceNames();
+		long	servantInstances();
+		ServantNameSequence	servantNames();	
+		long	interfaceCalls();
+		long	interfaceNamedCalls(string name);
+		long	servantCalls(string servantName);
+		long	servantNamedCalls(string servantName, string name);
+	};
+
 	/**
 	 * \brief Configuration data structures
 	 */

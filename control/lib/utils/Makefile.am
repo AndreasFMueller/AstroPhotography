@@ -27,6 +27,7 @@ libastroutils_la_SOURCES = 						\
 	ImageCoordinates.cpp						\
 	JulianDate.cpp							\
 	LongLat.cpp							\
+	Memory.cpp							\
 	Path.cpp							\
 	Pidfile.cpp							\
 	Point.cpp							\

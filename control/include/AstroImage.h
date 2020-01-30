@@ -22,6 +22,7 @@
 #include <cmath>
 #include <AstroDebug.h>
 #include <AstroFormat.h>
+#include <AstroStatistics.h>
 
 namespace astro {
 namespace image {
@@ -682,6 +683,8 @@ public:
 				"alloc %d pixels for image %s at %p",
 				frame.size().getPixels(),
 				frame.size().toString().c_str(), pixels);
+			statistics::Memory::image_allocate(
+				frame.size().getPixels(), sizeof(Pixel));
 		}
 	}
 
@@ -713,6 +716,8 @@ public:
 				"alloc %d pixels for image %s at %p",
 				size.getPixels(),
 				size.toString().c_str(), pixels);
+			statistics::Memory::image_allocate(
+				size.getPixels(), sizeof(Pixel));
 		}
 	}
 
@@ -734,6 +739,8 @@ public:
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "copy %s alloc %ld pixels at %p",
 			frame.size().toString().c_str(), number_of_pixels,
 			pixels);
+		statistics::Memory::image_allocate(number_of_pixels,
+			sizeof(Pixel));
 #		pragma omp parallel for
 		for (int x = 0; x < frame.size().width(); x++) {
 			for (int y = 0; y < frame.size().height(); y++) {
@@ -761,6 +768,8 @@ public:
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "copy %s alloc %d pixels at %p",
 			frame.size().toString().c_str(),
 			frame.size().getPixels(), pixels);
+		statistics::Memory::image_allocate(number_of_pixels,
+			sizeof(Pixel));
 #		pragma omp parallel for
 		for (int x = 0; x < frame.size().width(); x++) {
 			for (int y = 0; y < frame.size().height(); y++) {
@@ -784,6 +793,8 @@ public:
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "copy %s alloc %d pixels at %p",
 			frame.size().toString().c_str(),
 			frame.size().getPixels(), pixels);
+		statistics::Memory::image_allocate(frame.size().getPixels(),
+			sizeof(Pixel));
 		convertPixelArray(pixels, other.pixels,
 			frame.size().getPixels());
 	}
@@ -810,6 +821,8 @@ public:
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "copy %s alloc %d pixels at %p",
 			frame.size().toString().c_str(),
 			frame.size().getPixels(), pixels);
+		statistics::Memory::image_allocate(frame.size().getPixels(),
+			sizeof(Pixel));
 		std::copy(p.pixels, p.pixels + frame.size().getPixels(), pixels);
 	}
 
@@ -830,6 +843,8 @@ public:
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "copy %s alloc %d pixels at %p",
 			frame.size().toString().c_str(),
 			frame.size().getPixels(), pixels);
+		statistics::Memory::image_allocate(number_of_pixels,
+			sizeof(Pixel));
 		for (long i = 0; i < number_of_pixels; i++) {
 			pixels[i] = p.pixels[i] * scalefactor;
 		}
@@ -885,6 +900,8 @@ public:
 	virtual	~Image() {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "delete pixels at %p", pixels);
 		delete[] pixels;
+		statistics::Memory::image_deallocate(frame.size().getPixels(),
+			sizeof(Pixel));
 	}
 
 	/**
@@ -1240,6 +1257,8 @@ Image<Pixel>::Image(const Image<Pixel>& src,
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "alloc %d bytes for subframe %s at %p",
 		subframe.size().getPixels(), subframe.size().toString().c_str(),
 		pixels);
+	statistics::Memory::image_allocate(subframe.size().getPixels(),
+			sizeof(Pixel));
 	for (int y = 0; y < subframe.size().height(); y++) {
 		ImageRow	srcrow(src.frame.size(), subframe.origin().y() + y);
 		ImageRow	destrow(frame.size(), y);
