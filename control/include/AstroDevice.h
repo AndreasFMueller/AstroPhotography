@@ -268,6 +268,7 @@ public:
 	typedef enum state_type { IDLE, ALIGNED, TRACKING, GOTO } state_type;
 	static std::string	state2string(state_type s);
 	static state_type	string2state(const std::string& s);
+	typedef enum location_source_type { LOCAL, GPS } location_source_type;
 
 	static DeviceName::device_type	devicetype;
 private:
@@ -278,6 +279,7 @@ protected:
 	void	location(const LongLat& l);
 public:
 	virtual LongLat	location();
+	virtual location_source_type	location_source();
 	virtual time_t	time();
 
 	Mount(const std::string& name);

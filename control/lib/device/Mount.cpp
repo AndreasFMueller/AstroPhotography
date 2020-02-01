@@ -120,6 +120,13 @@ LongLat	Mount::location() {
 }
 
 /**
+ * \brief Get the location source
+ */
+Mount::location_source_type	Mount::location_source() {
+	return Mount::LOCAL;
+}
+
+/**
  * \brief Get the time from the mount
  *
  * In most cases, this is just the system time. But if e.g. a Celestron mount

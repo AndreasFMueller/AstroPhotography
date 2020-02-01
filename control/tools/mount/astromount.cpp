@@ -120,6 +120,12 @@ int	get_command(MountPtr mount) {
 	}
 	std::cout << " ";
 	std::cout << state2string(mount->state());
+	std::cout << " ";
+	if (mount->telescopePositionWest()) {
+		std::cout << "W";
+	} else {
+		std::cout << "E";
+	}
 	std::cout << std::endl;
 	return EXIT_SUCCESS;
 }
@@ -169,6 +175,37 @@ int	time_command(MountPtr mount) {
 }
 
 /**
+ * \brief Implementation of the guidereates command
+ */
+int	location_command(MountPtr mount) {
+	LongLat	location = mount->location();
+	std::cout << location.longitude().dms().c_str();
+	std::cout << " ";
+	std::cout << location.latitude().dms().c_str();
+	std::cout << " ";
+	switch (mount->location_source()) {
+	case Mount::LOCAL:	std::cout << "local"; break;
+	case Mount::GPS:	std::cout << "GPS"; break;
+	}
+	std::cout << std::endl;
+	return 0;
+}
+
+/**
+ * \brief Implementation of the guiderates command
+ */
+int	guiderates_command(MountPtr mount) {
+	if (!mount->hasGuideRates()) {
+		std::cout << "mount has no guide rates" << std::endl;
+		return 1;
+	}
+	astro::RaDec	guiderates = mount->getGuideRates();
+	std::cout << "RA rate:  " << guiderates.ra().hms().c_str() << std::endl;
+	std::cout << "DEC rate: " << guiderates.dec().hms().c_str() << std::endl;
+	return 0;
+}
+
+/**
  * \brief Table of options for the astromount command
  */
 static struct option    longopts[] = {
@@ -193,6 +230,8 @@ static void	usage(const std::string& progname) {
 	std::cout << prg << " [ options ] cancel MOUNT" << std::endl;
 	std::cout << prg << " [ options ] wait MOUNT" << std::endl;
 	std::cout << prg << " [ options ] time MOUNT" << std::endl;
+	std::cout << prg << " [ options ] location MOUNT" << std::endl;
+	std::cout << prg << " [ options ] guiderates MOUNT" << std::endl;
 	std::cout << std::endl;
 	std::cout << "list mounts, get or set RA and DEC of a mount";
 	std::cout << std::endl;
@@ -302,6 +341,12 @@ int main(int argc, char *argv[]) {
 	}
 	if (command == "time") {
 		return time_command(mount);
+	}
+	if (command == "location") {
+		return location_command(mount);
+	}
+	if (command == "guiderates") {
+		return guiderates_command(mount);
 	}
 
 	throw std::runtime_error("unknown command");

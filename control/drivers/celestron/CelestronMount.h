@@ -49,6 +49,7 @@ class CelestronMount : public astro::device::Mount,
 
 	// also we prevent the location from being required all the time
 	time_t	_last_location_queried;
+	location_source_type	_last_location_source;
 
 public:
 	CelestronMount(const std::string& devicename);
@@ -59,6 +60,7 @@ public:
 	virtual RaDec	getRaDec();
 	virtual AzmAlt	getAzmAlt();
 	virtual LongLat	location();
+	virtual location_source_type	location_source();
 	virtual time_t	time();
 	virtual void	Goto(const RaDec& radec);
 	virtual void	Goto(const AzmAlt& azmalt);

@@ -4,6 +4,8 @@ ChangeLog for the Astro project.
 	* fix some warnings in snowguide.cpp
 	* fix statistics to compile
 	* fix bug in devices.properties of celestron driver
+	* added proper east/west decoding in CelestronMount
+	* add location source to the Mount class
 
 20200130:
 	* system information interface

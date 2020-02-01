@@ -13,3 +13,6 @@ astromount_LDADD = -L$(top_builddir)/lib -lastro
 
 test:	astromount
 	./astromount --debug GET mount:celestron/0 2>&1 | tee test.log
+
+time:	astromount
+	./astromount --debug time mount:celestron/0 2>&1 | tee test.log

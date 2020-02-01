@@ -85,6 +85,7 @@ CelestronMount::CelestronMount(const std::string& devicename)
 	_last_time_offset = 0;
 	_last_time_queried = 0;
 	_last_location_queried = 0;
+	_last_location_source = Mount::LOCAL;
 }
 
 /**
@@ -236,7 +237,9 @@ RaDec	CelestronMount::getRaDec() {
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "ra = %f, dec = %f",
 		Angle(a.first).hours(), Angle(a.second).degrees());
-	return RaDec(Angle(a.first), Angle(a.second));
+	RaDec	result(Angle(a.first), Angle(a.second));
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "radec = %s", result.toString().c_str());
+	return result;
 }
 
 /*
@@ -263,18 +266,20 @@ bool	CelestronMount::telescopePositionWest() {
 	// XXX on which side the telescope currently is, at least for
 	// XXX GE mounts
 	
-#if 0
+#if 1
 	// first query the mount to find out whether the telescope is 
 	// actually equatorial by using the "t" command 
 	bool	north = true; // XXX use t command
 
-	// depending on the orientation, use the azm angle to decied whether
+	// depending on the orientation, use the azm angle to decide whether
 	// or not we are on the east/west side
 	AzmAlt	azmalt = getAzmAlt();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "got AzmAlt: %s",
+		azmalt.toString().c_str());
 	if (north) {
-		return azmalt.azm() < 0;
+		return azmalt.azm() > Angle::right_angle;
 	} else {
-		return azmalt.azm() < 0;
+		return azmalt.azm() < Angle::right_angle;
 	}
 #endif
 
@@ -366,6 +371,8 @@ std::vector<uint8_t>	CelestronMount::gps_command(uint8_t a, uint8_t b, size_t l)
  */
 bool	CelestronMount::gps_linked() {
 	std::vector<uint8_t>	x = gps_command(55, 1, 1);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "gps linked: %s",
+		(x[0] > 0) ? "yes" : "no");
 	return (x[0] > 0);
 }
 
@@ -441,11 +448,23 @@ LongLat	CelestronMount::location() {
 		if (gps_linked()) {
 			debug(LOG_DEBUG, DEBUG_LOG, 0, "have to read location");
 			_last_location_queried = now;
+			_last_location_source = Mount::GPS;
 			LongLat	loc = LongLat(gps_longitude(), gps_latitude());
 			Mount::location(loc);
+		} else {
+			// XXX should get location from HandControl, i.e. using
+			// XXX the w command
+			_last_location_source = Mount::LOCAL;
 		}
 	}
 	return Mount::location();
+}
+
+/**
+ * \brief Get the location source
+ */
+Mount::location_source_type	CelestronMount::location_source() {
+	return _last_location_source;
 }
 
 /**
@@ -499,6 +518,10 @@ time_t	CelestronMount::time() {
 
 		// return the current time
 		return result;
+	} else {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "no GPS link available");
+		// XXX should read time from the hand control, i.e. using
+		// XXX the h command
 	}
 	// if not linked, use the superclass time
 	return Mount::time();
