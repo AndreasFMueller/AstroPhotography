@@ -19,7 +19,7 @@ namespace transform {
  * \param numberofstars		the number of stars to extract
  * \param searchradius		the minimum radius between points
  */
-StarExtractor::StarExtractor(int numberofstars, int searchradius)
+StarExtractor::StarExtractor(unsigned int numberofstars, int searchradius)
 	: _numberofstars(numberofstars), _searchradius(searchradius), 
 	  _saturation(1.0) {
 }

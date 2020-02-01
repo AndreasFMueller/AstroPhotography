@@ -8,10 +8,11 @@
 
 #include <repository.h>
 #include <AstroConfig.h>
+#include "StatisticsI.h"
 
 namespace snowstar {
 
-class RepositoriesI : virtual public Repositories {
+class RepositoriesI : virtual public Repositories, public StatisticsI {
 	std::string	_repositoriesDB;
 	astro::config::ConfigurationPtr	_configuration;
 public:

@@ -4,10 +4,11 @@
  * (c) 2015 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
 #include <instruments.h>
+#include "StatisticsI.h"
 
 namespace snowstar {
 
-class InstrumentsI : virtual public Instruments {
+class InstrumentsI : virtual public Instruments, public StatisticsI {
 public:
 	InstrumentsI();
 	virtual ~InstrumentsI();

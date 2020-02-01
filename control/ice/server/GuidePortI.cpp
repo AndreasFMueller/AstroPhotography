@@ -16,11 +16,13 @@ GuidePortI::GuidePortI(astro::camera::GuidePortPtr guideport)
 GuidePortI::~GuidePortI() {
 }
 
-Ice::Byte	GuidePortI::active(const Ice::Current& /* current */) {
+Ice::Byte	GuidePortI::active(const Ice::Current& current) {
+	CallStatistics::count(current);
 	return _guideport->active();
 }
 
-void	GuidePortI::activate(float ra, float dec, const Ice::Current& /* current */) {
+void	GuidePortI::activate(float ra, float dec, const Ice::Current& current) {
+	CallStatistics::count(current);
 	double  raplus = 0, raminus = 0, decplus = 0, decminus = 0;
 	if (ra > 0) {
 		raplus = ra;

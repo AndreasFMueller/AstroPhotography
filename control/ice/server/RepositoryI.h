@@ -9,10 +9,11 @@
 #include <repository.h>
 #include <AstroConfig.h>
 #include <AstroProject.h>
+#include "StatisticsI.h"
 
 namespace snowstar {
 
-class RepositoryI : virtual public Repository {
+class RepositoryI : virtual public Repository, public StatisticsI {
 	astro::project::ImageRepo	_repo;
 public:
 	RepositoryI(astro::project::ImageRepo repo);

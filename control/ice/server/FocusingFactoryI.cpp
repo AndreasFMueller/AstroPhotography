@@ -104,6 +104,7 @@ FocusingContext	FocusingSingleton::get(int id) {
  */
 FocusingPrx	FocusingFactoryI::get(const std::string& ccd,
 		const std::string& focuser, const Ice::Current& current) {
+	CallStatistics::count(current);
 	FocusingContext	ctx = FocusingSingleton::get(ccd, focuser);
 	std::string	focusingname = astro::stringprintf("focusing/%d",
 		ctx.id);
@@ -115,7 +116,8 @@ FocusingPrx	FocusingFactoryI::get(const std::string& ccd,
 /**
  * \brief Get a list of methods
  */
-FocusMethods	FocusingFactoryI::getMethods(const Ice::Current& /* current */) {
+FocusMethods	FocusingFactoryI::getMethods(const Ice::Current& current) {
+	CallStatistics::count(current);
 	std::list<std::string>	methods
 		= astro::focusing::FocusEvaluatorFactory::evaluatornames();
 	FocusMethods	result;
@@ -126,7 +128,8 @@ FocusMethods	FocusingFactoryI::getMethods(const Ice::Current& /* current */) {
 /**
  * \brief Get a list of solvers
  */
-FocusSolvers	FocusingFactoryI::getSolvers(const Ice::Current& /* current */) {
+FocusSolvers	FocusingFactoryI::getSolvers(const Ice::Current& current) {
+	CallStatistics::count(current);
 	std::list<std::string>	solvers
 		= astro::focusing::FocusSolverFactory::solvernames();
 	FocusSolvers	result;

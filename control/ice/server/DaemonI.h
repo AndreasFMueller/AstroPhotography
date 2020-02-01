@@ -8,10 +8,11 @@
 
 #include <types.h>
 #include <Server.h>
+#include <StatisticsI.h>
 
 namespace snowstar {
 
-class DaemonI : virtual public Daemon {
+class DaemonI : virtual public Daemon, public StatisticsI {
 	Server&	_server;
 public:
 	DaemonI(Server& server) : _server(server) { }

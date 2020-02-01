@@ -8,10 +8,11 @@
 
 #include <device.h>
 #include <AstroLoader.h>
+#include "StatisticsI.h"
 
 namespace snowstar {
 
-class DevicesI : virtual public Devices {
+class DevicesI : virtual public Devices, public StatisticsI {
 	astro::module::Devices&	_devices;
 public:
 	// constructors

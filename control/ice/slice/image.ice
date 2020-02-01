@@ -34,7 +34,7 @@ module snowstar {
 	 * to give access to all the information contained in a FITS file,
 	 * if that is desired, the FITS file should be used directly.
 	 */
-	interface Image {
+	interface Image extends Statistics {
 		/**
 		 * \brief Get the filename of the image
  		 */
@@ -168,7 +168,7 @@ module snowstar {
 	 * access to these services
 	 */
 	sequence<string>	ImageList;
-	interface Images {
+	interface Images extends Statistics {
 		ImageList	listImages();
 		int	imageSize(string name) throws NotFound;
 		int	imageAge(string name) throws NotFound;

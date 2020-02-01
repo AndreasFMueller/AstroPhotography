@@ -86,8 +86,8 @@ module snowstar {
 		void	stop();
 	};
 
-	sequence<string>	InterfaceNameSequence;
-	sequence<string>	ServantNameSequence;
+	sequence<Ice::Identity>	ObjectIdentitySequence;
+	sequence<string>	OperationSequence;
 
 	/**
 	 * \brief Interface statistics
@@ -96,13 +96,19 @@ module snowstar {
 	 * the number of calls that were done against this interface
 	 */
 	interface Statistics {
-		InterfaceNameSequence	interfaceNames();
-		long	servantInstances();
-		ServantNameSequence	servantNames();	
-		long	interfaceCalls();
-		long	interfaceNamedCalls(string name);
-		long	servantCalls(string servantName);
-		long	servantNamedCalls(string servantName, string name);
+		// access known object identities
+		ObjectIdentitySequence	objectidentities();
+		long	objectidentityCount();
+		// access known operation for each identity
+		OperationSequence	operations(Ice::Identity objectidentity);
+		long	operationCount(Ice::Identity objectidentity);
+		// access call statistics
+		long	callsPerObject(Ice::Identity objectidentity);
+		long	callsPerObjectAndOperation(Ice::Identity objectidentity,
+				string operation);
+		// call statistics of this particular object
+		long	calls();
+		long	operationCalls(string operation);
 	};
 
 	/**
@@ -125,7 +131,7 @@ module snowstar {
 	/**
  	 * \brief Configuration interface
 	 */
-	interface Configuration {
+	interface Configuration extends Statistics {
 		bool	has(ConfigurationKey key);
 		ConfigurationItem	get(ConfigurationKey key)
 						throws NotFound;
@@ -172,7 +178,7 @@ module snowstar {
 	 * These relate to process control and more generally operating
 	 * system functions.
 	 */
-	interface Daemon {
+	interface Daemon extends Statistics {
 		void	reloadRepositories();
 		void	shutdownServer(float delay);
 		void	restartServer(float delay);
@@ -253,7 +259,7 @@ module snowstar {
 	/**
 	 * \brief An object having parameters that can be set
 	 */
-	interface Device {
+	interface Device extends Statistics {
 		string	getName();
 		stringlist	parameterNames();
 		bool	hasParameter(string name);
@@ -296,7 +302,7 @@ module snowstar {
 		void	update(Event eventinfo);
 	};
 
-	interface EventHandler {
+	interface EventHandler extends Statistics {
 		Event		eventId(int id);
 		eventlist	eventsBetween(double fromago, double toago);
 		eventlist	eventsCondition(string condition);
@@ -327,7 +333,7 @@ module snowstar {
 		void	update(StatusUpdate status);
 	};
 
-	interface Gateway {
+	interface Gateway extends Statistics {
 		void	send(StatusUpdate update);
 		void	registerMonitor(Ice::Identity statusupdatemonitor);
                 void	unregisterMonitor(Ice::Identity statusupdatemonitor);

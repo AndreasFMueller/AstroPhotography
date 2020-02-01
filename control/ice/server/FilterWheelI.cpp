@@ -17,28 +17,34 @@ FilterWheelI::FilterWheelI(astro::camera::FilterWheelPtr filterwheel)
 FilterWheelI::~FilterWheelI() {
 }
 
-int	FilterWheelI::nFilters(const Ice::Current& /* current */) {
+int	FilterWheelI::nFilters(const Ice::Current& current) {
+	CallStatistics::count(current);
 	return _filterwheel->nFilters();
 }
 
-int	FilterWheelI::currentPosition(const Ice::Current& /* current */) {
+int	FilterWheelI::currentPosition(const Ice::Current& current) {
+	CallStatistics::count(current);
 	return _filterwheel->currentPosition();
 }
 
-void	FilterWheelI::select(int position, const Ice::Current& /* current */) {
+void	FilterWheelI::select(int position, const Ice::Current& current) {
+	CallStatistics::count(current);
 	return _filterwheel->select(position);
 }
 
-void	FilterWheelI::selectName(const std::string& filtername, const Ice::Current& /* current */) {
+void	FilterWheelI::selectName(const std::string& filtername, const Ice::Current& current) {
+	CallStatistics::count(current);
 	return _filterwheel->select(filtername);
 }
 
 std::string	FilterWheelI::filterName(int position,
-			const Ice::Current& /* current */) {
+			const Ice::Current& current) {
+	CallStatistics::count(current);
 	return _filterwheel->filterName(position);
 }
 
-FilterwheelState	FilterWheelI::getState(const Ice::Current& /* current */) {
+FilterwheelState	FilterWheelI::getState(const Ice::Current& current) {
+	CallStatistics::count(current);
 	return convert(_filterwheel->getState());
 }
 

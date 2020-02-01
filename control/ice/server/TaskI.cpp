@@ -34,23 +34,28 @@ astro::task::TaskQueueEntry	TaskI::entry() {
 	return result;
 }
 
-TaskState	TaskI::state(const Ice::Current& /* current */) {
+TaskState	TaskI::state(const Ice::Current& current) {
+	CallStatistics::count(current);
 	return snowstar::convert(entry().state());
 }
 
-TaskParameters	TaskI::parameters(const Ice::Current& /* current */) {
+TaskParameters	TaskI::parameters(const Ice::Current& current) {
+	CallStatistics::count(current);
 	return snowstar::convert(entry().parameters());
 }
 
-TaskInfo	TaskI::info(const Ice::Current& /* current */) {
+TaskInfo	TaskI::info(const Ice::Current& current) {
+	CallStatistics::count(current);
 	return snowstar::convert(entry().info());
 }
 
-std::string	TaskI::imagename(const Ice::Current& /* current */) {
+std::string	TaskI::imagename(const Ice::Current& current) {
+	CallStatistics::count(current);
 	return entry().filename();
 }
 
-ImagePrx	TaskI::getImage(const Ice::Current& /* current */) {
+ImagePrx	TaskI::getImage(const Ice::Current& current) {
+	CallStatistics::count(current);
 	// find out whether the file exists
 	std::string	filename = entry().filename();
 	astro::image::ImageDatabaseDirectory	imagedir;
@@ -66,7 +71,8 @@ ImagePrx	TaskI::getImage(const Ice::Current& /* current */) {
 }
 
 int	TaskI::imageToRepo(const std::string& reponame,
-		const Ice::Current& /* current */) {
+		const Ice::Current& current) {
+	CallStatistics::count(current);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "imageToRepo(%s)", reponame.c_str());
 	// first make sure the file really exist
 	std::string	filename = entry().filename();

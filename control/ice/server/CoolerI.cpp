@@ -16,23 +16,28 @@ CoolerI::CoolerI(astro::camera::CoolerPtr cooler)
 CoolerI::~CoolerI() {
 }
 
-float	CoolerI::getSetTemperature(const Ice::Current& /* current */) {
+float	CoolerI::getSetTemperature(const Ice::Current& current) {
+	CallStatistics::count(current);
 	return _cooler->getSetTemperature();
 }
 
-float	CoolerI::getActualTemperature(const Ice::Current& /* current */) {
+float	CoolerI::getActualTemperature(const Ice::Current& current) {
+	CallStatistics::count(current);
 	return _cooler->getActualTemperature();
 }
 
-void	CoolerI::setTemperature(float temperature, const Ice::Current& /* current */) {
+void	CoolerI::setTemperature(float temperature, const Ice::Current& current) {
+	CallStatistics::count(current);
 	_cooler->setTemperature(temperature);
 }
 
-bool	CoolerI::isOn(const Ice::Current& /* current */) {
+bool	CoolerI::isOn(const Ice::Current& current) {
+	CallStatistics::count(current);
 	return _cooler->isOn();
 }
 
-void	CoolerI::setOn(bool onoff, const Ice::Current& /* current */) {
+void	CoolerI::setOn(bool onoff, const Ice::Current& current) {
+	CallStatistics::count(current);
 	_cooler->setOn(onoff);
 }
 
@@ -42,20 +47,24 @@ CoolerPrx	CoolerI::createProxy(const std::string& coolername,
 		NameConverter::urlencode(coolername), current);
 }
 
-bool	CoolerI::hasDewHeater(const Ice::Current& /* current */) {
+bool	CoolerI::hasDewHeater(const Ice::Current& current) {
+	CallStatistics::count(current);
 	return _cooler->hasDewHeater();
 }
 
-float	CoolerI::getDewHeater(const Ice::Current& /* current */) {
+float	CoolerI::getDewHeater(const Ice::Current& current) {
+	CallStatistics::count(current);
 	return _cooler->dewHeater();
 }
 
 void	CoolerI::setDewHeater(float dewheatervalue,
-		const Ice::Current& /* current */) {
+		const Ice::Current& current) {
+	CallStatistics::count(current);
 	_cooler->dewHeater(dewheatervalue);
 }
 
-Interval	CoolerI::dewHeaterRange(const Ice::Current& /* current */) {
+Interval	CoolerI::dewHeaterRange(const Ice::Current& current) {
+	CallStatistics::count(current);
 	std::pair<float, float>	i = _cooler->dewHeaterRange();
 	Interval	result;
 	result.min = i.first;

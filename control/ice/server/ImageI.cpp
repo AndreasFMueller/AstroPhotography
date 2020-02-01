@@ -69,7 +69,8 @@ ImageI::~ImageI() {
 /**
  * \brief Get the name of an image
  */
-std::string	ImageI::name(const Ice::Current& /* current */) {
+std::string	ImageI::name(const Ice::Current& current) {
+	CallStatistics::count(current);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "request for image %s",
 		_filename.c_str());
 	return _filename;
@@ -78,7 +79,8 @@ std::string	ImageI::name(const Ice::Current& /* current */) {
 /**
  * \brief Get the age of an image in the directory
  */
-int	ImageI::age(const Ice::Current& /* current */) {
+int	ImageI::age(const Ice::Current& current) {
+	CallStatistics::count(current);
 	astro::image::ImageDirectory	_imagedirectory;
 	return _imagedirectory.fileAge(_filename);
 }
@@ -86,35 +88,40 @@ int	ImageI::age(const Ice::Current& /* current */) {
 /**
  * \brief Get the size of the image
  */
-ImageSize       ImageI::size(const Ice::Current& /* current */) {
+ImageSize       ImageI::size(const Ice::Current& current) {
+	CallStatistics::count(current);
 	return _size;
 }
 
 /**
  * \brief Get the origin of the image inside the ccd frame
  */
-ImagePoint      ImageI::origin(const Ice::Current& /* current */) {
+ImagePoint      ImageI::origin(const Ice::Current& current) {
+	CallStatistics::count(current);
 	return _origin;
 }
 
 /**
  * \brief Get the size of a pixel
  */
-int     ImageI::bytesPerPixel(const Ice::Current& /* current */) {
+int     ImageI::bytesPerPixel(const Ice::Current& current) {
+	CallStatistics::count(current);
 	return _bytesperpixel;
 }
 
 /**
  * \brief Get the number of image planes
  */
-int     ImageI::planes(const Ice::Current& /* current */) {
+int     ImageI::planes(const Ice::Current& current) {
+	CallStatistics::count(current);
 	return _planes;
 }
 
 /**
  * \brief Get the size of a single value in a plane
  */
-int     ImageI::bytesPerValue(const Ice::Current& /* current */) {
+int     ImageI::bytesPerValue(const Ice::Current& current) {
+	CallStatistics::count(current);
 	return _bytespervalue;
 }
 
@@ -122,7 +129,8 @@ int     ImageI::bytesPerValue(const Ice::Current& /* current */) {
  * \brief Find out whether there is a keyword in the metadata
  */
 bool	ImageI::hasMeta(const std::string& keyword,
-			const Ice::Current& /* current */) {
+			const Ice::Current& current) {
+	CallStatistics::count(current);
 	return image()->hasMetadata(keyword);
 }
 
@@ -130,7 +138,8 @@ bool	ImageI::hasMeta(const std::string& keyword,
  * \brief Get the metadata for a keyword
  */
 Metavalue	ImageI::getMeta(const std::string& keyword,
-			const Ice::Current& /* current */) {
+			const Ice::Current& current) {
+	CallStatistics::count(current);
 	if (!image()->hasMetadata(keyword)) {
 		throw NotFound("keyword not found");
 	}
@@ -141,7 +150,8 @@ Metavalue	ImageI::getMeta(const std::string& keyword,
  * \brief Set a metadata value for an image
  */
 void	ImageI::setMetavalue(const Metavalue& metavalue,
-			const Ice::Current& /* current */) {
+			const Ice::Current& current) {
+	CallStatistics::count(current);
 	ImageMetadata	metadata;
 	metadata.setMetadata(convert(metavalue));
 	astro::image::ImageDirectory	_imagedirectory;
@@ -153,7 +163,8 @@ void	ImageI::setMetavalue(const Metavalue& metavalue,
  * \brief Set metadata for an image
  */
 void	ImageI::setMetadata(const Metadata& metadata,
-			const Ice::Current& /* current */) {
+			const Ice::Current& current) {
+	CallStatistics::count(current);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "setting metadata on file %s, %d items",
 		_filename.c_str(), metadata.size());
 	ImageMetadata	m;
@@ -243,7 +254,8 @@ ImageBuffer	ImageI::filePNG() {
  * \brief Retrieve the content of the FITS file
  */
 ImageBuffer       ImageI::file(ImageEncoding encoding,
-			const Ice::Current& /* current */) {
+			const Ice::Current& current) {
+	CallStatistics::count(current);
 	switch (encoding) {
 	case ImageEncodingFITS:
 		return fileFITS();
@@ -258,7 +270,8 @@ ImageBuffer       ImageI::file(ImageEncoding encoding,
 /**
  * \brief Get the size of an image file
  */
-int     ImageI::filesize(const Ice::Current& /* current */) {
+int     ImageI::filesize(const Ice::Current& current) {
+	CallStatistics::count(current);
 	astro::image::ImageDirectory	_imagedirectory;
 	return _imagedirectory.fileSize(_filename);
 }
@@ -267,7 +280,8 @@ int     ImageI::filesize(const Ice::Current& /* current */) {
  * \brief Save an image in a repository
  */
 void	ImageI::toRepository(const std::string& reponame,
-		const Ice::Current& /* current */) {
+		const Ice::Current& current) {
+	CallStatistics::count(current);
 	// get the repository
 	astro::project::ImageRepoPtr	repo;
 	try {
@@ -290,7 +304,8 @@ void	ImageI::toRepository(const std::string& reponame,
  *
  * Note that this method does not remove the image itself
  */
-void    ImageI::remove(const Ice::Current& /* current */) {
+void    ImageI::remove(const Ice::Current& current) {
+	CallStatistics::count(current);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "destroy the image file '%s'",
 		_filename.c_str());
 	astro::image::ImageDirectory	_imagedirectory;
@@ -353,7 +368,8 @@ ByteImageI::ByteImageI(astro::image::ImagePtr image,
 ByteImageI::~ByteImageI() {
 }
 
-ByteSequence	ByteImageI::getBytes(const Ice::Current& /* current */) {
+ByteSequence	ByteImageI::getBytes(const Ice::Current& current) {
+	CallStatistics::count(current);
 	ByteSequence	result;
 	unsigned int	size = image()->size().getPixels();
 	sequence_mono(unsigned char, size);
@@ -382,7 +398,8 @@ ShortImageI::ShortImageI(astro::image::ImagePtr image,
 ShortImageI::~ShortImageI() {
 }
 
-ShortSequence	ShortImageI::getShorts(const Ice::Current& /* current */) {
+ShortSequence	ShortImageI::getShorts(const Ice::Current& current) {
+	CallStatistics::count(current);
 	ShortSequence	result;
 	unsigned int	size = image()->size().getPixels();
         sequence_mono(unsigned short, size);
@@ -411,7 +428,8 @@ IntImageI::IntImageI(astro::image::ImagePtr image,
 IntImageI::~IntImageI() {
 }
 
-IntSequence	IntImageI::getInts(const Ice::Current& /* current */) {
+IntSequence	IntImageI::getInts(const Ice::Current& current) {
+	CallStatistics::count(current);
 	IntSequence	result;
 	unsigned int	size = image()->size().getPixels();
         sequence_mono(unsigned int, size);
@@ -440,7 +458,8 @@ FloatImageI::FloatImageI(astro::image::ImagePtr image,
 FloatImageI::~FloatImageI() {
 }
 
-FloatSequence	FloatImageI::getFloats(const Ice::Current& /* current */) {
+FloatSequence	FloatImageI::getFloats(const Ice::Current& current) {
+	CallStatistics::count(current);
 	FloatSequence	result;
 	unsigned int	size = image()->size().getPixels();
         sequence_mono(float, size);
@@ -469,7 +488,8 @@ DoubleImageI::DoubleImageI(astro::image::ImagePtr image,
 DoubleImageI::~DoubleImageI() {
 }
 
-DoubleSequence	DoubleImageI::getDoubles(const Ice::Current& /* current */) {
+DoubleSequence	DoubleImageI::getDoubles(const Ice::Current& current) {
+	CallStatistics::count(current);
 	DoubleSequence	result;
 	unsigned int	size = image()->size().getPixels();
         sequence_mono(double, size);
@@ -483,6 +503,7 @@ DoubleSequence	DoubleImageI::getDoubles(const Ice::Current& /* current */) {
  */
 ImagePrx	ImageI::createProxy(const std::string& filename,
 			const Ice::Current& current) {
+	CallStatistics::count(current);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "create proxy for %s pixels",
 		astro::demangle(_type.name()).c_str());
 	return getImage(filename, _type, current);

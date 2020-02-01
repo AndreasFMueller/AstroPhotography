@@ -41,7 +41,8 @@ GuiderFactoryI::~GuiderFactoryI() {
  * This method forwards the request to the original guider factory and
  * converts the result retrieved so that the ICE interface understands it
  */
-GuiderList	GuiderFactoryI::list(const Ice::Current& /* current */) {
+GuiderList	GuiderFactoryI::list(const Ice::Current& current) {
+	CallStatistics::count(current);
 	std::vector<astro::guiding::GuiderDescriptor>	l
 		= guiderfactory()->list();
 	GuiderList	result;
@@ -64,6 +65,7 @@ GuiderList	GuiderFactoryI::list(const Ice::Current& /* current */) {
  */
 GuiderPrx	GuiderFactoryI::get(const GuiderDescriptor& descriptor,
 			const Ice::Current& current) {
+	CallStatistics::count(current);
 	// name of the guider
 	astro::guiding::GuiderDescriptor	d = convert(descriptor);
 	std::string	gn = guiderdescriptor2name(descriptor);
@@ -212,7 +214,8 @@ void	GuiderFactoryI::buildnewguider(const GuiderDescriptor& descriptor) {
 /**
  * \brief Get all calibrations stored in the database
  */
-idlist	GuiderFactoryI::getAllCalibrations(const Ice::Current& /* current */) {
+idlist	GuiderFactoryI::getAllCalibrations(const Ice::Current& current) {
+	CallStatistics::count(current);
 	astro::guiding::CalibrationStore	store;
 	std::list<long> calibrations = store.getAllCalibrations();
 	idlist	result;
@@ -225,7 +228,8 @@ idlist	GuiderFactoryI::getAllCalibrations(const Ice::Current& /* current */) {
  * \brief Get all the calibrations for a specific guider
  */
 idlist	GuiderFactoryI::getCalibrations(const GuiderDescriptor& guider,
-			ControlType type, const Ice::Current& /* current */) {
+			ControlType type, const Ice::Current& current) {
+	CallStatistics::count(current);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "get calibrations");
 	astro::guiding::CalibrationStore	store;
 	std::list<long> calibrations = store.getCalibrations(convert(guider),
@@ -242,7 +246,8 @@ idlist	GuiderFactoryI::getCalibrations(const GuiderDescriptor& guider,
  * \brief get details about a specific calibration
  */
 Calibration	GuiderFactoryI::getCalibration(int id,
-			const Ice::Current& /* current */) {
+			const Ice::Current& current) {
+	CallStatistics::count(current);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieve calibration %d", id);
 	CalibrationSource	source;
 	return source.get(id);
@@ -252,7 +257,8 @@ Calibration	GuiderFactoryI::getCalibration(int id,
  * \brief Delete a calibration
  */
 void	GuiderFactoryI::deleteCalibration(int id,
-			const Ice::Current& /* current */) {
+			const Ice::Current& current) {
+	CallStatistics::count(current);
 	astro::guiding::CalibrationStore	store;
 	if (!store.contains(id)) {
 		NotFound	exception;
@@ -267,7 +273,8 @@ void	GuiderFactoryI::deleteCalibration(int id,
  * \brief Add a calibration
  */
 int	GuiderFactoryI::addCalibration(const Calibration& calibration,
-			const Ice::Current& /* current */) {
+			const Ice::Current& current) {
+	CallStatistics::count(current);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "storing a calibration");
 	astro::guiding::CalibrationStore	store;
 	// convert the calibration to a persistent calibration
@@ -328,7 +335,8 @@ int	GuiderFactoryI::addCalibration(const Calibration& calibration,
 /**
  * \brief Get all guide run ids available in the database
  */
-idlist	GuiderFactoryI::getAllTracks(const Ice::Current& /* current */) {
+idlist	GuiderFactoryI::getAllTracks(const Ice::Current& current) {
+	CallStatistics::count(current);
 	astro::guiding::TrackingStore	store;
 	std::list<long>	trackings = store.getAllTrackings();
 	idlist	result;
@@ -340,7 +348,8 @@ idlist	GuiderFactoryI::getAllTracks(const Ice::Current& /* current */) {
  * \brief Get the guide run ids for a specific guider
  */
 idlist	GuiderFactoryI::getTracks(const GuiderDescriptor& guider,
-			const Ice::Current& /* current */) {
+			const Ice::Current& current) {
+	CallStatistics::count(current);
 	astro::guiding::TrackingStore	store;
 	std::list<long>	trackings = store.getTrackings(convert(guider));
 	idlist	result;
@@ -357,7 +366,8 @@ idlist	GuiderFactoryI::getTracks(const GuiderDescriptor& guider,
  * are quite manageable in size, about 360 points per hour of guiding.
  */
 TrackingHistory	GuiderFactoryI::getTrackingHistory(int id,
-			const Ice::Current& /* current */) {
+			const Ice::Current& current) {
+	CallStatistics::count(current);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieve history %d", id);
 	try {
 		astro::guiding::TrackingStore	store;
@@ -389,7 +399,8 @@ TrackingHistory	GuiderFactoryI::getTrackingHistory(int id,
  * only the tracking points of that particular type.
  */
 TrackingHistory	GuiderFactoryI::getTrackingHistoryType(int id,
-	ControlType type, const Ice::Current& /* current */) {
+	ControlType type, const Ice::Current& current) {
+	CallStatistics::count(current);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieve history %d", id);
 	try {
 		astro::guiding::TrackingStore	store;
@@ -431,7 +442,8 @@ TrackingHistory	GuiderFactoryI::getTrackingHistoryType(int id,
  * way too much information. This 
  */
 TrackingSummary	GuiderFactoryI::getTrackingSummary(int id,
-			const Ice::Current& /* current */) {
+			const Ice::Current& current) {
+	CallStatistics::count(current);
 	try {
 		astro::guiding::TrackingStore	store;
 		return convert(store.getSummary(id));
@@ -456,7 +468,8 @@ TrackingSummary	GuiderFactoryI::getTrackingSummary(int id,
  * \brief Delete a tracking history from the database
  */
 void	GuiderFactoryI::deleteTrackingHistory(int id,
-		const Ice::Current& /* current */) {
+		const Ice::Current& current) {
+	CallStatistics::count(current);
 	astro::guiding::TrackingStore	store;
 	if (!store.contains(id)) {
 		NotFound	exception;

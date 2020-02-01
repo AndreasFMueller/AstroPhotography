@@ -8,10 +8,11 @@
 
 #include <tasks.h>
 #include <AstroTask.h>
+#include "StatisticsI.h"
 
 namespace snowstar {
 
-class TaskI : virtual public Task {
+class TaskI : virtual public Task, public StatisticsI {
 	astro::persistence::Database	database;
 	long	queueid;
 	astro::task::TaskQueueEntry	entry();

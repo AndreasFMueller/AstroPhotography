@@ -1,6 +1,8 @@
 ChangeLog for the Astro project.
 
 20200201:
+	* add statistics command to snowdaemon
+	* add call statistics to all server side interfaces
 	* fix some warnings in snowguide.cpp
 	* fix statistics to compile
 	* fix bug in devices.properties of celestron driver

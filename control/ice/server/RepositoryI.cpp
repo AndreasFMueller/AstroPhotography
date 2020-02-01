@@ -15,16 +15,19 @@ RepositoryI::RepositoryI(astro::project::ImageRepo repo) : _repo(repo) {
 RepositoryI::~RepositoryI() {
 }
 
-idlist	RepositoryI::getIds(const Ice::Current& /* current */) {
+idlist	RepositoryI::getIds(const Ice::Current& current) {
+	CallStatistics::count(current);
 	return _repo.getIds();
 }
 
 idlist	RepositoryI::getIdsCondition(const std::string& condition,
-		const Ice::Current& /* current */) {
+		const Ice::Current& current) {
+	CallStatistics::count(current);
 	return _repo.getIds(condition);
 }
 
-uuidlist        RepositoryI::getUUIDs(const Ice::Current& /* current */) {
+uuidlist        RepositoryI::getUUIDs(const Ice::Current& current) {
+	CallStatistics::count(current);
 	uuidlist	result;
 	std::set<astro::UUID>	uuids = _repo.getUUIDs("0 = 0");
 	std::copy(uuids.begin(), uuids.end(), std::back_inserter(result));
@@ -32,7 +35,8 @@ uuidlist        RepositoryI::getUUIDs(const Ice::Current& /* current */) {
 }
 
 uuidlist	RepositoryI::getUUIDsCondition(const std::string& condition,
-	const Ice::Current& /* current */) {
+	const Ice::Current& current) {
+	CallStatistics::count(current);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieve images with condition '%s'",
 		condition.c_str());
 	uuidlist	result;
@@ -41,21 +45,25 @@ uuidlist	RepositoryI::getUUIDsCondition(const std::string& condition,
 	return result;
 }
 
-projectnamelist	RepositoryI::getProjectnames(const Ice::Current& /* current */) {
+projectnamelist	RepositoryI::getProjectnames(const Ice::Current& current) {
+	CallStatistics::count(current);
 	return _repo.getProjectnames();
 }
 
-bool	RepositoryI::has(int id, const Ice::Current& /* current */) {
+bool	RepositoryI::has(int id, const Ice::Current& current) {
+	CallStatistics::count(current);
 	return _repo.has(id);
 }
 
 bool	RepositoryI::hasUUID(const std::string& uuid,
-		const Ice::Current& /* current */) {
+		const Ice::Current& current) {
+	CallStatistics::count(current);
 	return _repo.has(astro::UUID(uuid));
 }
 
 int    RepositoryI::getId(const std::string& uuid,
-			const Ice::Current& /* current */) {
+			const Ice::Current& current) {
+	CallStatistics::count(current);
 	if (!_repo.has(astro::UUID(uuid))) {
 		std::string	msg = astro::stringprintf("repo does not have "
 			"%s", uuid.c_str());
@@ -66,7 +74,8 @@ int    RepositoryI::getId(const std::string& uuid,
 }
 
 ImageBuffer       RepositoryI::getImage(int id, ImageEncoding encoding,
-		const Ice::Current& /* current */) {
+		const Ice::Current& current) {
+	CallStatistics::count(current);
 	if (!_repo.has(id)) {
 		std::string	msg = astro::stringprintf("repo does not have "
 			"%d", id);
@@ -81,7 +90,8 @@ ImageBuffer       RepositoryI::getImage(int id, ImageEncoding encoding,
 }
 
 ImageInfo	RepositoryI::getInfo(int id,
-			const Ice::Current& /* current */) {
+			const Ice::Current& current) {
+	CallStatistics::count(current);
 	if (!_repo.has(id)) {
 		std::string	msg = astro::stringprintf("repo does not have "
 			"%d", id);
@@ -91,7 +101,8 @@ ImageInfo	RepositoryI::getInfo(int id,
 }
 
 int    RepositoryI::save(const ImageFile& image,
-		const Ice::Current& /* current */) {
+		const Ice::Current& current) {
+	CallStatistics::count(current);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "request to save image of size %d",
 		image.size());
 	astro::image::ImagePtr	imageptr = convertfile(image);
@@ -102,7 +113,8 @@ int    RepositoryI::save(const ImageFile& image,
 	}
 }
 
-int	RepositoryI::count(const Ice::Current& /* current */) {
+int	RepositoryI::count(const Ice::Current& current) {
+	CallStatistics::count(current);
 	try {
 		return _repo.count();
 	} catch (const std::exception& x) {
@@ -112,7 +124,8 @@ int	RepositoryI::count(const Ice::Current& /* current */) {
 	}
 }
 
-void    RepositoryI::remove(int id, const Ice::Current& /* current */) {
+void    RepositoryI::remove(int id, const Ice::Current& current) {
+	CallStatistics::count(current);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "request to remvoe %d", id);
 	if (!_repo.has(id)) {
 		std::string	msg = astro::stringprintf("repo does not have "

@@ -9,6 +9,7 @@
 #include <guider.h>
 #include <AstroGuiding.h>
 #include <GuiderLocator.h>
+#include "StatisticsI.h"
 
 namespace snowstar {
 
@@ -19,7 +20,7 @@ namespace snowstar {
  * It is essentially a wrapper around the original guiderfactory object,
  * but it needs some support structure, e.g. the database for persistence.
  */
-class GuiderFactoryI : virtual public GuiderFactory {
+class GuiderFactoryI : virtual public GuiderFactory, public StatisticsI {
 	GuiderLocator	*locator;
 public:
 	GuiderFactoryI(GuiderLocator *locator);

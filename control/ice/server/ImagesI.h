@@ -8,6 +8,7 @@
 
 #include <image.h>
 #include <typeindex>
+#include "StatisticsI.h"
 
 namespace snowstar {
 
@@ -16,7 +17,7 @@ ImagePrx	getImage(const std::string& name, std::type_index type,
 ImagePrx	getImage(const std::string& name,
 			const Ice::Current& current);
 
-class ImagesI : virtual public Images {
+class ImagesI : virtual public Images, public StatisticsI {
 public:
 	ImagesI();
 	virtual ~ImagesI();

@@ -23,6 +23,7 @@
 namespace snowstar {
 
 static void     do_shutdown(float delay, const Ice::Current& current) {
+	CallStatistics::count(current);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "shutting down communicator in %f",
 		delay);
 	useconds_t	udelay = 1000000 * delay;
@@ -35,7 +36,8 @@ static void     do_shutdown(float delay, const Ice::Current& current) {
 /**
  * \brief Reload the repository database
  */
-void	DaemonI::reloadRepositories(const Ice::Current& /* current */) {
+void	DaemonI::reloadRepositories(const Ice::Current& current) {
+	CallStatistics::count(current);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "repositories reloaded");
 	_server.reloadRepositories();
 }
@@ -45,13 +47,15 @@ void	DaemonI::reloadRepositories(const Ice::Current& /* current */) {
  */
 void    DaemonI::shutdownServer(Ice::Float delay,
 		const Ice::Current& current) {
+	CallStatistics::count(current);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "server shutdown requested");
 	Restart::shutdown_instead(true);
 	std::thread	t(do_shutdown, delay, current);
 	t.detach();
 }
 
-static void	do_shutdownsystem(float delay, const Ice::Current& /* current */) {
+static void	do_shutdownsystem(float delay, const Ice::Current& current) {
+	CallStatistics::count(current);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "shutting down systen in %f", delay);
 	useconds_t	udelay = 1000000 * delay;
 	usleep(udelay);
@@ -64,6 +68,7 @@ static void	do_shutdownsystem(float delay, const Ice::Current& /* current */) {
  * \brief Initiate shutdown of the system
  */
 void	DaemonI::shutdownSystem(Ice::Float delay, const Ice::Current& current) {
+	CallStatistics::count(current);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "shutdown request");
 	std::thread	t(do_shutdownsystem, delay, current);
 	t.detach();
@@ -74,6 +79,7 @@ void	DaemonI::shutdownSystem(Ice::Float delay, const Ice::Current& current) {
  */
 void    DaemonI::restartServer(Ice::Float delay,
 		const Ice::Current& current) {
+	CallStatistics::count(current);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "server restart requested");
 	Restart::shutdown_instead(false);
 	std::thread	t(do_shutdown, delay, current);
@@ -84,7 +90,8 @@ void    DaemonI::restartServer(Ice::Float delay,
  * \brief Get information about the directory
  */
 DirectoryInfo	DaemonI::statDirectory(const std::string& dirname,
-			const Ice::Current& /* current */) {
+			const Ice::Current& current) {
+	CallStatistics::count(current);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "statDirectory(%s)", dirname.c_str());
 	struct stat	sb;
 	if (stat(dirname.c_str(), &sb) < 0) {
@@ -154,7 +161,8 @@ DirectoryInfo	DaemonI::statDirectory(const std::string& dirname,
  * \brief Get information about a file
  */
 FileInfo	DaemonI::statFile(const std::string& filename,
-			const Ice::Current& /* current */) {
+			const Ice::Current& current) {
+	CallStatistics::count(current);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "statFile(%s)", filename.c_str());
 	struct stat	sb;
 	if (stat(filename.c_str(), &sb) < 0) {
@@ -183,7 +191,8 @@ FileInfo	DaemonI::statFile(const std::string& filename,
  * \brief Get information about a block device
  */
 FileInfo	DaemonI::statDevice(const std::string& devicename,
-			const Ice::Current& /* current */) {
+			const Ice::Current& current) {
+	CallStatistics::count(current);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "statDevice(%s)", devicename.c_str());
 	struct stat	sb;
 	if (stat(devicename.c_str(), &sb) < 0) {
@@ -212,7 +221,8 @@ FileInfo	DaemonI::statDevice(const std::string& devicename,
  * \brief Mount a device
  */
 void	DaemonI::mount(const std::string& device, const std::string& mountpoint,
-		const Ice::Current& /* current */) {
+		const Ice::Current& current) {
+	CallStatistics::count(current);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "mounting %s on %s", device.c_str(),
 		mountpoint.c_str());
 
@@ -267,7 +277,8 @@ void	DaemonI::mount(const std::string& device, const std::string& mountpoint,
  * \brief unmount a directory
  */
 void	DaemonI::unmount(const std::string& mountpoint,
-		const Ice::Current& /* current */) {
+		const Ice::Current& current) {
+	CallStatistics::count(current);
 	struct stat	sb;
 	if (stat(mountpoint.c_str(), &sb) < 0) {
 		NotFound	error;
@@ -293,7 +304,8 @@ void	DaemonI::unmount(const std::string& mountpoint,
 /**
  * \brief get the system time
  */
-Ice::Long	DaemonI::getSystemTime(const Ice::Current& /* current */) {
+Ice::Long	DaemonI::getSystemTime(const Ice::Current& current) {
+	CallStatistics::count(current);
 	time_t	now;
 	time(&now);
 	return now;
@@ -305,7 +317,8 @@ Ice::Long	DaemonI::getSystemTime(const Ice::Current& /* current */) {
  * \param unixtime	the unix time to set
  */
 void	DaemonI::setSystemTime(Ice::Long unixtime,
-		const Ice::Current& /* current */) {
+		const Ice::Current& current) {
+	CallStatistics::count(current);
 	time_t	t = unixtime;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "setting system time to %s", ctime(&t));
 
@@ -350,22 +363,26 @@ void	DaemonI::setSystemTime(Ice::Long unixtime,
 	}
 }
 
-std::string	DaemonI::osVersion(const Ice::Current& /* current */) {
+std::string	DaemonI::osVersion(const Ice::Current& current) {
+	CallStatistics::count(current);
 	struct utsname	u;
 	uname(&u);
 	return std::string(u.version);
 }
 
-std::string	DaemonI::astroVersion(const Ice::Current& /* current */) {
+std::string	DaemonI::astroVersion(const Ice::Current& current) {
+	CallStatistics::count(current);
 	return astro::version();
 }
 
-std::string	DaemonI::snowstarVersion(const Ice::Current& /* current */) {
+std::string	DaemonI::snowstarVersion(const Ice::Current& current) {
+	CallStatistics::count(current);
 	return astro::stringprintf("%s - %s %s", snowstar::version.c_str(),
 		__DATE__ ,__TIME__);
 }
 
-Sysinfo	DaemonI::getSysinfo(const Ice::Current& /* current */) {
+Sysinfo	DaemonI::getSysinfo(const Ice::Current& current) {
+	CallStatistics::count(current);
 #if __APPLE__
 	NotImplemented	notimplemented;
 	notimplemented.cause = std::string("sysinfo not available");
@@ -397,13 +414,15 @@ Sysinfo	DaemonI::getSysinfo(const Ice::Current& /* current */) {
 	return result;
 }
 
-float	DaemonI::daemonUptime(const Ice::Current& /* current */) {
+float	DaemonI::daemonUptime(const Ice::Current& current) {
+	CallStatistics::count(current);
 	long	ticks = sysconf(_SC_CLK_TCK);
 	struct tms	t;
 	return (times(&t) - _server.start_clock()) / (float)ticks;
 }
 
-float	DaemonI::cputime(const Ice::Current& /* current */) {
+float	DaemonI::cputime(const Ice::Current& current) {
+	CallStatistics::count(current);
 	long	ticks = sysconf(_SC_CLK_TCK);
 	struct tms	t;
 	times(&t);
@@ -413,7 +432,8 @@ float	DaemonI::cputime(const Ice::Current& /* current */) {
 /**
  * \brief Retrieve the core temperature
  */
-float	DaemonI::getTemperature(const Ice::Current& /* current */) {
+float	DaemonI::getTemperature(const Ice::Current& current) {
+	CallStatistics::count(current);
 	try {
 		astro::Temperature	t = astro::Temperature::core();
 		return t.temperature();

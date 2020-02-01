@@ -20,11 +20,13 @@ CameraI::CameraI(astro::camera::CameraPtr camera)
 CameraI::~CameraI() {
 }
 
-int	CameraI::nCcds(const Ice::Current& /* current */) {
+int	CameraI::nCcds(const Ice::Current& current) {
+	CallStatistics::count(current);
 	return _camera->nCcds();
 }
 
-CcdInfo	CameraI::getCcdinfo(int ccdid, const Ice::Current& /* current */) {
+CcdInfo	CameraI::getCcdinfo(int ccdid, const Ice::Current& current) {
+	CallStatistics::count(current);
 	astro::camera::CcdInfo	info = _camera->getCcdInfo(ccdid);
 	return convert(info);
 }
@@ -32,28 +34,33 @@ CcdInfo	CameraI::getCcdinfo(int ccdid, const Ice::Current& /* current */) {
 typedef IceUtil::Handle<CcdI>        CcdIPtr;
 
 CcdPrx	CameraI::getCcd(int ccdid, const Ice::Current& current) {
+	CallStatistics::count(current);
 	std::string	name = _camera->getCcd(ccdid)->name();
 	return CcdI::createProxy(name, current);
 }
 
-bool	CameraI::hasFilterWheel(const Ice::Current& /* current */) {
+bool	CameraI::hasFilterWheel(const Ice::Current& current) {
+	CallStatistics::count(current);
 	return _camera->hasFilterWheel();
 }
 
 typedef IceUtil::Handle<FilterWheelI>        FilterWheelIPtr;
 
 FilterWheelPrx	CameraI::getFilterWheel(const Ice::Current& current) {
+	CallStatistics::count(current);
 	std::string	name = _camera->getFilterWheel()->name();
 	return FilterWheelI::createProxy(name, current);
 }
 
-bool	CameraI::hasGuidePort(const Ice::Current& /* current */) {
+bool	CameraI::hasGuidePort(const Ice::Current& current) {
+	CallStatistics::count(current);
 	return _camera->hasGuidePort();
 }
 
 typedef IceUtil::Handle<GuidePortI>        GuidePortIPtr;
 
 GuidePortPrx	CameraI::getGuidePort(const Ice::Current& current) {
+	CallStatistics::count(current);
 	std::string	name = _camera->getGuidePort()->name();
 	return GuidePortI::createProxy(name, current);
 }

@@ -12,6 +12,7 @@
 #include <CallbackHandler.h>
 #include <AstroDebug.h>
 #include <AstroProject.h>
+#include "StatisticsI.h"
 #include "RepositoryUser.h"
 
 namespace snowstar {
@@ -42,7 +43,7 @@ void	callback_adapter<CalibrationImageMonitorPrx>(
  * GuiderITrackingCallback etc and used to persist the data and to send
  * it to callbacks via ICE.
  */
-class GuiderI : virtual public Guider, virtual public RepositoryUser {
+class GuiderI : virtual public Guider, virtual public RepositoryUser, public StatisticsI {
 	astro::guiding::GuiderPtr	guider;
 	// some infrastructure members we need 
 	Point	_point;

@@ -22,7 +22,8 @@ namespace snowstar {
  */
 void GuiderI::startGuiding(Ice::Float gpinterval, Ice::Float aointerval,
 		bool stepping,
-		const Ice::Current& /* current */) {
+		const Ice::Current& current) {
+	CallStatistics::count(current);
 	debug(LOG_DEBUG, DEBUG_LOG, 0,
 		"start guiding with interval gp=%.1f, ao=%.1f",
 		gpinterval, aointerval);
@@ -47,7 +48,8 @@ void GuiderI::startGuiding(Ice::Float gpinterval, Ice::Float aointerval,
 /**
  * \brief Get the gain from the guider
  */
-float	GuiderI::getFilterParameter(int dir, const Ice::Current& /* current */) {
+float	GuiderI::getFilterParameter(int dir, const Ice::Current& current) {
+	CallStatistics::count(current);
 	return guider->filter_parameter(dir);
 }
 
@@ -55,7 +57,8 @@ float	GuiderI::getFilterParameter(int dir, const Ice::Current& /* current */) {
  * /brief Set the gain for a particular direction
  */
 void	GuiderI::setFilterParameter(int dir, float value,
-		const Ice::Current& /* current */) {
+		const Ice::Current& current) {
+	CallStatistics::count(current);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "got new filter parameter %d: %f",
 		dir, value);
 	guider->filter_parameter(dir, value);
@@ -64,14 +67,16 @@ void	GuiderI::setFilterParameter(int dir, float value,
 /**
  * \brief Retrieve the guiding interval from the guider
  */
-Ice::Float GuiderI::getGuidingInterval(const Ice::Current& /* current */) {
+Ice::Float GuiderI::getGuidingInterval(const Ice::Current& current) {
+	CallStatistics::count(current);
 	return guider->getInterval();
 }
 
 /**
  * \brief Stop guiding
  */
-void GuiderI::stopGuiding(const Ice::Current& /* current */) {
+void GuiderI::stopGuiding(const Ice::Current& current) {
+	CallStatistics::count(current);
 	guider->stopGuiding();
 
 	// send the clients that guiding was stopped
@@ -90,6 +95,7 @@ void GuiderI::stopGuiding(const Ice::Current& /* current */) {
  * \brief Get the most recent image
  */
 ImagePrx GuiderI::mostRecentImage(const Ice::Current& current) {
+	CallStatistics::count(current);
 	// retrieve image
 	astro::image::ImagePtr	image = guider->mostRecentImage();
 	if (!image) {
@@ -107,7 +113,8 @@ ImagePrx GuiderI::mostRecentImage(const Ice::Current& current) {
 /**
  * \brief Get the most recent tracking point
  */
-TrackingPoint GuiderI::mostRecentTrackingPoint(const Ice::Current& /* current */) {
+TrackingPoint GuiderI::mostRecentTrackingPoint(const Ice::Current& current) {
+	CallStatistics::count(current);
 	if (astro::guiding::Guide::guiding != guider->state()) {
 		throw BadState("not currently guiding");
 	}
@@ -130,7 +137,8 @@ TrackingPoint GuiderI::mostRecentTrackingPoint(const Ice::Current& /* current */
  * \brief Get the complete tracking history
  */
 TrackingHistory GuiderI::getTrackingHistory(Ice::Int id,
-	const Ice::Current& /* current */) {
+	const Ice::Current& current) {
+	CallStatistics::count(current);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "get tracking history %d", id);
 	astro::guiding::TrackingStore	store;
 	return convert(store.get(id));
@@ -140,7 +148,8 @@ TrackingHistory GuiderI::getTrackingHistory(Ice::Int id,
  * \brief Get a tracking history for a given control type
  */
 TrackingHistory GuiderI::getTrackingHistoryType(Ice::Int id,
-	ControlType type, const Ice::Current& /* current */) {
+	ControlType type, const Ice::Current& current) {
+	CallStatistics::count(current);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "get tracking history %d", id);
 	astro::guiding::TrackingStore	store;
 	switch (type) {
@@ -161,6 +170,7 @@ TrackingHistory GuiderI::getTrackingHistoryType(Ice::Int id,
  */
 void    GuiderI::registerTrackingMonitor(const Ice::Identity& trackingcallback,
 		const Ice::Current& current) {
+	CallStatistics::count(current);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "register tracking callback");
 	try {
 		trackingcallbacks.registerCallback(trackingcallback, current);
@@ -179,6 +189,7 @@ void    GuiderI::registerTrackingMonitor(const Ice::Identity& trackingcallback,
  */
 void    GuiderI::unregisterTrackingMonitor(const Ice::Identity& trackingcallback,
 		const Ice::Current& current) {
+	CallStatistics::count(current);
 	trackingcallbacks.unregisterCallback(trackingcallback, current);
 }
 
@@ -219,7 +230,8 @@ void	GuiderI::trackingImageUpdate(const astro::callback::CallbackDataPtr data) {
 /**
  * \brief Handle the summary retrieval method
  */
-TrackingSummary	GuiderI::getTrackingSummary(const Ice::Current& /* current */) {
+TrackingSummary	GuiderI::getTrackingSummary(const Ice::Current& current) {
+	CallStatistics::count(current);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "calling for tracking summary");
 	if (astro::guiding::Guide::guiding != guider->state()) {
 		BadState	exception;
@@ -284,7 +296,8 @@ void	callback_adapter<ImageMonitorPrx>(ImageMonitorPrx& p,
  * \brief Set the filtering method
  */
 void	GuiderI::setFilterMethod(FilterMethod filtermethod,
-		const Ice::Current& /* current */) {
+		const Ice::Current& current) {
+	CallStatistics::count(current);
 	switch (filtermethod) {
 	case FilterNONE:
 		_filter_method = astro::guiding::FilterNONE;
@@ -301,7 +314,8 @@ void	GuiderI::setFilterMethod(FilterMethod filtermethod,
 /**
  * \brief Get the filtering method
  */
-FilterMethod	GuiderI::getFilterMethod(const Ice::Current& /* current */) {
+FilterMethod	GuiderI::getFilterMethod(const Ice::Current& current) {
+	CallStatistics::count(current);
 	switch (_filter_method) {
 	case astro::guiding::FilterNONE:	return FilterNONE;
 	case astro::guiding::FilterGAIN:	return FilterGAIN;
@@ -315,7 +329,8 @@ FilterMethod	GuiderI::getFilterMethod(const Ice::Current& /* current */) {
  * \brief Set a new dither offset
  */
 void	GuiderI::setDither(const Point& point,
-		const Ice::Current& /* current */) {
+		const Ice::Current& current) {
+	CallStatistics::count(current);
 	try {
 		guider->dither(convert(point));
 	} catch (const astro::guiding::BadState& exception) {
@@ -326,7 +341,8 @@ void	GuiderI::setDither(const Point& point,
 /**
  * \brief Get the current dither offset
  */
-Point	GuiderI::getDither(const Ice::Current& /* current */) {
+Point	GuiderI::getDither(const Ice::Current& current) {
+	CallStatistics::count(current);
 	try {
 		return convert(guider->dither());
 	} catch (const astro::guiding::BadState& exception) {
@@ -337,7 +353,8 @@ Point	GuiderI::getDither(const Ice::Current& /* current */) {
 /**
  * \brief Generate and set a new dither offset
  */
-void    GuiderI::setDitherArcsec(double arcsec, const Ice::Current& /* current */) {
+void    GuiderI::setDitherArcsec(double arcsec, const Ice::Current& current) {
+	CallStatistics::count(current);
 	try {
 		guider->ditherArcsec(arcsec);
 	} catch (const astro::guiding::BadState& exception) {

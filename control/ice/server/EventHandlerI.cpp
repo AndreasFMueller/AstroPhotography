@@ -69,7 +69,8 @@ EventHandlerI::~EventHandlerI() {
 /**
  * \brief Get an event identified by its id
  */
-Event	EventHandlerI::eventId(int id, const Ice::Current& /* current */) {
+Event	EventHandlerI::eventId(int id, const Ice::Current& current) {
+	CallStatistics::count(current);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "event id %d requested", id);
 	astro::config::ConfigurationPtr	configuration
                 = astro::config::Configuration::get();
@@ -94,6 +95,7 @@ Event	EventHandlerI::eventId(int id, const Ice::Current& /* current */) {
  */
 eventlist	EventHandlerI::eventsBetween(double fromago, double toago,
 					const Ice::Current& current) {
+	CallStatistics::count(current);
 	std::string	condition
 		= astro::stringprintf("eventtime between %f and %f", 
 			astro::Timer::gettime() - fromago,
@@ -105,7 +107,8 @@ eventlist	EventHandlerI::eventsBetween(double fromago, double toago,
  * \brief Retrieve all events matching a condition
  */
 eventlist	EventHandlerI::eventsCondition(const std::string& condition,
-					const Ice::Current& /* current */) {
+					const Ice::Current& current) {
+	CallStatistics::count(current);
 	// get the database
 	astro::config::ConfigurationPtr	configuration
                 = astro::config::Configuration::get();
@@ -132,6 +135,7 @@ eventlist	EventHandlerI::eventsCondition(const std::string& condition,
  */
 void	EventHandlerI::registerMonitor(const Ice::Identity& eventmonitor,
 		const Ice::Current& current) {
+	CallStatistics::count(current);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "callback registration");
 	try {
 		eventcallbacks.registerCallback(eventmonitor, current);
@@ -150,6 +154,7 @@ void	EventHandlerI::registerMonitor(const Ice::Identity& eventmonitor,
  */	
 void	EventHandlerI::unregisterMonitor(const Ice::Identity& eventmonitor,
 		const Ice::Current& current) {
+	CallStatistics::count(current);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "callback unregistration");
 	eventcallbacks.unregisterCallback(eventmonitor, current);
 }

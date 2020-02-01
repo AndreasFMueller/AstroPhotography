@@ -9,6 +9,7 @@
 #include <types.h>
 #include <AstroCallback.h>
 #include <CallbackHandler.h>
+#include <StatisticsI.h>
 
 namespace snowstar {
 
@@ -16,7 +17,7 @@ template<>
 void    callback_adapter<EventMonitorPrx>(EventMonitorPrx& p,
                 const astro::callback::CallbackDataPtr d);
 
-class EventHandlerI : virtual public EventHandler {
+class EventHandlerI : virtual public EventHandler, public StatisticsI {
 	astro::callback::CallbackPtr	_callback;
 public:
 	EventHandlerI();

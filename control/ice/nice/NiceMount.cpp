@@ -36,6 +36,13 @@ LongLat NiceMount::location() {
 	return l;
 }
 
+Mount::location_source_type	NiceMount::location_source() {
+	switch (_mount->getLocationSource()) {
+	case snowstar::LocationLOCAL:	return Mount::LOCAL;
+	case snowstar::LocationGPS:	return Mount::GPS;
+	}
+}
+
 time_t  NiceMount::time() {
 	return _mount->getTime();
 }

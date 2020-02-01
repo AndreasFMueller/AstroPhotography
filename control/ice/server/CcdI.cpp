@@ -14,7 +14,7 @@
 #include <IceConversions.h>
 #include <Ice/Connection.h>
 #include <ImageDirectory.h>
-
+#include "StatisticsI.h"
 
 namespace snowstar {
 
@@ -33,14 +33,16 @@ CcdI::~CcdI() {
 /**
  * \brief return the Ccd information
  */
-CcdInfo	CcdI::getInfo(const Ice::Current& /* current */) {
+CcdInfo	CcdI::getInfo(const Ice::Current& current) {
+	CallStatistics::count(current);
 	return convert(_ccd->getInfo());
 }
 
 /**
  * \brief return the Exposue status
  */
-ExposureState	CcdI::exposureStatus(const Ice::Current& /* current */) {
+ExposureState	CcdI::exposureStatus(const Ice::Current& current) {
+	CallStatistics::count(current);
 	if (_ccd->streaming()) {
 		return snowstar::STREAMING;
 	}
@@ -62,7 +64,8 @@ ExposureState	CcdI::exposureStatus(const Ice::Current& /* current */) {
  * \param start an exposue
  */
 void	CcdI::startExposure(const Exposure& exposure,
-		const Ice::Current& /* current */) {
+		const Ice::Current& current) {
+	CallStatistics::count(current);
 	if (_ccd->streaming()) {
 		throw BadState("cannot start exposure while streaming");
 	}
@@ -83,14 +86,16 @@ void	CcdI::startExposure(const Exposure& exposure,
 /**
  * \brief Return the time when the last exposure was started
  */
-int	CcdI::lastExposureStart(const Ice::Current& /* current */) {
+int	CcdI::lastExposureStart(const Ice::Current& current) {
+	CallStatistics::count(current);
 	return laststart;
 }
 
 /**
  * \brief Cancel an exposure
  */
-void	CcdI::cancelExposure(const Ice::Current& /* current */) {
+void	CcdI::cancelExposure(const Ice::Current& current) {
+	CallStatistics::count(current);
 	if (_ccd->streaming()) {
 		throw BadState("cannot cancel exposure while streaming");
 	}
@@ -110,7 +115,8 @@ void	CcdI::cancelExposure(const Ice::Current& /* current */) {
 /**
  * \brief Get the exposure data in use for the current/last exposure
  */
-Exposure	CcdI::getExposure(const Ice::Current& /* current */) {
+Exposure	CcdI::getExposure(const Ice::Current& current) {
+	CallStatistics::count(current);
 	try {
 		return convert(_ccd->getExposure());
 	} catch (const astro::camera::BadState& badstate) {
@@ -128,6 +134,7 @@ Exposure	CcdI::getExposure(const Ice::Current& /* current */) {
  * \brief Get an image proxy to retrieve an image
  */
 ImagePrx	CcdI::getImage(const Ice::Current& current) {
+	CallStatistics::count(current);
 	if (_ccd->streaming()) {
 		throw BadState("cannot get image while streaming");
 	}
@@ -155,49 +162,59 @@ ImagePrx	CcdI::getImage(const Ice::Current& current) {
 	return snowstar::getImage(filename, current);
 }
 
-bool	CcdI::hasGain(const Ice::Current& /* current */) {
+bool	CcdI::hasGain(const Ice::Current& current) {
+	CallStatistics::count(current);
 	return _ccd->hasGain();
 }
 
-float	CcdI::getGain(const Ice::Current& /* current */) {
+float	CcdI::getGain(const Ice::Current& current) {
+	CallStatistics::count(current);
 	return _ccd->getGain();
 }
 
-Interval	CcdI::gainInterval(const Ice::Current& /* current */) {
+Interval	CcdI::gainInterval(const Ice::Current& current) {
+	CallStatistics::count(current);
 	return convert(_ccd->gainInterval());
 }
 
-bool	CcdI::hasShutter(const Ice::Current& /* current */) {
+bool	CcdI::hasShutter(const Ice::Current& current) {
+	CallStatistics::count(current);
 	return _ccd->hasShutter();
 }
 
-ShutterState	CcdI::getShutterState(const Ice::Current& /* current */) {
+ShutterState	CcdI::getShutterState(const Ice::Current& current) {
+	CallStatistics::count(current);
 	return convert(_ccd->getShutterState());
 }
 
 void	CcdI::setShutterState(ShutterState state,
-		const Ice::Current& /* current */) {
+		const Ice::Current& current) {
+	CallStatistics::count(current);
 	_ccd->setShutterState(convert(state));
 }
 
-bool	CcdI::hasCooler(const Ice::Current& /* current */) {
+bool	CcdI::hasCooler(const Ice::Current& current) {
+	CallStatistics::count(current);
 	return _ccd->hasCooler();
 }
 
 typedef IceUtil::Handle<CoolerI>	CoolerIPtr;
 
 CoolerPrx	CcdI::getCooler(const Ice::Current& current) {
+	CallStatistics::count(current);
 	std::string	name = _ccd->getCooler()->name();
 	return snowstar::createProxy<CoolerPrx>(name, current);
 }
 
 CcdPrx	CcdI::createProxy(const std::string& ccdname,
 		const Ice::Current& current) {
+	CallStatistics::count(current);
 	return snowstar::createProxy<CcdPrx>(ccdname, current);
 }
 
 void	CcdI::registerSink(const Ice::Identity& imagesinkidentity,
 		const Ice::Current& current) {
+	CallStatistics::count(current);
 	if (_sink) {
 		try {
 			_sink->stop();
@@ -213,7 +230,8 @@ void	CcdI::registerSink(const Ice::Identity& imagesinkidentity,
 }
 
 void	CcdI::startStream(const ::snowstar::Exposure& e,
-		const Ice::Current& /* current */) {
+		const Ice::Current& current) {
+	CallStatistics::count(current);
 	if (_ccd->streaming()) {
 		throw BadState("already streaming");
 	}
@@ -224,13 +242,15 @@ void	CcdI::startStream(const ::snowstar::Exposure& e,
 }
 
 void	CcdI::updateStream(const ::snowstar::Exposure& e,
-		const Ice::Current& /* current */) {
+		const Ice::Current& current) {
+	CallStatistics::count(current);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "new exposure time: %.1f",
 		e.exposuretime);
 	_ccd->streamExposure(convert(e));
 }
 
-void	CcdI::stopStream(const ::Ice::Current& /* current */) {
+void	CcdI::stopStream(const ::Ice::Current& current) {
+	CallStatistics::count(current);
 	if (!_ccd->streaming()) {
 		throw BadState("cannot stop stream: not streaming");
 	}
@@ -247,6 +267,7 @@ void	CcdI::stopStream(const ::Ice::Current& /* current */) {
 }
 
 void	CcdI::unregisterSink(const ::Ice::Current& current) {
+	CallStatistics::count(current);
 	stopStream(current);
 	_sink = NULL;
 }

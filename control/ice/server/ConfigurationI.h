@@ -8,10 +8,11 @@
 
 #include <types.h>
 #include <AstroConfig.h>
+#include "StatisticsI.h"
 
 namespace snowstar {
 
-class ConfigurationI : virtual public Configuration {
+class ConfigurationI : virtual public Configuration, public StatisticsI {
 	astro::config::ConfigurationPtr	configuration;
 public:
 	ConfigurationI(astro::config::ConfigurationPtr configuration);

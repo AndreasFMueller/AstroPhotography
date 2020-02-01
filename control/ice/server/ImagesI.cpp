@@ -18,7 +18,8 @@ ImagesI::ImagesI() {
 ImagesI::~ImagesI() {
 }
 
-ImageList	ImagesI::listImages(const Ice::Current& /* current */) {
+ImageList	ImagesI::listImages(const Ice::Current& current) {
+	CallStatistics::count(current);
 	ImageList	result;
 	astro::image::ImageDirectory	imagedirectory;
 	std::list<std::string>	names = imagedirectory.fileList();
@@ -28,13 +29,15 @@ ImageList	ImagesI::listImages(const Ice::Current& /* current */) {
 }
 
 int	ImagesI::imageSize(const std::string& name,
-			const Ice::Current& /* current */) {
+			const Ice::Current& current) {
+	CallStatistics::count(current);
 	astro::image::ImageDirectory	imagedirectory;
 	return imagedirectory.fileSize(name);
 }
 
 int	ImagesI::imageAge(const std::string& name,
-			const Ice::Current& /* current */) {
+			const Ice::Current& current) {
+	CallStatistics::count(current);
 	astro::image::ImageDirectory	imagedirectory;
 	return imagedirectory.fileAge(name);
 }
@@ -44,6 +47,7 @@ int	ImagesI::imageAge(const std::string& name,
  */
 ImagePrx	getImage(const std::string& filename, std::type_index type,
 				const Ice::Current& current) {
+	CallStatistics::count(current);
 	// find the identity
 	std::string     identity = std::string("image/") + filename;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "getting image with %s pixels",
@@ -84,6 +88,7 @@ ImagePrx	getImage(const std::string& filename, std::type_index type,
 
 ImagePrx	getImage(const std::string& filename,
 				const Ice::Current& current) {
+	CallStatistics::count(current);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "get image named %s", filename.c_str());
 	// find the number bytes per pixel
 	astro::image::ImageDirectory	imagedirectory;
@@ -96,7 +101,8 @@ ImagePrx	getImage(const std::string& filename,
 }
 
 void	ImagesI::remove(const std::string& filename,
-			const Ice::Current& /* current */) {
+			const Ice::Current& current) {
+	CallStatistics::count(current);
 	try {
 		astro::image::ImageDirectory	imagedirectory;
 		imagedirectory.remove(filename);
@@ -108,7 +114,8 @@ void	ImagesI::remove(const std::string& filename,
 }
 
 std::string	ImagesI::save(const ImageFile& file,
-		const Ice::Current& /* current */) {
+		const Ice::Current& current) {
+	CallStatistics::count(current);
 	try {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "saving file");
 		astro::image::ImagePtr	image = convertfile(file);

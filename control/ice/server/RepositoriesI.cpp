@@ -55,7 +55,8 @@ void	RepositoriesI::reloadDB() {
 /**
  * \brief Retrieve a list of repository names known to the configuration
  */
-reponamelist	RepositoriesI::list(const Ice::Current& /* current */) {
+reponamelist	RepositoriesI::list(const Ice::Current& current) {
+	CallStatistics::count(current);
 	reponamelist	result;
 	// retrieve a list of repository names from the configuration
 	astro::config::ImageRepoConfigurationPtr	imagerepos
@@ -71,7 +72,8 @@ reponamelist	RepositoriesI::list(const Ice::Current& /* current */) {
 /**
  * \brief Retrieve a list of repository summaries of all repositories
  */
-reposummarylist	RepositoriesI::summarylist(const Ice::Current& /* current */) {
+reposummarylist	RepositoriesI::summarylist(const Ice::Current& current) {
+	CallStatistics::count(current);
 	reposummarylist	result;
 	// retrieve a list of repository names from the configuration
 	astro::config::ImageRepoConfigurationPtr	imagerepos
@@ -104,7 +106,8 @@ reposummarylist	RepositoriesI::summarylist(const Ice::Current& /* current */) {
  * \brief Find out whether an image repository of a given name exists
  */
 bool	RepositoriesI::has(const std::string& reponame,
-			const Ice::Current& /* current */) {
+			const Ice::Current& current) {
+	CallStatistics::count(current);
 	// retrieve a list of repository names from the configuration
 	astro::config::ImageRepoConfigurationPtr	imagerepos
 		= astro::config::ImageRepoConfiguration::get(_configuration);
@@ -116,6 +119,7 @@ bool	RepositoriesI::has(const std::string& reponame,
  */
 RepositoryPrx	RepositoriesI::get(const std::string& reponame,
 			const Ice::Current& current) {
+	CallStatistics::count(current);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "request repo '%s'", reponame.c_str());
 	return createProxy<RepositoryPrx>("repository/" + reponame, current,
 		false);
@@ -128,7 +132,8 @@ RepositoryPrx	RepositoriesI::get(const std::string& reponame,
  * and removes its content if the removecontents parameter is true.
  */
 void	RepositoriesI::remove(const std::string& reponame, bool removecontents,
-		const Ice::Current& /* current */) {
+		const Ice::Current& current) {
+	CallStatistics::count(current);
 	// get configuration
 	astro::config::ImageRepoConfigurationPtr	imagerepos
 		= astro::config::ImageRepoConfiguration::get(_configuration);
@@ -161,7 +166,8 @@ void	RepositoriesI::remove(const std::string& reponame, bool removecontents,
  */
 void	RepositoriesI::add(const std::string& reponame,
 		const std::string& directory,
-		const Ice::Current& /* current */) {
+		const Ice::Current& current) {
+	CallStatistics::count(current);
 	// get configuration
 	astro::config::ImageRepoConfigurationPtr	imagerepos
 		= astro::config::ImageRepoConfiguration::get(_configuration);
@@ -190,7 +196,8 @@ void	RepositoriesI::add(const std::string& reponame,
  * \brief return hidden status of a repository
  */
 bool	RepositoriesI::hidden(const std::string& reponame,
-		const Ice::Current& /* current */) {
+		const Ice::Current& current) {
+	CallStatistics::count(current);
 	// get configuration
 	astro::config::ImageRepoConfigurationPtr	imagerepos
 		= astro::config::ImageRepoConfiguration::get(_configuration);
@@ -209,7 +216,8 @@ bool	RepositoriesI::hidden(const std::string& reponame,
  * \brief Hide/unhide a repository
  */
 void	RepositoriesI::setHidden(const std::string& reponame,
-		bool hidden, const Ice::Current& /* current */) {
+		bool hidden, const Ice::Current& current) {
+	CallStatistics::count(current);
 	// get configuration
 	astro::config::ImageRepoConfigurationPtr	imagerepos
 		= astro::config::ImageRepoConfiguration::get(_configuration);

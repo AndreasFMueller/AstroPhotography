@@ -22,6 +22,7 @@ namespace snowstar {
  */
 void    GuiderI::registerBacklashMonitor(const Ice::Identity& backlashcallback,
 		const Ice::Current& current) {
+	CallStatistics::count(current);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "register a backlash callback");
 	backlashmonitorcallbacks.registerCallback(backlashcallback, current);
 }
@@ -31,6 +32,7 @@ void    GuiderI::registerBacklashMonitor(const Ice::Identity& backlashcallback,
  */
 void    GuiderI::unregisterBacklashMonitor(const Ice::Identity& backlashcallback,
 		const Ice::Current& current) {
+	CallStatistics::count(current);
 	backlashmonitorcallbacks.unregisterCallback(backlashcallback, current);
 }
 
@@ -38,7 +40,8 @@ void    GuiderI::unregisterBacklashMonitor(const Ice::Identity& backlashcallback
  * \brief Start backlash process
  */
 void	GuiderI::startBacklash(double interval, BacklashDirection direction,
-		const Ice::Current& /* current */) {
+		const Ice::Current& current) {
+	CallStatistics::count(current);
 	try {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "start backlash");
 		astro::guiding::TrackerPtr	tracker = getTracker();
@@ -53,7 +56,8 @@ void	GuiderI::startBacklash(double interval, BacklashDirection direction,
 /**
  * \brief Stop backlash process
  */
-void	GuiderI::stopBacklash(const Ice::Current& /* current */) {
+void	GuiderI::stopBacklash(const Ice::Current& current) {
+	CallStatistics::count(current);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "stop the backlash process");
 	guider->stopBacklash();
 }
@@ -69,12 +73,14 @@ void	GuiderI::backlashUpdate(astro::callback::CallbackDataPtr data) {
 /**
  * \brief Get the backlash data for the current backlash run
  */
-BacklashData	GuiderI::getBacklashData(const Ice::Current& /* current */) {
+BacklashData	GuiderI::getBacklashData(const Ice::Current& current) {
+	CallStatistics::count(current);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "backlash data call");
 	return convert(guider->backlashData());
 }
 
-void	GuiderI::setLastPoints(int n, const Ice::Current& /* current */) {
+void	GuiderI::setLastPoints(int n, const Ice::Current& current) {
+	CallStatistics::count(current);
 	if (!guider) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "no guider present!");
 		return;
@@ -124,7 +130,8 @@ void	callback_adapter<BacklashMonitorPrx>(BacklashMonitorPrx& p,
 		typeid(*data).name());
 }
 
-BacklashDirection	GuiderI::getBacklashDirection(const Ice::Current& /* current */) {
+BacklashDirection	GuiderI::getBacklashDirection(const Ice::Current& current) {
+	CallStatistics::count(current);
 	switch (guider->getBacklashDirection()) {
 	case astro::guiding::backlash_dec:
 		return BacklashDEC;

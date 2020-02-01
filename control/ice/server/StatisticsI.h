@@ -17,52 +17,74 @@ namespace snowstar {
 class CallStatistics;
 typedef std::shared_ptr<CallStatistics>	CallStatisticsPtr;
 
+/**
+ * \brief A container class for call statistics information
+ */
 class CallStatistics : public std::map<std::string, unsigned long> {
-	static std::map<std::string, CallStatisticsPtr>	call_statistics;
-	std::string	_servantname;
+	static std::map<Ice::Identity, CallStatisticsPtr>	call_statistics;
+	Ice::Identity	_objectidentity;
 public:
-	CallStatistics(const std::string& servantname)
-		: _servantname(servantname) {
+	CallStatistics(const Ice::Identity& objectidentity)
+		: _objectidentity(objectidentity) {
 	}
 
-	static long	calls(const std::string& servantname,
-				const std::string& callname);
-	static void	count(const std::string& servantname,
-				const std::string& callname);
-	static std::list<std::string>	servantnames();
-	static std::list<std::string>	callnames(
-						const std::string& servantname);
+	// return information on object ids
+	static std::list<Ice::Identity>	objectidentities();
+	static unsigned long	objectidentityCount();
 
-	long	calls(const std::string& callname) {
-		return calls(_servantname, callname);
-	}
+	// return information on objects
+	static std::list<std::string>	operations(
+					const Ice::Identity& objectidentity);
+	static unsigned long	operationCount(
+					const Ice::Identity& objectidentity);
 
-	void	count(const std::string& callname) {
-		count(_servantname, callname);
-	}
+	// return various counters
+	static unsigned long	calls(const Ice::Identity& objectidentity);
+	static unsigned long	calls(const Ice::Identity& objectidentity,
+					const std::string& operation);
 
-	static void	remember(const std::string& servantname,
-				CallStatisticsPtr);
-	static CallStatisticsPtr	recall(const std::string& servantname);
+	// count a call to an operation
+	static void	count(const Ice::Identity& objectidentity,
+					const std::string& operation);
+	static void	count(const Ice::Current& current);
+
+	// return number of calls
+	unsigned long	calls(const std::string& operation) const;
+	unsigned long	calls() const;
+	void	count(const std::string& operation);
+
+	// access to the call statistics objects
+	static CallStatisticsPtr	recall(
+					const Ice::Identity& objectidentity);
 };
 
-
-class StatisticsI : virtual public Daemon {
-	CallStatisticsPtr	_statistics;
+/*
+ * Implementation of the statistics interface inherited by many
+ */
+class StatisticsI : virtual public Statistics {
 public:
-	StatisticsI(const std::string& name);
 	StatisticsI();
 	~StatisticsI();
-	InterfaceNameSequence	interfaceNames(const Ice::Current& current);
-	long	servantInstances(const Ice::Current& current);
-	ServantNameSequence	servantNames(const Ice::Current& current);
-	long	interfaceCalls(const Ice::Current& current);
-	long	interfaceNamedCalls(const std::string& callname,
+	// object identities
+	ObjectIdentitySequence	objectidentities(const Ice::Current& current);
+	long	objectidentityCount(const Ice::Current& current);
+	// operations
+	OperationSequence	operations(const Ice::Identity& objectidentity,
+					const Ice::Current& current);
+	long	operationCount(const Ice::Identity& objectidentity,
+					const Ice::Current& current);
+
+	// global statistics
+	long	callsPerObject(const Ice::Identity& objectidentity,
 			const Ice::Current& current);
-	long	servantCalls(const std::string& servantname,
+	long	callsPerObjectAndOperation(const Ice::Identity& objectidentity,
+			const std::string& operation,
 			const Ice::Current& current);
-	long	servantNamedCalls(const std::string& servantname,
-			const std::string& callname,
+	
+	// operations for this instance only, uses the object identity in
+	// the current argument
+	long	calls(const Ice::Current& current);
+	long	operationCalls(const std::string& operation,
 			const Ice::Current& current);
 };
 

@@ -49,7 +49,8 @@ void	callback_adapter<CalibrationImageMonitorPrx>(CalibrationImageMonitorPrx& p,
  * \brief start the dark acquire process
  */
 void	GuiderI::startDarkAcquire(double exposuretime, int imagecount,
-		double badpixellimit, const Ice::Current& /* current */) {
+		double badpixellimit, const Ice::Current& current) {
+	CallStatistics::count(current);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "startDarkAcquire called");
 	try {
 		guider->startDark(exposuretime, imagecount, badpixellimit);
@@ -64,6 +65,7 @@ void	GuiderI::startDarkAcquire(double exposuretime, int imagecount,
  * \brief Return the dark image of the imager
  */
 ImagePrx	GuiderI::darkImage(const Ice::Current& current) {
+	CallStatistics::count(current);
 	// retrieve image
 	astro::image::ImagePtr	darkimage = guider->imager().dark();
 	if (!darkimage) {
@@ -84,6 +86,7 @@ ImagePrx	GuiderI::darkImage(const Ice::Current& current) {
  * \brief Return the flat image of the imager
  */
 ImagePrx	GuiderI::flatImage(const Ice::Current& current) {
+	CallStatistics::count(current);
 	// retrieve image
 	astro::image::ImagePtr	flatimage = guider->imager().flat();
 	if (!flatimage) {
@@ -103,21 +106,24 @@ ImagePrx	GuiderI::flatImage(const Ice::Current& current) {
 /**
  * \brief Whether or not the imager has a dark image
  */
-bool    GuiderI::hasDark(const Ice::Current& /* current */) {
+bool    GuiderI::hasDark(const Ice::Current& current) {
+	CallStatistics::count(current);
 	return guider->imager().hasDark();
 }
 
 /**
  * \brief query the use dark
  */
-bool	GuiderI::useDark(const Ice::Current& /* current */) {
+bool	GuiderI::useDark(const Ice::Current& current) {
+	CallStatistics::count(current);
 	return guider->imager().darksubtract();
 }
 
 /**
  * \brief set whether the dark images should be used (if present)
  */
-void	GuiderI::setUseDark(bool usedark, const Ice::Current& /* current */) {
+void	GuiderI::setUseDark(bool usedark, const Ice::Current& current) {
+	CallStatistics::count(current);
 	if (guider->imager().hasDark()) {
 		guider->imager().darksubtract(usedark);
 		return;
@@ -134,7 +140,8 @@ void	GuiderI::setUseDark(bool usedark, const Ice::Current& /* current */) {
  */
 void    GuiderI::startFlatAcquire(double exposuretime, int imagecount,
 				bool useDark,
-				const Ice::Current& /* current */) {
+				const Ice::Current& current) {
+	CallStatistics::count(current);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "startFlatAcquire(%.3f, %d) called",
 		exposuretime, imagecount);
 	try {
@@ -149,21 +156,24 @@ void    GuiderI::startFlatAcquire(double exposuretime, int imagecount,
 /**
  * \brief Whether or not the imager has a flat image to apply
  */
-bool    GuiderI::hasFlat(const Ice::Current& /* current */) {
+bool    GuiderI::hasFlat(const Ice::Current& current) {
+	CallStatistics::count(current);
 	return guider->imager().hasFlat();
 }
 
 /**
  * \brief Whether or not the imager acutally uses the flat image
  */
-bool    GuiderI::useFlat(const Ice::Current& /* current */) {
+bool    GuiderI::useFlat(const Ice::Current& current) {
+	CallStatistics::count(current);
 	return guider->imager().flatdivide();
 }
 
 /**
  * \brief Whether or not the imager is supposed to use the flag image
  */
-void    GuiderI::setUseFlat(bool useflat, const Ice::Current& /* current */) {
+void    GuiderI::setUseFlat(bool useflat, const Ice::Current& current) {
+	CallStatistics::count(current);
 	if (guider->imager().hasFlat()) {
 		guider->imager().flatdivide(useflat);
 		return;
@@ -178,7 +188,8 @@ void    GuiderI::setUseFlat(bool useflat, const Ice::Current& /* current */) {
 /**
  * \brief Whether or not the imager currently uses interpolation
  */
-bool    GuiderI::interpolate(const Ice::Current& /* current */) {
+bool    GuiderI::interpolate(const Ice::Current& current) {
+	CallStatistics::count(current);
 	return guider->imager().interpolate();
 }
 
@@ -186,7 +197,8 @@ bool    GuiderI::interpolate(const Ice::Current& /* current */) {
  * \brief Whether or not the imager currently should use interpolation
  */
 void    GuiderI::setInterpolate(bool interpolate, 
-			const Ice::Current& /* current */) {
+			const Ice::Current& current) {
+	CallStatistics::count(current);
 	if (guider->imager().hasDark()) {
 		guider->imager().interpolate(interpolate);
 		return;
@@ -203,6 +215,7 @@ void    GuiderI::setInterpolate(bool interpolate,
  */
 void    GuiderI::registerCalibrationImageMonitor(const Ice::Identity& imagecallback,
 		const Ice::Current& current) {
+	CallStatistics::count(current);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "register an image callback");
 	calibrationimagecallbacks.registerCallback(imagecallback, current);
 }
@@ -212,6 +225,7 @@ void    GuiderI::registerCalibrationImageMonitor(const Ice::Identity& imagecallb
  */
 void    GuiderI::unregisterCalibrationImageMonitor(const Ice::Identity& imagecallback,
 		const Ice::Current& current) {
+	CallStatistics::count(current);
 	calibrationimagecallbacks.unregisterCallback(imagecallback, current);
 }
 

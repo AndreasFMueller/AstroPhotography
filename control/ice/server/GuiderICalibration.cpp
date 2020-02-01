@@ -25,7 +25,8 @@ namespace snowstar {
  * computed on the other side of the meridian.
  */
 void GuiderI::useCalibration(Ice::Int calid, bool /* flipped */,
-	const Ice::Current& /* current */) {
+	const Ice::Current& current) {
+	CallStatistics::count(current);
 	if (calid <= 0) {
 		throw BadParameter("not a valid calibration id");
 	}
@@ -47,7 +48,8 @@ void GuiderI::useCalibration(Ice::Int calid, bool /* flipped */,
  * \brief Merian flip requires that we need to flip the calibration too
  */
 void GuiderI::flipCalibration(ControlType type,
-	const Ice::Current& /* current */) {
+	const Ice::Current& current) {
+	CallStatistics::count(current);
 	switch (type) {
 	case ControlGuidePort:
 		guider->guidePortDevice->flip();
@@ -66,7 +68,8 @@ void GuiderI::flipCalibration(ControlType type,
  * to uncalibrate a device so that it is no longer used for guiding.
  */
 void	GuiderI::unCalibrate(ControlType calibrationtype,
-	const Ice::Current& /* current */) {
+	const Ice::Current& current) {
+	CallStatistics::count(current);
 	// retrieve guider data from the database
 	try {
 		switch (calibrationtype) {
@@ -97,7 +100,8 @@ void	GuiderI::unCalibrate(ControlType calibrationtype,
  * unconfigured, it throws the BadState exception.
  */
 Calibration GuiderI::getCalibration(ControlType calibrationtype,
-		const Ice::Current& /* current */) {
+		const Ice::Current& current) {
+	CallStatistics::count(current);
 	Calibration	calibration;
 	switch (calibrationtype) {
 	case ControlGuidePort:
@@ -143,7 +147,8 @@ Calibration GuiderI::getCalibration(ControlType calibrationtype,
  * get from anywhere else, so it has to be specified
  */
 Ice::Int GuiderI::startCalibration(ControlType caltype,
-		const Ice::Current& /* current */) {
+		const Ice::Current& current) {
+	CallStatistics::count(current);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "start calibration, type = %s",
 		calibrationtype2string(caltype).c_str());
 
@@ -173,14 +178,16 @@ Ice::Int GuiderI::startCalibration(ControlType caltype,
 /**
  * \brief Retrieve the current progress figure of the calibration
  */
-Ice::Double GuiderI::calibrationProgress(const Ice::Current& /* current */) {
+Ice::Double GuiderI::calibrationProgress(const Ice::Current& current) {
+	CallStatistics::count(current);
 	return guider->calibrationProgress();
 }
 
 /**
  * \brief cancel the current calibration process
  */
-void GuiderI::cancelCalibration(const Ice::Current& /* current */) {
+void GuiderI::cancelCalibration(const Ice::Current& current) {
+	CallStatistics::count(current);
 	guider->guidePortDevice->cancelCalibration();
 }
 
@@ -188,7 +195,8 @@ void GuiderI::cancelCalibration(const Ice::Current& /* current */) {
  * \brief Wait for the calibration to complete
  */
 bool GuiderI::waitCalibration(Ice::Double timeout,
-	const Ice::Current& /* current */) {
+	const Ice::Current& current) {
+	CallStatistics::count(current);
 	return guider->guidePortDevice->waitCalibration(timeout);
 }
 
@@ -196,6 +204,7 @@ bool GuiderI::waitCalibration(Ice::Double timeout,
  * \brief Register a callback for the calibration process
  */
 void	GuiderI::registerCalibrationMonitor(const Ice::Identity& calibrationcallback, const Ice::Current& current) {
+	CallStatistics::count(current);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "calibration callback registered");
 	try {
 		calibrationcallbacks.registerCallback(calibrationcallback,
@@ -213,6 +222,7 @@ void	GuiderI::registerCalibrationMonitor(const Ice::Identity& calibrationcallbac
  * \brief Unregister a callback for the calibration process
  */
 void	GuiderI::unregisterCalibrationMonitor(const Ice::Identity& calibrationcallback, const Ice::Current& current) {
+	CallStatistics::count(current);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "calibration callback unregistered");
 	calibrationcallbacks.unregisterCallback(calibrationcallback, current);
 }

@@ -51,18 +51,21 @@ GatewayI::~GatewayI() {
 }
 
 void	GatewayI::send(const StatusUpdate& statusupdate,
-			const Ice::Current& /* current */) {
+			const Ice::Current& current) {
+	CallStatistics::count(current);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "got a status udpate");
 	update(statusupdate);
 }
 
 void    GatewayI::registerMonitor(const Ice::Identity& statusupdatemonitor,
 			const Ice::Current& current) {
+	CallStatistics::count(current);
 	statusupdatecallbacks.registerCallback(statusupdatemonitor, current);
 }
 
 void    GatewayI::unregisterMonitor(const Ice::Identity& statusupdatemonitor,
 			const Ice::Current& current) {
+	CallStatistics::count(current);
 	statusupdatecallbacks.unregisterCallback(statusupdatemonitor, current);
 }
 

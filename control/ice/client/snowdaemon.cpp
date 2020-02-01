@@ -28,6 +28,7 @@ int	command_help(const std::string& progname) {
 	std::cout << p << " [ options ] <server> help" << std::endl;
 	std::cout << p << " [ options ] <server> time" << std::endl;
 	std::cout << p << " [ options ] <server> sync" << std::endl;
+	std::cout << p << " [ options ] <server> statistics " << std::endl;
 	std::cout << p << " [ options ] <server> shutdown [ delay ]" << std::endl;
 	std::cout << p << " [ options ] <server> restart [ delay ]" << std::endl;
 	std::cout << p << " [ options ] <server> system [ delay ]" << std::endl;
@@ -72,6 +73,32 @@ int	command_sync(DaemonPrx daemon) {
 		std::cerr << std::endl;
 	}
 	return EXIT_FAILURE;
+}
+
+/**
+ * \brief statistics command
+ */
+int	command_statistics(DaemonPrx daemon) {
+	try {
+		ObjectIdentitySequence	objids = daemon->objectidentities();
+		for (auto i = objids.begin(); i != objids.end(); i++) {
+			Ice::Identity	objectid = *i;
+			std::cout << Ice::identityToString(objectid);
+			std::cout << ":" << std::endl;
+			OperationSequence ops = daemon->operations(objectid);
+			for (auto j = ops.begin(); j != ops.end(); j++) {
+				std::string	operation = *j;
+				std::cout << "\t";
+				std::cout << operation << " ";
+				std::cout << daemon->callsPerObjectAndOperation(objectid, operation);
+				std::cout << std::endl;
+			}
+		}
+	} catch (const std::exception& x) {
+		std::cerr << "cannot get statistics: ";
+		std::cerr << x.what();
+		std::cerr << std::endl;
+	}
 }
 
 /**
@@ -182,6 +209,9 @@ int	main(int argc, char *argv[]) {
 	}
 	if (command == "sync") {
 		return command_sync(daemon);
+	}
+	if (command == "statistics") {
+		return command_statistics(daemon);
 	}
 
 	// the following commands may have an additional dealy parameter

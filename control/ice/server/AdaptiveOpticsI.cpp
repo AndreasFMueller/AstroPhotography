@@ -17,25 +17,30 @@ AdaptiveOpticsI::AdaptiveOpticsI(astro::camera::AdaptiveOpticsPtr ao)
 AdaptiveOpticsI::~AdaptiveOpticsI() {
 }
 
-void	AdaptiveOpticsI::set(const Point& position, const Ice::Current& /* current */) {
+void	AdaptiveOpticsI::set(const Point& position, const Ice::Current& current) {
+	CallStatistics::count(current);
 	_ao->set(convert(position));
 }
 
-Point	AdaptiveOpticsI::get(const Ice::Current& /* current */) {
+Point	AdaptiveOpticsI::get(const Ice::Current& current) {
+	CallStatistics::count(current);
 	return convert(_ao->get());
 }
 
-bool	AdaptiveOpticsI::hasGuidePort(const Ice::Current& /* current */) {
+bool	AdaptiveOpticsI::hasGuidePort(const Ice::Current& current) {
+	CallStatistics::count(current);
 	return _ao->hasGuidePort();
 }
 
 GuidePortPrx	AdaptiveOpticsI::getGuidePort(const Ice::Current& current) {
+	CallStatistics::count(current);
 	std::string	name
 		= NameConverter::urlencode(_ao->getGuidePort()->name());
 	return GuidePortI::createProxy(name, current);
 }
 
-void	AdaptiveOpticsI::center(const Ice::Current& /* current */) {
+void	AdaptiveOpticsI::center(const Ice::Current& current) {
+	CallStatistics::count(current);
 	_ao->center();
 }
 

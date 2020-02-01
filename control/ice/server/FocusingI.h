@@ -10,6 +10,7 @@
 #include <AstroFocus.h>
 #include <CallbackHandler.h>
 #include <RepositoryUser.h>
+#include "StatisticsI.h"
 
 namespace snowstar {
 
@@ -20,7 +21,7 @@ void	callback_adapter<FocusCallbackPrx>(FocusCallbackPrx& p,
 /**
  * \brief Focusing servant implementation
  */
-class FocusingI : virtual public Focusing, virtual public RepositoryUser {
+class FocusingI : virtual public Focusing, virtual public RepositoryUser, public StatisticsI {
 	astro::focusing::FocusingPtr	_focusingptr;
 	FocusHistory	_history;
 public:

@@ -18,20 +18,24 @@ DeviceLocatorI::~DeviceLocatorI() {
 }
 
 DeviceNameList	DeviceLocatorI::getDevicelist(devicetype type,
-	const Ice::Current& /* current */) {
+	const Ice::Current& current) {
+	CallStatistics::count(current);
 	return _locator->getDevicelist(convert(type));
 }
 
-std::string	DeviceLocatorI::getName(const Ice::Current& /* current */) {
+std::string	DeviceLocatorI::getName(const Ice::Current& current) {
+	CallStatistics::count(current);
 	return _locator->getName();
 }
 
-std::string	DeviceLocatorI::getVersion(const Ice::Current& /* current */) {
+std::string	DeviceLocatorI::getVersion(const Ice::Current& current) {
+	CallStatistics::count(current);
 	return _locator->getVersion();
 }
 
 AdaptiveOpticsPrx	DeviceLocatorI::getAdaptiveOptics(const std::string& name,
 			const Ice::Current& current) {
+	CallStatistics::count(current);
 	try {
 		return createProxy<AdaptiveOpticsPrx>(name, current);
 	} catch (const std::exception& x) {
@@ -46,6 +50,7 @@ AdaptiveOpticsPrx	DeviceLocatorI::getAdaptiveOptics(const std::string& name,
 
 CameraPrx	DeviceLocatorI::getCamera(const std::string& name,
 			const Ice::Current& current) {
+	CallStatistics::count(current);
 	try {
 		return createProxy<CameraPrx>(name, current);
 	} catch (const std::exception& x) {
@@ -59,6 +64,7 @@ CameraPrx	DeviceLocatorI::getCamera(const std::string& name,
 
 CcdPrx          DeviceLocatorI::getCcd(const std::string& name,
                                         const Ice::Current& current) {
+	CallStatistics::count(current);
 	try {
 		return createProxy<CcdPrx>(name, current);
 	} catch (const std::exception& x) {
@@ -72,6 +78,7 @@ CcdPrx          DeviceLocatorI::getCcd(const std::string& name,
 
 GuidePortPrx   DeviceLocatorI::getGuidePort(const std::string& name,
 					const Ice::Current& current) {
+	CallStatistics::count(current);
 	try {
 		return createProxy<GuidePortPrx>(name, current);
 	} catch (const std::exception& x) {
@@ -85,6 +92,7 @@ GuidePortPrx   DeviceLocatorI::getGuidePort(const std::string& name,
 
 FilterWheelPrx  DeviceLocatorI::getFilterWheel(const std::string& name,
 					const Ice::Current& current) {
+	CallStatistics::count(current);
 	try {
 		return createProxy<FilterWheelPrx>(name, current);
 	} catch (const std::exception& x) {
@@ -99,6 +107,7 @@ FilterWheelPrx  DeviceLocatorI::getFilterWheel(const std::string& name,
 
 CoolerPrx       DeviceLocatorI::getCooler(const std::string& name,
 					const Ice::Current& current) {
+	CallStatistics::count(current);
 	try {
 		return createProxy<CoolerPrx>(name, current);
 	} catch (const std::exception& x) {
@@ -112,6 +121,7 @@ CoolerPrx       DeviceLocatorI::getCooler(const std::string& name,
 
 FocuserPrx      DeviceLocatorI::getFocuser(const std::string& name,
 					const Ice::Current& current) {
+	CallStatistics::count(current);
 	try {
 		return createProxy<FocuserPrx>(name, current);
 	} catch (const std::exception& x) {
@@ -125,6 +135,7 @@ FocuserPrx      DeviceLocatorI::getFocuser(const std::string& name,
 
 MountPrx      DeviceLocatorI::getMount(const std::string& name,
 					const Ice::Current& current) {
+	CallStatistics::count(current);
 	try {
 		return createProxy<MountPrx>(name, current);
 	} catch (const std::exception& x) {

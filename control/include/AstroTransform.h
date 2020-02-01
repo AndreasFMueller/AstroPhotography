@@ -566,10 +566,10 @@ class StarExtractor {
 	/**
 	 * \brief The number of stars to extract from an image
 	 */
-	int	_numberofstars;
+	unsigned int	_numberofstars;
 public:
-	int	numberofstars() const { return _numberofstars; }
-	void	numberofstars(int n) { _numberofstars = n; }
+	unsigned int	numberofstars() const { return _numberofstars; }
+	void	numberofstars(unsigned int n) { _numberofstars = n; }
 private:
 	/**
 	 * \brief The search radius
@@ -595,7 +595,7 @@ public:
 	double	saturation() const { return _saturation; }
 	void	saturation(double s) { _saturation = s; }
 public:
-	StarExtractor(int numberofstars = 10, int searchradius = 10);
+	StarExtractor(unsigned int numberofstars = 10, int searchradius = 10);
 	StarExtractor(const StarExtractor& other);
 protected:
 static std::vector<Point>	stars2points(const std::vector<Star>& stars);

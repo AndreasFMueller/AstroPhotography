@@ -58,7 +58,7 @@ module snowstar {
 	/**
 	 * \brief Instrument interface
 	 */
-	interface Instrument {
+	interface Instrument extends Statistics {
 		string	name();
 
 		/**
@@ -130,7 +130,7 @@ module snowstar {
 	 * This interface allows to list available instruments, creating and
 	 * deleting instruments. It also gives access to instrument instances.
 	 */
-	interface Instruments {
+	interface Instruments extends Statistics {
 		InstrumentList	list();
 		Instrument	*get(string name) throws NotFound;
 		void	remove(string name) throws NotFound;

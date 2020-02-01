@@ -75,12 +75,14 @@ TaskQueueI::~TaskQueueI() {
 }
 
 // interface methods
-QueueState TaskQueueI::state(const Ice::Current& /* current */) {
+QueueState TaskQueueI::state(const Ice::Current& current) {
+	CallStatistics::count(current);
 	//debug(LOG_DEBUG, DEBUG_LOG, 0, "state request");
 	return convert(taskqueue.state());
 }
 
-void TaskQueueI::start(const Ice::Current& /* current */) {
+void TaskQueueI::start(const Ice::Current& current) {
+	CallStatistics::count(current);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "start request");
 	try {
 		taskqueue.start();
@@ -96,7 +98,8 @@ void TaskQueueI::start(const Ice::Current& /* current */) {
 	}
 }
 
-void TaskQueueI::stop(const Ice::Current& /* current */) {
+void TaskQueueI::stop(const Ice::Current& current) {
+	CallStatistics::count(current);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "stop request");
 	try {
 		taskqueue.stop();
@@ -116,7 +119,8 @@ void TaskQueueI::stop(const Ice::Current& /* current */) {
  * \brief Submit a task to the task queue
  */
 int TaskQueueI::submit(const TaskParameters& parameters,
-		const Ice::Current& /* current */) {
+		const Ice::Current& current) {
+	CallStatistics::count(current);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "submit a new task on '%s', purpose = %d, gain = %.1f",
 		parameters.instrument.c_str(), parameters.exp.purpose,
 		parameters.exp.gain);
@@ -229,7 +233,8 @@ int TaskQueueI::submit(const TaskParameters& parameters,
 /**
  * \brief Retrieve parameters from the queue
  */
-TaskParameters TaskQueueI::parameters(int taskid, const Ice::Current& /* current */) {
+TaskParameters TaskQueueI::parameters(int taskid, const Ice::Current& current) {
+	CallStatistics::count(current);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "query parameters of task %d", taskid);
 	if (!taskqueue.exists(taskid)) {
 		std::string	cause = astro::stringprintf(
@@ -254,7 +259,8 @@ TaskParameters TaskQueueI::parameters(int taskid, const Ice::Current& /* current
 /**
  * \brief Retrieve parameters from the queue
  */
-TaskInfo TaskQueueI::info(int taskid, const Ice::Current& /* current */) {
+TaskInfo TaskQueueI::info(int taskid, const Ice::Current& current) {
+	CallStatistics::count(current);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "query info of task %d", taskid);
 	if (!taskqueue.exists(taskid)) {
 		std::string	cause = astro::stringprintf(
@@ -277,7 +283,8 @@ TaskInfo TaskQueueI::info(int taskid, const Ice::Current& /* current */) {
 /**
  * \brief cancel a task in the queue
  */
-void TaskQueueI::cancel(int taskid, const Ice::Current& /* current */) {
+void TaskQueueI::cancel(int taskid, const Ice::Current& current) {
+	CallStatistics::count(current);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "cancel request for %d", taskid);
 	if (!taskqueue.exists(taskid)) {
 		std::string	cause = astro::stringprintf(
@@ -302,7 +309,8 @@ void TaskQueueI::cancel(int taskid, const Ice::Current& /* current */) {
 /**
  * \brief Remove a task from the queue
  */
-void TaskQueueI::remove(int taskid, const Ice::Current& /* current */) {
+void TaskQueueI::remove(int taskid, const Ice::Current& current) {
+	CallStatistics::count(current);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "remove request for %d", taskid);
 	if (!taskqueue.exists(taskid)) {
 		std::string	cause = astro::stringprintf(
@@ -328,6 +336,7 @@ void TaskQueueI::remove(int taskid, const Ice::Current& /* current */) {
  * \brief Resubmit a tesk
  */
 void TaskQueueI::resubmit(int taskid, const Ice::Current& current) {
+	CallStatistics::count(current);
 	if (!taskqueue.exists(taskid)) {
 		std::string	cause = astro::stringprintf(
 			"task %d does not exist", taskid);
@@ -343,7 +352,8 @@ void TaskQueueI::resubmit(int taskid, const Ice::Current& current) {
 }
 
 taskidsequence TaskQueueI::tasklist(TaskState state,
-		const Ice::Current& /* current */) {
+		const Ice::Current& current) {
+	CallStatistics::count(current);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "list tasks in state %s",
 		astro::task::TaskInfo::state2string(convert(state)).c_str());
 	std::list<long>	taskidlist = taskqueue.tasklist(snowstar::convert(state));
@@ -353,6 +363,7 @@ taskidsequence TaskQueueI::tasklist(TaskState state,
 }
 
 TaskPrx TaskQueueI::getTask(int taskid, const Ice::Current& current) {
+	CallStatistics::count(current);
 	// make sure the task exists
 	if (!taskqueue.exists(taskid)) {
 		throw NotFound("task does not exist");
@@ -371,6 +382,7 @@ TaskPrx TaskQueueI::getTask(int taskid, const Ice::Current& current) {
 
 void	TaskQueueI::registerMonitor(const Ice::Identity& callback,
 		const Ice::Current& current) {
+	CallStatistics::count(current);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "register a new monitor callback");
 	try {
 		callbacks.registerCallback(callback, current);
@@ -385,6 +397,7 @@ void	TaskQueueI::registerMonitor(const Ice::Identity& callback,
 
 void	TaskQueueI::unregisterMonitor(const Ice::Identity& callback,
 		const Ice::Current& current) {
+	CallStatistics::count(current);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "unregistering a monitor callback");
 	try {
 		callbacks.unregisterCallback(callback, current);

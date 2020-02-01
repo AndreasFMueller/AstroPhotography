@@ -16,11 +16,13 @@ ModulesI::ModulesI() {
 ModulesI::~ModulesI() {
 }
 
-int	ModulesI::numberOfModules(const Ice::Current& /* current */) {
+int	ModulesI::numberOfModules(const Ice::Current& current) {
+	CallStatistics::count(current);
 	return _repository->numberOfModules();
 }
 
-ModuleNameList	ModulesI::getModuleNames(const Ice::Current& /* current */) {
+ModuleNameList	ModulesI::getModuleNames(const Ice::Current& current) {
+	CallStatistics::count(current);
 	ModuleNameList	result = _repository->moduleNames();
 	// suppress names that should not be published
 	ModuleNameList::iterator	i;
@@ -37,6 +39,7 @@ ModuleNameList	ModulesI::getModuleNames(const Ice::Current& /* current */) {
 
 DriverModulePrx	ModulesI::getModule(const std::string& modulename,
 	const Ice::Current& current) {
+	CallStatistics::count(current);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "request for module '%s'",
 		modulename.c_str());
 	return snowstar::createProxy<DriverModulePrx>(std::string("drivermodule/") + modulename, current, false);

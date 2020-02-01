@@ -247,7 +247,7 @@ module snowstar {
 	 * attached camera, and derive corrective actions that they then
 	 * output to the guideport.
 	 */
-	interface Guider {
+	interface Guider extends Statistics {
 		GuiderState	getState();
 
 		/**
@@ -441,7 +441,7 @@ module snowstar {
 	 * to the server, but the data should still be accessible.
 	 */
 	sequence<GuiderDescriptor> GuiderList;
-	interface GuiderFactory {
+	interface GuiderFactory extends Statistics {
 		GuiderList	list();
 
 		/**

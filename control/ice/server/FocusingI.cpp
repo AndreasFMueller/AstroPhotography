@@ -32,14 +32,16 @@ FocusingI::~FocusingI() {
 /**
  * \brief Get the current status
  */
-FocusState	FocusingI::status(const Ice::Current& /* current */) {
+FocusState	FocusingI::status(const Ice::Current& current) {
+	CallStatistics::count(current);
 	return convert(_focusingptr->status());
 }
 
 /**
  * \brief provide the Method
  */
-std::string	FocusingI::method(const Ice::Current& /* current */) {
+std::string	FocusingI::method(const Ice::Current& current) {
+	CallStatistics::count(current);
 	return _focusingptr->method();
 }
 
@@ -47,7 +49,8 @@ std::string	FocusingI::method(const Ice::Current& /* current */) {
  * \brief Set the method
  */
 void	FocusingI::setMethod(const std::string& method,
-		const Ice::Current& /* current */) {
+		const Ice::Current& current) {
+	CallStatistics::count(current);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "set the method to %s",
 		method.c_str());
 	_focusingptr->method(method);
@@ -56,7 +59,8 @@ void	FocusingI::setMethod(const std::string& method,
 /**
  * \brief provide the Solver
  */
-std::string	FocusingI::solver(const Ice::Current& /* current */) {
+std::string	FocusingI::solver(const Ice::Current& current) {
+	CallStatistics::count(current);
 	return _focusingptr->solver();
 }
 
@@ -64,7 +68,8 @@ std::string	FocusingI::solver(const Ice::Current& /* current */) {
  * \brief Set the solver
  */
 void	FocusingI::setSolver(const std::string& solver,
-		const Ice::Current& /* current */) {
+		const Ice::Current& current) {
+	CallStatistics::count(current);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "set the solver to %s",
 		solver.c_str());
 	_focusingptr->solver(solver);
@@ -73,7 +78,8 @@ void	FocusingI::setSolver(const std::string& solver,
 /**
  * \brief provide the information about the exposure
  */
-Exposure	FocusingI::getExposure(const Ice::Current& /* current */) {
+Exposure	FocusingI::getExposure(const Ice::Current& current) {
+	CallStatistics::count(current);
 	return convert(_focusingptr->exposure());
 }
 
@@ -81,7 +87,8 @@ Exposure	FocusingI::getExposure(const Ice::Current& /* current */) {
  * \brief Set the exposure for the focusing process
  */
 void	FocusingI::setExposure(const Exposure& exposure,
-		const Ice::Current& /* current */) {
+		const Ice::Current& current) {
+	CallStatistics::count(current);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "set exposure");
 	_focusingptr->exposure(convert(exposure));
 }
@@ -89,14 +96,16 @@ void	FocusingI::setExposure(const Exposure& exposure,
 /**
  * \brief provide the number of steps
  */
-int	FocusingI::steps(const Ice::Current& /* current */) {
+int	FocusingI::steps(const Ice::Current& current) {
+	CallStatistics::count(current);
 	return _focusingptr->steps();
 }
 
 /**
  * \brief Set the number of steps
  */
-void	FocusingI::setSteps(int steps, const Ice::Current& /* current */) {
+void	FocusingI::setSteps(int steps, const Ice::Current& current) {
+	CallStatistics::count(current);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "set steps to %d", steps);
 	_focusingptr->steps(steps);
 }
@@ -104,7 +113,8 @@ void	FocusingI::setSteps(int steps, const Ice::Current& /* current */) {
 /**
  * \brief Start the focusing process
  */
-void	FocusingI::start(int min, int max, const Ice::Current& /* current */) {
+void	FocusingI::start(int min, int max, const Ice::Current& current) {
+	CallStatistics::count(current);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "start focusing in interval [%d,%d]",
 		min, max);
 	// ensure we are in the right state
@@ -133,7 +143,8 @@ void	FocusingI::start(int min, int max, const Ice::Current& /* current */) {
 /**
  * \brief Cancel the focusing process in progress
  */
-void	FocusingI::cancel(const Ice::Current& /* current */) {
+void	FocusingI::cancel(const Ice::Current& current) {
+	CallStatistics::count(current);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "cancelling the focusing");
 	_focusingptr->cancel();
 }
@@ -142,6 +153,7 @@ void	FocusingI::cancel(const Ice::Current& /* current */) {
  * \brief Provide a CCD proxy
  */
 CcdPrx	FocusingI::getCcd(const Ice::Current& current) {
+	CallStatistics::count(current);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "creating the CCD proxy");
 	std::string	name = _focusingptr->ccd()->name();
 	return createProxy<CcdPrx>(name, current);
@@ -151,6 +163,7 @@ CcdPrx	FocusingI::getCcd(const Ice::Current& current) {
  * \brief Provide a Focuser proxy
  */
 FocuserPrx	FocusingI::getFocuser(const Ice::Current& current) {
+	CallStatistics::count(current);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "creating the focuser proxy");
 	std::string	name = _focusingptr->focuser()->name();
 	return createProxy<FocuserPrx>(name, current);
@@ -159,7 +172,8 @@ FocuserPrx	FocusingI::getFocuser(const Ice::Current& current) {
 /**
  * \brief retrieve the focus history
  */
-FocusHistory	FocusingI::history(const Ice::Current& /* current */) {
+FocusHistory	FocusingI::history(const Ice::Current& current) {
+	CallStatistics::count(current);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieve the history");
 	return _history;
 }
@@ -178,6 +192,7 @@ void	FocusingI::addPoint(const FocusPoint& point) {
  */
 void	FocusingI::registerCallback(const Ice::Identity& callbackidentity,
 		const Ice::Current& current) {
+	CallStatistics::count(current);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "registering callback: %s",
 		callbackidentity.name.c_str());
 	try {
@@ -193,6 +208,7 @@ void	FocusingI::registerCallback(const Ice::Identity& callbackidentity,
  */
 void	FocusingI::unregisterCallback(const Ice::Identity& callbackidentity,
 		const Ice::Current& current) {
+	CallStatistics::count(current);
 	callbacks.unregisterCallback(callbackidentity, current);
 }
 
@@ -249,6 +265,7 @@ void	FocusingI::updateFocusing(astro::callback::CallbackDataPtr data) {
  */
 void    FocusingI::setRepositoryName(const std::string& reponame,
                                 const Ice::Current& current) {
+	CallStatistics::count(current);
 	RepositoryUser::setRepositoryName(reponame, current);
 }
 
@@ -256,6 +273,7 @@ void    FocusingI::setRepositoryName(const std::string& reponame,
  * \brief get the repository name
  */
 std::string     FocusingI::getRepositoryName(const Ice::Current& current) {
+	CallStatistics::count(current);
 	return RepositoryUser::getRepositoryName(current);
 }
 

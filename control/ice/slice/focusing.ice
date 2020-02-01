@@ -61,7 +61,7 @@ sequence<string>	FocusSolvers;
  *
  * This interface gives access to the 
  */
-interface Focusing {
+interface Focusing extends Statistics {
 	/**
 	 * \brief Get the current focusing state
 	 */
@@ -154,7 +154,7 @@ interface Focusing {
  * server, the factory keeps a running list of ids and creates proxies using
  * these ids.
  */
-interface FocusingFactory {
+interface FocusingFactory extends Statistics {
 	Focusing*	get(string ccd, string focuser);
 	FocusMethods	getMethods();
 	FocusSolvers	getSolvers();

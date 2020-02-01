@@ -41,7 +41,7 @@ module snowstar {
 	 * as it is only intended to implement replication between a local
 	 * and a remote repository.
 	 */
-	interface Repository {
+	interface Repository extends Statistics {
 		idlist		getIds();
 		idlist		getIdsCondition(string condition);
 		uuidlist	getUUIDs();
@@ -76,7 +76,7 @@ module snowstar {
 	 * There may be multiple repositories on the server, and this method
 	 * allows to retrieve a proxy to a repository.
 	 */
-	interface Repositories {
+	interface Repositories extends Statistics {
 		reponamelist	list();
 		reposummarylist	summarylist();
 		bool	has(string reponame);

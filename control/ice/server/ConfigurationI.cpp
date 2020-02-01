@@ -19,14 +19,16 @@ ConfigurationI::ConfigurationI(astro::config::ConfigurationPtr _configuration)
 }
 
 bool	ConfigurationI::has(const ConfigurationKey& key,
-		const Ice::Current& /* current */) {
+		const Ice::Current& current) {
+	CallStatistics::count(current);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "check whether get %s.%s.%s exists",
 		key.domain.c_str(), key.section.c_str(), key.name.c_str());
 	return configuration->has(convert(key));
 }
 
 ConfigurationItem	ConfigurationI::get(const ConfigurationKey& key,
-				const Ice::Current& /* current */) {
+				const Ice::Current& current) {
+	CallStatistics::count(current);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "get configuration %s.%s.%s",
 		key.domain.c_str(), key.section.c_str(), key.name.c_str());
 	if (!configuration->has(convert(key))) {
@@ -41,7 +43,8 @@ ConfigurationItem	ConfigurationI::get(const ConfigurationKey& key,
 }
 
 void	ConfigurationI::remove(const ConfigurationKey& key,
-				const Ice::Current& /* current */) {
+				const Ice::Current& current) {
+	CallStatistics::count(current);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "remove configuration %s.%s.%s",
 		key.domain.c_str(), key.section.c_str(), key.name.c_str());
 	if (!configuration->has(convert(key))) {
@@ -55,19 +58,22 @@ void	ConfigurationI::remove(const ConfigurationKey& key,
 }
 
 void	ConfigurationI::set(const ConfigurationItem& item,
-		const Ice::Current& /* current */) {
+		const Ice::Current& current) {
+	CallStatistics::count(current);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "set configuration %s.%s.%s",
 		item.domain.c_str(), item.section.c_str(), item.name.c_str());
 	configuration->set(item.domain, item.section, item.name, item.value);
 }
 
 ConfigurationList	ConfigurationI::list(const Ice::Current& current) {
+	CallStatistics::count(current);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "list all config variables");
 	return listDomain("global", current);
 }
 
 ConfigurationList	ConfigurationI::listDomain(const std::string& domain,
-				const Ice::Current& /* current */) {
+				const Ice::Current& current) {
+	CallStatistics::count(current);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "list domain %s", domain.c_str());
 	ConfigurationList	result;
 	std::list<astro::config::ConfigurationEntry>	l
@@ -82,7 +88,8 @@ ConfigurationList	ConfigurationI::listDomain(const std::string& domain,
 
 ConfigurationList	ConfigurationI::listSection(const std::string& domain,
 				const std::string& section,
-				const Ice::Current& /* current */) {
+				const Ice::Current& current) {
+	CallStatistics::count(current);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "list section %s.%s", domain.c_str(),
 		section.c_str());
 	ConfigurationList	result;
@@ -97,7 +104,8 @@ ConfigurationList	ConfigurationI::listSection(const std::string& domain,
 }
 
 ConfigurationKeyList	ConfigurationI::registeredKeys(
-				const Ice::Current& /* current */) {
+				const Ice::Current& current) {
+	CallStatistics::count(current);
 	std::list<astro::config::ConfigurationKey>	keys
 		= astro::config::Configuration::listRegistered();
 	ConfigurationKeyList	result;
@@ -110,7 +118,8 @@ ConfigurationKeyList	ConfigurationI::registeredKeys(
 }
 
 std::string	ConfigurationI::description(const ConfigurationKey& key,
-			const Ice::Current& /* current */) {
+			const Ice::Current& current) {
+	CallStatistics::count(current);
 	return astro::config::Configuration::describe(convert(key));
 }
 

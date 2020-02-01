@@ -8,10 +8,11 @@
 
 #include <instruments.h>
 #include <AstroDiscovery.h>
+#include "StatisticsI.h"
 
 namespace snowstar {
 
-class InstrumentI : virtual public Instrument {
+class InstrumentI : virtual public Instrument, public StatisticsI {
 	astro::discover::InstrumentPtr	_instrument;
 public:
 	InstrumentI(astro::discover::InstrumentPtr instrument);

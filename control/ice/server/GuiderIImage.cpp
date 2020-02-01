@@ -21,7 +21,8 @@ namespace snowstar {
  * \brief start imaging with a given exposure
  */
 void	GuiderI::startImaging(const Exposure& exposure,
-                                const Ice::Current& /* current */) {
+                                const Ice::Current& current) {
+	CallStatistics::count(current);
 	try {
 		astro::camera::Exposure	e = convert(exposure);
 		guider->startImaging(e);
@@ -36,6 +37,7 @@ void	GuiderI::startImaging(const Exposure& exposure,
  * \brief retrieve the image
  */
 ImagePrx	GuiderI::getImage(const Ice::Current& current) {
+	CallStatistics::count(current);
 	// retrieve image
 	astro::image::ImagePtr	image = guider->getImaging();
 	if (!image) {

@@ -9,6 +9,7 @@
 #include <image.h>
 #include <AstroImage.h>
 #include <typeindex>
+#include "StatisticsI.h"
 
 namespace snowstar {
 
@@ -18,7 +19,7 @@ namespace snowstar {
  * derived classes of this class will implement returning pixel arrays for
  * different pixel types
  */
-class ImageI : virtual public Image {
+class ImageI : virtual public Image, public StatisticsI {
 protected:
 	astro::image::ImagePtr	_image;
 	astro::image::ImagePtr	image();

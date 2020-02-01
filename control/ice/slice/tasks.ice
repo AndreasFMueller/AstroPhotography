@@ -111,7 +111,7 @@ module snowstar {
 	 *
 	 * Tasks can manipulated using this interface.
 	 */
-	interface Task {
+	interface Task extends Statistics {
 		TaskState	state();
 		TaskParameters	parameters();
 		TaskInfo	info();
@@ -151,7 +151,7 @@ module snowstar {
 	 *
 	 * The task queue stores exposure tasks and executes them.
 	 */
-	interface TaskQueue {
+	interface TaskQueue extends Statistics {
 		/**
 		 * \brief manipulate the task queue 
 		 */

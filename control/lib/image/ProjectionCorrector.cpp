@@ -152,7 +152,7 @@ Projection	ProjectionCorrector::corrected(
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "new projection: %s",
 		pr.toString().c_str());
 
-	return pr;
+	return std::move(pr);
 }
 
 } // namespace project

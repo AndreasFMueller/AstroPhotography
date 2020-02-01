@@ -28,6 +28,7 @@ public:
         virtual void    Goto(const RaDec& radec);
         virtual void    Goto(const AzmAlt& azmalt);
         virtual bool    telescopePositionWest();
+	virtual location_source_type	location_source();
         virtual void    cancel();
 };
 

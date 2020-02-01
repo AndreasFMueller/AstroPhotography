@@ -8,10 +8,11 @@
 
 #include <device.h>
 #include <AstroLocator.h>
+#include "StatisticsI.h"
 
 namespace snowstar {
 
-class DeviceLocatorI : virtual public DeviceLocator {
+class DeviceLocatorI : virtual public DeviceLocator, public StatisticsI {
 	astro::device::DeviceLocatorPtr	_locator;
 public:
 	DeviceLocatorI(astro::device::DeviceLocatorPtr locator);

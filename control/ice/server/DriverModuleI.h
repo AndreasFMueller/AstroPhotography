@@ -8,10 +8,11 @@
 
 #include <device.h>
 #include <AstroLoader.h>
+#include "StatisticsI.h"
 
 namespace snowstar {
 
-class DriverModuleI : virtual public DriverModule {
+class DriverModuleI : virtual public DriverModule, public StatisticsI {
 	astro::module::ModulePtr	_module;
 public:
 	DriverModuleI(astro::module::ModulePtr module);

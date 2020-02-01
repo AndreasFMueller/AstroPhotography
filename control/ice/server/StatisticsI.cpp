@@ -9,63 +9,83 @@
 
 namespace snowstar {
 
-StatisticsI::StatisticsI(const std::string& name) {
-	CallStatisticsPtr	ptr(new CallStatistics(name));
-	CallStatistics::remember(name, ptr);
-}
-
 StatisticsI::StatisticsI() {
-	std::string	name = astro::stringprintf("%p", this);
-	CallStatisticsPtr	ptr(new CallStatistics(name));
-	CallStatistics::remember(name, ptr);
 }
 
 StatisticsI::~StatisticsI() {
 }
 
-InterfaceNameSequence   StatisticsI::interfaceNames(const Ice::Current& /* current */) {
-	InterfaceNameSequence	result;
-	// XXX implementation missing
+/**
+ * \brief Return a list of object identities
+ */
+ObjectIdentitySequence   StatisticsI::objectidentities(
+	const Ice::Current& /* current */) {
+	std::list<Ice::Identity>	identities
+		= CallStatistics::objectidentities();
+	ObjectIdentitySequence	result;
+	std::copy(identities.begin(), identities.end(),
+		std::back_inserter(result));
 	return result;
 }
 
-long    StatisticsI::servantInstances(const Ice::Current& /* current */) {
-	return 0;
+/**
+ * \brief Return the number of objects known to the server
+ */
+long    StatisticsI::objectidentityCount(const Ice::Current& /* current */) {
+	return CallStatistics::objectidentityCount();
 }
 
-ServantNameSequence     StatisticsI::servantNames(const Ice::Current& /* current */) {
-	ServantNameSequence	result;
-	// XXX implementation missing
+/**
+ * \brief Get a list of operations
+ */
+OperationSequence	StatisticsI::operations(
+				const Ice::Identity& objectidentity,
+				const Ice::Current& /* current */) {
+	std::list<std::string>	o = CallStatistics::operations(objectidentity);
+	OperationSequence	result;
+	std::copy(o.begin(), o.end(), std::back_inserter(result));
 	return result;
 }
 
-long    StatisticsI::interfaceCalls(const Ice::Current& /* current */) {
-	// XXX implementation missing
-	return 0;
+/**
+ * \brief Return the number of operation count
+ */
+long	StatisticsI::operationCount(const Ice::Identity& objectidentity,
+				const Ice::Current& /* current */) {
+	return CallStatistics::operationCount(objectidentity);
 }
 
-long    StatisticsI::interfaceNamedCalls(const std::string& callname,
+/**
+ * \brief 
+ */
+long	StatisticsI::callsPerObject(const Ice::Identity& objectidentity,
 		const Ice::Current& /* current */) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "interfaceNamedCalls(%s)",
-		callname.c_str());
-	// XXX implementation missing
-	return 0;
+	return CallStatistics::calls(objectidentity);
 }
 
-long    StatisticsI::servantCalls(const std::string& servantname,
+/**
+ * \brief
+ */
+long	StatisticsI::callsPerObjectAndOperation(
+		const Ice::Identity& objectidentity,
+		const std::string& operation,
 		const Ice::Current& /* current */) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "servantCalls(%s)", servantname.c_str());
-	// XXX implementation missing
-	return 0;
+	return CallStatistics::calls(objectidentity, operation);
 }
 
-long    StatisticsI::servantNamedCalls(const std::string& servantname,
-		const std::string& callname,
-		const Ice::Current& /* current */) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "servantNamedCalles(%s, %s)",
-		servantname.c_str(), callname.c_str());
-	// XXX implementation missing
-	return 0;
+/**
+ * \brief Return the total number of alls on this object
+ */
+long	StatisticsI::calls(const Ice::Current& current) {
+	return CallStatistics::recall(current.id)->calls();
+}
+
+/**
+ * \brief Return the number of calls to an operation on this object
+ */
+long	StatisticsI::operationCalls(const std::string& operation,
+		const Ice::Current& current) {
+	return CallStatistics::recall(current.id)->calls(operation);
 }
 
 } // namespace snowstar

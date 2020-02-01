@@ -12,6 +12,7 @@ module snowstar {
 
 	// state of mount
 	enum mountstate { MountIDLE, MountALIGNED, MountTRACKING, MountGOTO };
+	enum locationtype { LocationLOCAL, LocationGPS };
 
 	/**
 	 * \brief Interface to a telescope mount
@@ -25,6 +26,7 @@ module snowstar {
 		bool	telescopePositionWest() throws DeviceException;
 		void	cancel() throws DeviceException;
 		LongLat	getLocation() throws DeviceException;
+		locationtype	getLocationSource() throws DeviceException;
 		long	getTime() throws DeviceException;
 		bool	hasGuideRates() throws DeviceException;
 		RaDec	getGuideRates() throws DeviceException;
@@ -39,7 +41,7 @@ module snowstar {
 	/**
 	 * \brief Device Locator interface within a module
 	 */
-	interface Devices {
+	interface Devices extends Statistics {
 		/**
 		 * \brief Retrieve a list of device names for a device type
 		 *
@@ -67,7 +69,7 @@ module snowstar {
 	/**
 	 * \brief Device Locator interface, locates devices in a module
 	 */
-	interface DeviceLocator {
+	interface DeviceLocator extends Statistics {
 		string	getName();
 		string	getVersion();
 		DeviceNameList	getDevicelist(devicetype type);
@@ -84,7 +86,7 @@ module snowstar {
 	/**
 	 * \brief interface to a driver module
  	 */
-	interface DriverModule {
+	interface DriverModule extends Statistics {
 		string	getName();
 		string	getVersion();
 		bool	hasLocator();
@@ -96,7 +98,7 @@ module snowstar {
 	/**
 	 * \brief get access to modules
 	 */
-	interface Modules {
+	interface Modules extends Statistics {
 		int	numberOfModules();
 		ModuleNameList	getModuleNames();
 		DriverModule*	getModule(string name) throws NotFound;

@@ -151,8 +151,8 @@ int	ConnectedComponentBase::grow(ImageAdapter<unsigned char>& image) const {
  */
 WindowedImage<unsigned char>	*ConnectedComponentBase::component(
 				const ConstImageAdapter<unsigned char>& image) {
-	int	w = image.getSize().width();
-	int	h = image.getSize().height();
+	//int	w = image.getSize().width();
+	//int	h = image.getSize().height();
 	debug(LOG_DEBUG, DEBUG_LOG, 0,
 		"extracting connected component from %s image at %s",
 		image.getSize().toString().c_str(), _point.toString().c_str());

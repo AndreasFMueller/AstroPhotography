@@ -14,7 +14,8 @@ MountI::MountI(astro::device::MountPtr mount) : DeviceI(*mount), _mount(mount) {
 MountI::~MountI() {
 }
 
-RaDec	MountI::getRaDec(const Ice::Current& /* current */) {
+RaDec	MountI::getRaDec(const Ice::Current& current) {
+	CallStatistics::count(current);
 	try {
 		return convert(_mount->getRaDec());
 	} catch (std::exception x) {
@@ -26,7 +27,8 @@ RaDec	MountI::getRaDec(const Ice::Current& /* current */) {
 	}
 }
 
-AzmAlt	MountI::getAzmAlt(const Ice::Current& /* current */) {
+AzmAlt	MountI::getAzmAlt(const Ice::Current& current) {
+	CallStatistics::count(current);
 	try {
 		return convert(_mount->getAzmAlt());
 	} catch (std::exception x) {
@@ -38,7 +40,8 @@ AzmAlt	MountI::getAzmAlt(const Ice::Current& /* current */) {
 	}
 }
 
-LongLat	MountI::getLocation(const Ice::Current& /* current */) {
+LongLat	MountI::getLocation(const Ice::Current& current) {
+	CallStatistics::count(current);
 	try {
 		astro::LongLat	loc = _mount->location();
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "got location: %s",
@@ -53,7 +56,24 @@ LongLat	MountI::getLocation(const Ice::Current& /* current */) {
 	}
 }
 
-Ice::Long	MountI::getTime(const Ice::Current& /* current */) {
+locationtype	MountI::getLocationSource(const Ice::Current& current) {
+	CallStatistics::count(current);
+	try {
+		switch (_mount->location_source()) {
+		case astro::device::Mount::LOCAL:	return LocationLOCAL;
+		case astro::device::Mount::GPS:		return LocationGPS;
+		}
+	} catch (std::exception x) {
+		DeviceException	except;
+		except.cause = astro::stringprintf("cannot call location(): %s",
+			x.what());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", except.cause.c_str());
+		throw except;
+	}
+}
+
+Ice::Long	MountI::getTime(const Ice::Current& current) {
+	CallStatistics::count(current);
 	try {
 		return _mount->time();
 	} catch (std::exception x) {
@@ -65,7 +85,8 @@ Ice::Long	MountI::getTime(const Ice::Current& /* current */) {
 	}
 }
 
-void	MountI::cancel(const Ice::Current& /* current */) {
+void	MountI::cancel(const Ice::Current& current) {
+	CallStatistics::count(current);
 	try {
 		_mount->cancel();
 	} catch (std::exception x) {
@@ -77,7 +98,8 @@ void	MountI::cancel(const Ice::Current& /* current */) {
 	}
 }
 
-bool	MountI::telescopePositionWest(const Ice::Current& /* current */) {
+bool	MountI::telescopePositionWest(const Ice::Current& current) {
+	CallStatistics::count(current);
 	try {
 		return _mount->telescopePositionWest();
 	} catch (std::exception x) {
@@ -91,7 +113,8 @@ bool	MountI::telescopePositionWest(const Ice::Current& /* current */) {
 }
 
 void	MountI::GotoAzmAlt(const AzmAlt& azmalt,
-		const Ice::Current& /* current */) {
+		const Ice::Current& current) {
+	CallStatistics::count(current);
 	try {
 		_mount->Goto(convert(azmalt));
 	} catch (std::exception x) {
@@ -104,7 +127,8 @@ void	MountI::GotoAzmAlt(const AzmAlt& azmalt,
 }
 
 void	MountI::GotoRaDec(const RaDec& radec,
-		const Ice::Current& /* current */) {
+		const Ice::Current& current) {
+	CallStatistics::count(current);
 	try {
 		_mount->Goto(convert(radec));
 	} catch (std::exception x) {
@@ -116,7 +140,8 @@ void	MountI::GotoRaDec(const RaDec& radec,
 	}
 }
 
-mountstate	MountI::state(const Ice::Current& /* current */) {
+mountstate	MountI::state(const Ice::Current& current) {
+	CallStatistics::count(current);
 	try {
 		return convert(_mount->state());
 	} catch (std::exception x) {
@@ -128,7 +153,8 @@ mountstate	MountI::state(const Ice::Current& /* current */) {
 	}
 }
 
-bool	MountI::hasGuideRates(const Ice::Current& /* current */) {
+bool	MountI::hasGuideRates(const Ice::Current& current) {
+	CallStatistics::count(current);
 	try {
 		return _mount->hasGuideRates();
 	} catch (std::exception x) {
@@ -140,7 +166,8 @@ bool	MountI::hasGuideRates(const Ice::Current& /* current */) {
 	}
 }
 
-RaDec	MountI::getGuideRates(const Ice::Current& /* current */) {
+RaDec	MountI::getGuideRates(const Ice::Current& current) {
+	CallStatistics::count(current);
 	try {
 		return convert(_mount->getGuideRates());
 	} catch (std::exception x) {

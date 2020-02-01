@@ -84,11 +84,13 @@ GuiderI::~GuiderI() {
 	guider->removeBacklashCallback(_backlashcallback);
 }
 
-GuiderState GuiderI::getState(const Ice::Current& /* current */) {
+GuiderState GuiderI::getState(const Ice::Current& current) {
+	CallStatistics::count(current);
 	return convert(guider->state());
 }
 
 CcdPrx GuiderI::getCcd(const Ice::Current& current) {
+	CallStatistics::count(current);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "getting ccd");
 	astro::guiding::GuiderDescriptor	descriptor
 		= guider->getDescriptor();
@@ -97,31 +99,37 @@ CcdPrx GuiderI::getCcd(const Ice::Current& current) {
 }
 
 GuidePortPrx GuiderI::getGuidePort(const Ice::Current& current) {
+	CallStatistics::count(current);
 	std::string	name = guider->getDescriptor().guideport();
 	return GuidePortI::createProxy(name, current);
 }
 
-GuiderDescriptor GuiderI::getDescriptor(const Ice::Current& /* current */) {
+GuiderDescriptor GuiderI::getDescriptor(const Ice::Current& current) {
+	CallStatistics::count(current);
 	return convert(guider->getDescriptor());
 }
 
-Ice::Float	GuiderI::getFocallength(const Ice::Current& /* current */) {
+Ice::Float	GuiderI::getFocallength(const Ice::Current& current) {
+	CallStatistics::count(current);
 	return guider->focallength();
 }
 
-Ice::Float	GuiderI::getGuiderate(const Ice::Current& /* current */) {
+Ice::Float	GuiderI::getGuiderate(const Ice::Current& current) {
+	CallStatistics::count(current);
 	return guider->guiderate();
 }
 
 void GuiderI::setExposure(const Exposure& exposure,
-	const Ice::Current& /* current */) {
+	const Ice::Current& current) {
+	CallStatistics::count(current);
 	astro::camera::Exposure	e = convert(exposure);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "set exposure: %s",
 		e.toString().c_str());
 	guider->exposure(e);
 }
 
-Exposure GuiderI::getExposure(const Ice::Current& /* current */) {
+Exposure GuiderI::getExposure(const Ice::Current& current) {
+	CallStatistics::count(current);
 	return convert(guider->exposure());
 }
 
@@ -130,22 +138,26 @@ Exposure GuiderI::getExposure(const Ice::Current& /* current */) {
  *
  * \param point		star point in absolute coordinates
  */
-void GuiderI::setStar(const Point& point, const Ice::Current& /* current */) {
+void GuiderI::setStar(const Point& point, const Ice::Current& current) {
+	CallStatistics::count(current);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "new star set: %.1f,%.1f",
 		point.x, point.y);
 	_point = point;
 }
 
-Point GuiderI::getStar(const Ice::Current& /* current */) {
+Point GuiderI::getStar(const Ice::Current& current) {
+	CallStatistics::count(current);
 	return _point;
 }
 
-TrackerMethod	GuiderI::getTrackerMethod(const Ice::Current& /* current */) {
+TrackerMethod	GuiderI::getTrackerMethod(const Ice::Current& current) {
+	CallStatistics::count(current);
 	return _tracker_method;
 }
 
 void	GuiderI::setTrackerMethod(TrackerMethod method,
-		const Ice::Current& /* current */) {
+		const Ice::Current& current) {
+	CallStatistics::count(current);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "using method: %s",
 		(method == TrackerUNDEFINED) ? "undefined" : (
 			(method == TrackerSTAR) ? "star" : (
@@ -213,6 +225,7 @@ astro::guiding::TrackerPtr	 GuiderI::getTracker() {
  */
 void    GuiderI::registerImageMonitor(const Ice::Identity& imagecallback,
 		const Ice::Current& current) {
+	CallStatistics::count(current);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "register an image callback");
 	imagecallbacks.registerCallback(imagecallback, current);
 }
@@ -222,6 +235,7 @@ void    GuiderI::registerImageMonitor(const Ice::Identity& imagecallback,
  */
 void    GuiderI::unregisterImageMonitor(const Ice::Identity& imagecallback,
 		const Ice::Current& current) {
+	CallStatistics::count(current);
 	imagecallbacks.unregisterCallback(imagecallback, current);
 }
 
@@ -230,6 +244,7 @@ void    GuiderI::unregisterImageMonitor(const Ice::Identity& imagecallback,
  */
 void    GuiderI::setRepositoryName(const std::string& reponame,
                                 const Ice::Current& current) {
+	CallStatistics::count(current);
 	RepositoryUser::setRepositoryName(reponame, current);
 }
 
@@ -237,6 +252,7 @@ void    GuiderI::setRepositoryName(const std::string& reponame,
  * \brief Get the repository name
  */
 std::string     GuiderI::getRepositoryName(const Ice::Current& current) {
+	CallStatistics::count(current);
 	return RepositoryUser::getRepositoryName(current);
 }
 

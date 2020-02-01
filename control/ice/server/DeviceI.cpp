@@ -22,12 +22,14 @@ DeviceI::DeviceI(astro::device::Device& device) : _device(device) {
 DeviceI::~DeviceI() {
 }
 
-std::string	DeviceI::getName(const Ice::Current& /* current */) {
+std::string	DeviceI::getName(const Ice::Current& current) {
+	CallStatistics::count(current);
 	return _device.name().toString();
 }
 
 std::vector<std::string>	DeviceI::parameterNames(
-					const Ice::Current& /* current */) {
+					const Ice::Current& current) {
+	CallStatistics::count(current);
 	std::vector<std::string>	result;
 	std::list<std::string>	pn = _device.parameterNames();
 	copy(pn.begin(), pn.end(), std::back_inserter(result));
@@ -35,36 +37,42 @@ std::vector<std::string>	DeviceI::parameterNames(
 }
 
 bool	DeviceI::hasParameter(const std::string& name,
-		const Ice::Current& /* current */) {
+		const Ice::Current& current) {
+	CallStatistics::count(current);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "does device parameter '%s' exist?",
 		name.c_str());
 	return _device.hasParameter(name);
 }
 
 ParameterDescription	DeviceI::parameter(const std::string& name,
-		const Ice::Current& /* current */) {
+		const Ice::Current& current) {
+	CallStatistics::count(current);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "querying device parameter '%s'",
 		name.c_str());
 	return convert(_device.parameter(name));
 }
 
 void	DeviceI::setParameterFloat(const std::string& name,
-		double value, const Ice::Current& /* current */) {
+		double value, const Ice::Current& current) {
+	CallStatistics::count(current);
 	_device.parameter(name, (float)value);
 }
 
 void	DeviceI::setParameterString(const std::string& name,
-		const std::string& value, const Ice::Current& /* current */) {
+		const std::string& value, const Ice::Current& current) {
+	CallStatistics::count(current);
 	_device.parameter(name, value);
 }
 
 float	DeviceI::parameterValueFloat(const std::string& name,
-		const Ice::Current& /* current */) {
+		const Ice::Current& current) {
+	CallStatistics::count(current);
 	return _device.parameterValueFloat(name);
 }
 
 std::string	DeviceI::parameterValueString(const std::string& name,
-		const Ice::Current& /* current */) {
+		const Ice::Current& current) {
+	CallStatistics::count(current);
 	return _device.parameterValueString(name);
 }
 

@@ -15,20 +15,24 @@ DriverModuleI::DriverModuleI(astro::module::ModulePtr module)
 DriverModuleI::~DriverModuleI() {
 }
 
-std::string	DriverModuleI::getName(const Ice::Current& /* current */) {
+std::string	DriverModuleI::getName(const Ice::Current& current) {
+	CallStatistics::count(current);
 	return _module->getDescriptor()->name();
 }
 
-std::string	DriverModuleI::getVersion(const Ice::Current& /* current */) {
+std::string	DriverModuleI::getVersion(const Ice::Current& current) {
+	CallStatistics::count(current);
 	return _module->getDescriptor()->version();
 }
 
-bool	DriverModuleI::hasLocator(const Ice::Current& /* current */) {
+bool	DriverModuleI::hasLocator(const Ice::Current& current) {
+	CallStatistics::count(current);
 	return _module->getDescriptor()->hasDeviceLocator();
 }
 
 DeviceLocatorPrx	DriverModuleI::getDeviceLocator(
 				const Ice::Current& current) {
+	CallStatistics::count(current);
 	std::string	modulename = _module->getDescriptor()->name();
 	try {
 		std::string	name = std::string("devicelocator/")

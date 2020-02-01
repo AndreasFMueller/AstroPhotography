@@ -8,10 +8,11 @@
 
 #include <types.h>
 #include <AstroDevice.h>
+#include <StatisticsI.h>
 
 namespace snowstar {
 
-class DeviceI : virtual public Device {
+class DeviceI : virtual public Device, public StatisticsI {
 	astro::device::Device&	_device;
 public:
 	DeviceI(astro::device::Device& device);

@@ -9,6 +9,7 @@
 #include <types.h>
 #include <AstroCallback.h>
 #include <CallbackHandler.h>
+#include <StatisticsI.h>
 
 namespace snowstar {
 
@@ -16,7 +17,7 @@ template<>
 void	callback_adapter<StatusUpdateMonitorPrx>(StatusUpdateMonitorPrx& p,
 		const astro::callback::CallbackDataPtr d);
 
-class GatewayI : virtual public Gateway {
+class GatewayI : virtual public Gateway, public StatisticsI {
 public:
 	GatewayI();
 	virtual ~GatewayI();

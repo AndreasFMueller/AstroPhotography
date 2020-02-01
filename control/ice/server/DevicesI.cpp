@@ -21,7 +21,8 @@ DevicesI::~DevicesI() {
 }
 
 DeviceNameList DevicesI::getDevicelist(devicetype type,
-			const Ice::Current& /* current */) {
+			const Ice::Current& current) {
+	CallStatistics::count(current);
 	try {
 		astro::module::Devices::devicelist	devicelist
 			= _devices.getDevicelist(convert(type));
@@ -37,6 +38,7 @@ DeviceNameList DevicesI::getDevicelist(devicetype type,
 
 AdaptiveOpticsPrx	DevicesI::getAdaptiveOptics(const std::string& name,
 					const Ice::Current& current) {
+	CallStatistics::count(current);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieve AO %s", name.c_str());
 	try {
 		return createProxy<AdaptiveOpticsPrx>(name, current);
@@ -51,6 +53,7 @@ AdaptiveOpticsPrx	DevicesI::getAdaptiveOptics(const std::string& name,
 
 CameraPrx	DevicesI::getCamera(const std::string& name,
 					const Ice::Current& current) {
+	CallStatistics::count(current);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieve Camera %s", name.c_str());
 	try {
 		return createProxy<CameraPrx>(name, current);
@@ -65,6 +68,7 @@ CameraPrx	DevicesI::getCamera(const std::string& name,
 
 CcdPrx		DevicesI::getCcd(const std::string& name,
 					const Ice::Current& current) {
+	CallStatistics::count(current);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieve CCD %s", name.c_str());
 	try {
 		return createProxy<CcdPrx>(name, current);
@@ -79,6 +83,7 @@ CcdPrx		DevicesI::getCcd(const std::string& name,
 
 GuidePortPrx	DevicesI::getGuidePort(const std::string& name,
 					const Ice::Current& current) {
+	CallStatistics::count(current);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieve GuidePort %s", name.c_str());
 	try {
 		return createProxy<GuidePortPrx>(name, current);
@@ -93,6 +98,7 @@ GuidePortPrx	DevicesI::getGuidePort(const std::string& name,
 
 FilterWheelPrx	DevicesI::getFilterWheel(const std::string& name,
 					const Ice::Current& current) {
+	CallStatistics::count(current);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieve FilterWheel %s", name.c_str());
 	try {
 		return createProxy<FilterWheelPrx>(name, current);
@@ -107,6 +113,7 @@ FilterWheelPrx	DevicesI::getFilterWheel(const std::string& name,
 
 CoolerPrx	DevicesI::getCooler(const std::string& name,
 					const Ice::Current& current) {
+	CallStatistics::count(current);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieve Cooler %s", name.c_str());
 	try {
 		return createProxy<CoolerPrx>(name, current);
@@ -121,6 +128,7 @@ CoolerPrx	DevicesI::getCooler(const std::string& name,
 
 FocuserPrx	DevicesI::getFocuser(const std::string& name,
 					const Ice::Current& current) {
+	CallStatistics::count(current);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieve Focuser %s", name.c_str());
 	try {
 		return createProxy<FocuserPrx>(name, current);
@@ -135,6 +143,7 @@ FocuserPrx	DevicesI::getFocuser(const std::string& name,
 
 MountPrx	DevicesI::getMount(const std::string& name,
 					const Ice::Current& current) {
+	CallStatistics::count(current);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieve Mount %s", name.c_str());
 	try {
 		return createProxy<MountPrx>(name, current);

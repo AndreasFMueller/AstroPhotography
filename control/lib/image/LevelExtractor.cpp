@@ -175,7 +175,6 @@ void	LevelExtractor::analyze(const ConstImageAdapter<double>& image,
 	}
 
 	// scan for high values
-	int	x = r;
 	for (int x = r; x < w -r; x += step) {
 		for (int y = r; y < h - r; y += step) {
 #if 0
@@ -196,6 +195,7 @@ void	LevelExtractor::analyze(const ConstImageAdapter<double>& image,
 			// between m and _level
 			int	skip = inspectpoint(reducedimage, x, y, _limit,
 					criterion);
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "skip = %d", skip);
 		}
 	}
 }

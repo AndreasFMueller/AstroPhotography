@@ -8,10 +8,11 @@
 
 #include <device.h>
 #include <AstroLoader.h>
+#include "StatisticsI.h"
 
 namespace snowstar {
 
-class ModulesI : virtual public Modules {
+class ModulesI : virtual public Modules, public StatisticsI {
 	astro::module::ModuleRepositoryPtr	_repository;
 public:
 	ModulesI();
