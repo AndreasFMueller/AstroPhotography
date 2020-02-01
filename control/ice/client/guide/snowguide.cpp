@@ -23,17 +23,14 @@ namespace snowguide {
  * \brief long options for the snow guiding program
  */
 static struct option	longopts[] = {
-{ "adaptiveoptics",	required_argument,	NULL,	'a' }, /*  0 */
 { "aointerval",		required_argument,	NULL,	'A' }, /*  1 */
 { "binning",		required_argument,	NULL,	'b' }, /*  2 */
-{ "ccd",		required_argument,	NULL,	'C' }, /*  3 */
 { "config",		required_argument,	NULL,	'c' }, /*  4 */
 { "csv",		no_argument,		NULL,	 1  }, /*  5 */
 { "debug",		no_argument,		NULL,	'd' }, /*  6 */
 { "dark",		no_argument,		NULL,	'D' }, /*  7 */
 { "exposure",		required_argument,	NULL,	'e' }, /*  8 */
 { "flipped",		no_argument,		NULL,	'f' }, /*  9 */
-{ "guideport",		required_argument,	NULL,	'G' }, /* 10 */
 { "help",		no_argument,		NULL,	'h' }, /* 11 */
 { "interval",		required_argument,	NULL,	'i' }, /* 12 */
 { "imagecount",		required_argument,	NULL,	'I' }, /* 13 */
@@ -43,7 +40,6 @@ static struct option	longopts[] = {
 { "rectangle",		required_argument,	NULL,	'r' }, /* 17 */
 { "star",		required_argument,	NULL,	's' }, /* 18 */
 { "stepping",		no_argument,		NULL,	'S' }, /* 19 */
-{ "temperature",	required_argument,	NULL,	't' }, /* 20 */
 { "verbose",		no_argument,		NULL,	'v' }, /* 21 */
 { "width",		required_argument,	NULL,	'w' }, /* 22 */
 { NULL,			0,			NULL,    0  }  /* 23 */
@@ -55,16 +51,12 @@ static struct option	longopts[] = {
 int	main(int argc, char *argv[]) {
 	CommunicatorSingleton	communicator(argc, argv);
 
-	double	temperature = std::numeric_limits<double>::quiet_NaN();
 	std::string	binning;
 	std::string	frame;
 	Guide	guide;
 
 	int	c;
 	int	longindex;
-	int	ccdIndex = 0;
-	int	guideportIndex = 0;
-	int	adaptiveopticsIndex = 0;
 	int	width = -1;
 
 	guide.exposure.exposuretime = 1.;
@@ -72,9 +64,6 @@ int	main(int argc, char *argv[]) {
 	while (EOF != (c = getopt_long(argc, argv,
 		"A:a:b:c:C:de:f:G:hi:m:r:s:t:vw:", longopts, &longindex)))
 		switch (c) {
-		case 'a':
-			adaptiveopticsIndex = std::stoi(optarg);
-			break;
 		case 'A':
 			guide.aointerval = std::stod(optarg);
 			break;
@@ -83,9 +72,6 @@ int	main(int argc, char *argv[]) {
 			break;
 		case 'c':
 			astro::config::Configuration::set_default(optarg);
-			break;
-		case 'C':
-			ccdIndex = std::stoi(optarg);
 			break;
 		case 'd':
 			debuglevel = LOG_DEBUG;
@@ -98,9 +84,6 @@ int	main(int argc, char *argv[]) {
 			break;
 		case 'f':
 			guide.flipped = true;
-			break;
-		case 'G':
-			guideportIndex = std::stoi(optarg);
 			break;
 		case 'h':
 			guide.usage(argv[0]);
@@ -144,9 +127,6 @@ int	main(int argc, char *argv[]) {
 			break;
 		case 'S':
 			guide.stepping = true;
-			break;
-		case 't':
-			temperature = std::stod(optarg);
 			break;
 		case 'v':
 			guide.verbose = true;

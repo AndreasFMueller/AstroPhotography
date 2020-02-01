@@ -16,6 +16,9 @@
 #include <AstroUtils.h>
 #include <sys/utsname.h>
 #include <sys/times.h>
+#ifdef __linux__
+#include <sys/sysinfo.h>
+#endif /* __linux__ */
 
 namespace snowstar {
 
@@ -372,7 +375,7 @@ Sysinfo	DaemonI::getSysinfo(const Ice::Current& /* current */) {
 #if __linux__
 	struct sysinfo	info;
 	if (sysinfo(&info) < 0) {
-		std::string	msg = stringprintf("no sysinfo: %s",
+		std::string	msg = astro::stringprintf("no sysinfo: %s",
 			strerror(errno));
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 		NotImplemented	notimplemented;

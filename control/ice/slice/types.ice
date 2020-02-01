@@ -163,7 +163,7 @@ module snowstar {
 		float	bufferram;
 		float	totalswap;
 		float	freeswap;
-		int	proccesses;
+		int	processes;
 	};
 
 	/**
