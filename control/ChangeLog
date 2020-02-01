@@ -3,6 +3,7 @@ ChangeLog for the Astro project.
 20200201:
 	* fix some warnings in snowguide.cpp
 	* fix statistics to compile
+	* fix bug in devices.properties of celestron driver
 
 20200130:
 	* system information interface

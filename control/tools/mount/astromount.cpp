@@ -186,13 +186,13 @@ static void	usage(const std::string& progname) {
 	std::string	prg = std::string("    ") + Path(progname).basename();
 	std::cout << "Usage:" << std::endl;
 	std::cout << std::endl;
-	std::cout << prg << "[ options ] help" << std::endl;
-	std::cout << prg << "[ options ] list" << std::endl;
-	std::cout << prg << "[ options ] get MOUNT" << std::endl;
-	std::cout << prg << "[ options ] set MOUNT ra dec" << std::endl;
-	std::cout << prg << "[ options ] cancel MOUNT" << std::endl;
-	std::cout << prg << "[ options ] wait MOUNT" << std::endl;
-	std::cout << prg << "[ options ] time MOUNT" << std::endl;
+	std::cout << prg << " [ options ] help" << std::endl;
+	std::cout << prg << " [ options ] list" << std::endl;
+	std::cout << prg << " [ options ] get MOUNT" << std::endl;
+	std::cout << prg << " [ options ] set MOUNT ra dec" << std::endl;
+	std::cout << prg << " [ options ] cancel MOUNT" << std::endl;
+	std::cout << prg << " [ options ] wait MOUNT" << std::endl;
+	std::cout << prg << " [ options ] time MOUNT" << std::endl;
 	std::cout << std::endl;
 	std::cout << "list mounts, get or set RA and DEC of a mount";
 	std::cout << std::endl;
@@ -220,7 +220,7 @@ int main(int argc, char *argv[]) {
 	int	c;
 	int	longindex;
 	putenv((char *)"POSIXLY_CORRECT=1");	// cast to silence compiler
-	while (EOF != (c = getopt_long(argc, argv, "c:dh", longopts,
+	while (EOF != (c = getopt_long(argc, argv, "c:dh?", longopts,
 		&longindex))) {
 		switch (c) {
 		case 'c':
@@ -230,6 +230,7 @@ int main(int argc, char *argv[]) {
 			debuglevel = LOG_DEBUG;
 			break;
 		case 'h':
+		case '?':
 			usage(argv[0]);
 			return EXIT_SUCCESS;
 		case 'n':

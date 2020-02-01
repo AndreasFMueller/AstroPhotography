@@ -11,3 +11,5 @@ astromount_SOURCES = astromount.cpp
 astromount_DEPENDENCIES = $(top_builddir)/lib/libastro.la
 astromount_LDADD = -L$(top_builddir)/lib -lastro
 
+test:	astromount
+	./astromount --debug GET mount:celestron/0 2>&1 | tee test.log
