@@ -9,6 +9,15 @@
 namespace snowstar {
 
 MountI::MountI(astro::device::MountPtr mount) : DeviceI(*mount), _mount(mount) {
+	// register the callback
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "%p creating a callback", this);
+	MountICallback	*mountcallback = new MountICallback(*this);
+	astro::callback::CallbackPtr	mountcallbackptr(mountcallback);
+	// add the callback to the mount
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "add callback");
+	_mount->addStatechangeCallback(mountcallbackptr);
+	_mount->addPositionCallback(mountcallbackptr);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "callbacks installed");
 }
 
 MountI::~MountI() {
@@ -143,7 +152,9 @@ void	MountI::GotoRaDec(const RaDec& radec,
 mountstate	MountI::state(const Ice::Current& current) {
 	CallStatistics::count(current);
 	try {
-		return convert(_mount->state());
+		astro::device::Mount::state_type	s = _mount->state();
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "got state %d", s);
+		return convert(s);
 	} catch (std::exception x) {
 		DeviceException	except;
 		except.cause = astro::stringprintf(
@@ -177,6 +188,73 @@ RaDec	MountI::getGuideRates(const Ice::Current& current) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", except.cause.c_str());
 		throw except;
 	}
+}
+
+void	MountI::registerCallback(const Ice::Identity& mountcallback,
+		const Ice::Current& current) {
+	CallStatistics::count(current);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "%p registser callback", this);
+	try {
+		callbacks.registerCallback(mountcallback, current);
+	} catch (const std::exception& x) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "cannot register callback: %s %s",
+			astro::demangle(typeid(x).name()).c_str(), x.what());
+	} catch (...) {
+		debug(LOG_ERR, DEBUG_LOG, 0,
+			"cannot register callback, unknown reason");
+	}
+}
+
+void	MountI::unregisterCallback(const Ice::Identity& mountcallback,
+		const Ice::Current& current) {
+	CallStatistics::count(current);
+	try {
+		callbacks.unregisterCallback(mountcallback, current);
+	} catch (const std::exception& x) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "cannot unregister callback: %s %s",
+			astro::demangle(typeid(x).name()).c_str(), x.what());
+	} catch (...) {
+		debug(LOG_ERR, DEBUG_LOG, 0,
+			"cannot unregister callback, unknown reason");
+	}
+}
+
+void	MountI::callbackUpdate(const astro::callback::CallbackDataPtr data) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "%p MountI::callbackUpdate called", this);
+	try {
+		callbacks(data);
+	} catch (const std::exception& x) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "cannot send callback: %s %s",
+			astro::demangle(typeid(x).name()).c_str(), x.what());
+	} catch (...) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "cannot send callback, unknown reason");
+	}
+}
+
+/**
+ * \brief Specialization of the callback_adapter for the MountPrx
+ */
+template<>
+void	callback_adapter<MountCallbackPrx>(MountCallbackPrx& p,
+		const astro::callback::CallbackDataPtr data) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "callback_adapter<MountCallbackPrx> called");
+	// find out what kinde of data is contained in the envelope
+	astro::device::Mount::StateCallbackData	*scd
+		= dynamic_cast<astro::device::Mount::StateCallbackData*>(&*data);
+	if (scd != NULL) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "state change received");
+		p->statechange(convert(scd->data()));
+		return;
+	}
+
+	astro::device::Mount::PositionCallbackData *pcd
+		= dynamic_cast<astro::device::Mount::PositionCallbackData*>(&*data);
+	if (pcd != NULL) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "position callback received");
+		p->position(convert(pcd->data()));
+		return;
+	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "unknown data in callback");
 }
 
 } // namespace snowstar

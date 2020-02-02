@@ -11,3 +11,28 @@ systemd:
 	3. systemctl enable snowstar.service
 	4. systemctl start snowstar.service
 
+Some other changes to system configuration may be useful.
+
+- some more complicated changes are described in individual README
+  files in this directory:
+
+	README.database		install the initial database
+	README.images		set up the image repository
+	README.log		setting up logging
+	README.repo		automatically mount a USB stick on the
+				repo directory
+	README.starcatalogs	making star catalogs available, mainly
+				for the simulator driver
+
+- sudo
+
+When logging into the system via the network during a cold night, it is
+nice if you can do most things with as few keystrokes as possible. Not
+needing to give a password to sudo is one of those time savers. Add a line
+
+	astro	ALL=(ALL:ALL) NOPASSWD: ALL
+
+to allow the astro user to become root without a password. Of course this
+is not a terribly secure configuration, but out in the field this is
+probably a lesser concern.
+

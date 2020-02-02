@@ -14,6 +14,7 @@
 #include <AstroCoordinates.h>
 #include <memory>
 #include <AstroImage.h>
+#include <AstroCallback.h>
 
 namespace astro {
 
@@ -286,8 +287,13 @@ public:
 	Mount(const DeviceName& name);
 	virtual ~Mount() { }
 
+private:
+	state_type	_state;
+protected:
+	void	state(state_type s);
+public:
 	// state
-	virtual state_type	state() { return IDLE; }
+	virtual state_type	state() { return _state; }
 
 	// position commands
 	virtual RaDec	getRaDec();
@@ -307,6 +313,20 @@ public:
 
 	// add position metadata to an image
 	void	addPositionMetadata(astro::image::ImageBase& image);
+private:
+	callback::CallbackSet	_statechangecallback;
+	callback::CallbackSet	_positioncallback;
+public:
+	void	addStatechangeCallback(callback::CallbackPtr callback);
+	void	removeStatechangeCallback(callback::CallbackPtr callback);
+	void	addPositionCallback(callback::CallbackPtr callback);
+	void	removePositionCallback(callback::CallbackPtr callback);
+protected:
+	void	callback(state_type newstate);
+	void	callback(const RaDec& newposition);
+public:
+	typedef	callback::CallbackDataEnvelope<state_type>	StateCallbackData;
+	typedef callback::CallbackDataEnvelope<RaDec>	PositionCallbackData;
 };
 
 } // namespace device

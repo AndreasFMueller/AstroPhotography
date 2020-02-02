@@ -1,5 +1,11 @@
 ChangeLog for the Astro project.
 
+20200202:
+	* add callback stuff to the Mount class
+	* refactor the simulator mount to work with callbacks
+	* add callbacks to the MountI
+	* add monitoring to the snowmount client
+
 20200201:
 	* add statistics command to snowdaemon
 	* add call statistics to all server side interfaces

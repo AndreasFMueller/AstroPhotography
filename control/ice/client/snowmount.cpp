@@ -37,6 +37,7 @@ static void	usage(const std::string& progname) {
 	std::cout << p << " [ options ] <server> set MOUNT RA DEC" << std::endl;
 	std::cout << p << " [ options ] <server> cancel MOUNT" << std::endl;
 	std::cout << p << " [ options ] <server> wait MOUNT" << std::endl;
+	std::cout << p << " [ options ] <server> monitor MOUNT" << std::endl;
 	std::cout << std::endl;
 	std::cout << "get help about the snowmount command, list mounts, get "
 		"right ascension from" << std::endl;
@@ -51,8 +52,8 @@ static void	usage(const std::string& progname) {
 	std::cout << "                    DD:MM:SS.sss format" << std::endl;
 	std::cout << " -h,--help          display this help message"
 		<< std::endl;
-	std::cout << " -w,--wait          wait for goto completion"
-		<< std::endl;
+	std::cout << " -w,--wait          wait for goto completion in the set "
+		"command" << std::endl;
 	std::cout << std::endl;
 }
 
@@ -82,6 +83,9 @@ int	command_help(const char *progname) {
 	std::cout << "    List all mounts available from the server"
 		<< std::endl;
 	std::cout << std::endl;
+	std::cout << "location MOUNT" << std::endl;
+	std::cout << "    Get the location of the mount" << std::endl;
+	std::cout << std::endl;
 	std::cout << "get MOUNT" << std::endl;
 	std::cout << "    Get right ascension and declination from the named "
 		"mount. This command" << std::endl;
@@ -94,6 +98,12 @@ int	command_help(const char *progname) {
 	std::cout << "    As with the get command, it will only work if the "
 		"mount has already" << std::endl;
 	std::cout << "    been calibrated." << std::endl;
+	std::cout << std::endl;
+	std::cout << "wait MOUNT" << std::endl;
+	std::cout << "    Wait for the mount to settle on the new position" << std::endl;
+	std::cout << std::endl;
+	std::cout << "monitor MOUNT" << std::endl;
+	std::cout << "    monitor state changes and position changes on this mount." << std::endl;
 	std::cout << std::endl;
 	return EXIT_SUCCESS;
 }
@@ -187,6 +197,47 @@ int	command_set(MountPrx mount, RaDec radec) {
 	return command_wait(mount, await_completion);
 }
 
+class MountCallbackI : public MountCallback {
+public:
+	virtual void	statechange(mountstate newstate,
+				const Ice::Current& /* current */) {
+		std::cout << astro::device::Mount::state2string(convert(newstate)) << std::endl;
+	}
+	virtual void	position(const RaDec& newposition,
+				const Ice::Current& /* current */) {
+		astro::RaDec	position = convert(newposition);
+		std::cout << position.toString() << std::endl;
+	}
+};
+
+void    signal_handler(int /* sig */) {
+	
+}
+
+/**
+ * \brief Monitor the mount
+ */
+int	command_monitor(MountPrx mount) {
+	// create a callback object
+	MountCallbackI	*_callback = new MountCallbackI();
+	// register the callback with the mount
+	Ice::ObjectPtr  callbackptr = _callback;
+        Ice::CommunicatorPtr	ic = CommunicatorSingleton::get();
+        CallbackAdapter adapter(ic);
+        Ice::Identity	ident = adapter.add(callbackptr);
+        mount->ice_getConnection()->setAdapter(adapter.adapter());
+        debug(LOG_DEBUG, DEBUG_LOG, 0, "register mount callback");
+        mount->registerCallback(ident);
+
+	// install a signal handler
+	signal(SIGINT, signal_handler);
+	
+	// wait indefinitely
+	sleep(86400);
+	mount->unregisterCallback(ident);
+	return 0;
+}
+
 /**
  * \brief main function 
  */
@@ -274,6 +325,9 @@ int	main(int argc, char *argv[]) {
 	}
 	if (command == "wait") {
 		return command_wait(mount, true);
+	}
+	if (command == "monitor") {
+		return command_monitor(mount);
 	}
 
 	// two more arguments are angles

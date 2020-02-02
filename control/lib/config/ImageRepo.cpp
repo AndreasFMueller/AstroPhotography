@@ -9,6 +9,7 @@
 #include <includes.h>
 #include "ImageRepoTables.h"
 #include <numeric>
+#include <filesystem>
 
 using namespace astro::persistence;
 using namespace astro::image;

@@ -12,15 +12,30 @@ namespace camera {
 namespace simulator {
 
 /**
+ * \brief Trampoline function to start the mount thread
+ */
+static void	mount_main(SimMount *_mount) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "start the mount thread");
+	try {
+		_mount->move();
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "mount thread complete");
+	} catch (std::exception& x) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "mount thread failed: %s",
+			x.what());
+	}
+}
+
+/**
  * \brief Construct a simulated mount
  *
  * \param locator	common simulated locator
  */
-SimMount::SimMount(SimLocator& locator) 
-	 : Mount(DeviceName("mount:simulator/mount")), _locator(locator) {
+SimMount::SimMount(/* SimLocator& locator */) 
+	 : Mount(DeviceName("mount:simulator/mount")) /*, _locator(locator)*/ {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "constructing simulated mount");
 	_when = 0;
 	_direction = _target;
+	_thread = NULL;
 	try {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "location: %s",
 			location().toString().c_str());
@@ -31,46 +46,47 @@ SimMount::SimMount(SimLocator& locator)
 	}
 }
 
-const static double _movetime = 10;
-
 /**
- * \param update the state variables
+ * \brief Destroy the simulator mount
  */
-void	SimMount::updateState() {
+SimMount::~SimMount() {
+	// wait for the thread to terminate
 	std::unique_lock<std::recursive_mutex>	lock(_mutex);
-	if (_when > 0) {
-		double	now = Timer::gettime();
-		if (now > _when) {
-			_when = 0;
-			_direction = _target;
-		}
+	if (Mount::GOTO == Mount::state()) {
+		Mount::state(Mount::TRACKING);
+		// wait for the thread to terminate
+		_thread->join();
+		delete _thread;
 	}
 }
+
+const static double _movetime = 10;
 
 /**
  * \brief Determine the state of the mount
  */
 Mount::state_type	SimMount::state() {
 	std::unique_lock<std::recursive_mutex>	lock(_mutex);
-	updateState();
-	if (_when > 0) {
-		return Mount::GOTO;
-	}
-	return Mount::TRACKING;
+	return Mount::state();
 }
 
 /**
  * \brief Compute the direction the mount is currently pointing
  */
 RaDec	SimMount::direction() {
-	updateState();
-	if (_when <= 0) {
-		return _direction;
-	}
-	// perform interpolation between _direction and target
-	double	_now = Timer::gettime();
-	double	t = (_when - _now) / _movetime;
-	return _target * (1 - t) + _direction * t;
+	std::unique_lock<std::recursive_mutex>	lock(_mutex);
+	return _direction;
+}
+
+/**
+ * \brief Set the direction
+ *
+ * \param d	RaDec structure to use as direction
+ */
+void	SimMount::direction(const RaDec& d) {
+	std::unique_lock<std::recursive_mutex>	lock(_mutex);
+	_direction = d;
+	callback(_direction);
 }
 
 /**
@@ -101,9 +117,26 @@ AzmAlt	SimMount::getAzmAlt() {
  */
 void	SimMount::Goto(const RaDec& radec) {
 	std::unique_lock<std::recursive_mutex>	lock(_mutex);
-	_direction = direction();
+	//_direction = direction();
+	// whatever we find out below, we certainly want to set the
+	// target and the arrival time according to the new data
 	_when = Timer::gettime() + _movetime;
 	_target = radec;
+	// first find out whether we alread have a thread. This is the
+	// case if the state is GOTO. In this case redirecting was good
+	// enough
+	if (Mount::GOTO == Mount::state()) {
+		return;
+	}
+
+	// set the state to GOTO, this ensures that the thread will
+	// start running
+	Mount::state(Mount::GOTO);
+
+	// here we should also start a thread that will periodically send
+	// RaDec updates to the callback and reset the state at the
+	// end of the move
+	_thread = new std::thread(mount_main, this);
 }
 
 /**
@@ -126,6 +159,9 @@ void	SimMount::cancel() {
 	std::unique_lock<std::recursive_mutex>	lock(_mutex);
 	_when = 0;
 	_target = _direction;
+	// Just reset the stsate to TRACKING. The thread will notice
+	// that it is no longer in GOTO mode and will terminate
+	Mount::state(Mount::TRACKING);
 }
 
 /**
@@ -144,6 +180,34 @@ RaDec	SimMount::getGuideRates() {
 	Angle	guiderate = rate * frequency * 4 * Angle::right_angle;
 	return RaDec(guiderate, guiderate);
 }
+
+/**
+ * \brief Do the actual movement
+ */
+void	SimMount::move() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "Simulator move thread starts %s",
+		_target.toString().c_str());
+	while (true) {
+		Timer::sleep(1);
+		std::unique_lock<std::recursive_mutex>	lock(_mutex);
+		if (Mount::GOTO == Mount::state()) {
+			double	_now = Timer::gettime();
+			if (_now > _when) {
+				direction(_target);
+				Mount::state(Mount::TRACKING);
+				return;
+			} else {
+				double	t = (_when - _now) / _movetime;
+				direction(_target * (1 - t) + _direction * t);
+			}
+		} else {
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "thread cancelled");
+			return;
+		}
+	}
+}
+
+
 
 } // namespace simulator
 } // namespace camera

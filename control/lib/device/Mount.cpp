@@ -16,6 +16,7 @@ DeviceName::device_type Mount::devicetype = DeviceName::Mount;
  * \brief Construct a mount from the stringified name
  */
 Mount::Mount(const std::string& name) : Device(name, DeviceName::Mount) {
+	state(Mount::TRACKING);
 	propertySetup();
 }
 
@@ -236,6 +237,68 @@ void	Mount::addPositionMetadata(astro::image::ImageBase& image) {
 		_location.latitude().degrees()));
 	image.setMetadata(astro::io::FITSKeywords::meta("LONGITUD",
 		_location.longitude().degrees()));
+}
+
+/**
+ * \brief Add a callback for state changes
+ */
+void	Mount::addStatechangeCallback(callback::CallbackPtr callback) {
+	_statechangecallback.insert(callback);
+}
+
+/**
+ * \brief Remove a callback
+ */
+void	Mount::removeStatechangeCallback(callback::CallbackPtr callback) {
+	auto	i = _statechangecallback.find(callback);
+	if (i != _statechangecallback.end()) {
+		_statechangecallback.erase(i);
+	}
+}
+
+/**
+ * \brief Add a callback for state changes
+ */
+void	Mount::addPositionCallback(callback::CallbackPtr callback) {
+	_positioncallback.insert(callback);
+}
+
+/**
+ * \brief Remove a callback
+ */
+void	Mount::removePositionCallback(callback::CallbackPtr callback) {
+	auto	i = _positioncallback.find(callback);
+	if (i != _positioncallback.end()) {
+		_positioncallback.erase(i);
+	}
+}
+
+/**
+ * \brief Send state change information to the callback
+ */
+void	Mount::callback(state_type newstate) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "state change callback: %s",
+		state2string(newstate).c_str());
+	callback::CallbackDataPtr	data(new StateCallbackData(newstate));
+	_statechangecallback(data);
+}
+
+/**
+ * \brief Send position information to the callback
+ */
+void	Mount::callback(const RaDec& newposition) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "position callback: %s",
+		newposition.toString().c_str());
+	callback::CallbackDataPtr	data(new PositionCallbackData(newposition));
+	_statechangecallback(data);
+}
+
+/**
+ * \brief Set state and also send state change callbac
+ */
+void	Mount::state(state_type s) {
+	_state = s;
+	callback(_state);
 }
 
 } // namespace device

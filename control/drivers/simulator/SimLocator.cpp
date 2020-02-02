@@ -109,7 +109,7 @@ SimLocator::SimLocator() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "focuser: %s",
 		_focuser->name().toString().c_str());
 
-	_mount = astro::device::MountPtr(new SimMount(*this));
+	_mount = astro::device::MountPtr(new SimMount(/* *this */));
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "mount: %s",
 		_mount->name().toString().c_str());
 

@@ -14,6 +14,11 @@ module snowstar {
 	enum mountstate { MountIDLE, MountALIGNED, MountTRACKING, MountGOTO };
 	enum locationtype { LocationLOCAL, LocationGPS };
 
+	interface MountCallback {
+		void	statechange(mountstate newstate);
+		void	position(RaDec newposition);
+	};
+
 	/**
 	 * \brief Interface to a telescope mount
 	 */
@@ -30,6 +35,8 @@ module snowstar {
 		long	getTime() throws DeviceException;
 		bool	hasGuideRates() throws DeviceException;
 		RaDec	getGuideRates() throws DeviceException;
+		void	registerCallback(Ice::Identity mountcallback);
+		void	unregisterCallback(Ice::Identity mountcallback);
 	};
 
 	// device related stuff

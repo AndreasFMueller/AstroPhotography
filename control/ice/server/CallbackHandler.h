@@ -54,6 +54,7 @@ public:
 	virtual astro::callback::CallbackDataPtr	operator()(
 			astro::callback::CallbackDataPtr data);
 	void	stop();
+	size_t	size() const { return callbacks.size(); }
 };
 
 /**
@@ -72,7 +73,7 @@ void	SnowCallback<proxy>::registerCallback(const Ice::Identity& identity,
 	callbacks.insert(std::make_pair(identity, callback));
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "%s callback %s installed, %d clients", 
 		astro::demangle(typeid(proxy).name()).c_str(),
-		identity.name.c_str(), callbacks.size());
+		identity.name.c_str(), size());
 }
 
 /**
@@ -83,7 +84,7 @@ void	SnowCallback<proxy>::unregisterCallback(const Ice::Identity& identity,
 		const Ice::Current& /* current */) {
 	callbacks.erase(identity);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "%s callback uninstalled, %d clients", 
-		astro::demangle(typeid(proxy).name()).c_str(), callbacks.size());
+		astro::demangle(typeid(proxy).name()).c_str(), size());
 }
 
 /**
@@ -117,8 +118,7 @@ astro::callback::CallbackDataPtr	SnowCallback<proxy>::operator()(
 	debug(LOG_DEBUG, DEBUG_LOG, 0,
 		"%s callback data received, %d clients, proxy=%s",
 		astro::demangle(typeid(proxy).name()).c_str(),
-		callbacks.size(),
-		typeid(proxy).name());
+		size(), typeid(proxy).name());
 	// the todelete array is used to keep track of all the identities
 	// that have failed
 	std::list<Ice::Identity>	todelete;
@@ -141,7 +141,7 @@ astro::callback::CallbackDataPtr	SnowCallback<proxy>::operator()(
 		}
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "%d callbacks called, %d to delete",
-		callbacks.size(), todelete.size());
+		size(), todelete.size());
 
 	// now erase all identities for which the callback has failed, we
 	// automatically unregister them
