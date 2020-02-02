@@ -67,24 +67,24 @@ public:
 	~StatisticsI();
 	// object identities
 	ObjectIdentitySequence	objectidentities(const Ice::Current& current);
-	long	objectidentityCount(const Ice::Current& current);
+	Ice::Long	objectidentityCount(const Ice::Current& current);
 	// operations
 	OperationSequence	operations(const Ice::Identity& objectidentity,
 					const Ice::Current& current);
-	long	operationCount(const Ice::Identity& objectidentity,
+	Ice::Long	operationCount(const Ice::Identity& objectidentity,
 					const Ice::Current& current);
 
 	// global statistics
-	long	callsPerObject(const Ice::Identity& objectidentity,
+	Ice::Long	callsPerObject(const Ice::Identity& objectidentity,
 			const Ice::Current& current);
-	long	callsPerObjectAndOperation(const Ice::Identity& objectidentity,
+	Ice::Long	callsPerObjectAndOperation(const Ice::Identity& objectidentity,
 			const std::string& operation,
 			const Ice::Current& current);
 	
 	// operations for this instance only, uses the object identity in
 	// the current argument
-	long	calls(const Ice::Current& current);
-	long	operationCalls(const std::string& operation,
+	Ice::Long	calls(const Ice::Current& current);
+	Ice::Long	operationCalls(const std::string& operation,
 			const Ice::Current& current);
 };
 

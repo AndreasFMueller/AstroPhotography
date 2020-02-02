@@ -31,7 +31,7 @@ ObjectIdentitySequence   StatisticsI::objectidentities(
 /**
  * \brief Return the number of objects known to the server
  */
-long    StatisticsI::objectidentityCount(const Ice::Current& /* current */) {
+Ice::Long    StatisticsI::objectidentityCount(const Ice::Current& /* current */) {
 	return CallStatistics::objectidentityCount();
 }
 
@@ -50,7 +50,7 @@ OperationSequence	StatisticsI::operations(
 /**
  * \brief Return the number of operation count
  */
-long	StatisticsI::operationCount(const Ice::Identity& objectidentity,
+Ice::Long	StatisticsI::operationCount(const Ice::Identity& objectidentity,
 				const Ice::Current& /* current */) {
 	return CallStatistics::operationCount(objectidentity);
 }
@@ -58,7 +58,7 @@ long	StatisticsI::operationCount(const Ice::Identity& objectidentity,
 /**
  * \brief 
  */
-long	StatisticsI::callsPerObject(const Ice::Identity& objectidentity,
+Ice::Long	StatisticsI::callsPerObject(const Ice::Identity& objectidentity,
 		const Ice::Current& /* current */) {
 	return CallStatistics::calls(objectidentity);
 }
@@ -66,7 +66,7 @@ long	StatisticsI::callsPerObject(const Ice::Identity& objectidentity,
 /**
  * \brief
  */
-long	StatisticsI::callsPerObjectAndOperation(
+Ice::Long	StatisticsI::callsPerObjectAndOperation(
 		const Ice::Identity& objectidentity,
 		const std::string& operation,
 		const Ice::Current& /* current */) {
@@ -76,14 +76,14 @@ long	StatisticsI::callsPerObjectAndOperation(
 /**
  * \brief Return the total number of alls on this object
  */
-long	StatisticsI::calls(const Ice::Current& current) {
+Ice::Long	StatisticsI::calls(const Ice::Current& current) {
 	return CallStatistics::recall(current.id)->calls();
 }
 
 /**
  * \brief Return the number of calls to an operation on this object
  */
-long	StatisticsI::operationCalls(const std::string& operation,
+Ice::Long	StatisticsI::operationCalls(const std::string& operation,
 		const Ice::Current& current) {
 	return CallStatistics::recall(current.id)->calls(operation);
 }
