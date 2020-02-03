@@ -1,5 +1,8 @@
 ChangeLog for the Qt GUI to Astrophotography
 
+20200203:
+	* convert the mountcontroller widget from polling to callbacks
+
 20200130:
 	* add system info widget
 	* integrate systeminfo widget into main window

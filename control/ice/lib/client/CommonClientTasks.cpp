@@ -376,4 +376,8 @@ Ice::Identity	CallbackAdapter::add(Ice::ObjectPtr callback) {
 	return ident;
 }
 
+void	CallbackAdapter::remove(const Ice::Identity& identity) {
+	_adapter->remove(identity);
+}
+
 } // namespace snowstar

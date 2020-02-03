@@ -115,6 +115,7 @@ public:
 	Ice::ObjectAdapterPtr	adapter() { return _adapter; }
 	CallbackAdapter(Ice::CommunicatorPtr communicator);
 	Ice::Identity	add(Ice::ObjectPtr callback);
+	void	remove(const Ice::Identity& identity);
 	void	connect(IceProxy::Ice::Object& proxy);
 };
 typedef std::shared_ptr<CallbackAdapter>	CallbackAdapterPtr;

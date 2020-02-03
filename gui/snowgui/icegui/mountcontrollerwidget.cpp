@@ -6,7 +6,9 @@
 #include "mountcontrollerwidget.h"
 #include "ui_mountcontrollerwidget.h"
 #include <QMessageBox>
+#include <CommunicatorSingleton.h>
 #include <IceConversions.h>
+#include <CommonClientTasks.h>
 
 namespace snowgui {
 
@@ -42,21 +44,6 @@ mountcontrollerwidget::mountcontrollerwidget(QWidget *parent)
 	connect(ui->targetDecField, SIGNAL(textEdited(const QString &)),
 		this, SLOT(targetDecChanged(const QString &)));
 
-	// create the update thread
-	_updatethread = new QThread(NULL);
-	connect(_updatethread, SIGNAL(finished()),
-		_updatethread, SLOT(deleteLater()));
-	_updatethread->start();
-
-	// create the work class
-	_updatework = new mountupdatework(this);
-	_updatework->moveToThread(_updatethread);
-
-	// initialize the timer
-	_statusTimer.setInterval(1000);
-	connect(&_statusTimer, SIGNAL(timeout()),
-		_updatework, SLOT(statusUpdate()));
-
 	// auxiliary window initialization
 	_skydisplay = NULL;
 	_catalogdialog = NULL;
@@ -66,7 +53,6 @@ mountcontrollerwidget::mountcontrollerwidget(QWidget *parent)
  * \brief Destroy the mount controller widget
  */
 mountcontrollerwidget::~mountcontrollerwidget() {
-	_statusTimer.stop();
 	//_updatethread->terminate();
 	if (_skydisplay) {
 		delete _skydisplay;
@@ -74,6 +60,14 @@ mountcontrollerwidget::~mountcontrollerwidget() {
 	if (_catalogdialog) {
 		delete _catalogdialog;
 	}
+	if (_mount_callback) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "unregister mount");
+		if (_mount) {
+			_mount->unregisterCallback(_mount_identity);
+			_mount->ice_getConnection()->getAdapter()->remove(
+				_mount_identity);
+		}
+	} 
 	delete ui;
 }
 
@@ -124,27 +118,39 @@ void	mountcontrollerwidget::setupComplete() {
  */
 void	mountcontrollerwidget::setupMount() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "setup the mount");
-	_statusTimer.stop();
 	_previousstate = snowstar::MountIDLE;
 	if (_mount) {
+		// make sure the connection of the mount has an adapter
+		try {
+			if (!_mount->ice_getConnection()->getAdapter()) {
+				Ice::CommunicatorPtr	ic
+					= snowstar::CommunicatorSingleton::get();
+				Ice::ObjectAdapterPtr	adapter
+					= snowstar::CommunicatorSingleton::getAdapter();
+				adapter->activate();
+				_mount->ice_getConnection()->setAdapter(adapter);
+			}
+		} catch (const std::exception& x) {
+		}
+
 		// read longitude and latitude from the mount
 		try {
-			_position = convert(_mount->getLocation());
+			_location = convert(_mount->getLocation());
 			debug(LOG_DEBUG, DEBUG_LOG, 0, "mount location: %s",
-				_position.toString().c_str());
+				_location.toString().c_str());
 
 			// write the position to the position label
 			std::string	pl;
-			pl += _position.longitude().dms(':', 0).substr(1);
-			pl += (_position.longitude().degrees() < 0) ? "W" : "E";
+			pl += _location.longitude().dms(':', 0).substr(1);
+			pl += (_location.longitude().degrees() < 0) ? "W" : "E";
 			pl += " ";
-			pl += _position.latitude().dms(':', 0).substr(1);
-			pl += (_position.longitude().degrees() < 0) ? "S" : "N";
+			pl += _location.latitude().dms(':', 0).substr(1);
+			pl += (_location.longitude().degrees() < 0) ? "S" : "N";
 			ui->observatoryField->setText(QString(pl.c_str()));
 
 			// write the position to the LMST widget
-			ui->siderealTime->position(_position);
-			ui->hourangleWidget->position(_position);
+			ui->siderealTime->position(_location);
+			ui->hourangleWidget->position(_location);
 		} catch (const std::exception& x) {
 			debug(LOG_ERR, DEBUG_LOG, 0,
 				"cannot get location from mount: %s", x.what());
@@ -183,6 +189,23 @@ void	mountcontrollerwidget::setupMount() {
 			debug(LOG_ERR, DEBUG_LOG, 0, "cannot update time: %s",
 				x.what());
 		}
+
+		// register this class as a callback
+		try {
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "registering callback");
+			MountCallbackI	*_callback = new MountCallbackI(*this);
+			_mount_callback = _callback;
+			_mount_identity.name = IceUtil::generateUUID();
+			_mount_identity.category = "";
+			_mount->ice_getConnection()->getAdapter()->add(_mount_callback, _mount_identity);
+			_mount->registerCallback(_mount_identity);
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "callback registered");
+		} catch (const std::exception& x) {
+			debug(LOG_ERR, DEBUG_LOG, 0, "failed to register as a "
+				"mount callback: %s", x.what());
+		}
+
+		currentUpdate();
 		
 		// turn on the buttons
 		ui->targetRaField->setEnabled(true);
@@ -190,7 +213,6 @@ void	mountcontrollerwidget::setupMount() {
 		ui->gotoButton->setEnabled(true);
 		ui->viewskyButton->setEnabled(true);
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "start the mount timer");
-		_statusTimer.start();
 	} else {
 		ui->targetRaField->setEnabled(false);
 		ui->targetDecField->setEnabled(false);
@@ -312,6 +334,15 @@ void	mountcontrollerwidget::statusUpdate() {
 	}
 
 	// read the current position from the mount
+	currentUpdate();
+
+	// read the current time from the mount
+	time_t	now = _mount->getTime();
+	emit updateTime(now);
+}
+
+void	mountcontrollerwidget::currentUpdate() {
+	// read the current position from the mount
 	snowstar::RaDec	radec = _mount->getRaDec();
 	astro::RaDec	rd = convert(radec);
 	if (rd != convert(_telescope)) {
@@ -325,10 +356,6 @@ void	mountcontrollerwidget::statusUpdate() {
 		rd.dec().dms(':',0).c_str()));
 	_telescope = radec;
 	ui->hourangleWidget->ra(rd.ra());
-
-	// read the current time from the mount
-	time_t	now = _mount->getTime();
-	emit updateTime(now);
 }
 
 /**
@@ -336,6 +363,12 @@ void	mountcontrollerwidget::statusUpdate() {
  */
 void	mountcontrollerwidget::mountChanged(int index) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "mount changed to %d", index);
+	// unregister the mount
+	if (_mount) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "unregister previous mount");
+		_mount->unregisterCallback(_mount_identity);
+		_mount->ice_getConnection()->getAdapter()->remove(_mount_identity);
+	} 
 	_mount = _instrument.mount(index);
 	setupMount();
 	emit mountSelected(index);
@@ -406,7 +439,7 @@ void	mountcontrollerwidget::viewskyClicked() {
 
 	// create a new SkyDisplayWidget
 	_skydisplay = new SkyDisplayDialog(NULL);
-	_skydisplay->position(_position);
+	_skydisplay->position(_location);
 	astro::RaDec	radec = current();
 	_skydisplay->telescope(radec);
 
