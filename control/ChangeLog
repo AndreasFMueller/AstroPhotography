@@ -1,5 +1,9 @@
 ChangeLog for the Astro project.
 
+20200203:
+	* remove #include <filesystem> again, wait until c++17 becomes
+	  more widespread
+
 20200202:
 	* add callback stuff to the Mount class
 	* refactor the simulator mount to work with callbacks
