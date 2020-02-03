@@ -401,9 +401,9 @@ Sysinfo	DaemonI::getSysinfo(const Ice::Current& current) {
 		throw notimplemented;
 	}
 	result.uptime = info.uptime;
-	result.load1min = info.loads[0];
-	result.load5min = info.loads[1];
-	result.load15min = info.loads[2];
+	result.load1min = info.loads[0] / 65535.;
+	result.load5min = info.loads[1] / 65535.;
+	result.load15min = info.loads[2] / 65535.;
 	result.totalram = info.totalram * info.mem_unit;
 	result.freeram = info.freeram * info.mem_unit;
 	result.sharedram = info.sharedram * info.mem_unit;
