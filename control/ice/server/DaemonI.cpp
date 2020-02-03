@@ -19,7 +19,6 @@
 #ifdef __linux__
 #include <sys/sysinfo.h>
 #endif /* __linux__ */
-#include <filesystem>
 
 namespace snowstar {
 
