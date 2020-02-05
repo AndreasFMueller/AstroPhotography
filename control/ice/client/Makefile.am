@@ -16,7 +16,7 @@ ICECPPFLAGS = -I$(top_builddir)/ice/include -I$(top_builddir)/ice/slice \
 bin_PROGRAMS = snowscan snowimages snowfocus snowmount snowrepo \
 	snowtask snowproject snowinstrument snowao snowservers \
 	snowevent snowconfig snowstream snowfiles snowdaemon \
-	snowgateway
+	snowgateway snowguideport
 noinst_PROGRAMS = snowflake 
 
 noinst_HEADERS = FocusCallbackI.h
@@ -45,6 +45,11 @@ snowfocus_SOURCES = FocusCallbackI.cpp snowfocus.cpp
 snowfocus_DEPENDENCIES = $(ICEDEPENDENCIES)
 snowfocus_LDADD = $(ICELDADD)
 snowfocus_CPPFLAGS = $(ICECPPFLAGS)
+
+snowguideport_SOURCES = snowguideport.cpp
+snowguideport_DEPENDENCIES = $(ICEDEPENDENCIES)
+snowguideport_LDADD = $(ICELDADD)
+snowguideport_CPPFLAGS = $(ICECPPFLAGS)
 
 snowmount_SOURCES = snowmount.cpp
 snowmount_DEPENDENCIES = $(ICEDEPENDENCIES)

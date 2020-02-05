@@ -32,6 +32,7 @@ libastrodevice_la_SOURCES =						\
 	FilterWheel.cpp							\
 	FlatWork.cpp							\
 	Focuser.cpp							\
+	GuidePortActivation.cpp						\
 	GuidePort.cpp							\
 	Imager.cpp							\
 	ImageQueue.cpp							\

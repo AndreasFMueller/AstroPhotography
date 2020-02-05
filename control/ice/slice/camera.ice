@@ -285,6 +285,17 @@ module snowstar {
 		Interval	dewHeaterRange();
 	};
 
+	struct GuidePortActivation {
+		float raplus;
+		float raminus;
+		float decplus;
+		float decminus;
+	};
+
+	interface GuidePortCallback {
+		void	activate(GuidePortActivation activation);
+	};
+
 	/**
 	 * \brief Interface for Guider Ports
 	 *
@@ -315,6 +326,8 @@ module snowstar {
 		 * \param dec	Time in seconds to activate the DEC outputs
 	 	 */
 		void	activate(float ra, float dec) throws DeviceException;
+		void	registerCallback(Ice::Identity callback);
+		void	unregisterCallback(Ice::Identity callback);
 	};
 
 

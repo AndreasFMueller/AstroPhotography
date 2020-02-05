@@ -461,7 +461,7 @@ void	GPCalibrationProcess::moveto(double ra, double dec) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0,
 			"RA: raplus = %f, raminus = %f, t = %f",
 			raplus, raminus, t);
-		guideport()->activate(raplus, raminus, 0, 0);
+		guideport()->activate(GuidePortActivation(raplus, raminus, 0., 0.));
 		Timer::sleep(t);
 		t = 0;
 	}
@@ -481,9 +481,9 @@ void	GPCalibrationProcess::moveto(double ra, double dec) {
 		"DEC: decplus = %f, decminus = %f, t = %f",
 		decplus, decminus, t);
 	if (sequential) {
-		guideport()->activate(0, 0, decplus, decminus);
+		guideport()->activate(GuidePortActivation(0, 0, decplus, decminus));
 	} else {
-		guideport()->activate(raplus, raminus, decplus, decminus);
+		guideport()->activate(GuidePortActivation(raplus, raminus, decplus, decminus));
 	}
 	Timer::sleep(t);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "moveto complete");

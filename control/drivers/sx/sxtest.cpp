@@ -204,25 +204,25 @@ void	sxtest::testSubimage() {
 void	sxtest::testGuideport() {
 	CameraPtr	camera = locator->getCamera(0);
 	GuidePortPtr	guideport = camera->getGuidePort();
-	guideport->activate(1,0,0,0);
+	guideport->activate(GuidePortActivation(1,0,0,0));
 	sleep(2);
-	guideport->activate(1,0,0,0);
+	guideport->activate(GuidePortActivation(1,0,0,0));
 	sleep(2);
-	guideport->activate(1,0,0,0);
+	guideport->activate(GuidePortActivation(1,0,0,0));
 	sleep(2);
-	guideport->activate(1,0,0,0);
+	guideport->activate(GuidePortActivation(1,0,0,0));
 	sleep(2);
-	guideport->activate(0,1,0,0);
+	guideport->activate(GuidePortActivation(0,1,0,0));
 	sleep(2);
-	guideport->activate(0,1,0,0);
+	guideport->activate(GuidePortActivation(0,1,0,0));
 	sleep(2);
-	guideport->activate(0,1,0,0);
+	guideport->activate(GuidePortActivation(0,1,0,0));
 	sleep(2);
-	guideport->activate(0,0,1,0);
+	guideport->activate(GuidePortActivation(0,0,1,0));
 	sleep(2);
-	guideport->activate(0,0,1,0);
+	guideport->activate(GuidePortActivation(0,0,1,0));
 	sleep(2);
-	guideport->activate(0,0,0,1);
+	guideport->activate(GuidePortActivation(0,0,0,1));
 	sleep(3);
 }
 
@@ -242,7 +242,7 @@ void	sxtest::testGuideport2() {
 		float	decplus = delta * ((0x2 & flags) ? 1 : 0);
 		float	decminus = delta * ((0x4 & flags) ? 1 : 0);
 		float	raminus = delta * ((0x8 & flags) ? 1 : 0);
-		guideport->activate(raplus, raminus, decplus, decminus);
+		guideport->activate(GuidePortActivation(raplus, raminus, decplus, decminus));
 		usleep(2 * delta * 1000000);
 	}
 }

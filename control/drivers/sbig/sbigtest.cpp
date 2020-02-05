@@ -154,25 +154,25 @@ void	sbigtest::testCooler() {
 void	sbigtest::testGuideport() {
 	CameraPtr	camera = locator->getCamera(0);
 	GuidePortPtr	guideport = camera->getGuidePort();
-	guideport->activate(3, 0, 0, 0);
+	guideport->activate(GuidePortActivation(3, 0, 0, 0));
 	for (int t = 0; t < 5; t++) {
 		uint8_t	port = guideport->active();
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "active: %02x", port);
 		sleep(1);
 	}
-	guideport->activate(0, 3, 0, 0);
+	guideport->activate(GuidePortActivation(0, 3, 0, 0));
 	for (int t = 0; t < 5; t++) {
 		uint8_t	port = guideport->active();
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "active: %02x", port);
 		sleep(1);
 	}
-	guideport->activate(0, 0, 3, 0);
+	guideport->activate(GuidePortActivation(0, 0, 3, 0));
 	for (int t = 0; t < 5; t++) {
 		uint8_t	port = guideport->active();
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "active: %02x", port);
 		sleep(1);
 	}
-	guideport->activate(0, 0, 0, 3);
+	guideport->activate(GuidePortActivation(0, 0, 0, 3));
 	for (int t = 0; t < 5; t++) {
 		uint8_t	port = guideport->active();
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "active: %02x", port);
@@ -196,7 +196,7 @@ void	sbigtest::testGuideport2() {
 		float	decplus = delta * ((0x2 & flags) ? 1 : 0);
 		float	decminus = delta * ((0x4 & flags) ? 1 : 0);
 		float	raminus = delta * ((0x8 & flags) ? 1 : 0);
-		guideport->activate(raplus, raminus, decplus, decminus);
+		guideport->activate(GuidePortActivation(raplus, raminus, decplus, decminus));
 		usleep(2 * delta * 1000000);
 	}
 }

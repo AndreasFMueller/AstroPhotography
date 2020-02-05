@@ -71,10 +71,10 @@ void	GuidePortAction::execute() {
 
 	if (_sequential) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "RA movement: %.2f", tx);
-		_guideport->activate(raplus, raminus, 0, 0);
+		_guideport->activate(GuidePortActivation(raplus, raminus, 0, 0));
 		Timer::sleep(fabs(tx));
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "DEC movement: %.2f", ty);
-		_guideport->activate(0, 0, decplus, decminus);
+		_guideport->activate(GuidePortActivation(0, 0, decplus, decminus));
 		Timer::sleep(fabs(ty));
 	} else {
 		// find the number of seconds, and split the correction
@@ -91,8 +91,8 @@ void	GuidePortAction::execute() {
 		decminus /= steps;
 		int	step = 0;
 		while (step++ < steps) {
-			_guideport->activate(raplus, raminus,
-					decplus, decminus);
+			_guideport->activate(GuidePortActivation(raplus, raminus,
+					decplus, decminus));
 			Timer::sleep(correctiontime);
 		}
 	}

@@ -114,6 +114,9 @@ FilterwheelState convert(const astro::camera::FilterWheel::State& s);
 astro::camera::FilterWheel::State convert(const FilterwheelState& s);
 
 // Guider related
+GuidePortActivation	convert(const astro::camera::GuidePortActivation& a);
+astro::camera::GuidePortActivation	convert(const GuidePortActivation& a);
+
 GuiderState     convert(const astro::guiding::Guide::state& state);
 astro::guiding::Guide::state     convert(const GuiderState& state);
 

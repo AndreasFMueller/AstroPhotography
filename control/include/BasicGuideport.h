@@ -41,9 +41,11 @@ public:
 
 	// accessors
 	virtual uint8_t	active();
+protected:
 	virtual void	activate(float raplus, float raminus,
 				float declus, float decminus);
 
+public:
 	// the run method for the guideport
 	virtual void	do_activate(uint8_t active);
 	void	run();

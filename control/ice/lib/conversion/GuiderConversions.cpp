@@ -14,6 +14,20 @@
 
 namespace snowstar {
 
+GuidePortActivation	convert(const astro::camera::GuidePortActivation& a) {
+	GuidePortActivation	aa;
+	aa.raplus = a.raplus();
+	aa.raminus = a.raminus();
+	aa.decplus = a.decplus();
+	aa.decminus = a.decminus();
+	return aa;
+}
+
+astro::camera::GuidePortActivation	convert(const GuidePortActivation a) {
+	return astro::camera::GuidePortActivation(a.raplus, a.raminus,
+		a.decplus, a.decminus);
+}
+
 std::string	guiderdescriptor2name(const GuiderDescriptor& descriptor) {
 	std::string	guidername = descriptor.instrumentname;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "guidername: %s", guidername.c_str());

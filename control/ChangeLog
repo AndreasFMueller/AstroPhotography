@@ -1,5 +1,12 @@
 ChangeLog for the Astro project.
 
+20200204:
+	* add callback stuff to the Guideport class
+	* introduce GuidePortActivation class to simplify interface
+	* add callback stuff to the Guideport interface in slice
+	* add callback stuff to the GuidePortI servant
+	* add snowguideport client with monitoring capability
+
 20200203:
 	* remove #include <filesystem> again, wait until c++17 becomes
 	  more widespread

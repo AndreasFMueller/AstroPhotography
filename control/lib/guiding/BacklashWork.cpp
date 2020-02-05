@@ -8,6 +8,7 @@
 #include <AstroGuiding.h>
 #include <AstroEvent.h>
 #include <Backlash.h>
+#include <AstroCamera.h>
 
 namespace astro {
 namespace guiding {
@@ -44,20 +45,24 @@ void	BacklashWork::lastPoints(int n) {
  * \param interval	duration of the diferent moves
  */
 void	BacklashWork::move(double interval) {
-	double	i = fabs(interval);
+	float	i = fabs(interval);
 	switch (_direction) {
 	case backlash_dec:
 		if (interval > 0) {
-			_guider.guideport()->activate(0, 0, i, 0);
+			_guider.guideport()->activate(
+				camera::GuidePortActivation(0., 0., i, 0.));
 		} else {
-			_guider.guideport()->activate(0, 0, 0, i);
+			_guider.guideport()->activate(
+				camera::GuidePortActivation(0., 0., 0., i));
 		}
 		break;
 	case backlash_ra:
 		if (interval > 0) {
-			_guider.guideport()->activate(i, 0, 0, 0);
+			_guider.guideport()->activate(
+				camera::GuidePortActivation(i, 0., 0., 0.));
 		} else {
-			_guider.guideport()->activate(0, i, 0, 0);
+			_guider.guideport()->activate(
+				camera::GuidePortActivation(0., i, 0., 0.));
 		}
 		break;
 	}

@@ -595,6 +595,31 @@ public:
 };
 
 /**
+ * \brief Data class for guide port activation
+ */
+class GuidePortActivation {
+	float	_raplus;
+	float	_raminus;
+	float	_decplus;
+	float	_decminus;
+public:
+	float	raplus() const { return _raplus; }
+	float	raminus() const { return _raminus; }
+	float	decplus() const { return _decplus; }
+	float	decminus() const { return _decminus; }
+	GuidePortActivation();
+	GuidePortActivation(float raplus, float raminus,
+		float decplus, float decminus)
+		: _raplus(raplus), _raminus(raminus),
+		  _decplus(decplus), _decminus(decminus) {
+		}
+	typedef	enum { RAPLUS, RAMINUS, DECPLUS, DECMINUS } direction_t;
+	GuidePortActivation(direction_t dir, float time);
+};
+
+typedef	callback::CallbackDataEnvelope<GuidePortActivation>	ActivationCallbackData;
+
+/**
  * \brief Abstraction for the Guider port
  */
 class GuidePort : public astro::device::Device {
@@ -627,8 +652,18 @@ public:
 	 * \param decplus	activation time for DEC+ relay
 	 * \param decminus	activation time for DEC- relay
 	 */
+protected:
 	virtual void	activate(float raplus, float raminus,
 		float decplus, float decminus) = 0;
+public:
+	void	activate(const GuidePortActivation& a);
+private:
+	callback::CallbackSet	_callback;
+public:
+	void	callback(const GuidePortActivation& a);
+	void	addCallback(callback::CallbackPtr callback);
+	void	removeCallback(callback::CallbackPtr callback);
+	typedef	callback::CallbackDataEnvelope<GuidePortActivation>	ActivationCallbackData;
 };
 
 /**

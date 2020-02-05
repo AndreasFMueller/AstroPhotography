@@ -67,7 +67,7 @@ void	display(astro::camera::GuidePortPtr guideport,
 	if (decplus > 0) { printf("%5.1f", decplus); } else { printf(" ____"); }
 	if (decminus > 0) { printf("%5.1f", decminus); } else { printf(" ____"); }
 	printf("\n");
-	guideport->activate(raplus, raminus, decplus, decminus);
+	guideport->activate(astro::camera::GuidePortActivation(raplus, raminus, decplus, decminus));
 }
 
 void	prog0(astro::camera::GuidePortPtr guideport) {

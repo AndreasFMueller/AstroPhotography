@@ -194,16 +194,16 @@ int	main(int argc, char *argv[]) {
 				"found command %s for %.3fs",
 				direction, duration);
 			if (0 == strcmp(direction, "D-")) {
-				guideport->activate(0, 0, 0, duration);
+				guideport->activate(GuidePortActivation(0, 0, 0, duration));
 			}
 			if (0 == strcmp(direction, "D+")) {
-				guideport->activate(0, 0, duration, 0);
+				guideport->activate(GuidePortActivation(0, 0, duration, 0));
 			}
 			if (0 == strcmp(direction, "R-")) {
-				guideport->activate(0, duration, 0, 0);
+				guideport->activate(GuidePortActivation(0, duration, 0, 0));
 			}
 			if (0 == strcmp(direction, "R+")) {
-				guideport->activate(duration, 0, 0, 0);
+				guideport->activate(GuidePortActivation(duration, 0, 0, 0));
 			}
 			usleep(1000000 * duration);
 			printf(""); fflush(stdout);
