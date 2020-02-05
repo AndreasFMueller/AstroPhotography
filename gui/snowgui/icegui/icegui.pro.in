@@ -149,7 +149,7 @@ SOURCES += 								\
 	InstrumentSetupThread.cpp					\
 	InstrumentWidget.cpp						\
 	MonitorImage.cpp						\
-	mountupdatework.cpp						\
+	MountCallbackI.cpp						\
 	remoteconfigurationwidget.cpp					\
 	repoenablebox.cpp						\
 	StateMonitoringWork.cpp						\

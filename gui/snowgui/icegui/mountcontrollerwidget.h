@@ -11,6 +11,8 @@
 #include <AstroCoordinates.h>
 #include <skydisplaydialog.h>
 #include <catalogdialog.h>
+#include <device.h>
+#include <CommonClientTasks.h>
 
 namespace snowgui {
 
@@ -20,18 +22,14 @@ namespace Ui {
 
 class mountcontrollerwidget;
 
-/**
- * \brief Update thread for the mount controller
- */
-class	mountupdatework : public QObject {
-	Q_OBJECT
-	mountcontrollerwidget	*_mountcontrollerwidget;
-	std::recursive_mutex	_mutex;
+class MountCallbackI : public snowstar::MountCallback {
+	mountcontrollerwidget&	_mountcontrollerwidget;
 public:
-	mountupdatework(mountcontrollerwidget *mc);
-	~mountupdatework();
-public slots:
-	void	statusUpdate();
+	MountCallbackI(mountcontrollerwidget& m);
+	void	statechange(snowstar::mountstate newstate,
+			const Ice::Current& current);
+	void	position(const snowstar::RaDec& newposition,
+			const Ice::Current& current);
 };
 
 /**
@@ -45,13 +43,14 @@ class mountcontrollerwidget : public InstrumentWidget {
 	bool			_previouswest;
 	snowstar::MountPrx	_mount;
 
+	Ice::ObjectPtr		_mount_callback;
+	Ice::Identity		_mount_identity;
+
 	snowstar::RaDec		_telescope;
-	astro::LongLat		_position;
+	astro::LongLat		_location;
 	SkyDisplayDialog	*_skydisplay;
 	CatalogDialog		*_catalogdialog;
 
-	mountupdatework	*_updatework;
-	QThread		*_updatethread;
 
 public:
 	explicit mountcontrollerwidget(QWidget *parent = 0);
@@ -76,7 +75,6 @@ signals:
 
 private:
 	Ui::mountcontrollerwidget *ui;
-	QTimer	_statusTimer;
 
 	void	setupMount();
 	void	targetChangedCommon();
@@ -84,6 +82,7 @@ private:
 public slots:
 	void	mountChanged(int);
 	void	gotoClicked();
+	void	currentUpdate();
 	void	statusUpdate();
 	void	viewskyClicked();
 	void	skyviewDestroyed();
