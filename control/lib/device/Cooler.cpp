@@ -208,7 +208,7 @@ float	Cooler::dewHeater() {
  * \param d	the dew heater value
  */
 void	Cooler::dewHeater(float d) {
-	callback(d);
+	callback(DewHeater(d));
 }
 
 void	Cooler::callback(const CoolerInfo& info) {
@@ -216,9 +216,9 @@ void	Cooler::callback(const CoolerInfo& info) {
 	_callback(cb);
 }
 
-void	Cooler::callback(float dewheaterinfo) {
+void	Cooler::callback(const DewHeater& dewheater) {
 	callback::CallbackDataPtr	cb(new DewHeaterCallbackData(
-						dewheaterinfo));
+						dewheater));
 	_callback(cb);
 }
 

@@ -6,6 +6,7 @@
 
 SOURCES =								\
 	CcdConversions.cpp						\
+	CoolerConversions.cpp						\
 	ConfigConversions.cpp						\
 	DeviceConversions.cpp						\
 	EventConversions.cpp						\

@@ -230,6 +230,18 @@ module snowstar {
 		void	unregisterSink() throws NotImplemented;
 	};
 
+	struct CoolerInfo {
+		float	actualTemperature;
+		float	setTemperature;
+		bool	on;
+	};
+
+	interface CoolerCallback {
+		void	updateCoolerInfo(CoolerInfo info);
+		void	updateSetTemperature(float settemperature);
+		void	updateDewHeater(float dewheater);
+	};
+
 	/**
 	 * \brief Thermoelectric coolers
 	 *
@@ -283,6 +295,9 @@ module snowstar {
 		 * \brief Retrieve the range of valid dew heater values
 		 */
 		Interval	dewHeaterRange();
+
+		void	registerCallback(Ice::Identity callback);
+		void	unregisterCallback(Ice::Identity callback);
 	};
 
 	struct GuidePortActivation {

@@ -144,8 +144,8 @@ int	main(int argc, char *argv[]) {
 	CoolerPtr	cooler(NULL);
 	if ((temperature == temperature)
 		&& (instrument->hasCooler())) {
-		double	absolute = 273.15 + temperature;
-		if (absolute < 0) {
+		Temperature	absolute(temperature);
+		if (absolute.temperature() < 0) {
 			std::string	msg
 				= stringprintf("illegal temperature: %f",
 					temperature);
@@ -158,7 +158,7 @@ int	main(int argc, char *argv[]) {
 
 		double	delta;
 		do {
-			double	actual = cooler->getActualTemperature();
+			Temperature	actual = cooler->getActualTemperature();
 			delta = fabs(absolute - actual);
 			debug(LOG_DEBUG, DEBUG_LOG, 0,
 				"set: %.1f, actual: %.1f, delta: %.1f",

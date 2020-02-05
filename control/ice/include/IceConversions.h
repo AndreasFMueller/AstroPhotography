@@ -109,6 +109,10 @@ typedef std::shared_ptr<ImageQueueEntry>	ImageQueueEntryPtr;
 ImageQueueEntryPtr	convert(const astro::camera::ImageQueueEntry e);
 astro::camera::ImageQueueEntry	convert(ImageQueueEntryPtr e);
 
+// Cooler
+CoolerInfo	convert(const astro::camera::CoolerInfo& ci);
+astro::camera::CoolerInfo	convert(const CoolerInfo& ci);
+
 // FilterWheel
 FilterwheelState convert(const astro::camera::FilterWheel::State& s);
 astro::camera::FilterWheel::State convert(const FilterwheelState& s);

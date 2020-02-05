@@ -549,8 +549,16 @@ public:
 };
 
 typedef callback::CallbackDataEnvelope<CoolerInfo>	CoolerInfoCallbackData;
+
+class DewHeater {
+public:
+	float	dewheater;
+	DewHeater(float d) : dewheater(d) { }
+	DewHeater&	operator=(float d) { dewheater = d; return *this; }
+};
+typedef callback::CallbackDataEnvelope<DewHeater>	DewHeaterCallbackData;
+
 typedef callback::CallbackDataEnvelope<Temperature>	SetTemperatureCallbackData;
-typedef callback::CallbackDataEnvelope<float>	DewHeaterCallbackData;
 
 /**
  * \brief Cooler abstraction
@@ -593,7 +601,7 @@ private:
 	callback::CallbackSet	_callback;
 public:
 	void	callback(const CoolerInfo& info);
-	void	callback(float dewheaterinfo);
+	void	callback(const DewHeater& dewheater);
 	void	callback(const Temperature& newSetTemperature);
 	void	addCallback(callback::CallbackPtr callback);
 	void	removeCallback(callback::CallbackPtr callback);

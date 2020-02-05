@@ -15,6 +15,8 @@ Devices:
 	which should be made available through the CCD interface
       - Need minimum/maximum exposure time for gui (make available through
 	properties?)
+      - Need snow* tools for cooler, filterwheel, ccd, all with monitoring
+	capability to test callback functionality
 
 Guiding:
       -	Missing configuration itmes should result in useful error messages
