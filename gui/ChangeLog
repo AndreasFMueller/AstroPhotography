@@ -1,5 +1,8 @@
 ChangeLog for the Qt GUI to Astrophotography
 
+20200205:
+	* converted guideportcontrollerwidget to using callbacks
+
 20200203:
 	* convert the mountcontroller widget from polling to callbacks
 

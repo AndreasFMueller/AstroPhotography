@@ -143,6 +143,7 @@ SOURCES += 								\
 	FocusButton.cpp							\
 	focuselementstack.cpp						\
 	FocusingCallbackI.cpp						\
+	GuidePortCallbackI.cpp						\
 	GuiderButton.cpp						\
 	ImageForwarder.cpp						\
 	ImageRetrieverThread.cpp					\

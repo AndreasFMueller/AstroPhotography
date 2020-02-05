@@ -8,6 +8,13 @@
 namespace astro {
 namespace camera {
 
+GuidePortActivation::GuidePortActivation() {
+	_raplus = 0.;
+	_raminus = 0.;
+	_decplus = 0.;
+	_decminus = 0.;
+}
+
 GuidePortActivation::GuidePortActivation(GuidePortActivation::direction_t dir,
 	float time) {
 	_raplus = 0.;
@@ -20,6 +27,11 @@ GuidePortActivation::GuidePortActivation(GuidePortActivation::direction_t dir,
 	case DECPLUS:	_decplus = time;	break;
 	case DECMINUS:	_decminus = time;	break;
 	}
+}
+
+GuidePortActivation::GuidePortActivation(float raplus, float raminus,
+	float decplus, float decminus) : _raplus(raplus), _raminus(raminus),
+	_decplus(decplus), _decminus(decminus) {
 }
 
 } // namespace camea

@@ -1,5 +1,8 @@
 ChangeLog for the Astro project.
 
+20200205:
+	* fix some minor bugs in the guideport callback stuff
+
 20200204:
 	* add callback stuff to the Guideport class
 	* introduce GuidePortActivation class to simplify interface

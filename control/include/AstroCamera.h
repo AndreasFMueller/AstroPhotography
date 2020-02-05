@@ -609,10 +609,7 @@ public:
 	float	decminus() const { return _decminus; }
 	GuidePortActivation();
 	GuidePortActivation(float raplus, float raminus,
-		float decplus, float decminus)
-		: _raplus(raplus), _raminus(raminus),
-		  _decplus(decplus), _decminus(decminus) {
-		}
+		float decplus, float decminus);
 	typedef	enum { RAPLUS, RAMINUS, DECPLUS, DECMINUS } direction_t;
 	GuidePortActivation(direction_t dir, float time);
 };

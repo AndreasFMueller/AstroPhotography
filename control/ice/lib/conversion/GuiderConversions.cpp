@@ -23,7 +23,7 @@ GuidePortActivation	convert(const astro::camera::GuidePortActivation& a) {
 	return aa;
 }
 
-astro::camera::GuidePortActivation	convert(const GuidePortActivation a) {
+astro::camera::GuidePortActivation	convert(const GuidePortActivation& a) {
 	return astro::camera::GuidePortActivation(a.raplus, a.raminus,
 		a.decplus, a.decminus);
 }

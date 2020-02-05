@@ -6,6 +6,8 @@
 #include "guideportcontrollerwidget.h"
 #include "ui_guideportcontrollerwidget.h"
 #include <camera.h>
+#include <CommunicatorSingleton.h>
+#include <CommonClientTasks.h>
 
 namespace snowgui {
 
@@ -21,6 +23,10 @@ guideportcontrollerwidget::guideportcontrollerwidget(QWidget *parent)
 	ui->guideWidget->setEnabled(false);
 	ui->activationWidget->setEnabled(false);
 	ui->proposalWidget->setEnabled(false);
+
+	// register the type for the activation
+	qRegisterMetaType<astro::camera::GuidePortActivation>(
+                "astro::camera::GuidePortActivation");
 
 	// guiderate
 	_guiderate = 0.5;
@@ -38,13 +44,28 @@ guideportcontrollerwidget::guideportcontrollerwidget(QWidget *parent)
 	connect(ui->activationtimeSpinBox, SIGNAL(valueChanged(double)),
 		this, SLOT(changeActivationTime(double)));
 
+	// perform corrections
 	connect(ui->activateButton, SIGNAL(clicked()),
 		this, SLOT(activateClicked()));
 
+	// configure the times as single shot
+	_activationTimerRAplus.setSingleShot(true);
+	_activationTimerRAminus.setSingleShot(true);
+	_activationTimerDECplus.setSingleShot(true);
+	_activationTimerDECminus.setSingleShot(true);
+
+	// connect the timers
+	connect(&_activationTimerRAplus, SIGNAL(timeout()),
+		this, SLOT(deactivatedRAplus()));
+	connect(&_activationTimerRAminus, SIGNAL(timeout()),
+		this, SLOT(deactivatedRAminus()));
+	connect(&_activationTimerDECplus, SIGNAL(timeout()),
+		this, SLOT(deactivatedDECplus()));
+	connect(&_activationTimerDECminus, SIGNAL(timeout()),
+		this, SLOT(deactivatedDECminus()));
+
 	// start the timer
 	_active = 0;
-	connect(&_statusTimer, SIGNAL(timeout()), this, SLOT(statusUpdate()));
-	_statusTimer.setInterval(100);
 
 	// set default activation time
 	_activationtime = 5;
@@ -54,8 +75,14 @@ guideportcontrollerwidget::guideportcontrollerwidget(QWidget *parent)
  * \brief Destroy the guideport controller
  */
 guideportcontrollerwidget::~guideportcontrollerwidget() {
-	_statusTimer.stop();
 	delete ui;
+	if (_guideport_callback) {
+		if (_guideport) {
+			_guideport->unregisterCallback(_guideport_identity);
+			_guideport->ice_getConnection()->getAdapter()
+				->remove(_guideport_identity);
+		}
+	}
 }
 
 /**
@@ -100,25 +127,59 @@ void	guideportcontrollerwidget::setupComplete() {
  * \brief GUI components setup
  */
 void	guideportcontrollerwidget::setupGuideport() {
-	_statusTimer.stop();
 	if (_guideport) {
-		try {
-			// try to 
-			_guideport->active();
-			_statusTimer.start();
-		} catch (const std::exception& x) {
-			std::string	msg = astro::stringprintf("cannot "
-				"connect to '%s'", instrumentname().c_str());
-			return;
-		}
-		ui->guideWidget->setEnabled(true);
-		ui->activationWidget->setEnabled(true);
-		ui->proposalWidget->setEnabled(true);
-	} else {
 		ui->guideWidget->setEnabled(false);
 		ui->activationWidget->setEnabled(false);
 		ui->proposalWidget->setEnabled(false);
 	}
+
+	// ensure that we have an object adapter
+	try {
+		if (!_guideport->ice_getConnection()->getAdapter()) {
+			Ice::CommunicatorPtr	ic
+				= snowstar::CommunicatorSingleton::get();
+			Ice::ObjectAdapterPtr	adapter
+				= snowstar::CommunicatorSingleton::getAdapter();
+			adapter->activate();
+			_guideport->ice_getConnection()->setAdapter(adapter);
+		}
+	} catch (const std::exception& x) {
+		debug(LOG_ERR, DEBUG_LOG, 0,
+			"problem installing an object adapter: %s",
+			x.what());
+	}
+
+	// create and register the callback
+	try {
+		GuidePortCallbackI	*guideportcallback
+			= new GuidePortCallbackI(*this);
+		connect(guideportcallback,
+			SIGNAL(activation(astro::camera::GuidePortActivation)),
+			this,
+			SLOT(activate(astro::camera::GuidePortActivation)));
+		_guideport_callback = guideportcallback;
+		_guideport_identity.name = IceUtil::generateUUID();
+		_guideport_identity.category = "";
+		_guideport->ice_getConnection()->getAdapter()->add(
+			_guideport_callback, _guideport_identity);
+		_guideport->registerCallback(_guideport_identity);
+	} catch (const std::exception& x) {
+		debug(LOG_ERR, DEBUG_LOG, 0,
+			"cannot install callback: %s", x.what());
+	}
+
+	try {
+		// get and display the current activation state
+		updateActivation();
+	} catch (const std::exception& x) {
+		std::string	msg = astro::stringprintf("cannot "
+			"connect to '%s'", instrumentname().c_str());
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "%s", msg.c_str());
+		return;
+	}
+	ui->guideWidget->setEnabled(true);
+	ui->activationWidget->setEnabled(true);
+	ui->proposalWidget->setEnabled(true);
 }
 
 /**
@@ -181,22 +242,19 @@ void	guideportcontrollerwidget::changeActivationTime(double t) {
  *
  * This slot is activated by the timer at regular intervals
  */
-void	guideportcontrollerwidget::statusUpdate() {
+void	guideportcontrollerwidget::updateActivation() {
 	if (!_guideport) { return; }
 	try {
 		unsigned char	newactive = _guideport->active();
-		if (newactive != _active) {
-			_active = newactive;
-			ui->guiderButton->setNorthActive(
-				_active & snowstar::DECPLUS);
-			ui->guiderButton->setSouthActive(
-				_active & snowstar::DECMINUS);
-			ui->guiderButton->setWestActive(
-				_active & snowstar::RAPLUS);
-			ui->guiderButton->setEastActive(
-				_active & snowstar::RAMINUS);
-			repaint();
+		if (newactive == _active) {
+			return;
 		}
+		_active = newactive;
+		ui->guiderButton->setNorthActive(_active & snowstar::DECPLUS);
+		ui->guiderButton->setSouthActive(_active & snowstar::DECMINUS);
+		ui->guiderButton->setWestActive(_active & snowstar::RAPLUS);
+		ui->guiderButton->setEastActive(_active & snowstar::RAMINUS);
+		ui->guiderButton->repaint();
 	} catch (const std::exception& x) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "couldn't get active data: %s",
 			x.what());
@@ -269,6 +327,75 @@ void	guideportcontrollerwidget::activateClicked() {
 		debug(LOG_ERR, DEBUG_LOG, 0, "cannot activate %.3f,%.3f: %s",
 			racorrection, deccorrection, x.what());
 	}
+}
+
+void	guideportcontrollerwidget::activate(
+		astro::camera::GuidePortActivation activation) {
+	// RA+
+	int	raplusactivationtime = activation.raplus() * 1000;
+	if (raplusactivationtime > 0) {
+		_active |= snowstar::RAPLUS;
+		ui->guiderButton->setWestActive(true);
+		_activationTimerRAplus.setInterval(raplusactivationtime);
+		_activationTimerRAplus.start();
+	} else {
+		ui->guiderButton->setWestActive(false);
+	}
+	// RA-
+	int	raminusactivationtime = activation.raminus() * 1000;
+	if (raminusactivationtime > 0) {
+		_active |= snowstar::RAMINUS;
+		ui->guiderButton->setEastActive(true);
+		_activationTimerRAminus.setInterval(raminusactivationtime);
+		_activationTimerRAminus.start();
+	} else {
+		ui->guiderButton->setEastActive(false);
+	}
+	// DEC+
+	int	decplusactivationtime = activation.decplus() * 1000;
+	if (decplusactivationtime > 0) {
+		_active |= snowstar::DECPLUS;
+		ui->guiderButton->setNorthActive(true);
+		_activationTimerDECplus.setInterval(decplusactivationtime);
+		_activationTimerDECplus.start();
+	} else {
+		ui->guiderButton->setNorthActive(false);
+	}
+	// DEC-
+	int	decminusactivationtime = activation.decminus() * 1000;
+	if (decminusactivationtime > 0) {
+		_active |= snowstar::DECMINUS;
+		ui->guiderButton->setSouthActive(true);
+		_activationTimerDECminus.setInterval(decminusactivationtime);
+		_activationTimerDECminus.start();
+	} else {
+		ui->guiderButton->setSouthActive(false);
+	}
+	ui->guiderButton->repaint();
+}
+
+void	guideportcontrollerwidget::deactivatedRAplus() {
+	_active &= ~snowstar::RAPLUS;
+	ui->guiderButton->setWestActive(false);
+	ui->guiderButton->repaint();
+}
+
+void	guideportcontrollerwidget::deactivatedRAminus() {
+	_active &= ~snowstar::RAMINUS;
+	ui->guiderButton->setEastActive(false);
+	ui->guiderButton->repaint();
+}
+
+void	guideportcontrollerwidget::deactivatedDECplus() {
+	_active &= ~snowstar::DECPLUS;
+	ui->guiderButton->setNorthActive(false);
+	ui->guiderButton->repaint();
+}
+
+void	guideportcontrollerwidget::deactivatedDECminus() {
+	_active &= ~snowstar::DECMINUS;
+	ui->guiderButton->setSouthActive(false);
+	ui->guiderButton->repaint();
 }
 
 } // namespace snowgui
