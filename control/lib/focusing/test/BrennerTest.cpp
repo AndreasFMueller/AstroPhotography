@@ -59,7 +59,7 @@ void	BrennerTest::setUp() {
 		= devices.getCamera(DeviceName("camera:simulator/camera"));
 	camera::CcdPtr	ccd = camera->getCcd(0);
 	camera::CoolerPtr	cooler = ccd->getCooler();
-	cooler->setTemperature(-10);
+	cooler->setTemperature(Temperature(-10, Temperature::CELSIUS));
 	cooler->wait(10);
 	camera::FocuserPtr	focuser
 		= devices.getFocuser(DeviceName("focuser:simulator/focuser"));

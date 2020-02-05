@@ -20,8 +20,8 @@ class QsiCooler : public Cooler {
 	std::atomic_bool	_is_on;
 public:
 	QsiCooler(QsiCamera& camera);
-	virtual float	getSetTemperature();
-	virtual float	getActualTemperature();
+	virtual Temperature	getSetTemperature();
+	virtual Temperature	getActualTemperature();
 	virtual void	setTemperature(const float temperature);
 	virtual bool	isOn();
 	virtual void	setOn(bool onoff);

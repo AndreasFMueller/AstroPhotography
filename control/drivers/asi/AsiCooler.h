@@ -23,9 +23,11 @@ class AsiCooler : public Cooler {
 public:
 	AsiCooler(AsiCamera& camera, AsiCcd& ccd);
 	~AsiCooler();
-	virtual float	getSetTemperature();
-	virtual float	getActualTemperature();
+	virtual Temperature	getSetTemperature();
+	virtual Temperature	getActualTemperature();
+protected:
 	virtual void	setTemperature(const float temperature);
+public:
 	virtual bool	isOn();
 	virtual void	setOn(bool onoff);
 	// dew heater stuff

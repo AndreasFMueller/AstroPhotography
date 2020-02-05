@@ -16,19 +16,22 @@ namespace atik {
 class AtikCooler : public Cooler {
 	AtikCamera&	_camera;
 	bool	_lastIsOn;
-	float	_lastTemperature;
-	float	_lastSetTemperature;
+	Temperature	_lastTemperature;
+	Temperature	_lastSetTemperature;
 public:
 	AtikCooler(AtikCamera&);
 	virtual ~AtikCooler();
-	virtual float	getSetTemperature();
-	virtual float	getActualTemperature();
+	virtual Temperature	getSetTemperature();
+	virtual Temperature	getActualTemperature();
+protected:
 	virtual void	setTemperature(const float temperature);
+public:
 	virtual bool	isOn();
 	virtual void	setOn(bool onoff);
 	virtual std::string	userFriendlyName() const {
 		return _camera.userFriendlyName();
 	}
+	void	overrideSetTemperature(float temperature);
 };
 
 } // namespace atik

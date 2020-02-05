@@ -18,17 +18,17 @@ CoolerI::~CoolerI() {
 
 float	CoolerI::getSetTemperature(const Ice::Current& current) {
 	CallStatistics::count(current);
-	return _cooler->getSetTemperature();
+	return _cooler->getSetTemperature().temperature();
 }
 
 float	CoolerI::getActualTemperature(const Ice::Current& current) {
 	CallStatistics::count(current);
-	return _cooler->getActualTemperature();
+	return _cooler->getActualTemperature().temperature();
 }
 
 void	CoolerI::setTemperature(float temperature, const Ice::Current& current) {
 	CallStatistics::count(current);
-	_cooler->setTemperature(temperature);
+	_cooler->setTemperature(astro::Temperature(temperature));
 }
 
 bool	CoolerI::isOn(const Ice::Current& current) {

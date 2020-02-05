@@ -87,7 +87,7 @@ void	Gateway::update(const std::string& instrument,
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "update cooler info");
 	TaskUpdatePtr	taskupdate = get(instrument);
 	try {
-		taskupdate->ccdtemperature = cooler->getActualTemperature();
+		taskupdate->ccdtemperature = cooler->getActualTemperature().temperature();
 	} catch (const std::exception& ex) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "cannot get temperature: %s",
 			ex.what());

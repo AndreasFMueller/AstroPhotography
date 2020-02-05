@@ -126,10 +126,16 @@ class Temperature {
 public:
 	typedef enum { KELVIN, CELSIUS } temperature_scale;
 	const static float	zero;
-	Temperature(float temperature, temperature_scale scale = KELVIN);
+	Temperature(float temperature = zero, temperature_scale scale = KELVIN);
+	Temperature&	operator=(float t);
 	float	celsius() const;
 	float	temperature() const { return _temperature; }
 	static Temperature	core();
+	float	operator-(const Temperature& other) const;
+	bool	operator>(const Temperature& other) const;
+	bool	operator>=(const Temperature& other) const;
+	bool	operator>(float) const;
+	bool	operator==(const Temperature& other) const;
 };
 
 } // namespace astro

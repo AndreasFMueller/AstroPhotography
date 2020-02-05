@@ -432,7 +432,7 @@ void    AtikCamera::abortExposure() {
 /**
  * \brief Ask the camera for the set temperature
  */
-float	AtikCamera::getSetTemperature(AtikCooler& cooler) {
+Temperature	AtikCamera::getSetTemperature(AtikCooler& cooler) {
 	std::unique_lock<std::recursive_mutex>	lock(_mutex, std::try_to_lock);
 	if (!lock) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "cannot get set temperature");
@@ -445,7 +445,7 @@ float	AtikCamera::getSetTemperature(AtikCooler& cooler) {
 	//debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieve cooler temperature: %.1f, "
 	//	"power %.2f, state %d", targetTemp, power, state);
 	if ((state == COOLING_ON) || (state == COOLING_SETPOINT)) {
-		cooler.Cooler::setTemperature(targetTemp + Temperature::zero);
+		cooler.overrideSetTemperature(targetTemp + Temperature::zero);
 	}
 	return cooler.Cooler::getSetTemperature();
 }
@@ -453,10 +453,10 @@ float	AtikCamera::getSetTemperature(AtikCooler& cooler) {
 /**
  * \brief Get the actual temperature of the CCD
  */
-float	AtikCamera::getActualTemperature(AtikCooler& cooler) {
+Temperature	AtikCamera::getActualTemperature(AtikCooler& cooler) {
 	std::unique_lock<std::recursive_mutex>	lock(_mutex, std::try_to_lock);
 	if (!lock) {
-		return _last_actual_temperature;
+		return Temperature(_last_actual_temperature);
 	}
 	//debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieve current Temp (%d)",
 	//	_tempSensorCount);
@@ -478,7 +478,7 @@ float	AtikCamera::getActualTemperature(AtikCooler& cooler) {
 		return _last_actual_temperature = Temperature::zero + 20;
 	case COOLING_SETPOINT:
 		return _last_actual_temperature
-				= cooler.Cooler::getSetTemperature();
+				= cooler.Cooler::getSetTemperature().temperature();
 	}
 	std::string	msg = stringprintf("unknown cooling state: %d",
 		state);
@@ -492,7 +492,7 @@ float	AtikCamera::getActualTemperature(AtikCooler& cooler) {
 void	AtikCamera::setTemperature(const float temperature, AtikCooler& cooler) {
 	std::unique_lock<std::recursive_mutex>	lock(_mutex);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "set temperature: %f", temperature);
-	cooler.Cooler::setTemperature(temperature);
+	cooler.overrideSetTemperature(temperature);
 	if (isOn(cooler)) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "setCooling(%f)",
 			temperature - Temperature::zero);

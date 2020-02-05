@@ -24,14 +24,14 @@ namespace sx {
 class SxCooler : public Cooler {
 	SxCamera&	camera;
 	bool	cooler_on;
-	float	settemperature;
-	float	actualtemperature;
+	Temperature	settemperature;
+	Temperature	actualtemperature;
 	void	cmd();
 public:
 	SxCooler(SxCamera& camera);
 	virtual	~SxCooler();
 	//virtual float	getSetTemperature();
-	virtual float	getActualTemperature();
+	virtual Temperature	getActualTemperature();
 	virtual void	setTemperature(float temperature);
 	virtual bool	isOn();
 	virtual	void	setOn(bool onoff);

@@ -24,7 +24,7 @@ class QhyCooler : public Cooler {
 public:
 	QhyCooler(QhyCamera& _camera, ::qhy::DevicePtr devptr);
 	virtual ~QhyCooler();
-	virtual float	getActualTemperature();
+	virtual Temperature	getActualTemperature();
 	virtual void	setTemperature(float temperature);
 	virtual bool	isOn();
 	virtual void	setOn(bool onoff);

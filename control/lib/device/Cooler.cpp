@@ -37,19 +37,19 @@ DeviceName	Cooler::defaultname(const DeviceName& parent,
 /**
  * \brief Create a cooler from the name
  */
-Cooler::Cooler(const DeviceName& name) : Device(name, DeviceName::Cooler) {
+Cooler::Cooler(const DeviceName& name) : Device(name, DeviceName::Cooler),
+	temperature(25, Temperature::CELSIUS) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "create cooler named %s",
 		Device::name().name().c_str());
-	temperature = 25 + Temperature::zero;
 }
 
 /**
  * \brief Create a cooler from the unit name
  */
-Cooler::Cooler(const std::string& name) : Device(name, DeviceName::Cooler) {
+Cooler::Cooler(const std::string& name) : Device(name, DeviceName::Cooler),
+	temperature(25, Temperature::CELSIUS) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "create cooler named %s",
 		Device::name().name().c_str());
-	temperature = 25 + Temperature::zero;
 }
 
 /**
@@ -61,7 +61,7 @@ Cooler::~Cooler() {
 /**
  * \brief Get the current set temperature
  */
-float	Cooler::getSetTemperature() {
+Temperature	Cooler::getSetTemperature() {
 	return temperature;
 }
 
@@ -71,7 +71,7 @@ float	Cooler::getSetTemperature() {
  * Not all coolers can report the actual temperature. This method must
  * be overridden by concrete Cooler implementations.
  */
-float	Cooler::getActualTemperature() {
+Temperature	Cooler::getActualTemperature() {
 	throw std::runtime_error("cannot measure temperature");
 }
 
@@ -92,12 +92,22 @@ void	Cooler::setTemperature(float _temperature) {
 	temperature = _temperature;
 }
 
+void	Cooler::setTemperature(const Temperature& temperature) {
+	// send the new temperature to the callback
+	callback(temperature);
+	setTemperature(temperature.temperature());
+}
+
 /**
  * \brief Turn the cooler on/off
  *
  * This is an empty implementation that must be overridden by driver classes.
+ * Driver classes still need to call this method at the end of their
+ * implementation to ensure that the callback is sent.
  */
 void	Cooler::setOn(bool /* onoff */) {
+	CoolerInfo	ci(getActualTemperature(), getSetTemperature(), isOn());
+	callback(ci);
 }
 
 /**
@@ -118,14 +128,14 @@ void	Cooler::addTemperatureMetadata(ImageBase& image) {
 		// add set temperature information to the image (SET-TEMP)
 		image.setMetadata(
 			FITSKeywords::meta(std::string("SET-TEMP"),
-				this->getSetTemperature() - Temperature::zero));
+				this->getSetTemperature().celsius()));
 	}
 	
 	// add actual temperature info to the image (CCD-TEMP)
 	try {
 		image.setMetadata(
 			FITSKeywords::meta(std::string("CCD-TEMP"),
-				getActualTemperature() - Temperature::zero));
+				getActualTemperature().celsius()));
 	} catch (std::exception& x) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "actual temperature unknown: %s",
 			x.what());
@@ -149,8 +159,8 @@ bool	Cooler::stable() {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "stable limit config: %.1f",
 			stablelimit);
 	}
-	float	actualtemperature = this->getActualTemperature();
-	float	delta = fabs(actualtemperature - temperature);
+	float	actualtemperature = this->getActualTemperature().temperature();
+	float	delta = fabs(actualtemperature - temperature.temperature());
 	debug(LOG_DEBUG, DEBUG_LOG, 0,
 		"T_act = %.1f, T_set = %.1f, delta = %.1f, limit = %.1f",
 		actualtemperature, temperature, delta, stablelimit);
@@ -198,7 +208,35 @@ float	Cooler::dewHeater() {
  * \param d	the dew heater value
  */
 void	Cooler::dewHeater(float d) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "ignoring dew heater value");
+	callback(d);
+}
+
+void	Cooler::callback(const CoolerInfo& info) {
+	callback::CallbackDataPtr	cb(new CoolerInfoCallbackData(info));
+	_callback(cb);
+}
+
+void	Cooler::callback(float dewheaterinfo) {
+	callback::CallbackDataPtr	cb(new DewHeaterCallbackData(
+						dewheaterinfo));
+	_callback(cb);
+}
+
+void	Cooler::callback(const Temperature& newSetTemperature) {
+	callback::CallbackDataPtr	cb(new SetTemperatureCallbackData(
+						newSetTemperature));
+	_callback(cb);
+}
+
+void	Cooler::addCallback(callback::CallbackPtr callback) {
+	_callback.insert(callback);
+}
+
+void	Cooler::removeCallback(callback::CallbackPtr callback) {
+	auto	i = _callback.find(callback);
+	if (i != _callback.end()) {
+		_callback.erase(i);
+	}
 }
 
 

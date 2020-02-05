@@ -61,7 +61,7 @@ void	SbigCooler::query_temperature_status(
 /**
  * \brief Query the set temperature
  */
-float	SbigCooler::getSetTemperature() {
+Temperature	SbigCooler::getSetTemperature() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieve set temperature from %hd",
 		camera.handle);
 
@@ -69,20 +69,21 @@ float	SbigCooler::getSetTemperature() {
 
 	query_temperature_status(&results);
 
-	return temperature = results.ccdSetpoint + 273.1;
+	return temperature = Temperature(results.ccdSetpoint,
+				Temperature::CELSIUS);
 }
 
 /**
  * \brief Query the actual temperature
  */
-float	SbigCooler::getActualTemperature() {
+Temperature	SbigCooler::getActualTemperature() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "get actual temperature");
 
 	QueryTemperatureStatusResults2	results;
 
 	query_temperature_status(&results);
 
-	return results.imagingCCDTemperature + 273.1;
+	return Temperature(results.imagingCCDTemperature, Temperature::CELSIUS);
 }
 
 /**
@@ -119,7 +120,7 @@ void	SbigCooler::set() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "set parameters");
 	SetTemperatureRegulationParams2	params;
 	params.regulation = (enabled) ? REGULATION_ON : REGULATION_OFF;
-	params.ccdSetpoint = temperature - 273.1;
+	params.ccdSetpoint = temperature.celsius();
 	set_temperature_regulation2(&params);
 }
 

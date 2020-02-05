@@ -130,24 +130,24 @@ void	sbigtest::testCooler() {
 	CameraPtr	camera = locator->getCamera(0);
 	CcdPtr	ccd = camera->getCcd(0);
 	CoolerPtr	cooler = ccd->getCooler();
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "current temperature: %f",
-		cooler->getActualTemperature() - 273.1);
-	cooler->setTemperature(273.1);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "current temperature: %fºC",
+		cooler->getActualTemperature().celsius());
+	cooler->setTemperature(Temperature(273.1));
 	cooler->setOn(true);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "current set temperature: %f, "
-		"enabled: %s", cooler->getSetTemperature(),
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "current set temperature: %fºC, "
+		"enabled: %s", cooler->getSetTemperature().celsius(),
 		(cooler->isOn()) ? "YES" : "NO");
 	for (int t = 0; t < 60; t++) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "current temperature: %f",
-			cooler->getActualTemperature() - 273.1);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "current temperature: %fºC",
+			cooler->getActualTemperature().celsius());
 	}
 	cooler->setOn(false);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "current set temperature: %f, "
-		"enabled: %s", cooler->getSetTemperature(),
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "current set temperature: %fºC, "
+		"enabled: %s", cooler->getSetTemperature().celsius(),
 		(cooler->isOn()) ? "YES" : "NO");
 	for (int t = 0; t < 60; t++) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "current temperature: %f",
-			cooler->getActualTemperature() - 273.1);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "current temperature: %fºC",
+			cooler->getActualTemperature().celsius());
 	}
 }
 

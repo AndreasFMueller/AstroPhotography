@@ -66,7 +66,7 @@ void	DitherWork::run() {
 
 		// infer the dither amount from the task parameters
 		// the ccd temperature is abused for the dither pixel
-		double	arcsec = task().ccdtemperature();
+		double	arcsec = task().ccdtemperature().temperature();
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "dithering for %.1f arcsec",
 			arcsec);
 

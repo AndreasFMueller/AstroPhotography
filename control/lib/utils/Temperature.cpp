@@ -50,4 +50,46 @@ Temperature	Temperature::core() {
 #endif
 }
 
+/**
+ * \brief Get the temperature difference
+ *
+ * The difference is not in itself a temperature
+ */
+float	Temperature::operator-(const Temperature& other) const {
+	return _temperature - other.temperature();
+}
+
+/**
+ * \brief Comparison operator for temperature
+ */
+bool	Temperature::operator>(const Temperature& other) const {
+	return _temperature > other.temperature();
+}
+
+/**
+ * \brief Comparison operator for temperature
+ */
+bool	Temperature::operator>=(const Temperature& other) const {
+	return _temperature >= other.temperature();
+}
+
+/**
+ * \brief Check whether the absolute temperature is positive
+ */
+bool	Temperature::operator>(float t) const {
+	return _temperature > t;
+}
+
+/**
+ * \brief allow assignment of absolute temperatures
+ */
+Temperature&	Temperature::operator=(float t) {
+	_temperature = t;
+	return *this;
+}
+
+bool	Temperature::operator==(const Temperature& other) const {
+	return _temperature == other._temperature;
+}
+
 } // namespace astro

@@ -90,17 +90,19 @@ void	sxtest::testCooler() {
 	try {
 		CoolerPtr	cooler = ccd->getCooler();
 		CPPUNIT_ASSERT(cooler->getActualTemperature() > 250);
-		float	temp = cooler->getActualTemperature();
-		float	newtemp = cooler->getActualTemperature();
-		float	targettemperature = 283.1;
+		float	temp = cooler->getActualTemperature().temperature();
+		float	newtemp = cooler->getActualTemperature().temperature();
+		Temperature	targettemperature(283.1);
 		cooler->setTemperature(targettemperature);
 		cooler->setOn(true);
-		CPPUNIT_ASSERT(cooler->getSetTemperature() == targettemperature);
+		Temperature	actual = cooler->getSetTemperature();
+		CPPUNIT_ASSERT(actual == targettemperature);
 		for (int time = 0; time < 60; time++) {
 			sleep(1);
-			float	newtemp = cooler->getActualTemperature();
-			debug(LOG_DEBUG, DEBUG_LOG, 0, "target: %.1f, actual: %.1f",
-				targettemperature, newtemp);
+			Temperature	newtemp = cooler->getActualTemperature();
+			debug(LOG_DEBUG, DEBUG_LOG, 0,
+				"target: %.1fºC, actual: %.1fºC",
+				targettemperature.celsius(), newtemp.celsius());
 			if ((fabs(newtemp - targettemperature)) < 0.3) {
 				return;
 			}

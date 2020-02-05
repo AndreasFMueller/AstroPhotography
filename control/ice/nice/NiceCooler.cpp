@@ -16,12 +16,12 @@ NiceCooler::NiceCooler(snowstar::CoolerPrx cooler, const DeviceName& devicename)
 NiceCooler::~NiceCooler() {
 }
 
-float	NiceCooler::getSetTemperature() {
-	return _cooler->getSetTemperature();
+Temperature	NiceCooler::getSetTemperature() {
+	return Temperature(_cooler->getSetTemperature());
 }
 
-float	NiceCooler::getActualTemperature() {
-	return _cooler->getActualTemperature();
+Temperature	NiceCooler::getActualTemperature() {
+	return Temperature(_cooler->getActualTemperature());
 }
 
 void	NiceCooler::setTemperature(float temperature) {

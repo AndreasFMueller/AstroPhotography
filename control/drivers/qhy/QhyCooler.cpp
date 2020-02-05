@@ -38,8 +38,8 @@ QhyCooler::~QhyCooler() {
 /**
  * \brief Get the actual temperature of the cooler
  */
-float	QhyCooler::getActualTemperature() {
-	return deviceptr->dc201().temperature();
+Temperature	QhyCooler::getActualTemperature() {
+	return Temperature(deviceptr->dc201().temperature());
 }
 
 /**

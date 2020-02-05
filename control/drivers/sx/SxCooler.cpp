@@ -31,7 +31,7 @@ SxCooler::SxCooler(SxCamera& _camera)
 	// back to the original state. We also use the actual temperature
 	// for the set temperature, for lack of anything better.
 	cmd();
-	Cooler::setTemperature(actualtemperature);
+	Cooler::setTemperature(actualtemperature.temperature());
 	cmd();
 }
 
@@ -40,9 +40,9 @@ SxCooler::~SxCooler() {
 }
 
 void	SxCooler::cmd() {
-	uint16_t	temp = getSetTemperature() * 10;
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "cooler command T = %.1f, on = %s",
-		getSetTemperature(), (cooler_on) ? "yes" : "no");
+	uint16_t	temp = getSetTemperature().temperature() * 10;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "cooler command T = %.1fºC, on = %s",
+		getSetTemperature().celsius(), (cooler_on) ? "yes" : "no");
 	Request<sx_cooler_temperature_t>	request(
 		RequestBase::vendor_specific_type,
 		RequestBase::device_recipient,
@@ -64,13 +64,13 @@ void	SxCooler::cmd() {
 		throw DeviceTimeout(msg);
 	}
 	camera.release("cooler");
-	actualtemperature = request.data()->temperature / 10.;
+	actualtemperature = Temperature(request.data()->temperature / 10.);
 	cooler_on = (request.data()->status) ? true : false;
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "actual temperature = %.1f",
-		actualtemperature);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "actual temperature = %.1fºC",
+		actualtemperature.celsius());
 }
 
-float	SxCooler::getActualTemperature() {
+Temperature	SxCooler::getActualTemperature() {
 	cmd();
 	return actualtemperature;
 }

@@ -22,7 +22,7 @@ static DeviceName	asiCoolerName(AsiCcd& ccd) {
  */
 AsiCooler::AsiCooler(AsiCamera& camera, AsiCcd& ccd)
 	: Cooler(asiCoolerName(ccd)), _camera(camera) {
-	float	t = getActualTemperature();
+	float	t = getActualTemperature().temperature();
 	_camera.settemperature(t);
 }
 
@@ -42,15 +42,15 @@ AsiCooler::~AsiCooler() {
 /**
  * \brief Get the set temperature
  */
-float	AsiCooler::getSetTemperature() {
-	return _camera.settemperature();
+Temperature	AsiCooler::getSetTemperature() {
+	return Temperature(_camera.settemperature());
 }
 
 /**
  * \brief Get the current temperature
  */
-float	AsiCooler::getActualTemperature() {
-	return Temperature::zero + _camera.getControlValue(AsiTemperature).value / 10.;
+Temperature	AsiCooler::getActualTemperature() {
+	return Temperature(_camera.getControlValue(AsiTemperature).value / 10.);
 }
 
 /**

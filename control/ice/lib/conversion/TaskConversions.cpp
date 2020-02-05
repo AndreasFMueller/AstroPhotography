@@ -160,7 +160,7 @@ TaskParameters	convert(const astro::task::TaskParameters& parameters) {
 	result.cameraIndex = parameters.cameraindex();
 	result.ccdIndex = parameters.ccdindex();
 	result.coolerIndex = parameters.coolerindex();
-	result.ccdtemperature = parameters.ccdtemperature();
+	result.ccdtemperature = parameters.ccdtemperature().temperature();
 	result.filterwheelIndex = parameters.filterwheelindex();
 	result.filter = parameters.filter();
 	result.mountIndex = parameters.mountindex();

@@ -527,6 +527,32 @@ public:
 };
 
 /**
+ * \brief Class containing 
+ */
+class CoolerInfo {
+	Temperature	_actualTemperature;
+	Temperature	_setTemperature;
+	bool	_on;
+public:
+	const Temperature&	actualTemperature() const {
+		return _actualTemperature;
+	}
+	const Temperature&	setTemperature() const {
+		return _setTemperature;
+	}
+	bool	on() const { return _on; }
+	CoolerInfo(const Temperature& actualTemperature,
+		const Temperature& setTemperature,  bool on)
+		: _actualTemperature(actualTemperature),
+		  _setTemperature(setTemperature), _on(on) {
+	}
+};
+
+typedef callback::CallbackDataEnvelope<CoolerInfo>	CoolerInfoCallbackData;
+typedef callback::CallbackDataEnvelope<Temperature>	SetTemperatureCallbackData;
+typedef callback::CallbackDataEnvelope<float>	DewHeaterCallbackData;
+
+/**
  * \brief Cooler abstraction
  *
  * Some CCDs of some cameras have a thermoelectric cooler that helps reduce
@@ -538,7 +564,7 @@ public:
  */
 class Cooler : public astro::device::Device {
 protected:
-	float	temperature;
+	Temperature	temperature;
 public:
 	typedef CoolerPtr	sharedptr;
 	static DeviceName::device_type	devicetype;
@@ -547,9 +573,12 @@ public:
 	Cooler(const DeviceName& name);
 	Cooler(const std::string& name);
 	virtual ~Cooler();
-	virtual float	getSetTemperature();
-	virtual float	getActualTemperature();
+	virtual Temperature	getSetTemperature();
+	virtual Temperature	getActualTemperature();
+protected:
 	virtual void	setTemperature(const float temperature);
+public:
+	virtual void	setTemperature(const Temperature& temperature);
 	virtual bool	isOn();
 	virtual void	setOn(bool onoff);
 	virtual void	addTemperatureMetadata(astro::image::ImageBase& image);
@@ -560,6 +589,14 @@ public:
 	virtual std::pair<float, float>	dewHeaterRange();
 	virtual float	dewHeater();
 	virtual void	dewHeater(float d);
+private:
+	callback::CallbackSet	_callback;
+public:
+	void	callback(const CoolerInfo& info);
+	void	callback(float dewheaterinfo);
+	void	callback(const Temperature& newSetTemperature);
+	void	addCallback(callback::CallbackPtr callback);
+	void	removeCallback(callback::CallbackPtr callback);
 };
 
 /**
@@ -660,7 +697,6 @@ public:
 	void	callback(const GuidePortActivation& a);
 	void	addCallback(callback::CallbackPtr callback);
 	void	removeCallback(callback::CallbackPtr callback);
-	typedef	callback::CallbackDataEnvelope<GuidePortActivation>	ActivationCallbackData;
 };
 
 /**

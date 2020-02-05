@@ -102,10 +102,10 @@ public:
 	}
 
 private:
-	float	_ccdtemperature;
+	Temperature	_ccdtemperature;
 public:
-	float	ccdtemperature() const { return _ccdtemperature; }
-	void	ccdtemperature(float ccdtemperature) {
+	Temperature	ccdtemperature() const { return _ccdtemperature; }
+	void	ccdtemperature(const Temperature& ccdtemperature) {
 			_ccdtemperature = ccdtemperature;
 	}
 

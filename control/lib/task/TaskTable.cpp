@@ -80,7 +80,7 @@ TaskQueueEntry	TaskTableAdapter::row_to_object(int objectid, const Row& row) {
 	parameters.cameraindex(row["cameraindex"]->intValue());
 	parameters.ccdindex(row["ccdindex"]->intValue());
 	parameters.coolerindex(row["coolerindex"]->intValue());
-	parameters.ccdtemperature(row["temperature"]->doubleValue());
+	parameters.ccdtemperature(Temperature(row["temperature"]->doubleValue()));
 	parameters.filterwheelindex(row["filterwheelindex"]->intValue());
 	parameters.filter(row["filter"]->stringValue());
 	parameters.mountindex(row["mountindex"]->intValue());
@@ -149,7 +149,7 @@ UpdateSpec TaskTableAdapter::object_to_updatespec(const TaskQueueEntry& entry) {
 
 	spec.insert(Field("cooler", factory.get(entry.cooler())));
 	spec.insert(Field("coolerindex", factory.get(entry.coolerindex())));
-	spec.insert(Field("temperature", factory.get(entry.ccdtemperature())));
+	spec.insert(Field("temperature", factory.get(entry.ccdtemperature().temperature())));
 
 	spec.insert(Field("filterwheel", factory.get(entry.filterwheel())));
 	spec.insert(Field("filterwheelindex", factory.get(entry.filterwheelindex())));

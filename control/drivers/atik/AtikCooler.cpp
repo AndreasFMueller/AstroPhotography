@@ -37,12 +37,12 @@ AtikCooler::~AtikCooler() {
  *
  * \return temperature in Kelvin (absolute temperature)
  */
-float	AtikCooler::getSetTemperature() {
+Temperature	AtikCooler::getSetTemperature() {
 	try {
-		return _lastSetTemperature = _camera.getSetTemperature(*this);
+		_lastSetTemperature = _camera.getSetTemperature(*this);
 	} catch (...) {
-		return _lastSetTemperature;
 	}
+	return _lastSetTemperature;
 }
 
 /** 
@@ -50,12 +50,12 @@ float	AtikCooler::getSetTemperature() {
  *
  * \return temperature in Kelvin (absolute temperature)
  */
-float	AtikCooler::getActualTemperature() {
+Temperature	AtikCooler::getActualTemperature() {
 	try {
-		return _lastTemperature = _camera.getActualTemperature(*this);
+		_lastTemperature = _camera.getActualTemperature(*this);
 	} catch (...) {
-		return _lastTemperature;
 	}
+	return _lastTemperature;
 }
 
 /**
@@ -89,6 +89,10 @@ bool	AtikCooler::isOn() {
 void	AtikCooler::setOn(bool onoff) {
 	_camera.setOn(onoff, *this);
 	_lastIsOn = onoff;
+}
+
+void	AtikCooler::overrideSetTemperature(float temperature) {
+	Cooler::setTemperature(temperature);
 }
 
 } // namespace atik

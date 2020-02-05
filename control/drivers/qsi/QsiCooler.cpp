@@ -28,7 +28,7 @@ QsiCooler::QsiCooler(QsiCamera& camera)
 
 	// get the temperature, this initializes the _actual_temperature
 	getActualTemperature();
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "actual temperature: %.1f",		
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "actual temperature: %.1fºC",		
 		_actual_temperature - Temperature::zero);
 	_is_on = false;
 }
@@ -38,7 +38,7 @@ QsiCooler::QsiCooler(QsiCamera& camera)
  *
  * \return Set absolute temperature of the cooler 
  */
-float	QsiCooler::getSetTemperature() {
+Temperature	QsiCooler::getSetTemperature() {
 	//debug(LOG_DEBUG, DEBUG_LOG, 0, "getting set temperature");
 	std::unique_lock<std::recursive_mutex>	lock(_camera.mutex,
 		std::try_to_lock);
@@ -51,7 +51,7 @@ float	QsiCooler::getSetTemperature() {
 		_camera.camera().get_SetCCDTemperature(&temp);
 		END_STOPWATCH("get_SetCCDTemperature()");
 		//debug(LOG_DEBUG, DEBUG_LOG, 0, "got temerature %.1f", temp);
-		return temp + Temperature::zero;
+		return Temperature(temp, Temperature::CELSIUS);
 	} catch (const std::exception& x) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "could not get set "
 			"temperature: %s", x.what());
@@ -65,12 +65,12 @@ float	QsiCooler::getSetTemperature() {
  * This method returns the last retrieved actual temperature if the
  * camera happens to be locked
  */
-float	QsiCooler::getActualTemperature() {
+Temperature	QsiCooler::getActualTemperature() {
 	//debug(LOG_DEBUG, DEBUG_LOG, 0, "getting actual temperature");
 	std::unique_lock<std::recursive_mutex>	lock(_camera.mutex,
 		std::try_to_lock);
 	if (!lock) {
-		return _actual_temperature;
+		return Temperature(_actual_temperature);
 	}
 	try {
 		double	temp;
@@ -83,7 +83,7 @@ float	QsiCooler::getActualTemperature() {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "could not get actual "
 			"temperature: %s", x.what());
 	}
-	return _actual_temperature;
+	return Temperature(_actual_temperature);
 }
 
 /**

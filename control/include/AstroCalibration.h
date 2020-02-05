@@ -139,7 +139,7 @@ class CalibrationFrameProcess {
 protected:
 	astro::camera::CcdPtr	ccd;
 	astro::camera::Exposure	exposure;
-	float	_temperature;
+	Temperature	_temperature;
 	unsigned int	_nimages;
 	void	prepare();
 	void	cleanup();
@@ -155,8 +155,8 @@ public:
 		exposure.exposuretime(exposuretime);
 	}
 
-	float	temperature() const { return _temperature; }
-	void	setTemperature(float temperatur) { _temperature = temperatur; }
+	Temperature	temperature() const { return _temperature; }
+	void	setTemperature(const Temperature& t) { _temperature = t; }
 	unsigned int	nimages() const { return _nimages; }
 	void	setNimages(unsigned int nimages) { _nimages = nimages; }
 

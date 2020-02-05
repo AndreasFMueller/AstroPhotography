@@ -734,6 +734,7 @@ void	guidercontrollerwidget::launchMonitor() {
 	_trackingmonitor = new TrackingMonitorController(NULL,
 				_trackingmonitordialog);
 	_trackingmonitorptr = Ice::ObjectPtr(_trackingmonitor);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "tracking monitor generated");
 
 	// get the history of the track
 	snowstar::TrackingSummary	summary = _guider->getTrackingSummary();

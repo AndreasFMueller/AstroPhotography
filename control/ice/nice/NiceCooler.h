@@ -20,10 +20,11 @@ public:
 	NiceCooler(snowstar::CoolerPrx cooler, const DeviceName& devicename);
 	virtual ~NiceCooler();
 
-	virtual float getSetTemperature();
-	virtual float getActualTemperature();
-	void	setTemperature(float temperature);
-	
+	virtual Temperature getSetTemperature();
+	virtual Temperature getActualTemperature();
+protected:
+	virtual void	setTemperature(float temperature);
+public:
 	virtual bool	isOn();
 	virtual void	setOn(bool onoff);
 

@@ -46,13 +46,13 @@ void	SimCoolerTest::testName() {
 void	SimCoolerTest::testCooler() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "Start cooler test");
 	CoolerPtr	cooler = locator->getCooler("cooler:simulator/cooler");
-	double	ambient = Temperature::zero + 13.2;
+	Temperature	ambient(13.2, Temperature::CELSIUS);
 	CPPUNIT_ASSERT(fabs(ambient - cooler->getActualTemperature()) < 0.01);
 	CPPUNIT_ASSERT(cooler->getActualTemperature()
 				== cooler->getSetTemperature());
 	CPPUNIT_ASSERT(!cooler->isOn());
-	cooler->setTemperature(260);
-	CPPUNIT_ASSERT(cooler->getSetTemperature() == 260);
+	cooler->setTemperature(Temperature(260));
+	CPPUNIT_ASSERT(cooler->getSetTemperature() == Temperature(260));
 	cooler->setOn(true);
 	CPPUNIT_ASSERT(cooler->isOn());
 	for (int i = 0; i < 10; i++) {

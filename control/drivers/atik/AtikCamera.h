@@ -55,8 +55,8 @@ private:
 	int	_tempSensorCount;
 	std::atomic_bool	_is_on;
 	std::atomic<float>	_last_actual_temperature;
-	float	getSetTemperature(AtikCooler& cooler);
-	float	getActualTemperature(AtikCooler& cooler);
+	Temperature	getSetTemperature(AtikCooler& cooler);
+	Temperature	getActualTemperature(AtikCooler& cooler);
 	void	setTemperature(const float temperature, AtikCooler& cooler);
 	bool	isOn(AtikCooler& cooler);
 	void	setOn(bool onoff, AtikCooler& cooler);

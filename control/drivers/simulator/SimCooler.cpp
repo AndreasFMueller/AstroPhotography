@@ -14,15 +14,15 @@ namespace astro {
 namespace camera {
 namespace simulator {
 
-#define AMBIENT_TEMPERATURE     (Temperature::zero + 13.2)
+const static Temperature	ambient_temperature(Temperature::zero + 13.2);
 
 /**
  *  \brief Construct a new cooler object
  */
 SimCooler::SimCooler(SimLocator& locator)
 	: Cooler(DeviceName("cooler:simulator/cooler")), _locator(locator) {
-	temperature = AMBIENT_TEMPERATURE;
-	lasttemperature = AMBIENT_TEMPERATURE;
+	temperature = ambient_temperature;
+	lasttemperature = ambient_temperature;
 	laststatechange = simtime();
 	on = false;
 	_dewheatervalue = 0.;
@@ -31,20 +31,21 @@ SimCooler::SimCooler(SimLocator& locator)
 /**
  * \brief Get the actual temperature
  */
-float	SimCooler::getActualTemperature() {
+Temperature	SimCooler::getActualTemperature() {
 	double	timepast = simtime() - laststatechange;
-	float	targettemperature = (on) ? temperature : AMBIENT_TEMPERATURE;
+	Temperature	targettemperature
+				= (on) ? temperature : ambient_temperature;
 	float	delta = targettemperature - lasttemperature;
 	// for past time < 5, we let the temperature change linearly
 	// at the end of 
 	float	actemp = 0;
 	if (timepast < 5) {
-		actemp = (timepast / 6) * delta + lasttemperature;
+		actemp = (timepast / 6) * delta + lasttemperature.temperature();
 	} else {
-		actemp = targettemperature - exp(5 - timepast) * delta / 6;
+		actemp = targettemperature.temperature() - exp(5 - timepast) * delta / 6;
 	}
 	//debug(LOG_DEBUG, DEBUG_LOG, 0, "t = %.1f, T = %.1f", timepast, actemp);
-	return actemp;
+	return Temperature(actemp);
 }
 
 /**
@@ -74,7 +75,7 @@ void	SimCooler::setOn(bool onoff) {
  * \brief Find out whether the cooler is currently below ambient temperature
  */
 int	SimCooler::belowambient() {
-	int	result = (AMBIENT_TEMPERATURE - getActualTemperature()) / 7.;
+	int	result = (ambient_temperature - getActualTemperature()) / 7.;
 	return result;
 }
 

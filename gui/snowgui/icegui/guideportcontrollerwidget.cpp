@@ -329,6 +329,11 @@ void	guideportcontrollerwidget::activateClicked() {
 	}
 }
 
+static const int	minguideportdisplaytime = 200;
+#define	ensure_minimum(a)						\
+	if (a < minguideportdisplaytime) { a = minguideportdisplaytime; }
+
+
 void	guideportcontrollerwidget::activate(
 		astro::camera::GuidePortActivation activation) {
 	// RA+
@@ -336,6 +341,7 @@ void	guideportcontrollerwidget::activate(
 	if (raplusactivationtime > 0) {
 		_active |= snowstar::RAPLUS;
 		ui->guiderButton->setWestActive(true);
+		ensure_minimum(raplusactivationtime);
 		_activationTimerRAplus.setInterval(raplusactivationtime);
 		_activationTimerRAplus.start();
 	} else {
@@ -346,6 +352,7 @@ void	guideportcontrollerwidget::activate(
 	if (raminusactivationtime > 0) {
 		_active |= snowstar::RAMINUS;
 		ui->guiderButton->setEastActive(true);
+		ensure_minimum(raminusactivationtime);
 		_activationTimerRAminus.setInterval(raminusactivationtime);
 		_activationTimerRAminus.start();
 	} else {
@@ -356,6 +363,7 @@ void	guideportcontrollerwidget::activate(
 	if (decplusactivationtime > 0) {
 		_active |= snowstar::DECPLUS;
 		ui->guiderButton->setNorthActive(true);
+		ensure_minimum(decplusactivationtime);
 		_activationTimerDECplus.setInterval(decplusactivationtime);
 		_activationTimerDECplus.start();
 	} else {
@@ -366,6 +374,7 @@ void	guideportcontrollerwidget::activate(
 	if (decminusactivationtime > 0) {
 		_active |= snowstar::DECMINUS;
 		ui->guiderButton->setSouthActive(true);
+		ensure_minimum(decminusactivationtime);
 		_activationTimerDECminus.setInterval(decminusactivationtime);
 		_activationTimerDECminus.start();
 	} else {

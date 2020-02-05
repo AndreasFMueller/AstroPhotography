@@ -15,12 +15,14 @@ namespace simulator {
 class SimCooler : public Cooler {
 	SimLocator&	_locator;
 	double	laststatechange;
-	float	lasttemperature;
+	Temperature	lasttemperature;
 	bool	on;
 public:
 	SimCooler(SimLocator& locator);
-	virtual float	getActualTemperature();
+	virtual Temperature	getActualTemperature();
+protected:
 	virtual void	setTemperature(float _temperature);
+public:
 	virtual void	setOn(bool onoff);
 	virtual bool	isOn() { return on; }
 	int	belowambient();

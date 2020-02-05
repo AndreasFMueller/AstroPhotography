@@ -86,7 +86,7 @@ ExposureWork::ExposureWork(TaskQueueEntry& __task) : TaskWork(__task) {
 
 	// turn on the cooler
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "get cooler '%s', temperature %.2f ",
-		task().cooler().c_str(), task().ccdtemperature());
+		task().cooler().c_str(), task().ccdtemperature().celsius());
 	if ((task().cooler().size() > 0) && (task().ccdtemperature() > 0)) {
 		try {
 			astro::device::DeviceAccessor<astro::camera::CoolerPtr>
