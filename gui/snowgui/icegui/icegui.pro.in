@@ -136,7 +136,7 @@ SOURCES += 								\
 	calibrationimagewidget.cpp					\
 	ccddata.cpp							\
 	CoolerActive.cpp						\
-	coolerupdatework.cpp						\
+	CoolerCallbackI.cpp						\
 	EventMonitor.cpp						\
 	FilterWheelBusy.cpp						\
 	filterwheelupdatework.cpp					\

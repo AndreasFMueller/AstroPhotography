@@ -1,5 +1,10 @@
 ChangeLog for the Qt GUI to Astrophotography
 
+20200206:
+	* added callback to coolercontrollerwidget
+	* add CoolerCallbackI.cpp
+	* remove coolerupdatework.cpp
+
 20200205:
 	* converted guideportcontrollerwidget to using callbacks
 

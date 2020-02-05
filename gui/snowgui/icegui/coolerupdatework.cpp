@@ -7,6 +7,7 @@
 
 namespace snowgui {
 
+#if 0
 /**
  * \brief Cooler update work construction
  */
@@ -32,5 +33,6 @@ void    coolerupdatework::statusUpdate() {
                 _coolercontrollerwidget->statusUpdate();
         }
 }
+#endif
 
 } // namespace snowgui

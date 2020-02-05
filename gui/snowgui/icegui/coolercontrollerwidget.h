@@ -17,20 +17,20 @@ namespace Ui {
 
 class coolercontrollerwidget;
 
-/**
- * \brief udpate thread
- *
- * see filterwheelcontrollerwidget for the rationale behind this class
- */
-class coolerupdatework : public QObject {
-	Q_OBJECT
-	coolercontrollerwidget	*_coolercontrollerwidget;
-	std::recursive_mutex	_mutex;
+class CoolerCallbackI : public snowstar::CoolerCallback {
+	coolercontrollerwidget&	_coolercontrollerwidget;
 public:
-	coolerupdatework(coolercontrollerwidget *cc);
-	~coolerupdatework();
-public slots:
-	void	statusUpdate();
+	CoolerCallbackI(coolercontrollerwidget& c)
+		: _coolercontrollerwidget(c) { }
+
+	void	updateCoolerInfo(const snowstar::CoolerInfo& info,
+				const Ice::Current& current);
+
+	void	updateSetTemperature(float settemperature,
+				const Ice::Current& current);
+
+	void	updateDewHeater(float dewheater,
+                                const Ice::Current& current);
 };
 
 /**
@@ -41,8 +41,10 @@ class coolercontrollerwidget : public InstrumentWidget {
 
 	snowstar::CoolerPrx	_cooler;
 	std::vector<std::string>	_cooler_names;
-	QThread			*_updatethread;
-	coolerupdatework	*_updatework;
+
+	Ice::ObjectPtr	_cooler_callback;
+	Ice::Identity	_cooler_identity;
+
 	std::pair<float,float>	_dewheaterinterval;
 public:
 	explicit coolercontrollerwidget(QWidget *parent = 0);
