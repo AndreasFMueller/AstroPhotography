@@ -322,17 +322,6 @@ void	DaemonI::setSystemTime(Ice::Long unixtime,
 	time_t	t = unixtime;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "setting system time to %s", ctime(&t));
 
-	int	rc;
-#if 0
-	rc = stime(&t);
-	if (rc == 0) {
-		return;
-	}
-	if (EPERM != errno) {
-		debug(LOG_ERR, DEBUG_LOG, 0, "cannot set time: %s",
-			strerror(errno));
-	}
-#endif
 
 	// construct the command
 	struct tm	*tp = localtime(&t);
@@ -352,7 +341,7 @@ void	DaemonI::setSystemTime(Ice::Long unixtime,
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "time set command: %s", cmd.c_str());
 
 	// execute the command
-	rc = system(cmd.c_str());
+	int	rc = system(cmd.c_str());
 	if (rc) {
 		// throw an exception
 		OperationFailed	f;

@@ -117,15 +117,6 @@ void	SimCooler::updateTemperature() {
 				= (on) ? temperature : ambient_temperature;
 	float	delta = targettemperature - lasttemperature;
 
-#if 0
-	// for past time < 5, we let the temperature change linearly
-	float	actemp = 0;
-	if (timepast < 5) {
-		actemp = (timepast / 6) * delta + lasttemperature.temperature();
-	} else {
-		actemp = targettemperature.temperature() - exp(5 - timepast) * delta / 6;
-	}
-#endif
 	// linearly change the temperature. Because we often update
 	// the last temperature, the temperature changes become slower
 	// with time
