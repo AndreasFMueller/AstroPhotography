@@ -1,5 +1,8 @@
 ChangeLog for the Astro project.
 
+20200206:
+	* add a build script
+
 20200205:
 	* fix some minor bugs in the guideport callback stuff
 
