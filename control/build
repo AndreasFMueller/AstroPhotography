@@ -67,9 +67,7 @@ echo compiling on ${cores} cores
 #
 # now run all the jobs and measure the time they take
 #
-time (
-	set -o posix
-	set -x
+(
 	if [ "${run_configure}" = yes ]
 	then
 		echo "reconfiguring..."
@@ -82,9 +80,10 @@ time (
 	fi
 	echo build on ${cores} cores, targets: $@ ...
 	make ${dryrun} -j ${cores} $@
+	set -o posix
 	TIMEFORMAT='
 real    %lR
-user    %lU %P%% of real
+user    %lU %P%%
 sys     %lS'
 	time
 ) 2>&1 | tee ${log_options} make.log
