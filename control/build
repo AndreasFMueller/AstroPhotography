@@ -31,7 +31,7 @@ do
 		echo "  -h,-?   display this help message and exit"
 		exit 0
 		;;
-	a)	log_options=-a
+	a)	log_options=--append
 		;;
 	c)	run_configure=yes
 		;;
@@ -62,12 +62,14 @@ case `uname -s` in
 		echo "number of cores unknown, using 2"
 		;;
 esac
-echo compiling on ${cores} core
+echo compiling on ${cores} cores
 
 #
-# now run all the jobs in a subshell and measure the time they tike
+# now run all the jobs and measure the time they take
 #
 time (
+	set -o posix
+	set -x
 	if [ "${run_configure}" = yes ]
 	then
 		echo "reconfiguring..."
@@ -80,6 +82,11 @@ time (
 	fi
 	echo build on ${cores} cores, targets: $@ ...
 	make ${dryrun} -j ${cores} $@
-)  2>&1 | tee ${log_options} make.log
+	TIMEFORMAT='
+real    %lR
+user    %lU %P%% of real
+sys     %lS'
+	time
+) 2>&1 | tee ${log_options} make.log
 
 
