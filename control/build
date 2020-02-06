@@ -1,0 +1,91 @@
+#! /bin/sh
+# 
+# build the complete project using as many CPUs as available on the present
+# platform
+#
+# (c) 2020 Prof Dr Andreas Müller, Hochschule Rapperswil
+#
+
+#
+# initialize some control variables, options may override some of them
+#
+run_configure=no	# set to yes to run the configure step first
+run_clean=no		# set to yes to run "make clean" before building
+dryrun=			# set to -n to run make with the -n option
+
+#
+# parse command line options
+#
+while getopts "acChin?" opt
+do
+	case "${opt}" in
+	h|\?)	echo "usage: ./build [ options ] targets ..."
+		echo
+		echo "Build AstroPhotography project, targets are handed to the make command"
+		echo
+		echo "options:"
+		echo "  -a      append to existing log file instead starting a new one"
+		echo "  -n      dry run, don\'t build anything, just show what would be done"
+		echo "  -c      run configure before building"
+		echo "  -C      run make clean before building"
+		echo "  -h,-?   display this help message and exit"
+		exit 0
+		;;
+	a)	log_options=--append
+		;;
+	c)	run_configure=yes
+		;;
+	C)	run_clean=yes
+		;;
+	n)	dryrun=-n
+		;;
+	esac
+done
+
+#
+# remove all arguments processed so far, we will later hand them over 
+# as target arguments to the make command
+#
+shift $((OPTIND-1))
+[ "${1:-}" = "--" ] && shift
+
+#
+# find the number of cores available for compiling
+#
+cores=1
+case `uname -s` in
+	Linux)	cores=`awk 'BEGIN {n=0} /^processor/ {++n} END {print n}' /proc/cpuinfo`
+		;;
+	Darwin)	cores=`sysctl -n hw.ncpu`
+		;;
+	*)	cores=2
+		echo "number of cores unknown, using 2"
+		;;
+esac
+echo compiling on ${cores} cores
+
+#
+# now run all the jobs and measure the time they take
+#
+(
+	if [ "${run_configure}" = yes ]
+	then
+		echo "reconfiguring..."
+		bash configureit
+	fi
+	if [ "${run_clean}" = yes ]
+	then
+		echo "cleaning..."
+		make -j ${cores} clean
+	fi
+	echo build on ${cores} cores, targets: $@ ...
+	make ${dryrun} -j ${cores} $@
+	set -o posix
+	TIMEFORMAT='
+real    %lR
+user    %lU %P%%
+sys     %lS'
+	time
+) 2>&1 | tee ${log_options} make.log
+
+
