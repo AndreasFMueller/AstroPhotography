@@ -76,7 +76,7 @@ echo compiling on ${cores} cores
 	if [ "${run_clean}" = yes ]
 	then
 		echo "cleaning..."
-		make -j ${cores} clean
+		make -j ${cores} clean
 	fi
 	echo build on ${cores} cores, targets: $@ ...
 	make ${dryrun} -j ${cores} $@
