@@ -1,0 +1,14 @@
+Email of february 11 2020 from Terry Platt @ SX:
+
+Here's Dave's answer on the cooler -
+
+Andreas is correct the first function "SX_CMD_COOLER" works as he
+describes it.
+
+The second function "SX_CMD_COOLER_TEMPERATURE" is used just to
+return the cooler temperature & status. It cannot change the cooler
+set point. Originally only the first function was available but
+some customers did not like the idea of setting the cooler operating
+point each time they wanted to know the current temperature. So a
+simpler function was introduced to do this.
+
