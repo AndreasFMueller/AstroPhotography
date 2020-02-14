@@ -92,4 +92,8 @@ bool	Temperature::operator==(const Temperature& other) const {
 	return _temperature == other._temperature;
 }
 
+bool	Temperature::operator!=(const Temperature& other) const {
+	return _temperature != other._temperature;
+}
+
 } // namespace astro

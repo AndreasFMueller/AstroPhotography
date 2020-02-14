@@ -38,7 +38,8 @@ DeviceName	Cooler::defaultname(const DeviceName& parent,
  * \brief Create a cooler from the name
  */
 Cooler::Cooler(const DeviceName& name) : Device(name, DeviceName::Cooler),
-	temperature(25, Temperature::CELSIUS) {
+	_actualTemperature(25, Temperature::CELSIUS),
+	_setTemperature(25, Temperature::CELSIUS), _on(false) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "create cooler named %s",
 		Device::name().name().c_str());
 }
@@ -47,7 +48,8 @@ Cooler::Cooler(const DeviceName& name) : Device(name, DeviceName::Cooler),
  * \brief Create a cooler from the unit name
  */
 Cooler::Cooler(const std::string& name) : Device(name, DeviceName::Cooler),
-	temperature(25, Temperature::CELSIUS) {
+	_actualTemperature(25, Temperature::CELSIUS),
+	_setTemperature(25, Temperature::CELSIUS), _on(false) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "create cooler named %s",
 		Device::name().name().c_str());
 }
@@ -62,7 +64,7 @@ Cooler::~Cooler() {
  * \brief Get the current set temperature
  */
 Temperature	Cooler::getSetTemperature() {
-	return temperature;
+	return _setTemperature;
 }
 
 /**
@@ -72,7 +74,7 @@ Temperature	Cooler::getSetTemperature() {
  * be overridden by concrete Cooler implementations.
  */
 Temperature	Cooler::getActualTemperature() {
-	throw std::runtime_error("cannot measure temperature");
+	return _actualTemperature;
 }
 
 /**
@@ -81,6 +83,8 @@ Temperature	Cooler::getActualTemperature() {
  * Temperature must be absolute, so temperatures below 0 are rejected as
  * well as temperatures above 350K, as they correspond to heaters rather
  * than coolers.
+ *
+ * \param _temperature	new set temperature
  */
 void	Cooler::setTemperature(float _temperature) {
 	if (_temperature < 0) {
@@ -89,9 +93,15 @@ void	Cooler::setTemperature(float _temperature) {
 	if (_temperature > 350) {
 		throw std::range_error("temperature too large: heater?");
 	}
-	temperature = _temperature;
+	_setTemperature = _temperature;
 }
 
+/**
+ * \brief Set the temperature
+ *
+ * This is the public interface which ensures that the status update
+ * callback is called
+ */
 void	Cooler::setTemperature(const Temperature& temperature) {
 	// send the new temperature to the callback
 	callback(temperature);
@@ -104,6 +114,8 @@ void	Cooler::setTemperature(const Temperature& temperature) {
  * This is an empty implementation that must be overridden by driver classes.
  * Driver classes still need to call this method at the end of their
  * implementation to ensure that the callback is sent.
+ *
+ *  \param onoff	Turn the cooler on/off
  */
 void	Cooler::setOn(bool /* onoff */) {
 	CoolerInfo	ci(getActualTemperature(), getSetTemperature(), isOn());
@@ -116,7 +128,7 @@ void	Cooler::setOn(bool /* onoff */) {
  * This is a default implementation, must be overridden by driver classes.
  */
 bool	Cooler::isOn() {
-	return true;
+	return _on;
 }
 
 /**
@@ -160,10 +172,11 @@ bool	Cooler::stable() {
 			stablelimit);
 	}
 	float	actualtemperature = this->getActualTemperature().temperature();
-	float	delta = fabs(actualtemperature - temperature.temperature());
+	float	delta = fabs(actualtemperature - _setTemperature.temperature());
 	debug(LOG_DEBUG, DEBUG_LOG, 0,
 		"T_act = %.1f, T_set = %.1f, delta = %.1f, limit = %.1f",
-		actualtemperature, temperature, delta, stablelimit);
+		actualtemperature, _setTemperature.temperature(),
+		delta, stablelimit);
 	return (delta < stablelimit);
 }
 

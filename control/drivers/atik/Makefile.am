@@ -12,10 +12,11 @@ noinst_HEADERS = AtikLocator.h AtikUtils.h AtikCamera.h AtikCcd.h	\
 pkglib_LTLIBRARIES = atik.la 
 
 if USE_UDEV
-
+if ENABLE_NONROOT
+else
 udevdir = /etc/udev/rules.d
 udev_DATA = 80-atik.rules
-
+endif
 endif
 
 if ENABLE_UNITTESTS

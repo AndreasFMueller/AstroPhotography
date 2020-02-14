@@ -8,10 +8,11 @@ EXTRA_DIST = 80-othello.rules
 if ENABLE_OTHELLO
 
 if USE_UDEV
-
+if ENABLE_NONROOT
+else
 udevdir = /etc/udev/rules.d
 udev_DATA = 80-othello.rules
-
+endif
 endif
 
 pkglib_LTLIBRARIES = othello.la

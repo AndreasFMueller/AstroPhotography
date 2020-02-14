@@ -19,34 +19,67 @@ static DeviceName	sx_coolername(const DeviceName& cameraname) {
 	return coolername;
 }
 
+/**
+ * \brief Trampoline function to start the run() method in the cooler
+ *
+ * \param simcooler	the cooler to run this thread for
+ */
+static void	cooler_main(SxCooler *simcooler) {
+	try {
+		simcooler->run();
+	} catch (...) {
+	}
+}
+
+/**
+ * \brief Create the cooler
+ *
+ * \param _camera	The camera this cooler belongs to
+ */
 SxCooler::SxCooler(SxCamera& _camera)
 	: Cooler(sx_coolername(_camera.name())), camera(_camera) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "create an SX cooler");
-	cooler_on = false;
-	// we should find out whether the cooler is on, this is done by
-	// calling the cooler command twice. The first time we may use the
-	// wrong parameters, but when we then retrieve the result, we know
-	// the current state, remember it and immediately set it again. So
-	// even if our first request was wrong, after the second, we are 
-	// back to the original state. We also use the actual temperature
-	// for the set temperature, for lack of anything better.
-	cmd();
-	Cooler::setTemperature(actualtemperature.temperature());
-	cmd();
+	// call the query function to find the current temperature
+	// and cooler state
+	query(false);
+
+	// if the cooler is on, we cannot really know the set temperature
+	// so we just fake it and assume that the actual temperature
+	// is also the set temperature
+	if (isOn()) {
+		_setTemperature = _actualTemperature;
+	}
+
+	// start the thread
+	std::unique_lock<std::recursive_mutex>	lock(_mutex);
+	_thread = std::thread(cooler_main, this);
 }
 
+/**
+ * \brief Destroy the cooler
+ */
 SxCooler::~SxCooler() {
 	// XXX we should turn the cooler off
+	{
+		std::unique_lock<std::recursive_mutex>	lock(_mutex);
+		_terminate = true;
+	}
+	_cond.notify_all();
+	_thread.join();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "cooler thread completed");
 }
 
+/**
+ * \brief Execute the COOLER command
+ */
 void	SxCooler::cmd() {
 	uint16_t	temp = getSetTemperature().temperature() * 10;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "cooler command T = %.1fºC, on = %s",
-		getSetTemperature().celsius(), (cooler_on) ? "yes" : "no");
+		getSetTemperature().celsius(), (_on) ? "yes" : "no");
 	Request<sx_cooler_temperature_t>	request(
 		RequestBase::vendor_specific_type,
 		RequestBase::device_recipient,
-		(uint16_t)((cooler_on) ? 1 : 0),
+		(uint16_t)((_on) ? 1 : 0),
 		(uint8_t)SX_CMD_COOLER, temp);
 	try {
 		if (camera.reserve("cooler", 100)) {
@@ -64,30 +97,114 @@ void	SxCooler::cmd() {
 		throw DeviceTimeout(msg);
 	}
 	camera.release("cooler");
-	actualtemperature = Temperature(request.data()->temperature / 10.);
-	cooler_on = (request.data()->status) ? true : false;
+	Temperature	actual = Temperature(request.data()->temperature / 10.);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "actual temperature = %.1fºC",
-		actualtemperature.celsius());
+		_actualTemperature.celsius());
+	bool		on = (request.data()->status) ? true : false;
+	if ((on != _on) || (actual != _actualTemperature)) {
+		_actualTemperature = actual;
+		_on = on;
+		callback(CoolerInfo(_actualTemperature, _setTemperature, _on));
+	}
 }
 
+/**
+ * \brief Query the state of the cooler, using the COOLER_TEMPERATURE command
+ */
+void	SxCooler::query(bool sendcallback) {
+	uint16_t	temp = getSetTemperature().temperature() * 10;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "cooler command T = %.1fºC, on = %s",
+		getSetTemperature().celsius(), (_on) ? "yes" : "no");
+	Request<sx_cooler_temperature_t>	request(
+		RequestBase::vendor_specific_type,
+		RequestBase::device_recipient,
+		(uint16_t)((_on) ? 1 : 0),
+		(uint8_t)SX_CMD_COOLER_TEMPERATURE, temp);
+	try {
+		if (camera.reserve("cooler", 100)) {
+			camera.controlRequest(&request);
+		} else {
+			debug(LOG_WARNING, DEBUG_LOG, 0,
+				"Warning: cannot set cooler, camera reserved");
+			return;
+		}
+	} catch (USBError& x) {
+		camera.release("cooler");
+		std::string	msg = stringprintf("%s usb error: %s",
+					name().toString().c_str(), x.what());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw DeviceTimeout(msg);
+	}
+	camera.release("cooler");
+
+	// interpret the data received
+	Temperature	actual = Temperature(request.data()->temperature / 10.);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "actual temperature = %.1fºC",
+		actual.celsius());
+	bool		on = (request.data()->status) ? true : false;
+
+	// find out whether anything has changed, in which case we
+	// should update the callback
+	if ((on != _on) || (actual != _actualTemperature)) {
+		_actualTemperature = actual;
+		_on = on;
+		if (sendcallback) {
+			callback(CoolerInfo(_actualTemperature,
+				_setTemperature, _on));
+		}
+	}
+}
+
+/**
+ *  \brief Get the temperature
+ */
 Temperature	SxCooler::getActualTemperature() {
-	cmd();
-	return actualtemperature;
+	query(true);
+	return Cooler::getActualTemperature();
 }
 
+/**
+ * \brief Set the temperature
+ *
+ * \param temperature	the temperature to set
+ */
 void	SxCooler::setTemperature(float temperature) {
 	Cooler::setTemperature(temperature);
 	cmd();
 }
 
+/**
+ *  \brief Query whether the cooler is on
+ */
 bool	SxCooler::isOn() {
-	cmd();
-	return cooler_on;
+	query(true);
+	return Cooler::isOn();
 }
 
+/**
+ * \brief Turn the cooler on
+ * 
+ *  \param onoff	whether or not to turn the cooler on or off
+ */
 void	SxCooler::setOn(bool onoff) {
-	cooler_on = onoff;
+	Cooler::setOn(onoff);
 	cmd();
+}
+
+/**
+ * \brief Main thread for 
+ */
+void	SxCooler::run() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "run() starts");
+	std::unique_lock<std::recursive_mutex>	lock(_mutex);
+	do {
+		// query temperature
+		query(true);
+
+		// wait until something happens or at most 3 seconds
+		_cond.wait_for(lock, std::chrono::milliseconds(3000));
+	} while (!_terminate);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "run() terminates");
 }
 
 } // namespace sx

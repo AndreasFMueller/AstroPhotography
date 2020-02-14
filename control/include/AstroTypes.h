@@ -136,6 +136,7 @@ public:
 	bool	operator>=(const Temperature& other) const;
 	bool	operator>(float) const;
 	bool	operator==(const Temperature& other) const;
+	bool	operator!=(const Temperature& other) const;
 };
 
 } // namespace astro

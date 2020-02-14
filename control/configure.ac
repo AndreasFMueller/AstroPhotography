@@ -616,6 +616,14 @@ else
 fi
 AC_SUBST(ASTROGROUP)
 
+# 
+AC_ARG_ENABLE([nonroot],
+[AS_HELP_STRING([--enable-nonroot], [enable install as nonroot])],
+[
+],[
+])
+AM_CONDITIONAL(ENABLE_NONROOT, test x$enable_nonroot = xyes)
+
 # find the current hostname
 server=`hostname`
 AC_SUBST(server)

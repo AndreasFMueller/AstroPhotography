@@ -18,6 +18,10 @@ namespace astro {
 namespace camera {
 namespace sx {
 
+class SxCcd;
+class SxCooler;
+class SxGuidePort;
+
 /**
  * \brief Starlight Xpress camera class
  *

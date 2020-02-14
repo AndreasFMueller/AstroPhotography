@@ -1,5 +1,11 @@
 ChangeLog for the Astro project.
 
+20200214:
+	* add --enable-nonroot option to configure script
+	* refactor the Cooler class, moving the state variables to the top
+	  class
+	* add a monitoring thread to the SX cooler driver
+
 20200206:
 	* add a build script
 

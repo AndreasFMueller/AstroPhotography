@@ -26,10 +26,11 @@ install-data-hook:
 	fi
 
 if USE_UDEV
-
+if ENABLE_NONROOT
+else
 udevdir = /etc/udev/rules.d
 udev_DATA = 80-sx.rules
-
+endif
 endif
 
 if ENABLE_UNITTESTS

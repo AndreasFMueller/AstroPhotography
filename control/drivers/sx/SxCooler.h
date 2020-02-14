@@ -23,10 +23,13 @@ namespace sx {
  */
 class SxCooler : public Cooler {
 	SxCamera&	camera;
-	bool	cooler_on;
-	Temperature	settemperature;
-	Temperature	actualtemperature;
 	void	cmd();
+	void	query(bool sendcallback = false);
+	// separate thread for cooler monitoring
+	std::thread		_thread;
+	std::recursive_mutex	_mutex;
+	std::condition_variable_any	_cond;
+	bool			_terminate;
 public:
 	SxCooler(SxCamera& camera);
 	virtual	~SxCooler();
@@ -35,6 +38,7 @@ public:
 	virtual void	setTemperature(float temperature);
 	virtual bool	isOn();
 	virtual	void	setOn(bool onoff);
+	void	run();
 };
 
 } // namespace sx

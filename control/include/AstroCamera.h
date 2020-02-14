@@ -572,7 +572,9 @@ typedef callback::CallbackDataEnvelope<Temperature>	SetTemperatureCallbackData;
  */
 class Cooler : public astro::device::Device {
 protected:
-	Temperature	temperature;
+	Temperature	_actualTemperature;
+	Temperature	_setTemperature;
+	bool	_on;
 public:
 	typedef CoolerPtr	sharedptr;
 	static DeviceName::device_type	devicetype;

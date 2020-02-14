@@ -33,7 +33,7 @@ static void	cooler_main(SimCooler *simcooler) {
  */
 SimCooler::SimCooler(SimLocator& locator)
 	: Cooler(DeviceName("cooler:simulator/cooler")), _locator(locator) {
-	temperature = ambient_temperature;
+	_setTemperature = ambient_temperature;
 	_actualTemperature = ambient_temperature;
 	lasttemperature = 0.;	// this temperature causes the thread to
 				// send an update to the callback in the
@@ -114,7 +114,7 @@ void	SimCooler::updateTemperature() {
 	// compute time since last info callback and temperature difference
 	double	timepast = simtime() - laststatechange;
 	Temperature	targettemperature
-				= (on) ? temperature : ambient_temperature;
+				= (on) ? _setTemperature : ambient_temperature;
 	float	delta = targettemperature - lasttemperature;
 
 	// linearly change the temperature. Because we often update
@@ -156,7 +156,7 @@ Temperature	SimCooler::getActualTemperature() {
  */
 void	SimCooler::setTemperature(float _temperature) {
 	std::unique_lock<std::recursive_mutex>	lock(_mutex);
-	temperature = _temperature;
+	_setTemperature = _temperature;
 	// signal the thread that something has happened
 	_cond.notify_all();
 }

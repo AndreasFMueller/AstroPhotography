@@ -25,7 +25,6 @@ class SimCooler : public Cooler {
 	std::condition_variable_any	_cond;
 	std::recursive_mutex	_mutex;
 	bool			_terminate;
-	Temperature	_actualTemperature;
 public:
 	SimCooler(SimLocator& locator);
 	virtual ~SimCooler();

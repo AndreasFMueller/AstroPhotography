@@ -12,10 +12,11 @@ noinst_HEADERS = QhyLocator.h QhyUtils.h QhyCamera.h QhyCcd.h QhyCooler.h
 SRCFILES = QhyLocator.cpp QhyUtils.cpp QhyCamera.cpp QhyCcd.cpp QhyCooler.cpp
 
 if USE_UDEV
-
+if ENABLE_NONROOT
+else
 udevdir = /etc/udev/rules.d
 udev_DATA = firmware/85-qhy.rules
-
+endif
 endif
 
 if ENABLE_UNITTESTS

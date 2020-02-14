@@ -175,6 +175,7 @@ then
 	user=astro
 else
 	user=`whoami`
+	commonflags="${commonflags} --enable-nonroot"
 fi
 useroptions="--with-owner=${user}"
 if bash scripts/getent group astro >/dev/null
