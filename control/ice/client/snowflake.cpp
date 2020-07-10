@@ -12,7 +12,9 @@
 #include <AstroUtils.h>
 #include <CommonClientTasks.h>
 #include <CommunicatorSingleton.h>
+#include <IceConversions.h>
 #include <includes.h>
+#include <time.h>
 
 using namespace snowstar;
 
@@ -80,7 +82,8 @@ int	main(int argc, char *argv[]) {
 	for (i = sequence.begin(); i != sequence.end(); i++) {
 		TaskInfo	info = tasks->info(*i);
 		std::cout << "id:     " << info.taskid << std::endl;
-		std::cout << "last:   " << info.lastchange << std::endl;
+		time_t	when = converttime(info.lastchange);
+		std::cout << "last:   " << ctime(&when); // << std::endl;
 		std::cout << "cause:  " << info.cause << std::endl;
 		std::cout << "file:   " << info.filename << std::endl;
 

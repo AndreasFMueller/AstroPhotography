@@ -3,7 +3,7 @@
  *
  * (c) 2016 Prof Dr Andreas Müller, Hochschule Rapperswil
  */
-#include <ChannelDisplayWidget.h>
+#include "ChannelDisplayWidget.h"
 #include <QPainter>
 #include <AstroDebug.h>
 #include <AstroFormat.h>

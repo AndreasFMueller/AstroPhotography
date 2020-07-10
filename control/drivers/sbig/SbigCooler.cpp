@@ -35,7 +35,7 @@ namespace sbig {
 SbigCooler::SbigCooler(SbigCamera& _camera, const DeviceName& name)
 	: Cooler(name), SbigDevice(_camera) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "constructing cooler");
-	enabled = isOn();
+	_on = isOn();
 	getSetTemperature();
 }
 
@@ -69,7 +69,7 @@ Temperature	SbigCooler::getSetTemperature() {
 
 	query_temperature_status(&results);
 
-	return temperature = Temperature(results.ccdSetpoint,
+	return _setTemperature = Temperature(results.ccdSetpoint,
 				Temperature::CELSIUS);
 }
 
@@ -93,7 +93,7 @@ void	SbigCooler::setTemperature(const float temperature) {
 	SbigLock	lock;
 	camera.sethandle();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "set the set temperature");
-	this->temperature = temperature;
+	Cooler::setTemperature(temperature);
 	if (!isOn()) {
 		return;
 	}
@@ -119,8 +119,8 @@ void	SbigCooler::set_temperature_regulation2(
 void	SbigCooler::set() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "set parameters");
 	SetTemperatureRegulationParams2	params;
-	params.regulation = (enabled) ? REGULATION_ON : REGULATION_OFF;
-	params.ccdSetpoint = temperature.celsius();
+	params.regulation = (_on) ? REGULATION_ON : REGULATION_OFF;
+	params.ccdSetpoint = _setTemperature.celsius();
 	set_temperature_regulation2(&params);
 }
 
@@ -142,7 +142,7 @@ bool	SbigCooler::isOn() {
  * \brief Turn cooler on.
  */
 void	SbigCooler::setOn(bool onoff) {
-	enabled = onoff;
+	_on = onoff;
 	set();
 }
 

@@ -16,7 +16,6 @@ namespace camera {
 namespace sbig {
 
 class SbigCooler : public Cooler, public SbigDevice {
-	bool	enabled;
 	void	set();
 	void	query_temperature_status(
 			QueryTemperatureStatusResults2  *results);

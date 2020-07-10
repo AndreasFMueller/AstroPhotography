@@ -6,6 +6,7 @@
 #include <FocusGraphWidget.h>
 #include <AstroDebug.h>
 #include <QPainter>
+#include <QPainterPath>
 
 namespace snowgui {
 

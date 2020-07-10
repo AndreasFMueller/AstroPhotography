@@ -8,6 +8,7 @@
 #include <AstroDebug.h>
 #include <AstroDevice.h>
 #include <QPainter>
+#include <QPainterPath>
 #include <QMouseEvent>
 #include <QToolTip>
 #include <QMenu>

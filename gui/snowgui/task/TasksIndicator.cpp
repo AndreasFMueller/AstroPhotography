@@ -5,6 +5,7 @@
  */
 #include "TasksIndicator.h"
 #include <QPainter>
+#include <QPainterPath>
 #include <AstroDebug.h>
 
 namespace snowgui {

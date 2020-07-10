@@ -286,7 +286,7 @@ gotbuildnumber:
 	}
 
 	// find out whether there is a shutter
-	if (ccd0request.data()->extra_capabilities & REGULATED_COOLER) {
+	if (ccd0request.data()->extra_capabilities & HAS_SHUTTER) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "has shutter");
 		ccd0.shutter(true);
 	} else {

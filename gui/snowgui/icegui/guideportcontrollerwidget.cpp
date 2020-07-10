@@ -127,11 +127,12 @@ void	guideportcontrollerwidget::setupComplete() {
  * \brief GUI components setup
  */
 void	guideportcontrollerwidget::setupGuideport() {
-	if (_guideport) {
-		ui->guideWidget->setEnabled(false);
-		ui->activationWidget->setEnabled(false);
-		ui->proposalWidget->setEnabled(false);
+	if (!_guideport) {
+		return;
 	}
+	ui->guideWidget->setEnabled(false);
+	ui->activationWidget->setEnabled(false);
+	ui->proposalWidget->setEnabled(false);
 
 	// ensure that we have an object adapter
 	try {

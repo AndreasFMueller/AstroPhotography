@@ -5,6 +5,7 @@
  */
 #include <CoolerActive.h>
 #include <QPainter>
+#include <QPainterPath>
 #include <cmath>
 #include <AstroDebug.h>
 

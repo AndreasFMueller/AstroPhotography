@@ -6,6 +6,7 @@
 #include "AdaptiveOpticsWidget.h"
 #include <QMouseEvent>
 #include <QPainter>
+#include <QPainterPath>
 #include <AstroDebug.h>
 #include <cmath>
 

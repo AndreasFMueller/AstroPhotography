@@ -5,6 +5,7 @@
  */
 #include <CalibrationDisplayWidget.h>
 #include <QPainter>
+#include <QPainterPath>
 #include <QEvent>
 #include <AstroDebug.h>
 #include <cmath>

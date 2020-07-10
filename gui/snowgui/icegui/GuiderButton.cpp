@@ -6,6 +6,7 @@
 #include <GuiderButton.h>
 #include <QWidget>
 #include <QPainter>
+#include <QPainterPath>
 #include <QMouseEvent>
 #include <cmath>
 #include <AstroDebug.h>

@@ -1,5 +1,9 @@
 ChangeLog for the Qt GUI to Astrophotography
 
+20200710:
+	* migrate to Qt5.15
+	* portability fixes
+
 20200206:
 	* added callback to coolercontrollerwidget
 	* add CoolerCallbackI.cpp

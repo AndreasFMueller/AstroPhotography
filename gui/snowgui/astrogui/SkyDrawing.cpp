@@ -7,6 +7,7 @@
 #include <AstroSolarsystem.h>
 #include <time.h>
 #include <sstream>
+#include <QPainterPath>
 
 using namespace astro::catalog;
 

@@ -25,6 +25,7 @@ static DeviceName	sx_coolername(const DeviceName& cameraname) {
  * \param simcooler	the cooler to run this thread for
  */
 static void	cooler_main(SxCooler *simcooler) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "start cooler thread");
 	try {
 		simcooler->run();
 	} catch (...) {
@@ -112,20 +113,19 @@ void	SxCooler::cmd() {
  * \brief Query the state of the cooler, using the COOLER_TEMPERATURE command
  */
 void	SxCooler::query(bool sendcallback) {
-	uint16_t	temp = getSetTemperature().temperature() * 10;
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "cooler command T = %.1fºC, on = %s",
-		getSetTemperature().celsius(), (_on) ? "yes" : "no");
+	uint16_t	temp = 0;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "cooler query");
 	Request<sx_cooler_temperature_t>	request(
 		RequestBase::vendor_specific_type,
 		RequestBase::device_recipient,
-		(uint16_t)((_on) ? 1 : 0),
+		(uint16_t)(0),
 		(uint8_t)SX_CMD_COOLER_TEMPERATURE, temp);
 	try {
 		if (camera.reserve("cooler", 100)) {
 			camera.controlRequest(&request);
 		} else {
 			debug(LOG_WARNING, DEBUG_LOG, 0,
-				"Warning: cannot set cooler, camera reserved");
+				"Warning: cannot query cooler, camera reserved");
 			return;
 		}
 	} catch (USBError& x) {
@@ -187,6 +187,8 @@ bool	SxCooler::isOn() {
  *  \param onoff	whether or not to turn the cooler on or off
  */
 void	SxCooler::setOn(bool onoff) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "turning cooler %s",
+		(onoff) ? "on" : "off");
 	Cooler::setOn(onoff);
 	cmd();
 }
@@ -202,7 +204,15 @@ void	SxCooler::run() {
 		query(true);
 
 		// wait until something happens or at most 3 seconds
-		_cond.wait_for(lock, std::chrono::milliseconds(3000));
+		switch (_cond.wait_for(lock, std::chrono::milliseconds(3000))) {
+		case std::cv_status::timeout:
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "cond timeout");
+			break;
+		case std::cv_status::no_timeout:
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "no cond timeout");
+			break;
+		}
+
 	} while (!_terminate);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "run() terminates");
 }

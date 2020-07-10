@@ -8,6 +8,7 @@ QT       += core gui widgets
 
 TEMPLATE = lib
 CONFIG += staticlib
+CONFIG += widgets
 
 QMAKE_MAC_SDK = @MACSDK@
 

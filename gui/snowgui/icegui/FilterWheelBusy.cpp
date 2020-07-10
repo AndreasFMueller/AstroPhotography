@@ -6,6 +6,7 @@
 #include "FilterWheelBusy.h"
 #include <AstroUtils.h>
 #include <QPainter>
+#include <QPainterPath>
 #include <QEvent>
 #include <cmath>
 

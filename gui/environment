@@ -5,7 +5,10 @@
 #
 
 
-if [ -d /Applications/Qt5/Qt5.14/5.14.0/clang_64/bin ]
+if [ -d /Applications/Qt5/Qt5.15/5.15.0/clang_64/bin ]
+then
+	PATH=${PATH}:/Applications/Qt5/Qt5.15/5.15.0/clang_64/bin
+elif [ -d /Applications/Qt5/Qt5.14/5.14.0/clang_64/bin ]
 then
 	PATH=${PATH}:/Applications/Qt5/Qt5.14/5.14.0/clang_64/bin
 elif [ -d /Applications/Qt5/Qt5.13/5.13.1/clang_64/bin ]
