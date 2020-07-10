@@ -1,5 +1,8 @@
 ChangeLog for the Astro project.
 
+20200710:
+	* add time option to astrotime utility
+
 20200214:
 	* add --enable-nonroot option to configure script
 	* refactor the Cooler class, moving the state variables to the top

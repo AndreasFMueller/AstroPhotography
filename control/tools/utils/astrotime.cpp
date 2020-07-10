@@ -12,6 +12,7 @@
 #include <sstream>
 #include <getopt.h>
 #include <string>
+#include <time.h>
 
 namespace astro {
 namespace app {
@@ -23,6 +24,7 @@ namespace time {
 static struct option	longopts[] = {
 { "debug",	no_argument,		NULL,		'd' },
 { "help",	no_argument,		NULL,		'h' },
+{ "time",	required_argument,	NULL,		't' },
 { NULL,		0,			NULL,		 0  }
 };
 
@@ -34,11 +36,17 @@ static void	usage(const std::string& progname) {
 	std::cout << "Usage:" << std::endl;
 	std::cout << std::endl;
 	std::cout << prg << " [ options ] <longitude> <latitude>" << std::endl;
+	std::cout << std::endl;
+	std::cout << "compute local siderial time" << std::endl;
+	std::cout << std::endl;
 	std::cout << "Options:" << std::endl;
 	std::cout << " -d,--debug           enter debug mode"
 		<< std::endl;
 	std::cout << " -h,--help            display this help message and exit"
 		<< std::endl;
+	std::cout << " -t,--time=<t>        compute siderial time for time <t> "
+		"in the format " << std::endl;
+	std::cout << "                      '%Y-%m-%d %H:%M:%S'" << std::endl;
 }
 
 /**
@@ -50,10 +58,12 @@ static void	usage(const std::string& progname) {
 int	main(int argc, char *argv[]) {
 	debug_set_ident("astrotime");
 	debugthreads = 1;
+	time_t	t;
+	::time(&t);
 	int	c;
 	int	longindex;
 	putenv((char *)"POSIXLY_CORRECT=1");    // cast to silence compiler
-	while (EOF != (c = getopt_long(argc, argv, "dh?",
+	while (EOF != (c = getopt_long(argc, argv, "dh?t:",
 		longopts, &longindex))) {
 		switch (c) {
 		case 'd':
@@ -63,6 +73,15 @@ int	main(int argc, char *argv[]) {
 		case '?':
 			usage(argv[0]);
 			return EXIT_SUCCESS;
+		case 't':
+			struct tm tm;
+			if (NULL == strptime(optarg, "%F %T", &tm)) {
+				std::cerr << "cannot parse date: '" << optarg;
+				std::cerr << "'" << std::endl;
+				return EXIT_FAILURE;
+			}
+			t = mktime(&tm);
+			break;
 		}
 	}
 
@@ -78,7 +97,7 @@ int	main(int argc, char *argv[]) {
 	astro::Angle	latitude(std::stod(argv[optind++]), Angle::Degrees);
 	astro::LongLat	longlat(longitude, latitude);
 
-	astro::AzmAltConverter	azmaltconverter(longlat);
+	astro::AzmAltConverter	azmaltconverter(t, longlat);
 	std::cout << azmaltconverter.LMST().hms() << std::endl;
 
 	return EXIT_SUCCESS;
