@@ -9,7 +9,7 @@
 # the -fuse-cxa-atexit seems to be necessary for dynamically loaded 
 # C++ modules, but I'm not convinced. The tests still crash when
 # unloading the modules
-CFLAGS="-Wall -Wextra -g -O2 -Wno-psabi"
+CFLAGS="-Wall -Wextra -g -O2"
 CXXFLAGS="-fuse-cxa-atexit ${CFLAGS}"
 export CFLAGS CXXFLAGS
 
@@ -127,7 +127,7 @@ Darwin)	echo "configuring for Mac OS X"
 		echo "configureing with SBIG driver"
 		sbigoption=--enable-sbig
 	fi
-	commonflags="${commonflags} --enable-unittests"
+	commonflags="${commonflags}"
 	;;
 Linux)	if [ -r /etc/debian_version ]
 	then
@@ -236,7 +236,7 @@ Darwin)
 	CXXFLAGS="${CXXFLAGS} -stdlib=libc++"
 	set -x
 	./configure --prefix=${prefix} ${commonflags} --enable-unittests \
-		--enable-uvc ${sbigoption}
+		--enable-uvc ${sbigoption} --disable-unittests
 	set +x
 	;;
 esac

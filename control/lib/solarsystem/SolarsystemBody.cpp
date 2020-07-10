@@ -13,6 +13,10 @@ SolarsystemBody::SolarsystemBody(const std::string& name) : _name(name) {
 		_name.c_str());
 }
 
+SolarsystemBody::~SolarsystemBody() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "destroying %s", _name.c_str());
+}
+
 RaDec	SolarsystemBody::ephemeris(time_t when) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "ephemeris for time %ld", when);
 	JulianDate	jd(when);

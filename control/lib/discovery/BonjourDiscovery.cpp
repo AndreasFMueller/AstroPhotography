@@ -45,7 +45,7 @@ void    BonjourDiscovery::browsereply_callback(DNSServiceRef /* sdRef */,
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "flags=%d found service %s/%s@%s", flags,
 		serviceName, regtype, replyDomain);
 	
-	if (flags && kDNSServiceFlagsAdd) {
+	if (flags & kDNSServiceFlagsAdd) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "add service '%s'",
 			serviceName);
 		add(ServiceKey(serviceName, regtype, replyDomain));

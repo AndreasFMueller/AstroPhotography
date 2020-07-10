@@ -8,7 +8,14 @@ SUBDIRS = . test
 noinst_LTLIBRARIES = libastrosolarsystem.la
 
 libastrosolarsystem_la_SOURCES = 					\
+	EclipticalCoordinates.cpp					\
+	JulianCenturies.cpp						\
 	Moon.cpp							\
+	PerturbationTerm.cpp						\
+	PerturbationSeries.cpp						\
+	PerturbedPlanetoid.cpp						\
+	Planetoid.cpp							\
+	SinCos.cpp							\
 	SolarsystemBody.cpp						\
 	SolarsystemFactory.cpp						\
 	Sun.cpp

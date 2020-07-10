@@ -399,6 +399,7 @@ public:
  * types, which have almost no limits to the size of the pixels, a
  * comparable integer type has to be specified.
  */
+#if 0
 #define COLOR_CONSTANTS(T, P)                                           \
 template<>                                                              \
 const Color<T>::value_type Color<T>::pedestal;				\
@@ -417,6 +418,7 @@ COLOR_CONSTANTS(unsigned long, unsigned long)
  */
 COLOR_CONSTANTS(float, unsigned int)
 COLOR_CONSTANTS(double, unsigned long)
+#endif
 
 template<>
 const Color<unsigned char>::value_type Color<unsigned char>::limit;
