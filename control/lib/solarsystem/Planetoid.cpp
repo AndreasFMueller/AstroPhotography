@@ -4,6 +4,8 @@
  * (c) 2020 Prof Dr Andreas Müller, Hochschule Rapperswil
  */
 #include <AstroSolarsystem.h>
+#include <iomanip>
+#include <AstroFormat.h>
 
 namespace astro {
 namespace solarsystem {
@@ -59,6 +61,25 @@ SinCos	Planetoid::Msc(const JulianCenturies& T) const {
 
 EclipticalCoordinates   Planetoid::ecliptical(const JulianCenturies& T) const {
 	return EclipticalCoordinates(l(T), r(T), b(T));
+}
+
+std::ostream&	operator<<(std::ostream& out, const Planetoid& planetoid) {
+	out << planetoid.name() << ":" << std::endl;
+
+	out << stringprintf("a =     %9.6f  ", planetoid.a());
+	out << stringprintf("e =  %9.6f  ", planetoid.e());
+	out << stringprintf("M0 =    %9.4f  ", planetoid.M0().degrees());
+	out << stringprintf("n =  %12.4f  ", planetoid.n().degrees());
+
+	out << std::endl;
+
+	out << stringprintf("Omega = %9.4f  ", planetoid.Omega().degrees());
+	out << stringprintf("i =  %9.4f  ", planetoid.i().degrees());
+	out << stringprintf("omega = %9.4f  ", planetoid.omega().degrees());
+
+	out << std::endl;
+
+	return out;
 }
 
 } // namespace solarsystem

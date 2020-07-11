@@ -212,6 +212,7 @@ protected:
 public:
 	Vector();
 	Vector(const double x[3]);
+	Vector(double X, double Y, double Z);
 	Vector	cross(const Vector& other) const;
 	double	x() const { return _x[0]; }
 	double	y() const { return _x[1]; }

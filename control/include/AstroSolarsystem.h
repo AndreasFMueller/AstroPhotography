@@ -83,10 +83,15 @@ public:
 	const Angle&	l() const { return _l; }
 	double	r() const { return _r; }
 	const Angle&	b() const { return _b; }
+	Vector	v() const;
+
 	EclipticalCoordinates	operator+(const EclipticalCoordinates& other) const;
 	EclipticalCoordinates	operator-(const EclipticalCoordinates& other) const;
 	EclipticalCoordinates	operator*(double m) const;
+	std::string	toString() const;
 };
+
+std::ostream&	operator<<(std::ostream& out, const EclipticalCoordinates& ec);
 
 EclipticalCoordinates	operator*(double m, const EclipticalCoordinates& ecl);
 
@@ -126,6 +131,14 @@ public:
 		double a, double e, const Angle& Omega, const Angle& i,
 		const Angle& omega, const Angle& omegabar, const Angle& n,
 		const Angle& M0);
+	const std::string&	name() const { return _name; }
+	double	a() const { return _a; }
+	double	e() const { return _e; }
+	const Angle&	Omega() const { return _Omega; }
+	const Angle&	i() const { return _i; }
+	const Angle&	omega() const { return _omega; }
+	const Angle&	n() const { return _n; }
+	const Angle&	M0() const { return _M0; }
 protected:
 	Angle	l(const JulianCenturies& T) const;
 	Angle	b(const JulianCenturies& T) const;
@@ -134,9 +147,57 @@ public:
 	Angle	M(const JulianCenturies& T) const;
 	SinCos	Msc(const JulianCenturies& T) const;
 	EclipticalCoordinates	ecliptical(const JulianCenturies& T) const;
+	Vector	XYZ(const JulianCenturies& T) const;
 };
 
+std::ostream&	operator<<(std::ostream& out, const Planetoid& planetoid);
+
 typedef std::shared_ptr<Planetoid>	PlanetoidPtr;
+
+class	Mercury : public Planetoid {
+public:
+	Mercury();
+};
+
+class	Venus : public Planetoid {
+public:
+	Venus();
+};
+
+class	Earth : public Planetoid {
+public:
+	Earth();
+};
+
+class	Mars : public Planetoid {
+public:
+	Mars();
+};
+
+class	Jupiter : public Planetoid {
+public:
+	Jupiter();
+};
+
+class	Saturn : public Planetoid {
+public:
+	Saturn();
+};
+
+class	Uranus : public Planetoid {
+public:
+	Uranus();
+};
+
+class	Neptune : public Planetoid {
+public:
+	Neptune();
+};
+
+class	Pluto : public Planetoid {
+public:
+	Pluto();
+};
 
 /**
  * \brief Perturbation series Term
@@ -202,6 +263,8 @@ public:
 	void	add(PerturbationSeriesPtr series);
 	EclipticalCoordinates	ecliptical(const JulianCenturies& T) const;
 };
+
+
 
 } // namespace solarsystem
 } // namespace astro

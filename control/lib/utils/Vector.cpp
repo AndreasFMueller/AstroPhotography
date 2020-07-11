@@ -26,6 +26,12 @@ Vector::Vector(const double x[3]) {
 	_x[2] = x[2];
 }
 
+Vector::Vector(double X, double Y, double Z) {
+	_x[0] = X;
+	_x[1] = Y;
+	_x[2] = Z;
+}
+
 double	Vector::abs() const {
 	return sqrt(_x[0] * _x[0] + _x[1] * _x[1] + _x[2] * _x[2]);
 }
