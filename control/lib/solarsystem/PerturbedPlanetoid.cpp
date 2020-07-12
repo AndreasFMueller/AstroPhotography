@@ -17,15 +17,22 @@ namespace solarsystem {
  * \param Omega		ascending node
  * \param i		inclination
  * \param omega		perihelion length
- * \param omegabar	perihelion argument
  * \param n		mean rate
  * \param M0		perihelion offset
  */
 PerturbedPlanetoid::PerturbedPlanetoid(const std::string& name,
                 double a, double e, const Angle& Omega, const Angle& i, 
-                const Angle& omega, const Angle& omegabar, const Angle& n,
-                const Angle& M0)
-	: Planetoid(name, a, e, Omega, i, omega, omegabar, n, M0) {
+                const Angle& omega, const Angle& n, const Angle& M0)
+	: Planetoid(name, a, e, Omega, i, omega, n, M0) {
+}
+
+/**
+ * \brief Construct a perturbation series planetoid from a simple planetoid
+ *
+ * \param planetoid	the simple planetoid to copy the data from
+ */
+PerturbedPlanetoid::PerturbedPlanetoid(const Planetoid& planetoid)
+	: Planetoid(planetoid) {
 }
 
 /**
@@ -47,8 +54,20 @@ void	PerturbedPlanetoid::add(PerturbationSeriesPtr series) {
 EclipticalCoordinates	PerturbedPlanetoid::ecliptical(
 	const JulianCenturies& T) const {
 	EclipticalCoordinates	result = Planetoid::ecliptical(T);
+	result = result + perturbations(T);
+	return result;
+}
+
+/**
+ * \brief compute the perturbations specifically
+ *
+ * \param T	the time in julian centuries
+ */
+EclipticalCoordinates	PerturbedPlanetoid::perturbations(
+	const JulianCenturies& T) const {
+	EclipticalCoordinates	result;
 	for (auto const s : _perturbers) {
-		result = result + s->ecliptical(T);
+		result = result + s->perturbations(T);
 	}
 	return result;
 }

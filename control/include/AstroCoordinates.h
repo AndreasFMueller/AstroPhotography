@@ -27,6 +27,7 @@ public:
 	virtual void	reduce(double base = 0);
 	typedef enum { Radians, Degrees, Hours, Revolutions, ArcMinutes, ArcSeconds } unit;
 	Angle(double angle = 0, unit u = Radians);
+	Angle(double x, double y);
 	virtual ~Angle() { }
 	double	degrees() const;
 	double	arcminutes() const;
@@ -42,6 +43,7 @@ public:
 	void	radians(double radians) { _angle = radians; }
 	double	revolutions() const;
 	void	revolutions(double revolutions);
+	double	value(unit u) const;
 	Angle	operator+(const Angle& other) const;
 	Angle	operator-(const Angle& other) const;
 	Angle	operator*(const double& other) const;

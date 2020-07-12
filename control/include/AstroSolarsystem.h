@@ -98,13 +98,14 @@ EclipticalCoordinates	operator*(double m, const EclipticalCoordinates& ecl);
 /**
  * \brief Auxiliary class to streamline computation of cos(k*x) and sin(k*x)
  */
-class	SinCos {
+class	SinCos : public Angle {
 	double	_cos;
 	double	_sin;
 public:
 	SinCos(double cos, double sin);
 	SinCos();
 	SinCos(const Angle& a);
+	SinCos(const std::pair<double,double>& p);
 	double	sin() const { return _sin; }
 	double	cos() const { return _cos; }
 	SinCos	operator*(int k) const;
@@ -123,14 +124,12 @@ class	Planetoid {
 	Angle	_Omega;		// ascending node
 	Angle	_i;		// orbital inclination
 	Angle	_omega;		// perihelion argument
-	Angle	_omegabar;	// perihelion length
 	Angle	_n;		// anomaly
 	Angle	_M0;		// perihelion angle
 public:
 	Planetoid(const std::string& name,
 		double a, double e, const Angle& Omega, const Angle& i,
-		const Angle& omega, const Angle& omegabar, const Angle& n,
-		const Angle& M0);
+		const Angle& omega, const Angle& n, const Angle& M0);
 	const std::string&	name() const { return _name; }
 	double	a() const { return _a; }
 	double	e() const { return _e; }
@@ -139,15 +138,18 @@ public:
 	const Angle&	omega() const { return _omega; }
 	const Angle&	n() const { return _n; }
 	const Angle&	M0() const { return _M0; }
+	void	n(const Angle& n) { _n = n; }
+	void	M0(const Angle& M0) { _M0 = M0; }
 protected:
-	Angle	l(const JulianCenturies& T) const;
-	Angle	b(const JulianCenturies& T) const;
-	double	r(const JulianCenturies& T) const;
+	Angle	l(const SinCos& m) const;
+	Angle	b(const SinCos& m) const;
+	double	r(const SinCos& m) const;
 public:
 	Angle	M(const JulianCenturies& T) const;
 	SinCos	Msc(const JulianCenturies& T) const;
 	EclipticalCoordinates	ecliptical(const JulianCenturies& T) const;
 	Vector	XYZ(const JulianCenturies& T) const;
+	std::string	toString(Angle::unit unit = Angle::Degrees) const;
 };
 
 std::ostream&	operator<<(std::ostream& out, const Planetoid& planetoid);
@@ -245,7 +247,8 @@ public:
 				double dr_cos, double dr_sin,
 				double db_cos, double db_sin);
 	EclipticalCoordinates	operator()(const JulianCenturies& T) const;
-	EclipticalCoordinates	ecliptical(const JulianCenturies& T) const;
+	EclipticalCoordinates	perturbations(const JulianCenturies& T) const;
+	Planetoid&	perturber() { return _perturber; }
 };
 
 typedef std::shared_ptr<PerturbationSeries>	PerturbationSeriesPtr;
@@ -258,12 +261,83 @@ class	PerturbedPlanetoid : public Planetoid {
 public:
 	PerturbedPlanetoid(const std::string& name,
 		double a, double e, const Angle& Omega, const Angle& i,
-		const Angle& omega, const Angle& omegabar, const Angle& n,
-		const Angle& M0);
+		const Angle& omega, const Angle& n, const Angle& M0);
+	PerturbedPlanetoid(const Planetoid& p);
 	void	add(PerturbationSeriesPtr series);
+	EclipticalCoordinates	perturbations(const JulianCenturies& T) const;
 	EclipticalCoordinates	ecliptical(const JulianCenturies& T) const;
 };
 
+class	MercuryPerturbed : public PerturbedPlanetoid {
+	PerturbationSeriesPtr	venus;
+	PerturbationSeriesPtr	earth;
+	PerturbationSeriesPtr	jupiter;
+	PerturbationSeriesPtr	saturn;
+public:
+	MercuryPerturbed();
+};
+
+class	VenusPerturbed : public PerturbedPlanetoid {
+	PerturbationSeriesPtr	mercury;
+	PerturbationSeriesPtr	earth;
+	PerturbationSeriesPtr	mars;
+	PerturbationSeriesPtr	jupiter;
+	PerturbationSeriesPtr	saturn;
+public:
+	VenusPerturbed();
+};
+
+class	EarthPerturbed : public PerturbedPlanetoid {
+public:
+	EarthPerturbed();
+};
+
+class	MarsPerturbed : public PerturbedPlanetoid {
+	PerturbationSeriesPtr	venus;
+	PerturbationSeriesPtr	earth;
+	PerturbationSeriesPtr	jupiter;
+	PerturbationSeriesPtr	saturn;
+public:
+	MarsPerturbed();
+};
+
+class	JupiterPerturbed : public PerturbedPlanetoid {
+	PerturbationSeriesPtr	saturn;
+	PerturbationSeriesPtr	uranus;
+public:
+	JupiterPerturbed();
+};
+
+class	SaturnPerturbed : public PerturbedPlanetoid {
+	PerturbationSeriesPtr	jupiter;
+	PerturbationSeriesPtr	uranus;
+	PerturbationSeriesPtr	neptune;
+public:
+	SaturnPerturbed();
+};
+
+class	UranusPerturbed : public PerturbedPlanetoid {
+	PerturbationSeriesPtr	jupiter;
+	PerturbationSeriesPtr	saturn;
+	PerturbationSeriesPtr	neptune;
+public:
+	UranusPerturbed();
+};
+
+class	NeptunePerturbed : public PerturbedPlanetoid {
+	PerturbationSeriesPtr	jupiter;
+	PerturbationSeriesPtr	saturn;
+	PerturbationSeriesPtr	uranus;
+public:
+	NeptunePerturbed();
+};
+
+class	PlutoPerturbed : public PerturbedPlanetoid {
+	PerturbationSeriesPtr	jupiter;
+	PerturbationSeriesPtr	saturn;
+public:
+	PlutoPerturbed();
+};
 
 
 } // namespace solarsystem

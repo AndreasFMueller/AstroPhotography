@@ -8,14 +8,21 @@
 namespace astro {
 namespace solarsystem {
 
-SinCos::SinCos(double cos, double sin) : _cos(cos), _sin(sin) {
+SinCos::SinCos(double cos, double sin) : Angle(cos, sin), _cos(cos), _sin(sin) {
 }
 
 SinCos::SinCos() : _cos(1), _sin(0) {
 }
 
 SinCos::SinCos(const Angle& angle)
-	: _cos(astro::cos(angle)), _sin(astro::sin(angle)) {
+	: Angle(angle), _cos(astro::cos(angle)), _sin(astro::sin(angle)) {
+}
+
+SinCos::SinCos(const std::pair<double, double>& p)
+	: Angle(p.first, p.second) {
+	double	r = hypot(p.first, p.second);
+	_cos = p.first / r;
+	_sin = p.second / r;
 }
 
 SinCos	SinCos::operator-() const {

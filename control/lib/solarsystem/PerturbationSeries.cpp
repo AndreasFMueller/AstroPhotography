@@ -65,9 +65,11 @@ PerturbationTerm	PerturbationSeries::add(
 				double dr_cos, double dr_sin,
 				double db_cos, double db_sin) {
 	return add(perturbed_i, perturber_i, T_exponent,
-			Angle(dl_cos), Angle(dl_sin),
-			dr_cos, dr_sin,
-			Angle(db_cos), Angle(db_sin));
+			Angle(dl_cos, Angle::ArcSeconds),
+			Angle(dl_sin, Angle::ArcSeconds),
+			dr_cos * 1e-5, dr_sin * 1e-5,
+			Angle(db_cos, Angle::ArcSeconds),
+			Angle(db_sin, Angle::ArcSeconds));
 }
 
 /**
@@ -75,7 +77,7 @@ PerturbationTerm	PerturbationSeries::add(
  *
  * \param T	the time in julian centuries
  */
-EclipticalCoordinates   PerturbationSeries::ecliptical(
+EclipticalCoordinates   PerturbationSeries::perturbations(
 	const JulianCenturies& T) const {
 	EclipticalCoordinates	result;
 	for (const auto t : *this) {
@@ -91,7 +93,7 @@ EclipticalCoordinates   PerturbationSeries::ecliptical(
  */
 EclipticalCoordinates	PerturbationSeries::operator()(
 	const JulianCenturies& T) const {
-	return ecliptical(T);
+	return perturbations(T);
 }
 
 } // namespace solarsystem

@@ -14,6 +14,7 @@ libastrosolarsystem_la_SOURCES = 					\
 	PerturbationTerm.cpp						\
 	PerturbationSeries.cpp						\
 	PerturbedPlanetoid.cpp						\
+	PerturbedPlanets.cpp						\
 	Planetoid.cpp							\
 	Planets.cpp							\
 	SinCos.cpp							\

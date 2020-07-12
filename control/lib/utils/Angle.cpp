@@ -84,6 +84,10 @@ Angle::Angle(double angle, unit u) : _angle(angle) {
 	}
 }
 
+Angle::Angle(double x, double y) {
+	_angle = atan2(y, x);
+}
+
 double	Angle::degrees() const {
 	return radians_to_degrees(_angle);
 }
@@ -130,6 +134,23 @@ double	Angle::revolutions() const {
 
 void	Angle::revolutions(double revolutions) {
 	radians(2 * M_PI * revolutions);
+}
+
+double	Angle::value(Angle::unit u) const {
+	switch (u) {
+	case Radians:
+		return radians();
+	case Degrees:
+		return degrees();
+	case Hours:
+		return hours();
+	case Revolutions:
+		return revolutions();
+	case ArcMinutes:
+		return arcminutes();
+	case ArcSeconds:
+		return arcseconds();
+	}
 }
 
 Angle	Angle::operator+(const Angle& other) const {
