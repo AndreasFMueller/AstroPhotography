@@ -16,7 +16,7 @@ namespace solarsystem {
  * \param perturber	the perturbing planetoid
  */
 PerturbationSeries::PerturbationSeries(const Planetoid& perturbed,
-	const Planetoid& perturber)
+	const PerturberPlanetoid& perturber)
 	: _perturbed(perturbed), _perturber(perturber) {
 }
 
@@ -67,7 +67,7 @@ PerturbationTerm	PerturbationSeries::add(
 	return add(perturbed_i, perturber_i, T_exponent,
 			Angle(dl_cos, Angle::ArcSeconds),
 			Angle(dl_sin, Angle::ArcSeconds),
-			dr_cos * 1e-5, dr_sin * 1e-5,
+			dr_cos * 1e-6, dr_sin * 1e-6,
 			Angle(db_cos, Angle::ArcSeconds),
 			Angle(db_sin, Angle::ArcSeconds));
 }

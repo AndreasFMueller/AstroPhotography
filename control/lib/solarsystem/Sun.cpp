@@ -17,8 +17,8 @@ RaDec	Sun::ephemerisT(double T0) {
 	Rotation3D	Rx('x', -eps);
 	Angle	M(0.993133 + 99.997361 * T0, Angle::Revolutions);
 	Angle	L = Angle(0.7859453, Angle::Revolutions) + M +
-		Angle(6893.0 * sin(M) + 72.0 * sin(2. * M) + 6191.2 * T0,
-			Angle::ArcSeconds);
+			Angle(6893.0 * sin(M) + 72.0 * sin(2. * M) + 6191.2 * T0,
+				Angle::ArcSeconds);
 	SphericalCoordinates	spherical(L, Angle::right_angle);
 	UnitVector	pos(spherical);
 	RaDec	result(Rx(pos));

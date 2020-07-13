@@ -17,6 +17,7 @@ libastrosolarsystem_la_SOURCES = 					\
 	PerturbedPlanets.cpp						\
 	Planetoid.cpp							\
 	Planets.cpp							\
+	RelativePosition.cpp						\
 	SinCos.cpp							\
 	SolarsystemBody.cpp						\
 	SolarsystemFactory.cpp						\

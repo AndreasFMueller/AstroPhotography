@@ -144,10 +144,11 @@ protected:
 	Angle	l(const SinCos& m) const;
 	Angle	b(const SinCos& m) const;
 	double	r(const SinCos& m) const;
+	virtual EclipticalCoordinates	position(const JulianCenturies& T) const;
 public:
 	Angle	M(const JulianCenturies& T) const;
 	SinCos	Msc(const JulianCenturies& T) const;
-	EclipticalCoordinates	ecliptical(const JulianCenturies& T) const;
+	virtual EclipticalCoordinates	ecliptical(const JulianCenturies& T) const;
 	Vector	XYZ(const JulianCenturies& T) const;
 	std::string	toString(Angle::unit unit = Angle::Degrees) const;
 };
@@ -156,57 +157,76 @@ std::ostream&	operator<<(std::ostream& out, const Planetoid& planetoid);
 
 typedef std::shared_ptr<Planetoid>	PlanetoidPtr;
 
-class	Mercury : public Planetoid {
+/**
+ * \brief Perturber Planetoid
+ *
+ * The perturber may have an additional angle argument
+ */
+class PerturberPlanetoid : public Planetoid {
+	Angle	_phi0;
+public:
+	const Angle	phi0() const { return _phi0; }
+	void	phi0(const Angle& p) { _phi0 = p; }
+	PerturberPlanetoid(const std::string& name,
+		double a, double e, const Angle& Omega, const Angle& i,
+		const Angle& omega, const Angle& n, const Angle& M0,
+		Angle phi0 = Angle())
+		: Planetoid(name, a, e, Omega, i, omega, n, M0), _phi0(phi0) {
+	}
+};
+
+class	Mercury : public PerturberPlanetoid {
 public:
 	Mercury();
 };
 
-class	Venus : public Planetoid {
+class	Venus : public PerturberPlanetoid {
 public:
 	Venus();
 };
 
-class	Earth : public Planetoid {
+class	Earth : public PerturberPlanetoid {
 public:
 	Earth();
 };
 
-class	Mars : public Planetoid {
+class	Mars : public PerturberPlanetoid {
 public:
 	Mars();
 };
 
-class	Jupiter : public Planetoid {
+class	Jupiter : public PerturberPlanetoid {
 public:
 	Jupiter();
 };
 
-class	Saturn : public Planetoid {
+class	Saturn : public PerturberPlanetoid {
 public:
 	Saturn();
 };
 
-class	Uranus : public Planetoid {
+class	Uranus : public PerturberPlanetoid {
 public:
 	Uranus();
 };
 
-class	Neptune : public Planetoid {
+class	Neptune : public PerturberPlanetoid {
 public:
 	Neptune();
 };
 
-class	Pluto : public Planetoid {
+class	Pluto : public PerturberPlanetoid {
 public:
 	Pluto();
 };
+
 
 /**
  * \brief Perturbation series Term
  */
 class	PerturbationTerm {
 	const Planetoid&	_perturbed;
-	const Planetoid&	_perturber;
+	const PerturberPlanetoid&	_perturber;
 	int	_perturbed_i;
 	int	_perturber_i;
 	int	_T_exponent;
@@ -217,7 +237,8 @@ class	PerturbationTerm {
 	Angle	_db_cos;
 	Angle	_db_sin;
 public:
-	PerturbationTerm(const Planetoid& perturbed, const Planetoid& perturber,
+	PerturbationTerm(const Planetoid& perturbed,
+		const PerturberPlanetoid& perturber,
 		int perturbed_i, int perturber_i, int T_exponent,
 		const Angle& dl_cos, const Angle& dl_sin,
 		double dr_cos, double dr_sin,
@@ -232,10 +253,10 @@ typedef std::shared_ptr<PerturbationTerm>	PerturbationTermPtr;
  */
 class	PerturbationSeries : std::list<PerturbationTerm> {
 	const Planetoid&	_perturbed;
-	Planetoid	_perturber;
+	PerturberPlanetoid	_perturber;
 public:
 	PerturbationSeries(const Planetoid& perturbed,
-		const Planetoid& perturber);
+		const PerturberPlanetoid& perturber);
 	PerturbationTerm	add(int perturbed_i, int perturber_i,
 				int T_exponent,
 				const Angle& dl_cos, const Angle& dl_sin,
@@ -248,13 +269,18 @@ public:
 				double db_cos, double db_sin);
 	EclipticalCoordinates	operator()(const JulianCenturies& T) const;
 	EclipticalCoordinates	perturbations(const JulianCenturies& T) const;
-	Planetoid&	perturber() { return _perturber; }
+	PerturberPlanetoid&	perturber() { return _perturber; }
 };
 
 typedef std::shared_ptr<PerturbationSeries>	PerturbationSeriesPtr;
 
 /**
  * \brief A planetoid with a perturbation series attached
+ *
+ * A perturbed planetoid is a planetoid with some perturbation series
+ * attached. It may also have an implementation of the corrections
+ * method that adds additional corrections to the position of the
+ * planetoid orbit.
  */
 class	PerturbedPlanetoid : public Planetoid {
 	std::list<PerturbationSeriesPtr>	_perturbers;
@@ -264,10 +290,15 @@ public:
 		const Angle& omega, const Angle& n, const Angle& M0);
 	PerturbedPlanetoid(const Planetoid& p);
 	void	add(PerturbationSeriesPtr series);
-	EclipticalCoordinates	perturbations(const JulianCenturies& T) const;
-	EclipticalCoordinates	ecliptical(const JulianCenturies& T) const;
+	virtual EclipticalCoordinates	perturbations(const JulianCenturies& T) const;
+	virtual EclipticalCoordinates	ecliptical(const JulianCenturies& T) const;
+protected:
+	virtual EclipticalCoordinates	corrections(const JulianCenturies& T) const;
 };
 
+/**
+ * \brief Mercury with perturbations
+ */
 class	MercuryPerturbed : public PerturbedPlanetoid {
 	PerturbationSeriesPtr	venus;
 	PerturbationSeriesPtr	earth;
@@ -275,8 +306,13 @@ class	MercuryPerturbed : public PerturbedPlanetoid {
 	PerturbationSeriesPtr	saturn;
 public:
 	MercuryPerturbed();
+protected:
+	virtual EclipticalCoordinates	position(const JulianCenturies& T) const;
 };
 
+/**
+ * \brief Venus with perturbations
+ */
 class	VenusPerturbed : public PerturbedPlanetoid {
 	PerturbationSeriesPtr	mercury;
 	PerturbationSeriesPtr	earth;
@@ -285,13 +321,30 @@ class	VenusPerturbed : public PerturbedPlanetoid {
 	PerturbationSeriesPtr	saturn;
 public:
 	VenusPerturbed();
+protected:
+	virtual EclipticalCoordinates	position(const JulianCenturies& T) const;
+	virtual EclipticalCoordinates	corrections(const JulianCenturies& T) const;
 };
 
+/**
+ * \brief Earth with perturbations
+ */
 class	EarthPerturbed : public PerturbedPlanetoid {
+	PerturbationSeriesPtr	venus;
+	PerturbationSeriesPtr	mars;
+	PerturbationSeriesPtr	jupiter;
+	PerturbationSeriesPtr	saturn;
 public:
 	EarthPerturbed();
+	virtual EclipticalCoordinates	ecliptical(const JulianCenturies& T) const;
+protected:
+	virtual EclipticalCoordinates	position(const JulianCenturies& T) const;
+	virtual EclipticalCoordinates	corrections(const JulianCenturies& T) const;
 };
 
+/**
+ * \brief Mars with perturbations
+ */
 class	MarsPerturbed : public PerturbedPlanetoid {
 	PerturbationSeriesPtr	venus;
 	PerturbationSeriesPtr	earth;
@@ -299,46 +352,96 @@ class	MarsPerturbed : public PerturbedPlanetoid {
 	PerturbationSeriesPtr	saturn;
 public:
 	MarsPerturbed();
+protected:
+	virtual EclipticalCoordinates	position(const JulianCenturies& T) const;
+	virtual EclipticalCoordinates	corrections(const JulianCenturies& T) const;
 };
 
+/**
+ * \brief Jupiter with perturbations
+ */
 class	JupiterPerturbed : public PerturbedPlanetoid {
 	PerturbationSeriesPtr	saturn;
 	PerturbationSeriesPtr	uranus;
 public:
 	JupiterPerturbed();
+protected:
+	virtual EclipticalCoordinates	position(const JulianCenturies& T) const;
+	virtual EclipticalCoordinates	corrections(const JulianCenturies& T) const;
 };
 
+/**
+ * \brief Saturn with perturbations
+ */
 class	SaturnPerturbed : public PerturbedPlanetoid {
 	PerturbationSeriesPtr	jupiter;
 	PerturbationSeriesPtr	uranus;
 	PerturbationSeriesPtr	neptune;
 public:
 	SaturnPerturbed();
+protected:
+	virtual EclipticalCoordinates	position(const JulianCenturies& T) const;
+	virtual EclipticalCoordinates	corrections(const JulianCenturies& T) const;
 };
 
+/**
+ * \brief Uranus with perturbations
+ */
 class	UranusPerturbed : public PerturbedPlanetoid {
 	PerturbationSeriesPtr	jupiter;
 	PerturbationSeriesPtr	saturn;
 	PerturbationSeriesPtr	neptune;
+	PerturbationSeriesPtr	jsu;
 public:
 	UranusPerturbed();
+protected:
+	virtual EclipticalCoordinates	position(const JulianCenturies& T) const;
+	virtual EclipticalCoordinates	perturbations(const JulianCenturies& T) const;
 };
 
+/**
+ * \brief Neptune with perturbations
+ */
 class	NeptunePerturbed : public PerturbedPlanetoid {
 	PerturbationSeriesPtr	jupiter;
 	PerturbationSeriesPtr	saturn;
 	PerturbationSeriesPtr	uranus;
 public:
 	NeptunePerturbed();
+protected:
+	virtual EclipticalCoordinates	position(const JulianCenturies& T) const;
 };
 
+/**
+ * \brief Pluto with perturbations
+ */
 class	PlutoPerturbed : public PerturbedPlanetoid {
 	PerturbationSeriesPtr	jupiter;
 	PerturbationSeriesPtr	saturn;
 public:
 	PlutoPerturbed();
+protected:
+	virtual EclipticalCoordinates	position(const JulianCenturies& T) const;
+	virtual EclipticalCoordinates	corrections(const JulianCenturies& T) const;
 };
 
+/**
+ * \brief Class to compute positions relative to earth
+ */
+class	RelativePosition {
+	JulianCenturies		_T;
+	EclipticalCoordinates	_earth;
+static	Angle	eps;
+public:
+	RelativePosition(const JulianCenturies& T,
+		const EclipticalCoordinates& earth) : _T(T), _earth(earth) {
+	}
+	const JulianCenturies&	T() const { return _T; }
+	const EclipticalCoordinates&	earth() const { return _earth; }
+	RaDec	radec(const Vector& v) const;
+	RaDec	radec(Planetoid& planet);
+	RaDec	radec(PerturbedPlanetoid *planet);
+};
 
 } // namespace solarsystem
 } // namespace astro

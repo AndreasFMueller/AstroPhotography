@@ -24,7 +24,7 @@ namespace solarsystem {
  * \param db_sin	the coefficient of th sin term in b
  */
 PerturbationTerm::PerturbationTerm(
-		const Planetoid& perturbed, const Planetoid& perturber,
+		const Planetoid& perturbed, const PerturberPlanetoid& perturber,
                 int perturbed_i, int perturber_i, int T_exponent,
                 const Angle& dl_cos, const Angle& dl_sin,
                 double dr_cos, double dr_sin,
@@ -52,12 +52,17 @@ EclipticalCoordinates	PerturbationTerm::operator()(const JulianCenturies& T)
 	const {
 	SinCos	Mperturbed = _perturbed.Msc(T);
 	SinCos	Mperturber = _perturber.Msc(T);
-	SinCos	o = Mperturber * _perturber_i + Mperturbed * _perturbed_i;
-	return pow((double)T, _T_exponent) * EclipticalCoordinates(
+	SinCos	phi(_perturber.phi0());
+	SinCos	o = phi + Mperturbed * _perturbed_i + Mperturber * _perturber_i;
+	EclipticalCoordinates	result(
 		_dl_cos * o.cos() + _dl_sin * o.sin(),
 		_dr_cos * o.cos() + _dr_sin * o.sin(),
 		_db_cos * o.cos() + _db_sin * o.sin()
 	);
+	result = pow((double)T, _T_exponent) * result;
+	//debug(LOG_DEBUG, DEBUG_LOG, 0, "%s %d,%d,%d %s", _perturber.name().c_str(),
+	//	_perturbed_i, _perturber_i, _T_exponent, result.toString().c_str());
+	return result;
 }
 
 } // namespace solarsystem

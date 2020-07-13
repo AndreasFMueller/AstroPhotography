@@ -79,7 +79,7 @@ Angle::Angle(double angle, unit u) : _angle(angle) {
 		hours(angle);
 		return;
 	case Revolutions:
-		revolutions(angle - trunc(angle));
+		revolutions(angle);
 		return;
 	}
 }

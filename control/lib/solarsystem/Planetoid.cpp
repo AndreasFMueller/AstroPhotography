@@ -40,6 +40,8 @@ inline static double	sqr(const double x) {
  * \param m	time from 2000.0 equinox in julian centuries 
  */
 Angle   Planetoid::l(const SinCos& m) const {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "omega = %f, M = %f",
+		_omega.degrees(), m.degrees());
 	Angle	result = _omega + m;
 	SinCos	m2 = m * 2;
 	result = result + Angle(2 * _e * m.sin());
@@ -47,6 +49,7 @@ Angle   Planetoid::l(const SinCos& m) const {
 	    (1.25 * sqr(_e) - sqr(tan(0.5 * _i)) * cos(2 * _omega)) * m2.sin()
 	);
 	result = result + Angle(-sqr(tan(0.5 * _i)) * sin(2*_omega) * m2.cos());
+	result.reduce(0);
 	return result;
 }
 
@@ -94,13 +97,33 @@ SinCos	Planetoid::Msc(const JulianCenturies& T) const {
 }
 
 /**
+ * \brief Compute the position
+ *
+ * \param T	time from 2000.0 equinox in julian centuries
+ */
+EclipticalCoordinates   Planetoid::position(const JulianCenturies& T) const {
+	SinCos	m = Msc(T);
+	EclipticalCoordinates	result(l(m), r(m), b(m));
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "position: %s", result.toString().c_str());
+	return result;
+}
+
+/**
  * \brief Compute ecliptical coordinates 
  *
  * \param T	time from 2000.0 equinox in julian centuries
  */
 EclipticalCoordinates   Planetoid::ecliptical(const JulianCenturies& T) const {
-	SinCos	m = Msc(T);
-	return EclipticalCoordinates(l(m), r(m), b(m));
+	return this->position(T);
+}
+
+/**
+ * \brief Compute XYZ coordinates
+ *
+ * \param T	time from 2000.0 equinox in julian centuries
+ */
+Vector   Planetoid::XYZ(const JulianCenturies& T) const {
+	return this->ecliptical(T).v();
 }
 
 /**

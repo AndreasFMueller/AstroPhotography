@@ -53,8 +53,10 @@ void	PerturbedPlanetoid::add(PerturbationSeriesPtr series) {
  */
 EclipticalCoordinates	PerturbedPlanetoid::ecliptical(
 	const JulianCenturies& T) const {
-	EclipticalCoordinates	result = Planetoid::ecliptical(T);
-	result = result + perturbations(T);
+	EclipticalCoordinates	result = this->position(T);
+	result = result + this->perturbations(T) + this->corrections(T);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "perturbed %s: %s", this->name().c_str(),
+		result.toString().c_str());
 	return result;
 }
 
@@ -69,7 +71,18 @@ EclipticalCoordinates	PerturbedPlanetoid::perturbations(
 	for (auto const s : _perturbers) {
 		result = result + s->perturbations(T);
 	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "perturbations: %s", result.toString().c_str());
 	return result;
+}
+
+/**
+ * \brief Compute additional corrections that are not in the form of perturbation series
+ *
+ * \param T	the time in julian centuries
+ */
+EclipticalCoordinates	PerturbedPlanetoid::corrections(
+				const JulianCenturies& /* T */) const {
+	return EclipticalCoordinates(Angle(0), 0, Angle(0));
 }
 
 } // namespace solarsystem
