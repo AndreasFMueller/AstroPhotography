@@ -29,5 +29,5 @@ testhorizon:	astrohorizon
 	./astrohorizon --debug Theodolite_Log_2020.01.02_11.24.29.csv
 
 testephemeris:	astroephemeris
-	./astroephemeris --time='1989-01-01 00:00:00' --debug sun moon mercury venus mars jupiter saturn uranus neptune pluto
+	./astroephemeris --time='1989-01-01 00:00:00' sun moon mercury venus mars jupiter saturn uranus neptune pluto
 
