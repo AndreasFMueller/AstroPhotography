@@ -96,6 +96,7 @@ public slots:
 	void	setHorizonVisible(bool);
 	void	setSunVisible(bool);
 	void	setMoonVisible(bool);
+	void	setPlanetsVisible(bool);
 
 	void	toggleAltAzmGridVisible();
 	void	toggleRaDecGridVisible();
@@ -110,6 +111,7 @@ public slots:
 	void	toggleHorizonVisible();
 	void	toggleSunVisible();
 	void	toggleMoonVisible();
+	void	togglePlanetsVisible();
 
 	void	showContextMenu(const QPoint& point);
 

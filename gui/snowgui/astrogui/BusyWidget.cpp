@@ -6,6 +6,7 @@
 #include "BusyWidget.h"
 #include <QTimer>
 #include <QPainter>
+#include <QPainterPath>
 #include <AstroDebug.h>
 #include <cmath>
 

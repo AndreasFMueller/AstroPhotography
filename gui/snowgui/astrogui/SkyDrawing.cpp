@@ -95,6 +95,7 @@ SkyDrawing::SkyDrawing() {
 	_show_horizon = false;
 	_show_sun = true;
 	_show_moon = true;
+	_show_planets = true;
 	_converter = NULL;
 	_time = 0;
 	_timeoffset = 0;
@@ -111,6 +112,15 @@ SkyDrawing::~SkyDrawing() {
 }
 
 void	SkyDrawing::redraw() {
+}
+
+time_t	SkyDrawing::displaytime() const {
+	time_t	t = _time;
+	if (!_time) {
+		::time(&t);
+	}
+	t += timeoffset();
+	return t;
 }
 
 /**
@@ -595,11 +605,7 @@ void	SkyDrawing::drawPosition(QPainter& painter) {
  */
 void	SkyDrawing::drawTime(QPainter& painter) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "print time");
-	time_t	t = _time;
-	if (!_time) {
-		::time(&t);
-	}
-	t += timeoffset();
+	time_t	t = displaytime();
 	struct tm	*tmp = localtime(&t);
 	char	buffer[128];
 	strftime(buffer, sizeof(buffer), "%F %T", tmp);
@@ -640,9 +646,7 @@ void	SkyDrawing::draw(QPainter& painter, QSize& size) {
 	if (_time) {
 		_converter->update(_time + timeoffset());
 	} else {
-		time_t	t;
-		::time(&t);
-		_converter->update(t + timeoffset()); // updates to the current time
+		_converter->update(displaytime()); // updates to the current time
 	}
 
 	// set up the parameters of drawing: radius and center
@@ -706,6 +710,9 @@ void	SkyDrawing::draw(QPainter& painter, QSize& size) {
 	}
 	if (show_moon()) {
 		drawMoon(painter);
+	}
+	if (show_planets()) {
+		drawPlanets(painter);
 	}
 
 	// draw the horizon
@@ -986,18 +993,28 @@ void	SkyDrawing::drawConstellations(QPainter& painter) {
  */
 void	SkyDrawing::drawSolarsystemBody(QPainter& painter,
 		const astro::RaDec& position,
-		double radius, QColor color) {
+		double radius, QColor color, QString label) {
 	astro::AzmAlt	Position = convert(position);
 	if (Position.alt().radians() < 0) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "object not visible");
 		return;
 	}
 
-	// draw the moon
+	// draw the body
 	QPointF	center = convert(Position);
 	QPainterPath	circle;
 	circle.addEllipse(center, radius, radius);
 	painter.fillPath(circle, color);
+
+	// draw the label
+	if (label.length() == 0) {
+		return;
+	}
+	QPen	pen(Qt::SolidLine);
+	pen.setColor(color);
+	painter.setPen(pen);
+	painter.drawText(center.x() - 15, center.y() - 20,
+		30, 20, Qt::AlignCenter, label);
 }
 
 /**
@@ -1007,14 +1024,14 @@ void	SkyDrawing::drawSolarsystemBody(QPainter& painter,
  */
 void	SkyDrawing::drawMoon(QPainter& painter) {
 	astro::solarsystem::Moon	moon;
-	astro::RaDec	moonposition = moon.ephemeris(_time + _timeoffset);
+	astro::RaDec	moonposition = moon.ephemeris(displaytime());
 
 	// prepare for drawing
 	QColor	moonblue(0,204,255);
 	double	mr = _radius / 180.;
 	if (mr < 7) { mr = 7.; }
 
-	drawSolarsystemBody(painter, moonposition, mr, moonblue);
+	drawSolarsystemBody(painter, moonposition, mr, moonblue, QString());
 }
 
 /**
@@ -1024,16 +1041,75 @@ void	SkyDrawing::drawMoon(QPainter& painter) {
  */
 void	SkyDrawing::drawSun(QPainter& painter) {
 	astro::solarsystem::Sun	sun;
-	astro::RaDec	sunposition = sun.ephemeris(_time + _timeoffset);
+	astro::RaDec	sunposition = sun.ephemeris(displaytime());
 
 	// prepare for drawing
 	QColor	sunyellow(255,255,0);
 	double	sr = _radius / 180.;
 	if (sr < 7) { sr = 7.; }
 
-	drawSolarsystemBody(painter, sunposition, sr, sunyellow);
+	drawSolarsystemBody(painter, sunposition, sr, sunyellow, QString());
 }
 
+/**
+ * \brief Draw a planet
+ *
+ * \param painter		the painter to draw on
+ * \param rp			relative position for RA/DEC computation
+ * \param planet		a pointer to the planet implementation
+ * \param pr			planet radius
+ * \param planetcolor		color of the planet
+ * \param label			the label to place next to the planet
+ */
+void	SkyDrawing::drawPlanet(QPainter& painter,
+		astro::solarsystem::RelativePosition& rp,
+		astro::solarsystem::Planetoid *planet,
+		double pr, QColor planetcolor, QString label) {
+	astro::RaDec	planetposition = rp.radec(planet);
+	drawSolarsystemBody(painter, planetposition, pr, planetcolor, label);
+	delete planet;
+}
+
+/**
+ * \brief Draw the sun
+ *
+ * \param painter	QPainter to draw on
+ */
+void	SkyDrawing::drawPlanets(QPainter& painter) {
+	astro::solarsystem::JulianCenturies	T(displaytime());
+	astro::solarsystem::Earth	earth;
+	astro::solarsystem::EclipticalCoordinates	earthpos
+		= earth.ecliptical(T);
+	astro::solarsystem::RelativePosition	rp(T, earthpos);
+
+	// determine planetary radius
+	double	pr = _radius / 180.;
+	if (pr < 4) { pr = 4.; }
+
+	astro::solarsystem::Planetoid	*mercury = new astro::solarsystem::Mercury();
+	drawPlanet(painter, rp, mercury, 4, QColor(255,255,204), QString("☿"));
+
+	astro::solarsystem::Planetoid	*venus = new astro::solarsystem::Venus();
+	drawPlanet(painter, rp, venus, 4, QColor(255,255,204), QString("♀︎"));
+
+	astro::solarsystem::Planetoid	*mars = new astro::solarsystem::Mars();
+	drawPlanet(painter, rp, mars, 4, QColor(255,51,51), QString("♂︎"));
+
+	astro::solarsystem::Planetoid	*jupiter = new astro::solarsystem::Jupiter();
+	drawPlanet(painter, rp, jupiter, 4, QColor(255,255,204), QString("♃"));
+
+	astro::solarsystem::Planetoid	*saturn = new astro::solarsystem::Saturn();
+	drawPlanet(painter, rp, saturn, 4, QColor(255,153,153), QString("♄"));
+
+	astro::solarsystem::Planetoid	*uranus = new astro::solarsystem::Uranus();
+	drawPlanet(painter, rp, uranus, 4, QColor(0,204,102), QString("⛢"));
+
+	astro::solarsystem::Planetoid	*neptune = new astro::solarsystem::Neptune();
+	drawPlanet(painter, rp, neptune, 4, QColor(51,153,255), QString("♆"));
+
+	astro::solarsystem::Planetoid	*pluto = new astro::solarsystem::Pluto();
+	drawPlanet(painter, rp, pluto, 4, QColor(102,0,0), QString("♇"));
+}
 
 
 } // namespace snowgui

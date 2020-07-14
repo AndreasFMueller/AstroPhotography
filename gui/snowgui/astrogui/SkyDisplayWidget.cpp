@@ -326,6 +326,10 @@ void	SkyDisplayWidget::setMoonVisible(bool m) {
 	show_moon(m);
 }
 
+void	SkyDisplayWidget::setPlanetsVisible(bool m) {
+	show_planets(m);
+}
+
 void	SkyDisplayWidget::toggleRaDecGridVisible() {
 	setRaDecGridVisible(!show_radec());
 }
@@ -378,6 +382,10 @@ void	SkyDisplayWidget::toggleMoonVisible() {
 	setMoonVisible(!show_moon());
 }
 
+void	SkyDisplayWidget::togglePlanetsVisible() {
+	setPlanetsVisible(!show_planets());
+}
+
 void	SkyDisplayWidget::showContextMenu(const QPoint& point) {
 	_mouse_pressed = false;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "show context menu at %d/%d",
@@ -404,6 +412,13 @@ void	SkyDisplayWidget::showContextMenu(const QPoint& point) {
 	contextMenu.addAction(&actionSun);
 	connect(&actionSun, SIGNAL(triggered()),
 		this, SLOT(toggleSunVisible()));
+
+	QAction	actionPlanets(QString("Planets"), this);
+	actionPlanets.setCheckable(true);
+	actionPlanets.setChecked(show_planets());
+	contextMenu.addAction(&actionPlanets);
+	connect(&actionPlanets, SIGNAL(triggered()),
+		this, SLOT(togglePlanetsVisible()));
 
 	QAction	actionRaDec(QString("RA/DEC grid"), this);
 	actionRaDec.setCheckable(true);

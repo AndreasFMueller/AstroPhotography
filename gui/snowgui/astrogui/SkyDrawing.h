@@ -14,6 +14,7 @@
 #include <AstroCatalog.h>
 #include <AstroCoordinates.h>
 #include <AstroHorizon.h>
+#include <AstroSolarsystem.h>
 #include <set>
 #include <cmath>
 #include <deque>
@@ -135,6 +136,7 @@ private:
 	bool	_show_horizon;
 	bool	_show_moon;
 	bool	_show_sun;
+	bool	_show_planets;
 	astro::RaDec	_telescope;
 	astro::RaDec	_target;
 	astro::LongLat	_position;
@@ -189,6 +191,8 @@ public:
 	void	show_moon(bool s) { _show_moon = s; }
 	bool	show_sun() const { return _show_sun; }
 	void	show_sun(bool s) { _show_sun = s; }
+	bool	show_planets() const { return _show_planets; }
+	void	show_planets(bool s) { _show_planets = s; }
 	const astro::horizon::HorizonPtr	horizon() const {
 							return _horizon;
 	}
@@ -203,6 +207,7 @@ public:
 	time_t	time() const { return _time; }
 	void	timeoffset(long t) { _timeoffset = t; }
 	long	timeoffset() const { return _timeoffset; }
+	time_t	displaytime() const;
 
 public:
 	virtual void	telescopeChanged(astro::RaDec);
@@ -243,9 +248,13 @@ private:
 	void	drawHorizon(QPainter& painter);
 	void	drawSolarsystemBody(QPainter& painter,
 			const astro::RaDec& position,
-			double radius, QColor color);
+			double radius, QColor color, QString label);
 	void	drawSun(QPainter& painter);
 	void	drawMoon(QPainter& painter);
+	void    drawPlanet(QPainter& painter, astro::solarsystem::RelativePosition& rp,
+			astro::solarsystem::Planetoid *planet, double pr,
+			QColor planetcolor, QString label);
+	void	drawPlanets(QPainter& painter);
 protected:
 	virtual void	redraw();
 	astro::AzmAlt	convert(const astro::RaDec& radec);
