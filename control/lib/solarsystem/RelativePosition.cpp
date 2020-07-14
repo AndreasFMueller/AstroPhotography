@@ -30,11 +30,12 @@ RaDec	RelativePosition::radec(const Vector& v) const {
  *
  * \param planet	the planet to compute the position from
  */
-RaDec	RelativePosition::radec(Planetoid& planet) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "compute position of %s", planet.name().c_str());
-	Vector	r = planet.XYZ(_T);
+RaDec	RelativePosition::radec(Planetoid *planet) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "compute position of %s",
+		planet->name().c_str());
+	Vector	r = planet->XYZ(_T);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "relative position of %s: %s",
-		planet.name().c_str(), r.toString().c_str());
+		planet->name().c_str(), r.toString().c_str());
 	return radec(r);
 }
 

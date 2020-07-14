@@ -130,6 +130,7 @@ public:
 	Planetoid(const std::string& name,
 		double a, double e, const Angle& Omega, const Angle& i,
 		const Angle& omega, const Angle& n, const Angle& M0);
+	virtual	~Planetoid();
 	const std::string&	name() const { return _name; }
 	double	a() const { return _a; }
 	double	e() const { return _e; }
@@ -289,6 +290,7 @@ public:
 		double a, double e, const Angle& Omega, const Angle& i,
 		const Angle& omega, const Angle& n, const Angle& M0);
 	PerturbedPlanetoid(const Planetoid& p);
+	virtual ~PerturbedPlanetoid();
 	void	add(PerturbationSeriesPtr series);
 	virtual EclipticalCoordinates	perturbations(const JulianCenturies& T) const;
 	virtual EclipticalCoordinates	ecliptical(const JulianCenturies& T) const;
@@ -420,6 +422,7 @@ class	PlutoPerturbed : public PerturbedPlanetoid {
 	PerturbationSeriesPtr	saturn;
 public:
 	PlutoPerturbed();
+	virtual EclipticalCoordinates	ecliptical(const JulianCenturies& T) const;
 protected:
 	virtual EclipticalCoordinates	position(const JulianCenturies& T) const;
 	virtual EclipticalCoordinates	corrections(const JulianCenturies& T) const;
@@ -439,7 +442,7 @@ public:
 	const JulianCenturies&	T() const { return _T; }
 	const EclipticalCoordinates&	earth() const { return _earth; }
 	RaDec	radec(const Vector& v) const;
-	RaDec	radec(Planetoid& planet);
+	RaDec	radec(Planetoid *planet);
 	RaDec	radec(PerturbedPlanetoid *planet);
 };
 

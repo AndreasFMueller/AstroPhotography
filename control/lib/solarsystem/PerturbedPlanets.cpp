@@ -1112,5 +1112,9 @@ EclipticalCoordinates	PlutoPerturbed::corrections(const JulianCenturies& T) cons
 	return EclipticalCoordinates(dl, dr * 1e-5, db);
 }
 
+EclipticalCoordinates	PlutoPerturbed::ecliptical(const JulianCenturies& T) const {
+	return PerturbedPlanetoid::ecliptical(T + 0.5);
+}
+
 } // namespace solarsystem
 } // namespace astro

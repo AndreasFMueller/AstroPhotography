@@ -35,6 +35,9 @@ PerturbedPlanetoid::PerturbedPlanetoid(const Planetoid& planetoid)
 	: Planetoid(planetoid) {
 }
 
+PerturbedPlanetoid::~PerturbedPlanetoid() {
+}
+
 /**
  * \brief Add a new perturbation series to the planetoid
  *

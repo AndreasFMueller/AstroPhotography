@@ -30,6 +30,9 @@ Planetoid::Planetoid(const std::string& name,
 	  _n(n), _M0(M0) {
 }
 
+Planetoid::~Planetoid() {
+}
+
 inline static double	sqr(const double x) {
 	return x * x;
 }
