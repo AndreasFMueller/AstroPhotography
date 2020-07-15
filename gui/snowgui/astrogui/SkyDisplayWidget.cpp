@@ -156,7 +156,7 @@ astro::RaDec	SkyDisplayWidget::convert(QMouseEvent *e) {
 
 void	SkyDisplayWidget::redraw() {
 	SkyDrawing::redraw();
-	repaint();
+	update();
 }
 
 /**
@@ -262,52 +262,52 @@ void	SkyDisplayWidget::positionChanged(astro::LongLat longlat) {
 
 void    SkyDisplayWidget::setAltAzmGridVisible(bool s) {
 	show_altaz(s);
-	repaint();
+	update();
 }
 
 void    SkyDisplayWidget::setRaDecGridVisible(bool s) {
 	show_radec(s);
-	repaint();
+	update();
 }
 
 void    SkyDisplayWidget::setConstellationsVisible(bool s) {
 	show_constellations(s);
-	repaint();
+	update();
 }
 
 void    SkyDisplayWidget::setConstellationLabelsVisible(bool s) {
 	show_constellation_labels(s);
-	repaint();
+	update();
 }
 
 void    SkyDisplayWidget::setTargetVisible(bool s) {
 	show_target(s);
-	repaint();
+	update();
 }
 
 void    SkyDisplayWidget::setTelescopeVisible(bool s) {
 	show_telescope(s);
-	repaint();
+	update();
 }
 
 void    SkyDisplayWidget::setTooltipVisible(bool s) {
 	show_tooltip(s);
-	repaint();
+	update();
 }
 
 void    SkyDisplayWidget::setLabelsVisible(bool s) {
 	show_labels(s);
-	repaint();
+	update();
 }
 
 void    SkyDisplayWidget::setEclipticVisible(bool s) {
 	show_ecliptic(s);
-	repaint();
+	update();
 }
 
 void	SkyDisplayWidget::setMilkywayVisible(bool s) {
 	show_milkyway(s);
-	repaint();
+	update();
 }
 
 void	SkyDisplayWidget::setHorizonVisible(bool h) {
@@ -315,19 +315,22 @@ void	SkyDisplayWidget::setHorizonVisible(bool h) {
 		return;
 	}
 	show_horizon(h);
-	repaint();
+	update();
 }
 
 void	SkyDisplayWidget::setSunVisible(bool s) {
 	show_sun(s);
+	update();
 }
 
 void	SkyDisplayWidget::setMoonVisible(bool m) {
 	show_moon(m);
+	update();
 }
 
 void	SkyDisplayWidget::setPlanetsVisible(bool m) {
 	show_planets(m);
+	update();
 }
 
 void	SkyDisplayWidget::toggleRaDecGridVisible() {
@@ -495,13 +498,13 @@ void	SkyDisplayWidget::showContextMenu(const QPoint& point) {
 void	SkyDisplayWidget::rotationChanged(int angle) {
 	angle = (180 - _dial_stepsize * angle) % 360;
 	_rotate.angle(astro::Angle((double)angle, astro::Angle::Degrees));
-	repaint();
+	update();
 }
 
 void	SkyDisplayWidget::timeoffsetChanged(int tens) {
 	long	toff = 60 * tens;
 	timeoffset(toff);
-	repaint();
+	update();
 }
 
 int	SkyDisplayWidget::dialsize() {
