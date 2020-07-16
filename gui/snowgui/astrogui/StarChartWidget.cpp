@@ -326,94 +326,14 @@ void	StarChartWidget::drawGrid(QPainter& painter) {
 	pen.setWidth(1);
 	painter.setPen(pen);
 
-#if 0
-	// construct a Skywindow to know which lines we have to draw
-	astro::catalog::SkyWindow	window = SkyWindow::hull(_direction, 
-				width() * _resolution, height() * _resolution);
-
-	// start drawing the grid lines spaced 1degree or 4minutes
-	astro::Angle	rastep(M_PI / 180);
-	astro::Angle	decstep(M_PI / 180);
-
-	// first find out where to strt
-	astro::Angle	initialra = window.leftra();
-	initialra.degrees(trunc(initialra.degrees()));
-	astro::Angle	initialdec = window.bottomdec();
-	initialdec.degrees(trunc(initialdec.degrees()));
-
-	// initial number of lines
-	int	ralines = 360;
-
-	// use one degree steps by default, but for declinations 
-	// close to the pole, use smaller RA steps
-	if (_direction.dec() > astro::Angle(80 * M_PI / 180)) {
-		initialra.degrees(20 * trunc(initialra.degrees() / 20));
-		ralines = ralines / 20;
-		rastep.degrees(20);
-	} else if (_direction.dec() > astro::Angle(70 * M_PI / 180)) {
-		initialra.degrees(10 * trunc(initialra.degrees() / 10));
-		ralines = ralines / 10;
-		rastep.degrees(10);
-	} else if (_direction.dec() > astro::Angle(60 * M_PI / 180)) {
-		initialra.degrees(5 * trunc(initialra.degrees() / 5));
-		ralines = ralines / 5;
-		rastep.degrees(5);
-	}
-
-	// add some security by going another degree lower just to be on
-	// the safe side
-	initialdec = initialdec - decstep;
-	double	decspan = (window.topdec() - initialdec).degrees();
-	int	declines = trunc(decspan + 2);
-
-	// find the maximum number of lines that we will have to draw in RA
-	double	raspan = (window.rightra() - initialra).degrees();
-	if (raspan > 0) { 
-		ralines = trunc(raspan + 2);
-	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "RA lines = %d, DEC lines = %d",
-		ralines, declines);
-
-	// line parameters
-	astro::Angle	ra;
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "RA line spacing %s",
-		rastep.hms().c_str());
-	astro::Angle	dec;
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "DEC line spacing %s",
-		decstep.dms().c_str());
-
-	// draw RA lines
-	for (int r = 0; r <= ralines; r++) {
-		ra = initialra + r * rastep;
-		//debug(LOG_DEBUG, DEBUG_LOG, 0, "RA = %s", ra.hms().c_str());
-		astro::Angle	dstep = 0.1 * decstep;
-		for (int d = 0; d <= 10 * declines; d++) {
-			dec = initialdec + d * dstep;
-			astro::RaDec	from(ra, dec);
-			astro::RaDec	to(ra, dec + dstep);
-			drawLine(painter, from, to);
-		}
-	}
-
-	// draw DEC lines
-	for (int d = 0; d <= declines; d++) {
-		dec = initialdec + d * decstep;
-		//debug(LOG_DEBUG, DEBUG_LOG, 0, "DEC = %s", dec.dms().c_str());
-		astro::Angle	rstep = 0.1 * rastep;
-		for (int r = 0; r <= 10 * ralines; r++) {
-			ra = initialra + r * rstep;
-			astro::RaDec	from(ra, dec);
-			astro::RaDec	to(ra + rstep, dec);
-			drawLine(painter, from, to);
-		}
-	}
-#endif
+	// use the gridcalculator to compute the grid parameters
 	astro::utils::GridCalculator	gridcalculator(_direction,
 					astro::Size(width(), height()),
 					1 / _resolution.degrees());
 	gridcalculator.gridsetup(100);
 
 	int	steps = 200;
+	// draw RA grid lines
 	for (int ra = gridcalculator.minra(); ra <= gridcalculator.maxra(); ra++) {
 		astro::Angle	raangle = gridcalculator.ra(ra);
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "drawing ra grid line for RA %s",
@@ -426,6 +346,7 @@ void	StarChartWidget::drawGrid(QPainter& painter) {
 			drawLine(painter, from, to);
 		}
 	}
+	// draw DEC grid lines
 	for (int dec = gridcalculator.mindec(); dec <= gridcalculator.maxdec(); dec++) {
 		astro::Angle	decangle = gridcalculator.dec(dec);
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "drawing dec grid line for DEC %s",
