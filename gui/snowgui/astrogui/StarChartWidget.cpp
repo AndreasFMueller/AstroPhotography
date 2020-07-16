@@ -326,6 +326,7 @@ void	StarChartWidget::drawGrid(QPainter& painter) {
 	pen.setWidth(1);
 	painter.setPen(pen);
 
+#if 0
 	// construct a Skywindow to know which lines we have to draw
 	astro::catalog::SkyWindow	window = SkyWindow::hull(_direction, 
 				width() * _resolution, height() * _resolution);
@@ -403,6 +404,37 @@ void	StarChartWidget::drawGrid(QPainter& painter) {
 			ra = initialra + r * rstep;
 			astro::RaDec	from(ra, dec);
 			astro::RaDec	to(ra + rstep, dec);
+			drawLine(painter, from, to);
+		}
+	}
+#endif
+	astro::utils::GridCalculator	gridcalculator(_direction,
+					astro::Size(width(), height()),
+					1 / _resolution.degrees());
+	gridcalculator.gridsetup(100);
+
+	int	steps = 200;
+	for (int ra = gridcalculator.minra(); ra <= gridcalculator.maxra(); ra++) {
+		astro::Angle	raangle = gridcalculator.ra(ra);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "drawing ra grid line for RA %s",
+			raangle.hms().c_str());
+		astro::TwoAngles	decrange = gridcalculator.angleRangeDEC(ra);
+		astro::Angle	step = (decrange.a2() - decrange.a1()) / steps;
+		for (int dec = 0; dec < steps; dec++) {
+			astro::RaDec	from(raangle, decrange.a1() + dec * step);
+			astro::RaDec	to(raangle, decrange.a1() + (dec + 1) * step);
+			drawLine(painter, from, to);
+		}
+	}
+	for (int dec = gridcalculator.mindec(); dec <= gridcalculator.maxdec(); dec++) {
+		astro::Angle	decangle = gridcalculator.dec(dec);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "drawing dec grid line for DEC %s",
+			decangle.dms().c_str());
+		astro::TwoAngles	rarange = gridcalculator.angleRangeRA(dec);
+		astro::Angle	step = (rarange.a2() - rarange.a1()) / steps;
+		for (int ra = 0; ra < steps; ra++) {
+			astro::RaDec	from(rarange.a1() + ra * step, decangle);
+			astro::RaDec	to(rarange.a1() + (ra + 1) * step, decangle);
 			drawLine(painter, from, to);
 		}
 	}

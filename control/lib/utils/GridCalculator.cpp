@@ -154,8 +154,8 @@ void	GridCalculator::gridsetup(double pixelstep) {
 
 	// compute the maximum and minimu for ra
 	Angle	delta_ra = _gridzero.ra() - _center.ra();
-	_maxra = trunc((gamma - delta_ra) / _stepsizes.ra());
-	_minra = trunc((-gamma - delta_ra) / _stepsizes.ra());
+	_maxra = trunc((gamma - delta_ra) / _stepsizes.ra()) + 1;
+	_minra = trunc((-gamma - delta_ra) / _stepsizes.ra()) - 1;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "minra = %d, maxra = %d", _minra, _maxra);
 
 	// the angular height of the image 
@@ -176,14 +176,15 @@ void	GridCalculator::gridsetup(double pixelstep) {
 	if (topcenter > Angle(0)) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "top border %s above equator, "
 			"center determines maximum", topcenter.dms().c_str());
-		_maxdec = round((Angle::right_angle - _gridzero.dec())
-			/ _stepsizes.dec()) - 1;
+		_maxdec = round((topcenter - _gridzero.dec())
+			/ _stepsizes.dec());
 	} else {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "top border %s below equator, "
 			"corner determines maximum", topcenter.dms().c_str());
-		Angle	g = Angle::right_angle - gamma_ur;
+		Angle	g = Angle::right_angle - b_ur;
 		_maxdec = round((g - _gridzero.dec()) / _stepsizes.dec());
 	}
+	_maxdec += 1;
 	if (_maxdec > dec_abs_max) {
 		_maxdec = dec_abs_max;
 	}
@@ -193,14 +194,15 @@ void	GridCalculator::gridsetup(double pixelstep) {
 	if (bottomcenter < Angle(0)) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "bottom border %s below equator, "
 			"center determines minimum", bottomcenter.dms().c_str());
-		_mindec = round((Angle::right_angle - _gridzero.dec())
-			/ _stepsizes.dec()) + 1;
+		_mindec = round((bottomcenter - _gridzero.dec())
+			/ _stepsizes.dec());
 	} else {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "bottom border %s above equator, "
 			"corner determines minimum", bottomcenter.dms().c_str());
-		Angle	g = Angle::right_angle - gamma_lr;
+		Angle	g = Angle::right_angle - b_lr;
 		_mindec = round((g - _gridzero.dec()) / _stepsizes.dec());
 	}
+	_mindec -= 1;
 	if (_mindec < dec_abs_min) {
 		_mindec = dec_abs_min;
 	}

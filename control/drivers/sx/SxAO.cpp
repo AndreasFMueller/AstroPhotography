@@ -98,7 +98,7 @@ bool	SxAO::move2(int x, int y) {
 	char	nschar = (y > 0) ? 'N' : 'S';
 	char	cmd[15];
 	snprintf(cmd, sizeof(cmd), "G%c%05dG%c%05d",
-		ewchar, abs(x), nschar, abs(y));
+		ewchar, ::abs(x), nschar, ::abs(y));
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "goto command: %s", cmd);
 	if (14 != write(serial, cmd, 14)) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "cannot write command %s: %s",
