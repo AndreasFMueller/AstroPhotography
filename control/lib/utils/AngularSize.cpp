@@ -21,7 +21,7 @@ AngularSize::AngularSize(const Angle& angle) : Angle(angle) {
 }
 
 double	AngularSize::scaledPixel(double distance) const {
-	return distance * tan(*this);
+	return distance * tan();
 }
 
 double	operator*(double r, const AngularSize& s) {

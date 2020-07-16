@@ -6,9 +6,9 @@
 
 bin_PROGRAMS = astrotime astrohorizon astroephemeris astrosunmoon
 
-noinst_HEADERS = 
+noinst_PROGRAMS = gridcalculator
 
-noinst_PROGRAMS = 
+noinst_HEADERS = 
 
 astrotime_SOURCES = astrotime.cpp
 astrotime_DEPENDENCIES = $(top_builddir)/lib/libastro.la
@@ -26,6 +26,10 @@ astrosunmoon_SOURCES = astrosunmoon.cpp
 astrosunmoon_DEPENDENCIES = $(top_builddir)/lib/libastro.la
 astrosunmoon_LDADD = -L$(top_builddir)/lib -lastro
 
+gridcalculator_SOURCES = gridcalculator.cpp
+gridcalculator_DEPENDENCIES = $(top_builddir)/lib/libastro.la
+gridcalculator_LDADD = -L$(top_builddir)/lib -lastro
+
 test:	astrotime
 	./astrotime --debug 9.7531 46.9246
 
@@ -39,4 +43,6 @@ testephemeris:	astroephemeris
 testsunmoon:	astrosunmoon
 	./astrosunmoon --time='1989-01-01 00:00:00' sun moon
 
-
+testgrid:	gridcalculator
+	./gridcalculator --debug --center='+12.38 +13.4' --resolution=100 \
+		--frame=1920x1080 --pixels=200

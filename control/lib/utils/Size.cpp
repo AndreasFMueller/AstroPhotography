@@ -18,12 +18,17 @@ void	Size::setup(const Point& lowerleft, const Point& upperright) {
 		throw std::runtime_error("negative vertical size");
 	}
 }
+
 Size::Size(const Point& lowerleft, const Point& upperright) {
 	setup(lowerleft, upperright);
 }
 
 Size::Size(const std::set<Point>& points) {
 	setup(Point::lowerleft(points), Point::upperright(points));
+}
+
+Size::Size(const std::string& sizestring) {
+	// XXX implementation missing
 }
 
 std::string	Size::toString() const {
@@ -38,6 +43,10 @@ std::ostream&	operator<<(std::ostream& out, const Size& size) {
 bool	Size::contains(const Point& point) const {
 	return (0 <= point.x()) && (point.x() <= _width - 1) &&
 		(0 <= point.y()) && (point.y() <= _height - 1);
+}
+
+double	Size::diagonal() const {
+	return hypot(_width, _height);
 }
 
 } // namespace astro

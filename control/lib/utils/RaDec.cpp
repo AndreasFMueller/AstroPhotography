@@ -19,6 +19,10 @@ RaDec::RaDec(const Vector& vector) {
 	dec() = Angle(asin(vector.z() / vector.abs()));
 }
 
+RaDec::RaDec(const std::string& radecstring) {
+	// XXX implementation missing
+}
+
 bool	RaDec::operator<(const RaDec& other) const {
 	if (dec() < other.dec()) {
 		return true;

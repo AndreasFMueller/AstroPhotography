@@ -1,5 +1,11 @@
 ChangeLog for the Astro project.
 
+20200716:
+	* add GridCalculator class and gridcalculator utility
+
+20200713:
+	* add perturbation series for planets
+
 20200710:
 	* add time option to astrotime utility
 

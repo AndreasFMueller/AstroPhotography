@@ -85,9 +85,11 @@ public:
 	Size(double width, double height) : _width(width), _height(height) { }
 	Size(const Point& lowerleft, const Point& upperright);
 	Size(const std::set<Point>& points);
+	Size(const std::string& sizestring);
 	double width() const { return _width; }
 	void	width(double w) { _width = w; }
 	double height() const { return _height; }
+	double	diagonal() const;
 	void	height(double h) { _height = h; }
 	bool	contains(const Point& point) const;
 	std::string	toString() const;

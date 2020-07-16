@@ -78,6 +78,12 @@ Angle::Angle(double angle, unit u) : _angle(angle) {
 	case Hours:
 		hours(angle);
 		return;
+	case Minutes:
+		minutes(angle);
+		return;
+	case Seconds:
+		seconds(angle);
+		return;
 	case Revolutions:
 		revolutions(angle);
 		return;
@@ -124,6 +130,22 @@ void	Angle::hours(double hours) {
 	_angle = hours_to_radians(hours);
 }
 
+double	Angle::minutes() const {
+	return 60. * hours();
+}
+
+double	Angle::seconds() const {
+	return 3600. * hours();
+}
+
+void	Angle::minutes(double minutes) {
+	hours(minutes / 60.);
+}
+
+void	Angle::seconds(double seconds) {
+	hours(seconds / 3600.);
+}
+
 std::string	Angle::hms(const char separator, int precision) const {
 	return xms(hours(), separator, precision);
 }
@@ -144,6 +166,10 @@ double	Angle::value(Angle::unit u) const {
 		return degrees();
 	case Hours:
 		return hours();
+	case Minutes:
+		return minutes();
+	case Seconds:
+		return seconds();
 	case Revolutions:
 		return revolutions();
 	case ArcMinutes:
@@ -195,6 +221,18 @@ bool	Angle::operator==(const Angle& other) const {
 
 bool	Angle::operator!=(const Angle& other) const {
 	return !((*this) == other);
+}
+
+double	Angle::cos() const {
+	return ::cos(_angle);
+}
+
+double	Angle::sin() const {
+	return ::sin(_angle);
+}
+
+double	Angle::tan() const {
+	return ::tan(_angle);
 }
 
 double	cos(const Angle& a) { return ::cos(a.radians()); }
@@ -329,6 +367,10 @@ Angle	Angle::ecliptic(double T) {
 	double	a = 23.4392794 + (-0.0130102136
 			+ (-0.00000005086 + 0.000000556 * T) * T) * T;
 	return Angle(a * M_PI / 180);
+}
+
+Angle	abs(const Angle& a) {
+	return Angle(fabs(a.radians()));
 }
 
 } // namespace astro

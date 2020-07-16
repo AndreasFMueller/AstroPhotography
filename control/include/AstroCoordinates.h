@@ -25,7 +25,7 @@ class Angle {
 	double	_angle; // in radians
 public:
 	virtual void	reduce(double base = 0);
-	typedef enum { Radians, Degrees, Hours, Revolutions, ArcMinutes, ArcSeconds } unit;
+	typedef enum { Radians, Degrees, Hours, Revolutions, ArcMinutes, ArcSeconds, Minutes, Seconds } unit;
 	Angle(double angle = 0, unit u = Radians);
 	Angle(double x, double y);
 	virtual ~Angle() { }
@@ -37,13 +37,20 @@ public:
 	void	arcseconds(double arcseconds);
 	std::string	dms(const char separator = ':', int precision = 3) const;
 	double	hours() const;
+	double	minutes() const;
+	double	seconds() const;
 	void	hours(double hours);
+	void	minutes(double minutes);
+	void	seconds(double seconds);
 	std::string	hms(const char separator = ':', int precision = 3) const;
 	double	radians() const { return _angle; }
 	void	radians(double radians) { _angle = radians; }
 	double	revolutions() const;
 	void	revolutions(double revolutions);
 	double	value(unit u) const;
+	double	sin() const;
+	double	cos() const;
+	double	tan() const;
 	Angle	operator+(const Angle& other) const;
 	Angle	operator-(const Angle& other) const;
 	Angle	operator*(const double& other) const;
@@ -75,6 +82,7 @@ double	tan(const Angle& a);
 double	cot(const Angle& a);
 double	sec(const Angle& a);
 double	csc(const Angle& a);
+Angle	abs(const Angle& a);
 
 Angle	arccos(double x);
 Angle	arcsin(double x);
@@ -105,7 +113,7 @@ public:
 	bool	operator==(const TwoAngles& other) const;
 	bool	operator!=(const TwoAngles& other) const;
 	bool	operator<(const TwoAngles& other) const;
-	std::string	toString() const;
+	std::string	toString(Angle::unit unit = Angle::Degrees) const;
 };
 
 class LongLat;
@@ -147,6 +155,7 @@ public:
 			Angle(M_PI / 2) - spherical.theta()) { }
 	RaDec(const Vector& vector);
 	RaDec(const Ecliptic& ecliptic);
+	RaDec(const std::string& radecstring);
 	virtual ~RaDec() { }
 	const Angle&	ra() const { return a1(); }
 	Angle&	ra() { return a1(); }
@@ -394,6 +403,49 @@ public:
 double	operator/(double r, const AngularSize& s);
 double	operator/(const Angle& angle, const AngularSize& s);
 
+namespace utils {
+
+/**
+ * \brief Utility class to compute coordinate grids on the celestial sphere
+ *
+ * This is used by the StarChartWidget class in the gui to do the computation
+ * for grid displays.
+ */
+class GridCalculator {
+	RaDec	_center;
+	Size	_frame;
+	double	_pixels_per_degree;
+public:
+	GridCalculator(const RaDec& center, const Size& frame,
+		double pixels_per_degree);
+	const RaDec&	center() const { return _center; }
+	const Size&	frame() const { return _frame; }
+	double	pixels_per_degree() const { return _pixels_per_degree; }
+private:
+	RaDec	_gridzero;
+	RaDec	_stepsizes;
+	int	_minra;
+	int	_maxra;
+	int	_mindec;
+	int	_maxdec;
+	bool	_pole_in_frame;
+public:
+	const RaDec&	gridzero() const { return _gridzero; }
+	const RaDec&	stepsizes() const { return _stepsizes; }
+	int	maxra() const { return _maxra; }
+	int	minra() const { return _minra; }
+	int	maxdec() const { return _maxdec; }
+	int	mindec() const { return _mindec; }
+	void	gridsetup(double pixelstep);
+	// compute grid points
+	Angle	ra(int ra) const;
+	Angle	dec(int dec) const;
+	RaDec	gridpoint(int ra, int dec) const;
+	TwoAngles	angleRangeRA(int dec) const;
+	TwoAngles	angleRangeDEC(int ra) const;
+};
+
+} // namespace utils
 } // namespace astro
 
 #endif /* _AstroCoordinates_h */

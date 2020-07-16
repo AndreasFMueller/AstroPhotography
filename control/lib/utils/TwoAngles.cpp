@@ -51,9 +51,34 @@ bool	TwoAngles::operator!=(const TwoAngles& other) const {
 	return (_a1 != other._a1) || (_a2 != other._a2);
 }
 
-std::string	TwoAngles::toString() const {
+std::string	TwoAngles::toString(Angle::unit unit) const {
 	std::ostringstream	out;
-	out << _a1.degrees() << "/" << _a2.degrees();
+	switch (unit) {
+	case Angle::Radians:
+		out << _a1.radians() << "/" << _a2.radians();
+		break;
+	case Angle::Degrees:
+		out << _a1.degrees() << "/" << _a2.degrees();
+		break;
+	case Angle::Hours:
+		out << _a1.hours() << "/" << _a2.hours();
+		break;
+	case Angle::Minutes:
+		out << _a1.minutes() << "/" << _a2.minutes();
+		break;
+	case Angle::Seconds:
+		out << _a1.seconds() << "/" << _a2.seconds();
+		break;
+	case Angle::ArcMinutes:
+		out << _a1.arcminutes() << "/" << _a2.arcminutes();
+		break;
+	case Angle::ArcSeconds:
+		out << _a1.arcseconds() << "/" << _a2.arcseconds();
+		break;
+	case Angle::Revolutions:
+		out << _a1.revolutions() << "/" << _a2.revolutions();
+		break;
+	}
 	return out.str();
 }
 
