@@ -177,6 +177,7 @@ double	Angle::value(Angle::unit u) const {
 	case ArcSeconds:
 		return arcseconds();
 	}
+	throw std::runtime_error("unknown unit");
 }
 
 Angle	Angle::operator+(const Angle& other) const {
