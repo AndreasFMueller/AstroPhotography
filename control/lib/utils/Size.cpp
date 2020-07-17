@@ -28,7 +28,12 @@ Size::Size(const std::set<Point>& points) {
 }
 
 Size::Size(const std::string& sizestring) {
-	// XXX implementation missing
+	// split the string at the x
+	auto i = sizestring.find("x");
+	std::string	first = sizestring.substr(0, i);
+	_width = stod(first);
+	std::string	second = sizestring.substr(i + 1);
+	_height = stod(second);
 }
 
 std::string	Size::toString() const {

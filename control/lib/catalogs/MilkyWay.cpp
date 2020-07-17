@@ -75,8 +75,8 @@ void	MilkyWay::parse(std::istream& in) {
 			// create a new outline
 			for (json::iterator pi = it->begin(); pi != it->end();
 				pi++) {
-				Angle	ra((*pi)[0], Angle::Degrees);
-				Angle	dec((*pi)[1], Angle::Degrees);
+				Angle	ra((*pi)[0].get<double>(), Angle::Degrees);
+				Angle	dec((*pi)[1].get<double>(), Angle::Degrees);
 				outline->push_back(RaDec(ra, dec));
 			}
 			//debug(LOG_DEBUG, DEBUG_LOG, 0, "outline %s: %d points",

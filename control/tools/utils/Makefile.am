@@ -44,5 +44,5 @@ testsunmoon:	astrosunmoon
 	./astrosunmoon --time='1989-01-01 00:00:00' sun moon
 
 testgrid:	gridcalculator
-	./gridcalculator --debug --center='+12.38 +13.4' --resolution=100 \
-		--frame=1920x1080 --pixels=200
+	./gridcalculator --debug --center='+14:11:60.000 +32:30:00.000' \
+		--resolution=100 --frame=1118x753 --pixels=100

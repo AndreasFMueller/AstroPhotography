@@ -28,6 +28,7 @@ public:
 	typedef enum { Radians, Degrees, Hours, Revolutions, ArcMinutes, ArcSeconds, Minutes, Seconds } unit;
 	Angle(double angle = 0, unit u = Radians);
 	Angle(double x, double y);
+	Angle(const std::string& a, unit u = Degrees);
 	virtual ~Angle() { }
 	double	degrees() const;
 	double	arcminutes() const;
@@ -76,6 +77,8 @@ static Angle	ecliptic(double T);
 
 Angle	operator*(double l, const Angle& a);
 
+std::ostream&	operator<<(std::ostream& out, const Angle& angle);
+
 double	cos(const Angle& a);
 double	sin(const Angle& a);
 double	tan(const Angle& a);
@@ -115,6 +118,8 @@ public:
 	bool	operator<(const TwoAngles& other) const;
 	std::string	toString(Angle::unit unit = Angle::Degrees) const;
 };
+
+std::ostream&	operator<<(std::ostream& out, const TwoAngles& angles);
 
 class LongLat;
 class RaDec;
@@ -177,6 +182,8 @@ static const RaDec	south_pole;
 	Angle	distance(const RaDec& other) const;
 	double	scalarproduct(const RaDec& other) const;
 };
+
+std::ostream&	operator<<(std::ostream& out, const RaDec& radec);
 
 /**
  * \brief Ecliptic coordinates
@@ -241,6 +248,8 @@ friend class Rotation3D;
 	static Vector Ey();
 	static Vector Ez();
 };
+
+std::ostream&	operator<<(std::ostream& out, const Vector& vector);
 
 /**
  * \brief Class describing a unit vector

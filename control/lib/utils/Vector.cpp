@@ -11,9 +11,6 @@
 
 namespace astro {
 
-//////////////////////////////////////////////////////////////////////
-// Vector implementation
-//////////////////////////////////////////////////////////////////////
 Vector::Vector() {
 	_x[0] = 0.;
 	_x[1] = 0.;
@@ -103,6 +100,12 @@ Vector	Vector::Ez() {
 	return Vector(x);
 }
 
+std::ostream&	operator<<(std::ostream& out, const Vector& vector) {
+	out << vector.toString();
+	return out;
+}
+
+#if 0
 //////////////////////////////////////////////////////////////////////
 // UnitVector implementation
 //////////////////////////////////////////////////////////////////////
@@ -164,5 +167,6 @@ UnitVector	UnitVector::Ez() {
 	double	x[3] = { 0., 0., 1. };
 	return UnitVector(x);
 }
+#endif
 
 } // namespace astro

@@ -25,6 +25,16 @@ static std::string	xms(double value, const char separator, int precision) {
 		return stringprintf("%c%02d%c%02d",
 			(sign < 0) ? '-' : '+', X, separator, M);
 	} else {
+		// round S to <precision> decimal places
+		double	f = pow(10., precision);
+		S = round(f * S) / f;
+		if (S >= 60) {
+			S -= 60;
+			M += 1;
+			if (M >= 60) {
+				X += 1;
+			}
+		}
 		return stringprintf("%c%02d%c%02d%c%0*.*f",
 			(sign < 0) ? '-' : '+',
 			X, separator, M, separator,
@@ -92,6 +102,36 @@ Angle::Angle(double angle, unit u) : _angle(angle) {
 
 Angle::Angle(double x, double y) {
 	_angle = atan2(y, x);
+}
+
+Angle::Angle(const std::string& a, unit u) {
+	switch (u) {
+	case Radians:
+		_angle = std::stod(a);
+		return;
+	case Degrees:
+		_angle = dms_to_angle(a).radians();
+		return;
+	case Hours:
+		_angle = hms_to_angle(a).radians();
+		return;
+	case Revolutions:
+		revolutions(std::stod(a));
+		return;
+	case ArcMinutes:
+		arcminutes(std::stod(a));
+		return;
+	case ArcSeconds:
+		arcseconds(std::stod(a));
+		return;
+	case Minutes:
+		minutes(std::stod(a));
+		return;
+	case Seconds:
+		minutes(std::stod(a));
+		return;
+	}
+	throw std::runtime_error("unknown unit");
 }
 
 double	Angle::degrees() const {
@@ -372,6 +412,11 @@ Angle	Angle::ecliptic(double T) {
 
 Angle	abs(const Angle& a) {
 	return Angle(fabs(a.radians()));
+}
+
+std::ostream&	operator<<(std::ostream& out, const Angle& angle) {
+	out << angle.dms();
+	return out;
 }
 
 } // namespace astro
