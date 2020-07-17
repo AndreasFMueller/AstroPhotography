@@ -1,5 +1,12 @@
 ChangeLog for the Astro project.
 
+20200717:
+	* add implementation of Size(std::string) constructor
+	* implement Angle(std::string) constructor
+	* improve MilkyWay parser
+	* add more operator<< for angle types
+	* fix rounding of seconds in HMS/DMS display
+
 20200716:
 	* add GridCalculator class and gridcalculator utility
 

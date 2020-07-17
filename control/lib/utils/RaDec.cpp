@@ -20,7 +20,12 @@ RaDec::RaDec(const Vector& vector) {
 }
 
 RaDec::RaDec(const std::string& radecstring) {
-	// XXX implementation missing
+	// split the string at the first blank
+	auto i = radecstring.find(" ");
+	std::string	rastring = radecstring.substr(0, i);
+	ra() = Angle(rastring, Angle::Hours);
+	std::string	decstring = radecstring.substr(i + 1);
+	dec() = Angle(decstring, Angle::Degrees);
 }
 
 bool	RaDec::operator<(const RaDec& other) const {
@@ -128,6 +133,11 @@ Angle	RaDec::distance(const RaDec& other) const {
  */
 double	RaDec::scalarproduct(const RaDec& other) const {
 	return UnitVector(*this) * UnitVector(other);
+}
+
+std::ostream&	operator<<(std::ostream& out, const RaDec& radec) {
+	out << radec.toString();
+	return out;
 }
 
 } // namespace astro

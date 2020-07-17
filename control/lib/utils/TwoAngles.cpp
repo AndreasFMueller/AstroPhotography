@@ -92,4 +92,9 @@ bool	TwoAngles::operator<(const TwoAngles& other) const {
 	return a2() < other.a2();
 }
 
+std::ostream&	operator<<(std::ostream& out, const TwoAngles& angles) {
+	out << angles.toString();
+	return out;
+}
+
 } // namespace astro

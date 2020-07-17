@@ -51,6 +51,7 @@ libastroutils_la_SOURCES = 						\
 	Typename.cpp							\
 	utils.cpp							\
 	UUID.cpp							\
+	UnitVector.cpp							\
 	Vector.cpp							\
 	Version.cpp
 
