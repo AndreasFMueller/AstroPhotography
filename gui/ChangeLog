@@ -5,6 +5,9 @@ ChangeLog for the Qt GUI to Astrophotography
 	* add planet display in the StarChartWidget
 	* separate the PlanetDrawing from the SkyDrawing so that it can be used
 	  in the StarChartWidget
+	* add constellation lines to StarChartWidget
+	* add wide resolution to the finder chart
+	* add configurable limit magnitude to StarChartWidget
 
 20200710:
 	* migrate to Qt5.15

@@ -73,6 +73,8 @@ class StarChartWidget : public QWidget, public PlanetDrawing {
 	astro::Angle	_imager_resolution;
 	astro::Angle	_finder_resolution;
 	astro::Angle	_guider_resolution;
+	static const astro::Angle	_standard_resolution;
+	static const astro::Angle	_wide_resolution;
 	snowgui::ImagerRectangle	_imager_rectangle;
 	snowgui::ImagerRectangle	_finder_rectangle;
 	snowgui::ImagerRectangle	_guider_rectangle;
@@ -98,6 +100,7 @@ class StarChartWidget : public QWidget, public PlanetDrawing {
 	bool	_show_planets;
 	bool	_show_sun;
 	bool	_show_moon;
+	bool	_show_constellations;
 
 	bool	_retrieval_necessary;
 	StarChartRetriever	*_retriever;
@@ -165,6 +168,9 @@ public:
 	void	show_sun(bool p) { _show_sun = p; }
 	bool	show_sun() const { return _show_sun; }
 
+	void	show_constellations(bool p) { _show_constellations = p; }
+	bool	show_constellations() const { return _show_constellations; }
+
 	int	gridstep_pixels() const { return _gridstep_pixels; }
 	void	gridstep_pixels_up();
 	void	gridstep_pixels_down();
@@ -196,6 +202,7 @@ private:
 			const ImagerRectangle& rectangle,
 			const astro::Angle& resolution);
 	void	drawTarget(QPainter& painter);
+	void	drawConstellations(QPainter& painter);
 
 	void	mouseCommon(QMouseEvent *event);
 
@@ -243,6 +250,7 @@ public slots:
 	void	setPlanetsVisible(bool);
 	void	setSunVisible(bool);
 	void	setMoonVisible(bool);
+	void	setConstellationsVisible(bool);
 	
 	void	toggleStarsVisible();
 	void	toggleGridVisible();
@@ -260,11 +268,16 @@ public slots:
 	void	togglePlanetsVisible();
 	void	toggleSunVisible();
 	void	toggleMoonVisible();
+	void	toggleConstellationsVisible();
 
 	void	useFinderResolution();
 	void	useGuiderResolution();
 	void	useImagerResolution();
 	void	useStandardResolution();
+	void	useWideResolution();
+
+	void	increaseLimitMagnitude();
+	void	decreaseLimitMagnitude();
 
 	void	gridstepIncrement();
 	void	gridstepDecrement();

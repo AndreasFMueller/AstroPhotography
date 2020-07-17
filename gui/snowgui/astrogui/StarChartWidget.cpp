@@ -19,6 +19,11 @@ using namespace astro::catalog;
 
 namespace snowgui {
 
+const astro::Angle	StarChartWidget::_standard_resolution(1 / 100.,
+				astro::Angle::Degrees);
+const astro::Angle	StarChartWidget::_wide_resolution(1 / 50.,
+				astro::Angle::Degrees);
+
 /**
  * \brief Construct a new Star chart
  *
@@ -27,7 +32,7 @@ namespace snowgui {
 StarChartWidget::StarChartWidget(QWidget *parent) : QWidget(parent),
 	_converter(astro::RaDec(), astro::Angle((M_PI / 180) / 100.),
 		astro::Angle(0)) {
-	_resolution.degrees(1 / 100.); // 1 deg/100 pixels
+	_resolution = _standard_resolution;
 	_limit_magnitude = 10;
 	_negative = false;
 	_show_stars = true;
@@ -41,6 +46,7 @@ StarChartWidget::StarChartWidget(QWidget *parent) : QWidget(parent),
 	_show_planets = true;
 	_show_sun = true;
 	_show_moon = true;
+	_show_constellations = true;
 	_flip = true; // XXX is this correct?
 	_show_deepsky = true;
 	_show_tooltips = true;
@@ -509,6 +515,11 @@ void	StarChartWidget::draw() {
 	// draw the grid
 	if (show_grid()) {
 		drawGrid(painter);
+	}
+
+	// draw the constellations
+	if (show_constellations()) {
+		drawConstellations(painter);
 	}
 
 	// draw the cross hairs
@@ -1045,6 +1056,10 @@ void	StarChartWidget::toggleSunVisible() {
 	setSunVisible(!show_sun());
 }
 
+void	StarChartWidget::toggleConstellationsVisible() {
+	setConstellationsVisible(!show_constellations());
+}
+
 void	StarChartWidget::useFinderResolution() {
 	resolutionChanged(_finder_resolution);
 }
@@ -1058,7 +1073,11 @@ void	StarChartWidget::useImagerResolution() {
 }
 
 void	StarChartWidget::useStandardResolution() {
-	resolutionChanged(astro::Angle(1. / 100., astro::Angle::Degrees));
+	resolutionChanged(_standard_resolution);
+}
+
+void	StarChartWidget::useWideResolution() {
+	resolutionChanged(_wide_resolution);
 }
 
 void	StarChartWidget::setPlanetsVisible(bool p) {
@@ -1073,6 +1092,21 @@ void	StarChartWidget::setSunVisible(bool p) {
 
 void	StarChartWidget::setMoonVisible(bool p) {
 	show_moon(p);
+	repaint();
+}
+
+void	StarChartWidget::setConstellationsVisible(bool p) {
+	show_constellations(p);
+	repaint();
+}
+
+void	StarChartWidget::increaseLimitMagnitude() {
+	_limit_magnitude += 1;
+	repaint();
+}
+
+void	StarChartWidget::decreaseLimitMagnitude() {
+	_limit_magnitude -= 1;
 	repaint();
 }
 
@@ -1170,6 +1204,13 @@ void	StarChartWidget::showContextMenu(const QPoint& point) {
 	connect(&actionCataloglabels, SIGNAL(triggered()),
 		this, SLOT(toggleCataloglabelsVisible()));
 
+	QAction	actionConstellations(QString("Constellations"), this);
+	actionConstellations.setCheckable(true);
+	actionConstellations.setChecked(show_constellations());
+	contextMenu.addAction(&actionConstellations);
+	connect(&actionConstellations, SIGNAL(triggered()),
+		this, SLOT(toggleConstellationsVisible()));
+
 	QAction	actionTooltips(QString("Coordinates"), this);
 	actionTooltips.setCheckable(true);
 	actionTooltips.setChecked(show_tooltips());
@@ -1197,6 +1238,8 @@ void	StarChartWidget::showContextMenu(const QPoint& point) {
 
 	QAction actionFinderResolution(QString("Finder resolution"), this);
 	if (_finder_resolution > 0) {
+		actionFinderResolution.setCheckable(true);
+		actionFinderResolution.setChecked(_finder_resolution == _resolution);
 		contextMenu.addAction(&actionFinderResolution);
 		connect(&actionFinderResolution, SIGNAL(triggered()),
 			this, SLOT(useFinderResolution()));
@@ -1206,6 +1249,8 @@ void	StarChartWidget::showContextMenu(const QPoint& point) {
 
 	QAction actionGuiderResolution(QString("Guider resolution"), this);
 	if (_guider_resolution > 0) {
+		actionGuiderResolution.setCheckable(true);
+		actionGuiderResolution.setChecked(_guider_resolution == _resolution);
 		contextMenu.addAction(&actionGuiderResolution);
 		connect(&actionGuiderResolution, SIGNAL(triggered()),
 			this, SLOT(useGuiderResolution()));
@@ -1215,6 +1260,8 @@ void	StarChartWidget::showContextMenu(const QPoint& point) {
 
 	QAction actionImagerResolution(QString("Imager resolution"), this);
 	if (_imager_resolution > 0) {
+		actionImagerResolution.setCheckable(true);
+		actionImagerResolution.setChecked(_imager_resolution == _resolution);
 		contextMenu.addAction(&actionImagerResolution);
 		connect(&actionImagerResolution, SIGNAL(triggered()),
 			this, SLOT(useImagerResolution()));
@@ -1223,9 +1270,18 @@ void	StarChartWidget::showContextMenu(const QPoint& point) {
 	}
 
 	QAction actionStandardResolution(QString("Standard resolution"), this);
+	actionStandardResolution.setCheckable(true);
+	actionStandardResolution.setChecked(_standard_resolution == _resolution);
 	contextMenu.addAction(&actionStandardResolution);
 	connect(&actionStandardResolution, SIGNAL(triggered()),
 		this, SLOT(useStandardResolution()));
+
+	QAction actionWideResolution(QString("Wide resolution"), this);
+	actionWideResolution.setCheckable(true);
+	actionWideResolution.setChecked(_wide_resolution == _resolution);
+	contextMenu.addAction(&actionWideResolution);
+	connect(&actionWideResolution, SIGNAL(triggered()),
+		this, SLOT(useWideResolution()));
 
 	contextMenu.addSeparator();
 
@@ -1262,6 +1318,26 @@ void	StarChartWidget::showContextMenu(const QPoint& point) {
 	contextMenu.addAction(&actionLegend);
 	connect(&actionLegend, SIGNAL(triggered()),
 		this, SLOT(showLegend()));
+
+	contextMenu.addSeparator();
+
+	std::string	s = astro::stringprintf("Limit magnitude: %.1f",
+		limit_magnitude());
+	QAction actionShowLimitMagnitude(QString(s.c_str()), this);
+	actionShowLimitMagnitude.setEnabled(false);
+	contextMenu.addAction(&actionShowLimitMagnitude);
+
+	QAction actionIncreaseLimitMagnitude(QString("Limit Magnitude +"), this);
+	//actionIncreaseLimitMagnitude.setEnabled(true);
+	contextMenu.addAction(&actionIncreaseLimitMagnitude);
+	connect(&actionIncreaseLimitMagnitude, SIGNAL(triggered()),
+		this, SLOT(increaseLimitMagnitude()));
+
+	QAction actionDecreaseLimitMagnitude(QString("Limit Magnitude -"), this);
+	//actionDecreaseLimitMagnitude.setEnabled();
+	contextMenu.addAction(&actionDecreaseLimitMagnitude);
+	connect(&actionDecreaseLimitMagnitude, SIGNAL(triggered()),
+		this, SLOT(decreaseLimitMagnitude()));
 
 	QAction	actionReload(QString("Reload stars"), this);
 	actionReload.setEnabled(_retriever == NULL);
@@ -1353,5 +1429,39 @@ QPointF	StarChartWidget::position(const astro::RaDec& pos) {
 	}
 	return point;
 }
+
+/**
+ * \brief Draw constellation lines
+ */
+void    StarChartWidget::drawConstellations(QPainter& painter) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "draw constellation lines");
+	// set up the pen 
+	QPen    pen(Qt::SolidLine);
+	pen.setWidth(1);
+	QColor  pink(255,0,204);
+	pen.setColor(pink);
+	painter.setPen(pen);
+
+	// get the Constellations
+	astro::catalog::ConstellationCatalogPtr consts
+		= astro::catalog::ConstellationCatalog::get();
+	for (auto c = consts->begin(); c != consts->end(); c++) {
+		// get the next constellation
+		astro::catalog::ConstellationPtr        constellation = c->second;
+		for (auto e = constellation->begin();
+			e != constellation->end(); e++) {
+			// go through all the edges
+			if ((_direction.scalarproduct(e->from()) < 0) ||
+				(_direction.scalarproduct(e->to()) < 0)) {
+				debug(LOG_DEBUG, DEBUG_LOG, 0,
+					"point on the wrong side");
+			} else {
+				drawLine(painter, e->from(), e->to());
+			}
+		}
+	}
+}
+
+
 
 } // namespace snowgui
