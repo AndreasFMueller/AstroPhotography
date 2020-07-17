@@ -8,6 +8,7 @@ ChangeLog for the Qt GUI to Astrophotography
 	* add constellation lines to StarChartWidget
 	* add wide resolution to the finder chart
 	* add configurable limit magnitude to StarChartWidget
+	* background and border for the deep sky object labels
 
 20200710:
 	* migrate to Qt5.15

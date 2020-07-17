@@ -250,7 +250,7 @@ void	SimCcd::catalogStarfield(const RaDec& direction) {
 
 	// rotate the star field
 	Angle	alpha;
-	alpha.degrees(azimuth);
+	alpha.degrees(-azimuth);
 	image::transform::Transform	transform(alpha.radians(), Point());
 	transform = image::transform::Transform(alpha.radians(),
 			center - transform(center));

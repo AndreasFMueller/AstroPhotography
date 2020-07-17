@@ -307,10 +307,30 @@ void	StarChartWidget::drawDeepSkyObject(QPainter& painter,
 		return;
 	}
 
+	// label string to write
+	QString	labelstring(deepskyobject.name.c_str());
+
+	// draw a rectangle in transparent black
+	QColor	background(0, 0, 0, 96);
+	QRectF	labelrect;
+	labelrect = painter.boundingRect(labelrect, Qt::AlignCenter, labelstring);
+	double	w = labelrect.width() / 2. + 1;
+	double	h = labelrect.height() / 2.;
+	painter.fillRect(p.x() - w, p.y() - h, 2 * w, 2 * h, background);
+
+	// draw border
+	QPainterPath	labelpath;
+	pen.setWidth(0.5);
+	labelpath.moveTo(p.x() - w, p.y() - h);
+	labelpath.lineTo(p.x() + w, p.y() - h);
+	labelpath.lineTo(p.x() + w, p.y() + h);
+	labelpath.lineTo(p.x() - w, p.y() + h);
+	labelpath.closeSubpath();
+	painter.drawPath(labelpath);
+
 	// draw the name of the object
 	painter.drawText(p.x() - 40, p.y() - 10, 80, 20,
-		Qt::AlignCenter,
-		QString(deepskyobject.name.c_str()));
+		Qt::AlignCenter, labelstring);
 	if (deepskyobject.name.size() == 0) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "unnamed object %s",
 			deepskyobject.toString().c_str());
