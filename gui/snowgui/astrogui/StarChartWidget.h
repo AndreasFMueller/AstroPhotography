@@ -14,6 +14,7 @@
 #include <BusyWidget.h>
 #include <StarChartLegend.h>
 #include <ImagerRectangle.h>
+#include <PlanetDrawing.h>
 
 namespace snowgui {
 
@@ -61,7 +62,7 @@ signals:
  * XXX size of the CCD chip. The difficulty is how how to select the
  * XXX from the three sizes of guider, finder and imager
  */
-class StarChartWidget : public QWidget {
+class StarChartWidget : public QWidget, public PlanetDrawing {
 	Q_OBJECT
 
 	astro::catalog::Catalog::starsetptr	_stars;
@@ -94,10 +95,16 @@ class StarChartWidget : public QWidget {
 	bool	_show_imager_rectangle;
 	bool	_show_finder_rectangle;
 	bool	_show_guider_rectangle;
+	bool	_show_planets;
+	bool	_show_sun;
+	bool	_show_moon;
 
 	bool	_retrieval_necessary;
 	StarChartRetriever	*_retriever;
 	BusyWidget	*_busywidget;
+
+	int	_gridstep_pixels;
+	time_t	_time;
 
 	StarChartLegend	*_legend;
 
@@ -149,8 +156,26 @@ public:
 	void	show_target(bool t) { _show_target = t; }
 	bool	show_target() const { return _show_target; }
 
+	void	show_planets(bool p) { _show_planets = p; }
+	bool	show_planets() const { return _show_planets; }
+
+	void	show_moon(bool p) { _show_moon = p; }
+	bool	show_moon() const { return _show_moon; }
+
+	void	show_sun(bool p) { _show_sun = p; }
+	bool	show_sun() const { return _show_sun; }
+
+	int	gridstep_pixels() const { return _gridstep_pixels; }
+	void	gridstep_pixels_up();
+	void	gridstep_pixels_down();
+
+	time_t	time() const;
+	void	time(time_t t) { _time = t; }
+
 	explicit StarChartWidget(QWidget *parent = NULL);
 	virtual ~StarChartWidget();
+
+	virtual QPointF	position(const astro::RaDec& radec);
 
 signals:
 	void	pointSelected(astro::RaDec);
@@ -215,6 +240,9 @@ public slots:
 	void	setFinderRectangleVisible(bool);
 	void	setGuiderRectangleVisible(bool);
 	void	setTargetVisible(bool);
+	void	setPlanetsVisible(bool);
+	void	setSunVisible(bool);
+	void	setMoonVisible(bool);
 	
 	void	toggleStarsVisible();
 	void	toggleGridVisible();
@@ -229,11 +257,17 @@ public slots:
 	void	toggleFinderRectangleVisible();
 	void	toggleGuiderRectangleVisible();
 	void	toggleTargetVisible();
+	void	togglePlanetsVisible();
+	void	toggleSunVisible();
+	void	toggleMoonVisible();
 
 	void	useFinderResolution();
 	void	useGuiderResolution();
 	void	useImagerResolution();
 	void	useStandardResolution();
+
+	void	gridstepIncrement();
+	void	gridstepDecrement();
 
 	void	showLegend();
 	void	removeLegend();

@@ -18,6 +18,7 @@
 #include <set>
 #include <cmath>
 #include <deque>
+#include <PlanetDrawing.h>
 
 namespace snowgui {
 
@@ -110,7 +111,7 @@ public:
 /**
  * \brief Class that does the drawing of a sky in the SkyView
  */
-class SkyDrawing {
+class SkyDrawing : public PlanetDrawing {
 	Q_GADGET
 	astro::catalog::Catalog::starsetptr	_stars;
 	std::recursive_mutex	_mutex;
@@ -246,15 +247,8 @@ private:
 			astro::catalog::MilkyWay::level_t level);
 	void	drawMilkyWay(QPainter& painter);
 	void	drawHorizon(QPainter& painter);
-	void	drawSolarsystemBody(QPainter& painter,
-			const astro::RaDec& position,
-			double radius, QColor color, QString label);
-	void	drawSun(QPainter& painter);
-	void	drawMoon(QPainter& painter);
-	void    drawPlanet(QPainter& painter, astro::solarsystem::RelativePosition& rp,
-			astro::solarsystem::Planetoid *planet, double pr,
-			QColor planetcolor, QString label);
-	void	drawPlanets(QPainter& painter);
+	// override the position method in PlanetDrawing
+	QPointF	position(const astro::RaDec& radec);
 protected:
 	virtual void	redraw();
 	astro::AzmAlt	convert(const astro::RaDec& radec);

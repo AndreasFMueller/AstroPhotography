@@ -1,5 +1,11 @@
 ChangeLog for the Qt GUI to Astrophotography
 
+2020717:
+	* fixing grid display in the StarChartWidget
+	* add planet display in the StarChartWidget
+	* separate the PlanetDrawing from the SkyDrawing so that it can be used
+	  in the StarChartWidget
+
 20200710:
 	* migrate to Qt5.15
 	* portability fixes

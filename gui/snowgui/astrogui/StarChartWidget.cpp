@@ -13,6 +13,7 @@
 #include <QToolTip>
 #include <QMenu>
 #include <QAction>
+#include <stdexcept>
 
 using namespace astro::catalog;
 
@@ -37,11 +38,16 @@ StarChartWidget::StarChartWidget(QWidget *parent) : QWidget(parent),
 	_show_crosshairs = false;
 	_show_directions = true;
 	_show_cataloglabels = true;
+	_show_planets = true;
+	_show_sun = true;
+	_show_moon = true;
 	_flip = true; // XXX is this correct?
 	_show_deepsky = true;
 	_show_tooltips = true;
 	_state = astro::device::Mount::TRACKING; // safe assumption
 	_legend = NULL;
+	_gridstep_pixels = 128;
+	_time = 0;
 
 	qRegisterMetaType<astro::catalog::Catalog::starsetptr>("astro::catalog::Catalog::starsetptr");
 	qRegisterMetaType<astro::catalog::DeepSkyObjectSetPtr>("astro::catalog::DeepSkyObjectSetPtr");
@@ -98,6 +104,18 @@ StarChartWidget::StarChartWidget(QWidget *parent) : QWidget(parent),
  * \brief Destroy the star chart
  */
 StarChartWidget::~StarChartWidget() {
+}
+
+void	StarChartWidget::gridstep_pixels_up() {
+	if (_gridstep_pixels < 1024) {
+		_gridstep_pixels <<= 1;
+	}
+}
+
+void	StarChartWidget::gridstep_pixels_down() {
+	if (_gridstep_pixels > 16) {
+		_gridstep_pixels >>= 1;
+	}
 }
 
 /**
@@ -330,7 +348,7 @@ void	StarChartWidget::drawGrid(QPainter& painter) {
 	astro::utils::GridCalculator	gridcalculator(_direction,
 					astro::Size(width(), height()),
 					1 / _resolution.degrees());
-	gridcalculator.gridsetup(100);
+	gridcalculator.gridsetup(gridstep_pixels());
 
 	int	steps = 200;
 	// draw RA grid lines
@@ -538,6 +556,20 @@ void	StarChartWidget::draw() {
 	}
 	if (show_imager_rectangle()) {
 		drawRectangle(painter, _imager_rectangle, _imager_resolution);
+	}
+
+	// draw the planets
+	radius(10);
+	if (show_planets()) {
+		drawPlanets(painter, time());
+	}
+	radius(0.25 / _resolution.degrees());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "radius of sun/moon: %f", radius());
+	if (show_moon()) {
+		drawMoon(painter, time());
+	}
+	if (show_sun()) {
+		drawSun(painter, time());
 	}
 }
 
@@ -926,6 +958,29 @@ void	StarChartWidget::setFlip(bool s) {
 	repaint();
 }
 
+void	StarChartWidget::resolutionChanged(astro::Angle resolution) {
+	_resolution = resolution;
+	_converter = astro::ImageCoordinates(_direction, _resolution,
+                        astro::Angle(0));
+	repaint();
+}
+
+void	StarChartWidget::gridstepIncrement() {
+	int	previous = gridstep_pixels();
+	gridstep_pixels_up();
+	if (previous != gridstep_pixels()) {
+		repaint();
+	}
+}
+
+void	StarChartWidget::gridstepDecrement() {
+	int	previous = gridstep_pixels();
+	gridstep_pixels_down();
+	if (previous != gridstep_pixels()) {
+		repaint();
+	}
+}
+
 void	StarChartWidget::toggleStarsVisible() {
 	setStarsVisible(!show_stars());
 }
@@ -978,6 +1033,18 @@ void	StarChartWidget::toggleGuiderRectangleVisible() {
 	setGuiderRectangleVisible(!show_guider_rectangle());
 }
 
+void	StarChartWidget::togglePlanetsVisible() {
+	setPlanetsVisible(!show_planets());
+}
+
+void	StarChartWidget::toggleMoonVisible() {
+	setMoonVisible(!show_moon());
+}
+
+void	StarChartWidget::toggleSunVisible() {
+	setSunVisible(!show_sun());
+}
+
 void	StarChartWidget::useFinderResolution() {
 	resolutionChanged(_finder_resolution);
 }
@@ -994,11 +1061,28 @@ void	StarChartWidget::useStandardResolution() {
 	resolutionChanged(astro::Angle(1. / 100., astro::Angle::Degrees));
 }
 
-void	StarChartWidget::resolutionChanged(astro::Angle resolution) {
-	_resolution = resolution;
-	_converter = astro::ImageCoordinates(_direction, _resolution,
-                        astro::Angle(0));
+void	StarChartWidget::setPlanetsVisible(bool p) {
+	show_planets(p);
 	repaint();
+}
+
+void	StarChartWidget::setSunVisible(bool p) {
+	show_sun(p);
+	repaint();
+}
+
+void	StarChartWidget::setMoonVisible(bool p) {
+	show_moon(p);
+	repaint();
+}
+
+time_t	StarChartWidget::time() const {
+	if (_time) {
+		return _time;
+	}
+	time_t	t;
+	::time(&t);
+	return t;
 }
 
 void	StarChartWidget::showContextMenu(const QPoint& point) {
@@ -1019,6 +1103,16 @@ void	StarChartWidget::showContextMenu(const QPoint& point) {
 	contextMenu.addAction(&actionGrid);
 	connect(&actionGrid, SIGNAL(triggered()),
 		this, SLOT(toggleGridVisible()));
+
+	QAction actionGridDown(QString("Grid resolution +"), this);
+	contextMenu.addAction(&actionGridDown);
+	connect(&actionGridDown, SIGNAL(triggered()),
+		this, SLOT(gridstepDecrement()));
+
+	QAction actionGridUp(QString("Grid resolution -"), this);
+	contextMenu.addAction(&actionGridUp);
+	connect(&actionGridUp, SIGNAL(triggered()),
+		this, SLOT(gridstepIncrement()));
 
 	QAction	actionCrosshairs(QString("Crosshairs"), this);
 	actionCrosshairs.setCheckable(true);
@@ -1047,6 +1141,27 @@ void	StarChartWidget::showContextMenu(const QPoint& point) {
 	contextMenu.addAction(&actionDeepsky);
 	connect(&actionDeepsky, SIGNAL(triggered()),
 		this, SLOT(toggleDeepskyVisible()));
+
+	QAction	actionPlanets(QString("Planets"), this);
+	actionPlanets.setCheckable(true);
+	actionPlanets.setChecked(show_planets());
+	contextMenu.addAction(&actionPlanets);
+	connect(&actionPlanets, SIGNAL(triggered()),
+		this, SLOT(togglePlanetsVisible()));
+
+	QAction	actionSun(QString("Sun"), this);
+	actionSun.setCheckable(true);
+	actionSun.setChecked(show_sun());
+	contextMenu.addAction(&actionSun);
+	connect(&actionSun, SIGNAL(triggered()),
+		this, SLOT(toggleSunVisible()));
+
+	QAction	actionMoon(QString("Moon"), this);
+	actionMoon.setCheckable(true);
+	actionMoon.setChecked(show_moon());
+	contextMenu.addAction(&actionMoon);
+	connect(&actionMoon, SIGNAL(triggered()),
+		this, SLOT(toggleMoonVisible()));
 
 	QAction	actionCataloglabels(QString("Catalog labels"), this);
 	actionCataloglabels.setCheckable(true);
@@ -1221,6 +1336,22 @@ void	StarChartWidget::drawRectangle(QPainter& painter,
 	rectpath.lineTo(p4);
 	rectpath.closeSubpath();
 	painter.drawPath(rectpath);
+}
+
+QPointF	StarChartWidget::position(const astro::RaDec& pos) {
+	if (_direction.scalarproduct(pos) < 0) {
+		throw std::runtime_error("planet on the other side");
+	}
+	QPointF	point = convert(pos);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "solar system body position (%f,%f)", 
+		point.x(), point.y());
+	if ((point.x() < 0) || (point.x() > width())) {
+		throw std::runtime_error("planet outside image");
+	}
+	if ((point.y() < 0) || (point.y() > height())) {
+		throw std::runtime_error("planet outside image");
+	}
+	return point;
 }
 
 } // namespace snowgui

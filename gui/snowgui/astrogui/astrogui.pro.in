@@ -65,6 +65,7 @@ SOURCES += 								\
 	LocalTimeWidget.cpp						\
 	LogSpinBox.cpp							\
 	OffsetDial.cpp							\
+	PlanetDrawing.cpp						\
 	RotateDial.cpp							\
 	RoundingSpinBox.cpp						\
 	Scaler.cpp							\
@@ -98,6 +99,7 @@ HEADERS  += 								\
 	LocalTimeWidget.h						\
 	LogSpinBox.h							\
 	OffsetDial.h							\
+	PlanetDrawing.h							\
 	RotateDial.h							\
 	RoundingSpinBox.h						\
 	Scaler.h							\
