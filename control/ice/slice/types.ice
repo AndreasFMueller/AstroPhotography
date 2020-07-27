@@ -86,6 +86,17 @@ module snowstar {
 		void	stop();
 	};
 
+	/**
+	 * \brief A callback for a heartbeat
+	 *
+	 * The heartbeat can be used by a client to figure out whether
+	 * the connection was unavailable for some time. It can use this
+	 * information to refresh the information it has about the server.
+	 */
+	interface HeartbeatMonitor extends Callback {
+		void	beat(int sequencenumber);
+	};
+
 	sequence<Ice::Identity>	ObjectIdentitySequence;
 	sequence<string>	OperationSequence;
 
@@ -215,6 +226,13 @@ module snowstar {
 		float	getTemperature() throws NotImplemented;
 		float	cputime();
 		Sysinfo	getSysinfo() throws NotImplemented;
+		/**
+		 * \brief register a heartbeat cleint
+		 */
+		int	heartbeatInterval();
+		void	setHeartbeatInterval();
+		void	registerHeartbeatMonitor(Ice::Identity heartbeatmonitor);
+		void	unregisterHeartbeatMonitor(Ice::Identity heartbeatmonitor);
 	};
 
 	/**

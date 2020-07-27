@@ -9,10 +9,11 @@
 #include <types.h>
 #include <Server.h>
 #include <StatisticsI.h>
+#include <Heartbeat.h>
 
 namespace snowstar {
 
-class DaemonI : virtual public Daemon, public StatisticsI {
+class DaemonI : virtual public Daemon, public StatisticsI, public Heartbeat {
 	Server&	_server;
 public:
 	DaemonI(Server& server) : _server(server) { }
@@ -40,6 +41,15 @@ public:
 	float	daemonUptime(const Ice::Current& current);
 	float	getTemperature(const Ice::Current& current);
 	float	cputime(const Ice::Current& current);
+	void	registerHeartbeatMonitor(
+			const Ice::Identity& heartbeatmonitor,
+			const Ice::Current& current);
+	void	unregisterHeartbeatMonitor(
+			const Ice::Identity& heartbeatmonitor,
+			const Ice::Current& current);
+	Ice::Int	heartbeatInterval(const Ice::Current& current);
+	void	setHeartbeatInterval(Ice::Int interval,
+			const Ice::Current& current);
 };
 
 } // namespace snowstar

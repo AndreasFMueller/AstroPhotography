@@ -104,6 +104,12 @@ static astro::config::ConfigurationRegister	_service_gateway_registration(
 	_service_gateway_key,
 	"whether or not gateway service is offered");
 
+static astro::config::ConfigurationKey	_heartbeat_interval_key(
+	"snowstar", "daemon", "heartbeat");
+static astro::config::ConfigurationRegister	_heartbeat_interval_registration(
+	_heartbeat_interval_key,
+	"the default heartbeat interval");
+
 /**
  * \brief Get the services to be activated from the configuration
  */
@@ -208,7 +214,25 @@ void	Server::add_configuration_servant() {
 }
 
 void	Server::add_daemon_servant() {
-	Ice::ObjectPtr	object = new DaemonI(*this);
+	// create the daemon
+	DaemonI	*daemon = new DaemonI(*this);
+	Ice::ObjectPtr	object = daemon;
+
+	// get the interval from the configuration
+	astro::config::ConfigurationPtr	configuration
+		= astro::config::Configuration::get();
+	std::string	intervalstring = configuration->get(
+				_heartbeat_interval_key, "5");
+	int	interval = 0;
+	try {
+		interval = std::stoi(intervalstring);
+	} catch (const std::exception& x) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "invalid interval string '%s': %s",
+			intervalstring.c_str(), x.what());
+	}
+	daemon->interval(interval);
+
+	// add the daemon to the adapter
 	adapter->add(object, STRING_TO_IDENTITY("Daemon"));
 	astro::event(EVENT_GLOBAL, astro::events::INFO,
 		astro::events::Event::DEBUG,

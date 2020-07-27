@@ -61,6 +61,16 @@ public:
 };
 
 /**
+ * \brief Integer callback argument
+ */
+class IntegerCallbackData : public CallbackData {
+	int	_i;
+public:
+	IntegerCallbackData(int i)  : _i(i) { }
+	int	value() const { return _i; }
+};
+
+/**
  * \brief Image callback argument
  */
 class ImageCallbackData : public CallbackData {

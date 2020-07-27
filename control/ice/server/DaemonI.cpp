@@ -43,7 +43,7 @@ void	DaemonI::reloadRepositories(const Ice::Current& current) {
 }
 
 /**
- * \brief Initiate shutdown of the server
+ * \brief Initiate shutdown of the server process
  */
 void    DaemonI::shutdownServer(Ice::Float delay,
 		const Ice::Current& current) {
@@ -52,6 +52,10 @@ void    DaemonI::shutdownServer(Ice::Float delay,
 	Restart::shutdown_instead(true);
 	std::thread	t(do_shutdown, delay, current);
 	t.detach();
+	try {
+		Heartbeat::terminate(true);
+	} catch (const std::exception& x) {
+	}
 }
 
 static void	do_shutdownsystem(float delay, const Ice::Current& current) {
@@ -433,6 +437,49 @@ float	DaemonI::getTemperature(const Ice::Current& current) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "cannot get temperature");
 	}
 	return astro::Temperature::zero;
+}
+
+/**
+ * \brief Register a heartbeat monitor
+ *
+ * \param heartbeatmonitor	the monitor to register
+ * \param current		the current call context
+ */
+void	DaemonI::registerHeartbeatMonitor(const Ice::Identity& heartbeatmonitor,
+		const Ice::Current& current) {
+	Heartbeat::doregister(heartbeatmonitor, current);
+}
+
+/**
+ * \brief Unregister a heartbeat monitor
+ *
+ * \param heartbeatmonitor	the monitor to unregister
+ * \param current		the current call context
+ */
+void	DaemonI::unregisterHeartbeatMonitor(
+		const Ice::Identity& heartbeatmonitor,
+		const Ice::Current& current) {
+	Heartbeat::unregister(heartbeatmonitor, current);
+}
+
+/**
+ * \brief Get the heartbeat interval
+ *
+ * \param current	the current call context
+ */
+Ice::Int	DaemonI::heartbeatInterval(const Ice::Current& /* current */) {
+	return Heartbeat::interval();
+}
+
+/**
+ * \brief Chagen the heartbeat interval
+ *
+ * \param interval	the new heartbeat interval
+ * \param current	the current call context
+ */
+void	DaemonI::setHeartbeatInterval(Ice::Int interval,
+		const Ice::Current& /* current */) {
+	Heartbeat::interval(interval);
 }
 
 } // namespace snowstar

@@ -36,6 +36,7 @@ noinst_HEADERS =							\
 	GuiderI.h							\
 	GuiderITemplates.h						\
 	GuiderLocator.h							\
+	Heartbeat.h							\
 	ImageI.h							\
 	ImageLocator.h							\
 	ImageRepo.h							\
@@ -91,6 +92,7 @@ snowstar_SOURCES = snowstar.cpp 					\
 	GuiderIImage.cpp						\
 	GuiderI.cpp							\
 	GuiderLocator.cpp						\
+	Heartbeat.cpp							\
 	ImageI.cpp							\
 	ImageLocator.cpp						\
 	ImageRepo.cpp							\
