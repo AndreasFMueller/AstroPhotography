@@ -230,7 +230,7 @@ module snowstar {
 		 * \brief register a heartbeat cleint
 		 */
 		int	heartbeatInterval();
-		void	setHeartbeatInterval();
+		void	setHeartbeatInterval(int interval);
 		void	registerHeartbeatMonitor(Ice::Identity heartbeatmonitor);
 		void	unregisterHeartbeatMonitor(Ice::Identity heartbeatmonitor);
 	};
