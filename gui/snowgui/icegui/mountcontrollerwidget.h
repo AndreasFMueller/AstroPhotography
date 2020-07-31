@@ -22,6 +22,9 @@ namespace Ui {
 
 class mountcontrollerwidget;
 
+/**
+ * \brief A callback class for mount monitoring
+ */
 class MountCallbackI : public snowstar::MountCallback {
 	mountcontrollerwidget&	_mountcontrollerwidget;
 public:

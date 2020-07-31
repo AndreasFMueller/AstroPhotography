@@ -16,12 +16,29 @@ namespace Ui {
 	class SystemInfoWidget;
 }
 
+class HeartbeatMonitor : public QObject, public snowstar::HeartbeatMonitor {
+	Q_OBJECT
+
+public:
+	HeartbeatMonitor();
+	virtual ~HeartbeatMonitor();
+
+	virtual void    beat(int sequence_number, 
+				const Ice::Current& /* current */);
+	virtual void    stop(const Ice::Current& /* current */);
+	
+signals:
+	void	update(QString);
+};
+
 class SystemInfoWidget : public QWidget {
 	Q_OBJECT
 
 	QTimer	_timer;
 	snowstar::DaemonPrx     _daemon;
 	Ui::SystemInfoWidget *ui;
+	Ice::Identity	_heartbeat_identity;
+	Ice::ObjectPtr	_heartbeat_monitor;
 public:
 	explicit SystemInfoWidget(QWidget *parent = nullptr);
 	~SystemInfoWidget();
@@ -30,6 +47,7 @@ public:
 
 public slots:
 	void	update();
+	void	heartbeat_update(QString);
 };
 
 } // namespace snowgui

@@ -1,5 +1,9 @@
 ChangeLog for the Astro project.
 
+2020731:
+	* add processSize method to Daemon interface
+	* fix possible seg faults in CommunicatorSingleton
+
 20200717:
 	* add implementation of Size(std::string) constructor
 	* implement Angle(std::string) constructor

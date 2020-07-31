@@ -49,7 +49,6 @@ coolercontrollerwidget::coolercontrollerwidget(QWidget *parent) :
 	// connect the dew heater slider
 	connect(ui->dewHeaterSlider, SIGNAL(valueChanged(int)),
 		this, SLOT(dewHeaterChanged(int)));
-
 }
 
 /**
@@ -102,20 +101,27 @@ void	coolercontrollerwidget::setupComplete() {
  * \brief Destroy the cooler controller widget
  */
 coolercontrollerwidget::~coolercontrollerwidget() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "destroy the cooler controller widget");
 	if (_cooler_callback) {
 		if (_cooler) {
 			_cooler->unregisterCallback(_cooler_identity);
-			_cooler->ice_getConnection()->getAdapter()->remove(
-				_cooler_identity);
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "unregister callback");
 		}
+		snowstar::CommunicatorSingleton::remove(_cooler_identity);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "cooler callback removed");
+		_cooler_callback = NULL;
 	}
-	delete ui;
+	if (ui) {
+		delete ui;
+	}
+	ui = NULL;
 }
 
 /**
  * \brief Set up the cooler
  */
 void	coolercontrollerwidget::setupCooler() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "setupCooler called");
 	ui->setTemperatureSpinBox->blockSignals(true);
 	if (!_cooler) {
 		ui->activeWidget->setValue(1);
@@ -123,17 +129,11 @@ void	coolercontrollerwidget::setupCooler() {
 		return;
 	}
 
-	// make sure there is an adapter
-	try {
-		if (!_cooler->ice_getConnection()->getAdapter()) {
-			Ice::CommunicatorPtr	ic
-				= snowstar::CommunicatorSingleton::get();
-			Ice::ObjectAdapterPtr	adapter
-				= snowstar::CommunicatorSingleton::getAdapter();
-			adapter->activate();
-			_cooler->ice_getConnection()->setAdapter(adapter);
-		}
-	} catch (const std::exception& x) {
+	// if we already have a cooler and a callback, we should
+	// destroy them
+	if ((_cooler) && (_cooler_callback)) {
+		_cooler->unregisterCallback(_cooler_identity);
+		snowstar::CommunicatorSingleton::remove(_cooler_identity);
 	}
 
 	// enable all input widgets
@@ -196,10 +196,7 @@ void	coolercontrollerwidget::setupCooler() {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "registering callback");
 		CoolerCallbackI  *_callback = new CoolerCallbackI(*this);
 		_cooler_callback = _callback;
-		_cooler_identity.name = IceUtil::generateUUID();
-		_cooler_identity.category = "";
-		_cooler->ice_getConnection()->getAdapter()
-			->add(_cooler_callback, _cooler_identity);
+		_cooler_identity = snowstar::CommunicatorSingleton::add(_cooler_callback);
 		_cooler->registerCallback(_cooler_identity);
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "callback registered");
 	} catch (const std::exception& x) {
@@ -420,7 +417,7 @@ void    coolercontrollerwidget::setDewHeater(float dewheatervalue) {
  *
  * \param dewheatervalue	the value of the dew heater
  */
-void    coolercontrollerwidget::setDewHeaterSlider(float dewheatervalue) {
+void    coolercontrollerwidget::setDewHeaterSlider(float /* dewheatervalue */) {
 	if (!_cooler) {
 		return;
 	}

@@ -225,6 +225,7 @@ module snowstar {
 		float	daemonUptime();
 		float	getTemperature() throws NotImplemented;
 		float	cputime();
+		float	processSize();
 		Sysinfo	getSysinfo() throws NotImplemented;
 		/**
 		 * \brief register a heartbeat cleint

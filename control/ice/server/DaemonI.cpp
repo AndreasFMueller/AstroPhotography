@@ -16,9 +16,14 @@
 #include <AstroUtils.h>
 #include <sys/utsname.h>
 #include <sys/times.h>
+#include <sys/sysctl.h>
 #ifdef __linux__
 #include <sys/sysinfo.h>
 #endif /* __linux__ */
+
+#if defined(__APPLE__) && defined(__MACH__)
+#include <mach/mach.h>
+#endif
 
 namespace snowstar {
 
@@ -376,12 +381,31 @@ std::string	DaemonI::snowstarVersion(const Ice::Current& current) {
 
 Sysinfo	DaemonI::getSysinfo(const Ice::Current& current) {
 	CallStatistics::count(current);
+	Sysinfo	result;
+	result.uptime = 0;
+	result.load1min = 0;
+	result.load5min = 0;
+	result.load15min = 0;
+	result.totalram = 0;
+	result.sharedram = 0;
+	result.bufferram = 0;
+	result.totalswap = 0;
+	result.freeswap = 0;
+	result.processes = 0;
 #if __APPLE__
+#if 0
 	NotImplemented	notimplemented;
 	notimplemented.cause = std::string("sysinfo not available");
 	throw notimplemented;
+#else
+	// XXX get memory size
+	char	buffer[1024];
+	size_t	s = sizeof(buffer);
+	if (0 == sysctlbyname("hw.memsize", buffer, &s, 0, 0)) {
+		result.totalram = (*(int64_t *)buffer);
+	}
 #endif
-	Sysinfo	result;
+#endif
 #if __linux__
 	struct sysinfo	info;
 	if (sysinfo(&info) < 0) {
@@ -420,6 +444,46 @@ float	DaemonI::cputime(const Ice::Current& current) {
 	struct tms	t;
 	times(&t);
 	return (t.tms_utime + t.tms_stime) / (float)ticks;
+}
+
+/**
+ * Returns the current resident set size (physical memory use) measured
+ * in bytes, or zero if the value cannot be determined on this OS.
+ * (found on https://stackoverflow.com/questions/669438/how-to-get-memory-usage-at-runtime-using-c)
+ */
+static size_t getCurrentRSS( ) {
+#if defined(__APPLE__) && defined(__MACH__)
+    /* OSX ------------------------------------------------------ */
+    struct mach_task_basic_info info;
+    mach_msg_type_number_t infoCount = MACH_TASK_BASIC_INFO_COUNT;
+    if ( task_info( mach_task_self( ), MACH_TASK_BASIC_INFO,
+        (task_info_t)&info, &infoCount ) != KERN_SUCCESS )
+        return (size_t)0L;      /* Can't access? */
+    return (size_t)info.resident_size;
+
+#elif defined(__linux__) || defined(__linux) || defined(linux) || defined(__gnu_linux__)
+    /* Linux ---------------------------------------------------- */
+    long rss = 0L;
+    FILE* fp = NULL;
+    if ( (fp = fopen( "/proc/self/statm", "r" )) == NULL )
+        return (size_t)0L;      /* Can't open? */
+    if ( fscanf( fp, "%*s%ld", &rss ) != 1 )
+    {
+        fclose( fp );
+        return (size_t)0L;      /* Can't read? */
+    }
+    fclose( fp );
+    return (size_t)rss * (size_t)sysconf( _SC_PAGESIZE);
+
+#else
+    /* AIX, BSD, Solaris, and Unknown OS ------------------------ */
+    return (size_t)0L;          /* Unsupported. */
+#endif
+}
+
+float	DaemonI::processSize(const Ice::Current& current) {
+	CallStatistics::count(current);
+	return getCurrentRSS();
 }
 
 /**

@@ -1,5 +1,12 @@
 ChangeLog for the Qt GUI to Astrophotography
 
+2020731:
+	* make sure connection is established right at the beginning
+	* fix typos
+	* fix a bug of callbacks not being correctly unregistered in
+	  coolercontrollerwidget and mountcontrollerwidget
+	* add process size display
+
 2020717:
 	* fixing grid display in the StarChartWidget
 	* add planet display in the StarChartWidget

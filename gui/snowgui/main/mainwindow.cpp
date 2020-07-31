@@ -123,6 +123,9 @@ MainWindow::MainWindow(QWidget *parent,
 		_serviceobject.connect("Daemon"));
 	snowstar::DaemonPrx	daemon
 		= snowstar::DaemonPrx::checkedCast(base);
+	snowstar::CommunicatorSingleton::connect(daemon);
+	
+	// remember the daemon in the systeminfo widget
 	ui->systeminfoWidget->setDaemon(daemon);
 
 	// create a 

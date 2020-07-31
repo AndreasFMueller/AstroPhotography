@@ -42,7 +42,7 @@ void	PlanetDrawing::drawSolarsystemBody(QPainter& painter,
 	try {
 		center = this->position(pos);
 	} catch (const std::exception& x) {
-		std::string	msg = astro::stringprintf("cannot darw %s: %s",
+		std::string	msg = astro::stringprintf("cannot draw %s: %s",
 			label.unicode(), x.what());
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "%s", msg.c_str());
 		return;

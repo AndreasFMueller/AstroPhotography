@@ -64,9 +64,9 @@ mountcontrollerwidget::~mountcontrollerwidget() {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "unregister mount");
 		if (_mount) {
 			_mount->unregisterCallback(_mount_identity);
-			_mount->ice_getConnection()->getAdapter()->remove(
-				_mount_identity);
 		}
+		snowstar::CommunicatorSingleton::remove(_mount_identity);
+		_mount_callback = NULL;
 	} 
 	delete ui;
 }
@@ -115,105 +115,15 @@ void	mountcontrollerwidget::setupComplete() {
 
 /**
  * \brief setup the mount
+ *
+ * This method assumes that there is currently no callback installed
  */
 void	mountcontrollerwidget::setupMount() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "setup the mount");
 	_previousstate = snowstar::MountIDLE;
-	if (_mount) {
-		// make sure the connection of the mount has an adapter
-		try {
-			if (!_mount->ice_getConnection()->getAdapter()) {
-				Ice::CommunicatorPtr	ic
-					= snowstar::CommunicatorSingleton::get();
-				Ice::ObjectAdapterPtr	adapter
-					= snowstar::CommunicatorSingleton::getAdapter();
-				adapter->activate();
-				_mount->ice_getConnection()->setAdapter(adapter);
-			}
-		} catch (const std::exception& x) {
-		}
 
-		// read longitude and latitude from the mount
-		try {
-			_location = convert(_mount->getLocation());
-			debug(LOG_DEBUG, DEBUG_LOG, 0, "mount location: %s",
-				_location.toString().c_str());
-
-			// write the position to the position label
-			std::string	pl;
-			pl += _location.longitude().dms(':', 0).substr(1);
-			pl += (_location.longitude().degrees() < 0) ? "W" : "E";
-			pl += " ";
-			pl += _location.latitude().dms(':', 0).substr(1);
-			pl += (_location.longitude().degrees() < 0) ? "S" : "N";
-			ui->observatoryField->setText(QString(pl.c_str()));
-
-			// write the position to the LMST widget
-			ui->siderealTime->position(_location);
-			ui->hourangleWidget->position(_location);
-		} catch (const std::exception& x) {
-			debug(LOG_ERR, DEBUG_LOG, 0,
-				"cannot get location from mount: %s", x.what());
-		}
-
-		try {
-			// make sure the star chart knows the orientation
-			_previouswest = _mount->telescopePositionWest();
-			debug(LOG_DEBUG, DEBUG_LOG, 0, "sending orientation: %s",
-				(_previouswest) ? "west" : "east");
-			emit orientationChanged(_previouswest);
-		} catch (const std::exception& x) {
-			debug(LOG_ERR, DEBUG_LOG, 0, "cannot get whether "
-				"telescope is east or west: %s", x.what());
-		}
-
-		try {
-			// make sure everybody knows our direction
-			_telescope = _mount->getRaDec();
-			debug(LOG_DEBUG, DEBUG_LOG, 0, "sending telescope: %s",
-				convert(_telescope).toString().c_str());
-			emit telescopeChanged(convert(_telescope));
-
-			// initially, telescope and target are identical
-			targetChanged(convert(_telescope));
-		} catch (const std::exception& x) {
-			debug(LOG_ERR, DEBUG_LOG, 0, "cannot get telescope: %s",
-				x.what());
-		}
-
-		// try to get the time
-		try {
-			debug(LOG_DEBUG, DEBUG_LOG, 0, "trying to get time");
-			emit updateTime(_mount->getTime());
-		} catch (std::exception& x) {
-			debug(LOG_ERR, DEBUG_LOG, 0, "cannot update time: %s",
-				x.what());
-		}
-
-		// register this class as a callback
-		try {
-			debug(LOG_DEBUG, DEBUG_LOG, 0, "registering callback");
-			MountCallbackI	*_callback = new MountCallbackI(*this);
-			_mount_callback = _callback;
-			_mount_identity.name = IceUtil::generateUUID();
-			_mount_identity.category = "";
-			_mount->ice_getConnection()->getAdapter()->add(_mount_callback, _mount_identity);
-			_mount->registerCallback(_mount_identity);
-			debug(LOG_DEBUG, DEBUG_LOG, 0, "callback registered");
-		} catch (const std::exception& x) {
-			debug(LOG_ERR, DEBUG_LOG, 0, "failed to register as a "
-				"mount callback: %s", x.what());
-		}
-
-		currentUpdate();
-		
-		// turn on the buttons
-		ui->targetRaField->setEnabled(true);
-		ui->targetDecField->setEnabled(true);
-		ui->gotoButton->setEnabled(true);
-		ui->viewskyButton->setEnabled(true);
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "start the mount timer");
-	} else {
+	// if we have no mount then we just disable all the fields
+	if (!_mount) {
 		ui->targetRaField->setEnabled(false);
 		ui->targetDecField->setEnabled(false);
 		ui->gotoButton->setEnabled(false);
@@ -222,7 +132,87 @@ void	mountcontrollerwidget::setupMount() {
 		ui->currentRaField->setText(QString("(idle)"));
 		ui->currentDecField->setText(QString("(idle)"));
 		ui->observatoryField->setText(QString("(unknown)"));
+		return;
 	}
+
+	// read longitude and latitude from the mount
+	try {
+		_location = convert(_mount->getLocation());
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "mount location: %s",
+			_location.toString().c_str());
+
+		// write the position to the position label
+		std::string	pl;
+		pl += _location.longitude().dms(':', 0).substr(1);
+		pl += (_location.longitude().degrees() < 0) ? "W" : "E";
+		pl += " ";
+		pl += _location.latitude().dms(':', 0).substr(1);
+		pl += (_location.longitude().degrees() < 0) ? "S" : "N";
+		ui->observatoryField->setText(QString(pl.c_str()));
+
+		// write the position to the LMST widget
+		ui->siderealTime->position(_location);
+		ui->hourangleWidget->position(_location);
+	} catch (const std::exception& x) {
+		debug(LOG_ERR, DEBUG_LOG, 0,
+			"cannot get location from mount: %s", x.what());
+	}
+
+	try {
+		// make sure the star chart knows the orientation
+		_previouswest = _mount->telescopePositionWest();
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "sending orientation: %s",
+			(_previouswest) ? "west" : "east");
+		emit orientationChanged(_previouswest);
+	} catch (const std::exception& x) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "cannot get whether "
+			"telescope is east or west: %s", x.what());
+	}
+
+	try {
+		// make sure everybody knows our direction
+		_telescope = _mount->getRaDec();
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "sending telescope: %s",
+			convert(_telescope).toString().c_str());
+		emit telescopeChanged(convert(_telescope));
+
+		// initially, telescope and target are identical
+		targetChanged(convert(_telescope));
+	} catch (const std::exception& x) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "cannot get telescope: %s",
+			x.what());
+	}
+
+	// try to get the time
+	try {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "trying to get time");
+		emit updateTime(_mount->getTime());
+	} catch (std::exception& x) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "cannot update time: %s",
+			x.what());
+	}
+
+	// register a callback for monitoring
+	try {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "registering callback");
+		MountCallbackI	*_callback = new MountCallbackI(*this);
+		_mount_callback = _callback;
+		_mount_identity = snowstar::CommunicatorSingleton::add(_mount_callback);
+		_mount->registerCallback(_mount_identity);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "callback registered");
+	} catch (const std::exception& x) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "failed to register as a "
+			"mount callback: %s", x.what());
+	}
+
+	currentUpdate();
+	
+	// turn on the buttons
+	ui->targetRaField->setEnabled(true);
+	ui->targetDecField->setEnabled(true);
+	ui->gotoButton->setEnabled(true);
+	ui->viewskyButton->setEnabled(true);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "start the mount timer");
 }
 
 static QString	rangemessage("The RA value must be between 0 and 24 hours, "
@@ -363,12 +353,17 @@ void	mountcontrollerwidget::currentUpdate() {
  */
 void	mountcontrollerwidget::mountChanged(int index) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "mount changed to %d", index);
-	// unregister the mount
+	// unregister the mount we already have
 	if (_mount) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "unregister previous mount");
 		_mount->unregisterCallback(_mount_identity);
-		_mount->ice_getConnection()->getAdapter()->remove(_mount_identity);
 	} 
+	if (_mount_callback) {
+		snowstar::CommunicatorSingleton::remove(_mount_identity);
+		_mount_callback = NULL;
+	}
+
+	// get the mount and set it put
 	_mount = _instrument.mount(index);
 	setupMount();
 	emit mountSelected(index);

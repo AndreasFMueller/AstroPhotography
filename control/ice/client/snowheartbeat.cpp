@@ -96,10 +96,7 @@ static int	monitor(DaemonPrx daemon) {
         Ice::ObjectPtr  monitor = heartbeatmonitor;
 
 	// get the adapter and construct the identity
-        Ice::CommunicatorPtr    ic = CommunicatorSingleton::get();
-	CallbackAdapter adapter(ic);
-        Ice::Identity   ident = adapter.add(monitor);
-        daemon->ice_getConnection()->setAdapter(adapter.adapter());
+        Ice::Identity   ident = CommunicatorSingleton::add(monitor);
 
 	// set the last update timer
 	time(&lastupdate);
@@ -120,10 +117,7 @@ static int	monitor(DaemonPrx daemon) {
 			std::cerr << std::endl;
 			try {
 				time(&lastupdate);
-        			ident = adapter.add(monitor);
-        			daemon->ice_getConnection()->setAdapter(adapter.adapter());
-				daemon->registerHeartbeatMonitor(ident);
-				HeartbeatMonitorI::interval = daemon->heartbeatInterval();
+        			ident = CommunicatorSingleton::add(monitor);
 				std::cerr << "reregistered" << std::endl;
 				debug(LOG_DEBUG, DEBUG_LOG, 0, "interval: %d",
 					HeartbeatMonitorI::interval);
@@ -183,22 +177,38 @@ int	main(int argc, char *argv[]) {
 	// get the heartbeat interface
 	Ice::ObjectPrx	base = ic->stringToProxy(servername.connect("Daemon"));
 	DaemonPrx	daemon = DaemonPrx::checkedCast(base);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "daemon proxy created");
+	CommunicatorSingleton::connect(daemon);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "daemon connected");
 
 	if (command == "monitor") {
 		monitor(daemon);
 	}
 
 	if (command == "interval") {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "processing interval command");
 		if (optind >= argc) {
-			std::cerr << "interval argument missing" << std::endl;
-		}
-		int	interval = std::stoi(argv[optind++]);
-		try {
-			daemon->setHeartbeatInterval(interval);
-		} catch (const std::exception& x) {
-			debug(LOG_ERR, DEBUG_LOG, 0, "cannot set interval "
-				"%d: %s", interval, x.what());
-		}
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "get interval");
+			try {
+				std::cout << "interval: ";
+				std::cout << daemon->heartbeatInterval();
+				std::cout << std::endl;
+			} catch (const std::exception& x) {
+				debug(LOG_ERR, DEBUG_LOG, 0,
+					"cannot get interval: %s", x.what());
+			}
+		} else {
+			int	interval = std::stoi(argv[optind++]);
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "set interval to %d",
+				interval);
+			try {
+				daemon->setHeartbeatInterval(interval);
+			} catch (const std::exception& x) {
+				debug(LOG_ERR, DEBUG_LOG, 0,
+					"cannot set interval %d: %s",
+					interval, x.what());
+			}
+		} 
 	}
 
 	return EXIT_SUCCESS;

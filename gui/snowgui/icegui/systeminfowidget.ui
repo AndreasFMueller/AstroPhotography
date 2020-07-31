@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>400</width>
-    <height>170</height>
+    <height>208</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -34,7 +34,7 @@
    <item row="2" column="0">
     <widget class="QLabel" name="loadLabel">
      <property name="text">
-      <string> System Load:</string>
+      <string>System Load:</string>
      </property>
     </widget>
    </item>
@@ -128,6 +128,20 @@
    </item>
    <item row="6" column="1">
     <widget class="QLabel" name="sizeField">
+     <property name="text">
+      <string/>
+     </property>
+    </widget>
+   </item>
+   <item row="7" column="0">
+    <widget class="QLabel" name="heartbeatLabel">
+     <property name="text">
+      <string>Latest Heartbeat:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="7" column="1">
+    <widget class="QLabel" name="heartbeatField">
      <property name="text">
       <string/>
      </property>

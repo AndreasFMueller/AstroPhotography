@@ -17,11 +17,14 @@ namespace Ui {
 
 class coolercontrollerwidget;
 
+/**
+ * \brief The cooler callback implementation class
+ */
 class CoolerCallbackI : public snowstar::CoolerCallback {
 	coolercontrollerwidget&	_coolercontrollerwidget;
 public:
-	CoolerCallbackI(coolercontrollerwidget& c)
-		: _coolercontrollerwidget(c) { }
+	CoolerCallbackI(coolercontrollerwidget& c);
+	~CoolerCallbackI();
 
 	void	updateCoolerInfo(const snowstar::CoolerInfo& info,
 				const Ice::Current& current);

@@ -9,6 +9,10 @@
 #include <AstroFormat.h>
 #include <AstroDebug.h>
 #include <AstroTypes.h>
+#include <CommunicatorSingleton.h>
+#include <IceConversions.h>
+#include <CommonClientTasks.h>
+
 
 namespace snowgui {
 
@@ -34,6 +38,22 @@ void	SystemInfoWidget::setDaemon(snowstar::DaemonPrx daemon) {
 	if (_daemon) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "starting timer");
 		_timer.start();
+
+		// construct the heartbeat monitor
+		snowgui::HeartbeatMonitor	*heartbeatmonitor
+			= new snowgui::HeartbeatMonitor();
+		_heartbeat_monitor = heartbeatmonitor;
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "heartbeat monitor created: %p",
+			heartbeatmonitor);
+		connect(heartbeatmonitor, SIGNAL(update(QString)),
+			this, SLOT(heartbeat_update(QString)));
+		// get the identity
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "get identity");
+		_heartbeat_identity = snowstar::CommunicatorSingleton::add(
+			_heartbeat_monitor);
+		// register the monitor
+		_daemon->registerHeartbeatMonitor(_heartbeat_identity);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "monitor registered");
 	}
 }
 
@@ -78,7 +98,17 @@ void	SystemInfoWidget::update() {
 		ui->systemMemoryField->setText(memorystring);
 	} catch (...) {
 	}
+	// process size
+	try {
+		float	s = _daemon->processSize();
+		QString	sizestring(astro::stringprintf("%.3f MiB", s / (1024.*1024.)).c_str());
+		ui->sizeField->setText(sizestring);
+	} catch (...) {
+	}
 }
 
+void	SystemInfoWidget::heartbeat_update(QString s) {
+	ui->heartbeatField->setText(s);
+}
 
 } // namespace snowgui

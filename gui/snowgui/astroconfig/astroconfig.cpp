@@ -42,6 +42,7 @@ int	main(int argc, char *argv[]) {
 	cw->show();
 	
 	a.exec();
+	return EXIT_SUCCESS;
 }
 
 } // namespace snowgui

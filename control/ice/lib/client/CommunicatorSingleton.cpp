@@ -7,18 +7,28 @@
 #include <IceUtil/UUID.h>
 #include <AstroDebug.h>
 #include <AstroUtils.h>
+#include <AstroFormat.h>
 #include <stdexcept>
 #include <mutex>
 
 namespace snowstar {
 
 static bool	initialized = false;
+static bool	connected = false;
 Ice::CommunicatorPtr	CommunicatorSingleton::_communicator;
 
 /**
  * \brief Create the Communicator singleton
+ *
+ * \param argc		number of arguments
+ * \param argv		array of argument strings
  */
 CommunicatorSingleton::CommunicatorSingleton(int& argc, char *argv[]) {
+	if (initialized) {
+		std::string	msg("communicator already initialized");
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw std::runtime_error(msg);
+	}
 	// extract properties from the command line
 	Ice::PropertiesPtr props = Ice::createProperties(argc, argv);
 
@@ -65,6 +75,7 @@ Ice::CommunicatorPtr	CommunicatorSingleton::get() {
  */
 void	CommunicatorSingleton::release() {
 	_communicator->destroy();
+	initialized = false;
 }
 
 /**
@@ -82,6 +93,9 @@ Ice::ObjectAdapterPtr	CommunicatorSingleton::getAdapter() {
 		return _adapter;
 	}
 	_adapter = CommunicatorSingleton::get()->createObjectAdapter("");
+	if (!_adapter) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "no adapter found");
+	}
 	_adapter->activate();
 	return _adapter;
 }
@@ -90,6 +104,7 @@ Ice::ObjectAdapterPtr	CommunicatorSingleton::getAdapter() {
  * \brief add a servant to the adapter
  */
 Ice::Identity	CommunicatorSingleton::add(Ice::ObjectPtr servant) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "add servant to the adapter");
 	// create a new identity for the servant
 	Ice::Identity	identity;
 	identity.name = IceUtil::generateUUID();
@@ -122,9 +137,28 @@ void	CommunicatorSingleton::remove(Ice::Identity identity) {
  * over the connection of this proxy
  */
 void	CommunicatorSingleton::connect(Ice::ObjectPrx proxy) {
+	if (connected) {
+		debug(LOG_WARNING, DEBUG_LOG, 0, "already connected");
+	}
+	if (!proxy) {
+		std::string	msg = astro::stringprintf("cannot connect "
+			"without a proxy");
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw std::runtime_error(msg);
+	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "adding adapter to connection of %s",
 		astro::demangle(typeid(*proxy).name()).c_str());
-	proxy->ice_getConnection()->setAdapter(getAdapter());
+	auto	connection = proxy->ice_getConnection();
+	if (!connection) {
+		std::string	msg("no connection available");
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw std::runtime_error(msg);
+	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "adding adapter to %s",
+		astro::demangle(typeid(connection).name()).c_str());
+	connection->setAdapter(getAdapter());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "connected");
+	connected = true;
 }
 
 } // namespace snowstar

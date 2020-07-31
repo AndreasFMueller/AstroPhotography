@@ -31,6 +31,8 @@ static std::string	removeblanks(const std::string& v) {
 void	OutlineCatalog::parseOutlines(const std::string& directory) {
 	// construct the file name
 	std::string	filename(directory + "/outlines.data");
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "parse outlines from '%s'",
+		filename.c_str());
 
 	// make sure the file exists by opening it for reading
 	std::ifstream	in(filename.c_str());
@@ -117,7 +119,8 @@ static std::vector<std::string>	splitline(const char *data) {
 void	OutlineCatalog::parseEllipses(const std::string& directory) {
 	// construct the file name
 	std::string	filename(directory + "/catalog.txt");
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "parsing %s", filename.c_str());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "parsing ellipses from %s",
+		filename.c_str());
 
 	// open the input file
 	std::ifstream	in(filename.c_str());

@@ -145,6 +145,7 @@ SOURCES += 								\
 	FocusingCallbackI.cpp						\
 	GuidePortCallbackI.cpp						\
 	GuiderButton.cpp						\
+	HeartbeatMonitor.cpp						\
 	ImageForwarder.cpp						\
 	ImageRetrieverThread.cpp					\
 	InstrumentSetupThread.cpp					\

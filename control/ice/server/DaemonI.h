@@ -41,6 +41,7 @@ public:
 	float	daemonUptime(const Ice::Current& current);
 	float	getTemperature(const Ice::Current& current);
 	float	cputime(const Ice::Current& current);
+	float	processSize(const Ice::Current& current);
 	void	registerHeartbeatMonitor(
 			const Ice::Identity& heartbeatmonitor,
 			const Ice::Current& current);
