@@ -84,7 +84,7 @@ BinningMode	convert(const astro::image::Binning& binning);
 astro::image::Binning	convert(const BinningMode& mode);
 
 BinningSet	convert(const astro::camera::BinningSet& binningset);
-astro::camera::BinningSet	convet(const BinningSet& binningset);
+astro::camera::BinningSet	convert(const BinningSet& binningset);
 
 CcdInfo convert(const astro::camera::CcdInfo& info);
 astro::camera::CcdInfo convert(const CcdInfo& info);

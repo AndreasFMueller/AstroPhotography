@@ -20,8 +20,15 @@ namespace snowstar {
 
 /**
  * \brief Construct a Ccd server wrapper
+ *
+ * \param ccd	the ccd this servant is supposed to represent
  */
 CcdI::CcdI(astro::camera::CcdPtr ccd) : DeviceI(*ccd), _ccd(ccd) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "create the ccd callback");
+	CcdICallback	*ccdcallback = new CcdICallback(*this);
+	CcdICallbackPtr	ccdcallbackptr(ccdcallback);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "install the callback in the ccd");
+	_ccd->addCallback(ccdcallbackptr);
 }
 
 /**
@@ -32,6 +39,8 @@ CcdI::~CcdI() {
 
 /**
  * \brief return the Ccd information
+ *
+ * \param current	the current call context
  */
 CcdInfo	CcdI::getInfo(const Ice::Current& current) {
 	CallStatistics::count(current);
@@ -40,6 +49,8 @@ CcdInfo	CcdI::getInfo(const Ice::Current& current) {
 
 /**
  * \brief return the Exposue status
+ *
+ * \param current	the current call context
  */
 ExposureState	CcdI::exposureStatus(const Ice::Current& current) {
 	CallStatistics::count(current);
@@ -61,7 +72,8 @@ ExposureState	CcdI::exposureStatus(const Ice::Current& current) {
 /**
  * \brief Start a new exposure
  *
- * \param start an exposue
+ * \param exposure	the exposure data tostart the exposure
+ * \param current	the current call context
  */
 void	CcdI::startExposure(const Exposure& exposure,
 		const Ice::Current& current) {
@@ -85,6 +97,8 @@ void	CcdI::startExposure(const Exposure& exposure,
 
 /**
  * \brief Return the time when the last exposure was started
+ *
+ * \param current	the current call context
  */
 int	CcdI::lastExposureStart(const Ice::Current& current) {
 	CallStatistics::count(current);
@@ -93,6 +107,8 @@ int	CcdI::lastExposureStart(const Ice::Current& current) {
 
 /**
  * \brief Cancel an exposure
+ *
+ * \param current	the current call context
  */
 void	CcdI::cancelExposure(const Ice::Current& current) {
 	CallStatistics::count(current);
@@ -114,6 +130,8 @@ void	CcdI::cancelExposure(const Ice::Current& current) {
 
 /**
  * \brief Get the exposure data in use for the current/last exposure
+ *
+ * \param current	the current call context
  */
 Exposure	CcdI::getExposure(const Ice::Current& current) {
 	CallStatistics::count(current);
@@ -132,6 +150,8 @@ Exposure	CcdI::getExposure(const Ice::Current& current) {
 
 /**
  * \brief Get an image proxy to retrieve an image
+ *
+ * \param current	the current call context
  */
 ImagePrx	CcdI::getImage(const Ice::Current& current) {
 	CallStatistics::count(current);
@@ -162,37 +182,73 @@ ImagePrx	CcdI::getImage(const Ice::Current& current) {
 	return snowstar::getImage(filename, current);
 }
 
+/**
+ * \brief Check whether the ccd has a gain setting
+ *
+ * \param current	the current call context
+ */
 bool	CcdI::hasGain(const Ice::Current& current) {
 	CallStatistics::count(current);
 	return _ccd->hasGain();
 }
 
+/**
+ * \brief Retrieve the gain of the ccd
+ *
+ * \param current	the current call context
+ */
 float	CcdI::getGain(const Ice::Current& current) {
 	CallStatistics::count(current);
 	return _ccd->getGain();
 }
 
+/**
+ * \brief Get the interval of valid gains
+ *
+ * \param current	the current call context
+ */
 Interval	CcdI::gainInterval(const Ice::Current& current) {
 	CallStatistics::count(current);
 	return convert(_ccd->gainInterval());
 }
 
+/**
+ * \brief Check whether the camera has a shutter
+ *
+ * \param current	the current call context
+ */
 bool	CcdI::hasShutter(const Ice::Current& current) {
 	CallStatistics::count(current);
 	return _ccd->hasShutter();
 }
 
+/**
+ * \brief Set the shutter state
+ *
+ * \param current	the current call context
+ */
 ShutterState	CcdI::getShutterState(const Ice::Current& current) {
 	CallStatistics::count(current);
 	return convert(_ccd->getShutterState());
 }
 
+/**
+ * \brief Set the shutter state
+ *
+ * \param state		the shutter state
+ * \param current	the current call context
+ */
 void	CcdI::setShutterState(ShutterState state,
 		const Ice::Current& current) {
 	CallStatistics::count(current);
 	_ccd->setShutterState(convert(state));
 }
 
+/**
+ * \brief Check whether the camera has a cooler
+ *
+ * \param current	the current call context
+ */
 bool	CcdI::hasCooler(const Ice::Current& current) {
 	CallStatistics::count(current);
 	return _ccd->hasCooler();
@@ -200,18 +256,35 @@ bool	CcdI::hasCooler(const Ice::Current& current) {
 
 typedef IceUtil::Handle<CoolerI>	CoolerIPtr;
 
+/**
+ * \brief Get the cooler
+ *
+ * \param current	the current call context
+ */
 CoolerPrx	CcdI::getCooler(const Ice::Current& current) {
 	CallStatistics::count(current);
 	std::string	name = _ccd->getCooler()->name();
 	return snowstar::createProxy<CoolerPrx>(name, current);
 }
 
+/**
+ * \brief Create a proxy for a given ccd name
+ *
+ * \param ccdname	the name of the ccd to return
+ * \param current	the current call context
+ */
 CcdPrx	CcdI::createProxy(const std::string& ccdname,
 		const Ice::Current& current) {
 	CallStatistics::count(current);
 	return snowstar::createProxy<CcdPrx>(ccdname, current);
 }
 
+/**
+ * \brief Register a servant that acts as an image sink for a stream
+ *
+ * \param imagesinkidentity	id if the image sink
+ * \param current		the current call context
+ */
 void	CcdI::registerSink(const Ice::Identity& imagesinkidentity,
 		const Ice::Current& current) {
 	CallStatistics::count(current);
@@ -229,6 +302,12 @@ void	CcdI::registerSink(const Ice::Identity& imagesinkidentity,
 	_sink = CcdSinkPtr(sink);
 }
 
+/**
+ * \brief Start the stream
+ *
+ * \param e		the exposure settings to use for the stream
+ * \param current	the current call context
+ */
 void	CcdI::startStream(const ::snowstar::Exposure& e,
 		const Ice::Current& current) {
 	CallStatistics::count(current);
@@ -241,6 +320,12 @@ void	CcdI::startStream(const ::snowstar::Exposure& e,
 	_ccd->startStream(convert(e));
 }
 
+/**
+ * \brief Update the stream
+ *
+ * \param e		the new exposure settings
+ * \param current	the current call context
+ */
 void	CcdI::updateStream(const ::snowstar::Exposure& e,
 		const Ice::Current& current) {
 	CallStatistics::count(current);
@@ -249,6 +334,11 @@ void	CcdI::updateStream(const ::snowstar::Exposure& e,
 	_ccd->streamExposure(convert(e));
 }
 
+/**
+ * \brief Stop the stream
+ *
+ * \param current	the current call context
+ */
 void	CcdI::stopStream(const ::Ice::Current& current) {
 	CallStatistics::count(current);
 	if (!_ccd->streaming()) {
@@ -266,10 +356,94 @@ void	CcdI::stopStream(const ::Ice::Current& current) {
 	_sink = NULL;
 }
 
+/**
+ * \brief Unregister the stream image sink
+ *
+ * \param current	the current call context
+ */
 void	CcdI::unregisterSink(const ::Ice::Current& current) {
 	CallStatistics::count(current);
 	stopStream(current);
 	_sink = NULL;
+}
+
+/**
+ * \brief Register a callback for state upates
+ *
+ * \param callback	the callback id to register
+ * \param current	the current call context
+ */
+void	CcdI::registerCallback(const Ice::Identity& callback,
+		const Ice::Current& current) {
+	try {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "register %s",
+			callback.name.c_str());
+		callbacks.registerCallback(callback, current);
+	} catch (const std::exception& x) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "cannot register callback %s: %s",
+			astro::demangle(typeid(x).name()).c_str(), x.what());
+	} catch (...) {
+		debug(LOG_ERR, DEBUG_LOG, 0,
+			"cannot register callback %s, unknown reason",
+			callback.name.c_str());
+	}
+}
+
+/**
+ * \brief Unregister a callback for state upates
+ *
+ * \param callback	the callback id to unregister
+ * \param current	the current call context
+ */
+void	CcdI::unregisterCallback(const Ice::Identity& callback,
+		const Ice::Current& current) {
+	try {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "unregister %s",
+			callback.name.c_str());
+		callbacks.unregisterCallback(callback, current);
+	} catch (const std::exception& x) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "cannot unregister callback %s: %s",
+			astro::demangle(typeid(x).name()).c_str(), x.what());
+	} catch (...) {
+		debug(LOG_ERR, DEBUG_LOG, 0,
+			"cannot unregister callback %s, unknown reason",
+			callback.name.c_str());
+	}
+}
+
+/**
+ * \brief Method to forward the state change to the callbacks
+ *
+ * \param data	the callback data
+ */
+void	CcdI::stateUpdate(const astro::callback::CallbackDataPtr data) {
+	try {
+		callbacks(data);
+	} catch (const std::exception& x) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "cannot send callbacks: %s",
+			x.what());
+	} catch (...) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "cannot send callbacks (unknown)");
+	}
+}
+
+/**
+ * \brief Adapter method for the camera state callback
+ *
+ * \param p		the callback proxy to call
+ * \param data		the callback data to use as argument in the call
+ */
+template<>
+void	callback_adapter<CcdCallbackPrx>(CcdCallbackPrx& p,
+		const astro::callback::CallbackDataPtr data) {
+	astro::camera::CcdStateCallbackData	*cs
+		= dynamic_cast<astro::camera::CcdStateCallbackData*>(&*data);
+	if (NULL != cs) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "state callback");
+		snowstar::ExposureState	s = convert(cs->data());
+		p->state(s);
+		return;
+	}
 }
 
 } // namespace snowstar

@@ -143,6 +143,8 @@ void	Ccd::state(CcdState::State s) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "notify all of state change");
 		// notify waiting threads of the state change
 		_condition.notify_all();
+		// also update all the callbacks
+		stateUpdate(s);
 	}
 
 	if (ccd_lck_debug)
@@ -551,6 +553,40 @@ void	Ccd::addMetadata(ImageBase& image) {
 std::pair<float, float>	Ccd::gainInterval() {
 	return std::make_pair((float)1., (float)1.);
 }
+
+/**
+ * \brief Initiate the callback to all the installed callback handlers
+ *
+ * \param state		the new ccd state to register
+ */
+void	Ccd::stateUpdate(const CcdState& state) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "propagating new state to callbacks");
+	callback::CallbackDataPtr	cb(new CcdStateCallbackData(state));
+	_callback(cb);
+}
+
+/**
+ * \brief Add callback for state changes
+ *
+ * \param callback	the callback class to add
+ */
+void	Ccd::addCallback(callback::CallbackPtr callback) {
+	_callback.insert(callback);
+}
+
+/**
+ * \brief Remove callback for state changes
+ *
+ * \param callback	the callback class to remove
+ */
+void	Ccd::removeCallback(callback::CallbackPtr callback) {
+	auto	i = _callback.find(callback);
+	if (i != _callback.end()) {
+		_callback.erase(i);
+	}
+}
+
+
 
 } // namespace camera
 } // namespace astro

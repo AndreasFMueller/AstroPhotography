@@ -74,6 +74,7 @@ public:
 	CcdState(State s = idle) : _s(s) { }
 	CcdState(const std::string s) : _s(string2state(s)) { }
 	std::string	toString() const { return state2string(_s); }
+	operator	State() const { return _s; }
 };
 
 /**
@@ -368,6 +369,11 @@ public:
 };
 
 /**
+ * \brief Callback data type for CCD state updates
+ */
+typedef callback::CallbackDataEnvelope<CcdState>	CcdStateCallbackData;
+
+/**
  * \brief Abstraction for a CCD chip
  *
  * This class is necessary because a camera can have several imaging
@@ -453,6 +459,14 @@ protected:
 public:
 	virtual bool	hasCooler() const { return false; }
 	CoolerPtr	getCooler();
+
+	// callback methods, registering and unregistering a callback
+private:
+	callback::CallbackSet	_callback;
+public:
+	void	stateUpdate(const CcdState& state);
+	void	addCallback(callback::CallbackPtr callback);
+	void	removeCallback(callback::CallbackPtr callback);
 
 	// methods related to metadata
 	virtual void	addExposureMetadata(astro::image::ImageBase& image) const;

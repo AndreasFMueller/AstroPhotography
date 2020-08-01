@@ -55,6 +55,7 @@ SOURCES += 								\
 	FitsTable.cpp							\
 	FocusPoints.cpp							\
 	FocusPointsWidget.cpp						\
+	HeartWidget.cpp							\
 	HideProgress.cpp						\
 	HideWidget.cpp							\
 	Histogram.cpp							\
@@ -89,6 +90,7 @@ HEADERS  += 								\
 	FitsTable.h							\
 	FocusPoints.h							\
 	FocusPointsWidget.h						\
+	HeartWidget.h							\
 	HideProgress.h							\
 	HideWidget.h							\
 	Histogram.h							\

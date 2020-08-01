@@ -84,6 +84,21 @@ signals:
 };
 
 /**
+ * \brief Callback for CCD state updates
+ */
+class CcdCallbackI : public QObject, public snowstar::CcdCallback {
+	Q_OBJECT
+	ccdcontrollerwidget&	_ccdcontrollerwidget;
+public:
+	CcdCallbackI(ccdcontrollerwidget& c);
+	void	state(snowstar::ExposureState s,
+			const Ice::Current& /* current */);
+	void	stop(const Ice::Current& /* current */);
+signals:
+	void	stateChanged(snowstar::ExposureState);
+};
+
+/**
  * \brief A reusable component to control a CCD
  */
 class ccdcontrollerwidget : public InstrumentWidget {
@@ -100,6 +115,9 @@ class ccdcontrollerwidget : public InstrumentWidget {
 	astro::camera::Exposure	_imageexposure;
 	snowstar::ImagePrx	_imageproxy;
 
+	Ice::ObjectPtr	_ccd_callback;
+	Ice::Identity	_ccd_identity;
+
 	bool	_guiderccdonly;
 	bool	_nosubframe;
 	bool	_nobuttons;
@@ -112,9 +130,11 @@ class ccdcontrollerwidget : public InstrumentWidget {
 	HideWidget	*_hide;
 	HideProgress	*_hideprogress;
 
+#if 0
 	StateMonitoringWork	*_statemonitoringwork;
 	QThread	*_statemonitoringthread;
 	QTimer	_statemonitoringTimer;
+#endif
 public:
 	explicit ccdcontrollerwidget(QWidget *parent = NULL);
 	~ccdcontrollerwidget();

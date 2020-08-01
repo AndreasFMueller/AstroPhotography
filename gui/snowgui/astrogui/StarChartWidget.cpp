@@ -1473,8 +1473,8 @@ void    StarChartWidget::drawConstellations(QPainter& painter) {
 			// go through all the edges
 			if ((_direction.scalarproduct(e->from()) < 0) ||
 				(_direction.scalarproduct(e->to()) < 0)) {
-				debug(LOG_DEBUG, DEBUG_LOG, 0,
-					"point on the wrong side");
+				//debug(LOG_DEBUG, DEBUG_LOG, 0,
+				//	"point on the wrong side");
 			} else {
 				drawLine(painter, e->from(), e->to());
 			}

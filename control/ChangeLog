@@ -1,6 +1,10 @@
 ChangeLog for the Astro project.
 
-2020731:
+20200801:
+	* add callback to the ccd device
+	* add callback to CcdI servant interface and implementation
+
+20200731:
 	* add processSize method to Daemon interface
 	* fix possible seg faults in CommunicatorSingleton
 

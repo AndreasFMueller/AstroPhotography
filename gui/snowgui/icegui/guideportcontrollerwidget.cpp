@@ -75,14 +75,17 @@ guideportcontrollerwidget::guideportcontrollerwidget(QWidget *parent)
  * \brief Destroy the guideport controller
  */
 guideportcontrollerwidget::~guideportcontrollerwidget() {
-	delete ui;
-	if (_guideport_callback) {
-		if (_guideport) {
-			_guideport->unregisterCallback(_guideport_identity);
-			_guideport->ice_getConnection()->getAdapter()
-				->remove(_guideport_identity);
-		}
+	if (_guideport) {
+		_guideport->unregisterCallback(_guideport_identity);
 	}
+	try {
+		snowstar::CommunicatorSingleton::remove(_guideport_identity);
+	} catch (...) {
+	}
+	if (_guideport_callback) {
+		_guideport_callback = NULL;
+	}
+	delete ui;
 }
 
 /**
@@ -128,26 +131,10 @@ void	guideportcontrollerwidget::setupComplete() {
  */
 void	guideportcontrollerwidget::setupGuideport() {
 	if (!_guideport) {
+		ui->guideWidget->setEnabled(false);
+		ui->activationWidget->setEnabled(false);
+		ui->proposalWidget->setEnabled(false);
 		return;
-	}
-	ui->guideWidget->setEnabled(false);
-	ui->activationWidget->setEnabled(false);
-	ui->proposalWidget->setEnabled(false);
-
-	// ensure that we have an object adapter
-	try {
-		if (!_guideport->ice_getConnection()->getAdapter()) {
-			Ice::CommunicatorPtr	ic
-				= snowstar::CommunicatorSingleton::get();
-			Ice::ObjectAdapterPtr	adapter
-				= snowstar::CommunicatorSingleton::getAdapter();
-			adapter->activate();
-			_guideport->ice_getConnection()->setAdapter(adapter);
-		}
-	} catch (const std::exception& x) {
-		debug(LOG_ERR, DEBUG_LOG, 0,
-			"problem installing an object adapter: %s",
-			x.what());
 	}
 
 	// create and register the callback
@@ -158,11 +145,9 @@ void	guideportcontrollerwidget::setupGuideport() {
 			SIGNAL(activation(astro::camera::GuidePortActivation)),
 			this,
 			SLOT(activate(astro::camera::GuidePortActivation)));
+
 		_guideport_callback = guideportcallback;
-		_guideport_identity.name = IceUtil::generateUUID();
-		_guideport_identity.category = "";
-		_guideport->ice_getConnection()->getAdapter()->add(
-			_guideport_callback, _guideport_identity);
+		_guideport_identity = snowstar::CommunicatorSingleton::add(_guideport_callback);
 		_guideport->registerCallback(_guideport_identity);
 	} catch (const std::exception& x) {
 		debug(LOG_ERR, DEBUG_LOG, 0,
@@ -187,6 +172,18 @@ void	guideportcontrollerwidget::setupGuideport() {
  * \brief Slot called when a different guide port is selected
  */
 void	guideportcontrollerwidget::guideportChanged(int index) {
+	try {
+		if (_guideport) {
+			_guideport->unregisterCallback(_guideport_identity);
+		}
+		if (_guideport_callback) {
+			snowstar::CommunicatorSingleton::remove(
+				_guideport_identity);
+		}
+	} catch (const std::exception& x) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "cannot remove callback: %s",
+			x.what());
+	}
 	_guideport = _instrument.guideport(index);
 	setupGuideport();
 	emit guideportSelected(index);

@@ -136,6 +136,13 @@ module snowstar {
 	};
 
 	/**
+	 * \brief Callback interface for CCD state changes
+	 */
+	interface CcdCallback extends Callback {
+		void	state(ExposureState s);
+	}
+
+	/**
 	 * \brief Interface to a CCD chip of a camera.
 	 *
 	 * A camera can have multiple CCD chips (up to three, e.g. in the
@@ -221,7 +228,13 @@ module snowstar {
 		Cooler*	getCooler() throws NotImplemented;
 
 		/**
-		 * \brief
+ 		 * \brief Methods to register the state change callback
+		 */
+		void	registerCallback(Ice::Identity callback);
+		void	unregisterCallback(Ice::Identity callback);
+
+		/**
+		 * \brief methods related to streaming
 		 */
 		void	registerSink(Ice::Identity i) throws NotImplemented;
 		void	startStream(Exposure e) throws NotImplemented;

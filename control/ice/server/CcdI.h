@@ -9,6 +9,7 @@
 #include <camera.h>
 #include <AstroCamera.h>
 #include <DeviceI.h>
+#include <CallbackHandler.h>
 
 namespace snowstar {
 
@@ -28,6 +29,13 @@ public:
 	void	stop();
 };
 typedef std::shared_ptr<CcdSink>	CcdSinkPtr;
+
+/**
+ * \brief The callback adapter for ccd state callbacks
+ */
+template<>
+void	callback_adapter<CcdCallbackPrx>(CcdCallbackPrx& p,
+		const astro::callback::CallbackDataPtr data);
 
 /**
  * \brief Ccd servant implementation
@@ -62,6 +70,16 @@ static	CcdPrx	createProxy(const std::string& ccdname,
 	bool	hasCooler(const Ice::Current& current);
 	CoolerPrx	getCooler(const Ice::Current& current);
 
+	// state change callback stuff
+private:
+	SnowCallback<CcdCallbackPrx>	callbacks;
+public:
+	void	registerCallback(const Ice::Identity& callback,
+			const Ice::Current& current);
+	void	unregisterCallback(const Ice::Identity& callback,
+			const Ice::Current& current);
+	void	stateUpdate(astro::callback::CallbackDataPtr data);
+
 	// stream methods
 private:
 	CcdSinkPtr	_sink;
@@ -75,6 +93,19 @@ public:
 	void	stopStream(const ::Ice::Current& current);
 	void	unregisterSink(const ::Ice::Current& current);
 };
+
+/**
+ * \brief Callback interface to install in the ccd 
+ */
+class CcdICallback : public astro::callback::Callback {
+	CcdI&	_ccd;
+public:
+	CcdICallback(CcdI& ccd);
+	virtual astro::callback::CallbackDataPtr	operator()(
+		astro::callback::CallbackDataPtr data);
+};
+
+typedef std::shared_ptr<CcdICallback>        CcdICallbackPtr;
 
 } // namespace snowstar
 

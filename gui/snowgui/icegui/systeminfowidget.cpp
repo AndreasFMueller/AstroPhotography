@@ -54,6 +54,9 @@ void	SystemInfoWidget::setDaemon(snowstar::DaemonPrx daemon) {
 		// register the monitor
 		_daemon->registerHeartbeatMonitor(_heartbeat_identity);
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "monitor registered");
+
+		// get the heartbeat interval
+		ui->heartWidget->interval(_daemon->heartbeatInterval());
 	}
 }
 
@@ -109,6 +112,7 @@ void	SystemInfoWidget::update() {
 
 void	SystemInfoWidget::heartbeat_update(QString s) {
 	ui->heartbeatField->setText(s);
+	ui->heartWidget->beat();
 }
 
 } // namespace snowgui

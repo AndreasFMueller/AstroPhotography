@@ -15,6 +15,7 @@
 #include <QMessageBox>
 #include <HideWidget.h>
 #include <HideProgress.h>
+#include <CommunicatorSingleton.h>
 
 using namespace astro::image;
 using namespace astro::io;
@@ -88,13 +89,11 @@ ccdcontrollerwidget::ccdcontrollerwidget(QWidget *parent) :
 	ui->frameWidget->setEnabled(false);
 	ui->buttonArea->setEnabled(false);
 
-	// start the state monitoring thread
-	_statemonitoringwork = new StateMonitoringWork(this);
-
 	// handle failed image downloads
 	connect(this, SIGNAL(imageNotReceived(QString)),
 		this, SLOT(retrieveImageFailed(QString)));
 
+#if 0
 	// create the update thread
 	_statemonitoringthread = new QThread(NULL);
 	connect(_statemonitoringthread, SIGNAL(finished()),
@@ -115,6 +114,7 @@ ccdcontrollerwidget::ccdcontrollerwidget(QWidget *parent) :
 
 	_statemonitoringTimer.setInterval(100);
 	_statemonitoringTimer.start();
+#endif
 
 	// make sure no signals are emitted during setup
 	ui->ccdSelectionBox->blockSignals(true);
@@ -298,11 +298,20 @@ void	ccdcontrollerwidget::setupComplete() {
  * \brief Destroy the CCD controller
  */
 ccdcontrollerwidget::~ccdcontrollerwidget() {
+	if (_ccd) {
+		_ccd->unregisterCallback(_ccd_identity);
+	}
+	try {
+		snowstar::CommunicatorSingleton::remove(_ccd_identity);
+	} catch (...) {
+	}
+#if 0
 	_statemonitoringTimer.stop();
 	_statemonitoringthread->quit();
 	_statemonitoringthread->wait();
 	delete _statemonitoringthread;
 	delete _statemonitoringwork;
+#endif
 	delete ui;
 }
 
@@ -311,7 +320,9 @@ ccdcontrollerwidget::~ccdcontrollerwidget() {
  */
 void	ccdcontrollerwidget::setupCcd() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "setupCcd() begin");
+#if 0
 	_statemonitoringTimer.stop();
+#endif
 	// we set the previous state to idle, but if that is not correct, then
 	// then the first status update will fix it.
 	ui->captureButton->setEnabled(true);
@@ -380,6 +391,22 @@ void	ccdcontrollerwidget::setupCcd() {
 
 		// query the status
 		statusUpdate(_ccd->exposureStatus());
+
+		// install a callback
+		try {
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "setting up callback");
+			CcdCallbackI	*ccdcallback = new CcdCallbackI(*this);
+			connect(ccdcallback,
+				SIGNAL(stateChanged(snowstar::ExposureState)),
+				this,
+				SLOT(statusUpdate(snowstar::ExposureState)));
+			_ccd_callback = ccdcallback;
+			_ccd_identity = snowstar::CommunicatorSingleton::add(_ccd_callback);
+			_ccd->registerCallback(_ccd_identity);
+		} catch (const std::exception& x) {
+			debug(LOG_ERR, DEBUG_LOG, 0,
+				"cannot install callback: %s", x.what());
+		}
 	}
 
 	// now reenable signals
@@ -393,7 +420,9 @@ void	ccdcontrollerwidget::setupCcd() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "setupCcd() end");
 
 	// start the timer
+#if 0
 	_statemonitoringTimer.start();
+#endif
 }
 
 /**
@@ -720,6 +749,20 @@ void	ccdcontrollerwidget::setImage(ImagePtr image) {
 void	ccdcontrollerwidget::ccdChanged(int index) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "CCD changed: %d from %d", index,
 		_ccddata.size());
+	// make sure old callbacks are removed
+	try {
+		if (_ccd) {
+			_ccd->unregisterCallback(_ccd_identity);
+		}
+		if (_ccd_callback) {
+			snowstar::CommunicatorSingleton::remove(_ccd_identity);
+		}
+	} catch (const std::exception& x) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "cannot remove callback: %s",
+			x.what());
+	}
+
+	// get the ccd
 	try {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "checking index = %d", index);
 		_current_ccddata = _ccddata[index];
@@ -753,7 +796,7 @@ void	ccdcontrollerwidget::ccdChanged(int index) {
 		return;
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "ccd selected, setting up");
-        setupCcd();
+        setupCcd();	// this also sets up the callback
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "emitting ccdSelected(%d)", index);
 	emit ccdSelected(index);
 	emit ccdprxSelected(_ccd);

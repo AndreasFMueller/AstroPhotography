@@ -7,64 +7,21 @@
     <x>0</x>
     <y>0</y>
     <width>400</width>
-    <height>208</height>
+    <height>238</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <layout class="QFormLayout" name="formLayout">
-   <property name="labelAlignment">
-    <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-   </property>
-   <item row="0" column="0">
-    <widget class="QLabel" name="systemUptimeLabel">
-     <property name="text">
-      <string>System uptime:</string>
-     </property>
-    </widget>
-   </item>
-   <item row="0" column="1">
-    <widget class="QLabel" name="systemUptimeField">
+  <layout class="QGridLayout" name="gridLayout">
+   <item row="6" column="3">
+    <widget class="QLabel" name="sizeField">
      <property name="text">
       <string/>
      </property>
     </widget>
    </item>
-   <item row="2" column="0">
-    <widget class="QLabel" name="loadLabel">
-     <property name="text">
-      <string>System Load:</string>
-     </property>
-    </widget>
-   </item>
-   <item row="2" column="1">
-    <widget class="QLabel" name="loadField">
-     <property name="text">
-      <string/>
-     </property>
-    </widget>
-   </item>
-   <item row="3" column="0">
-    <widget class="QLabel" name="temperatureLabel">
-     <property name="minimumSize">
-      <size>
-       <width>0</width>
-       <height>0</height>
-      </size>
-     </property>
-     <property name="maximumSize">
-      <size>
-       <width>120</width>
-       <height>16777215</height>
-      </size>
-     </property>
-     <property name="text">
-      <string>Core temperature:</string>
-     </property>
-    </widget>
-   </item>
-   <item row="3" column="1">
+   <item row="3" column="3">
     <widget class="QLabel" name="temperatureField">
      <property name="minimumSize">
       <size>
@@ -77,63 +34,28 @@
      </property>
     </widget>
    </item>
-   <item row="5" column="0">
-    <widget class="QLabel" name="cputimeLabel">
-     <property name="text">
-      <string>CPU time:</string>
-     </property>
-    </widget>
-   </item>
-   <item row="5" column="1">
-    <widget class="QLabel" name="cputimeField">
+   <item row="2" column="3">
+    <widget class="QLabel" name="loadField">
      <property name="text">
       <string/>
      </property>
     </widget>
    </item>
-   <item row="4" column="0">
-    <widget class="QLabel" name="daemonUptimeLabel">
-     <property name="text">
-      <string>Daemon uptime:</string>
-     </property>
-    </widget>
-   </item>
-   <item row="1" column="0">
-    <widget class="QLabel" name="systemMemoryLabel">
-     <property name="text">
-      <string>System Memory:</string>
-     </property>
-    </widget>
-   </item>
-   <item row="4" column="1">
-    <widget class="QLabel" name="daemonUptimeField">
-     <property name="text">
-      <string/>
-     </property>
-    </widget>
-   </item>
-   <item row="1" column="1">
+   <item row="1" column="3">
     <widget class="QLabel" name="systemMemoryField">
      <property name="text">
       <string/>
      </property>
     </widget>
    </item>
-   <item row="6" column="0">
-    <widget class="QLabel" name="sizeLabel">
+   <item row="1" column="1" colspan="2">
+    <widget class="QLabel" name="systemMemoryLabel">
      <property name="text">
-      <string>Process size:</string>
+      <string>System Memory:</string>
      </property>
     </widget>
    </item>
-   <item row="6" column="1">
-    <widget class="QLabel" name="sizeField">
-     <property name="text">
-      <string/>
-     </property>
-    </widget>
-   </item>
-   <item row="7" column="0">
+   <item row="7" column="2">
     <widget class="QLabel" name="heartbeatLabel">
      <property name="text">
       <string>Latest Heartbeat:</string>
@@ -141,14 +63,113 @@
     </widget>
    </item>
    <item row="7" column="1">
+    <widget class="snowgui::HeartWidget" name="heartWidget" native="true">
+     <property name="minimumSize">
+      <size>
+       <width>32</width>
+       <height>24</height>
+      </size>
+     </property>
+     <property name="maximumSize">
+      <size>
+       <width>32</width>
+       <height>24</height>
+      </size>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="1" colspan="2">
+    <widget class="QLabel" name="loadLabel">
+     <property name="text">
+      <string>System Load:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="4" column="1" colspan="2">
+    <widget class="QLabel" name="daemonUptimeLabel">
+     <property name="text">
+      <string>Daemon uptime:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="5" column="3">
+    <widget class="QLabel" name="cputimeField">
+     <property name="text">
+      <string/>
+     </property>
+    </widget>
+   </item>
+   <item row="4" column="3">
+    <widget class="QLabel" name="daemonUptimeField">
+     <property name="text">
+      <string/>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="3">
+    <widget class="QLabel" name="systemUptimeField">
+     <property name="text">
+      <string/>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="1" colspan="2">
+    <widget class="QLabel" name="systemUptimeLabel">
+     <property name="text">
+      <string>System uptime:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="7" column="3">
     <widget class="QLabel" name="heartbeatField">
      <property name="text">
       <string/>
      </property>
     </widget>
    </item>
+   <item row="3" column="1" colspan="2">
+    <widget class="QLabel" name="temperatureLabel">
+     <property name="minimumSize">
+      <size>
+       <width>0</width>
+       <height>0</height>
+      </size>
+     </property>
+     <property name="maximumSize">
+      <size>
+       <width>16777215</width>
+       <height>16777215</height>
+      </size>
+     </property>
+     <property name="text">
+      <string>Core temperature:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="5" column="1" colspan="2">
+    <widget class="QLabel" name="cputimeLabel">
+     <property name="text">
+      <string>CPU time:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="6" column="1" colspan="2">
+    <widget class="QLabel" name="sizeLabel">
+     <property name="text">
+      <string>Process size:</string>
+     </property>
+    </widget>
+   </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>snowgui::HeartWidget</class>
+   <extends>QWidget</extends>
+   <header location="global">HeartWidget.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>

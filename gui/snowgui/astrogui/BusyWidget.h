@@ -3,6 +3,9 @@
  *
  * (c) 2018 Prof Dr Andreas Müller, Hochschule Rapperswi
  */
+#ifndef _BusyWidget_h 
+#define _BusyWidget_h
+
 #include <QWidget>
 #include <QTimer>
 #include <AstroUtils.h>
@@ -29,3 +32,5 @@ public slots:
 };
 
 } // namespace snowgui
+
+#endif /* _BusyWidget_h */

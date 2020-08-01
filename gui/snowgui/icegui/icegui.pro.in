@@ -137,6 +137,7 @@ SOURCES += 								\
 	ccddata.cpp							\
 	CoolerActive.cpp						\
 	CoolerCallbackI.cpp						\
+	CcdCallbackI.cpp						\
 	EventMonitor.cpp						\
 	FilterWheelBusy.cpp						\
 	filterwheelupdatework.cpp					\

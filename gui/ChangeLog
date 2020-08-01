@@ -1,5 +1,10 @@
 ChangeLog for the Qt GUI to Astrophotography
 
+20200801:
+	* add HeartWidget
+	* add callback to ccdcontrollerwidget (uncommented the update worker
+	  thread too, everything still seems to work)
+
 2020731:
 	* make sure connection is established right at the beginning
 	* fix typos

@@ -331,6 +331,9 @@ void	mountcontrollerwidget::statusUpdate() {
 	emit updateTime(now);
 }
 
+/**
+ * \brief Update the current position
+ */
 void	mountcontrollerwidget::currentUpdate() {
 	// read the current position from the mount
 	snowstar::RaDec	radec = _mount->getRaDec();
@@ -382,6 +385,9 @@ astro::RaDec	mountcontrollerwidget::current() {
 	}
 }
 
+/**
+ * \brief Find out whether the telescope is oriented west
+ */
 bool	mountcontrollerwidget::orientation() {
 	if (_mount) {
 		bool	west = _mount->telescopePositionWest();
@@ -457,6 +463,9 @@ void	mountcontrollerwidget::skyviewDestroyed() {
 	_skydisplay = NULL;
 }
 
+/**
+ * \brief Slot to call when the catalog is destroyed
+ */
 void	mountcontrollerwidget::catalogDestroyed() {
 	_catalogdialog = NULL;
 }
@@ -505,6 +514,9 @@ void	mountcontrollerwidget::catalogClicked() {
 	}
 }
 
+/**
+ * \brief common stuff to do when the target changes
+ */
 void	mountcontrollerwidget::targetChangedCommon() {
 	astro::RaDec	radec;
 	std::string	f(ui->targetRaField->text().toLatin1().data());
@@ -526,11 +538,17 @@ void	mountcontrollerwidget::targetChangedCommon() {
 	emit retarget(radec);
 }
 
+/**
+ * \brief Change of the RA of the target
+ */
 void	mountcontrollerwidget::targetRaChanged(const QString& /* value */) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "RA change");
 	targetChangedCommon();
 }
 
+/**
+ * \brief Change of the DEC of the target
+ */
 void	mountcontrollerwidget::targetDecChanged(const QString& /* value */) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "DEC change");
 	targetChangedCommon();

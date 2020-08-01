@@ -63,6 +63,7 @@ snowstar_SOURCES = snowstar.cpp 					\
 	CalibrationSource.cpp						\
 	CameraI.cpp							\
 	CcdI.cpp							\
+	CcdICallback.cpp						\
 	CcdSink.cpp							\
 	ConfigurationI.cpp						\
 	CoolerI.cpp							\
