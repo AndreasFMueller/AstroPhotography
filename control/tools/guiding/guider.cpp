@@ -243,7 +243,7 @@ int	main(int argc, char *argv[]) {
 
 	// now perform the calibration
 	guider.exposure(exposure);
-	guider.startCalibration(GP, tracker);
+	guider.startCalibration(GP, tracker, 0.);
 	double	timeout = 120;
 	if (!guider.waitCalibration(timeout)) {
 		std::string	msg = stringprintf("tracker failed to calibrate");

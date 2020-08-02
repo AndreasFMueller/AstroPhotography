@@ -122,13 +122,16 @@ void	ControlDeviceBase::exposure(const camera::Exposure& e) {
 
 /**
  * \brief start the calibration
+ *
+ * \param tracker	the tracker to use for the calibration
  */
 int	ControlDeviceBase::startCalibration(TrackerPtr /* tracker */) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "common calibration start");
 
         // reset the current calibration, just to make sure we don't confuse
         // it with the previous
-	CalibrationProcess	*calibrationprocess = dynamic_cast<CalibrationProcess *>(&*process);
+	CalibrationProcess	*calibrationprocess
+		= dynamic_cast<CalibrationProcess *>(&*process);
 	if (NULL == calibrationprocess) {
 		std::string	cause = stringprintf("not a calibration "
 			"process: %s",
@@ -148,6 +151,11 @@ int	ControlDeviceBase::startCalibration(TrackerPtr /* tracker */) {
 	calibrationprocess->guiderate(parameter(std::string("guiderate"), 0.5));
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "guiderate = %.3f", 
 		calibrationprocess->guiderate());
+
+	// get the suggested grid pixel size
+	float	gridpixels = parameter(std::string("gridpixels"), 0.);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "suggested grid pixel size: %.1f",
+		gridpixels);
 
 	// compute angular size of pixels
 	_calibration->masPerPixel(

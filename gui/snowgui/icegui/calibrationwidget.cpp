@@ -168,7 +168,9 @@ void	calibrationwidget::calibrateClicked() {
 			_guidercontroller->setupTracker();
 		}
 		try {
-			_guider->startCalibration(_controltype);
+			// XXX we should get the gridpixels from the
+			// XXX gui, value 0 means ignore it
+			_guider->startCalibration(_controltype, 0.);
 		} catch (const std::exception& x) {
 		}
 	}

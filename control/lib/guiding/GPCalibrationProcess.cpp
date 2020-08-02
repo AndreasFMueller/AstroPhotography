@@ -152,7 +152,8 @@ void	GPCalibrationProcess::measure(int ra, int dec) {
 		Point	star = starAt(ra, dec);
 		double	t = Timer::gettime() - starttime;
 		CalibrationPoint	calibrationpoint(t,
-						Point(grid * ra, grid * dec), star);
+						Point(grid * ra, grid * dec),
+						star);
 
 		// add the calibration point to the calibrator
 		calibration()->add(calibrationpoint);
@@ -278,6 +279,13 @@ void	GPCalibrationProcess::main2(astro::thread::Thread<GPCalibrationProcess>& _t
 			gridspacing = DEFAULT_GRIDSPACING;
 		}
 	}
+
+	// see whether we can get pixelsize
+	if (_gridpixels > 0) {
+		gridspacing = _gridpixels;
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "found a grid spacing: %f",
+			_gridpixels);
+	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "grid spacing: %d", gridspacing);
 
 	// the grid constant normally depends on the focallength and the
@@ -374,7 +382,8 @@ GPCalibrationProcess::GPCalibrationProcess(GuiderBase *_guider,
 	persistence::Database _database)
 	: GuidePortProcess(_guider, guideport, _tracker, _database) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "construct a new calibration process");
-	_focallength = 0.600;
+	// XXX how to get the focal length
+	_focallength = 0.;
 	calibrated = false;
 
 	// find out whether we have to move sequentially

@@ -196,7 +196,7 @@ newcalibration:
 	// try to interpret the argument as a calibration type
 	try {
 		ControlType	caltype = string2calibrationtype(calarg);
-		calibrationid = guider->startCalibration(caltype);
+		calibrationid = guider->startCalibration(caltype, 0.);
 		std::cout << "new calibration " << calibrationid;
 		std::cout << " in progress" << std::endl;
 		return EXIT_SUCCESS;

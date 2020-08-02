@@ -7,6 +7,7 @@
 #include "ui_filterwheelcontrollerwidget.h"
 #include <camera.h>
 #include <QTimer>
+#include <CommunicatorSingleton.h>
 
 namespace snowgui {
 
@@ -40,38 +41,22 @@ filterwheelcontrollerwidget::filterwheelcontrollerwidget(QWidget *parent)
 	connect(this, SIGNAL(filterwheelPositionChanged(int)),
 		this, SLOT(filterwheelNewPosition(int)));
 
-	// create the update thread
-	_updatethread = new QThread(NULL);
-	connect(_updatethread, SIGNAL(finished()),
-		_updatethread, SLOT(deleteLater()));
-
-	// create the work class
-	_updatework = new filterwheelupdatework(this);
-	_updatework->moveToThread(_updatethread);
-
-	// initialize the timer
-	connect(&statusTimer, SIGNAL(timeout()),
-		_updatework, SLOT(statusUpdate()));
-	connect(&positionTimer, SIGNAL(timeout()),
-		_updatework, SLOT(positionUpdate()));
-
-	// start the thread
-	_updatethread->start();
-
-	statusTimer.setInterval(100);
-	positionTimer.setInterval(1000);
+	// create the callback 
+	_filterwheel_callback = new FilterWheelCallbackI(*this);
+	_filterwheel_identity = snowstar::CommunicatorSingleton::add(_filterwheel_callback);
 }
 
 /**
  * \brief Destroy the filterwheelcontrollerwidget
  */
 filterwheelcontrollerwidget::~filterwheelcontrollerwidget() {
-	statusTimer.stop();
-	positionTimer.stop();
-	_updatethread->quit();
-	_updatethread->wait();
-	delete _updatethread;
-	delete _updatework;
+	if (_filterwheel) {
+		_filterwheel->unregisterCallback(_filterwheel_identity);
+	}
+	if (_filterwheel_callback) {
+		snowstar::CommunicatorSingleton::remove(_filterwheel_identity);
+		_filterwheel_callback = NULL;
+	}
 	delete ui;
 }
 
@@ -132,10 +117,6 @@ void	filterwheelcontrollerwidget::setupComplete() {
 void	filterwheelcontrollerwidget::setupFilterwheel() {
 	ui->filterBox->blockSignals(true);
 
-	// make sure the status timer does not fire
-	statusTimer.stop();
-	positionTimer.stop();
-
 	// remove previous content of the filterwheel
 	while (ui->filterBox->count() > 0) {
 		ui->filterBox->removeItem(0);
@@ -166,9 +147,8 @@ void	filterwheelcontrollerwidget::setupFilterwheel() {
 		// store the current state
 		_previousstate = snowstar::FwUNKNOWN;
 
-		// start the timer
-		statusTimer.start();
-		positionTimer.start();
+		// register the callback with the server
+		_filterwheel->registerCallback(_filterwheel_identity);
 	}
 	ui->filterBox->blockSignals(false);
 
@@ -202,8 +182,9 @@ void    filterwheelcontrollerwidget::setFilter(int index) {
  * This slot is activate when the user chooses a different filter wheel.
  */
 void    filterwheelcontrollerwidget::filterwheelChanged(int index) {
-	statusTimer.stop();
-	positionTimer.stop();
+	if (_filterwheel) {
+		_filterwheel->unregisterCallback(_filterwheel_identity);
+	}
 	_filterwheel = _instrument.filterwheel(index);
 	setupFilterwheel();
 }
@@ -217,7 +198,7 @@ void    filterwheelcontrollerwidget::statusUpdate() {
 	if (!_filterwheel) {
 		return;
 	}
-	//debug(LOG_DEBUG, DEBUG_LOG, 0, "statusUpdate()");
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "statusUpdate()");
 
 	// get the new state
 	snowstar::FilterwheelState	newstate;
@@ -236,10 +217,12 @@ void    filterwheelcontrollerwidget::statusUpdate() {
 	_previousstate = newstate;
 	switch (newstate) {
 	case snowstar::FwMOVING:
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "start the wheel turning");
 		emit filterwheelStart();
 		break;
 	case snowstar::FwIDLE:
 	case snowstar::FwUNKNOWN:
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "stop the wheel turning");
 		emit filterwheelStop();
 		break;
 	}

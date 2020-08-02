@@ -8,6 +8,7 @@
 
 #include <InstrumentWidget.h>
 #include <QTimer>
+#include <camera.h>
 
 namespace snowgui {
 
@@ -17,29 +18,16 @@ namespace Ui {
 
 class filterwheelcontrollerwidget;
 
-/**
- * \brief update thread
- *
- * The idea of the update thread is that it does all the possibly lengthy
- * stuff that happends when updateing information from the server in a
- * separate thread. It does this by calling the statusUpdate method of the
- * main class. The main class then emits signals that it understands. This
- * queues the new data on the event loop of the main thread for the GUI
- * to quickly integrate.
- *
- * It should be easy to turn this thread class into a template class for
- * other device controller widgets to use in a similar way.
- */
-class filterwheelupdatework : public QObject {
-	Q_OBJECT
-	filterwheelcontrollerwidget	*_filterwheelcontrollerwidget;
-	std::recursive_mutex	_mutex;
+class FilterWheelCallbackI : public snowstar::FilterWheelCallback {
+	filterwheelcontrollerwidget&	_filterwheelcontrollerwidget;
 public:
-	filterwheelupdatework(filterwheelcontrollerwidget *fwc);
-	~filterwheelupdatework();
-public slots:
-	void	statusUpdate();
-	void	positionUpdate();
+	FilterWheelCallbackI(filterwheelcontrollerwidget& f);
+	~FilterWheelCallbackI();
+	void	state(const snowstar::FilterwheelState state,
+			const Ice::Current& current);
+	void	position(const int position,
+			const Ice::Current& current);
+	void	stop(const Ice::Current& current);
 };
 
 /**
@@ -51,8 +39,9 @@ class filterwheelcontrollerwidget : public InstrumentWidget {
 	snowstar::FilterWheelPrx	_filterwheel;
 	snowstar::FilterwheelState	_previousstate;
 	int				_position;
-	filterwheelupdatework		*_updatework;
-	QThread				*_updatethread;
+
+	Ice::ObjectPtr	_filterwheel_callback;
+	Ice::Identity	_filterwheel_identity;
 public:
 	explicit filterwheelcontrollerwidget(QWidget *parent = 0);
 	~filterwheelcontrollerwidget();
@@ -75,8 +64,6 @@ signals:
 
 private:
 	Ui::filterwheelcontrollerwidget *ui;
-	QTimer	statusTimer;
-	QTimer	positionTimer;
 
 	void	setupFilterwheel();
 	void	displayFilter(int index);

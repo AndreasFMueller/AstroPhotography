@@ -376,6 +376,14 @@ module snowstar {
 	};
 
 	/**
+	 * \brief Callback for filterwheel monitoring
+	 */
+	interface FilterWheelCallback extends Callback {
+		void	state(FilterwheelState s);
+		void	position(int filter);
+	};
+
+	/**
  	 * \brief FilterWheel interface
 	 *
 	 * A Filterwheel is a device that can position a certain number
@@ -408,6 +416,9 @@ module snowstar {
 		 * \brief Query the filter wheel state
 		 */
 		FilterwheelState	getState();
+
+		void	registerCallback(Ice::Identity callback);
+		void	unregisterCallback(Ice::Identity callback);
 	};
 
 	/**

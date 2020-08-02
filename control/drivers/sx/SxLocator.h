@@ -51,6 +51,7 @@ class SxCameraLocator : public DeviceLocator {
 			DeviceName::device_type device,
 			usb::DevicePtr devptr);
 public:
+	static std::mutex	_hid_mutex;
 	SxCameraLocator();
 	virtual ~SxCameraLocator();
 	virtual std::string	getName() const;

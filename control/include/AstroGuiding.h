@@ -1079,10 +1079,11 @@ public:
 	 * values for the calibration displacements.
 	 * \param type 		the type of the device to calibrate
 	 * \param tracker	The tracker used for tracking. 
+	 * \param gridpixels	number of pixels to dimension the grid
 	 * \return		the id of the calibration run
 	 */
 	int	startCalibration(ControlDeviceType type,
-			TrackerPtr tracker);
+			TrackerPtr tracker, float gridpixels);
 private:
 	void	checkCalibrationState();
 public:

@@ -70,6 +70,7 @@ focusingcontrollerwidget::focusingcontrollerwidget(QWidget *parent) :
 focusingcontrollerwidget::~focusingcontrollerwidget() {
 	_timer.stop();
 	_focusing->unregisterCallback(_ident);
+	snowstar::CommunicatorSingleton::remove(_ident);
 	// we should also remove it from the adapter
 	delete ui;
 }
@@ -114,10 +115,7 @@ void	focusingcontrollerwidget::instrumentSetup(
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "registering the callback");
 
 	// setting up the callback
-        _adapter = snowstar::CallbackAdapterPtr(
-                        new snowstar::CallbackAdapter(ic));
-        _ident = _adapter->add(callback);
-        _focusing->ice_getConnection()->setAdapter(_adapter->adapter());
+	_ident = snowstar::CommunicatorSingleton::add(_callback);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "registering %s", _ident.name.c_str());
 	_focusing->registerCallback(_ident);
 

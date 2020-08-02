@@ -140,6 +140,7 @@ SOURCES += 								\
 	CcdCallbackI.cpp						\
 	EventMonitor.cpp						\
 	FilterWheelBusy.cpp						\
+	FilterWheelCallbackI.cpp					\
 	filterwheelupdatework.cpp					\
 	FocusButton.cpp							\
 	focuselementstack.cpp						\

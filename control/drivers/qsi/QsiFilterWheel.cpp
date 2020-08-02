@@ -110,6 +110,7 @@ unsigned int	QsiFilterWheel::currentPosition() {
  * \param newposition	position we have to move to
  */
 void	QsiFilterWheel::move(size_t newposition) {
+	callback(FilterWheel::moving);
 	std::lock_guard<std::recursive_mutex>	lock(_camera.mutex);
 	short	position = newposition;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "put position %d", position);
@@ -124,6 +125,8 @@ void	QsiFilterWheel::move(size_t newposition) {
 	}
 	_movement_done = true;
 	lastState = FilterWheel::idle;
+	callback(position);
+	callback(FilterWheel::idle);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "put position return");
 }
 

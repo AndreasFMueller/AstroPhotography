@@ -23,8 +23,13 @@ namespace snowstar {
  * This method directs the guider to use a specific calibration from the 
  * database. The flipped argument allows to use the calibration if it was
  * computed on the other side of the meridian.
+ *
+ * \param calid		the calibration id
+ * \param flipped	whether or not the calibration eeds to be flipped
+ * \param current	current call context
  */
 void GuiderI::useCalibration(Ice::Int calid, bool /* flipped */,
+// XXX the flipped argument is currently not evaluated
 	const Ice::Current& current) {
 	CallStatistics::count(current);
 	if (calid <= 0) {
@@ -46,6 +51,9 @@ void GuiderI::useCalibration(Ice::Int calid, bool /* flipped */,
 
 /**
  * \brief Merian flip requires that we need to flip the calibration too
+ *
+ * \param type		the control device type
+ * \param current	current call context
  */
 void GuiderI::flipCalibration(ControlType type,
 	const Ice::Current& current) {
@@ -66,6 +74,9 @@ void GuiderI::flipCalibration(ControlType type,
  *
  * Since all configured devices are used for guiding, there must be a method
  * to uncalibrate a device so that it is no longer used for guiding.
+ *
+ * \param calibrationtype	the type of control device
+ * \param current		current call context
  */
 void	GuiderI::unCalibrate(ControlType calibrationtype,
 	const Ice::Current& current) {
@@ -98,6 +109,9 @@ void	GuiderI::unCalibrate(ControlType calibrationtype,
  *
  * This method retrieves the configuration of a device. If the device is
  * unconfigured, it throws the BadState exception.
+ *
+ * \param calibrationtype	the type of control device to calibrate
+ * \param current		current call context
  */
 Calibration GuiderI::getCalibration(ControlType calibrationtype,
 		const Ice::Current& current) {
@@ -145,9 +159,14 @@ Calibration GuiderI::getCalibration(ControlType calibrationtype,
  *
  * The focal length is the only piece of information that we can not
  * get from anywhere else, so it has to be specified
+ *
+ * \param caltype	type of calibration algorithm
+ * \param gridpixels	suggested grid size in pixels (unused if == 0);
+ * \param current	current call context
  */
 Ice::Int GuiderI::startCalibration(ControlType caltype,
-		const Ice::Current& current) {
+		Ice::Float gridpixels,
+		const Ice::Current& current ) {
 	CallStatistics::count(current);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "start calibration, type = %s",
 		calibrationtype2string(caltype).c_str());
@@ -162,13 +181,15 @@ Ice::Int GuiderI::startCalibration(ControlType caltype,
 			astro::events::Event::GUIDE,
 			astro::stringprintf("start GP %s calibration",
 			guider->instrument().c_str()));
-		return guider->startCalibration(astro::guiding::GP, tracker);
+		return guider->startCalibration(astro::guiding::GP, tracker,
+			gridpixels);
 	case ControlAdaptiveOptics:
 		astro::event(EVENT_CLASS, astro::events::INFO,
 			astro::events::Event::GUIDE,
 			astro::stringprintf("start AO %s calibration",
 			guider->instrument().c_str()));
-		return guider->startCalibration(astro::guiding::AO, tracker);
+		return guider->startCalibration(astro::guiding::AO, tracker,
+			gridpixels);
 	}
 	debug(LOG_ERR, DEBUG_LOG, 0,
 		"control type is invalid (should not happen)");
@@ -177,6 +198,8 @@ Ice::Int GuiderI::startCalibration(ControlType caltype,
 
 /**
  * \brief Retrieve the current progress figure of the calibration
+ *
+ * \param current	current call context
  */
 Ice::Double GuiderI::calibrationProgress(const Ice::Current& current) {
 	CallStatistics::count(current);
@@ -185,6 +208,8 @@ Ice::Double GuiderI::calibrationProgress(const Ice::Current& current) {
 
 /**
  * \brief cancel the current calibration process
+ *
+ * \param current	current call context
  */
 void GuiderI::cancelCalibration(const Ice::Current& current) {
 	CallStatistics::count(current);
@@ -193,6 +218,9 @@ void GuiderI::cancelCalibration(const Ice::Current& current) {
 
 /**
  * \brief Wait for the calibration to complete
+ *
+ * \param timeout	the maximum timeout to wait for the calibration
+ * \param current	current call context
  */
 bool GuiderI::waitCalibration(Ice::Double timeout,
 	const Ice::Current& current) {
@@ -202,6 +230,9 @@ bool GuiderI::waitCalibration(Ice::Double timeout,
 
 /**
  * \brief Register a callback for the calibration process
+ *
+ * \param calibrationcallback	the calibration monitor to register
+ * \param current		current call context
  */
 void	GuiderI::registerCalibrationMonitor(const Ice::Identity& calibrationcallback, const Ice::Current& current) {
 	CallStatistics::count(current);
@@ -220,6 +251,9 @@ void	GuiderI::registerCalibrationMonitor(const Ice::Identity& calibrationcallbac
 
 /**
  * \brief Unregister a callback for the calibration process
+ *
+ * \param calibrationcallback	the calibration monitor to unregister
+ * \param current		current call context
  */
 void	GuiderI::unregisterCalibrationMonitor(const Ice::Identity& calibrationcallback, const Ice::Current& current) {
 	CallStatistics::count(current);
@@ -229,6 +263,8 @@ void	GuiderI::unregisterCalibrationMonitor(const Ice::Identity& calibrationcallb
 
 /**
  * \brief Handle an update from the calibration process
+ *
+ * \param data		the callback data to send to the monitor
  */
 void	GuiderI::calibrationUpdate(const astro::callback::CallbackDataPtr data) {
 
@@ -238,6 +274,9 @@ void	GuiderI::calibrationUpdate(const astro::callback::CallbackDataPtr data) {
 
 /**
  * \brief calback adapter for Calibration monitor
+ *
+ * \param p	the callback to activate
+ * \param data	the callback data to formard
  */
 template<>
 void	callback_adapter<CalibrationMonitorPrx>(CalibrationMonitorPrx& p,

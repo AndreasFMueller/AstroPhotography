@@ -307,7 +307,7 @@ module snowstar {
 		void	unCalibrate(ControlType type) throws BadState;
 
 		// methods to perform a calibration asynchronously
-		int	startCalibration(ControlType caltype)
+		int	startCalibration(ControlType caltype, float gridpixels)
 					throws BadState;
 		double	calibrationProgress() throws BadState;
 		void	cancelCalibration() throws BadState;

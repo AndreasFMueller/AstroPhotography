@@ -79,7 +79,7 @@ FilterWheel::~FilterWheel() {
 /**
  * \brief wait for the filter wheel to come ready
  *
- * \param timeout maximum time to wait for the filter wheel to become idle
+ * \param timeout 	maximum time to wait for the filter wheel to become idle
  */
 bool	FilterWheel::wait(float timeout) {
 	while ((timeout > 0) && (getState() != idle)) {
@@ -93,6 +93,8 @@ bool	FilterWheel::wait(float timeout) {
 
 /**
  * \brief Select a filter by name
+ *
+ * \param filtername	the name of the filter
  */
 void	FilterWheel::select(const std::string& filtername) {
 	unsigned int	n = nFilters();
@@ -138,6 +140,8 @@ unsigned int	FilterWheel::nFilters() {
 
 /**
  * \brief Get the filter name
+ *
+ * \param index		the index of the filter
  */
 std::string	FilterWheel::filterName(size_t index) {
 	if (index >= nFilters()) {
@@ -150,6 +154,49 @@ std::string	FilterWheel::filterName(size_t index) {
 		return properties.getProperty(stringprintf("filter%u", index));
 	} catch (...) {
 		return stringprintf("%u", index);
+	}
+}
+
+/**
+ * \brief Send the new state to the callbacks
+ *
+ * \param state		the new state
+ */
+void	FilterWheel::callback(FilterWheel::State state) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "state update callback");
+	callback::CallbackDataPtr	cb(new FilterWheelStateCallbackData(state));
+	_callback(cb);
+}
+
+/**
+ * \brief Callback for the filter position
+ *
+ * \param filter	the number of the filter
+ */
+void	FilterWheel::callback(int filter) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "new filter %d callback", filter);
+	callback::CallbackDataPtr	cb(new callback::IntegerCallbackData(filter));
+	_callback(cb);
+}
+
+/**
+ * \brief Add a callback for the filterwheel state
+ *
+ * \param callback	the callback to add
+ */
+void	FilterWheel::addCallback(callback::CallbackPtr callback) {
+	_callback.insert(callback);
+}
+
+/**
+ * \brief Remove a callback
+ *
+ * \param callback	the callback to remove
+ */
+void	FilterWheel::removeCallback(callback::CallbackPtr callback) {
+	auto	i = _callback.find(callback);
+	if (i != _callback.end()) {
+		_callback.erase(i);
 	}
 }
 

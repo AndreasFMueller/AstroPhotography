@@ -615,10 +615,11 @@ public:
 	virtual void	dewHeater(float d);
 private:
 	callback::CallbackSet	_callback;
-public:
+protected:
 	void	callback(const CoolerInfo& info);
 	void	callback(const DewHeater& dewheater);
 	void	callback(const Temperature& newSetTemperature);
+public:
 	void	addCallback(callback::CallbackPtr callback);
 	void	removeCallback(callback::CallbackPtr callback);
 };
@@ -653,7 +654,17 @@ public:
 	virtual std::string	filterName(size_t filterindex);
 	virtual State	getState() = 0;
 	bool	wait(float timeout);
+private:
+	callback::CallbackSet	_callback;
+protected:
+	void	callback(State state);
+	void	callback(int filter);
+public:
+	void	addCallback(callback::CallbackPtr callback);
+	void	removeCallback(callback::CallbackPtr callback);
 };
+
+typedef callback::CallbackDataEnvelope<FilterWheel::State>	FilterWheelStateCallbackData;
 
 /**
  * \brief Data class for guide port activation

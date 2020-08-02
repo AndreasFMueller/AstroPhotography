@@ -1,6 +1,7 @@
 ChangeLog for the Astro project.
 
 20200802:
+	* add callbacks to filterwheel
 	* add pause and resume to the heartbeat interface
 	* add interval callback to the heartbeat interface
 	* add pause/resume commands to the snowheartbeat program

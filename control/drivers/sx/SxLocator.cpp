@@ -22,6 +22,7 @@ namespace astro {
 namespace module {
 namespace sx {
 
+
 //////////////////////////////////////////////////////////////////////
 // Implementation of the Starlight Express Module Descriptor
 //////////////////////////////////////////////////////////////////////
@@ -70,6 +71,8 @@ astro::module::ModuleDescriptor	*getDescriptor() {
 namespace astro {
 namespace camera {
 namespace sx {
+
+std::mutex	SxCameraLocator::_hid_mutex;
 
 //////////////////////////////////////////////////////////////////////
 // Implementation of the Camera Locator for Starlight Express
@@ -224,9 +227,21 @@ std::vector<std::string>	SxCameraLocator::getDevicelist(
 		// enumerate filterwheels
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "scan for hid devices");
 
+		// find out whether there is a matching product id, this
+		// prevents a crash on macosx if there is no SX filterwheel
+		// device present
+		libusb_device_handle	*h = libusb_open_device_with_vid_pid(
+			NULL, SX_VENDOR_ID, SX_FILTERWHEEL_PRODUCT_ID);
+		if (NULL == h) {
+			return names;
+		}
+		libusb_close(h);
+
 		// scan for filter wheels
+		std::unique_lock<std::mutex>	lock(_hid_mutex);
 		struct hid_device_info	*hinfo = hid_enumerate(SX_VENDOR_ID,
 			SX_FILTERWHEEL_PRODUCT_ID);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "got hid enumeration %p", hinfo);
 		struct hid_device_info	*p = hinfo;
 		while (p) {
 			debug(LOG_DEBUG, DEBUG_LOG, 0, "got HID at %p", hinfo);

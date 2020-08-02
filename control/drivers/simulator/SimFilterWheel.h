@@ -14,14 +14,22 @@ namespace astro {
 namespace camera {
 namespace simulator {
 
+/**
+ * \brief The simulated filterwheel
+ */
 class SimFilterWheel : public FilterWheel {
 	SimLocator&	_locator;
 	int	_currentposition;
+	int	_nextposition;
 	State	_currentstate;
-	double	_changetime;
-	void	checkstate();
+	std::thread	_thread;
+	std::mutex	_mutex;
+	std::condition_variable	_cond;
+	bool	_terminate;
 public:
 	SimFilterWheel(SimLocator& locator);
+	virtual ~SimFilterWheel();
+	void	run();
 protected:
 	virtual unsigned int	nFilters0() { return 5; }
 public:

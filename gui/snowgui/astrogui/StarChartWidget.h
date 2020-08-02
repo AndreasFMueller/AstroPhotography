@@ -85,6 +85,7 @@ class StarChartWidget : public QWidget, public PlanetDrawing {
 	astro::ImageCoordinates	_converter;
 	float	_limit_magnitude;
 	bool	_negative;
+	bool	_red_light;
 	bool	_show_stars;
 	bool	_show_grid;
 	bool	_show_crosshairs;
@@ -113,6 +114,8 @@ class StarChartWidget : public QWidget, public PlanetDrawing {
 
 	QPointF	_center;
 	QPointF	convert(const astro::RaDec& radec);
+
+	void	setupColors();
 public:
 	const astro::Angle&	resolution() const { return _resolution; }
 	void	resolution(const astro::Angle& r) { _resolution = r; }
@@ -120,8 +123,11 @@ public:
 	void	limit_magnitude(float l) { _limit_magnitude = l; }
 	float	limit_magnitude() const { return _limit_magnitude; }
 
-	void	negative(bool n) { _negative = n; }
+	void	negative(bool n);
 	bool	negative() const { return _negative; }
+
+	void	red_light(bool r);
+	bool	red_light() const { return _red_light; }
 
 	void	show_stars(bool s) { _show_stars = s; }
 	bool	show_stars() const { return _show_stars; }
@@ -217,6 +223,20 @@ protected:
 	void	mouseReleaseEvent(QMouseEvent *event);
 	void	mouseMoveEvent(QMouseEvent *event);
 
+	QColor	_skycolor;
+	QColor	_starcolor;
+	QColor	_gridcolor;
+	QColor	_targetcolor;
+	QColor	_directioncolor;
+	QColor	_rectanglecolor;
+	QColor	_constellationcolor;
+
+	QColor	_galaxycolor;
+	QColor	_nebulacolor;
+	QColor	_planetarynebulacolor;
+	QColor	_globularclustercolor;
+	QColor	_openclustercolor;
+
 public slots:
 	void	directionChanged(astro::RaDec);
 	void	targetChanged(astro::RaDec);
@@ -242,6 +262,7 @@ public slots:
 	void	setCataloglabelsVisible(bool);
 	void	setTooltipsVisible(bool);
 	void	setNegative(bool);
+	void	setRedLight(bool);
 	void	setFlip(bool);
 	void	setImagerRectangleVisible(bool);
 	void	setFinderRectangleVisible(bool);
@@ -260,6 +281,7 @@ public slots:
 	void	toggleCataloglabelsVisible();
 	void	toggleTooltipsVisible();
 	void	toggleNegative();
+	void	toggleRedLight();
 	void	toggleFlip();
 	void	toggleImagerRectangleVisible();
 	void	toggleFinderRectangleVisible();

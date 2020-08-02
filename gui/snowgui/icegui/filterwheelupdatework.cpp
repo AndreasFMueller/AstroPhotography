@@ -10,6 +10,8 @@
 
 namespace snowgui {
 
+#if 0
+
 /**
  * \brief Filterwheel update thread construction
  */
@@ -52,5 +54,7 @@ void    filterwheelupdatework::positionUpdate() {
 		_filterwheelcontrollerwidget->positionUpdate();
 	}
 }
+
+#endif
 
 } // namespace snowgui

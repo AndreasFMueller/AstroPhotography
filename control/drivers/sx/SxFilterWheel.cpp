@@ -4,6 +4,7 @@
  * (c) 2018 Prof Dr Andreas Müller, Hochschule Rapperswil
  */
 #include <SxFilterWheel.h>
+#include <SxLocator.h>
 #include <AstroExceptions.h>
 #include <SxUtils.h>
 #include <includes.h>
@@ -42,6 +43,7 @@ void	SxFilterWheel::run() {
 		if (pending_cmd == no_command) {
 			goto waitnext;
 		}
+		callback(FilterWheel::moving);
 
 		// send the command
 		memset(command, 0, sizeof(command));
@@ -95,6 +97,7 @@ void	SxFilterWheel::run() {
 		case get_total:
 		case current_filter:
 			currentposition = response[0];
+			callback(currentposition);
 			nfilters = response[1];
 			debug(LOG_DEBUG, DEBUG_LOG, 0,
 				"current = %d, total = %d",
@@ -132,6 +135,7 @@ void	SxFilterWheel::run() {
 			
 			pending_cmd = no_command;
 			state = idle;
+			callback(FilterWheel::idle);
 
 			// wait for the new command
 			_condition.wait(lock);
@@ -154,6 +158,7 @@ SxFilterWheel::SxFilterWheel(const DeviceName& name)
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "serial number: %s", serial.c_str());
 
 	// initialize connection to the filter wheel
+	std::unique_lock<std::mutex>	lock(SxCameraLocator::_hid_mutex);
 	struct hid_device_info	*hinfo = hid_enumerate(SX_VENDOR_ID,
 		SX_FILTERWHEEL_PRODUCT_ID);
 	if (NULL == hinfo) {
@@ -215,6 +220,7 @@ SxFilterWheel::~SxFilterWheel() {
 	delete _thread;
 
 	// close connection to the filter wheel
+	std::unique_lock<std::mutex>	lock(SxCameraLocator::_hid_mutex);
 	hid_close(_hid);
 	_hid = NULL;
 }

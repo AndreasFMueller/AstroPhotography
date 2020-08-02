@@ -13,26 +13,50 @@ namespace camera {
 namespace simulator {
 
 /**
+ * \brief Trampoline function to start the run method of the filterwheel
+ *
+ * \param filterwheel	the filterwheel implementation
+ */
+static void	start_filterwheel(SimFilterWheel *filterwheel) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "start the filterwheel thread for %s",
+		filterwheel->name().toString().c_str());
+	try {
+		filterwheel->run();
+	} catch (const std::exception& x) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "error in filterwheel thread: %s",
+			x.what());
+	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "end the filterwheel thread for %s",
+		filterwheel->name().toString().c_str());
+}
+
+/**
  * \brief Construct a new Filterwheel object
+ *
+ * \param locator	the locator for simulator devices
  */
 SimFilterWheel::SimFilterWheel(SimLocator& locator)
 	: FilterWheel(DeviceName("filterwheel:simulator/filterwheel")),
 	  _locator(locator) {
 	_currentposition = 0;
+	_nextposition = 0;
 	_currentstate = FilterWheel::unknown;
 	// setting the changetime to a future point of time makes sure
 	// that the 
-	_changetime = Timer::gettime() + 5;
+	_terminate = false;
+	_thread = std::thread(start_filterwheel, this);
 }
 
 /**
- * \brief Check the current state
+ * \brief Destroy the filterwheel instance
+ *
+ * The destructor has to wait for the thread to terminate
  */
-void	SimFilterWheel::checkstate() {
-	double	now = Timer::gettime();
-	if (now > _changetime) {
-		_currentstate = FilterWheel::idle;
-		_changetime = now + 1000000;
+SimFilterWheel::~SimFilterWheel() {
+	_terminate = true;
+	_cond.notify_all();
+	if (_thread.joinable()) {
+		_thread.join();
 	}
 }
 
@@ -42,18 +66,11 @@ void	SimFilterWheel::checkstate() {
  * This method has as a side effect to wait for the filterwheel to be idle
  */
 unsigned int	SimFilterWheel::currentPosition() {
-	checkstate();
+	std::unique_lock<std::mutex>	lock(_mutex);
+	// wait for the filterwheel to become idle
 	while (_currentstate != FilterWheel::idle) {
-		// wait long enough to make sure the filter wheel is now idle
-		double	waittime = _changetime - Timer::gettime() + 0.001;
-		// sleep  for the waittime
-		if (waittime > 0) {
-			debug(LOG_DEBUG, DEBUG_LOG, 0, "filter wheel not idle,"
-				" waiting for %.6f seconds", waittime);
-			Timer::sleep(waittime);
-		}
-		// check the state again
-		checkstate();
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "bad state, so we wait");
+		_cond.wait(lock);
 	}
 	return _currentposition;
 }
@@ -63,6 +80,8 @@ unsigned int	SimFilterWheel::currentPosition() {
  *
  * This triggers movement of the filter wheel, which is simulated by setting
  * the _changetime.
+ *
+ * \param filterindex	the index of the filter to select
  */
 void    SimFilterWheel::select(size_t filterindex) {
 	// make sure the index is legal
@@ -70,21 +89,24 @@ void    SimFilterWheel::select(size_t filterindex) {
 		throw BadParameter("filterindex may not exceed number "
 			"of filters");
 	}
-	// if we are already at the right position, return
-	unsigned int	currentposition = currentPosition();
-	if (filterindex == currentposition) {
-		return;
+
+	// lock the data structures
+	std::unique_lock<std::mutex>	lock(_mutex);
+
+	// if the filterwheel is not idle, we cannot select
+	if (_currentstate != FilterWheel::idle) {
+		throw BadState("bad filter state");
 	}
-	// find out how far we have to move
-	int	timedelta = filterindex - currentposition;
-	if (timedelta < 0) {
-		timedelta = nFilters() + timedelta;
-	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "filterwheel will stop in %d seconds",
-		2 * timedelta);
-	_changetime = Timer::gettime() + 2 * timedelta;
+
+	// change the state to moving
+	_nextposition = filterindex;
 	_currentstate = FilterWheel::moving;
-	_currentposition = filterindex;
+
+	// notify all threads of the data change
+	_cond.notify_all();
+
+	// update the callback
+	callback(_currentstate);
 }
 
 /**
@@ -105,8 +127,51 @@ std::string     SimFilterWheel::filterName(size_t filterindex) {
  * \brief Get the current filterwheel state
  */
 FilterWheel::State	SimFilterWheel::getState() {
-	checkstate();
+	std::unique_lock<std::mutex>	lock(_mutex);
 	return _currentstate;
+}
+
+/**
+ * \brief The run method of the filterwheel thread
+ */
+void	SimFilterWheel::run() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "sleep for 3 seconds until FW is ready");
+	std::unique_lock<std::mutex>	lock(_mutex);
+	while (!_terminate) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "new loop");
+		bool	has_new = true;
+		// check the current state
+		switch (_currentstate) {
+		case FilterWheel::idle:
+			// wait until something happens
+			has_new = false;
+			_cond.wait(lock);
+			break;
+		case FilterWheel::moving:
+			// wait for move to complete
+			_cond.wait_for(lock, std::chrono::seconds(5));
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "move complete");
+			break;
+		case FilterWheel::unknown:
+			// wait for fw to initialize
+			_cond.wait_for(lock, std::chrono::seconds(3));
+			debug(LOG_DEBUG, DEBUG_LOG, 0,
+				"FilterWheel initialized");
+			break;
+		}
+		// handle the case that the state has changed to terminate
+		if (_terminate) {
+			return;
+		}
+		// if we were moving or unknown, set the new idle state
+		if (has_new) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "setting new state");
+			_currentstate = FilterWheel::idle;
+			_currentposition = _nextposition;
+			callback(_currentstate);
+			callback(_currentposition);
+		}
+	}
 }
 
 } // namespace simulator

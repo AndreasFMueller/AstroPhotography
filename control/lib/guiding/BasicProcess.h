@@ -30,6 +30,13 @@ public:
 	double	focallength() const { return _focallength; }
 	void	focallength(double f) { _focallength = f; }
 
+protected:
+	// suggested pixel size
+	double	_gridpixels;
+public:
+	double	gridpixels() const { return _gridpixels; }
+	void	gridpixels(double g) { _gridpixels = g; }
+
 	// everything needed for all processes, i.e. exposure parameters,
 	// imager object (which encapsulates the ccd), 
 private:

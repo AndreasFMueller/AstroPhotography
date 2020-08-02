@@ -35,6 +35,8 @@ StarChartWidget::StarChartWidget(QWidget *parent) : QWidget(parent),
 	_resolution = _standard_resolution;
 	_limit_magnitude = 10;
 	_negative = false;
+	_red_light = false;
+	setupColors();
 	_show_stars = true;
 	_show_grid = true;
 	_retriever = NULL;
@@ -112,6 +114,22 @@ StarChartWidget::StarChartWidget(QWidget *parent) : QWidget(parent),
 StarChartWidget::~StarChartWidget() {
 }
 
+void	StarChartWidget::negative(bool n) {
+	_negative = n;
+	if (!n) {
+		_red_light = false;
+	}
+	setupColors();
+}
+
+void	StarChartWidget::red_light(bool r) {
+	_red_light = r;
+	if (_red_light) {
+		_negative = true;
+	}
+	setupColors();
+}
+
 void	StarChartWidget::gridstep_pixels_up() {
 	if (_gridstep_pixels < 1024) {
 		_gridstep_pixels <<= 1;
@@ -122,6 +140,33 @@ void	StarChartWidget::gridstep_pixels_down() {
 	if (_gridstep_pixels > 16) {
 		_gridstep_pixels >>= 1;
 	}
+}
+
+void	StarChartWidget::setupColors() {
+	if (_red_light) {
+		_skycolor = QColor(255,0,0);
+		_starcolor = QColor(0,0,0);
+		_gridcolor = QColor(51,0,255);
+		_targetcolor = Qt::white;
+	} else if (_negative) {
+		_skycolor = QColor(255,255,255);
+		_starcolor = QColor(0,0,0);
+		_gridcolor = QColor(51,0,255);
+		_targetcolor = Qt::red;
+	} else {
+		_skycolor = QColor(0,0,0);
+		_starcolor = QColor(255,255,255);
+		_gridcolor = QColor(102,204,255);
+		_targetcolor = Qt::red;
+	}
+	_rectanglecolor = QColor(255, 102, 0);
+	_constellationcolor = QColor(255,0,204);
+	_directioncolor = Qt::green;
+	_galaxycolor = Qt::red;
+	_nebulacolor = Qt::green;
+	_planetarynebulacolor = Qt::magenta;
+	_globularclustercolor = Qt::yellow;
+	_openclustercolor = Qt::cyan;;
 }
 
 /**
@@ -190,9 +235,7 @@ void	StarChartWidget::drawStar(QPainter& painter, const Star& star) {
 	starcircle.addEllipse(starcenter, sr, sr);
 
 	// draw the circle
-	QColor	black(0,0,0);
-	QColor	white(255,255,255);
-	painter.fillPath(starcircle, (_negative) ? black : white);
+	painter.fillPath(starcircle, _starcolor);
 }
 
 /**
@@ -221,20 +264,20 @@ void	StarChartWidget::drawDeepSkyObject(QPainter& painter,
 	case astro::catalog::DeepSkyObject::Galaxy:
 	case astro::catalog::DeepSkyObject::MultipleSystem:
 	case astro::catalog::DeepSkyObject::GalaxyInMultipleSystem:
-		pen.setColor(Qt::red);
+		pen.setColor(_galaxycolor);
 		break;
 	case astro::catalog::DeepSkyObject::BrightNebula:
 	case astro::catalog::DeepSkyObject::ClusterNebulosity:
-		pen.setColor(Qt::green);
+		pen.setColor(_nebulacolor);
 		break;
 	case astro::catalog::DeepSkyObject::PlanetaryNebula:
-		pen.setColor(Qt::magenta);
+		pen.setColor(_planetarynebulacolor);
 		break;
 	case astro::catalog::DeepSkyObject::GlobularCluster:
-		pen.setColor(Qt::yellow);
+		pen.setColor(_globularclustercolor);
 		break;
 	case astro::catalog::DeepSkyObject::OpenCluster:
-		pen.setColor(Qt::cyan);
+		pen.setColor(_openclustercolor);
 		break;
 	default:
 		pen.setColor(Qt::gray);
@@ -364,9 +407,7 @@ void	StarChartWidget::drawGrid(QPainter& painter) {
 
 	// prepare the pen used for drawing 
 	QPen	pen;
-	QColor	blue(102,204,255);
-	QColor	darkblue(51,0,255);
-	pen.setColor((_negative) ? darkblue : blue);
+	pen.setColor(_gridcolor);
 	pen.setWidth(1);
 	painter.setPen(pen);
 
@@ -444,8 +485,7 @@ void	StarChartWidget::drawTarget(QPainter& painter) {
 	QPainterPath    targetmarker;
 	QPen    pen(Qt::SolidLine);
 	pen.setWidth(2);
-	QColor  green(0, 255, 0);
-	pen.setColor(green);
+	pen.setColor(_targetcolor);
 	painter.setPen(pen);
 
 	// find out where to draw the marker
@@ -472,7 +512,7 @@ void	StarChartWidget::drawTarget(QPainter& painter) {
 void	StarChartWidget::drawDirections(QPainter& painter) {
 	// prepare pen for color
 	QPen	pen(Qt::SolidLine);
-	pen.setColor(Qt::green);
+	pen.setColor(_directioncolor);
 	painter.setPen(pen);
 
 	// draw the labels
@@ -528,9 +568,7 @@ void	StarChartWidget::draw() {
 	rectangle.lineTo(0, height());
 	rectangle.lineTo(0, 0);
 
-	QColor	white(255,255,255);
-	QColor	black(0,0,0);
-	painter.fillPath(rectangle, (_negative) ? white : black);
+	painter.fillPath(rectangle, _skycolor);
 
 	// draw the grid
 	if (show_grid()) {
@@ -984,6 +1022,11 @@ void	StarChartWidget::setNegative(bool s) {
 	repaint();
 }
 
+void	StarChartWidget::setRedLight(bool s) {
+	red_light(s);
+	repaint();
+}
+
 void	StarChartWidget::setFlip(bool s) {
 	flip(s);
 	repaint();
@@ -1046,6 +1089,10 @@ void	StarChartWidget::toggleTooltipsVisible() {
 
 void	StarChartWidget::toggleNegative() {
 	setNegative(!negative());
+}
+
+void	StarChartWidget::toggleRedLight() {
+	setRedLight(!red_light());
 }
 
 void	StarChartWidget::toggleFlip() {
@@ -1247,6 +1294,13 @@ void	StarChartWidget::showContextMenu(const QPoint& point) {
 	connect(&actionNegative, SIGNAL(triggered()),
 		this, SLOT(toggleNegative()));
 
+	QAction	actionRedLight(QString("Red light"), this);
+	actionRedLight.setCheckable(true);
+	actionRedLight.setChecked(red_light());
+	contextMenu.addAction(&actionRedLight);
+	connect(&actionRedLight, SIGNAL(triggered()),
+		this, SLOT(toggleRedLight()));
+
 	QAction	actionFlip(QString("Rotate"), this);
 	actionFlip.setCheckable(true);
 	actionFlip.setChecked(flip());
@@ -1411,8 +1465,7 @@ void	StarChartWidget::drawRectangle(QPainter& painter,
 		rectangle.toString().c_str());
 	// set line color
 	QPen	pen;
-	QColor	orange(255, 102, 0);
-	pen.setColor(orange);
+	pen.setColor(_rectanglecolor);
 	pen.setWidth(1);
 	painter.setPen(pen);
 	// set up the path for drawing
@@ -1458,8 +1511,7 @@ void    StarChartWidget::drawConstellations(QPainter& painter) {
 	// set up the pen 
 	QPen    pen(Qt::SolidLine);
 	pen.setWidth(1);
-	QColor  pink(255,0,204);
-	pen.setColor(pink);
+	pen.setColor(_constellationcolor);
 	painter.setPen(pen);
 
 	// get the Constellations

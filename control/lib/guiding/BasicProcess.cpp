@@ -55,6 +55,7 @@ BasicProcess::BasicProcess(GuiderBase *guider, TrackerPtr tracker,
 	debug(LOG_DEBUG, DEBUG_LOG, 0,
 		"construct a guiding process: exposure %s",
 		_guider->exposure().toString().c_str());
+	_gridpixels = 0.;
 }
 
 /**
@@ -65,7 +66,7 @@ BasicProcess::BasicProcess(const astro::camera::Exposure& exposure,
 	persistence::Database database)
 	: _guider(NULL), _exposure(exposure), _imager(imager),
 	  _tracker(tracker), _database(database) {
-
+	_gridpixels = 0.;
 }
 
 /**

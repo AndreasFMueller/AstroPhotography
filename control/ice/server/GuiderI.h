@@ -94,6 +94,7 @@ public:
 
 	// control calibration process
 	virtual Ice::Int startCalibration(ControlType caltype,
+				Ice::Float gridpixels,
 				const Ice::Current& current);
 	virtual Ice::Double calibrationProgress(const Ice::Current& current);
 	virtual void cancelCalibration(const Ice::Current& current);
