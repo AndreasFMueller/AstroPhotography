@@ -112,6 +112,9 @@ StarChartWidget::StarChartWidget(QWidget *parent) : QWidget(parent),
  * \brief Destroy the star chart
  */
 StarChartWidget::~StarChartWidget() {
+	if (_legend) {
+		delete _legend;
+	}
 }
 
 void	StarChartWidget::negative(bool n) {

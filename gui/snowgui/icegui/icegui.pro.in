@@ -141,7 +141,6 @@ SOURCES += 								\
 	EventMonitor.cpp						\
 	FilterWheelBusy.cpp						\
 	FilterWheelCallbackI.cpp					\
-	filterwheelupdatework.cpp					\
 	FocusButton.cpp							\
 	focuselementstack.cpp						\
 	FocusingCallbackI.cpp						\
