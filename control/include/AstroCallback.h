@@ -71,6 +71,16 @@ public:
 };
 
 /**
+ * \brief Float callback argument
+ */
+class FloatCallbackData : public CallbackData {
+	float	_f;
+public:
+	FloatCallbackData(float f)  : _f(f) { }
+	float	value() const { return _f; }
+};
+
+/**
  * \brief Image callback argument
  */
 class ImageCallbackData : public CallbackData {

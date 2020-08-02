@@ -1,5 +1,12 @@
 ChangeLog for the Qt GUI to Astrophotography
 
+20200802:
+	* Add heartbeat lost logic to the HeartBeat class
+	* decouple timer changes for QTimer in systeminfowidget
+	* add dead-logic to the HeartWidget
+	* add signals for reconnecting for other widgets 
+	* add global SystemInfoWidget for registration of heartbeat clients
+
 20200801:
 	* add HeartWidget
 	* add callback to ccdcontrollerwidget (uncommented the update worker

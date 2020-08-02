@@ -24,19 +24,21 @@ void	callback_adapter<HeartbeatMonitorPrx>(HeartbeatMonitorPrx& p,
  */
 class Heartbeat {
 	int	_sequence_number;
-	int	_interval;
+	float	_interval;
 	bool	_terminate;
 	const static int	_default_interval;
 	std::thread	_thread;
 	std::condition_variable	_cond;
 	std::mutex	_mutex;
 	void	send();
+	bool	_paused;
 public:
-	Heartbeat(int interval = 5);
+	Heartbeat(float interval = 5);
 	virtual ~Heartbeat();
 	void	run();
-	int	interval() const { return _interval; }
-	void	interval(int i);
+	float	interval() const { return _interval; }
+	void	send_interval();
+	void	interval(float f);
 	void	terminate(bool t);
 	int	sequence_number() const { return _sequence_number; }
 private:
@@ -46,6 +48,9 @@ public:
 			const Ice::Current& current);
 	void	unregister(const Ice::Identity& heartbeatmonitor,
 			const Ice::Current& current);
+	bool	paused() const { return _paused; }
+	void	pause();
+	void	resume();
 };
 
 } // namespace snowstar

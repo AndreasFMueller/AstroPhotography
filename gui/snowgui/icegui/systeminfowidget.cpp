@@ -16,6 +16,11 @@
 
 namespace snowgui {
 
+/**
+ * \brief Construct a SystemInfoWidget 
+ *
+ * \param parent	the parent widget
+ */
 SystemInfoWidget::SystemInfoWidget(QWidget *parent)
 	: QWidget(parent), ui(new Ui::SystemInfoWidget) {
 	ui->setupUi(this);
@@ -26,11 +31,44 @@ SystemInfoWidget::SystemInfoWidget(QWidget *parent)
 	_timer.setInterval(1000);
 }
 
+/**
+ * \brief Destroy the SystemInfoWidget
+ */
 SystemInfoWidget::~SystemInfoWidget() {
 	_timer.stop();
 	delete ui;
 }
 
+/**
+ * \brief Static global SystemInfoWidget
+ *
+ * The global SystemInfoWidget can be used to request heartbeat
+ * updates to other widgets so they can reconnect when the state
+ * changes.
+ */
+static SystemInfoWidget	*_systeminfowidget = NULL;
+
+/**
+ * \brief get a global systeminfowidget
+ */
+SystemInfoWidget	*SystemInfoWidget::global() {
+	return _systeminfowidget;
+}
+
+/**
+ * \brief Remember a systeinfowidget as the global one
+ *
+ * \param s	the SystemInfoWidget to remember
+ */
+void	SystemInfoWidget::setGlobal(SystemInfoWidget *s) {
+	_systeminfowidget = s;
+}
+
+/**
+ * \brief Connect to a daemon
+ *
+ * \param daemon	the daemon to use for system info
+ */
 void	SystemInfoWidget::setDaemon(snowstar::DaemonPrx daemon) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "add daemon proxy");
 	_timer.stop();
@@ -45,8 +83,7 @@ void	SystemInfoWidget::setDaemon(snowstar::DaemonPrx daemon) {
 		_heartbeat_monitor = heartbeatmonitor;
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "heartbeat monitor created: %p",
 			heartbeatmonitor);
-		connect(heartbeatmonitor, SIGNAL(update(QString)),
-			this, SLOT(heartbeat_update(QString)));
+		add_receiver(this);
 		// get the identity
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "get identity");
 		_heartbeat_identity = snowstar::CommunicatorSingleton::add(
@@ -60,6 +97,9 @@ void	SystemInfoWidget::setDaemon(snowstar::DaemonPrx daemon) {
 	}
 }
 
+/**
+ * \brief Handle an udpate
+ */
 void	SystemInfoWidget::update() {
 	if (!_daemon) {
 		return;
@@ -110,9 +150,40 @@ void	SystemInfoWidget::update() {
 	}
 }
 
+/**
+ * \brief handle heartbeat updates
+ */
 void	SystemInfoWidget::heartbeat_update(QString s) {
 	ui->heartbeatField->setText(s);
 	ui->heartWidget->beat();
+}
+
+/**
+ * \brief Handle notifications that the heartbeat was lost
+ */
+void	SystemInfoWidget::heartbeat_lost() {
+	if (!_daemon) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "cannot do anything about it");
+		return;
+	}
+	ui->heartWidget->dead();
+	try {
+		_daemon->unregisterHeartbeatMonitor(_heartbeat_identity);
+#if 0
+		snowstar::CommunicatorSingleton::remove(_heartbeat_identity);
+		_heartbeat_identity = snowstar::CommunicatorSingleton::add(
+			_heartbeat_monitor);
+#endif
+		_daemon->registerHeartbeatMonitor(_heartbeat_identity);
+	} catch (const std::exception& x) {
+	}
+}
+
+/**
+ * \brief Handle notifications that the heartbeat was reconnected
+ */
+void	SystemInfoWidget::heartbeat_reconnected() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "reconnected");
 }
 
 } // namespace snowgui

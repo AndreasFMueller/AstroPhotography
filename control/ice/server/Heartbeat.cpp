@@ -18,20 +18,36 @@ void	callback_adapter<HeartbeatMonitorPrx>(HeartbeatMonitorPrx& p,
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "adapter");
 	astro::callback::IntegerCallbackData	*icd
 		= dynamic_cast<astro::callback::IntegerCallbackData *>(&*data);
-	if (icd == NULL) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "not an integer");
-		return;
+	if (icd != NULL) {
+		int	sequence_number = icd->value();
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "sequence number to send: %d",
+			sequence_number);
+		try {
+			p->beat(sequence_number);
+			return;
+		} catch (const std::exception& x) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0,
+				"exception during beat: %s", x.what());
+		}
 	}
 
-	int	sequence_number = icd->value();
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "sequence number to send: %d",
-		sequence_number);
-	try {
-		p->beat(sequence_number);
-	} catch (const std::exception& x) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "exception during beat: %s",
-			x.what());
+	astro::callback::FloatCallbackData	*fcd
+		= dynamic_cast<astro::callback::FloatCallbackData*>(&*data);
+	if (fcd != NULL) {
+		float	interval = fcd->value();
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "new interval length: %f",
+			interval);
+		try {
+			p->interval(interval);
+			return;
+		} catch (const std::exception& x) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0,
+				"exception during interval: %s", x.what());
+		}
 	}
+
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "don't know how to handle %s data",
+		astro::demangle(typeid(*data).name()).c_str());
 }
 
 /**
@@ -57,8 +73,9 @@ static void	heartbeat_run(Heartbeat *hb) {
  *
  * \param interval	the heartbeat interval 
  */
-Heartbeat::Heartbeat(int interval) : _sequence_number(0), _interval(interval),
+Heartbeat::Heartbeat(float interval) : _sequence_number(0), _interval(interval),
 	_terminate(false), _thread(heartbeat_run, this) {
+	_paused = false;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "heartbeat initialize");
 }
 
@@ -78,6 +95,23 @@ Heartbeat::~Heartbeat() {
 }
 
 /**
+ * \brief Send the interval to the clients
+ */
+void	Heartbeat::send_interval() {
+	astro::callback::FloatCallbackData	*fcd
+		= new astro::callback::FloatCallbackData(_interval);
+	astro::callback::CallbackDataPtr	data(fcd);
+	try {
+		callbacks(data);
+	} catch (const std::exception& x) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "heartbeat failed: %s", x.what());
+	} catch (...) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "heartbeat failed for unknown "
+			"reason");
+	}
+}
+
+/**
  * \brief Change the interval
  *
  * This method also signals the thread that the heartbeat interval has 
@@ -85,16 +119,20 @@ Heartbeat::~Heartbeat() {
  *
  * \param i	the new interval to use
  */
-void	Heartbeat::interval(int i) {
-	if (i < 0) {
+void	Heartbeat::interval(float f) {
+	if (f < 0) {
 		std::string	msg = astro::stringprintf("negative interval "
-			"%d not allowed", i);
+			"%f not allowed", f);
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 		throw std::runtime_error(msg);
 	}
-	std::unique_lock<std::mutex>	lock(_mutex);
-	_interval = i;
-	_cond.notify_all();
+	{
+		std::unique_lock<std::mutex>	lock(_mutex);
+		_interval = f;
+		_cond.notify_all();
+	}
+	// signal the new interval length
+	send_interval();
 }
 
 /**
@@ -133,10 +171,11 @@ void	Heartbeat::run() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "starting the run method");
 	do {
 		// wait for interval seconds or for a signal
-		if (_interval > 0) {
-			debug(LOG_DEBUG, DEBUG_LOG, 0, "waiting for %d seconds",
-				_interval);
-			std::chrono::seconds	ivl(_interval);
+		long	milliseconds = 1000 * _interval;
+		if (milliseconds > 0) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0,
+				"waiting for %.3f seconds", _interval);
+			std::chrono::milliseconds	ivl(milliseconds);
 			if (_cond.wait_for(lock, ivl)
 				== std::cv_status::timeout) {
 				// if the timer expires, send the heartbeat
@@ -165,6 +204,11 @@ void	Heartbeat::run() {
  */
 void	Heartbeat::send() {
 	_sequence_number++;
+	if (_paused) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "paused, not sending %d",
+			_sequence_number);
+		return;
+	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "sending heartbeat %d",
 		sequence_number());
 	// do the actual sending
@@ -194,6 +238,7 @@ void    Heartbeat::doregister(
         // do the registering
 	try {
 		callbacks.registerCallback(heartbeatmonitor, current);
+		send_interval();
 	} catch (const std::exception& x) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "cannot register callback: %s %s",
 			astro::demangle(typeid(x).name()).c_str(), x.what());
@@ -222,6 +267,14 @@ void    Heartbeat::unregister(
 		debug(LOG_ERR, DEBUG_LOG, 0,
 			"cannot unregister callback for unknown reason");
 	}
+}
+
+void	Heartbeat::pause() {
+	_paused = true;
+}
+
+void	Heartbeat::resume() {
+	_paused = false;
 }
 
 } // namespace snowstar

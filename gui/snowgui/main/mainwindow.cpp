@@ -127,9 +127,11 @@ MainWindow::MainWindow(QWidget *parent,
 	
 	// remember the daemon in the systeminfo widget
 	ui->systeminfoWidget->setDaemon(daemon);
+	SystemInfoWidget::setGlobal(ui->systeminfoWidget);
 
 	// create a 
 	QTimer::singleShot(1000, this, SLOT(timecheck()));
+
 }
 
 /**

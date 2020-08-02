@@ -99,4 +99,12 @@ void	HeartWidget::draw() {
 	painter.fillPath(heartshape, _color);
 }
 
+/**
+ * \brief Mark the heartbeat as dead
+ */
+void	HeartWidget::dead() {
+	_color = QColor(0, 0, 0);
+	repaint();
+}
+
 } // namespace snowgui

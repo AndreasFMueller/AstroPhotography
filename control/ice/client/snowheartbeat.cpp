@@ -30,7 +30,7 @@ void	signal_handler(int /* sig */) {
 class HeartbeatMonitorI : public HeartbeatMonitor {
 	astro::Timer	_timer;
 public:
-	static int	interval;
+	static float	_interval;
 	HeartbeatMonitorI() {
 		_timer.start();
 	}
@@ -50,13 +50,18 @@ public:
 		std::cout << std::endl;
 		_timer.start();
 	}
+	virtual void	interval(const float interval,
+			const Ice::Current& /* current */) {
+		_interval = interval;
+		std::cout << "interval: " << _interval << std::endl;
+	}
 	virtual void	stop(const Ice::Current& /* current */) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "stop received");
 		completed = true;
 	}
 };
 
-int	HeartbeatMonitorI::interval = 0;
+float	HeartbeatMonitorI::_interval = 0;
 
 void	usage(const char *progname) {
 	astro::Path	path(progname);
@@ -64,7 +69,9 @@ void	usage(const char *progname) {
 	std::cout << "Usage:" << std::endl;
 	std::cout << std::endl;
 	std::cout << p << " [ options ] help" << std::endl;
-	std::cout << p << " [ options ] <service> monitor " << std::endl;
+	std::cout << p << " [ options ] <service> monitor" << std::endl;
+	std::cout << p << " [ options ] <service> pause" << std::endl;
+	std::cout << p << " [ options ] <service> resume" << std::endl;
 	std::cout << p << " [ options ] <service> interval <interval>"
 			 << std::endl;
 	std::cout << "options:" << std::endl;
@@ -88,8 +95,8 @@ static struct option	longopts[] = {
 
 static int	monitor(DaemonPrx daemon) {
 	// get the interval
-	HeartbeatMonitorI::interval = daemon->heartbeatInterval();
-	std::cout << "interval: " << HeartbeatMonitorI::interval << std::endl;
+	HeartbeatMonitorI::_interval = daemon->heartbeatInterval();
+	std::cout << "interval: " << HeartbeatMonitorI::_interval << std::endl;
 
 	// create the heartbeat monitor
 	HeartbeatMonitorI	*heartbeatmonitor = new HeartbeatMonitorI();
@@ -110,7 +117,7 @@ static int	monitor(DaemonPrx daemon) {
                 sleep(1);
 		time_t	now;
 		time(&now);
-		if ((HeartbeatMonitorI::interval > 0) && ((now - lastupdate) > (2 * HeartbeatMonitorI::interval))) {
+		if ((HeartbeatMonitorI::_interval > 0) && ((now - lastupdate) > (2 * HeartbeatMonitorI::_interval))) {
 			std::cerr << "missed heartbeat: last ";
 			std::cerr << (now - lastupdate);
 			std::cerr << " seconds ago";
@@ -119,8 +126,8 @@ static int	monitor(DaemonPrx daemon) {
 				time(&lastupdate);
         			ident = CommunicatorSingleton::add(monitor);
 				std::cerr << "reregistered" << std::endl;
-				debug(LOG_DEBUG, DEBUG_LOG, 0, "interval: %d",
-					HeartbeatMonitorI::interval);
+				debug(LOG_DEBUG, DEBUG_LOG, 0, "interval: %.3f",
+					HeartbeatMonitorI::_interval);
 			} catch (const std::exception& x) {
 				std::cerr << "cannot reconnect: ";
 				std::cerr << x.what();
@@ -182,7 +189,17 @@ int	main(int argc, char *argv[]) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "daemon connected");
 
 	if (command == "monitor") {
-		monitor(daemon);
+		return monitor(daemon);
+	}
+
+	if (command == "pause") {
+		daemon->pauseHeartbeat();
+		return EXIT_SUCCESS;
+	}
+
+	if (command == "resume") {
+		daemon->resumeHeartbeat();
+		return EXIT_SUCCESS;
 	}
 
 	if (command == "interval") {
@@ -198,22 +215,23 @@ int	main(int argc, char *argv[]) {
 					"cannot get interval: %s", x.what());
 			}
 		} else {
-			int	interval = std::stoi(argv[optind++]);
-			debug(LOG_DEBUG, DEBUG_LOG, 0, "set interval to %d",
+			float	interval = std::stod(argv[optind++]);
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "set interval to %.3f",
 				interval);
 			try {
 				daemon->setHeartbeatInterval(interval);
 			} catch (const std::exception& x) {
 				debug(LOG_ERR, DEBUG_LOG, 0,
-					"cannot set interval %d: %s",
+					"cannot set interval %.3f: %s",
 					interval, x.what());
 			}
 		} 
+		return EXIT_SUCCESS;
 	}
 
-	return EXIT_SUCCESS;
+	std::cerr << "unknown command: " << command << std::endl;
+	return EXIT_FAILURE;
 }
-
 
 } // namespace heartbeat
 } // namespace app

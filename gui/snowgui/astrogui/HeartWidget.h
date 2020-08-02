@@ -30,6 +30,7 @@ protected:
 public slots:
 	void	beat();
 	void	update();
+	void	dead();
 };
 
 } // namespace snowgui

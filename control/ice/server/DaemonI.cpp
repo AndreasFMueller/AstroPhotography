@@ -511,6 +511,7 @@ float	DaemonI::getTemperature(const Ice::Current& current) {
  */
 void	DaemonI::registerHeartbeatMonitor(const Ice::Identity& heartbeatmonitor,
 		const Ice::Current& current) {
+	CallStatistics::count(current);
 	Heartbeat::doregister(heartbeatmonitor, current);
 }
 
@@ -523,6 +524,7 @@ void	DaemonI::registerHeartbeatMonitor(const Ice::Identity& heartbeatmonitor,
 void	DaemonI::unregisterHeartbeatMonitor(
 		const Ice::Identity& heartbeatmonitor,
 		const Ice::Current& current) {
+	CallStatistics::count(current);
 	Heartbeat::unregister(heartbeatmonitor, current);
 }
 
@@ -531,7 +533,8 @@ void	DaemonI::unregisterHeartbeatMonitor(
  *
  * \param current	the current call context
  */
-Ice::Int	DaemonI::heartbeatInterval(const Ice::Current& /* current */) {
+Ice::Float	DaemonI::heartbeatInterval(const Ice::Current& current) {
+	CallStatistics::count(current);
 	return Heartbeat::interval();
 }
 
@@ -541,9 +544,40 @@ Ice::Int	DaemonI::heartbeatInterval(const Ice::Current& /* current */) {
  * \param interval	the new heartbeat interval
  * \param current	the current call context
  */
-void	DaemonI::setHeartbeatInterval(Ice::Int interval,
-		const Ice::Current& /* current */) {
+void	DaemonI::setHeartbeatInterval(Ice::Float interval,
+		const Ice::Current& current) {
+	CallStatistics::count(current);
 	Heartbeat::interval(interval);
+}
+
+/**
+ * \brief Pause the heartbeat
+ *
+ * \param current	current call context
+ */
+void	DaemonI::pauseHeartbeat(const Ice::Current& current) {
+	CallStatistics::count(current);
+	Heartbeat::pause();
+}
+
+/**
+ * \brief Resume the heartbeat
+ *
+ * \param current	current call context
+ */
+void	DaemonI::resumeHeartbeat(const Ice::Current& current) {
+	CallStatistics::count(current);
+	Heartbeat::resume();
+}
+
+/**
+ * \brief Check whether the heartbeat is paused
+ *
+ * \param current	current call context
+ */
+bool	DaemonI::heartbeatPaused(const Ice::Current& current) {
+	CallStatistics::count(current);
+	return Heartbeat::paused();
 }
 
 } // namespace snowstar

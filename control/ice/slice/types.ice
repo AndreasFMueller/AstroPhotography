@@ -95,6 +95,7 @@ module snowstar {
 	 */
 	interface HeartbeatMonitor extends Callback {
 		void	beat(int sequencenumber);
+		void	interval(float intvl);
 	};
 
 	sequence<Ice::Identity>	ObjectIdentitySequence;
@@ -230,10 +231,12 @@ module snowstar {
 		/**
 		 * \brief register a heartbeat cleint
 		 */
-		int	heartbeatInterval();
-		void	setHeartbeatInterval(int interval);
+		float	heartbeatInterval();
+		void	setHeartbeatInterval(float interval);
 		void	registerHeartbeatMonitor(Ice::Identity heartbeatmonitor);
 		void	unregisterHeartbeatMonitor(Ice::Identity heartbeatmonitor);
+		void	pauseHeartbeat();
+		void	resumeHeartbeat();
 	};
 
 	/**

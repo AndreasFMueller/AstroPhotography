@@ -173,6 +173,7 @@ HEADERS  += 								\
 	focuselementstack.h						\
 	FocusingCallbackI.h						\
 	GuiderButton.h							\
+	HeartbeatMonitor.h						\
 	ImageForwarder.h						\
 	InstrumentWidget.h						\
 	MonitorImage.h							\

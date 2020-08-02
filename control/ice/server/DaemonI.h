@@ -48,9 +48,12 @@ public:
 	void	unregisterHeartbeatMonitor(
 			const Ice::Identity& heartbeatmonitor,
 			const Ice::Current& current);
-	Ice::Int	heartbeatInterval(const Ice::Current& current);
-	void	setHeartbeatInterval(Ice::Int interval,
+	Ice::Float	heartbeatInterval(const Ice::Current& current);
+	void	setHeartbeatInterval(Ice::Float interval,
 			const Ice::Current& current);
+	void	pauseHeartbeat(const Ice::Current& current);
+	bool	heartbeatPaused(const Ice::Current& current);
+	void	resumeHeartbeat(const Ice::Current& current);
 };
 
 } // namespace snowstar
