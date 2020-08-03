@@ -184,6 +184,7 @@ void	callback_adapter<FilterWheelCallbackPrx>(FilterWheelCallbackPrx& p,
 		} catch (const std::exception& x) {
 			debug(LOG_ERR, DEBUG_LOG, 0, "cannot send state: %s",
 				x.what());
+			throw x;
 		}
 	}
 
@@ -200,6 +201,7 @@ void	callback_adapter<FilterWheelCallbackPrx>(FilterWheelCallbackPrx& p,
 		} catch (const std::exception& x) {
 			debug(LOG_DEBUG, DEBUG_LOG, 0,
 				"exception in filter callback: %s", x.what());
+			throw x;
 		}
 	}
 

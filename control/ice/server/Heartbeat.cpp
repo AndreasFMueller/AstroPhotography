@@ -28,6 +28,7 @@ void	callback_adapter<HeartbeatMonitorPrx>(HeartbeatMonitorPrx& p,
 		} catch (const std::exception& x) {
 			debug(LOG_DEBUG, DEBUG_LOG, 0,
 				"exception during beat: %s", x.what());
+			throw x;
 		}
 	}
 
@@ -43,6 +44,7 @@ void	callback_adapter<HeartbeatMonitorPrx>(HeartbeatMonitorPrx& p,
 		} catch (const std::exception& x) {
 			debug(LOG_DEBUG, DEBUG_LOG, 0,
 				"exception during interval: %s", x.what());
+			throw x;
 		}
 	}
 
