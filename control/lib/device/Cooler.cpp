@@ -225,27 +225,52 @@ void	Cooler::dewHeater(float d) {
 	callback(DewHeater(d));
 }
 
+/**
+ * \brief CoolerInfo callback
+ *
+ * \param info	the cooler info
+ */
 void	Cooler::callback(const CoolerInfo& info) {
 	callback::CallbackDataPtr	cb(new CoolerInfoCallbackData(info));
 	_callback(cb);
 }
 
+/**
+ * \brief Dew heater callback
+ *
+ * \param dewheater	the dewheater data to report
+ */
 void	Cooler::callback(const DewHeater& dewheater) {
 	callback::CallbackDataPtr	cb(new DewHeaterCallbackData(
 						dewheater));
 	_callback(cb);
 }
 
+/**
+ * \brief Set temperature change callback
+ *
+ * param newSetTemperature	the new set temperature
+ */
 void	Cooler::callback(const Temperature& newSetTemperature) {
 	callback::CallbackDataPtr	cb(new SetTemperatureCallbackData(
 						newSetTemperature));
 	_callback(cb);
 }
 
+/**
+ * \brief Register a new callback
+ *
+ * \param callback	the callback to install
+ */
 void	Cooler::addCallback(callback::CallbackPtr callback) {
 	_callback.insert(callback);
 }
 
+/**
+ * \brief Remove a new callback
+ *
+ * \param callback	the callback to install
+ */
 void	Cooler::removeCallback(callback::CallbackPtr callback) {
 	auto	i = _callback.find(callback);
 	if (i != _callback.end()) {

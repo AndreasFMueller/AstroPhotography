@@ -15,8 +15,21 @@ namespace astro {
 namespace camera {
 namespace nice {
 
+class NiceAdaptiveOptics;
+class NiceAdaptiveOpticsCallbackI : public snowstar::AdaptiveOpticsCallback {
+	NiceAdaptiveOptics&	_adaptiveoptics;
+public:
+	NiceAdaptiveOpticsCallbackI(NiceAdaptiveOptics& adaptiveoptics)
+		: _adaptiveoptics(adaptiveoptics) { }
+	virtual void	point(const snowstar::Point& p,
+				const Ice::Current& current);
+	virtual void	stop(const Ice::Current& current);
+};
+
 class NiceAdaptiveOptics : public AdaptiveOptics, public NiceDevice {
 	snowstar::AdaptiveOpticsPrx	_adaptiveoptics;
+	Ice::ObjectPtr	_adaptiveoptics_callback;
+	Ice::Identity	_adaptiveoptics_identity;
 public:
 	NiceAdaptiveOptics(snowstar::AdaptiveOpticsPrx adaptiveoptics,
 		const DeviceName& devicename);

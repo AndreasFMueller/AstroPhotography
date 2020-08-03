@@ -116,6 +116,7 @@ FilterWheelPrx	FilterWheelI::createProxy(const std::string& filterwheelname,
  */
 void	FilterWheelI::registerCallback(const Ice::Identity& callback,
 		const Ice::Current& current) {
+	CallStatistics::count(current);
 	try {
 		callbacks.registerCallback(callback, current);
 	} catch (const std::exception& x) {
@@ -135,6 +136,7 @@ void	FilterWheelI::registerCallback(const Ice::Identity& callback,
  */
 void	FilterWheelI::unregisterCallback(const Ice::Identity& callback,
 		const Ice::Current& current) {
+	CallStatistics::count(current);
 	try {
 		callbacks.unregisterCallback(callback, current);
 	} catch (const std::exception& x) {

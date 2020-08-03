@@ -60,6 +60,7 @@ void	AdaptiveOpticsI::center(const Ice::Current& current) {
  */
 void	AdaptiveOpticsI::registerCallback(const Ice::Identity& callback,
 		const Ice::Current& current) {
+	CallStatistics::count(current);
 	try {
 		callbacks.registerCallback(callback, current);
 	} catch (const std::exception& x) {
@@ -79,6 +80,7 @@ void	AdaptiveOpticsI::registerCallback(const Ice::Identity& callback,
  */
 void	AdaptiveOpticsI::unregisterCallback(const Ice::Identity& callback,
 		const Ice::Current& current) {
+	CallStatistics::count(current);
 	try {
 		callbacks.unregisterCallback(callback, current);
 	} catch (const std::exception& x) {

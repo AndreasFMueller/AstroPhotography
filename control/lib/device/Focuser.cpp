@@ -17,9 +17,11 @@ namespace camera {
 DeviceName::device_type	Focuser::devicetype = DeviceName::Focuser;
 
 Focuser::Focuser(const DeviceName& name) : Device(name, DeviceName::Focuser) {
+	_targetposition = 0;
 }
 
 Focuser::Focuser(const std::string& name) : Device(name, DeviceName::Focuser) {
+	_targetposition = 0;
 }
 
 Focuser::~Focuser() {
@@ -44,8 +46,9 @@ long	Focuser::backlash() {
 	return 0;
 }
 
-void	Focuser::set(long /* value */) {
-	throw NotImplemented("base Focuser does not implement set method");
+void	Focuser::set(long value) {
+	_targetposition = value;
+	callback(this->current(), value);
 }
 
 /**
@@ -102,6 +105,29 @@ bool	Focuser::moveto(long value, unsigned long timeout) {
 void	Focuser::addFocusMetadata(ImageBase& image) {
 	image.setMetadata(astro::io::FITSKeywords::meta("FOCUSPOS",
 		current()));
+}
+
+void	Focuser::callback(long position, bool on_target) {
+	callback::CallbackDataPtr cb(new callback::FocuserPositionCallbackData(
+		FocuserPositionInfo(position, on_target)));
+	_callback(cb);
+}
+
+void	Focuser::callback(long currentposition, long newposition) {
+	callback::CallbackDataPtr cb(new FocuserMovementInfoCallbackData(
+		FocuserMovementInfo(currentposition, newposition)));
+	_callback(cb);
+}
+
+void	Focuser::addCallback(callback::CallbackPtr callback) {
+	_callback.insert(callback);
+}
+
+void	Focuser::removeCallback(callback::CallbackPtr callback) {
+	auto	i = _callback.find(callback);
+	if (i != _callback.end()) {
+		_callback.erase(i);
+	}
 }
 
 } // namespace camera

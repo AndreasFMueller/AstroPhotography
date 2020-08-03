@@ -7,6 +7,7 @@
 #include <IceConversions.h>
 #include <NiceCooler.h>
 #include <AstroDebug.h>
+#include <CommunicatorSingleton.h>
 
 namespace astro {
 namespace camera {
@@ -21,12 +22,26 @@ static CcdInfo	ccd_rename(const CcdInfo info, const DeviceName& devicename) {
 	return result;
 }
 
+void	NiceCcdCallbackI::stop(const Ice::Current& /* current */) {
+}
+
+void	NiceCcdCallbackI::state(snowstar::ExposureState s,
+	const Ice::Current& /* current */) {
+	_ccd.stateUpdate(convert(s));
+}
+
 NiceCcd::NiceCcd(snowstar::CcdPrx ccd, const DeviceName& devicename)
 	: Ccd(ccd_rename(snowstar::convert(ccd->getInfo()), devicename)),
 	  NiceDevice(devicename), _ccd(ccd) {
+	_ccd_callback = new NiceCcdCallbackI(*this);
+	_ccd_identity = snowstar::CommunicatorSingleton::add(_ccd_callback);
+	_ccd->registerCallback(_ccd_identity);
+	
 }
 
 NiceCcd::~NiceCcd() {
+	_ccd->unregisterCallback(_ccd_identity);
+	snowstar::CommunicatorSingleton::remove(_ccd_identity);
 }
 
 void	NiceCcd::startExposure(const Exposure& exposure) {

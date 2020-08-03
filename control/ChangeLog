@@ -1,5 +1,9 @@
 ChangeLog for the Astro project.
 
+20200803:
+	* add callback stuff to the nice devices
+	* add callback stuff to more ice interfaces
+
 20200802:
 	* add callbacks to filterwheel
 	* add pause and resume to the heartbeat interface

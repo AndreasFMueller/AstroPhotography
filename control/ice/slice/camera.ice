@@ -422,7 +422,15 @@ module snowstar {
 	};
 
 	/**
+ 	 * \brief Callback interface for focusers
+	 */
+	interface FocuserCallback extends Callback {
+	};
+
+	/**
 	 * \brief Focuser abstraction
+	 *
+	 * XXX this interface should also use callbacks
 	 */
 	interface Focuser extends Device {
 		int	min();
@@ -430,6 +438,8 @@ module snowstar {
 		int	current();
 		int	backlash();
 		void	set(int value) throws DeviceException;
+		void	registerCallback(Ice::Identity callback);
+		void	unregisterCallback(Ice::Identity callback);
 	};
 
 	/**

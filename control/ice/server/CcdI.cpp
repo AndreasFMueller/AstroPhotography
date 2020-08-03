@@ -423,6 +423,7 @@ void	CcdI::stateUpdate(const astro::callback::CallbackDataPtr data) {
 	} catch (const std::exception& x) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "cannot send callbacks: %s",
 			x.what());
+		throw x;
 	} catch (...) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "cannot send callbacks (unknown)");
 	}

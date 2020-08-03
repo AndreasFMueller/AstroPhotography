@@ -14,8 +14,18 @@ namespace astro {
 namespace camera {
 namespace nice {
 
+class NiceFocuser;
+class NiceFocuserCallback : public snowstar::FocuserCallback {
+	NiceFocuser&	_focuser;
+public:
+	NiceFocuserCallback(NiceFocuser& focuser) : _focuser(focuser) { }
+	virtual void	stop(const Ice::Current& current);
+};
+
 class NiceFocuser : public Focuser, public NiceDevice {
 	snowstar::FocuserPrx	_focuser;
+	Ice::ObjectPtr	_focuser_callback;
+	Ice::Identity	_focuser_identity;
 public:
 	NiceFocuser(snowstar::FocuserPrx focuser, const DeviceName& name);
 	virtual ~NiceFocuser();

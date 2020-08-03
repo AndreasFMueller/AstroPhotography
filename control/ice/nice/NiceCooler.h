@@ -14,8 +14,24 @@ namespace astro {
 namespace camera {
 namespace nice {
 
+class NiceCooler;
+class NiceCoolerCallbackI : public snowstar::CoolerCallback {
+	NiceCooler&	_cooler;
+public:
+	NiceCoolerCallbackI(NiceCooler& cooler) : _cooler(cooler) { }
+	virtual void	updateCoolerInfo(const snowstar::CoolerInfo& info,
+				const Ice::Current& current);
+	virtual void	updateSetTemperature(Ice::Float settemperature,
+				const Ice::Current& current);
+	virtual void	updateDewHeater(Ice::Float dewheater,
+				const Ice::Current& current);
+	virtual void	stop(const Ice::Current& current);
+};
+
 class NiceCooler : public Cooler, public NiceDevice {
 	snowstar::CoolerPrx	_cooler;
+	Ice::ObjectPtr	_cooler_callback;
+	Ice::Identity	_cooler_identity;
 public:
 	NiceCooler(snowstar::CoolerPrx cooler, const DeviceName& devicename);
 	virtual ~NiceCooler();

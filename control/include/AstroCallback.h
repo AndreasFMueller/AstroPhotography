@@ -80,6 +80,7 @@ public:
 	float	value() const { return _f; }
 };
 
+typedef CallbackDataEnvelope<long>	LongCallbackData;
 typedef CallbackDataEnvelope<astro::Point>	PointCallbackData;
 typedef CallbackDataEnvelope<astro::Size>	SizeCallbackData;
 typedef CallbackDataEnvelope<astro::Rectangle>	RectangleCallbackData;

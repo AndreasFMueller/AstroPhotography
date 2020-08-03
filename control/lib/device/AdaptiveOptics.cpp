@@ -34,6 +34,7 @@ void	AdaptiveOptics::set(const Point& position) {
 	try {
 		this->set0(position);
 		currentposition = position;
+		callback(currentposition);
 	} catch (std::exception& x) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "error during positioning: %s",
 			x.what());
@@ -63,6 +64,22 @@ GuidePortPtr	AdaptiveOptics::getGuidePort0() {
 		"hasGuiderPort()?");
 	debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 	throw NotImplemented(msg);
+}
+
+void	AdaptiveOptics::addCallback(callback::CallbackPtr callback) {
+	_callback.insert(callback);
+}
+
+void	AdaptiveOptics::removeCallback(callback::CallbackPtr callback) {
+	auto	i = _callback.find(callback);
+	if (i != _callback.end()) {
+		_callback.erase(i);
+	}
+}
+
+void	AdaptiveOptics::callback(const Point& point) {
+	callback::CallbackDataPtr	cb(new callback::PointCallbackData(point));
+	_callback(cb);
 }
 
 } // namespace camera

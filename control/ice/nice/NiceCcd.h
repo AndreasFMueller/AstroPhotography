@@ -16,8 +16,21 @@ namespace astro {
 namespace camera {
 namespace nice {
 
+class NiceCcd;
+
+class NiceCcdCallbackI : public snowstar::CcdCallback {
+	NiceCcd&	_ccd;
+public:
+	NiceCcdCallbackI(NiceCcd& ccd) : _ccd(ccd) { }
+	virtual void	state(snowstar::ExposureState s,
+				const Ice::Current& current);
+	virtual void	stop(const Ice::Current& current);
+};
+
 class NiceCcd : public Ccd, public NiceDevice {
 	snowstar::CcdPrx	_ccd;
+	Ice::ObjectPtr	_ccd_callback;
+	Ice::Identity	_ccd_identity;
 public:
 	NiceCcd(snowstar::CcdPrx ccdprx, const DeviceName& devicename);
 	virtual ~NiceCcd();

@@ -14,8 +14,23 @@ namespace astro {
 namespace device {
 namespace nice {
 
+class NiceMount;
+
+class NiceMountCallbackI : public snowstar::MountCallback {
+	NiceMount&	_mount;
+public:
+	NiceMountCallbackI(NiceMount& mount) : _mount(mount) { }
+	void	statechange(snowstar::mountstate s,
+			const Ice::Current& current);
+	void	position(const snowstar::RaDec& newposition,
+			const Ice::Current& current);
+	void	stop(const Ice::Current& current);
+};
+
 class NiceMount : public astro::device::Mount {
 	snowstar::MountPrx	_mount;
+	Ice::ObjectPtr	_mount_callback;
+	Ice::Identity	_mount_identity;
 public:
 	NiceMount(snowstar::MountPrx mount, const DeviceName& devicename);
 	virtual ~NiceMount();

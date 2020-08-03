@@ -615,11 +615,11 @@ public:
 	virtual void	dewHeater(float d);
 private:
 	callback::CallbackSet	_callback;
-protected:
+public:
 	void	callback(const CoolerInfo& info);
 	void	callback(const DewHeater& dewheater);
 	void	callback(const Temperature& newSetTemperature);
-public:
+
 	void	addCallback(callback::CallbackPtr callback);
 	void	removeCallback(callback::CallbackPtr callback);
 };
@@ -656,10 +656,10 @@ public:
 	bool	wait(float timeout);
 private:
 	callback::CallbackSet	_callback;
-protected:
+public:
 	void	callback(State state);
 	void	callback(int filter);
-public:
+
 	void	addCallback(callback::CallbackPtr callback);
 	void	removeCallback(callback::CallbackPtr callback);
 };
@@ -735,9 +735,39 @@ public:
 };
 
 /**
+ * \brief FocuserMovementInfo that starts a focusing move
+ */
+class FocuserMovementInfo {
+	long	_fromposition;
+	long	_toposition;
+public:
+	long	fromposition() const { return _fromposition; }
+	long	toposition() const { return _toposition; }
+	FocuserMovementInfo(long from, long to) : _fromposition(from), _toposition(to) {
+	}
+};
+typedef callback::CallbackDataEnvelope<FocuserMovementInfo>	FocuserMovementInfoCallbackData;
+
+/**
+ * \brief FocuserPositionInfo informs about the current position
+ */
+class FocuserPositionInfo {
+	long	_position;
+	bool	_on_target;
+public:
+	long	position() const { return _position; }
+	bool	on_target() const { return _on_target; }
+	FocuserPositionInfo(long position, bool on_target)
+		: _position(position), _on_target(on_target) { }
+};
+typedef callback::CallbackDataEnvelope<FocuserPositionInfo>	FocuserPositionInfoCallbackData;
+
+/**
  * \brief Abstraction for a Focuser
  */
 class Focuser : public astro::device::Device {
+protected:
+	long	_targetposition;
 public:
 	typedef FocuserPtr	sharedptr;
 	static DeviceName::device_type	devicetype;
@@ -753,6 +783,13 @@ public:
 	virtual void	set(long value);
 	bool	moveto(long value, unsigned long timeout = 60);
 	void	addFocusMetadata(ImageBase& image);
+private:
+	callback::CallbackSet	_callback;
+public:
+	void	callback(long position, bool );
+	void	callback(long currentposition, long newposition);
+	void	addCallback(callback::CallbackPtr callback);
+	void	removeCallback(callback::CallbackPtr callback);
 };
 
 class AdaptiveOptics;
@@ -787,6 +824,12 @@ protected:
 	virtual GuidePortPtr	getGuidePort0();
 public:
 	GuidePortPtr	getGuidePort();
+private:
+	callback::CallbackSet	_callback;
+public:
+	void	callback(const Point& position);
+	void	addCallback(callback::CallbackPtr callback);
+	void	removeCallback(callback::CallbackPtr callback);
 };
 
 /**

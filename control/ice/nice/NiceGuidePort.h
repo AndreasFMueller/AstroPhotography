@@ -16,8 +16,22 @@ namespace astro {
 namespace camera {
 namespace nice {
 
+class NiceGuidePort;
+class NiceGuidePortCallbackI : public snowstar::GuidePortCallback {
+	NiceGuidePort&	_guideport;
+public:
+	NiceGuidePortCallbackI(NiceGuidePort& guideport)
+		: _guideport(guideport) { }
+	virtual void	activate(
+			const snowstar::GuidePortActivation& activation,
+			const Ice::Current& current);
+	virtual void	stop(const Ice::Current& current);
+};
+
 class NiceGuidePort : public GuidePort, public NiceDevice {
 	snowstar::GuidePortPrx	_guideport;
+	Ice::ObjectPtr	_guideport_callback;
+	Ice::Identity	_guideport_identity;
 public:
 	NiceGuidePort(snowstar::GuidePortPrx guideport,
 		const DeviceName& devicename);

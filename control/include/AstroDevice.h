@@ -321,10 +321,10 @@ public:
 	void	removeStatechangeCallback(callback::CallbackPtr callback);
 	void	addPositionCallback(callback::CallbackPtr callback);
 	void	removePositionCallback(callback::CallbackPtr callback);
-protected:
+
 	void	callback(state_type newstate);
 	void	callback(const RaDec& newposition);
-public:
+
 	typedef	callback::CallbackDataEnvelope<state_type>	StateCallbackData;
 	typedef callback::CallbackDataEnvelope<RaDec>	PositionCallbackData;
 };

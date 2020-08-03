@@ -4,17 +4,28 @@
  * (c) 2015 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
 #include <NiceFocuser.h>
+#include <CommunicatorSingleton.h>
+#include <IceConversions.h>
 
 namespace astro {
 namespace camera {
 namespace nice {
 
+void	NiceFocuserCallback::stop(const Ice::Current& /* current */) {
+}
+
 NiceFocuser::NiceFocuser(snowstar::FocuserPrx focuser,
 	const DeviceName& devicename)
 	: Focuser(devicename), NiceDevice(devicename), _focuser(focuser) {
+	_focuser_callback = new NiceFocuserCallback(*this);
+	_focuser_identity = snowstar::CommunicatorSingleton::add(
+				_focuser_callback);
+	_focuser->registerCallback(_focuser_identity);
 }
 
 NiceFocuser::~NiceFocuser() {
+	_focuser->unregisterCallback(_focuser_identity);
+	snowstar::CommunicatorSingleton::remove(_focuser_identity);
 }
 
 long	NiceFocuser::min() {

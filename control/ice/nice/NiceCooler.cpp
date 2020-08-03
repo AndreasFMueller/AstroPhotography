@@ -4,16 +4,42 @@
  * (c) 2015 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
 #include <NiceCooler.h>
+#include <CommunicatorSingleton.h>
+#include <IceConversions.h>
 
 namespace astro {
 namespace camera {
 namespace nice {
 
+void    NiceCoolerCallbackI::updateCoolerInfo(const snowstar::CoolerInfo& info,
+                                const Ice::Current& /* current */) {
+	_cooler.callback(convert(info));
+}
+
+void    NiceCoolerCallbackI::updateSetTemperature(Ice::Float settemperature,
+                                const Ice::Current& /* current */) {
+	_cooler.callback(Temperature(settemperature));
+}
+
+void    NiceCoolerCallbackI::updateDewHeater(Ice::Float dewheater,
+                                const Ice::Current& /* current */) {
+	_cooler.callback(DewHeater(dewheater));
+}
+
+void    NiceCoolerCallbackI::stop(const Ice::Current& /* current */) {
+}
+
+
 NiceCooler::NiceCooler(snowstar::CoolerPrx cooler, const DeviceName& devicename)
 	: Cooler(devicename), NiceDevice(devicename), _cooler(cooler)  {
+	_cooler_callback = new NiceCoolerCallbackI(*this);
+	_cooler_identity = snowstar::CommunicatorSingleton::add(_cooler_callback);
+	_cooler->registerCallback(_cooler_identity);
 }
 
 NiceCooler::~NiceCooler() {
+	_cooler->unregisterCallback(_cooler_identity);
+	snowstar::CommunicatorSingleton::remove(_cooler_identity);
 }
 
 Temperature	NiceCooler::getSetTemperature() {

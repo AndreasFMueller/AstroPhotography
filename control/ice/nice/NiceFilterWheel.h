@@ -14,8 +14,22 @@ namespace astro {
 namespace camera {
 namespace nice {
 
+class NiceFilterWheel;
+class NiceFilterWheelCallback : public snowstar::FilterWheelCallback {
+	NiceFilterWheel&	_filterwheel;
+public:
+	NiceFilterWheelCallback(NiceFilterWheel& filterwheel)
+		: _filterwheel(filterwheel) { }
+	void	state(snowstar::FilterwheelState s,
+			const Ice::Current& current);
+	void	position(int filter, const Ice::Current& current);
+	void	stop(const Ice::Current& current);
+};
+
 class NiceFilterWheel : public FilterWheel, public NiceDevice {
 	snowstar::FilterWheelPrx	_filterwheel;
+	Ice::ObjectPtr	_filterwheel_callback;
+	Ice::Identity	_filterwheel_identity;
 public:
 	NiceFilterWheel(snowstar::FilterWheelPrx filterwheel,
 		const DeviceName& devicename);

@@ -21,6 +21,16 @@ long	SimFocuser::variance() {
 	return (max() - min()) / 4;
 }
 
+static void	focuser_monitor(SimFocuser *focuser) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "start focuser thread");
+	try {
+		focuser->run();
+	} catch (const std::exception& x) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "run failed");
+	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "end focuser thread");
+}
+
 SimFocuser::SimFocuser(SimLocator& locator)
 	: Focuser(DeviceName("focuser:simulator/focuser")),
 	  _locator(locator) {
@@ -28,7 +38,30 @@ SimFocuser::SimFocuser(SimLocator& locator)
 debug(LOG_DEBUG, DEBUG_LOG, 0, "focuser set to %d", _value);
 	target = _value;
 	lastset = 0;
+	_terminate = false;
+	_thread = std::thread(focuser_monitor, this);
 }
+
+SimFocuser::~SimFocuser() {
+	_terminate = true;
+	_cond.notify_all();
+	if (_thread.joinable()) {
+		_thread.join();
+	}
+}
+
+void	SimFocuser::run() {
+	std::unique_lock<std::mutex>	lock(_mutex);
+	long	previous = current();
+	do {
+		long	c = current();
+		if (previous != c) {
+			callback(c, (target != c));
+		}
+		_cond.wait_for(lock, std::chrono::milliseconds(100));
+	} while (!_terminate);
+}
+
 
 void	SimFocuser::randomposition() {
 	_value = reference() + (random() % variance());
@@ -67,12 +100,14 @@ long	SimFocuser::backlash() {
 }
 
 void	SimFocuser::set(long value) {
-	current();
+	Focuser::set(value);
+	std::unique_lock<std::mutex>	lock(_mutex);
 	if (value == target) {
 		return;
 	}
 	lastset = simtime();
 	target = value;
+	_cond.notify_all();
 }
 
 #define	MAXRADIUS	20

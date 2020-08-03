@@ -5,16 +5,35 @@
  */
 #include <NiceMount.h>
 #include <IceConversions.h>
+#include <CommunicatorSingleton.h>
 
 namespace astro {
 namespace device {
 namespace nice {
 
+void	NiceMountCallbackI::statechange(snowstar::mountstate s,
+		const Ice::Current& /* current */) {
+	_mount.callback(convert(s));
+}
+
+void	NiceMountCallbackI::position(const snowstar::RaDec& newposition,
+		const Ice::Current& /* current */) {
+	_mount.callback(convert(newposition));
+}
+
+void	NiceMountCallbackI::stop(const Ice::Current& /* current */) {
+}
+
 NiceMount::NiceMount(snowstar::MountPrx mount, const DeviceName& devicename)
 	: Mount(devicename), _mount(mount) {
+	_mount_callback = new NiceMountCallbackI(*this);
+	_mount_identity = snowstar::CommunicatorSingleton::add(_mount_callback);
+	_mount->registerCallback(_mount_identity);
 }
 
 NiceMount::~NiceMount() {
+	_mount->unregisterCallback(_mount_identity);
+	snowstar::CommunicatorSingleton::remove(_mount_identity);
 }
 
 astro::device::Mount::state_type        NiceMount::state() {

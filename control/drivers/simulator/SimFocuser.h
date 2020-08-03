@@ -20,9 +20,13 @@ class SimFocuser : public Focuser {
 	long	_value;
 	double  reference();
 	long	variance();
+	bool	_terminate;
+	std::thread		_thread; // XXX movement monitoring thread
+	std::mutex		_mutex;
+	std::condition_variable	_cond;
 public:
 	SimFocuser(SimLocator& locator);
-	virtual ~SimFocuser() { }
+	virtual ~SimFocuser();
 	long	min();
 	long	max();
 	long	current();
@@ -30,6 +34,7 @@ public:
 	virtual void	set(long value);
 	double	radius();
 	void	randomposition();	
+	void	run();	// XXX main method for movement monitoring thread
 };
 
 } // namespace simulator
