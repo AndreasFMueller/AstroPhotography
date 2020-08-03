@@ -12,7 +12,7 @@ MountI::MountI(astro::device::MountPtr mount) : DeviceI(*mount), _mount(mount) {
 	// register the callback
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "%p creating a callback", this);
 	MountICallback	*mountcallback = new MountICallback(*this);
-	astro::callback::CallbackPtr	mountcallbackptr(mountcallback);
+	mountcallbackptr = MountICallbackPtr(mountcallback);
 	// add the callback to the mount
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "add callback");
 	_mount->addStatechangeCallback(mountcallbackptr);
@@ -21,6 +21,8 @@ MountI::MountI(astro::device::MountPtr mount) : DeviceI(*mount), _mount(mount) {
 }
 
 MountI::~MountI() {
+	_mount->removeStatechangeCallback(mountcallbackptr);
+	_mount->removePositionCallback(mountcallbackptr);
 }
 
 RaDec	MountI::getRaDec(const Ice::Current& current) {

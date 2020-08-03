@@ -7,7 +7,7 @@
 #define _AstroCallback_h
 
 #include <AstroImage.h>
-#include <AstroUtils.h>
+#include <AstroTypes.h>
 #include <set>
 
 namespace astro {
@@ -79,6 +79,11 @@ public:
 	FloatCallbackData(float f)  : _f(f) { }
 	float	value() const { return _f; }
 };
+
+typedef CallbackDataEnvelope<astro::Point>	PointCallbackData;
+typedef CallbackDataEnvelope<astro::Size>	SizeCallbackData;
+typedef CallbackDataEnvelope<astro::Rectangle>	RectangleCallbackData;
+typedef CallbackDataEnvelope<astro::Temperature>	TemperatureCallbackData;
 
 /**
  * \brief Image callback argument

@@ -37,6 +37,9 @@ template<>
 void	callback_adapter<CcdCallbackPrx>(CcdCallbackPrx& p,
 		const astro::callback::CallbackDataPtr data);
 
+class CcdICallback;
+typedef std::shared_ptr<CcdICallback>        CcdICallbackPtr;
+
 /**
  * \brief Ccd servant implementation
  */
@@ -44,6 +47,7 @@ class CcdI : virtual public Ccd, virtual public DeviceI {
 	astro::camera::CcdPtr	_ccd;
 	time_t	laststart;
 	astro::image::ImagePtr	image;
+	CcdICallbackPtr	ccdcallbackptr;
 public:
 	CcdI(astro::camera::CcdPtr ccd);
 	virtual	~CcdI();
@@ -104,8 +108,6 @@ public:
 	virtual astro::callback::CallbackDataPtr	operator()(
 		astro::callback::CallbackDataPtr data);
 };
-
-typedef std::shared_ptr<CcdICallback>        CcdICallbackPtr;
 
 } // namespace snowstar
 

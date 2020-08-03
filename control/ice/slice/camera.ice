@@ -477,6 +477,10 @@ module snowstar {
 		GuidePort*	getGuidePort() throws NotImplemented, DeviceException;
 	};
 
+	interface AdaptiveOpticsCallback extends Callback {
+		void	point(Point p);
+	};
+
 	/**
 	 * \brief AdaptiveOptics abstraction
 	 */
@@ -501,5 +505,8 @@ module snowstar {
 		 * \brief get the guider port of the adaptive optics unit
 		 */
 		GuidePort*	getGuidePort() throws NotImplemented;
+
+		void	registerCallback(Ice::Identity callback);
+		void	unregisterCallback(Ice::Identity callback);
 	};
 };

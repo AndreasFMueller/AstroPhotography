@@ -26,7 +26,7 @@ namespace snowstar {
 CcdI::CcdI(astro::camera::CcdPtr ccd) : DeviceI(*ccd), _ccd(ccd) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "create the ccd callback");
 	CcdICallback	*ccdcallback = new CcdICallback(*this);
-	CcdICallbackPtr	ccdcallbackptr(ccdcallback);
+	ccdcallbackptr = CcdICallbackPtr(ccdcallback);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "install the callback in the ccd");
 	_ccd->addCallback(ccdcallbackptr);
 }
@@ -35,6 +35,7 @@ CcdI::CcdI(astro::camera::CcdPtr ccd) : DeviceI(*ccd), _ccd(ccd) {
  * \brief Destroy the Ccd server wrapper
  */
 CcdI::~CcdI() {
+	_ccd->removeCallback(ccdcallbackptr);
 }
 
 /**
