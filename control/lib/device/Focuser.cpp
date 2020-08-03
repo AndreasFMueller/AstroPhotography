@@ -108,7 +108,7 @@ void	Focuser::addFocusMetadata(ImageBase& image) {
 }
 
 void	Focuser::callback(long position, bool on_target) {
-	callback::CallbackDataPtr cb(new callback::FocuserPositionCallbackData(
+	callback::CallbackDataPtr cb(new FocuserPositionInfoCallbackData(
 		FocuserPositionInfo(position, on_target)));
 	_callback(cb);
 }
