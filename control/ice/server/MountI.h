@@ -17,8 +17,12 @@ template<>
 void	callback_adapter<MountCallbackPrx>(MountCallbackPrx& p,
 		const astro::callback::CallbackDataPtr data);
 
+class MountICallback;
+typedef std::shared_ptr<MountICallback>	MountICallbackPtr;
+
 class MountI : virtual public Mount, virtual public DeviceI {
 	astro::device::MountPtr	_mount;
+	MountICallbackPtr	mountcallbackptr;
 public:
 	MountI(astro::device::MountPtr mount);
 	virtual ~MountI();

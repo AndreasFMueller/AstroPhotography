@@ -15,12 +15,13 @@ GuidePortI::GuidePortI(astro::camera::GuidePortPtr guideport)
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "create a callback");
 	GuidePortICallback	*guideportcallback
 		= new GuidePortICallback(*this);
-	GuidePortICallbackPtr	guideportcallbackptr(guideportcallback);
+	guideportcallbackptr = GuidePortICallbackPtr(guideportcallback);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "install callback in guideport");
 	_guideport->addCallback(guideportcallbackptr);
 }
 
 GuidePortI::~GuidePortI() {
+	_guideport->removeCallback(guideportcallbackptr);
 }
 
 Ice::Byte	GuidePortI::active(const Ice::Current& current) {

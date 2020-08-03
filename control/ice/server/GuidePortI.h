@@ -17,8 +17,12 @@ template<>
 void	callback_adapter<GuidePortCallbackPrx>(GuidePortCallbackPrx& p,
 		const astro::callback::CallbackDataPtr data);
 
+class GuidePortICallback;
+typedef std::shared_ptr<GuidePortICallback>	GuidePortICallbackPtr;
+
 class GuidePortI : virtual public GuidePort, virtual public DeviceI {
 	astro::camera::GuidePortPtr	_guideport;
+	GuidePortICallbackPtr	guideportcallbackptr;
 public:
 	GuidePortI(astro::camera::GuidePortPtr guideport);
 	virtual	~GuidePortI();
@@ -47,8 +51,6 @@ public:
 		return data;
 	}
 };
-
-typedef std::shared_ptr<GuidePortICallback>	GuidePortICallbackPtr;
 
 } // namespace snowstar
 

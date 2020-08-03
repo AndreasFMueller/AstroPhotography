@@ -19,7 +19,7 @@ CoolerI::CoolerI(astro::camera::CoolerPtr cooler)
 	: DeviceI(*cooler), _cooler(cooler) {
         debug(LOG_DEBUG, DEBUG_LOG, 0, "create a callback");
         CoolerICallback		*coolercallback = new CoolerICallback(*this);
-        CoolerICallbackPtr	coolercallbackptr(coolercallback);
+        coolercallbackptr = CoolerICallbackPtr(coolercallback);
         debug(LOG_DEBUG, DEBUG_LOG, 0, "install callback in cooler");
         _cooler->addCallback(coolercallbackptr);
 }
@@ -28,6 +28,7 @@ CoolerI::CoolerI(astro::camera::CoolerPtr cooler)
  * \brief Destroy the cooler
  */
 CoolerI::~CoolerI() {
+	_cooler->removeCallback(coolercallbackptr);
 }
 
 /**

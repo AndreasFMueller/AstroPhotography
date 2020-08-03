@@ -17,11 +17,15 @@ template<>
 void	callback_adapter<FilterWheelCallbackPrx>(FilterWheelCallbackPrx& p,
 	const astro::callback::CallbackDataPtr data);
 
+class FilterWheelICallback;
+typedef std::shared_ptr<FilterWheelICallback>        FilterWheelICallbackPtr;
+
 /**
  * \brief FilterWheel servant
  */
 class FilterWheelI : virtual public FilterWheel, virtual public DeviceI {
 	astro::camera::FilterWheelPtr	_filterwheel;
+	FilterWheelICallbackPtr	filterwheelcallbackptr;
 public:
 	FilterWheelI(astro::camera::FilterWheelPtr filterwheel);
 	virtual	~FilterWheelI();
@@ -59,7 +63,6 @@ public:
 	}
 };
 
-typedef std::shared_ptr<FilterWheelICallback>        FilterWheelICallbackPtr;
 
 } // namespace snowstar
 

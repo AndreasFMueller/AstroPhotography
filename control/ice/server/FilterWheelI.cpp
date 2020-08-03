@@ -19,7 +19,7 @@ FilterWheelI::FilterWheelI(astro::camera::FilterWheelPtr filterwheel)
 		: DeviceI(*filterwheel), _filterwheel(filterwheel) {
 	FilterWheelICallback	*filterwheelcallback
 		= new FilterWheelICallback(*this);
-	FilterWheelICallbackPtr	filterwheelcallbackptr(filterwheelcallback);
+	filterwheelcallbackptr = FilterWheelICallbackPtr(filterwheelcallback);
 	_filterwheel->addCallback(filterwheelcallbackptr);
 }
 
@@ -27,6 +27,7 @@ FilterWheelI::FilterWheelI(astro::camera::FilterWheelPtr filterwheel)
  * \brief Destroy the Filterwheel servant
  */
 FilterWheelI::~FilterWheelI() {
+	_filterwheel->removeCallback(filterwheelcallbackptr);
 }
 
 /**

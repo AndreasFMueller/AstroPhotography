@@ -17,8 +17,12 @@ template<>
 void	callback_adapter<CoolerCallbackPrx>(CoolerCallbackPrx& p,
 	const astro::callback::CallbackDataPtr data);
 
+class CoolerICallback;
+typedef std::shared_ptr<CoolerICallback>	CoolerICallbackPtr;
+
 class CoolerI : virtual public Cooler, virtual public DeviceI {
 	astro::camera::CoolerPtr	_cooler;
+	CoolerICallbackPtr	coolercallbackptr;
 public:
 	CoolerI(astro::camera::CoolerPtr cooler);
 	virtual ~CoolerI();
@@ -56,7 +60,6 @@ public:
 	}
 };
 
-typedef std::shared_ptr<CoolerICallback>	CoolerICallbackPtr;
 
 } // namespace snowstar
 
