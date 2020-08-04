@@ -16,13 +16,12 @@ AdaptiveOpticsI::AdaptiveOpticsI(astro::camera::AdaptiveOpticsPtr ao)
 	AdaptiveOpticsICallback	*aocallback
 		= new AdaptiveOpticsICallback(*this);
 	adaptiveopticscallbackptr = AdaptiveOpticsICallbackPtr(aocallback);
-	// XXX need to add creation of a callback and installation into
-	// XXX the adaptive optics device
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "XXX install callback in adaptive optics");
+	_ao->addCallback(adaptiveopticscallbackptr);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "install callback in adaptive optics");
 }
 
 AdaptiveOpticsI::~AdaptiveOpticsI() {
-	// XXX remove from adaptive optics callbacks
+	_ao->removeCallback(adaptiveopticscallbackptr);
 }
 
 void	AdaptiveOpticsI::set(const Point& position, const Ice::Current& current) {

@@ -73,7 +73,7 @@ static struct option    longopts[] = {
  */
 int	command_help(const char *progname) {
 	usage(progname);
-	std::cout << "The snowmount command understands the ollowing "
+	std::cout << "The snowmount command understands the following "
 		"subcommands:" << std::endl;
 	std::cout << std::endl;
 	std::cout << "help" << std::endl;

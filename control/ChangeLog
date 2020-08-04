@@ -1,5 +1,8 @@
 ChangeLog for the Astro project.
 
+20200804:
+	* add snowadaptiveoptics command
+
 20200803:
 	* add callback stuff to the nice devices
 	* add callback stuff to more ice interfaces
