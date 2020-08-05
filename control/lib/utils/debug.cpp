@@ -178,6 +178,11 @@ static void	rotate_logfile() {
  * static objects have the problem that the order of destruction is not fixed,
  * and because debugging is used very late, these objects may already have
  * been destroyed, leading to a crash at the end of the program.
+ *
+ * This class resolves the problem by instantiating the class once on the
+ * heap and never destroying it. However, there is another problem with the
+ * class namely that there is no mechanism to limit the size of the thread_map
+ * member. This map gets a new entry each time a new thread logs something.
  */
 class thread_helper {
 	int	nextthreadid;
@@ -189,6 +194,7 @@ public:
 		nextthreadid = 1;
 	}
 	int	lookupthreadid(std::thread::id);
+	static int	id();
 };
 static thread_helper	*th = NULL;
 
@@ -207,6 +213,12 @@ int	thread_helper::lookupthreadid(std::thread::id id) {
 	int	newid = nextthreadid++;
 	thread_map.insert(std::make_pair(id, newid));
 	return newid;
+}
+
+int	thread_helper::id() {
+	// make sure thread helper is initialized
+	std::call_once(thread_helper_once, thread_helper_initialize);
+	return th->lookupthreadid(std::this_thread::get_id());
 }
 
 static void	writeout(char *prefix, char *msgbuffer) {
@@ -246,9 +258,6 @@ extern "C" void vdebug(int loglevel, const char *file, int line,
 
 	if (loglevel > debuglevel) { return; }
 
-	// make sure thread helper is initialized
-	std::call_once(thread_helper_once, thread_helper_initialize);
-
 	// message content
 	localerrno = errno;
 	vsnprintf(msgbuffer2, sizeof(msgbuffer2), format, ap);
@@ -279,8 +288,7 @@ extern "C" void vdebug(int loglevel, const char *file, int line,
 
 	// find the current thread id if necessary
 	if (debugthreads) {
-		snprintf(threadid, sizeof(threadid), "/%d",
-			th->lookupthreadid(std::this_thread::get_id()));
+		snprintf(threadid, sizeof(threadid), "/%d", thread_helper::id());
 	} else {
 		threadid[0] = '\0';
 	}
