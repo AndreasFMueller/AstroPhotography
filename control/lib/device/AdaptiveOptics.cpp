@@ -47,7 +47,10 @@ void	AdaptiveOptics::set0(const Point& /* position */) {
 }
 
 void	AdaptiveOptics::center() {
-	this->set0(Point(0, 0));
+	Point	p(0, 0);
+	this->set0(p);
+	currentposition = p;
+	callback(currentposition);
 }
 
 GuidePortPtr	AdaptiveOptics::getGuidePort() {
