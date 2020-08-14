@@ -254,6 +254,11 @@ public:
 class Mount;
 typedef std::shared_ptr<Mount>	MountPtr;
 
+class MountBadState : public std::runtime_error {
+public:
+	MountBadState(const std::string cause) : std::runtime_error(cause) { }
+};
+
 /**
  * \brief Base class for all Mounts
  *
@@ -264,6 +269,7 @@ typedef std::shared_ptr<Mount>	MountPtr;
  */
 class Mount : public Device {
 public:
+	// some type definitions
 	typedef MountPtr	sharedptr;
 
 	typedef enum state_type { IDLE, ALIGNED, TRACKING, GOTO } state_type;
@@ -274,6 +280,8 @@ public:
 	static DeviceName::device_type	devicetype;
 private:
 	void	propertySetup();
+
+	// variables and methods handling location information for the mount
 	bool	_has_location;
 	LongLat	_location;
 protected:
@@ -283,17 +291,19 @@ public:
 	virtual location_source_type	location_source();
 	virtual time_t	time();
 
+	// Constructors and destructors
 	Mount(const std::string& name);
 	Mount(const DeviceName& name);
-	virtual ~Mount() { }
+	virtual ~Mount();
 
 private:
+	std::recursive_mutex	_mutex;	// protect the state
 	state_type	_state;
 protected:
 	void	state(state_type s);
 public:
 	// state
-	virtual state_type	state() { return _state; }
+	state_type	state();
 
 	// position commands
 	virtual RaDec	getRaDec();
@@ -313,6 +323,8 @@ public:
 
 	// add position metadata to an image
 	void	addPositionMetadata(astro::image::ImageBase& image);
+
+	// callback management
 private:
 	callback::CallbackSet	_statechangecallback;
 	callback::CallbackSet	_positioncallback;
@@ -322,7 +334,9 @@ public:
 	void	addPositionCallback(callback::CallbackPtr callback);
 	void	removePositionCallback(callback::CallbackPtr callback);
 
+	// callback to notify of state changes
 	void	callback(state_type newstate);
+	// callback to notify that the position has changed
 	void	callback(const RaDec& newposition);
 
 	typedef	callback::CallbackDataEnvelope<state_type>	StateCallbackData;

@@ -35,7 +35,6 @@ SimMount::SimMount(/* SimLocator& locator */)
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "constructing simulated mount");
 	_when = 0;
 	_direction = _target;
-	_thread = NULL;
 	try {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "location: %s",
 			location().toString().c_str());
@@ -51,30 +50,24 @@ SimMount::SimMount(/* SimLocator& locator */)
  */
 SimMount::~SimMount() {
 	// wait for the thread to terminate
-	std::unique_lock<std::recursive_mutex>	lock(_mutex);
+	std::unique_lock<std::recursive_mutex>	lock(_sim_mutex);
 	if (Mount::GOTO == Mount::state()) {
 		Mount::state(Mount::TRACKING);
+		_sim_condition.notify_all();
 		// wait for the thread to terminate
-		_thread->join();
-		delete _thread;
+		if (_sim_thread.joinable()) {
+			_sim_thread.join();
+		}
 	}
 }
 
-const static double _movetime = 10;
-
-/**
- * \brief Determine the state of the mount
- */
-Mount::state_type	SimMount::state() {
-	std::unique_lock<std::recursive_mutex>	lock(_mutex);
-	return Mount::state();
-}
+const double SimMount::_movetime = 10;
 
 /**
  * \brief Compute the direction the mount is currently pointing
  */
 RaDec	SimMount::direction() {
-	std::unique_lock<std::recursive_mutex>	lock(_mutex);
+	std::unique_lock<std::recursive_mutex>	lock(_sim_mutex);
 	return _direction;
 }
 
@@ -84,7 +77,7 @@ RaDec	SimMount::direction() {
  * \param d	RaDec structure to use as direction
  */
 void	SimMount::direction(const RaDec& d) {
-	std::unique_lock<std::recursive_mutex>	lock(_mutex);
+	std::unique_lock<std::recursive_mutex>	lock(_sim_mutex);
 	_direction = d;
 	callback(_direction);
 }
@@ -116,7 +109,7 @@ AzmAlt	SimMount::getAzmAlt() {
  * \param radec		new coordinates
  */
 void	SimMount::Goto(const RaDec& radec) {
-	std::unique_lock<std::recursive_mutex>	lock(_mutex);
+	std::unique_lock<std::recursive_mutex>	lock(_sim_mutex);
 	//_direction = direction();
 	// whatever we find out below, we certainly want to set the
 	// target and the arrival time according to the new data
@@ -132,11 +125,12 @@ void	SimMount::Goto(const RaDec& radec) {
 	// set the state to GOTO, this ensures that the thread will
 	// start running
 	Mount::state(Mount::GOTO);
+	_sim_condition.notify_all();
 
 	// here we should also start a thread that will periodically send
 	// RaDec updates to the callback and reset the state at the
 	// end of the move
-	_thread = new std::thread(mount_main, this);
+	_sim_thread = std::thread(mount_main, this);
 }
 
 /**
@@ -156,7 +150,7 @@ void	SimMount::Goto(const AzmAlt& /* azmalt */) {
  * This method is not implemented
  */
 void	SimMount::cancel() {
-	std::unique_lock<std::recursive_mutex>	lock(_mutex);
+	std::unique_lock<std::recursive_mutex>	lock(_sim_mutex);
 	_when = 0;
 	_target = _direction;
 	// Just reset the stsate to TRACKING. The thread will notice
@@ -189,7 +183,7 @@ void	SimMount::move() {
 		_target.toString().c_str());
 	while (true) {
 		Timer::sleep(1);
-		std::unique_lock<std::recursive_mutex>	lock(_mutex);
+		std::unique_lock<std::recursive_mutex>	lock(_sim_mutex);
 		if (Mount::GOTO == Mount::state()) {
 			double	_now = Timer::gettime();
 			if (_now > _when) {
@@ -206,8 +200,6 @@ void	SimMount::move() {
 		}
 	}
 }
-
-
 
 } // namespace simulator
 } // namespace camera

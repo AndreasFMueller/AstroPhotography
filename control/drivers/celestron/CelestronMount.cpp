@@ -16,7 +16,23 @@ namespace astro {
 namespace device {
 namespace celestron {
 
-const unsigned int	query_interval = 600;
+const unsigned int	CelestronMount::query_interval = 600;
+
+/**
+ * \brief run method for the celestron mount
+ *
+ * \param mount		the mount to run for
+ */
+static void	celestron_run(CelestronMount *mount) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "start a thread");
+	try {
+		mount->run();
+	} catch (const std::exception& x) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "run method failed: %s",
+			x.what());
+	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "thread ends");
+}
 
 /**
  * \brief Get the serial name from the properties
@@ -54,7 +70,8 @@ CelestronMount::CelestronMount(const std::string& devicename)
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "creating Celestron mount on %s",
 		serialdevice().c_str());
 
-	std::lock_guard<std::recursive_mutex>	lock(_mutex);
+	// lock the serial line
+	std::unique_lock<std::recursive_mutex>	lock(_mount_mutex);
 
 	// check communication
 	write("Kx");
@@ -64,6 +81,7 @@ CelestronMount::CelestronMount(const std::string& devicename)
 		std::runtime_error("no echo received");
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "mount has responded to echo request");
+
 	// ask for version
 	write("V");
 	std::string	v = readto('#');
@@ -88,10 +106,44 @@ CelestronMount::CelestronMount(const std::string& devicename)
 	_last_location_source = Mount::LOCAL;
 }
 
+void	CelestronMount::start_thread() {
+	if (_running) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "thread already running");
+		return;
+	}
+	// launch the thread
+	_running = true;
+	_mount_thread  = std::thread(celestron_run, this);
+}
+
+void	CelestronMount::stop_thread() {
+	// if the mount is in GOTO mode, signal the thread to terminate
+	// (leaving the mount alone)
+	_running = false;
+	_mount_condition.notify_all();
+
+	// wait for the mount to terminate
+	if (_mount_thread.joinable()) {
+		_mount_thread.join();
+	}
+}
+
+void	CelestronMount::check_state() {
+	// make sure we are in the right state
+	if ((state() == Mount::GOTO) || (state() == Mount::IDLE)) {
+		std::string	msg = stringprintf("bad state in %s: %s",
+			name().toString().c_str(), 
+			state2string(state()).c_str());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw MountBadState(msg);
+	}
+}
+
 /**
  * \brief Destroy the mount object
  */
 CelestronMount::~CelestronMount() {
+	stop_thread();
 }
 
 /**
@@ -110,9 +162,9 @@ void	CelestronMount::getprompt() {
 /**
  * \brief Query the state of the mount
  */
-Mount::state_type	CelestronMount::state() {
+Mount::state_type	CelestronMount::get_state() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "locking for state command");
-	std::lock_guard<std::recursive_mutex>	lock(_mutex);
+	std::unique_lock<std::recursive_mutex>	lock(_mount_mutex);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "sending J command to check alignment");
 	write("J");
 	std::string	s = readto('#');
@@ -138,7 +190,7 @@ Mount::state_type	CelestronMount::state() {
  */
 void	CelestronMount::cancel() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "locking for cancel command");
-	std::lock_guard<std::recursive_mutex>	lock(_mutex);
+	std::unique_lock<std::recursive_mutex>	lock(_mount_mutex);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "sending cancel command");
 	write("M");
 	getprompt();
@@ -150,8 +202,17 @@ void	CelestronMount::cancel() {
  * \param azmalt	AzmAlt object for the position to move to
  */
 void	CelestronMount::Goto(const AzmAlt& azmalt) {
+	// make sure we are in the right state
+	check_state();
+
+	// wait for the thread to complete
+	stop_thread();
+
+	// lock before you launch a new thread
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "locking for GOTO command");
-	std::lock_guard<std::recursive_mutex>	lock(_mutex);
+	std::unique_lock<std::recursive_mutex>	lock(_mount_mutex);
+
+	// send the GOTO command
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "sending GOTO AzmAtl command");
 	std::string	cmd;
 	if (version > 202) {
@@ -164,6 +225,9 @@ void	CelestronMount::Goto(const AzmAlt& azmalt) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "command sent: %s", cmd.c_str());
 	write(cmd);
 	getprompt();
+
+	// launch the thread
+	start_thread();
 }
 
 /**
@@ -172,8 +236,15 @@ void	CelestronMount::Goto(const AzmAlt& azmalt) {
  * \param radec		sky position to move to
  */
 void	CelestronMount::Goto(const RaDec& radec) {
+	// make sure we are in the right state
+	check_state();
+
+	// wait for the thread to complete
+	stop_thread();
+
+	// lock before you launch a new thread
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "locking for GOTO command");
-	std::lock_guard<std::recursive_mutex>	lock(_mutex);
+	std::unique_lock<std::recursive_mutex>	lock(_mount_mutex);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "sending GOTO RaDec command");
 	std::string	cmd;
 	if (version > 106) {
@@ -222,7 +293,7 @@ std::pair<double, double>	CelestronMount::parseangles(
  */
 RaDec	CelestronMount::getRaDec() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "locking for get command");
-	std::lock_guard<std::recursive_mutex>	lock(_mutex);
+	std::unique_lock<std::recursive_mutex>	lock(_mount_mutex);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "sending get RaDec command");
 	if (version >= 106) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "sending e command");
@@ -251,7 +322,7 @@ RaDec	CelestronMount::getRaDec() {
  */
 AzmAlt	CelestronMount::getAzmAlt() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "locking for get command");
-	std::lock_guard<std::recursive_mutex>	lock(_mutex);
+	std::unique_lock<std::recursive_mutex>	lock(_mount_mutex);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "sending get AzmAlt (z) command");
 	write("z");
 	std::pair<double, double>	a = parseangles(readto('#'));
@@ -345,8 +416,9 @@ static std::string	packet2hex(const std::vector<uint8_t>& packet) {
  * \param b	byte index 7 in the packet
  * \param l	size of the response
  */
-std::vector<uint8_t>	CelestronMount::gps_command(uint8_t a, uint8_t b, size_t l) {
-	std::lock_guard<std::recursive_mutex>	_lock(_mutex);
+std::vector<uint8_t>	CelestronMount::gps_command(uint8_t a, uint8_t b,
+				size_t l) {
+	std::unique_lock<std::recursive_mutex>	_lock(_mount_mutex);
 	std::vector<uint8_t>	packet;
 	packet.push_back('P');
 	packet.push_back(1);
@@ -444,7 +516,7 @@ LongLat	CelestronMount::location() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "location request");
 	time_t	now;
 	::time(&now);
-	if (now > (_last_location_queried + query_interval)) {
+	if (now > (_last_location_queried + CelestronMount::query_interval)) {
 		if (gps_linked()) {
 			debug(LOG_DEBUG, DEBUG_LOG, 0, "have to read location");
 			_last_location_queried = now;
@@ -468,14 +540,32 @@ Mount::location_source_type	CelestronMount::location_source() {
 }
 
 /**
+ * \find out whether a we can talk to the mount
+ */
+bool	CelestronMount::queriable(time_t last) {
+	// if the thread is running, we cannot query
+	if (_mount_thread.joinable()) {
+		return false;
+	}
+	// if in goto, don't bother
+	if (state() == Mount::GOTO) {
+		return false;
+	}
+	time_t	now;
+	::time(&now);
+	return (now < (last + CelestronMount::query_interval));
+}
+
+/**
  * \brief Get the GPS time of the mount
  */
 time_t	CelestronMount::time() {
 	time_t	now;
-	::time(&now);
 	// if the last request is not too far back, use the offset to 
-	// compute the current time
-	if (now < (_last_time_queried + query_interval)) {
+	// compute the current time, or if the mount is currently in
+	// GOTO mode
+	if (!queriable(_last_time_queried)) {
+		::time(&now);
 		return now + _last_time_offset;
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "offset too old, retrieving GPS time");
@@ -542,6 +632,19 @@ RaDec	CelestronMount::getGuideRates() {
 	double	frequency = 1/86400.;
 	Angle	guiderate = rate * frequency * 4 * Angle::right_angle;
 	return RaDec(guiderate, guiderate);
+}
+
+/**
+ * \brief Run method for a move 
+ */
+void	CelestronMount::run() {
+	while (_running) {
+		// periodically check the mount for a new position and state
+		// XXX implementation missing
+
+		// if the GOTO has completed, terminate
+		_running = false;
+	}
 }
 
 } // namespace celestron

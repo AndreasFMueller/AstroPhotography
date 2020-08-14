@@ -22,15 +22,26 @@ Mount::Mount(const std::string& name) : Device(name, DeviceName::Mount) {
 
 /**
  * \brief Construct a mount from the structured name
+ *
+ * \param name		device name to use for this mount
  */
 Mount::Mount(const DeviceName& name) : Device(name, DeviceName::Mount) {
+	state(Mount::TRACKING);
 	propertySetup();
+}
+
+/**
+ * \brief Destroy a mount
+ */
+Mount::~Mount() {
 }
 
 /**
  * \brief Prepare the properties
  *
- * Every mount has longitude and latitude associated with it
+ * Every mount has longitude and latitude associated with it. If it cannot
+ * be queried from the mount, it can at least be obtained from the
+ * properties.
  */
 void	Mount::propertySetup() {
 	// we assume to have a location
@@ -294,9 +305,20 @@ void	Mount::callback(const RaDec& newposition) {
 }
 
 /**
- * \brief Set state and also send state change callbac
+ * \brief Get the current state
+ */
+Mount::state_type      Mount::state() {
+	std::unique_lock<std::recursive_mutex>	lock(_mutex);
+	return _state;
+}
+
+/**
+ * \brief Set state and also send state change callback
+ *
+ * \param set the state
  */
 void	Mount::state(state_type s) {
+	std::unique_lock<std::recursive_mutex>	lock(_mutex);
 	_state = s;
 	callback(_state);
 }

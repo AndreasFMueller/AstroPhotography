@@ -22,17 +22,18 @@ class SimMount : public astro::device::Mount {
 	void	direction(const RaDec& d);
 	RaDec	direction();
 	// dynamic movement: target and time when the target will be reached
-	std::recursive_mutex	_mutex; // protext the state variables
-	RaDec	_target;	// where the movement is headed
-	double	_when;
-	std::thread	*_thread;
+	std::recursive_mutex	_sim_mutex; // protect the state variables
+	std::condition_variable	_sim_condition;
+	RaDec			_target;	// where the movement is headed
+	double			_when;
+	static const double	_movetime;
+	std::thread		_sim_thread;
 public:
-	void	move();
-	astro::device::Mount::state_type	state();
+	virtual void	move();
 	SimMount(/*SimLocator &locator*/);
 	virtual ~SimMount();
-	RaDec	getRaDec();
-	AzmAlt	getAzmAlt();
+	virtual RaDec	getRaDec();
+	virtual AzmAlt	getAzmAlt();
 	void	Goto(const RaDec& radec);
 	void	Goto(const AzmAlt& azmalt);
 	void	cancel();

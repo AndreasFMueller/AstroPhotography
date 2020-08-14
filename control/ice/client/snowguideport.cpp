@@ -19,16 +19,30 @@ namespace app {
 namespace snowguideport {
 
 static void	usage(const std::string& progname) {
+	std::cout << "Control a guideport in a snowstar server" << std::endl;
+	std::cout << std::endl;
+	std::cout << "Usage:" << std::endl;
 	astro::Path	path(progname);
 	std::string	p = std::string("    ") + path.basename();
-	std::cout << "Usage:" << std::endl;
 	std::cout << std::endl;
 	std::cout << p << " [ options ] [ server ] help" << std::endl;
 	std::cout << p << " [ options ] <server> list" << std::endl;
-	std::cout << p << " [ options ] <server> monitor <guideport>" << std::endl;
-	std::cout << p << " [ options ] <server> active <guideport>" << std::endl;
-	std::cout << p << " [ options ] <server> activate <RA+> <RA-> <DEC+> <DEC->" << std::endl;
+	std::cout << p << " [ options ] <server> monitor <guideport>"
+		<< std::endl;
+	std::cout << p << " [ options ] <server> active <guideport>"
+		<< std::endl;
+	std::cout << p << " [ options ] <server> activate <guideport> \\"
+		<< std::endl;
+	std::cout << "                                      <RA+> <RA-> <DEC+> <DEC->"
+		<< std::endl;
 	std::cout << std::endl;
+	std::cout << "If both RA+/- or DEC+/- are activated at the same time, "
+		"which is not allowed," << std::endl;
+	std::cout << "then the difference delta = X+ - X- is formed, and if "
+		"the difference is" << std::endl;
+	std::cout << "positive, the X+ terminal is activated for d seconds. "
+		"If d is negative," << std::endl;
+	std::cout << "then X- is activated for -d seconds." << std::endl;
 }
 
 

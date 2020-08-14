@@ -25,11 +25,18 @@ static DeviceName	sx_coolername(const DeviceName& cameraname) {
  * \param simcooler	the cooler to run this thread for
  */
 static void	cooler_main(SxCooler *simcooler) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "start cooler thread");
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "start %s thread",
+		simcooler->name().toString().c_str());
 	try {
 		simcooler->run();
+	} catch (const std::exception& x) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "%s exception in thread: %s",
+			demangle(typeid(x).name()).c_str(), x.what());
 	} catch (...) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "unknown exception");
 	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "%s thread terminates",
+		simcooler->name().toString().c_str());
 }
 
 /**
@@ -52,6 +59,7 @@ SxCooler::SxCooler(SxCamera& _camera)
 	}
 
 	// start the thread
+	_terminate = false;
 	std::unique_lock<std::recursive_mutex>	lock(_mutex);
 	_thread = std::thread(cooler_main, this);
 }
@@ -200,8 +208,10 @@ void	SxCooler::run() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "run() starts");
 	std::unique_lock<std::recursive_mutex>	lock(_mutex);
 	do {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "new repeat");
 		// query temperature
 		query(true);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "query complete");
 
 		// wait until something happens or at most 3 seconds
 		switch (_cond.wait_for(lock, std::chrono::milliseconds(3000))) {

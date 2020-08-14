@@ -1,5 +1,8 @@
 ChangeLog for the Astro project.
 
+20200812:
+	* make help message more precise in snowguideport client
+
 20200805:
 	* improve thread mapping in debug.cpp
 

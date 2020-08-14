@@ -18,7 +18,19 @@ namespace celestron {
 class CelestronMount : public astro::device::Mount,
 			public astro::device::Serial {
 	// mutex to protect serial communication from concurrent commands
-	std::recursive_mutex	_mutex;
+	std::recursive_mutex		_mount_mutex;
+	std::thread			_mount_thread;
+	std::condition_variable_any	_mount_condition;
+	std::atomic_bool		_running;
+	void	stop_thread();
+	void	start_thread();
+	void	check_state();
+public:
+	void	run();
+private:
+	// Goto launches a thread, no other communication with the mount
+	// is allowed until the Goto is completed, and the communication
+	// is entirely handled by the thread
 
 	// basic information for communication
 	int	version;
@@ -42,6 +54,8 @@ class CelestronMount : public astro::device::Mount,
 	typedef struct { int hour; int minute; int seconds; } gps_time_t;
 	gps_time_t	gps_time();
 
+	static const unsigned int	query_interval;
+
 	// the time() method could be called very often which might 
 	// interfere with the telescope operation. 
 	int	_last_time_offset;
@@ -51,12 +65,14 @@ class CelestronMount : public astro::device::Mount,
 	time_t	_last_location_queried;
 	location_source_type	_last_location_source;
 
+	bool	queriable(time_t last);
+	astro::device::Mount::state_type	get_state();
+
 public:
 	CelestronMount(const std::string& devicename);
 	virtual ~CelestronMount();
 
 	// accessors
-	virtual astro::device::Mount::state_type	state();
 	virtual RaDec	getRaDec();
 	virtual AzmAlt	getAzmAlt();
 	virtual LongLat	location();

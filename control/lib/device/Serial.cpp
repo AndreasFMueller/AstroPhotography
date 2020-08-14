@@ -127,6 +127,7 @@ Serial::~Serial() {
  * \brief Write a buffer of data to the serial connection
  */
 int	Serial::write(const std::string& data) {
+	std::unique_lock<std::recursive_mutex>	lock(_mutex);
 	int	rc = ::write(fd, data.c_str(), data.size());
 	if (rc < 0) {
 		std::string	msg = stringprintf("cannot write %d bytes: %s",
@@ -141,6 +142,7 @@ int	Serial::write(const std::string& data) {
  * \brief Read a number of bytes from the serial connection
  */
 std::string	Serial::read(int count) {
+	std::unique_lock<std::recursive_mutex>	lock(_mutex);
 	char	buffer[count];
 	int	bytes = 0;
 	do {
@@ -160,6 +162,7 @@ std::string	Serial::read(int count) {
  * \brief Read until we find a special character
  */
 std::string	Serial::readto(char promptchar) {
+	std::unique_lock<std::recursive_mutex>	lock(_mutex);
 	std::string	result;
 	char	c;
 	do {
@@ -178,6 +181,7 @@ std::string	Serial::readto(char promptchar) {
  */
 void	Serial::writeraw(const std::vector<uint8_t>& packet) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "%lu bytes to send", packet.size());
+	std::unique_lock<std::recursive_mutex>	lock(_mutex);
 	uint8_t	*b = (uint8_t *)alloca(packet.size());
 	std::copy(packet.begin(), packet.end(), b);
 	int	l = ::write(fd, b, packet.size());
@@ -198,6 +202,7 @@ void	Serial::writeraw(const std::vector<uint8_t>& packet) {
  */
 std::vector<uint8_t>	Serial::readraw(int count) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "reading %d bytes", count);
+	std::unique_lock<std::recursive_mutex>	lock(_mutex);
 	uint8_t	buffer[count];
 	int	bytes = 0;
 	do {

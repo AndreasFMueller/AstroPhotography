@@ -8,6 +8,7 @@
 
 #include <string>
 #include <vector>
+#include <mutex>
 
 namespace astro {
 namespace device {
@@ -15,6 +16,7 @@ namespace device {
 class Serial {
 	int	fd;
 	std::string	_serialdevice;
+	std::recursive_mutex	_mutex;
 public:
 	const std::string&	serialdevice() const { return _serialdevice; }
 private:
