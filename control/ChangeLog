@@ -2,6 +2,9 @@ ChangeLog for the Astro project.
 
 20200815:
 	* add Time class
+	* add astrocooler, astroccd, astrofilterwheel, programs
+	* add snowcamera, snowcooler, snowccd, snowguideport programs
+	* complete sx driver rework (can now reconnect)
 
 20200814:
 	* rework the sx driver

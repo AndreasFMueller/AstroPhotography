@@ -434,6 +434,12 @@ CcdPtr	SxCamera::getCcd0(size_t ccdindex) {
  * \brief Get the device pointer
  */
 DevicePtr	SxCamera::getDevicePtr() {
+	if (!deviceptr) {
+		std::string	msg = stringprintf("%s has no deviceptr",
+			name().toString().c_str());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw DeviceTimeout(msg);
+	}
 	return deviceptr;
 }
 
