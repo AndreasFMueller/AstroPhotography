@@ -300,7 +300,7 @@ int main(int argc, char *argv[]) {
 	}
 
 	// the other commands need a repository
-	astro::module::ModuleRepositoryPtr	repository = getModuleRepository();
+	auto	repository = ModuleRepository::get();
 	astro::module::Devices	devices(repository);
 
 	// list command

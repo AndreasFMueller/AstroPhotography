@@ -255,7 +255,7 @@ int	focus_command(const FocusParameters& parameters,
 	camera::CcdPtr	ccd;
 	camera::FocuserPtr	focuser;
 	try {
-		module::Devices	_devices(module::getModuleRepository());
+		module::Devices	_devices(module::ModuleRepository::get());
                 ccd = _devices.getCcd(ccdname);
 		focuser = _devices.getFocuser(focusername);
 	} catch (const std::exception& x) {

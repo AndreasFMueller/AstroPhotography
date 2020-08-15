@@ -34,5 +34,9 @@ GuidePortActivation::GuidePortActivation(float raplus, float raminus,
 	_decplus(decplus), _decminus(decminus) {
 }
 
+float	GuidePortActivation::max() const {
+	return std::max(std::max(_raplus, _raminus), std::max(_decplus, _decminus));
+}
+
 } // namespace camea
 } // namespace astro

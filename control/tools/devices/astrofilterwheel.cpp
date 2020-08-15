@@ -1,5 +1,5 @@
 /*
- * filterwheel.cpp
+ * astrofilterwheel.cpp
  *
  * (c) 2018 Prof Dr Andreas Müller, Hochschule Rapperswil
  */
@@ -14,6 +14,11 @@ namespace astro {
 namespace app {
 namespace filterwheel {
 
+/**
+ * \brief Display a usage message
+ *
+ * \param progname	the name of the program (for the command line)
+ */
 static void	usage(const char *progname) {
 	Path	p(progname);
 	std::cout << "usage:" << std::endl;
@@ -37,6 +42,13 @@ static struct option	longopts[] = {
 { NULL,		0,		NULL,	 0  }
 };
 
+/**
+ * \brief Implementation of the list command
+ *
+ * The list command lists the available filter wheels and their positions
+ *
+ * \param filterwheel	the filterwheel to handle
+ */
 static int	list_command(astro::camera::FilterWheelPtr filterwheel) {
 	size_t	nfilters = filterwheel->nFilters();
 	for (size_t position = 0; position < nfilters; position++) {
@@ -47,6 +59,12 @@ static int	list_command(astro::camera::FilterWheelPtr filterwheel) {
 	return EXIT_SUCCESS;
 }
 
+/**
+ * \brief Implementation of the goto command
+ *
+ * \param filterwheel	the filterwheel to move
+ * \param position	the position to move to
+ */
 static int	goto_command(astro::camera::FilterWheelPtr filterwheel,
 			const std::string& position) {
 	try {
@@ -70,6 +88,14 @@ static int	goto_command(astro::camera::FilterWheelPtr filterwheel,
 	return EXIT_SUCCESS;
 }
 
+/**
+ * \brief Implementation of the exercise command
+ *
+ * The exercise command moves the filterwheel around through all positions
+ * and terminates.
+ *
+ * \param filterwheel	the filterwheel to exercise
+ */
 static int	exercise_command(astro::camera::FilterWheelPtr filterwheel) {
 	filterwheel->wait(60);
 	std::cout << "number of filters: " << filterwheel->nFilters();
@@ -83,8 +109,14 @@ static int	exercise_command(astro::camera::FilterWheelPtr filterwheel) {
 	return EXIT_SUCCESS;
 }
 
+/**
+ * \brief The main function for the astrofilterwheel program
+ *
+ * \param argc		the number of arguments
+ * \param argv		the argument vector
+ */
 int	main(int argc, char *argv[]) {
-	debug_set_ident("filterwheel");
+	debug_set_ident("astrofilterwheel");
 	debugthreads = 1;
 	debugtimeprecision = 3;
 	int	c;
@@ -110,8 +142,7 @@ int	main(int argc, char *argv[]) {
 		name.toString().c_str());
 
 	// create a repository
-	astro::module::ModuleRepositoryPtr	repository
-		= module::getModuleRepository();
+	auto	repository = module::ModuleRepository::get();
 	astro::device::DeviceAccessor<astro::camera::FilterWheelPtr>	access(repository);
 	astro::camera::FilterWheelPtr	filterwheel = access.get(name);
 

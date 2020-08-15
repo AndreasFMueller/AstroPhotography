@@ -78,9 +78,12 @@ int	command_info(CoolerPrx cooler) {
 }
 
 class CoolerCallbackI : public CoolerCallback {
+	void	timestamp() {
+	}
 public:
 	virtual void	updateCoolerInfo(const CoolerInfo& info,
 				const Ice::Current& /* current */) {
+		timestamp();
 		astro::Temperature	actualTemperature(info.actualTemperature);
 		astro::Temperature	setTemperature(info.setTemperature);
 		std::cout << "actual=" << actualTemperature.celsius() << "ºC";
@@ -96,6 +99,7 @@ public:
 	}
 	virtual void	updateSetTemperature(float settemperature,
 				const Ice::Current& /* current */) {
+		timestamp();
 		astro::Temperature	temperature(settemperature);
 		std::cout << "new set temperature: ";
 		std::cout << temperature.celsius();
@@ -103,6 +107,7 @@ public:
 	}
 	virtual void	updateDewHeater(float dewheater,
 				const Ice::Current& /* current */) {
+		timestamp();
 		std::cout << "dew heater: " << dewheater << std::endl;
 	}
 };

@@ -100,12 +100,20 @@ public:
 	void	type(const device_type& type) { _type = type; }
 	void	typestring(const std::string& t);
 	bool	hasType(const device_type& t) const;
-public:
-	const std::string&	modulename() const;
+
 public:
 	const std::string&	unitname() const;
 	void	unitname(const std::string& u);
 	std::string	name() const;
+
+	const std::string&	enclosurename() const;
+	void	enclosurename(const std::string& n);
+
+	const std::string&	modulename() const;
+	void	modulename(const std::string& m);
+
+	const std::string&	hostname() const;
+	void	hostname(const std::string& h);
 private:
 	DeviceName() { }
 public:

@@ -1,5 +1,14 @@
 ChangeLog for the Astro project.
 
+20200815:
+	* add Time class
+
+20200814:
+	* rework the sx driver
+	* new naming scheme for sx devices
+	* add code to allow the sx driver from a connection failure or device
+	  reenumeration
+
 20200812:
 	* make help message more precise in snowguideport client
 

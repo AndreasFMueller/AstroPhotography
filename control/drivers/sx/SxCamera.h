@@ -8,6 +8,7 @@
 
 #include <AstroCamera.h>
 #include <AstroUSB.h>
+#include <SxLocator.h>
 #include "sx.h"
 #include <mutex>
 
@@ -28,6 +29,7 @@ class SxGuidePort;
  * The starlight express camera class 
  */
 class SxCamera : public Camera {
+	SxCameraLocator&	_locator;
 	DevicePtr	deviceptr;
 	uint16_t	model;
 	uint16_t	product;
@@ -44,31 +46,35 @@ public:
 	bool	hasInterlineCcd() const { return _has_interline_ccd; }
 	bool	hasRBIFlood() const;
 
+	static unsigned short	getModel(DevicePtr deviceptr);
+
 private:
 	// a lock to ensure that only one USB operation at a time goes to
 	// the camera
 	std::recursive_mutex		mutex;
 	std::condition_variable_any	condition;
-	bool	_busy;
-	std::string	_purpose;
+	// stuff needed for reservation
+	bool			_busy;
+	std::string		_purpose;
 public:
 	bool	busy();
 	std::string	purpose();
 	bool	reserve(const std::string& purpose, int timeout = 1000);
 	void	release(const std::string& purpose);
+	void	refresh();
 
 public:
 	// USB related methods
 	DevicePtr	getDevicePtr();
 	EndpointDescriptorPtr	getEndpoint();
 	InterfacePtr	getInterface();
-
 private:
-	SxCamera(const SxCamera& other);
-	SxCamera&	operator=(const SxCamera& other);
+	void	disconnect();
+	void	connect(DevicePtr devptr);
+	void	reconnect(DevicePtr devptr);
 public:
 	// constructors
-	SxCamera(DevicePtr& devptr);
+	SxCamera(SxCameraLocator& _locator, DevicePtr devptr);
 	virtual ~SxCamera();
 
 	virtual std::string	userFriendlyName() const;
@@ -95,6 +101,8 @@ protected:
 public:
 	void	controlRequest(RequestBase *request,
 		bool asUSBControlRequest = DEFAULT_AS_USB_CONTROL_REQUEST);
+	static void	controlRequest(DevicePtr deviceptr,
+				RequestBase *request);
 
 	// find out whether this is a color camera
 	bool	isColor() const;

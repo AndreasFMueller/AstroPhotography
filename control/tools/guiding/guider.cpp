@@ -156,7 +156,7 @@ int	main(int argc, char *argv[]) {
 		}
 
 	// get the driver module
-	ModuleRepositoryPtr	repository = getModuleRepository();
+	auto	repository = ModuleRepository::get();
 	ModulePtr	module = repository->getModule(modulename);
 	module->open();
 

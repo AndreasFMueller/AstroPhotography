@@ -70,10 +70,6 @@ DeviceName&	DeviceName::operator=(const DeviceName& other) {
 	return *this;
 }
 
-const std::string&	DeviceName::modulename() const {
-	return this->front();
-}
-
 const std::string&	DeviceName::unitname() const {
 	return this->back();
 }
@@ -84,6 +80,62 @@ void	DeviceName::unitname(const std::string& u) {
 	}
 	pop_back();
 	push_back(u);
+}
+
+const std::string&	DeviceName::enclosurename() const {
+	size_t	offset = 1;
+	if (isNetworkDevice()) {
+		offset += 1;
+	}
+	if (size() <= offset) {
+		throw std::runtime_error("no enclosure name");
+	}
+	return this->operator[](offset);
+}
+
+void	DeviceName::enclosurename(const std::string& n) {
+	size_t	offset = 1;
+	if (isNetworkDevice()) {
+		offset += 1;
+	}
+	if (n.size() <= offset) {
+		throw std::runtime_error("no enclosure name");
+	}
+	this->operator[](offset) = n;
+}
+
+const std::string&	DeviceName::modulename() const {
+	if (size() == 0) {
+		throw std::runtime_error("empty name");
+	}
+	return this->front();
+}
+
+void	DeviceName::modulename(const std::string& m) {
+	if (size() == 0) {
+		throw std::runtime_error("empty name");
+	}
+	this->operator[](0) = m;
+}
+
+const std::string&	DeviceName::hostname() const {
+	if (!isNetworkDevice()) {
+		throw std::runtime_error("not a network device");
+	}
+	if (size() < 2) {
+		throw std::runtime_error("no hostname present");
+	}
+	return this->operator[](1);
+}
+
+void	DeviceName::hostname(const std::string& h) {
+	if (!isNetworkDevice()) {
+		throw std::runtime_error("not a network device");
+	}
+	if (size() < 2) {
+		throw std::runtime_error("no hostname present");
+	}
+	this->operator[](1) = 1;
 }
 
 std::string	DeviceName::name() const {

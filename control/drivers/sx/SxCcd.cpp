@@ -25,6 +25,10 @@ namespace sx {
 
 /**
  * \brief Construct an SxCcd
+ *
+ * \param info		the ccdinfo for which to construct the ccd
+ * \param _camera	the camera this ccd is a part of
+ * \param _ccdindex	the index of the ccd (in the ccdinfo)
  */
 SxCcd::SxCcd(const CcdInfo& info, SxCamera& _camera, int _ccdindex)
 	: Ccd(info), camera(_camera), ccdindex(_ccdindex) {
@@ -35,24 +39,46 @@ SxCcd::SxCcd(const CcdInfo& info, SxCamera& _camera, int _ccdindex)
  * \brief Destroy an SxCcd
  */
 SxCcd::~SxCcd() {
+	// XXX here we should really destroy the thread
 }
 
 /**
  * \brief Start Routine of the exposure thread
+ *
+ * \param ccd	the SxCcd to use for the exposure
  */
 void	start_routine(SxCcd *ccd) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "start exposure thread");
+#if 0
 	pthread_attr_t	attr;
 	pthread_attr_init(&attr);
 	size_t	stacksize = 0;
 	pthread_attr_getstacksize(&attr, &stacksize);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "stack size: %lu", stacksize);
+#endif
 
 	try {
 		ccd->getImage0();
+	} catch (USBError& x) {
+		// construct an error message
+		std::string	msg = stringprintf("getImage0 failed: %s %s",
+			demangle(typeid(x).name()).c_str(), x.what());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+
+		// refresh the connection
+		ccd->refresh();
+	} catch (DeviceTimeout& x) {
+		// construct an error message
+		std::string	msg = stringprintf("getImage0 failed: %s %s",
+			demangle(typeid(x).name()).c_str(), x.what());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+
+		// refresh the connection
+		ccd->refresh();
 	} catch (const std::exception& x) {
-		std::string	msg = stringprintf("getImage0 failed: %s",
-			x.what());
+		// construct an error message
+		std::string	msg = stringprintf("getImage0 failed: %s %s",
+			demangle(typeid(x).name()).c_str(), x.what());
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "end exposure thread");
@@ -126,7 +152,13 @@ void	SxCcd::clearPixels() {
 		(uint8_t)SX_CMD_CLEAR_PIXELS,
 		(uint16_t)CCD_EXP_FLAGS_NOWIPE_FRAME);
 	camera.reserve("exposure", 1000);
-	camera.controlRequest(&clearrequest);
+	try {
+		camera.controlRequest(&clearrequest);
+	} catch (USBError& x) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "USB failed, refreshing");
+		refresh();
+		throw x;
+	}
 	camera.release("exposure");
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "pixels cleared");
 }
@@ -245,6 +277,15 @@ void	SxCcd::getImage0() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "data size to retrieve: %d",
 		sizeof(unsigned short) * size);
 
+	// when the transfer completes, one can use the data for the image
+	// for the time being we construct the image, but this is mainly
+	// to make sure that the data is properly cleaned up if an error
+	// occurs
+	Image<unsigned short>	*_image
+		= new Image<unsigned short>(targetsize, data);
+	_image->setOrigin(exposure.origin());
+	image = ImagePtr(_image);
+
 	// read the data from the data endpoint
 	BulkTransfer	transfer(camera.getEndpoint(),
 		sizeof(unsigned short) * size, (unsigned char *)data);
@@ -258,20 +299,18 @@ void	SxCcd::getImage0() {
 	try {
 		camera.getDevicePtr()->submit(&transfer);
 	} catch (USBError& x) {
+		// release the camera
 		camera.release("exposure");
 		std::string	msg = stringprintf("%s usb error: %s",
 			name().toString().c_str(), x.what());
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 		state(CcdState::idle);
+
+		// throw the exception
 		throw DeviceTimeout(msg);
 	}
 	camera.release("exposure");
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "received %d pixels", size);
-
-	// when the transfer completes, one can use the data for the image
-	Image<unsigned short>	*_image
-		= new Image<unsigned short>(targetsize, data);
-	_image->setOrigin(exposure.origin());
 
 	// if this is a color camera (which we can find out from the model
 	// of the camera), then we should add RGB information to the image
@@ -293,7 +332,8 @@ void	SxCcd::getImage0() {
 
 	// if the exposure requests a limiting function, we apply it now
 	if (exposure.limit() < INFINITY) {
-		for (unsigned int offset = 0; offset < _image->size().getPixels();
+		for (unsigned int offset = 0;
+			offset < _image->size().getPixels();
 			offset++) {
 			unsigned short	pv = _image->pixels[offset];
 			if (pv > exposure.limit()) {
@@ -306,7 +346,7 @@ void	SxCcd::getImage0() {
 	// add the metadata
 	addMetadata(*_image);
 
-	image = ImagePtr(_image);
+	// signal to the rest of the world that we have an image ready
 	state(CcdState::exposed);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "status set to exposed");
 }
@@ -320,7 +360,12 @@ void	SxCcd::flood(bool onoff) {
 		RequestBase::device_recipient, (uint16_t)0,
 		(uint8_t)SX_CMD_FLOOD_CCD, (uint16_t)((onoff) ? 1 : 0));
 	camera.reserve("exposure", 1000);
-	camera.controlRequest(&floodrequest);
+	try {
+		camera.controlRequest(&floodrequest);
+	} catch (USBError& x) {
+		refresh();
+		throw x;
+	}
 	camera.release("exposure");
 }
 
@@ -358,6 +403,13 @@ void	SxCcd::doFlood(const Exposure& exposure) {
  */
 std::string	SxCcd::userFriendlyName() const {
 	return camera.userFriendlyName();
+}
+
+/**
+ * \brief Refresh the connection
+ */
+void	SxCcd::refresh() {
+	camera.refresh();
 }
 
 } // namespace sx

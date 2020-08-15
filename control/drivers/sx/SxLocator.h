@@ -57,6 +57,11 @@ public:
 	virtual std::string	getName() const;
 	virtual std::string	getVersion() const;
 	virtual std::vector<std::string>	getDevicelist(DeviceName::device_type device = DeviceName::Camera);
+	// manage device names and USB devices
+	usb::DevicePtr	deviceForName(const DeviceName& name);
+	usb::DevicePtr	deviceForName(const std::string& enclosurename);
+	void	forget(const DeviceName& name);
+	void	forget(const std::string& enclosurename);
 protected:
 	virtual CameraPtr	getCamera0(const DeviceName& name);
 	virtual CcdPtr		getCcd0(const DeviceName& name);

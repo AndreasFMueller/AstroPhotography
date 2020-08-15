@@ -39,6 +39,7 @@ private:
 public:
 	SxCcd(const CcdInfo& info, SxCamera& camera, int ccdindex);
 	virtual ~SxCcd();
+	void	refresh();
 	virtual std::string	userFriendlyName() const;
 private:
 	void	clearPixels();

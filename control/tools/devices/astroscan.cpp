@@ -25,6 +25,8 @@ static struct option	longopts[] = {
 
 /**
  * \brief usage message for the astroscan program
+ *
+ * \param progname	the name of the program (for the help message)
  */
 static void	usage(const char *progname) {
 	Path	path(progname);
@@ -39,22 +41,46 @@ static void	usage(const char *progname) {
 	std::cout << " -d,--debug    increase the debug level" << std::endl;
 	std::cout << " -h,--help     display this help message and exit"
 		<< std::endl;
+	std::cout << " -v,--verbose  verbose display" << std::endl;
 }
 
 /**
  * \brief Modules command
+ *
+ * \param verbose	whether or not to use verbose display
  */
-static int	modules_command(bool /* verbose */) {
-	module::ModuleRepositoryPtr	_repository = module::getModuleRepository();
+static int	modules_command(bool verbose) {
+	auto _repository = module::ModuleRepository::get();
+	// show information about the repository
+	if (verbose) {
+		std::cout << "repository path: ";
+		std::cout << _repository->path();
+		std::cout << std::endl;
+	}
+
+	// construct a list of module names
 	std::vector<std::string>	modules = _repository->moduleNames();
 	for_each(modules.begin(), modules.end(),
-		[](const std::string& modulename) {
-			std::cout << modulename << std::endl; 
+		[_repository,verbose](const std::string& modulename) {
+			if (!verbose) {
+				std::cout << modulename << std::endl; 
+				return;
+			}
+			auto	module = _repository->getModule(modulename);
+			std::cout << module->ctime().toString();
+			std::cout << stringprintf("  %10lu  ", module->size());
+			std::cout << stringprintf("%-20.20s",
+				module->basename().c_str());
+			std::cout << modulename;
+			std::cout << std::endl;
 		}
 	);
 	return EXIT_SUCCESS;
 }
 
+/**
+ * \brief Auxiliary function to display a list of names
+ */
 static void	showlist(const std::vector<std::string>& names) {
 	for_each(names.begin(), names.end(),
 		[](const std::string& name) {
@@ -63,20 +89,48 @@ static void	showlist(const std::vector<std::string>& names) {
 	);
 }
 
+/**
+ * \brief implementation of the scan command
+ *
+ * \param modulename	the module name
+ * \param verbose	whether the display should be verbose
+ */
 static int	scan_command(const std::string& modulename, bool verbose) {
-	module::ModuleRepositoryPtr	_repository = module::getModuleRepository();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "scanning module '%s'",
+		modulename.c_str());
+	auto	_repository = module::ModuleRepository::get();
+
+	// retrieve the module
 	module::ModulePtr	module = _repository->getModule(modulename);
+	if (NULL == module) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "could not get module '%s'",
+			modulename.c_str());
+		return EXIT_FAILURE;
+	}
+
+	// get the module descriptor
 	module::ModuleDescriptor	*moddesc = module->getDescriptor();
+	if (NULL == moddesc) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "could not get a module "
+			"descriptor for '%s'", modulename.c_str());
+		return EXIT_FAILURE;
+	}
+
+	// show the module information
 	if (verbose) {
 		std::cout << "module " << modulename << " version ";
 		std::cout << moddesc->version() << std::endl;
 	}
 
+	// Check whether we have a device locator (some modules don't)
 	if (!moddesc->hasDeviceLocator()) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "could not get a device "
+			"locator for '%s'", modulename.c_str());
 		return EXIT_FAILURE;
 	}
 	device::DeviceLocatorPtr	devloc = module->getDeviceLocator();
 
+	// now tet the various types of objects
 	std::cout << "adaptive optics:  ";
 	showlist(devloc->getDevicelist(DeviceName::AdaptiveOptics));
 	std::cout << std::endl;
@@ -114,6 +168,9 @@ static int	scan_command(const std::string& modulename, bool verbose) {
 
 /**
  * \brief Main function for the astroscan program
+ *
+ * \param argc	the number of arguments
+ * \param argv	the verctor of arguments
  */
 int	main(int argc, char *argv[]) {
 	debug_set_ident("astroscan");

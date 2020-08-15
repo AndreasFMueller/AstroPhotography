@@ -43,11 +43,11 @@ ModuleRepositories::ModuleRepositories() {
 		this);
 }
 
-ModuleRepositoryPtr	getModuleRepository() {
+ModuleRepositoryPtr	ModuleRepository::get() {
 	return repositories.get(PKGLIBDIR);
 }
 
-ModuleRepositoryPtr	getModuleRepository(const std::string& path) {
+ModuleRepositoryPtr	ModuleRepository::get(const std::string& path) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieve module repo at %s",
 		path.c_str());
 	return repositories.get(path);

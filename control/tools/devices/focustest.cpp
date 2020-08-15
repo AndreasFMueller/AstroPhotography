@@ -99,7 +99,7 @@ int	main(int argc, char *argv[]) {
 		}
 
 	// get the repository
-	ModuleRepositoryPtr	repository = getModuleRepository();
+	auto	repository = ModuleRepository::get();
 	ModulePtr	cameramodule = repository->getModule(cameramodulename);
 	cameramodule->open();
 

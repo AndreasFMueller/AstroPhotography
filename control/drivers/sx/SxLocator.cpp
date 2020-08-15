@@ -79,48 +79,10 @@ std::mutex	SxCameraLocator::_hid_mutex;
 //////////////////////////////////////////////////////////////////////
 
 SxCameraLocator::SxCameraLocator() {
-	context.setDebugLevel(4);
+	//context.setDebugLevel(4);
 }
 
 SxCameraLocator::~SxCameraLocator() {
-}
-
-typedef struct sx_hascooler_s {
-	unsigned short	product;
-	bool	has_cooler;
-} sx_hascooler_t;
-
-#define sx_hascooler_size	21
-static sx_hascooler_t	models[sx_hascooler_size] {
-	{ 0x0000, false },
-	{ 0x0100, true },
-	{ 0x0105, true },
-	{ 0x0107, true },
-	{ 0x0119, true },
-	{ 0x0126, true },
-	{ 0x0128, true },
-	{ 0x0135, true },
-	{ 0x0136, true },
-	{ 0x0200, false },
-	{ 0x0305, true },
-	{ 0x0307, true },
-	{ 0x0308, true },
-	{ 0x0309, true },
-	{ 0x0319, true },
-	{ 0x0325, true },
-	{ 0x0326, true },
-	{ 0x0507, false }, // Lodestar
-	{ 0x0509, false }, // Oculus
-	{ 0x0517, false }, // Costar
-	{ 0x0601, true }, // SX-56
-};
-static bool	has_cooler(unsigned short product) {
-	for (int i = 0; i < sx_hascooler_size; i++) {
-		if (models[i].product == product) {
-			return models[i].has_cooler;
-		}
-	}
-	return false;
 }
 
 /**
@@ -150,7 +112,7 @@ std::string	SxCameraLocator::getVersion() const {
 void	SxCameraLocator::addname(std::vector<std::string> *names,
 		DeviceName::device_type device, usb::DevicePtr devptr) {
 	// construct the name of the device, and find its camera name
-	SxName sxname(devptr);
+	SxName sxname(device, devptr);
 	std::string	cameraname = sxname.cameraname();
 
 	// now verify whether the device already exists
@@ -175,7 +137,7 @@ void	SxCameraLocator::addname(std::vector<std::string> *names,
 		names->push_back(sxname.ccdname());
 		break;
 	case DeviceName::Cooler:
-		if (has_cooler(sxname.idproduct())) {
+		if (sxname.hascooler()) {
 			names->push_back(sxname.coolername());
 		}
 		break;
@@ -185,6 +147,96 @@ void	SxCameraLocator::addname(std::vector<std::string> *names,
 	default:
 		// unknown components
 		break;
+	}
+}
+
+/**
+ * \brief Get the connection for a device name
+ *
+ * \param name	the name of the device
+ */
+usb::DevicePtr	SxCameraLocator::deviceForName(const DeviceName& name) {
+	return deviceForName(name.enclosurename());
+}
+
+/**
+ * \brief Get the connetion for a enclosure name
+ *
+ * \param name	the name of the enclosure
+ */
+usb::DevicePtr	SxCameraLocator::deviceForName(const std::string& enclosure) {
+	// first isolate the enclosure name
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "looking for enclosure %s",
+		enclosure.c_str());
+
+	// this function works on the device map, so we have to lock it
+	std::unique_lock<std::recursive_mutex>	lock(_mutex);
+
+	// first check the cache
+	auto	j = _sxdevices.find(enclosure);
+	if (j != _sxdevices.end()) {
+		// we have found the device we are interested 
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "returning device %s from map",
+			enclosure.c_str());
+		return j->second;
+	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "%s not in the cache",
+		enclosure.c_str());
+
+	// get a list of devices
+	std::vector<DevicePtr>	d = context.devices(SX_VENDOR_ID);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "found %d devices", d.size());
+	for (auto i = d.begin(); i != d.end(); i++) {
+		// get the device
+		DevicePtr	dptr = (*i);
+
+		// open if necessare
+		bool	needsclose = false;
+		if (!dptr->isOpen()) {
+			dptr->open();
+			needsclose = true;
+		}
+
+		// get the device enclosure name
+		std::string	devenclosure = SxName::deviceName(dptr);
+
+		// close if we opened
+		if (needsclose) {
+			dptr->close();
+		}
+
+		// if the enclosure name matches remember and return the USB device
+		if (enclosure == devenclosure) {
+			_sxdevices.insert(std::make_pair(enclosure, dptr));
+			return dptr;
+		}
+	}
+
+	// throw an exception because the object was not found
+	std::string	msg = stringprintf("device %s not found",
+		enclosure.c_str());
+	debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+	throw NotFound(msg);
+}
+
+/**
+ * \brief Remove a device from the cache
+ *
+ * \param name	the device name to remove
+ */
+void	SxCameraLocator::forget(const DeviceName& name) {
+	forget(name.enclosurename());
+}
+
+/**
+ * \brief Remove a device from the cache by enclosure name
+ *
+ * \param enclosurename	the enclosure name to remove
+ */
+void	SxCameraLocator::forget(const std::string& enclosurename) {
+	auto	j = _sxdevices.find(enclosurename);
+	if (j != _sxdevices.end()) {
+		_sxdevices.erase(j);
 	}
 }
 
@@ -259,7 +311,7 @@ std::vector<std::string>	SxCameraLocator::getDevicelist(
 		return names;
 	}
 
-	// list all devices from the context
+	// list all devices from the context, ignoring filterwheel devices
 	debug(LOG_DEBUG, DEBUG_LOG, 0,
 		"iterating through remaining device types");
 	std::vector<DevicePtr>	d = context.devices((uint16_t)SX_VENDOR_ID);
@@ -302,8 +354,7 @@ std::vector<std::string>	SxCameraLocator::getDevicelist(
  */
 CameraPtr	SxCameraLocator::getCamera0(const DeviceName& name) {
 	// verify that this is a camera name
-	SxName	sxname(name);
-	if (!sxname.isCamera(name)) {
+	if (!name.hasType(DeviceName::Camera)) {
 		std::string	msg = stringprintf("%s is not a Camera name",
 			name.toString().c_str());
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
@@ -311,39 +362,33 @@ CameraPtr	SxCameraLocator::getCamera0(const DeviceName& name) {
 	}
 
 	// this function works on the device map, so we have to lock it
-	std::lock_guard<std::recursive_mutex>	lock(_mutex);
+	std::unique_lock<std::recursive_mutex>	lock(_mutex);
 
 	// first check the cache to see whether we already have this
 	// device read
-	auto	j = _sxdevices.find(name.toString());
+	std::string	enclosure = name.enclosurename();
+	auto	j = _sxdevices.find(enclosure);
 	if (j != _sxdevices.end()) {
 		// we have found the device we are interested in and we
 		// can just go ahead and build the camera
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "returning device %s from map",
-			name.toString().c_str());
+			enclosure.c_str());
 		j->second->open();
-		return CameraPtr(new SxCamera(j->second));
+		return CameraPtr(new SxCamera(*this, j->second));
 	}
 
-	// if we get to this point, then we have not yet scanned the bus and
-	// we have to open the device by searching the bus and find the
-	// device with this bus number and address
-	std::vector<DevicePtr>	d = context.devices(SX_VENDOR_ID);
-	std::vector<DevicePtr>::const_iterator	i;
-	for (i = d.begin(); i != d.end(); i++) {
-		DevicePtr	dptr = (*i);
-		int	busnumber = dptr->getBusNumber();
-		int	deviceaddress = dptr->getDeviceAddress();
-		if ((busnumber == sxname.busnumber()) &&
-			(deviceaddress == sxname.deviceaddress())) {
-			debug(LOG_DEBUG, DEBUG_LOG, 0, "found matching device");
-			// this is the device we want, add it to the map
-			addname(NULL, DeviceName::Camera, dptr);
-			// build the camera
-			dptr->open();
-			return CameraPtr(new SxCamera(dptr));
-		}
+	// check for a device with the right name
+	try {
+		DevicePtr	dptr = deviceForName(name);
+		addname(NULL, DeviceName::Camera, dptr);
+		return CameraPtr(new SxCamera(*this, dptr));
+	} catch (const std::exception& x) {
+		std::string	msg = stringprintf("cannot find device %s: %s",
+			name.toString().c_str(), x.what());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 	}
+
+	// if we get to this point, we were not able to find the camera
 	std::string	msg = stringprintf("cannot create camera from '%s'",
 		name.toString().c_str());
 	throw SxError(msg.c_str());
@@ -358,8 +403,7 @@ CoolerPtr	SxCameraLocator::getCooler0(const DeviceName& name) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieveing cooler '%s'",
 		name.toString().c_str());
 	// verify that this is in fact a cooler name
-	SxName	sxname(name);
-	if (!sxname.isCooler(name)) {
+	if (!name.hasType(DeviceName::Cooler)) {
 		std::string	msg = stringprintf("%s is not a Cooler name",
 			name.toString().c_str());
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
@@ -367,10 +411,10 @@ CoolerPtr	SxCameraLocator::getCooler0(const DeviceName& name) {
 	}
 
 	// protect against concurrent access
-	std::lock_guard<std::recursive_mutex>	lock(_mutex);
+	std::unique_lock<std::recursive_mutex>	lock(_mutex);
 
 	// get the camera with the same name
-	DeviceName	cameraname = sxname.cameraname();
+	DeviceName	cameraname = SxName::cameraname(name);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "camera name: %s",
 		cameraname.toString().c_str());
 
@@ -395,8 +439,7 @@ CcdPtr	SxCameraLocator::getCcd0(const DeviceName& name) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieveing CCD '%s'",
 		name.toString().c_str());
 	// make sure we have a ccd name
-	SxName	sxname(name);
-	if (!sxname.isCcd(name)) {
+	if (!name.hasType(DeviceName::Ccd)) {
 		std::string	msg = stringprintf("%s is not a CCD name",
 			name.toString().c_str());
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
@@ -404,10 +447,10 @@ CcdPtr	SxCameraLocator::getCcd0(const DeviceName& name) {
 	}
 
 	// protect against concurrent access
-	std::lock_guard<std::recursive_mutex>	lock(_mutex);
+	std::unique_lock<std::recursive_mutex>	lock(_mutex);
 
 	// get the camera with the same name
-	DeviceName	cameraname = sxname.cameraname();
+	DeviceName	cameraname = SxName::cameraname(name);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "camera name: %s",
 		cameraname.toString().c_str());
 	CameraPtr	camera = this->getCamera(cameraname);
@@ -434,8 +477,7 @@ AdaptiveOpticsPtr	SxCameraLocator::getAdaptiveOptics0(
  */
 GuidePortPtr	SxCameraLocator::getGuidePort0(const DeviceName& name) {
 	// make sure we have a guide port name
-	SxName	sxname(name);
-	if (!sxname.isGuideport(name)) {
+	if (!name.hasType(DeviceName::Guideport)) {
 		std::string	msg = stringprintf("%s is not a Guideport name",
 			name.toString().c_str());
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
@@ -443,10 +485,10 @@ GuidePortPtr	SxCameraLocator::getGuidePort0(const DeviceName& name) {
 	}
 
 	// protect against concurrent access
-	std::lock_guard<std::recursive_mutex>	lock(_mutex);
+	std::unique_lock<std::recursive_mutex>	lock(_mutex);
 
 	// get the associated camera
-	DeviceName	cameraname = sxname.cameraname();
+	DeviceName	cameraname = SxName::cameraname(name);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "looking for guider port of camera %s",
 		cameraname.toString().c_str());
 	CameraPtr	camera = this->getCamera(cameraname);

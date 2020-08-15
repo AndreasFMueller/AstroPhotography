@@ -85,7 +85,7 @@ Ccd::Ccd(const CcdInfo& _info)
 	}
 	try {
 		parameter("azimuth", azimuth);
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "using azimuth %.3f[m]",
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "using azimuth %.3f[°]",
 			parameterValueFloat("azimuth"));
 	} catch (const std::exception& x) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "focal length unusable: %s",

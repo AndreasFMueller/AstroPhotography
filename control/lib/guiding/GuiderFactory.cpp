@@ -67,7 +67,7 @@ GuiderPtr	GuiderFactory::get(const GuiderDescriptor& guiderdescriptor) {
 	GuiderName	guidername(guiderdescriptor.instrument());
 
 	// first get a module repository
-	ModuleRepositoryPtr	repository = getModuleRepository();
+	ModuleRepositoryPtr	repository = ModuleRepository::get();
 	if (!repository) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "no module repository");
 		throw std::logic_error("no module repository");

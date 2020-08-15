@@ -75,7 +75,7 @@ std::vector<DevicePtr>	Context::devices() {
 		}
 	}
 	// creating Device objects increases the reference count, 
-	// so it is save to unref all devices, we don't need them
+	// so it is safe to unref all devices, we don't need them
 	// any more
 	libusb_free_device_list(devlist, 1);
 	return result;
@@ -116,7 +116,7 @@ std::vector<DevicePtr>	Context::devices(uint16_t vendor_id) {
 	}
 
 	// creating Device objects increases the reference count, 
-	// so it is save to unref all devices, we don't need them
+	// so it is safe to unref all devices, we don't need them
 	// any more
 	libusb_free_device_list(devlist, 1);
 	return result;

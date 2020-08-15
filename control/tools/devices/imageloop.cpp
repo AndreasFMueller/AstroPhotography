@@ -393,7 +393,7 @@ int	main(int argc, char *argv[]) {
 	}
 
 	// get the CCD
-	ModuleRepositoryPtr	repository = getModuleRepository();
+	auto	repository = ModuleRepository::get();
 	Devices	devices(repository);
 	CcdPtr	ccd = devices.getCcd(ccdurl);
 	if (exposuretime < ccd->getInfo().minexposuretime()) {

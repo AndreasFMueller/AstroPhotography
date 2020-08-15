@@ -53,10 +53,13 @@ SxCooler::SxCooler(SxCamera& _camera)
 
 	// if the cooler is on, we cannot really know the set temperature
 	// so we just fake it and assume that the actual temperature
-	// is also the set temperature
-	if (isOn()) {
-		_setTemperature = _actualTemperature;
-	}
+	// is also the set temperature, however, if the cooler is off, 
+	// we don't know anything.
+	_setTemperature = _actualTemperature;
+
+	// to make sure this is true, we should actually set the temperature
+	// as we believe the set temperature is
+	cmd();
 
 	// start the thread
 	_terminate = false;
@@ -79,6 +82,16 @@ SxCooler::~SxCooler() {
 }
 
 /**
+ * \brief Find a good purpose string for reservation
+ */
+std::string	SxCooler::purpose() const {
+	if (std::this_thread::get_id() == _thread.get_id()) {
+		return std::string("cooler-thread");
+	}
+	return std::string("cooler");
+}
+
+/**
  * \brief Execute the COOLER command
  */
 void	SxCooler::cmd() {
@@ -91,7 +104,7 @@ void	SxCooler::cmd() {
 		(uint16_t)((_on) ? 1 : 0),
 		(uint8_t)SX_CMD_COOLER, temp);
 	try {
-		if (camera.reserve("cooler", 100)) {
+		if (camera.reserve(purpose(), 100)) {
 			camera.controlRequest(&request);
 		} else {
 			debug(LOG_WARNING, DEBUG_LOG, 0,
@@ -99,13 +112,13 @@ void	SxCooler::cmd() {
 			return;
 		}
 	} catch (USBError& x) {
-		camera.release("cooler");
+		camera.release(purpose());
 		std::string	msg = stringprintf("%s usb error: %s",
 					name().toString().c_str(), x.what());
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 		throw DeviceTimeout(msg);
 	}
-	camera.release("cooler");
+	camera.release(purpose());
 	Temperature	actual = Temperature(request.data()->temperature / 10.);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "actual temperature = %.1fºC",
 		_actualTemperature.celsius());
@@ -129,21 +142,21 @@ void	SxCooler::query(bool sendcallback) {
 		(uint16_t)(0),
 		(uint8_t)SX_CMD_COOLER_TEMPERATURE, temp);
 	try {
-		if (camera.reserve("cooler", 100)) {
+		if (camera.reserve(purpose(), 100)) {
 			camera.controlRequest(&request);
 		} else {
-			debug(LOG_WARNING, DEBUG_LOG, 0,
-				"Warning: cannot query cooler, camera reserved");
+			debug(LOG_WARNING, DEBUG_LOG, 0, "Warning: cannot "
+				"query cooler, camera reserved");
 			return;
 		}
 	} catch (USBError& x) {
-		camera.release("cooler");
+		camera.release(purpose());
 		std::string	msg = stringprintf("%s usb error: %s",
 					name().toString().c_str(), x.what());
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 		throw DeviceTimeout(msg);
 	}
-	camera.release("cooler");
+	camera.release(purpose());
 
 	// interpret the data received
 	Temperature	actual = Temperature(request.data()->temperature / 10.);
@@ -210,7 +223,14 @@ void	SxCooler::run() {
 	do {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "new repeat");
 		// query temperature
-		query(true);
+		try {
+			query(true);
+		} catch (DeviceTimeout& x) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "query failed: %s",
+				x.what());
+			camera.refresh();
+		}
+		
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "query complete");
 
 		// wait until something happens or at most 3 seconds

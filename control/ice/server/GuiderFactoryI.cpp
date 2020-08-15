@@ -138,8 +138,8 @@ void	GuiderFactoryI::buildnewguider(const GuiderDescriptor& descriptor) {
 
 		try {
 			// try to get the mount
-			astro::module::ModuleRepositoryPtr	repository
-				= astro::module::getModuleRepository();
+			auto	repository
+				= astro::module::ModuleRepository::get();
 			astro::device::DeviceAccessor<astro::device::MountPtr>
 					df(repository);
 			astro::device::MountPtr	mountptr = df.get(mountname);

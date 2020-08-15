@@ -117,8 +117,7 @@ void	Server::get_configured_services(astro::discover::ServicePublisherPtr sp) {
 	if (!sp) {
 		return;
 	}
-	astro::config::ConfigurationPtr configuration
-		= astro::config::Configuration::get();
+	auto configuration = astro::config::Configuration::get();
 	if (configuration->get(_service_instruments_key, "no") == "yes") {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "instruments enabled");
 		sp->set(astro::discover::ServiceSubset::INSTRUMENTS);
@@ -314,7 +313,7 @@ static astro::persistence::Database	getdatabase(const std::string& databasefilen
 
 Server::Server(Ice::CommunicatorPtr _ic, const std::string& dbfilename)
 	: ic(_ic),
-	  repository(astro::module::getModuleRepository()),
+	  repository(astro::module::ModuleRepository::get()),
 	  devices(repository),
 	  database(getdatabase(dbfilename)),
 	  taskqueue(database) {

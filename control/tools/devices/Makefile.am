@@ -6,7 +6,8 @@
 #
 
 bin_PROGRAMS = astroscan devicemapper getimages imageloop focus focustest \
-	dark flat focusing getstream astrofilterwheel
+	dark flat focusing getstream astrofilterwheel astrocooler \
+	astroguideport
 
 astroscan_SOURCES = astroscan.cpp
 astroscan_DEPENDENCIES = $(top_builddir)/lib/libastro.la
@@ -52,6 +53,14 @@ astrofilterwheel_SOURCES = astrofilterwheel.cpp
 astrofilterwheel_DEPENDENCIES = $(top_builddir)/lib/libastro.la
 astrofilterwheel_LDADD = -L$(top_builddir)/lib -lastro 
 
+astrocooler_SOURCES = astrocooler.cpp
+astrocooler_DEPENDENCIES = $(top_builddir)/lib/libastro.la
+astrocooler_LDADD = -L$(top_builddir)/lib -lastro 
+
+astroguideport_SOURCES = astroguideport.cpp
+astroguideport_DEPENDENCIES = $(top_builddir)/lib/libastro.la
+astroguideport_LDADD = -L$(top_builddir)/lib -lastro 
+
 # full night with the Starlight Express Oculus all sky camera.
 looptest:	imageloop
 	./imageloop --debug --period=60 --timestamp --exposure=0.01 	\
@@ -82,4 +91,7 @@ test:	astrofilterwheel
 
 sxtest:	getimages
 	./getimages --debug --config=database.db --out=test.fits SX56
+
+coolertest:	astrocooler
+	./astrocooler --debug cooler:sx/h16/Imaging/cooler
 

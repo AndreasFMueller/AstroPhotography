@@ -76,7 +76,7 @@ void	scan_module::operator()(const std::string& modulename) {
 		modulename.c_str());
 
 	// get a repository
-	ModuleRepositoryPtr	repository = getModuleRepository();
+	auto	repository = ModuleRepository::get();
 
 	// get the module
 	ModulePtr	module = repository->getModule(modulename);

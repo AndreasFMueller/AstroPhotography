@@ -70,12 +70,10 @@ static void	basicguideport_main(BasicGuideport *guideport) {
  * \brief The run method of the guider port
  */
 void	BasicGuideport::run() {
-	_running = true;
 	std::unique_lock<std::mutex>	lock(mtx);
 
-	// wait on the condition variable for the start signal
-	cond.wait(lock);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "start signal received");
+	// make sure the device also has 0
+	this->do_activate(0);
 
 	// start endless loop
 	do {
@@ -116,7 +114,7 @@ void	BasicGuideport::run() {
 		_active = a;
 
 		// really activate the output pins
-		do_activate(_active);
+		this->do_activate(_active);
 
 		// wait for signal or state change
 		cond.wait_until(lock, next);
@@ -131,7 +129,7 @@ void	BasicGuideport::run() {
  * is waiting in the run function for the initialization to complete.
  */
 BasicGuideport::BasicGuideport(const std::string& devicename)
-	: astro::camera::GuidePort(devicename),
+	: astro::camera::GuidePort(devicename), _running(true), _active(0),
 	  thread(basicguideport_main, this) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "BasicGuideport %s constructed",
 		devicename.c_str());
@@ -191,6 +189,7 @@ void	BasicGuideport::activate(float raplus, float raminus,
 	//debug(LOG_DEBUG, DEBUG_LOG, 0, "thread notified");
 }
 
+#if 0
 /**
  * \brief signal to the thread that initialization is complete
  *
@@ -200,6 +199,7 @@ void	BasicGuideport::start() {
 	std::unique_lock<std::mutex>	lock(mtx);
 	cond.notify_one();
 }
+#endif
 
 /**
  * \brief Stop the thread

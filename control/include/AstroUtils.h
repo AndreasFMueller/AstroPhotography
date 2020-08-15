@@ -247,6 +247,24 @@ std::string	timeformat(const std::string& format, time_t when,
 			bool local = true);
 
 /**
+ * \brief A simple wrapper class for unix time
+ *
+ * Unix time is used in many places, but we need some additional capabilities
+ * like string formatting, which is provided by this class.
+ */
+class Time {
+	time_t	_time;
+public:
+	Time();
+	Time(time_t t);
+	time_t	time() const { return _time; }
+	void	time(time_t t) { _time = t; }
+	std::string	toString(const std::string& format,
+		bool local = true) const;
+	std::string	toString(bool local = true) const;
+};
+
+/**
  * \brief Attribute value pairs container
  *
  * Command line applications use arguments of the form attribute=value

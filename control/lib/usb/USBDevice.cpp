@@ -367,6 +367,10 @@ void	Device::setInterfaceAltSetting(uint8_t interface, uint8_t altsetting) {
  * \param request	pointer to the control request
  */
 void	Device::controlRequest(RequestBase *request) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "processing %p", request);
+	if (NULL == request) {
+		std::runtime_error("no request structure for control request");
+	}
 	USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "bmRequest = %02x, bRequest = %02x, "
 		"wValue = %04x, wIndex = %04x, wLength = %d",
 		(unsigned int)request->bmRequestType(),
@@ -382,6 +386,13 @@ void	Device::controlRequest(RequestBase *request) {
 			request->payloadHex().c_str());
 	}
 
+	// preparing the control transfer
+	if (NULL == dev_handle) {
+		std::string	msg = stringprintf("%hx/%hx has no handle",
+			getVendorId(), getProductId());
+		USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw std::runtime_error(msg);
+	}
 	int	rc = libusb_control_transfer(dev_handle, 
 			request->bmRequestType(),
 			request->bRequest(),

@@ -30,6 +30,7 @@ class SxCooler : public Cooler {
 	std::recursive_mutex	_mutex;
 	std::condition_variable_any	_cond;
 	bool			_terminate;
+	std::string	purpose() const;
 public:
 	SxCooler(SxCamera& camera);
 	virtual	~SxCooler();

@@ -160,7 +160,7 @@ int	main(int argc, char *argv[]) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "start focusing process");
 
 	// get the device repository
-	astro::module::ModuleRepositoryPtr	repository = astro::module::getModuleRepository();
+	auto	repository = astro::module::ModuleRepository::get();
 	astro::module::Devices	devices(repository);
 
 	// get the ccd

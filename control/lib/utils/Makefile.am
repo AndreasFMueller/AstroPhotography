@@ -43,6 +43,7 @@ libastroutils_la_SOURCES = 						\
 	Sun.cpp								\
 	TaskUpdate.cpp							\
 	Temperature.cpp							\
+	Time.cpp							\
 	Timer.cpp							\
 	timeformat.cpp							\
 	ThreadBase.cpp							\

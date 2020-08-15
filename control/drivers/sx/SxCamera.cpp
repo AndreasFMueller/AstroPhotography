@@ -21,94 +21,67 @@ namespace astro {
 namespace camera {
 namespace sx {
 
-#define	SX_MODEL_M26C	0x005a
-#define SX_MODEL_56	0x0021
-#define SX_MODEL_46	0x0022
-#define SX_PRODUCT_M26C	0x0326
-
 #define	STAR2000_PORT		(1 << 0)
 #define COMPRESSED_PIXEL_FORMAT	(1 << 1)
 #define EEPROM			(1 << 2)
 #define	INTEGRATED_GUIDER	(1 << 3)
 #define REGULATED_COOLER	(1 << 4)
 #define HAS_SHUTTER		(1 << 5)
-/*
- * the last constant is not contained in the official documentation,
- * it is a meaning of that by conjectured in an email from Terry Platt, 
- * <tplatt@starlight.win-uk.net>, may 4, 2013
- */
-typedef struct sx_model_s {
-	unsigned short	product;
-	unsigned short	model;
-	std::string	name;
-} sx_model_t;
-
-#define	NUMBER_SX_MODELS	40
-sx_model_t	models[NUMBER_SX_MODELS] = {
-	{ 0x0105, 0x0045, std::string("SXVF-M5")       },
-	{ 0x0305, 0x00c5, std::string("SXVF-M5C")      },
-	{ 0x0107, 0x0047, std::string("SXVF-M7")       },
-	{ 0x0307, 0x00c7, std::string("SXVF-M7C")      },
-	{ 0x0000, 0x0048, std::string("SXVF-M8")       },
-	{ 0x0308, 0x00c8, std::string("SXVF-M8C")      },
-	{ 0x0109, 0x0049, std::string("MX9")           },
-	{ 0x0109, 0x0000, std::string("SXVF-M9")       },
-	{ 0x0309, 0x00c9, std::string("MX9C")          },
-	{ 0x0509, 0x0009, std::string("Oculus")        },
-	{ 0x0325, 0x0059, std::string("SXVR-M25C")     },
-	{ 0x0326, SX_MODEL_M26C, std::string("SXVR-M26C")     },
-	{ 0x0128, 0x0000, std::string("SXVR-H18")      },
-	{ 0x0126, 0x0000, std::string("SXVR-H16")      },
-	{ 0x0135, 0x0023, std::string("SXVR-H35")      },
-	{ 0x0135, 0x00b3, std::string("SXVR-H35C")     },
-	{ 0x0136, 0x0024, std::string("SXVR-H36")      },
-	{ 0x0136, 0x00b4, std::string("SXVR-H36C")     },
-	{ 0x0100, 0x0009, std::string("SXVR-H9")       },
-	{ 0x0119, 0x0009, std::string("SXVR-H9")       },
-	{ 0x0319, 0x0089, std::string("SXVR-H9C")      },
-	{ 0x0100, 0x0089, std::string("SXVR-H9C")      },
-	{ 0x0200, 0x0000, std::string("SXV interface") },
-	{ 0x0507, 0x0000, std::string("Lodestar")      },
-	{ 0x0507, 0x0000, std::string("Lodestar-C")    },
-	{ 0x0517, 0x0000, std::string("CoStar")        },
-	{ 0x0000, 0x0009, std::string("HX9")           },
-	{ 0x0000, 0x0010, std::string("SXVR-H16")      },
-	{ 0x0000, 0x0090, std::string("SXVR-H16C")     },
-	{ 0x0000, 0x0012, std::string("SXVR-H18")      },
-	{ 0x0000, 0x0092, std::string("SXVR-H18C")     },
-	{ 0x0000, 0x0056, std::string("SXVR-H674")     },
-	{ 0x0000, 0x00b6, std::string("SXVR-H674C")    },
-	{ 0x0000, 0x0057, std::string("SXVR-H694")     },
-	{ 0x0000, 0x00b7, std::string("SXVR-H694C")    },
-	{ 0x0000, 0x0028, std::string("SXVR-H814")     },
-	{ 0x0000, 0x00a8, std::string("SXVR-H814C")    },
-	{ 0x0000, 0x0058, std::string("SXVR-H290")     },
-	{ 0x0000, SX_MODEL_56, std::string("SX-56")         },
-	{ 0x0000, SX_MODEL_46, std::string("SX-46")         },
-};
 
 /**
- * \brief Create a new Camera from a USB device pointer
+ * \brief Get the model number from a device ptr
  *
- * The constructor has the side effect of claiming the data interface of
- * the camera. As we are doing multiple Bulk-Transfers during the lifetime
- * of the Camera object, it does not make sense to only claim and
- * release the interface when we need it. However this means that no other
- * instance of the camera object can access the camera (one can also consider
- * this a feature, not a bug). And the destructor absolutely must release
- * interface. When the constructor is called, the DevicePtr argument 
- * must refer to an open device.
- *
- * \param _deviceptr	USB device pointer
+ * \param deviceptr	device to query
  */
-SxCamera::SxCamera(DevicePtr& _deviceptr)
-	: Camera(SxName(_deviceptr).cameraname()), deviceptr(_deviceptr) {
-	// the default is to send requests over the data end point
-	// XXX here we use the USB control requests
-	useControlRequests = true;
+unsigned short	SxCamera::getModel(DevicePtr deviceptr) {
+	if (!deviceptr) {
+		std::string	msg = stringprintf("no device");
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw std::runtime_error(msg);
+	}
 
-	// make sure camera is not busy
-	_busy = false;
+	// learn the model number
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "get model number");
+	Request<sx_camera_model_t>      modelrequest(
+		RequestBase::vendor_specific_type,
+		RequestBase::device_recipient, (uint16_t)0,
+		(uint8_t)SX_CMD_CAMERA_MODEL, (uint16_t)0);
+
+	// send the request
+	deviceptr->controlRequest(&modelrequest);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "request was successful");
+	return modelrequest.data()->model;
+}
+
+/**
+ * \brief Connect to a given device
+ *
+ * \param _deviceptr	the device to connect to
+ */
+void	SxCamera::connect(DevicePtr _deviceptr) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "connect to %hu/%hu",
+		_deviceptr->getVendorId(), _deviceptr->getProductId());
+
+	// make sure we have a device
+	if (!_deviceptr) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "no device to specify");
+		throw BadParameter("no device specified");
+	}
+
+	// make sure the new name matches the old one
+	std::string	newname = SxName(DeviceName::Camera, _deviceptr)
+					.toString();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "trying newname = %s", newname.c_str());
+	if (name().toString() != newname) {
+		std::string	msg = stringprintf("reconnect name mismatch: "
+			"%s != %s", name().toString().c_str(),
+			newname.c_str());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw BadParameter(msg);
+	}
+
+	// remember the device ptr
+	deviceptr = _deviceptr;
 
 	// find the product id
 	product = deviceptr->descriptor()->idProduct();
@@ -198,16 +171,14 @@ gotbuildnumber:
 
 	// learn the model number
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "get model number");
-	Request<sx_camera_model_t>      modelrequest(
-		RequestBase::vendor_specific_type,
-		RequestBase::device_recipient, (uint16_t)0,
-		(uint8_t)SX_CMD_CAMERA_MODEL, (uint16_t)0);
-	controlRequest(&modelrequest);
-	model = modelrequest.data()->model;
+	model = getModel(deviceptr);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "model = %04x", model);
 
 	// find out whether this is a model with an interline CCD
 	_has_interline_ccd = (0x10 == (0x7f & model));
+
+	// remove all ccds
+	ccdinfo.clear();
 
 	// get information about this CCD from the camera
         Request<sx_ccd_params_t>        ccd0request(
@@ -299,7 +270,95 @@ gotbuildnumber:
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "Imaging CCD: %s",
 		ccd0.toString().c_str());
 	ccdinfo.push_back(ccd0);
+}
 
+/**
+ * \brief Disconnect the camera
+ *
+ * \param _deviceptr	the device to connect to
+ */
+void	SxCamera::disconnect() {
+	// make sure we have the exlusive access to the USB device
+	std::unique_lock<std::recursive_mutex>	_lock(mutex);
+
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "reconnecting SX device");
+	// clean up all the out endpoint
+	try {
+		outendpoint.reset();
+	} catch (const std::exception& x) {
+		std::string	msg = stringprintf("failed to destroy %s: %s",
+			demangle(typeid(x).name()).c_str(), x.what());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+	}
+
+	// clean up all the in endpoint
+	try {
+		inendpoint.reset();
+	} catch (const std::exception& x) {
+		std::string	msg = stringprintf("failed to destroy %s: %s",
+			demangle(typeid(x).name()).c_str(), x.what());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+	}
+
+	// clean up the interface
+	try {
+		interface.reset();
+	} catch (const std::exception& x) {
+		std::string	msg = stringprintf("failed to destroy %s: %s",
+			demangle(typeid(x).name()).c_str(), x.what());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+	}
+
+	// clean up the device itself
+	try {
+		deviceptr.reset();
+	} catch (const std::exception& x) {
+		std::string	msg = stringprintf("failed to destroy %s: %s",
+			demangle(typeid(x).name()).c_str(), x.what());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+	}
+}
+
+/**
+ * \brief Reconnect the camera to a new USB device
+ *
+ * \param _deviceptr	the device to connect to
+ */
+void	SxCamera::reconnect(DevicePtr _deviceptr) {
+	// make sure we have the exlusive access to the USB device
+	std::unique_lock<std::recursive_mutex>	_lock(mutex);
+
+	// connect to the new device
+	connect(_deviceptr);
+}
+
+/**
+ * \brief Create a new Camera from a USB device pointer
+ *
+ * The constructor has the side effect of claiming the data interface of
+ * the camera. As we are doing multiple Bulk-Transfers during the lifetime
+ * of the Camera object, it does not make sense to only claim and
+ * release the interface when we need it. However this means that no other
+ * instance of the camera object can access the camera (one can also consider
+ * this a feature, not a bug). And the destructor absolutely must release
+ * interface. When the constructor is called, the DevicePtr argument 
+ * must refer to an open device.
+ *
+ * \param _deviceptr	USB device pointer
+ */
+SxCamera::SxCamera(SxCameraLocator& locator, DevicePtr _deviceptr)
+	: Camera(SxName(DeviceName::Camera, _deviceptr).cameraname()),
+	  _locator(locator), deviceptr(_deviceptr) {
+	// the default is to send requests over the data end point
+	// XXX here we use the USB control requests
+	useControlRequests = true;
+
+	// make sure camera is not busy
+	_busy = false;
+	_purpose = "";
+
+	// now try to connect to the device
+	connect(_deviceptr);
 }
 
 /**
@@ -319,32 +378,10 @@ SxCamera::~SxCamera() {
  * \brief get the user friendly name
  */
 std::string	SxCamera::userFriendlyName() const {
-	// try to match model and product
-	for (int i = 0; i < NUMBER_SX_MODELS; i++) {
-		if ((product == models[i].product)
-			&& (model == models[i].model)) {
-			return models[i].name;
-		}
+	try {
+		SxName::userFriendlyName(product, model);
+	} catch (NotFound& x) {
 	}
-
-	// try to match model alone, at least if model != 0
-	if (model != 0) {
-		for (int i = 0; i < NUMBER_SX_MODELS; i++) {
-			if (model == models[i].model) {
-				return models[i].name;
-			}
-		}
-	}
-
-	// try to match product alone
-	if (product != 0) {
-		for (int i = 0; i < NUMBER_SX_MODELS; i++) {
-			if (product == models[i].product) {
-				return models[i].name;
-			}
-		}
-	}
-
 	return Device::userFriendlyName();
 }
 
@@ -356,7 +393,12 @@ void	SxCamera::reset() {
 		RequestBase::vendor_specific_type,
 		RequestBase::device_recipient, (uint16_t)0,
 		(uint8_t)SX_CMD_RESET, (uint16_t)0);
-	controlRequest(&resetrequest);
+	try {
+		controlRequest(&resetrequest);
+	} catch (USBError& x) {
+		refresh();
+		throw x;
+	}
 }
 
 /**
@@ -426,6 +468,16 @@ InterfacePtr	SxCamera::getInterface() {
  */
 void	SxCamera::controlRequest(RequestBase *request,
 		bool asUSBControlRequest) {
+	// before doing anything, check that we have a deviceptr
+	if (!deviceptr) {
+		refresh();
+		if (!deviceptr) {
+			std::string	msg = stringprintf("refresh failed");
+			debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+			throw DeviceTimeout(msg);
+		}
+	}
+
 	//request->setTimeout(request->getTimeout() + 60000);
 	if (request->getTimeout() <= 1000) {
 		request->setTimeout(30000);
@@ -560,8 +612,14 @@ bool	SxCamera::busy() {
  *
  * Any method that does an USB operation must reserve the device before
  * it initiates the operation, and release it when it completes.
+ *
+ * \param purpose	the purpose for the reservation
+ * \param timeout	the timeout in milliseconds to wait for the device
+ *			to become free
  */
 bool	SxCamera::reserve(const std::string& purpose, int timeout) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "RESERVE attempt '%s', current = '%s'",
+		purpose.c_str(), _purpose.c_str());
 	std::unique_lock<std::recursive_mutex>	lock(mutex);
 	if (_busy && (purpose == _purpose)) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0,
@@ -575,22 +633,25 @@ bool	SxCamera::reserve(const std::string& purpose, int timeout) {
 			purpose.c_str());
 		return true;
 	}
-	std::cv_status	status
-		= condition.wait_for(lock, std::chrono::milliseconds(timeout));
-	if (status == std::cv_status::timeout) {
-		return false;
+
+	// repeat waiting until we either hit a timeout or are successful
+	// at reserving the device
+	while (1) {
+		std::cv_status	status = condition.wait_for(lock,
+					std::chrono::milliseconds(timeout));
+		if (status == std::cv_status::timeout) {
+			return false;
+		}
+		// we now own the lock and can change the busy flag
+		if (!_busy) {
+			_busy = true;
+			_purpose = purpose;
+			debug(LOG_DEBUG, DEBUG_LOG, 0,
+				"RESERVE camera reserved: '%s'",
+				purpose.c_str());
+			return true;
+		}
 	}
-	// we now own the lock and can change the busy flag
-	if (!_busy) {
-		_busy = true;
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "RESERVE camera reserved: '%s'",
-			purpose.c_str());
-		return true;
-	}
-	
-	// we should not get to this point, because that indicates a logic
-	// error. After we receive a signal, the device should be free
-	return false;
 }
 
 /**
@@ -600,6 +661,8 @@ bool	SxCamera::reserve(const std::string& purpose, int timeout) {
  * allows them to continue
  */
 void	SxCamera::release(const std::string& purpose) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "RESERVE release '%s', current = '%s'",
+		purpose.c_str(), _purpose.c_str());
 	std::unique_lock<std::recursive_mutex>	lock(mutex);
 	if (_busy == false) {
 		debug(LOG_ERR, DEBUG_LOG, 0,
@@ -618,8 +681,60 @@ void	SxCamera::release(const std::string& purpose) {
 	condition.notify_all();
 }
 
+/**
+ * \brief Find out whether the camera has  flood ilumination LED
+ */
 bool	SxCamera::hasRBIFlood() const {
 	return ((model == SX_MODEL_56) && (model == SX_MODEL_56));
+}
+
+/**
+ * \brief Refresh the connection
+ */
+void	SxCamera::refresh() {
+	std::string	enclosurename = name().enclosurename();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "start refresh %s",
+		enclosurename.c_str());
+
+	// release the data structures
+	disconnect();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "disconnect the device");
+
+	// forget the enclosure we are currently using
+	try {
+		_locator.forget(enclosurename);
+	} catch (const std::exception& x) {
+		std::string	msg = stringprintf("error during forget: %s %s",
+			demangle(typeid(x).name()).c_str(), x.what());
+	}
+
+	// teset the deviceptr 
+
+	// get the device
+	usb::DevicePtr	newdevptr;
+	try {
+		newdevptr = _locator.deviceForName(enclosurename);
+	} catch (const std::exception& x) {
+		std::string	msg = stringprintf("error during "
+			"deviceForName: %s %s",
+			demangle(typeid(x).name()).c_str(), x.what());
+	}
+
+	// if we could not get the new pointer, we give up at this point
+	if (!newdevptr) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0,
+			"could not get a new connection for %s",
+			enclosurename.c_str());
+		return;
+	}
+
+	// reconnect to this enclosure
+	try {
+		reconnect(newdevptr);
+	} catch (const std::exception& x) {
+		std::string	msg = stringprintf("error during reconnect: "
+			"%s %s", demangle(typeid(x).name()).c_str(), x.what());
+	}
 }
 
 } // namespace sx

@@ -39,6 +39,8 @@ bool	Module::dlclose_on_close = true;
  * .la file specifies the file containing the code. This method
  * scans the .la file for the dlname attribute and returns a fully
  * qualified path to the code file, if it is found.
+ *
+ * \param lafile	the name of the load file
  */
 std::string	Module::getDlname(const std::string& lafile) const {
 	// open the file
@@ -81,12 +83,12 @@ end:
 bool	Module::dlfileexists() const {
 	// check that we can stast the dlname file
 	struct stat	sb;
-	if (stat(dlname.c_str(), &sb) < 0) {
+	if (stat(_dlname.c_str(), &sb) < 0) {
 		return false;
 	}
 
 	// check that the dlfile is accessible
-	if (access(dlname.c_str(), R_OK) < 0) {
+	if (access(_dlname.c_str(), R_OK) < 0) {
 		return false;
 	}
 
@@ -99,11 +101,26 @@ bool	Module::dlfileexists() const {
 }
 
 /**
+ * \brief Get the base name of the module file
+ */
+std::string	Module::basename() const {
+	// find the last / in the name
+	auto	i = _dlname.find_last_of("/");
+	if (i == std::string::npos) {
+		return _dlname;
+	}
+	return _dlname.substr(i + 1);
+}
+
+/**
  * \brief Construct a module given the repository directory and the module
  *        name.
  *
  * The file name of the .la file is constructed by concatenating the
  * directory name, the module name and the suffix .la.
+ *
+ * \param _dirname	name of the directory where the modules can be found
+ * \param modulename	the name of the module
  */
 Module::Module(const std::string& _dirname, const std::string& modulename)
 	: dirname(_dirname), _modulename(modulename) {
@@ -113,28 +130,40 @@ Module::Module(const std::string& _dirname, const std::string& modulename)
 	handle = NULL;
 
 	// get the path to the la file
-	dlname = getDlname(dirname + "/" + _modulename + ".la");
+	_dlname = getDlname(dirname + "/" + _modulename + ".la");
 
-	if (!dlfileexists()) {
+	// get information about the file
+	if (dlfileexists()) {
+		struct stat	sb;
+		if (stat(_dlname.c_str(), &sb) < 0) {
+			debug(LOG_ERR, DEBUG_LOG, 0, "cannot get ctime for %s",
+				_dlname.c_str());
+		} else {
+			_ctime.time(sb.st_ctime);
+			_size = sb.st_size;
+		}
+	} else {
 		std::string	msg = stringprintf(
-			"dl file '%s' not accessible", dlname.c_str());
+			"dl file '%s' not accessible", _dlname.c_str());
 	
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 		throw std::domain_error(msg);
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "module %s created from file %s",
-		modulename.c_str(), dlname.c_str());
+		modulename.c_str(), _dlname.c_str());
 }
 
 /**
  * \brief Returns the name of the code file (to be) loaded.
  */
 const std::string&	Module::filename() const {
-	return dlname;
+	return _dlname;
 }
 
 /**
  * \brief Compare modules.
+ *
+ * \param other		the other module to copy from
  */
 bool	Module::operator==(const Module& other) const {
 	return (other.dirname == dirname) && (other.modulename() == modulename());
@@ -157,18 +186,18 @@ void	Module::open() {
 
 	dlerror(); // clear error conditions
 
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "loading library %s", dlname.c_str());
-	handle = dlopen(dlname.c_str(), RTLD_NOW);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "loading library %s", _dlname.c_str());
+	handle = dlopen(_dlname.c_str(), RTLD_NOW);
 	if (NULL == handle) {
 		std::string	msg = stringprintf("cannot load %s: %s",
-			dlname.c_str(), dlerror());
+			_dlname.c_str(), dlerror());
 		event(EVENT_CLASS, astro::events::CRIT,
 			astro::events::Event::DEVICE, msg);
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 		throw std::runtime_error(msg);
 	}
 	event(EVENT_CLASS, astro::events::NOTICE, astro::events::Event::DEVICE,
-		stringprintf("module '%s' loaded", dlname.c_str()));
+		stringprintf("module '%s' loaded", _dlname.c_str()));
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "library opened: handle = %p", handle);
 }
 
@@ -190,6 +219,8 @@ void	Module::close() {
 
 /**
  * \brief Get a pointer to given symbol
+ *
+ * \param symbolname	the name of the symbol to check for
  */
 void	*Module::getSymbol(const std::string& symbolname) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "looking up symbol %s",

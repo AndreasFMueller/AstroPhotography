@@ -21,9 +21,12 @@ namespace camera {
  * \brief Basic guideport framework
  *
  * Hardware devices that work as a guider port can be controlled by this
- * class. It provides all the timeing, the only thing that needs to be
+ * class. It provides all the timing, the only thing that needs to be
  * implemented in a derived class is the method do_activate which actually
  * activates the output pins of the particular hardware.
+ *
+ * For an example of how this base class is used, consult the SxGuidePort
+ * class that is based on it.
  */
 class BasicGuideport : public astro::camera::GuidePort {
 	std::chrono::steady_clock::time_point	nextchange[4];
@@ -50,7 +53,6 @@ public:
 	virtual void	do_activate(uint8_t active);
 	void	run();
 	void	stop();
-	void	start();
 };
 
 } // namespace camera

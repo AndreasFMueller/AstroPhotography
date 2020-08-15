@@ -69,7 +69,9 @@ class ModuleRepositoryBackend;
 class	Module {
 	std::string	dirname;
 	std::string	_modulename;
-	std::string	dlname;
+	std::string	_dlname;
+	Time		_ctime;
+	size_t		_size;
 	void	*handle;	
 	std::string	getDlname(const std::string& lafilename) const;
 	bool	dlfileexists() const;
@@ -81,6 +83,10 @@ public:
 	bool	operator==(const Module& other) const;
 	const std::string&	filename() const;
 	const std::string&	modulename() const { return _modulename; }
+	const std::string&	dlname() const { return _dlname; }
+	std::string	basename() const;
+	Time	ctime() const { return _ctime; }
+	size_t	size() const { return _size; }
 	bool	isloaded() const { return NULL != handle; }
 	void	open();
 	void	close();
@@ -114,12 +120,6 @@ public:
 typedef std::shared_ptr<ModuleRepository>	ModuleRepositoryPtr;
 
 /**
- * \brief Class to retrieve module repositories
- */
-ModuleRepositoryPtr	getModuleRepository();
-ModuleRepositoryPtr	getModuleRepository(const std::string& path);
-
-/**
  * \brief A ModuleRepository gives access to a collection of modules.
  *
  * A Repository object represents the loadable modules contained in
@@ -145,6 +145,9 @@ public:
 	virtual std::vector<ModulePtr>	modules() const = 0;
 	virtual bool	contains(const std::string& modulename) = 0;
 	virtual ModulePtr	getModule(const std::string& modulename) = 0;
+	// access to the global repository
+	static ModuleRepositoryPtr	get();
+	static ModuleRepositoryPtr	get(const std::string& path);
 };
 
 /**

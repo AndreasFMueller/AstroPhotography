@@ -18,7 +18,6 @@ namespace gpio {
 
 GpioGuideport::GpioGuideport(const std::string& devicename)
 	: astro::camera::BasicGuideport(devicename) {
-	start();
 }
 
 GpioGuideport::~GpioGuideport() {

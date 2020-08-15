@@ -684,6 +684,7 @@ public:
 		float decplus, float decminus);
 	typedef	enum { RAPLUS, RAMINUS, DECPLUS, DECMINUS } direction_t;
 	GuidePortActivation(direction_t dir, float time);
+	float	max() const;
 };
 
 typedef	callback::CallbackDataEnvelope<GuidePortActivation>	ActivationCallbackData;
