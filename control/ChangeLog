@@ -1,6 +1,8 @@
 ChangeLog for the Astro project.
 
 20200816:
+	* rework ASI driver
+	* add CoolerInfo.cpp
 	* fix some timing issues with the SX guideport
 	* add PrecisionTime class
 	* cleanup the snow client code

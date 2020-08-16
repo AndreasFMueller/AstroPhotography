@@ -20,6 +20,7 @@ libastrodevice_la_SOURCES =						\
 	CcdInfo.cpp							\
 	CcdState.cpp							\
 	Cooler.cpp							\
+	CoolerInfo.cpp							\
 	DarkWork.cpp							\
 	Device.cpp							\
 	DeviceAccessor.cpp						\

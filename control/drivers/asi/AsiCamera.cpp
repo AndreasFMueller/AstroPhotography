@@ -202,6 +202,31 @@ AsiCamera::AsiCamera(AsiCameraLocator& locator, int index)
  * \brief Destroy the AsiCamera
  */
 AsiCamera::~AsiCamera() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "destroying %s",
+		name().toString().c_str());
+	// stop the guideport to ensure that the guideport thread does
+	// not try to use the camera
+	if (_guideport) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "stop the guideport");
+		AsiGuidePort *agp = dynamic_cast<AsiGuidePort*>(&*_guideport);
+		if (agp) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "stop the guideport");
+			agp->stop();
+		}
+	}
+
+	// stop the cooler to ensure that the cooler thread does
+	// not try to use the camera
+	if (_cooler) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "stop the cooler");
+		AsiCooler	*ac = dynamic_cast<AsiCooler*>(&*_cooler);
+		if (ac) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "stop the cooler");
+			ac->stop();
+		}
+	}
+
+	// close the camera
 	int	rc;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "close camera %d (id = %d)", _index, _id);
 	rc = ASICloseCamera(_index);
@@ -216,10 +241,13 @@ AsiCamera::~AsiCamera() {
 		return;
 	}
 	_locator.setopen(_index, false);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "camera destructor complete");
 }
 
 /**
  * \brief Get a CCD from 
+ *
+ * \param id	the index of the image format
  */
 CcdPtr	AsiCamera::getCcd0(size_t id) {
 	if (id >= nCcds()) {
@@ -246,7 +274,11 @@ bool    AsiCamera::hasGuidePort() const {
  * \brief Get a guider port
  */
 GuidePortPtr	AsiCamera::getGuidePort0() {
-	return GuidePortPtr(new AsiGuidePort(*this));
+	if (_guideport) {
+		return _guideport;
+	}
+	_guideport = GuidePortPtr(new AsiGuidePort(*this));
+	return _guideport;
 }
 
 /**
@@ -262,7 +294,6 @@ bool	AsiCamera::isColor() const {
  * \brief Get the index of a control based on the name
  */
 int	AsiCamera::controlIndex(const std::string& controlname) {
-	std::unique_lock<std::recursive_mutex>	lock(_api_mutex);
 	int	n = _capability_names.size();
 	for (int i = 0; i < n; i++) {
 		if (_capability_names[i] == controlname) {
@@ -278,17 +309,23 @@ int	AsiCamera::controlIndex(const std::string& controlname) {
 /**
  * \brief Common function to retrieve camera capabilities
  */
-static void	getControlCapabilities(int id, int control_index,
-	ASI_CONTROL_CAPS *caps) {
-	int	rc = ASIGetControlCaps(id, control_index, caps);
+void	AsiCamera::getControlCapabilities(int control_index,
+		ASI_CONTROL_CAPS *caps) {
+	int	rc;
+	{
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "lock ASI api_mutex %d",
+			control_index);
+		std::unique_lock<std::recursive_mutex>	lock(_api_mutex);
+		rc = ASIGetControlCaps(_id, control_index, caps);
+	}
 	if (Asi_Debug_Apicalls) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0,
 			"%d = ASIGetControlCaps(%d, %d, %p)",
-			rc, id, control_index, caps);
+			rc, _id, control_index, caps);
 	}
 	if (ASI_SUCCESS != rc) {
 		std::string	msg = stringprintf("%d cannot get caps: %s",
-			id, AsiCamera::error(rc).c_str());
+			_id, AsiCamera::error(rc).c_str());
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 		throw std::runtime_error(msg);
 	}
@@ -298,9 +335,8 @@ static void	getControlCapabilities(int id, int control_index,
  * \brief get the maximum value of a control by index
  */
 long    AsiCamera::controlMax(int control_index) {
-	std::unique_lock<std::recursive_mutex>	lock(_api_mutex);
 	ASI_CONTROL_CAPS	caps;
-	getControlCapabilities(_id, control_index, &caps);
+	getControlCapabilities(control_index, &caps);
 	return caps.MaxValue;
 }
 
@@ -315,9 +351,8 @@ long    AsiCamera::controlMax(const std::string& controlname) {
  * \brief get the minimum value of a control by index
  */
 long    AsiCamera::controlMin(int control_index) {
-	std::unique_lock<std::recursive_mutex>	lock(_api_mutex);
 	ASI_CONTROL_CAPS	caps;
-	getControlCapabilities(_id, control_index, &caps);
+	getControlCapabilities(control_index, &caps);
 	return caps.MinValue;
 }
 
@@ -332,9 +367,8 @@ long    AsiCamera::controlMin(const std::string& controlname) {
  * \brief get the default value of a control by index
  */
 long    AsiCamera::controlDefault(int control_index) {
-	std::unique_lock<std::recursive_mutex>	lock(_api_mutex);
 	ASI_CONTROL_CAPS	caps;
-	getControlCapabilities(_id, control_index, &caps);
+	getControlCapabilities(control_index, &caps);
 	return caps.DefaultValue;
 }
 
@@ -349,9 +383,8 @@ long    AsiCamera::controlDefault(const std::string& controlname) {
  * \brief Get the name of a control by index
  */
 std::string     AsiCamera::controlName(int control_index) {
-	std::unique_lock<std::recursive_mutex>	lock(_api_mutex);
 	ASI_CONTROL_CAPS	caps;
-	getControlCapabilities(_id, control_index, &caps);
+	getControlCapabilities(control_index, &caps);
 	return std::string(caps.Name);
 }
 
@@ -366,9 +399,8 @@ std::string     AsiCamera::controlName(const std::string& controlname) {
  * \brief Get the description of a control by index
  */
 std::string     AsiCamera::controlDescription(int control_index) {
-	std::unique_lock<std::recursive_mutex>	lock(_api_mutex);
 	ASI_CONTROL_CAPS	caps;
-	getControlCapabilities(_id, control_index, &caps);
+	getControlCapabilities(control_index, &caps);
 	return std::string(caps.Description);
 }
 
@@ -376,7 +408,6 @@ std::string     AsiCamera::controlDescription(int control_index) {
  * \brief Get the description of a control by name
  */
 std::string     AsiCamera::controlDescription(const std::string& controlname) {
-	std::unique_lock<std::recursive_mutex>	lock(_api_mutex);
 	return controlDescription(controlIndex(controlname));
 }
 
@@ -384,9 +415,8 @@ std::string     AsiCamera::controlDescription(const std::string& controlname) {
  * \brief get whether a control is writabl by index
  */
 bool    AsiCamera::controlWritable(int control_index) {
-	std::unique_lock<std::recursive_mutex>	lock(_api_mutex);
 	ASI_CONTROL_CAPS	caps;
-	getControlCapabilities(_id, control_index, &caps);
+	getControlCapabilities(control_index, &caps);
 	return (caps.IsWritable) ? true : false;
 }
 
@@ -463,12 +493,15 @@ static AsiControlType	asitype2type(ASI_CONTROL_TYPE asitype) {
  * \brief Get the value of a control
  */
 AsiControlValue	AsiCamera::getControlValue(AsiControlType type) {
-	std::unique_lock<std::recursive_mutex>	lock(_api_mutex);
 	long		value;
 	ASI_BOOL	pbauto;
 	ASI_CONTROL_TYPE	asitype = type2asitype(type);
 	int	rc;
-	rc = ASIGetControlValue(_id, asitype, &value, &pbauto);
+	{
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "lock api");
+		std::unique_lock<std::recursive_mutex>	lock(_api_mutex);
+		rc = ASIGetControlValue(_id, asitype, &value, &pbauto);
+	}
 	if (Asi_Debug_Apicalls) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0,
 			"%d = ASIGetControlValue(%d, %d, %ld, %s)",
@@ -492,12 +525,15 @@ AsiControlValue	AsiCamera::getControlValue(AsiControlType type) {
  * \brief Set the value of a control
  */
 void	AsiCamera::setControlValue(const AsiControlValue& controlvalue) {
-	std::unique_lock<std::recursive_mutex>	lock(_api_mutex);
 	ASI_CONTROL_TYPE	type = type2asitype(controlvalue.type);
 	long		value = controlvalue.value;
 	ASI_BOOL	pbauto = (controlvalue.isauto) ? ASI_TRUE : ASI_FALSE;
 	int	rc;
-	rc = ASISetControlValue(_id, type, value, pbauto);
+	{
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "lock ASI api");
+		std::unique_lock<std::recursive_mutex>	lock(_api_mutex);
+		rc = ASISetControlValue(_id, type, value, pbauto);
+	}
 	if (Asi_Debug_Apicalls) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0,
 			"%d = ASISetControlValue(%d, %d, %ld, %s)",
@@ -560,6 +596,7 @@ std::string	AsiCamera::error(int errorcode) {
  * \brief Set the ROI
  */
 void	AsiCamera::setROIFormat(const roi_t roi) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "lock ASI api");
 	std::unique_lock<std::recursive_mutex>	lock(_api_mutex);
 	int	iBin = roi.mode.x();
 	ASI_ERROR_CODE	rc = ASISetROIFormat(_id, roi.size.width(),
@@ -584,6 +621,7 @@ void	AsiCamera::setROIFormat(const roi_t roi) {
  * \brief Get the current ROI
  */
 AsiCamera::roi_t   AsiCamera::getROIFormat() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "lock ASI api");
 	std::unique_lock<std::recursive_mutex>	lock(_api_mutex);
 	int	iWidth, iHeight, iBin;
 	ASI_IMG_TYPE	Img_type;
@@ -611,6 +649,7 @@ AsiCamera::roi_t   AsiCamera::getROIFormat() {
  * \brief Set the start position
  */
 void    AsiCamera::setStartPos(const ImagePoint& point) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "lock ASI api");
 	std::unique_lock<std::recursive_mutex>	lock(_api_mutex);
 	ASI_ERROR_CODE	rc = ASISetStartPos(_id, point.x(), point.y());
 	if (Asi_Debug_Apicalls) {
@@ -632,6 +671,7 @@ void    AsiCamera::setStartPos(const ImagePoint& point) {
  * \brief Get the start position
  */
 ImagePoint      AsiCamera::getStartPos() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "lock ASI api");
 	std::unique_lock<std::recursive_mutex>	lock(_api_mutex);
 	int	iStartX, iStartY;
 	ASI_ERROR_CODE	rc = ASIGetStartPos(_id, &iStartX, &iStartY);
@@ -653,6 +693,7 @@ ImagePoint      AsiCamera::getStartPos() {
  * \brief Get the number of dropped frames
  */
 unsigned long   AsiCamera::getDroppedFrames() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "lock ASI api");
 	std::unique_lock<std::recursive_mutex>	lock(_api_mutex);
 	int	iDropFrames;
 	ASI_ERROR_CODE	rc = ASIGetDroppedFrames(_id, &iDropFrames);
@@ -674,6 +715,7 @@ unsigned long   AsiCamera::getDroppedFrames() {
  * \brief start exposure
  */
 void	AsiCamera::startExposure(bool isdark) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "lock ASI api");
 	std::unique_lock<std::recursive_mutex>	lock(_api_mutex);
 	// make sure the camera is idle
 	if (_asi_mode != mode_idle) {
@@ -704,6 +746,7 @@ void	AsiCamera::startExposure(bool isdark) {
  * \brief stop exposure
  */
 void	AsiCamera::stopExposure() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "lock ASI api");
 	std::unique_lock<std::recursive_mutex>	lock(_api_mutex);
 	// make sure the camera is in stream mode
 	if (_asi_mode != mode_stream) {
@@ -728,6 +771,7 @@ void	AsiCamera::stopExposure() {
  * \brief Get the exposure status
  */
 ASI_EXPOSURE_STATUS	AsiCamera::getExpStatus() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "lock ASI api");
 	std::unique_lock<std::recursive_mutex>	lock(_api_mutex);
 	// check that we are in the correct mode
 	switch (_asi_mode) {
@@ -774,6 +818,7 @@ ASI_EXPOSURE_STATUS	AsiCamera::getExpStatus() {
  * \brief retrieve the data
  */
 void	AsiCamera::getDataAfterExp(unsigned char *pBuffer, long lBuffSize) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "lock ASI api");
 	std::unique_lock<std::recursive_mutex>	lock(_api_mutex);
 	if (_asi_mode != mode_exposure) {
 		std::string	msg = stringprintf("%s: not in exposure mode: %d",
@@ -802,6 +847,7 @@ void	AsiCamera::getDataAfterExp(unsigned char *pBuffer, long lBuffSize) {
  * \brief Start the video stream
  */
 void    AsiCamera::startVideoCapture() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "lock ASI api");
 	std::unique_lock<std::recursive_mutex>	lock(_api_mutex);
 	// make sure the camera is idle
 	if (_asi_mode != mode_idle) {
@@ -830,6 +876,7 @@ void    AsiCamera::startVideoCapture() {
  * \brief Stop the video stream
  */
 void    AsiCamera::stopVideoCapture() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "lock ASI api");
 	std::unique_lock<std::recursive_mutex>	lock(_api_mutex);
 	// make sure the camera is in stream mode
 	if (_asi_mode != mode_stream) {
@@ -953,6 +1000,16 @@ void    AsiCamera::pulseGuideOff(direction_t dir) {
 	}
 }
 
+/**
+ * \brief Get the cooler from the camera
+ */
+CoolerPtr	AsiCamera::getCooler() {
+	if (_cooler) {
+		return _cooler;
+	}
+	_cooler = CoolerPtr(new AsiCooler(*this));
+	return _cooler;
+}
 
 } // namespace asi
 } // namespace camera

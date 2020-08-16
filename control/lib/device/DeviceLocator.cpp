@@ -64,22 +64,41 @@ MountPtr	DeviceCacheAdapter<Mount>::get0(const DeviceName& name) {
 }
 
 //////////////////////////////////////////////////////////////////////
+// DeviceLocatorBase implementation
+//////////////////////////////////////////////////////////////////////
+std::recursive_mutex	*DeviceLocatorBase::mutex;
+
+std::once_flag	DeviceLocatorBase::flag;
+
+void	DeviceLocatorBase::mutex_initialize() {
+	DeviceLocatorBase::mutex = new std::recursive_mutex();
+}
+
+std::recursive_mutex	*DeviceLocatorBase::getMutex() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "get the mutex");
+	std::call_once(DeviceLocatorBase::flag, mutex_initialize);
+	return DeviceLocatorBase::mutex;
+}
+
+//////////////////////////////////////////////////////////////////////
 // DeviceLocator implementation
 //////////////////////////////////////////////////////////////////////
+
 DeviceLocator::DeviceLocator() :
-	aocache(this, this->_mutex),
-	cameracache(this, this->_mutex),
-	ccdcache(this, this->_mutex),
-	coolercache(this, this->_mutex),
-	filterwheelcache(this, this->_mutex),
-	focusercache(this, this->_mutex),
-	guideportcache(this, this->_mutex),
-	mountcache(this, this->_mutex) {
+	aocache(this),
+	cameracache(this),
+	ccdcache(this),
+	coolercache(this),
+	filterwheelcache(this),
+	focusercache(this),
+	guideportcache(this),
+	mountcache(this) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "constructing DeviceLocator %s at %p",
 		demangle(typeid(*this).name()).c_str(), this);
 }
 
 DeviceLocator::~DeviceLocator() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "destroying device locator");
 }
 
 std::string	DeviceLocator::getName() const {

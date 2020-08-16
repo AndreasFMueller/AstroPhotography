@@ -27,10 +27,14 @@ class AsiCamera;
  * an adapter class to the CameraLocator class.
  */
 class AsiCameraLocator : public DeviceLocator {
-	std::recursive_mutex	_mutex;
+	static std::recursive_mutex	*_mutex;
+	static std::recursive_mutex	*getMutex();
 	static std::vector<bool>	cameraopen;
-	static void	initialize_cameraopen();
+	static std::once_flag	flag;
+	static void	locator_initialize();
+	static void	setopen(int index, bool o);
 public:
+	static bool	isopen(int index);
 	AsiCameraLocator();
 	virtual ~AsiCameraLocator();
 	virtual std::string	getName() const;
@@ -38,13 +42,13 @@ public:
 	virtual	std::vector<std::string>	getDevicelist(DeviceName::device_type device = DeviceName::Camera);
 protected:
 	virtual CameraPtr	getCamera0(const DeviceName& name);
+	virtual CoolerPtr	getCooler0(const DeviceName& name);
+	virtual GuidePortPtr	getGuidePort0(const DeviceName& name);
 public:
 	// stuff that is available to open cameras
 	std::vector<std::string>	imgtypes(int index);
-	bool	isopen(int index);
 	friend class AsiCamera;
 private:
-	void	setopen(int index, bool o);
 	void	addCameraNames(std::vector<std::string>& names);
 	void	addCcdNames(std::vector<std::string>& names);
 	void	addCoolerNames(std::vector<std::string>& names);

@@ -12,6 +12,7 @@
 #include <AstroFormat.h>
 #include <AsiCamera.hh>
 #include <AsiCcd.h>
+#include <AsiCooler.h>
 #include <includes.h>
 #include <ASICamera2.h>
 #include <utils.h>
@@ -76,6 +77,8 @@ namespace asi {
 // AsiLocator implementation
 //////////////////////////////////////////////////////////////////////
 
+std::recursive_mutex	*AsiCameraLocator::_mutex;
+
 std::vector<bool>	AsiCameraLocator::cameraopen;
 
 std::string	AsiCameraLocator::getName() const {
@@ -93,7 +96,11 @@ std::string	AsiCameraLocator::getVersion() const {
  * It has to be initialize to a length corresponding to the number of
  * cameras available. All cameras are flagged as closed initially.
  */
-void	AsiCameraLocator::initialize_cameraopen() {
+void	AsiCameraLocator::locator_initialize() {
+	// initialize the mutex
+	_mutex = new std::recursive_mutex();
+
+	// initialize the 
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "initialize the cameraopen array");
 	int	n = ASIGetNumOfConnectedCameras();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "found %d cameras", n);
@@ -106,19 +113,37 @@ void	AsiCameraLocator::initialize_cameraopen() {
 		"initalization of %d cameras complete", n);
 }
 
-std::once_flag	cameraopen_flag;
+std::once_flag	AsiCameraLocator::flag;
 
 /**
  * \brief Create a new ASI camera locator
  */
 AsiCameraLocator::AsiCameraLocator() {
-	std::call_once(cameraopen_flag, initialize_cameraopen);
+	std::call_once(flag, locator_initialize);
+}
+
+/**
+ * \brief Get the mutex
+ */
+std::recursive_mutex	*AsiCameraLocator::getMutex() {
+	std::call_once(flag, locator_initialize);
+	return _mutex;
 }
 
 /**
  * \brief Destroy a new ASI camera locator
  */
 AsiCameraLocator::~AsiCameraLocator() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "destroy the locator");
+	// close all cameras
+	int	n = ASIGetNumOfConnectedCameras();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "closing %d cameras", n);
+	for (int i = 0; i < n; i++) {
+		if (isopen(i)) {
+			ASICloseCamera(i);
+			setopen(i, false);
+		}
+	}
 }
 
 /**
@@ -175,15 +200,12 @@ void	AsiCameraLocator::addGuideportNames(std::vector<std::string>& names) {
  */
 void	AsiCameraLocator::addCoolerNames(std::vector<std::string>& names) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieving Cooler names");
+	// XXX there is a bug here: we should really test for the existence
+	// XXX of a cooler before we generate the name
 	int	n = ASIGetNumOfConnectedCameras();
 	for (int index = 0; index < n; index++) {
-		std::vector<std::string>	it = imgtypes(index);
-		std::vector<std::string>::const_iterator	i;
-		for (i = it.begin(); i != it.end(); i++) {
-			DeviceName	ccdname = asiCcdName(index, *i);
-			names.push_back(ccdname.child(DeviceName::Cooler,
-				"cooler"));
-		}
+		DeviceName	coolername = asiCoolerName(index);
+		names.push_back(coolername);
 	}
 }
 
@@ -198,7 +220,7 @@ void	AsiCameraLocator::addCoolerNames(std::vector<std::string>& names) {
  */
 std::vector<std::string>	AsiCameraLocator::getDevicelist(
 		DeviceName::device_type device) {
-	std::lock_guard<std::recursive_mutex>	lock(_mutex);
+	std::lock_guard<std::recursive_mutex>	lock(*getMutex());
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "get ASI device list");
 	std::vector<std::string>	names;
 	switch (device) {
@@ -232,8 +254,8 @@ std::vector<std::string>	AsiCameraLocator::getDevicelist(
  * \param index		index of the camera
  */
 bool	AsiCameraLocator::isopen(int index) {
-	std::lock_guard<std::recursive_mutex>	lock(_mutex);
-	std::call_once(cameraopen_flag, initialize_cameraopen);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "isopen(%d)", index);
+	std::lock_guard<std::recursive_mutex>	lock(*getMutex());
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "check camera %d", index);
 	if (index >= AsiCameraLocator::cameraopen.size()) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "out of range");
@@ -251,8 +273,9 @@ bool	AsiCameraLocator::isopen(int index) {
  * \param o		whether or not the camera is open
  */
 void	AsiCameraLocator::setopen(int index, bool o) {
-	std::lock_guard<std::recursive_mutex>	lock(_mutex);
-	std::call_once(cameraopen_flag, initialize_cameraopen);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "setopen(%d) = %s",
+		index, (o) ? "YES" : "NO");
+	std::lock_guard<std::recursive_mutex>	lock(*getMutex());
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "remember camera %d state %s", index,
 		(o) ? "open" : "closed");
 	cameraopen[index] = o;
@@ -265,7 +288,7 @@ void	AsiCameraLocator::setopen(int index, bool o) {
  */
 std::vector<std::string>	AsiCameraLocator::imgtypes(int index) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieving image types for %d", index);
-	std::lock_guard<std::recursive_mutex>	lock(_mutex);
+	std::lock_guard<std::recursive_mutex>	lock(*getMutex());
 	// make sure the index is valid
 	if (index >= ASIGetNumOfConnectedCameras()) {
 		std::string	msg = stringprintf("");
@@ -319,10 +342,11 @@ std::vector<std::string>	AsiCameraLocator::imgtypes(int index) {
  * This works by retrieving a list of cameras and the checking which number
  * has the right name. This index is then used to retreive the camera object
  * by number.
+ *
  * \param name	name of the camera
  */
 CameraPtr	AsiCameraLocator::getCamera0(const DeviceName& name) {
-	std::lock_guard<std::recursive_mutex>	lock(_mutex);
+	std::lock_guard<std::recursive_mutex>	lock(*getMutex());
 
 	// locate a camera
 	std::string	sname = name;
@@ -340,6 +364,46 @@ CameraPtr	AsiCameraLocator::getCamera0(const DeviceName& name) {
 	debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 	throw std::runtime_error(msg);
 }
+
+/**
+ * \brief Get a Guideport by name
+ *
+ * \param name	the name of the guideport
+ */
+GuidePortPtr	AsiCameraLocator::getGuidePort0(const DeviceName& name) {
+	std::lock_guard<std::recursive_mutex>	lock(*getMutex());
+	DeviceName	cameraname = name;
+	cameraname.type(DeviceName::Camera);
+	CameraPtr	camera = this->getCamera(cameraname);
+	if (camera->hasGuidePort()) {
+		return camera->getGuidePort();
+	}
+	std::string msg = stringprintf("guideport %s not found",
+		name.toString().c_str());
+	debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+	throw std::runtime_error(msg);
+}
+
+/**
+ * \brief Get a Cooler by name
+ *
+ * \param name	the name of the cooler
+ */
+CoolerPtr	AsiCameraLocator::getCooler0(const DeviceName& name) {
+	std::lock_guard<std::recursive_mutex>	lock(*getMutex());
+	DeviceName	cameraname = name;
+	cameraname.type(DeviceName::Camera);
+	CameraPtr	camera = this->getCamera(cameraname);
+	AsiCamera	*_camera = dynamic_cast<AsiCamera*>(&*camera);
+	if (NULL == _camera) {
+		std::string	msg = stringprintf("%s is not an asi camera",
+			cameraname.toString().c_str());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw std::runtime_error(msg);
+	}
+	return _camera->getCooler();
+}
+
 
 } // namespace asi
 } // namespace camera

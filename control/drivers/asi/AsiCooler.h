@@ -19,9 +19,13 @@ namespace asi {
  */
 class AsiCooler : public Cooler {
 	AsiCamera&	_camera;
+	std::mutex	_mutex;
+	std::condition_variable	_condition;
+	std::thread	_thread;
+	bool		_running;
 	void	setCoolerTemperature();
 public:
-	AsiCooler(AsiCamera& camera, AsiCcd& ccd);
+	AsiCooler(AsiCamera& camera);
 	~AsiCooler();
 	virtual Temperature	getSetTemperature();
 	virtual Temperature	getActualTemperature();
@@ -35,6 +39,8 @@ public:
 	virtual float	dewHeater();
 	virtual void	dewHeater(float dewheatervalue);
 	virtual std::pair<float, float>	dewHeaterRange();
+	void	run();
+	void	stop();
 };
 
 } // namespace asi

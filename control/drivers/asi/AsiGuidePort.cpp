@@ -14,8 +14,7 @@ namespace asi {
 /**
  * \brief trampoline function to start the run function of the class
  */
-static void	*asi_main(void *parameter) {
-	AsiGuidePort	*port = (AsiGuidePort *)parameter;
+static void	asi_guideport_main(AsiGuidePort *port) {
 	std::string	portname = port->name();
 	try {
 		port->run();
@@ -23,16 +22,13 @@ static void	*asi_main(void *parameter) {
 		std::string	msg = stringprintf("guider port %s failed: %s",
 			portname.c_str(), x.what());
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
-		return NULL;
 	} catch (...) {
 		std::string	msg = stringprintf("guideport %s thread "
 			"failed (unknown exception", portname.c_str());
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
-		return NULL;
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "%s thread terminates",
 		portname.c_str());
-	return parameter;
 }
 
 /**
@@ -47,7 +43,7 @@ AsiGuidePort::AsiGuidePort(AsiCamera& camera)
 	_ra = 0;
 	_dec = 0;
 	_running = true;
-	_thread = new std::thread(asi_main, this);
+	_thread = std::thread(asi_guideport_main, this);
 }
 
 /**
@@ -58,13 +54,9 @@ AsiGuidePort::AsiGuidePort(AsiCamera& camera)
  * which would cause a segmentation fault.
  */
 AsiGuidePort::~AsiGuidePort() {
-	{
-		std::unique_lock<std::mutex>	lock(_mutex);
-		_running = false;
-	}
-	activate(0, 0, 0, 0);
-	_thread->join();
-	delete _thread;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "destructor of the guideport");
+	stop();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "guideport completed");
 }
 
 /**
@@ -93,7 +85,9 @@ uint8_t	AsiGuidePort::active() {
  */
 void	AsiGuidePort::activate(float raplus, float raminus,
 		float decplus, float decminus) {
-	if ((fabs(raplus - raminus) > 1000) || (fabs(decplus - decminus))) {
+	int	activationlimit = 1000000;
+	if ((fabs(raplus - raminus) > activationlimit)
+		|| (fabs(decplus - decminus) > activationlimit)) {
 		std::string	portname = name();
 		std::string	msg = stringprintf("%s activation time too "
 			"long: %f/%f/%f/%f", raplus, raminus, decplus, decminus,
@@ -103,7 +97,7 @@ void	AsiGuidePort::activate(float raplus, float raminus,
 	}
 	std::unique_lock<std::mutex>	lock(_mutex);
 	_ra = (raplus - raminus) * 1000;
-	_dec = (decplus - decplus - decminus) * 1000;
+	_dec = (decplus - decminus) * 1000;
 	_condition.notify_one();
 }
 
@@ -179,17 +173,19 @@ void	AsiGuidePort::run() {
 	// we are sure not to miss this event, because we carefully lock
 	// the private data of the class all the time
 	while (_running) {
-		// find the time when the next action should finish
-		int	duration = 0;
+		// find the time (in milliseconds) when the next action
+		// should finish
+		int	raduration = 0;
+		int	decduration = 0;
 
 		// first check for any right ascension movement
 		if (0 != _ra) {
 			if (_ra > 0) {
 				west();
-				duration = _ra;
+				raduration = _ra;
 			} else {
 				east();
-				duration = -_ra;
+				raduration = -_ra;
 			}
 		} else {
 			rastop();
@@ -199,17 +195,25 @@ void	AsiGuidePort::run() {
 		if (0 != _dec) {
 			if (_dec > 0) {
 				north();
-				if (_dec < duration) {
-					duration = _dec;
-				}
+				decduration = _dec;
 			} else {
 				south();
-				if (-_dec < duration) {
-					duration = -_dec;
-				}
+				decduration = -_dec;
 			}
 		} else {
 			decstop();
+		}
+
+		// compute the time to the next event
+		int	duration = 0;
+		if (raduration > 0) {
+			if (decduration > 0) {
+				duration = std::min(raduration, decduration);
+			} else {
+				duration = raduration;
+			}
+		} else {
+			duration = decduration;
 		}
 
 		// so we are done, and wait for new information
@@ -244,6 +248,23 @@ void	AsiGuidePort::run() {
 			// new values
 		}
 	}
+}
+
+/**
+ * \brief Stop the guideport thread
+ */
+void	AsiGuidePort::stop() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "stopping the guideport");
+	{
+		std::unique_lock<std::mutex>	lock(_mutex);
+		_running = false;
+	}
+	_condition.notify_all();
+	if (_thread.joinable()) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "join the guideport thread");
+		_thread.join();
+	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "stop complete");
 }
 
 } // namespace asi

@@ -25,7 +25,7 @@ class AsiCcd : public Ccd {
 	std::string	imgtypename();
 	// the _mutex is necessary to to protect the _thread.
 	std::recursive_mutex	_mutex;
-	std::thread		*_thread;
+	std::thread		_thread;
 	std::atomic_bool	_exposure_done;
 public:
 	static std::string	imgtype2string(int imgtype);
@@ -64,9 +64,7 @@ public:
 	virtual void	stopStream();
 	virtual bool	streaming();
 
-	virtual std::string	userFriendlyName() const {
-		return _camera.userFriendlyName();
-	}
+	virtual std::string	userFriendlyName() const;
 };
 
 } // namespace asi

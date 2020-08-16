@@ -540,30 +540,28 @@ public:
 	GuidePortPtr	getGuidePort();
 };
 
+class Cooler;
 /**
- * \brief Class containing 
+ * \brief Class containing current cooler state
  */
 class CoolerInfo {
 	Temperature	_actualTemperature;
 	Temperature	_setTemperature;
 	bool	_on;
 public:
-	const Temperature&	actualTemperature() const {
-		return _actualTemperature;
-	}
-	const Temperature&	setTemperature() const {
-		return _setTemperature;
-	}
-	bool	on() const { return _on; }
+	const Temperature&	actualTemperature() const;
+	const Temperature&	setTemperature() const;
+	bool	on() const;
 	CoolerInfo(const Temperature& actualTemperature,
-		const Temperature& setTemperature,  bool on)
-		: _actualTemperature(actualTemperature),
-		  _setTemperature(setTemperature), _on(on) {
-	}
+		const Temperature& setTemperature,  bool on);
+	CoolerInfo(Cooler& cooler);
 };
 
 typedef callback::CallbackDataEnvelope<CoolerInfo>	CoolerInfoCallbackData;
 
+/**
+ * \brief A wraper class for dew heater control state
+ */
 class DewHeater {
 public:
 	float	dewheater;

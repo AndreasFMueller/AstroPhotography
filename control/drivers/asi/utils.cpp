@@ -48,8 +48,10 @@ DeviceName	asiCcdName(int index, const std::string& imgtype) {
 /**
  * \brief Generate the name of a cooler for an ASI Cooler camera
  */
-DeviceName	asiCoolerName(int index, const std::string& imgtype) {
-	return asiCcdName(index, imgtype).child(DeviceName::Cooler, "cooler");
+DeviceName	asiCoolerName(int index) {
+	DeviceName	coolername = asiCameraName(index);
+	coolername.type(DeviceName::Cooler);
+	return coolername;
 }
 
 /**
@@ -60,9 +62,8 @@ DeviceName	asiCoolerName(int index, const std::string& imgtype) {
  * ASI-specific implementation of this function is required.
  */
 DeviceName	asiGuideportName(int index) {
-	DeviceName	cameraname = asiCameraName(index);
-	DeviceName	guideportname
-		= cameraname.child(DeviceName::Guideport, "guideport");
+	DeviceName	guideportname = asiCameraName(index);
+	guideportname.type(DeviceName::Guideport);
 	return guideportname;
 }
 

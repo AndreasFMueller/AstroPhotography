@@ -9,13 +9,14 @@
 #include <AsiLocator.h>
 #include <AstroCamera.h>
 #include <ASICamera2.h>
+#include <AsiCooler.h>
 
 namespace astro {
 namespace camera {
 namespace asi {
 
 #define	Asi_Debug_State		1
-#define	Asi_Debug_Apicalls	0
+#define	Asi_Debug_Apicalls	1
 
 typedef enum AsiControlType_ {
 	AsiGain = 0,
@@ -66,6 +67,8 @@ class AsiCamera : public Camera {
 	std::recursive_mutex	_api_mutex;
 	int	_id;
 	int	_index;
+	void	getControlCapabilities(int control_index,
+			ASI_CONTROL_CAPS *caps);
 	std::string	_userFriendlyName;
 public:
 	int	id() const { return _id; }
@@ -75,6 +78,8 @@ private:
 public:
 	AsiCamera(AsiCameraLocator&, int index);
 	~AsiCamera();
+
+	bool	hasCooler() const { return _hasCooler; }
 
 	// prevent copying of the camera class
 private:
@@ -88,6 +93,7 @@ protected:
 
 private:
 	bool	_hasGuidePort;
+	GuidePortPtr	_guideport;
 public:
 	virtual bool	hasGuidePort() const;
 protected:
@@ -178,6 +184,11 @@ public:
 	virtual std::string	userFriendlyName() const {
 		return _userFriendlyName;
 	}
+
+private:
+	CoolerPtr	_cooler;
+public:
+	CoolerPtr	getCooler();
 };
 
 } // namespace asi

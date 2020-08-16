@@ -24,7 +24,6 @@ namespace asi {
 AsiCcd::AsiCcd(const CcdInfo& info, AsiCamera& camera)
 	: Ccd(info), _camera(camera) {
 	stream = NULL;
-	_thread = NULL;
 	_exposure_done = true;
 }
 
@@ -32,6 +31,7 @@ AsiCcd::AsiCcd(const CcdInfo& info, AsiCamera& camera)
  * \brief Destroy the CCD object
  */
 AsiCcd::~AsiCcd() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "destroy the Ccd");
 	if (stream) {
 		delete stream;
 	}
@@ -156,8 +156,20 @@ void	AsiCcd::setExposure(const Exposure& e) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "exposure settings complete");
 }
 
-static void     start_main(AsiCcd *asiccd) {
-        asiccd->run();
+/**
+ * \brief Trampoline function to start the run method of the ccd
+ *
+ * \param asiccd	the ccd to run for
+ */
+static void     asi_ccd_main(AsiCcd *asiccd) {
+	try {
+		asiccd->run();
+	} catch (const std::exception& x) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "exposure thread crashed: %s",
+			x.what());
+	} catch (...) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "exposure thread crashed");
+	}
 }
 
 /**
@@ -192,7 +204,7 @@ void	AsiCcd::startExposure(const Exposure& exposure) {
 	//exposureStatus();
 
 	_exposure_done = false;
-	_thread = new std::thread(start_main, this);
+	_thread = std::thread(asi_ccd_main, this);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "exposure started");
 }
 
@@ -237,11 +249,9 @@ void	AsiCcd::run() {
 CcdState::State	AsiCcd::exposureStatus() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "exposureStatus()");
 	std::lock_guard<std::recursive_mutex>	lock(_mutex);
-	if ((_thread) && (_exposure_done)) {
+	if (_thread.joinable() && _exposure_done) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "thread cleanup");
-		_thread->join();
-		delete _thread;
-		_thread = NULL;
+		_thread.join();
 	}
 	ASI_EXPOSURE_STATUS	status = _camera.getExpStatus();
 	switch (status) {
@@ -423,11 +433,13 @@ astro::image::ImagePtr	AsiCcd::getRawImage() {
  * \brief Get a cooler for this CCD
  */
 CoolerPtr	AsiCcd::getCooler0() {
-	return CoolerPtr(new AsiCooler(_camera, *this));
+	return _camera.getCooler();
 }
 
 /**
  * \brief Set the exposure parameters for the stream
+ *
+ * \param e	the exposure settings to use for the stream
  */
 void    AsiCcd::streamExposure(const Exposure& e) {
 	setExposure(e);
@@ -436,6 +448,8 @@ void    AsiCcd::streamExposure(const Exposure& e) {
 
 /**
  * \brief Start streaming
+ *
+ * \param exposure	the exposure settings to use for the stream
  */
 void    AsiCcd::startStream(const Exposure& exposure) {
 	if (NULL != stream) {
@@ -495,6 +509,13 @@ bool	AsiCcd::hasTemperature() {
  */
 float	AsiCcd::getTemperature() {
 	return Temperature::zero + _camera.getControlValue(AsiTemperature).value / 10.;
+}
+
+/**
+ * \brief Get the userfriendly name of this camera
+ */
+std::string	AsiCcd::userFriendlyName() const {
+	return _camera.userFriendlyName();
 }
 
 } // namespace asi

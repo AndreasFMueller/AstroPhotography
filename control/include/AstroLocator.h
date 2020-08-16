@@ -13,6 +13,14 @@
 namespace astro {
 namespace device {
 
+class DeviceLocatorBase {
+	static std::recursive_mutex	*mutex;
+	static std::once_flag	flag;	
+	static void	mutex_initialize();
+public:
+	static std::recursive_mutex	*getMutex();
+};
+
 /**
  * \brief Device cache adapter serving devices of any type
  *
@@ -60,13 +68,6 @@ template<>
 astro::device::MountPtr
 DeviceCacheAdapter<astro::device::Mount>::get0(const DeviceName& name);
 
-class DeviceLocatorBase {
-protected:
-	std::recursive_mutex	_mutex;
-public:
-	std::recursive_mutex&	mutex() { return _mutex; }
-};
-
 /**
  * \brief Cache for devices
  *
@@ -77,11 +78,8 @@ template<typename Device>
 class DeviceCache {
 	std::map<std::string, typename Device::sharedptr>	_cache;
 	DeviceLocator	*_locator;
-protected:
-	std::recursive_mutex&	_mutex;
 public:
-	DeviceCache(DeviceLocator *locator, std::recursive_mutex& m)
-		: _locator(locator), _mutex(m) { }
+	DeviceCache(DeviceLocator *locator) : _locator(locator){ }
 	typename Device::sharedptr	get(const std::string& name);
 };
 
@@ -114,7 +112,7 @@ typename DeviceType::sharedptr	DeviceCache<DeviceType>::get(
 	// below we access the map, so concurrency becomes an issue
 	// we use the lock from the locator to ensure that we are
 	// the only thread accessing the data structures
-	std::lock_guard<std::recursive_mutex>	lock(_mutex);
+	std::lock_guard<std::recursive_mutex>	lock(*DeviceLocatorBase::getMutex());
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "device cache lock acquired");
 
 	// find out whether the name is already present in the cache
@@ -141,6 +139,7 @@ typename DeviceType::sharedptr	DeviceCache<DeviceType>::get(
  * locator, which ensures that 
  */
 class   DeviceLocator {
+private:
 	DeviceCache<astro::camera::AdaptiveOptics>	aocache;
 	DeviceCache<astro::camera::Camera>	cameracache;
 	DeviceCache<astro::camera::Ccd>		ccdcache;
@@ -150,7 +149,6 @@ class   DeviceLocator {
 	DeviceCache<astro::camera::GuidePort>	guideportcache;
 	DeviceCache<astro::device::Mount>	mountcache;
 public:
-	std::recursive_mutex	_mutex;
 	// the virtual functions perform the retrieval of a single device
 	// from the locator. They are public so that driver modules can
 	// easily ask for arbitrary devices, as the hopefully know what

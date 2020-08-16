@@ -118,7 +118,7 @@ void	Cooler::setTemperature(const Temperature& temperature) {
  *  \param onoff	Turn the cooler on/off
  */
 void	Cooler::setOn(bool onoff) {
-	CoolerInfo	ci(getActualTemperature(), getSetTemperature(), onoff);
+	CoolerInfo	ci(*this);
 	_on = onoff;
 	callback(ci);
 }

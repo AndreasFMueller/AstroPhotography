@@ -23,10 +23,10 @@ class AsiGuidePort : public GuidePort {
 	AsiCamera&	_camera;
 	std::mutex	_mutex;
 	std::condition_variable	_condition;
+	std::thread	_thread;
 	int	_ra;
 	int	_dec;
 	bool	_running;
-	std::thread	*_thread;
 	AsiGuidePort(const AsiGuidePort& other);
 	AsiGuidePort&	operator=(const AsiGuidePort& other);
 	void	north();
@@ -42,6 +42,7 @@ public:
 	virtual void	activate(float raplus, float raminus,
 				float decplus, float decminus);
 	void	run();
+	void	stop();
 };
 
 } // namespace asi
