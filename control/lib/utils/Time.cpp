@@ -34,6 +34,16 @@ std::string	Time::toString(const std::string& format, bool local) const {
 /**
  * \brief Format a time string
  *
+ * \param format	format string to use
+ * \param local		whether to display as local time
+ */
+std::string	Time::toString(const char *format, bool local) const {
+	return timeformat(format, _time, local);
+}
+
+/**
+ * \brief Format a time string
+ *
  * This uses the default format "%T %F"
  *
  * \param local		whether to display as local time

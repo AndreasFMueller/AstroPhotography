@@ -47,6 +47,7 @@ sx_model_t	SxName::models[] = {
 { 0x0507, 0x0000, 		"lodestar",	"Lodestar",		false },
 { 0x0507, 0x0000, 		"lodestarc",	"Lodestar-C",		false },
 { 0x0517, 0x0000, 		"costar",	"CoStar",		false },
+{ 0x0525, 0x0000, 		"ultrastar",	"Ultrastar",		false },
 { 0x0000, 0x0009, 		"hx9",		"HX9",			true  },
 { 0x0000, 0x0010, 		"h16",		"SXVR-H16",		true  },
 { 0x0000, 0x0090, 		"h16c",		"SXVR-H16C",		true  },
@@ -96,10 +97,15 @@ SxName::SxName(DeviceName::device_type type, usb::DevicePtr deviceptr)
 	if (counter != 1) {
 		enclosurename(deviceName(_product, _model));
 	}
+
+	// make sure we correctly set the _hascooler flag
+	_hascooler = hasCooler(_product, _model);
 }
 
 /**
  * \brief convert the command code into a printable name
+ *
+ * \param command	the command code to convert
  */
 std::string	command_name(sx_command_t command) {
 	switch (command) {
@@ -345,20 +351,26 @@ DeviceName	SxName::cameraname(const DeviceName& other) {
 DeviceName	SxName::ccdname(const DeviceName& other) {
 	DeviceName	result = cameraname(other);
 	result.type(DeviceName::Ccd);
+#if 0
 	result.push_back("Imager");
+#endif
 	return result;
 }
 
 DeviceName	SxName::coolername(const DeviceName& other) {
 	DeviceName	result = ccdname(other);
 	result.type(DeviceName::Cooler);
+#if 0
 	result.push_back("cooler");
+#endif
 	return result;
 }
 
 DeviceName	SxName::guideportname(const DeviceName& other) {
 	DeviceName	result = cameraname(other);
+#if 0
 	result.push_back("guideport");
+#endif
 	result.type(DeviceName::Guideport);
 	return result;
 }

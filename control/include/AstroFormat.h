@@ -10,7 +10,9 @@
 namespace astro {
 
 extern std::string stringprintf(const char *format, ...);
+extern std::string stringprintf(const std::string format, ...);
 extern std::string vstringprintf(const char *format, va_list args);
+extern std::string vstringprintf(const std::string format, va_list args);
 
 } // namespace rocket
 

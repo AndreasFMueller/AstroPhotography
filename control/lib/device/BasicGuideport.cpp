@@ -71,9 +71,15 @@ static void	basicguideport_main(BasicGuideport *guideport) {
  */
 void	BasicGuideport::run() {
 	std::unique_lock<std::mutex>	lock(mtx);
+	auto	interval = std::chrono::milliseconds(100000);
 
 	// make sure the device also has 0
-	this->do_activate(0);
+	try {
+		this->do_activate(0);
+	} catch (...) {
+		debug(LOG_ERR, DEBUG_LOG, 0,
+			"do_activate(0x0) should never throw");
+	}
 
 	// start endless loop
 	do {
@@ -82,8 +88,7 @@ void	BasicGuideport::run() {
 			= std::chrono::steady_clock::now();
 
 		// when do we imperatively have our next stop?
-		std::chrono::steady_clock::time_point next = now +
-				std::chrono::milliseconds(1000);
+		std::chrono::steady_clock::time_point next = now + interval;
 
 		// set the active pins
 		uint8_t	a = 0;
@@ -114,9 +119,16 @@ void	BasicGuideport::run() {
 		_active = a;
 
 		// really activate the output pins
-		this->do_activate(_active);
+		try {
+			this->do_activate(_active);
+		} catch (...) {
+			debug(LOG_ERR, DEBUG_LOG, 0,
+				"do_activate(0x%1x) should never throw",
+				_active);
+		}
 
 		// wait for signal or state change
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "waiting for notification");
 		cond.wait_until(lock, next);
 	} while (_running);
 }
@@ -186,7 +198,7 @@ void	BasicGuideport::activate(float raplus, float raminus,
 	nextchange[3] = now + std::chrono::milliseconds(delta);
 
 	cond.notify_one();
-	//debug(LOG_DEBUG, DEBUG_LOG, 0, "thread notified");
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "thread notified");
 }
 
 #if 0

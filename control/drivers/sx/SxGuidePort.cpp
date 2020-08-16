@@ -26,6 +26,7 @@ SxGuidePort::~SxGuidePort() {
 }
 
 void	SxGuidePort::do_activate(uint8_t active) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "activate %02x received", active);
 	// log the state change
 	BasicGuideport::do_activate(active);
 
@@ -53,7 +54,13 @@ void	SxGuidePort::do_activate(uint8_t active) {
 				"cannot reserve the camera, giving up");
 			return;
 		}
-	} catch (USBError& x) {
+	} catch (const std::exception& x) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "%s exception: %s",
+			demangle(typeid(x).name()).c_str(), x.what());
+		camera.release("guideport");
+		camera.refresh();
+	} catch (...) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "unknown exception");
 		camera.release("guideport");
 		camera.refresh();
 	}

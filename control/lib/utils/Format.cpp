@@ -29,11 +29,22 @@ std::string vstringprintf(const char *format, va_list ap) {
 	return std::string(buffer);
 }
 
-std::string stringprintf(const char *format, ...)
-{
+std::string	vstringprintf(const std::string format, va_list ap) {
+	return vstringprintf(format.c_str(), ap);
+}
+
+std::string stringprintf(const char *format, ...) {
 	va_list ap;
 	va_start(ap, format);
 	std::string	result = vstringprintf(format, ap);
+	va_end(ap);
+	return result;
+}
+
+std::string	stringprintf(const std::string format, ...) {
+	va_list ap;
+	va_start(ap, format);
+	std::string	result = vstringprintf(format.c_str(), ap);
 	va_end(ap);
 	return result;
 }

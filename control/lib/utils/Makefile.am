@@ -33,6 +33,7 @@ libastroutils_la_SOURCES = 						\
 	Pidfile.cpp							\
 	Point.cpp							\
 	Precession.cpp							\
+	PrecisionTime.cpp						\
 	RaDec.cpp							\
 	Rectangle.cpp							\
 	Rotation.cpp							\

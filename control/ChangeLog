@@ -1,5 +1,11 @@
 ChangeLog for the Astro project.
 
+20200816:
+	* fix some timing issues with the SX guideport
+	* add PrecisionTime class
+	* cleanup the snow client code
+	* fix signal handling in some of the snow client programs
+
 20200815:
 	* add Time class
 	* add astrocooler, astroccd, astrofilterwheel, programs

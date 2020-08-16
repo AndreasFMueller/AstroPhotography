@@ -261,6 +261,24 @@ public:
 	void	time(time_t t) { _time = t; }
 	std::string	toString(const std::string& format,
 		bool local = true) const;
+	std::string	toString(const char *format, bool local = true) const;
+	std::string	toString(bool local = true) const;
+};
+
+/**
+ * \brief A high resolution time class
+ */
+class PrecisionTime {
+	struct timeval	_tv;
+public:
+	PrecisionTime();
+	PrecisionTime(time_t t);
+	PrecisionTime(const struct timeval& tv);
+	time_t	time() const;
+	void	time(time_t t);
+	std::string	toString(const std::string& format,
+		bool local = true) const;
+	std::string	toString(const char *format, bool local = true) const;
 	std::string	toString(bool local = true) const;
 };
 
