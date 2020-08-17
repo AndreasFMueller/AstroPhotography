@@ -132,7 +132,7 @@ void	LiveView::openCamera(std::string cameraname) {
 
 	// get the camera
 	try {
-		Devices	_devices(getModuleRepository());
+		Devices	_devices(ModuleRepository::get());
 		_ccd = _devices.getCcd(cameraname);
 	} catch (const std::exception& x) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "cannot open device %s: %s",
@@ -190,7 +190,7 @@ void	LiveView::openFocuser(std::string focusername) {
 		focusername.c_str());
 
 	try {
-		Devices	_devices(getModuleRepository());
+		Devices	_devices(ModuleRepository::get());
 		_focuser = _devices.getFocuser(focusername);
 	} catch (const std::exception& x) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "cannot open device %s: %s",

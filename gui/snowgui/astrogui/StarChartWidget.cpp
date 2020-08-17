@@ -366,7 +366,7 @@ void	StarChartWidget::drawDeepSkyObject(QPainter& painter,
 
 	// draw border
 	QPainterPath	labelpath;
-	pen.setWidth(0.5);
+	pen.setWidth(1);
 	labelpath.moveTo(p.x() - w, p.y() - h);
 	labelpath.lineTo(p.x() + w, p.y() - h);
 	labelpath.lineTo(p.x() + w, p.y() + h);

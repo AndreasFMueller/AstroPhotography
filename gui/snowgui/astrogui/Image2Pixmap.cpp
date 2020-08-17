@@ -208,7 +208,7 @@ public:
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "%s adapter Pixel type %s, "
 			"scale = %d",
 			getSize().toString().c_str(),
-			astro::demangle_cstr(Pixel), _scale);
+			astro::demangle_cstr(Pixel()), _scale);
 	}
 	GainAdapter(const ConstImageAdapter<Pixel>& image, double gain,
 		double brightness, int scale = 0)
@@ -217,7 +217,7 @@ public:
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "%s adapter Pixel type %s, "
 			"gain = %f, brightness = %f, scale = %d",
 			getSize().toString().c_str(),
-			astro::demangle_cstr(Pixel),
+			astro::demangle_cstr(Pixel()),
 			_gain, _brightness, _scale);
 	}
 	virtual unsigned char	pixel(int x, int y) const {
@@ -299,7 +299,7 @@ template<typename Pixel>
 QImage	*Image2Pixmap::convertMono(const ConstImageAdapter<Pixel>& image) {
 	ImageSize	size = image.getSize();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "converting Image<%s> of size %s",
-		astro::demangle_cstr(Pixel),
+		astro::demangle_cstr(Pixel()),
 		size.toString().c_str());
 	Histogram<double>	*histo = new Histogram<double>(256);
 	histo->logarithmic(_logarithmic);
@@ -461,7 +461,7 @@ template<typename Pixel>
 QImage	*Image2Pixmap::convertRGB(const ConstImageAdapter<RGB<Pixel> >& image) {
 	ImageSize	size = image.getSize();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "converting RGB<%s> image of size %s",
-		astro::demangle_cstr(Pixel),
+		astro::demangle_cstr(Pixel()),
 		size.toString().c_str());
 	Histogram<RGB<double> >	*histo = new Histogram<RGB<double> >(256);
 	histo->logarithmic(_logarithmic);

@@ -64,7 +64,7 @@ void	CameraLister::addFocusers(DeviceLocatorPtr locator) {
 void	CameraLister::run() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "listing cameras");
 	// get a module repository
-	ModuleRepositoryPtr	repo = getModuleRepository();
+	ModuleRepositoryPtr	repo = ModuleRepository::get();
 
 	// go through all the modules
 	std::vector<std::string>	modulenames = repo->moduleNames();
