@@ -94,11 +94,13 @@ int	command_statistics(DaemonPrx daemon) {
 				std::cout << std::endl;
 			}
 		}
+		return EXIT_SUCCESS;
 	} catch (const std::exception& x) {
 		std::cerr << "cannot get statistics: ";
 		std::cerr << x.what();
 		std::cerr << std::endl;
 	}
+	return EXIT_FAILURE;
 }
 
 /**

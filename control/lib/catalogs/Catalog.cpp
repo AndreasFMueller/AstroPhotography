@@ -78,7 +78,7 @@ Catalog::starsetptr	precess(const Precession& precession,
  * \param name		name prefix
  */
 Catalog::starsetptr	Catalog::findLike(const std::string& name,
-		int maxstars) {
+		size_t /* maxstars */) {
 	Catalog::starsetptr	result(new starset());
 	try {
 		Star	s = find(name);

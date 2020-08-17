@@ -183,6 +183,9 @@ int	main(int argc, char *argv[]) {
 
 	// get the Guider for the camera
 	GuidePortPtr	guideport = camera->getGuidePort();
+
+	// XXX how to use the k?
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "still have not figured out how to use k=%u", k);
 	
 	// now interpret the remaining arguments as control commands
 	if (optind < argc) {

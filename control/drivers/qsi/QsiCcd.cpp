@@ -326,6 +326,9 @@ float	QsiCcd::getGain() {
 		return 0;
 	case QSICamera::CameraGainAuto:
 		return 0.5;
+	default:
+		debug(LOG_ERR, DEBUG_LOG, 0, "unknown camera gain setting");
+		throw std::logic_error("unkonwn camera gain setting");
 	}
 }
 

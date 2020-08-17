@@ -73,6 +73,8 @@ locationtype	MountI::getLocationSource(const Ice::Current& current) {
 		switch (_mount->location_source()) {
 		case astro::device::Mount::LOCAL:	return LocationLOCAL;
 		case astro::device::Mount::GPS:		return LocationGPS;
+		default:
+			throw std::logic_error("unknown location source");
 		}
 	} catch (std::exception x) {
 		DeviceException	except;
@@ -81,6 +83,7 @@ locationtype	MountI::getLocationSource(const Ice::Current& current) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", except.cause.c_str());
 		throw except;
 	}
+	throw std::logic_error("unreachable state");
 }
 
 Ice::Long	MountI::getTime(const Ice::Current& current) {

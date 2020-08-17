@@ -138,7 +138,8 @@ int	command_image(CcdPrx ccd, const astro::camera::Exposure& exposure,
 
 class CcdCallbackI : public CcdCallback {
 public:
-	virtual void	state(ExposureState s, const Ice::Current& current) {
+	virtual void	state(ExposureState s,
+		const Ice::Current& /* current */) {
 		std::cout << astro::camera::CcdState::state2string(convert(s));
 		std::cout << std::endl;
 	}

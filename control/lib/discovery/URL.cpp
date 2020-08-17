@@ -250,7 +250,12 @@ int	URL::post(const PostData& data) {
 	out << "\r\n";
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "posting: %s", out.str().c_str());
 
-	write(fd, out.str().data(), out.str().size());
+	if (write(fd, out.str().data(), out.str().size()) < 0) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "cannot write request: %s",
+			strerror(errno));
+		close(fd);
+		return -1;
+	}
 
 	// read the response
 	char	buffer[10000];

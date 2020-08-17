@@ -243,6 +243,7 @@ void	SxCcdM26C::requestField(int field) {
 #define M26C_HEIGHT	2616
 #endif
 
+#if 0
 /**
  * \brief Compute the maximum of l int values
  */
@@ -255,6 +256,7 @@ static int	max(const int *v, int l) {
 	}
 	return result;
 }
+#endif
 
 /**
  * \brief Compute the minimum of l int values

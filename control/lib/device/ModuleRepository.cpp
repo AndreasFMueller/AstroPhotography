@@ -182,16 +182,8 @@ std::vector<std::string>	ModuleRepositoryBackend::moduleNames() const {
 		return result;
 	}
 	struct dirent	*direntp = NULL;
-	struct dirent	direntry;
 	do {
-		int	rc = readdir_r(dir, &direntry, &direntp);
-		if (rc) {
-			std::string	msg = stringprintf("cannot read module "
-				"dir %s: %s", path().c_str(), strerror(errno));
-			debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
-			closedir(dir);
-			throw std::runtime_error(msg);
-		}
+		direntp = readdir(dir);
 		if (NULL == direntp)
 			continue;
 		int	namelen = strlen(direntp->d_name);
@@ -224,16 +216,8 @@ std::vector<ModulePtr>	ModuleRepositoryBackend::modules() const {
 		return result;
 	}
 	struct dirent	*direntp = NULL;
-	struct dirent	direntry;
 	do {
-		int	rc = readdir_r(dir, &direntry, &direntp);
-		if (rc) {
-			std::string	msg = stringprintf("cannot read module "
-				"dir %s: %s", path().c_str(), strerror(errno));
-			debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
-			closedir(dir);
-			throw std::runtime_error(msg);
-		}
+		direntp = readdir(dir);
 		if (NULL == direntp)
 			continue;
 		int	namelen = strlen(direntp->d_name);

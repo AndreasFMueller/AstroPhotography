@@ -207,11 +207,11 @@ PGC::objectsetptr	PGC::find(const SkyWindow& window) const {
 }
 
 std::set<std::string>	PGC::findLike(const std::string& name,
-	int maxobjects) const {
+	size_t maxobjects) const {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "start finding like %s", name.c_str());
 	std::set<std::string>	result;
 	size_t	l = name.size();
-	int	counter = 0;
+	size_t	counter = 0;
 	// find matching PGC names
 	for (auto i = begin(); i != end(); i++) {
 		if (i->first.size() < l)

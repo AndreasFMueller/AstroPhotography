@@ -382,7 +382,7 @@ public:
 class FocusProcessBase : public FocusParameters {
 	// the main methods needed to implement the focusing process
 public:
-	virtual void		moveto(unsigned long position) = 0;
+	virtual void		moveto(long position) = 0;
 	virtual ImagePtr	get() = 0;
 private:
 	thread::Waiter<Focus::state_type>	_status;
@@ -440,7 +440,7 @@ public:
 		camera::CcdPtr ccd, camera::FocuserPtr focuser);
 	FocusProcess(unsigned long minposition, unsigned long maxposition,
 		camera::CcdPtr ccd, camera::FocuserPtr focuser);
-	virtual void	moveto(unsigned long);
+	virtual void	moveto(long);
 	virtual ImagePtr	get();
 };
 

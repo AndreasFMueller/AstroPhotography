@@ -178,7 +178,7 @@ int	command_list(const std::vector<std::string>& arguments) {
 /**
  * \brief Implementation of the listkeys command
  */
-int	command_listkeys(const std::vector<std::string>& arguments) {
+int	command_listkeys(const std::vector<std::string>& /* arguments */) {
 	auto	l = Configuration::listRegistered();
 	std::for_each(l.begin(), l.end(), [](ConfigurationKey key) {
 			std::cout << key.toString() << ": ";
@@ -186,6 +186,7 @@ int	command_listkeys(const std::vector<std::string>& arguments) {
 			std::cout << std::endl;
 		}
 	);
+	return EXIT_SUCCESS;
 }
 
 /**

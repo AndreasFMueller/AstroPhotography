@@ -184,23 +184,19 @@ void	Properties::setupDir(const std::string& name,
 
 	// scan the directory
 	struct dirent	*direntp = NULL;
-	struct dirent	direntry;
 	std::list<std::string>	files;
 	do {
-		int	rc = readdir_r(dir, &direntry, &direntp);
-		if (rc) {
-			std::string	msg = stringprintf("cannt read "
-				"property directory %s: %s", dirname.c_str(),
-				strerror(errno));
-			debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
-			closedir(dir);
-			throw std::runtime_error(msg);
-		}
+		direntp = readdir(dir);
+		// skip to the end
 		if (NULL == direntp)
 			continue;
+
+		// skip short names (they cannot be .properties files)
 		int     namelen = strlen(direntp->d_name);
 		if (namelen < 12)
 			continue;
+
+		// check for properites files
 		if (0 == strcmp(".properties", direntp->d_name + namelen - 11)) {
 			std::string     filename = dirname + "/"
 						+ std::string(direntp->d_name);

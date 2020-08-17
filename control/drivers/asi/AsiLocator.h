@@ -32,9 +32,9 @@ class AsiCameraLocator : public DeviceLocator {
 	static std::vector<bool>	cameraopen;
 	static std::once_flag	flag;
 	static void	locator_initialize();
-	static void	setopen(int index, bool o);
+	static void	setopen(size_t index, bool o);
 public:
-	static bool	isopen(int index);
+	static bool	isopen(size_t index);
 	AsiCameraLocator();
 	virtual ~AsiCameraLocator();
 	virtual std::string	getName() const;

@@ -65,16 +65,30 @@ size_t	FITS::writeFITS(ImagePtr image, const std::string& filename) {
 /**
  * \brief Write an image to a buffer
  *
+ * This is done by first writing the image to a temporary file (which is 
+ * supported by the FITS library) and then reading the file as a raw file
+ * back from the temporary file.
+ *
  * \param image		the image to write
  * \param buffer	the pointer to the buffer
  * \param buffersize	the size of the buffer
  */
 size_t	FITS::writeFITS(ImagePtr image, void **buffer, size_t *buffersize) {
+	// create a filename
 	char	filename[1024];
-	tmpnam(filename);
+	char	*tmpdir = getenv("TMPDIR");
+	if (tmpdir) {
+		stringprintf(filename, "%s/XXXXXX.fits", tmpdir);
+	} else {
+		strcpy(filename, "/var/tmp/XXXXXX.fits");
+	}
+	int	fd = mkstemps(filename, 5);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "filename created: %s", filename);
+	close(fd);	// prevent a file descriptor leak
 
 	// write the image to the temporary file
 	ssize_t	s = write(image, std::string(filename));
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "%lu bytes written", s);
 
 	// prepare a buffer
 	unsigned char	*b = (unsigned char *)malloc(s);
@@ -85,10 +99,18 @@ size_t	FITS::writeFITS(ImagePtr image, void **buffer, size_t *buffersize) {
 		unlink(filename);
 		throw std::runtime_error(msg);
 	}
-	int	fd = open(filename, O_RDONLY);
+
+	// read the data 
+	fd = open(filename, O_RDONLY);
 	if (s != ::read(fd, b, s)) {
-		
+		std::string	msg = stringprintf("cannot read %s: %s",
+			filename, strerror(errno));
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		close(fd);
+		throw std::runtime_error(msg);
 	}
+
+	// cleanup
 	close(fd);
 	unlink(filename);
 

@@ -59,6 +59,8 @@ Mount::location_source_type	NiceMount::location_source() {
 	switch (_mount->getLocationSource()) {
 	case snowstar::LocationLOCAL:	return Mount::LOCAL;
 	case snowstar::LocationGPS:	return Mount::GPS;
+	default:
+		throw std::logic_error("unknown location source");
 	}
 }
 

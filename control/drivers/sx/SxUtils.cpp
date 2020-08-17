@@ -180,7 +180,7 @@ std::string     wchar2string(const wchar_t *w) {
 	const wchar_t	*p = w;
 	while (p) {
 		int	r = wctob(*p);
-		if (r != WEOF) {
+		if (r != EOF) {
 			buffer[i++] = r;
 		}
 	}

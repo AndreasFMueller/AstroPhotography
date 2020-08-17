@@ -184,8 +184,8 @@ void	Serial::writeraw(const std::vector<uint8_t>& packet) {
 	std::unique_lock<std::recursive_mutex>	lock(_mutex);
 	uint8_t	*b = (uint8_t *)alloca(packet.size());
 	std::copy(packet.begin(), packet.end(), b);
-	int	l = ::write(fd, b, packet.size());
-	if (l != packet.size()) {
+	ssize_t	l = ::write(fd, b, packet.size());
+	if ((size_t)l != packet.size()) {
 		std::string	msg = stringprintf("failed to send %u bytes: "
 			"%d sent %s", packet.size(), l,
 			(l < 0) ? strerror(errno) : "");

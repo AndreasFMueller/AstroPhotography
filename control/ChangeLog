@@ -1,5 +1,39 @@
 ChangeLog for the Astro project.
 
+20200817:
+	* fix warning in debug.cpp
+	* fix warning in GridCalculator.cpp
+	* fix warning in URL.cpp
+	* fix warning in FITS.cpp
+	* fix warning in ImageBuffer.cpp
+	* fix warning in ImageDirectory.cpp
+	* fix initialization warnings in VectorField.cpp
+	* fix using readdir_r in Properties.cpp
+	* fix warnings in ParameterDescription.cpp
+	* fix warnings in ModuleRepository.cpp
+	* fix warnings in ImageRepo.cpp
+	* fix warnings in Catalog.cpp
+ 	* fix warnings in BSC.cpp
+	* fix warnings in DeepSkyObject.cpp
+	* fix warnings in PGCDatabase.cpp
+	* fix warnings in PGC.cpp
+	* fix warnings in PeakFinder.cpp
+	* fix warnings in ThresholdExtractor.cpp
+	* fix warnings in FocusProcess.cpp
+	* fix warnings in TaskInfo.cpp
+	* fix warnings in AstroTask.h (class TaskMonitorInfo)
+	* fix warnings in DaemonI.cpp
+	* fix warnings in MountI.cpp
+	* fix warnings in snowdaemon.cpp
+	* fix warnings in snowccd.cpp
+	* fix warnings in SxUtils.cpp, SxAO.cpp, SxCcdM26.cpp
+	* fix warnings in NiceMount.cpp
+	* fix warnings in QsiCcd.cpp, QsiFilterWheel.cpp
+	* fix warnings in AsiLocator.{h,cpp}, AsiCamera.cpp
+	* fix warnings in astroconfig.cpp
+	* fix warnings in guider.cpp
+	* fix warnings in astrosunmoon.cpp, astroephemeris.cpp
+
 20200816:
 	* rework ASI driver
 	* add CoolerInfo.cpp

@@ -117,7 +117,8 @@ ImageBuffer::ImageBuffer(const std::string& filename) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "%s", msg.c_str());
 		throw std::runtime_error(msg);
 	}
-	if (_buffersize != ::read(fd, _buffer, _buffersize)) {
+	ssize_t	rc = ::read(fd, _buffer, _buffersize);
+	if (_buffersize != (size_t)rc) {
 		free(_buffer);
 		close(fd);
 		std::string	msg = stringprintf("cannot read %s: %s",
@@ -165,6 +166,9 @@ ImagePtr	ImageBuffer::image() const {
 		}
 		break;
 	}
+	std::string	msg("inconsistent internal state: unknown image type");
+	debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+	throw std::runtime_error(msg);
 }
 
 /**
@@ -189,7 +193,7 @@ void	ImageBuffer::write(const std::string& filename) const {
 			strerror(errno));
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "%d bytes written", rc);
-	if (_buffersize != rc) {
+	if (_buffersize != (size_t)rc) {
 		close(fd);
 		std::string	msg = stringprintf("cannot write %s: %s",
 			filename.c_str(), strerror(errno));

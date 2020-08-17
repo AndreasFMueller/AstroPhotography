@@ -238,8 +238,21 @@ static void	writeout(char *prefix, char *msgbuffer) {
 		std::unique_lock<std::recursive_mutex>	lock(th->mtx);
 		linecounter++;
 		lseek(debug_filedescriptor, 0, SEEK_END);
-		write(debug_filedescriptor, msgbuffer2, strlen(msgbuffer2));
-		write(debug_filedescriptor, "\n", 1);
+		if (write(debug_filedescriptor, msgbuffer2,
+			strlen(msgbuffer2)) < 0) {
+			std::cerr << "cannot write to debug fd=";
+			std::cerr << debug_filedescriptor;
+			std::cerr << ": ";
+			std::cerr << strerror(errno);
+			std::cerr << std::endl;
+		}
+		if (write(debug_filedescriptor, "\n", 1) < 0) {
+			std::cerr << "cannot write to debug fd=";
+			std::cerr << debug_filedescriptor;
+			std::cerr << ": ";
+			std::cerr << strerror(errno);
+			std::cerr << std::endl;
+		}
 		// check whether we have to rotate the 
 		if ((debugmaxlines > 0) && (linecounter >= debugmaxlines)) {
 			rotate_logfile();

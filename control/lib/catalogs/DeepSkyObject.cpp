@@ -66,6 +66,8 @@ std::string      DeepSkyObject::classification2string(DeepSkyObject::object_clas
 		return std::string("multiple system");
 	case GalaxyInMultipleSystem:
 		return std::string("galaxy in multiple system");
+	default:
+		throw std::runtime_error("unknown object class");
 	}
 }
 

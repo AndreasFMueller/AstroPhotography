@@ -35,6 +35,9 @@ std::string      TaskInfo::state2string(taskstate t) {
 	case complete:
 		return std::string("complete");
 		break;
+	case deleted:
+		return std::string("deleted");
+		break;
 	}
 	throw std::runtime_error("unknown task state code");
 }
@@ -54,6 +57,9 @@ TaskInfo::taskstate        TaskInfo::string2state(const std::string& s) {
 	}
 	if (s == "complete") {
 		return complete;
+	}
+	if (s == "deleted") {
+		return deleted;
 	}
 	throw std::runtime_error("unknown task state name");
 }

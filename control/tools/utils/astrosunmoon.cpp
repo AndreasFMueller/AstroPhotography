@@ -83,6 +83,8 @@ int	main(int argc, char *argv[]) {
 		}
 	}
 
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "XXX still haven't figured out how to use u = %d", u);
+
 	if (optind >= argc) {
 		std::cerr << "no objects named" << std::endl;
 		usage(argv[0]);

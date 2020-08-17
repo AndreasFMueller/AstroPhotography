@@ -158,7 +158,7 @@ CatalogIterator	BSC::begin() {
  * \param maxstars	maximum number of stars to retrieve
  */
 Catalog::starsetptr	BSC::findLike(const std::string& name,
-		int maxstars) {
+		size_t maxstars) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "get stars for prefix %s", name.c_str());
 	Catalog::starsetptr	result(new Catalog::starset());
 	// ignore short names
@@ -172,7 +172,7 @@ Catalog::starsetptr	BSC::findLike(const std::string& name,
 	}
 
 	// find the first number
-	int	firstnumber = std::stoi((name + std::string("0000")).substr(3, 4));
+	size_t	firstnumber = std::stoi((name + std::string("0000")).substr(3, 4));
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "firstnumber = %d", firstnumber);
 
 	// find the last matching number
@@ -180,10 +180,10 @@ Catalog::starsetptr	BSC::findLike(const std::string& name,
 	for (int i = name.size(); i < 7; i++) {
 		intervallength *= 10;
 	}
-	int	lastnumber = firstnumber + intervallength;
+	size_t	lastnumber = firstnumber + intervallength;
 
 	// scan for these numbers
-	int	i = firstnumber;
+	size_t	i = firstnumber;
 	while ((result->size() < maxstars) && (i < lastnumber)) {
 		try {
 			debug(LOG_DEBUG, DEBUG_LOG, 0, "get BSC %d", i);

@@ -234,8 +234,16 @@ public:
 	virtual void	set_float(float f) { set(f); }
 };
 
+/**
+ * \brief The ClosesValues class
+ *
+ * This class constructs a map of distances of values from a given
+ * reference value. Then the operator[] allows to access the pair
+ * of distance/value ordered by distance, so operator[](0) gives
+ * the pair with smallest distance from the reference value
+ */
 class ClosestValues {
-	int	_n;
+	size_t	_n;
 	float	_reference;
 	typedef	std::map<float, float>	valuemap_t;
 	valuemap_t	_values;
@@ -247,11 +255,10 @@ class ClosestValues {
 		}
 		_values.erase(i);
 	}
-private:
-	ClosestValues(const ClosestValues& other);
-	ClosestValues&	operator=(const ClosestValues& other);
+	ClosestValues(const ClosestValues& other) = delete;
+	ClosestValues&	operator=(const ClosestValues& other) = delete;
 public:
-	ClosestValues(int n, float reference, const std::set<float>& v)
+	ClosestValues(size_t n, float reference, const std::set<float>& v)
 		: _n(n), _reference(reference) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "construct ClosestValues");
 		std::set<float>::const_iterator	i;
@@ -264,7 +271,7 @@ public:
 			}
 		}
 	}
-	std::pair<float, float>	operator[](int index) const {
+	std::pair<float, float>	operator[](size_t index) const {
 		if (index >= _n) {
 			throw std::range_error("index exceeds size");
 		}

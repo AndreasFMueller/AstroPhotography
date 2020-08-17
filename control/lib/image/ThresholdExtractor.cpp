@@ -14,7 +14,9 @@ namespace astro {
 double	ThresholdExtractor::threshold(const ConstImageAdapter<double>& image) const {
 	double	min = Min<double, double>().filter(image);
 	double	max = Max<double, double>().filter(image);
+#if 0
 	double	span = max - min;
+#endif
 
 	double	level = (min + max) / 2;
 	// XXX real implementation missing

@@ -119,7 +119,7 @@ void	QsiFilterWheel::move(size_t newposition) {
 	END_STOPWATCH("put_Position()");
 	position = 0;
 	_camera.camera().get_Position(&position);
-	if (position != newposition) {
+	if ((size_t)position != newposition) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "wrong position");
 		lastState = FilterWheel::unknown;
 	}

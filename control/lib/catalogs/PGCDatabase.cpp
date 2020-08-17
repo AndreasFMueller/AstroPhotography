@@ -247,7 +247,7 @@ DeepSkyObjectSetPtr	PGCDatabase::find(const SkyWindow& window) {
  * \param maxobjects	maximum namber of objects to return
  */
 std::set<std::string>	PGCDatabase::findLike(const std::string& name,
-	int maxobjects) {
+	size_t maxobjects) {
 	std::string	f("select a.pgcname "
 			  "from pgc a "
 			  "where a.name like ? "

@@ -253,8 +253,8 @@ std::vector<std::string>	AsiCameraLocator::getDevicelist(
  *
  * \param index		index of the camera
  */
-bool	AsiCameraLocator::isopen(int index) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "isopen(%d)", index);
+bool	AsiCameraLocator::isopen(size_t index) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "isopen(%u)", index);
 	std::lock_guard<std::recursive_mutex>	lock(*getMutex());
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "check camera %d", index);
 	if (index >= AsiCameraLocator::cameraopen.size()) {
@@ -272,8 +272,8 @@ bool	AsiCameraLocator::isopen(int index) {
  * \param index		index of the camera
  * \param o		whether or not the camera is open
  */
-void	AsiCameraLocator::setopen(int index, bool o) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "setopen(%d) = %s",
+void	AsiCameraLocator::setopen(size_t index, bool o) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "setopen(%u) = %s",
 		index, (o) ? "YES" : "NO");
 	std::lock_guard<std::recursive_mutex>	lock(*getMutex());
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "remember camera %d state %s", index,

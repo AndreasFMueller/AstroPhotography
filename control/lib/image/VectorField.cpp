@@ -95,8 +95,8 @@ double	VectorField::eliminate(int count) {
 	int	iterations = 0;
 	double	tolerance = 0.01;
 	int	l = badpoints(tolerance).size();
-	double	lowtolerance, hightolerance;
-	int	lowcount, highcount;
+	double	lowtolerance = tolerance, hightolerance = tolerance;
+	int	lowcount = 0, highcount = 0;
 	if (l > count) {
 		while (l > count) {
 			lowtolerance = tolerance;

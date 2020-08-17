@@ -27,7 +27,7 @@ public:
 	DeepSkyObject	find(const std::string& name);
 	DeepSkyObjectSetPtr	find(const SkyWindow& window);
 	std::set<std::string>	findLike(const std::string& name,
-					int maxobjects = 100);
+					size_t maxobjects = 100);
 	size_t	size();
 };
 
@@ -44,7 +44,7 @@ public:
 	DeepSkyObject	find(const std::string& name) const;
 	DeepSkyObjectSetPtr	find(const SkyWindow& window) const;
 	std::set<std::string>	findLike(const std::string& name,
-					int maxobjects = 100) const;
+					size_t maxobjects = 100) const;
 };
 
 } // namespace catalog

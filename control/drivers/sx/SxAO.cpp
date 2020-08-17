@@ -97,8 +97,10 @@ bool	SxAO::move2(int x, int y) {
 	char	ewchar = (x > 0) ? 'W' : 'T';
 	char	nschar = (y > 0) ? 'N' : 'S';
 	char	cmd[15];
+	// we limit the range of x and y to 100000 in order to silence
+	// the GNU compiler
 	snprintf(cmd, sizeof(cmd), "G%c%05dG%c%05d",
-		ewchar, ::abs(x), nschar, ::abs(y));
+		ewchar, ::abs(x) % 100000, nschar, ::abs(y) % 100000);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "goto command: %s", cmd);
 	if (14 != write(serial, cmd, 14)) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "cannot write command %s: %s",

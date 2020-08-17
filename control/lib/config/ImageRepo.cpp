@@ -204,16 +204,8 @@ void	ImageRepo::scan_directory(bool recurse) {
 		throw std::runtime_error(msg);
 	}
 	struct dirent	*d;
-	struct dirent	direntry;
 	do {
-		int	rc = readdir_r(dir, &direntry, &d);
-		if (rc) {
-			std::string	msg = stringprintf("cannot read dir "
-				"%s: %s", _directory.c_str(), strerror(errno));
-			debug(LOG_DEBUG, DEBUG_LOG, 0, "%s", msg.c_str());
-			closedir(dir);
-			throw std::runtime_error(msg);
-		}
+		d = readdir(dir);
 		if (NULL == d)
 			continue;
 		std::string     filename(d->d_name);

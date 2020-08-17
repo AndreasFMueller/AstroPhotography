@@ -135,7 +135,7 @@ void	DeviceName::hostname(const std::string& h) {
 	if (size() < 2) {
 		throw std::runtime_error("no hostname present");
 	}
-	this->operator[](1) = 1;
+	this->operator[](1) = h;
 }
 
 std::string	DeviceName::name() const {

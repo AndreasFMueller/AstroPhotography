@@ -267,7 +267,7 @@ public:
 
 	// get a set of stars matching a name
 	virtual starsetptr	findLike(const std::string& name,
-					int maxstars = 100);
+					size_t maxstars = 100);
 	static std::set<std::string>	starlist(const starsetptr stars);
 
 	// start to find the all stars in an a sky window

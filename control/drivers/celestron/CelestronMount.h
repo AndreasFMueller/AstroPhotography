@@ -10,6 +10,7 @@
 #include <Serial.h>
 #include <mutex>
 #include <thread>
+#include <atomic>
 
 namespace astro {
 namespace device {

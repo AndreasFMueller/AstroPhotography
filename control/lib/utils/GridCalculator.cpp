@@ -221,7 +221,7 @@ RaDec	GridCalculator::gridpoint(int _ra, int _dec) const {
 	return RaDec(ra(_ra),  dec(_dec));
 }
 
-TwoAngles	GridCalculator::angleRangeRA(int dec) const {
+TwoAngles	GridCalculator::angleRangeRA(int /* dec */) const {
 	if (_pole_in_frame) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "pole in frame");
 		return TwoAngles(Angle(0),  Angle(360, Angle::Degrees));
@@ -230,7 +230,7 @@ TwoAngles	GridCalculator::angleRangeRA(int dec) const {
 			_gridzero.ra() + _maxra * _stepsizes.ra());
 }
 
-TwoAngles	GridCalculator::angleRangeDEC(int ra) const {
+TwoAngles	GridCalculator::angleRangeDEC(int /* ra */) const {
 	return TwoAngles(_gridzero.dec() + _mindec * _stepsizes.dec(),
 			_gridzero.dec() + _maxdec * _stepsizes.dec());
 }

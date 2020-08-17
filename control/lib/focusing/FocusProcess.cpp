@@ -40,7 +40,7 @@ FocusProcess::FocusProcess(const FocusParameters& parameters,
  *
  * \param pos	focuser position to move to
  */
-void	FocusProcess::moveto(unsigned long pos) {
+void	FocusProcess::moveto(long pos) {
 	long	cur = _focuser->current();
 	// backlash compensation
 	long	bl = _focuser->backlash();

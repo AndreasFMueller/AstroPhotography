@@ -131,12 +131,12 @@ std::pair<WindowedImage<unsigned char>*,double>	PeakFinder::threshold(
 
 	// now start looking for a value so that about 3/8 of the pixels
 	// have a value between minvalue and maxvalue
-	int maxpixelcount = suggested;
+	size_t maxpixelcount = suggested;
 //	if (maxpixelcount > 100) {
 //		maxpixelcount = 100;
 //	}
-	const int minpixelcount = maxpixelcount / 2;
-	const int targetcount = (minpixelcount + maxpixelcount) / 2;
+	const size_t minpixelcount = maxpixelcount / 2;
+	const size_t targetcount = (minpixelcount + maxpixelcount) / 2;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "targetting %d pixels between %d and %d",
 		targetcount, minpixelcount, maxpixelcount);
 
@@ -149,7 +149,7 @@ std::pair<WindowedImage<unsigned char>*,double>	PeakFinder::threshold(
 	int	nlow = M_PI * _radius * _radius / 2;
 	int	nhigh = 1;
 	int	iterations = 32;
-	int	pixels = 0;
+	size_t	pixels = 0;
 	double	v = 0;
 	do {
 		// subdivide the interval

@@ -426,6 +426,8 @@ private:
 public:
 	time_t	when() const { return _when; }
 	void	when(time_t w) { _when = w; }
+
+	TaskMonitorInfo() : _oldstate(TaskInfo::deleted) { }
 };
 
 /**

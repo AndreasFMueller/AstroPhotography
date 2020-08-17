@@ -460,7 +460,7 @@ static ASI_CONTROL_TYPE	type2asitype(AsiControlType type) {
 	throw std::runtime_error(msg);
 }
 
-#if 1
+#if 0
 static AsiControlType	asitype2type(ASI_CONTROL_TYPE asitype) {
 	switch (asitype) {
 	case ASI_GAIN:			return AsiGain;

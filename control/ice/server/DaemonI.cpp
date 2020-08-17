@@ -69,7 +69,12 @@ static void	do_shutdownsystem(float delay, const Ice::Current& current) {
 	useconds_t	udelay = 1000000 * delay;
 	usleep(udelay);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "shutting down system now");
-	system("sudo shutdown -h now");
+	int	rc = system("sudo shutdown -h now");
+	if (rc < 0) {
+		std::string	msg = astro::stringprintf("cannot execute "
+			"shutdown command: %s", strerror(errno));
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "shutdown command sent");
 }
 
@@ -138,26 +143,16 @@ DirectoryInfo	DaemonI::statDirectory(const std::string& dirname,
 		error.cause = msg;
 		throw error;
 	}
-	struct dirent	direntry;
 	struct dirent	*direntryp;
 	do {
-		int	rc = readdir_r(dirp, &direntry, &direntryp);
-		if (rc) {
-			std::string	msg = astro::stringprintf("can't read "
-				"dir: %s", strerror(errno));
-			debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
-			IOException	error;
-			error.cause = msg;
-			closedir(dirp);
-			throw error;
-		}
+		direntryp = readdir(dirp);
 		if (NULL == direntryp)
 			continue;
-		std::string	entryname(direntry.d_name);
-		if (direntry.d_type == DT_REG) {
+		std::string	entryname(direntryp->d_name);
+		if (direntryp->d_type == DT_REG) {
 			info.files.push_back(entryname);
 		}
-		if (direntry.d_type == DT_DIR) {
+		if (direntryp->d_type == DT_DIR) {
 			info.directories.push_back(entryname);
 		}
 	} while (NULL != direntryp);
