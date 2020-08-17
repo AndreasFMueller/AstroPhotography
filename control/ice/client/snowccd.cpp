@@ -137,13 +137,20 @@ int	command_image(CcdPrx ccd, const astro::camera::Exposure& exposure,
 }
 
 class CcdCallbackI : public CcdCallback {
+	void	timestamp() {
+		astro::PrecisionTime	t;
+		std::cout << t.toString();
+	}
 public:
 	virtual void	state(ExposureState s,
 		const Ice::Current& /* current */) {
+		timestamp();
 		std::cout << astro::camera::CcdState::state2string(convert(s));
 		std::cout << std::endl;
 	}
 	virtual void	stop(const Ice::Current& /* current */) {
+		timestamp();
+		std::cout << "stop" << std::endl;
 		exit(EXIT_SUCCESS);
 	}
 };
@@ -173,7 +180,7 @@ int	main(int argc, char *argv[]) {
 	int	longindex;
 	astro::ServerName	servername;
 	astro::camera::Exposure	exposure;
-	putenv("POSIXLY_CORRECT=1");
+	putenv(strdup("POSIXLY_CORRECT=1"));
 	while (EOF != (c = getopt_long(argc, argv, "dh", longopts, &longindex)))
 		switch(c) {
 		case 'd':

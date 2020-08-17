@@ -23,6 +23,8 @@ bool	decimal = false;
 
 /**
  * \brief Usage function for the snowmount function
+ *
+ * \param progname	the program name
  */
 static void	usage(const std::string& progname) {
 	astro::Path	path(progname);
@@ -31,13 +33,13 @@ static void	usage(const std::string& progname) {
 	std::cout << std::endl;
 	std::cout << p << " [ options ] [ <server> ] help" << std::endl;
 	std::cout << p << " [ options ] <server> list" << std::endl;
-	std::cout << p << " [ options ] <server> location MOUNT" << std::endl;
-	std::cout << p << " [ options ] <server> altaz MOUNT" << std::endl;
-	std::cout << p << " [ options ] <server> get MOUNT" << std::endl;
-	std::cout << p << " [ options ] <server> set MOUNT RA DEC" << std::endl;
-	std::cout << p << " [ options ] <server> cancel MOUNT" << std::endl;
-	std::cout << p << " [ options ] <server> wait MOUNT" << std::endl;
-	std::cout << p << " [ options ] <server> monitor MOUNT" << std::endl;
+	std::cout << p << " [ options ] <server> MOUNT location" << std::endl;
+	std::cout << p << " [ options ] <server> MOUNT altaz" << std::endl;
+	std::cout << p << " [ options ] <server> MOUNT [ get ]" << std::endl;
+	std::cout << p << " [ options ] <server> MOUNT set RA DEC" << std::endl;
+	std::cout << p << " [ options ] <server> MOUNT cancel" << std::endl;
+	std::cout << p << " [ options ] <server> MOUNT wait" << std::endl;
+	std::cout << p << " [ options ] <server> MOUNT monitor" << std::endl;
 	std::cout << std::endl;
 	std::cout << "get help about the snowmount command, list mounts, get "
 		"right ascension from" << std::endl;
@@ -70,6 +72,8 @@ static struct option    longopts[] = {
 
 /**
  * \brief Help command implementation
+ *
+ * \param progname	the name program
  */
 int	command_help(const char *progname) {
 	usage(progname);
@@ -83,31 +87,38 @@ int	command_help(const char *progname) {
 	std::cout << "    List all mounts available from the server"
 		<< std::endl;
 	std::cout << std::endl;
-	std::cout << "location MOUNT" << std::endl;
+	std::cout << "MOUNT location" << std::endl;
 	std::cout << "    Get the location of the mount" << std::endl;
 	std::cout << std::endl;
-	std::cout << "get MOUNT" << std::endl;
+	std::cout << "MOUNT get" << std::endl;
 	std::cout << "    Get right ascension and declination from the named "
 		"mount. This command" << std::endl;
 	std::cout << "    may not work if the mount has not be calibrated yet"
 		<< std::endl;
 	std::cout << std::endl;
-	std::cout << "set MOUNT RA DEC" << std::endl;
+	std::cout << "MOUNT set RA DEC" << std::endl;
 	std::cout << "    Move the mount to the specified right ascension and "
 		"declination." << std::endl;
 	std::cout << "    As with the get command, it will only work if the "
 		"mount has already" << std::endl;
 	std::cout << "    been calibrated." << std::endl;
 	std::cout << std::endl;
-	std::cout << "wait MOUNT" << std::endl;
-	std::cout << "    Wait for the mount to settle on the new position" << std::endl;
+	std::cout << "MOUNT wait" << std::endl;
+	std::cout << "    Wait for the mount to settle on the new position"
+		<< std::endl;
 	std::cout << std::endl;
-	std::cout << "monitor MOUNT" << std::endl;
-	std::cout << "    monitor state changes and position changes on this mount." << std::endl;
+	std::cout << "MOUNT monitor" << std::endl;
+	std::cout << "    monitor state changes and position changes on this "
+		"mount." << std::endl;
 	std::cout << std::endl;
 	return EXIT_SUCCESS;
 }
 
+/**
+ * \brief Get a list of mounts
+ *
+ * \param devices	the devices proxy to query for mounts
+ */
 int	command_list(DevicesPrx devices) {
 	DeviceNameList	list = devices->getDevicelist(DevMOUNT);
 	std::for_each(list.begin(), list.end(), 
@@ -120,6 +131,8 @@ int	command_list(DevicesPrx devices) {
 
 /**
  * \brief Get command implementation
+ *
+ * \param mount		the mount to get information from
  */
 int	command_get(MountPrx mount) {
 	RaDec	radec = mount->getRaDec();
@@ -136,7 +149,9 @@ int	command_get(MountPrx mount) {
 }
 
 /**
- * \brief Get command implementation
+ * \brief Location command implementation
+ *
+ * \param mount		the mount to get information from
  */
 int	command_location(MountPrx mount) {
 	astro::LongLat	location = convert(mount->getLocation());
@@ -147,12 +162,33 @@ int	command_location(MountPrx mount) {
 	} else {
 		std::cout << longitude.degrees() << " " << latitude.degrees() << " ";
 	}
+	switch (mount->getLocationSource()) {
+	case LocationLOCAL:
+		std::cout << "local";
+		break;
+	case LocationGPS:
+		std::cout << "GPS";
+		break;
+	}
 	std::cout << std::endl;
 	return EXIT_SUCCESS;
 }
 
 /**
+ * \brief Time command implementation
+ *
+ * \param mount		the mount to get time from
+ */
+int	command_time(MountPrx mount) {
+	astro::Time	t(mount->getTime());
+	std::cout << t.toString() << std::endl;
+	return  EXIT_SUCCESS;
+}
+
+/**
  * \brief Get command implementation
+ *
+ * \param mount		the mount to get information from
  */
 int	command_altaz(MountPrx mount) {
 	astro::AzmAlt	azmalt = convert(mount->getAzmAlt());
@@ -169,6 +205,9 @@ int	command_altaz(MountPrx mount) {
 
 /**
  * \brief Wait command implementation
+ *
+ * \param mount		the mount to get information from
+ * \param dowait	whether or not to wait for the state to change
  */
 int	command_wait(MountPrx mount, bool dowait) {
 	if (dowait) {
@@ -183,6 +222,8 @@ int	command_wait(MountPrx mount, bool dowait) {
 
 /**
  * \brief Cancel command implementation
+ *
+ * \param mount		the mount to cancel
  */
 int	command_cancel(MountPrx mount) {
 	mount->cancel();
@@ -191,20 +232,34 @@ int	command_cancel(MountPrx mount) {
 
 /**
  * \brief Set command implementation
+ *
+ * \param mount		the mount to set the position
+ * \param radec		the coordinates to move to
  */
 int	command_set(MountPrx mount, RaDec radec) {
 	mount->GotoRaDec(radec);
 	return command_wait(mount, await_completion);
 }
 
+/**
+ * \brief A mount callback class for monitoring
+ */
 class MountCallbackI : public MountCallback {
+	void	timestamp() {
+		astro::PrecisionTime	t;
+		std::cout << t.toString("%T.%.03f:  ");
+	}
 public:
 	virtual void	statechange(mountstate newstate,
 				const Ice::Current& /* current */) {
-		std::cout << astro::device::Mount::state2string(convert(newstate)) << std::endl;
+		timestamp();
+		std::cout << astro::device::Mount::state2string(
+			convert(newstate));
+		std::cout << std::endl;
 	}
 	virtual void	position(const RaDec& newposition,
 				const Ice::Current& /* current */) {
+		timestamp();
 		astro::RaDec	position = convert(newposition);
 		std::cout << position.toString() << std::endl;
 	}
@@ -216,6 +271,8 @@ void    signal_handler(int /* sig */) {
 
 /**
  * \brief Monitor the mount
+ *
+ * \param mount		the mount to monitor
  */
 int	command_monitor(MountPrx mount) {
 	// create a callback object
@@ -240,6 +297,9 @@ int	command_monitor(MountPrx mount) {
 
 /**
  * \brief main function 
+ *
+ * \param argc		the number of arguments
+ * \param argv		the argument vector
  */
 int	main(int argc, char *argv[]) {
 	debug_set_ident("snowmount");
@@ -248,7 +308,7 @@ int	main(int argc, char *argv[]) {
 	int	c;
 	int	longindex;
 	astro::ServerName	servername;
-	putenv("POSIXLY_CORRECT=1");
+	putenv(strdup("POSIXLY_CORRECT=1"));
 	while (EOF != (c = getopt_long(argc, argv, "dhc:fw", longopts,
 		&longindex)))
 		switch (c) {
@@ -302,13 +362,16 @@ int	main(int argc, char *argv[]) {
 	}
 
 	// for the other commands we need the mount name
-	if (argc <= optind) {
-		throw std::runtime_error("no mount name");
-	}
-	std::string	mountname(argv[optind++]);
-
-	// get a proxy for the mount
+	std::string	mountname = command;
 	MountPrx	mount = devices->getMount(mountname);
+
+	// if there are no more arguments, interpret it as a get command
+	if (argc <= optind) {
+		return command_get(mount);
+	}
+
+	// get the command
+	command = std::string(argv[optind++]);
 
 	// get command
 	if (command == "get") {
@@ -316,6 +379,9 @@ int	main(int argc, char *argv[]) {
 	}
 	if (command == "location") {
 		return command_location(mount);
+	}
+	if (command == "time") {
+		return command_time(mount);
 	}
 	if (command == "altaz") {
 		return command_altaz(mount);

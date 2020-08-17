@@ -61,6 +61,20 @@ static std::string	getserialname(const std::string& devicename) {
 }
 
 /**
+ * \brief Format a string as HEX
+ *
+ * \param x	the string to format
+ */
+std::string	hexstring(const std::string& x) {
+	std::string	result;
+	for (auto c = x.begin(); c != x.end(); c++) {
+		int	C = *c;
+		result.append(stringprintf("%02X", C));
+	}
+	return result;
+}
+
+/**
  * \brief Construct a celestron mount object
  *
  * \param devicename	name of the device
@@ -86,8 +100,8 @@ CelestronMount::CelestronMount(const std::string& devicename)
 	write("V");
 	std::string	v = readto('#');
 	v = v.substr(0, 2);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "version = '%s' (%d bytes, %02X%02X)",
-		v.c_str(), v.size(), v[0], v[1]);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "version = '%s' (%d bytes, %s)",
+		v.c_str(), v.size(), hexstring(v).c_str());
 	version = 0;
 	if (v.size() >= 2) {
 		try {
@@ -104,9 +118,13 @@ CelestronMount::CelestronMount(const std::string& devicename)
 	_last_time_queried = 0;
 	_last_location_queried = 0;
 	_last_location_source = Mount::LOCAL;
+
+	// start the thread
+	start_thread();
 }
 
 void	CelestronMount::start_thread() {
+	std::unique_lock<std::recursive_mutex>	lock(_mount_mutex);
 	if (_running) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "thread already running");
 		return;
@@ -119,8 +137,11 @@ void	CelestronMount::start_thread() {
 void	CelestronMount::stop_thread() {
 	// if the mount is in GOTO mode, signal the thread to terminate
 	// (leaving the mount alone)
-	_running = false;
-	_mount_condition.notify_all();
+	{
+		std::unique_lock<std::recursive_mutex>	lock(_mount_mutex);
+		_running = false;
+		_mount_condition.notify_all();
+	}
 
 	// wait for the mount to terminate
 	if (_mount_thread.joinable()) {
@@ -168,8 +189,8 @@ Mount::state_type	CelestronMount::get_state() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "sending J command to check alignment");
 	write("J");
 	std::string	s = readto('#');
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "response: %s (%d bytes, %02X)",
-		s.c_str(), s.size(), s[0]);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "response: %s (%d bytes, %s)",
+		s.c_str(), s.size(), hexstring(s).c_str());
 	state_type	result = IDLE;
 	if (s[0] == 1) {
 		result = TRACKING;
@@ -177,8 +198,8 @@ Mount::state_type	CelestronMount::get_state() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "sending L command");
 	write("L");
 	s = readto('#');
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "response: %s (%d bytes, %02X)",
-		s.c_str(), s.size(), s[0]);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "response: %s (%d bytes, %s)",
+		s.c_str(), s.size(), hexstring(s).c_str());
 	if (s == "1#") {
 		result = GOTO;
 	}
@@ -205,9 +226,6 @@ void	CelestronMount::Goto(const AzmAlt& azmalt) {
 	// make sure we are in the right state
 	check_state();
 
-	// wait for the thread to complete
-	stop_thread();
-
 	// lock before you launch a new thread
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "locking for GOTO command");
 	std::unique_lock<std::recursive_mutex>	lock(_mount_mutex);
@@ -226,8 +244,8 @@ void	CelestronMount::Goto(const AzmAlt& azmalt) {
 	write(cmd);
 	getprompt();
 
-	// launch the thread
-	start_thread();
+	// notify the thread that something has changed
+	_mount_condition.notify_all();
 }
 
 /**
@@ -238,9 +256,6 @@ void	CelestronMount::Goto(const AzmAlt& azmalt) {
 void	CelestronMount::Goto(const RaDec& radec) {
 	// make sure we are in the right state
 	check_state();
-
-	// wait for the thread to complete
-	stop_thread();
 
 	// lock before you launch a new thread
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "locking for GOTO command");
@@ -257,11 +272,15 @@ void	CelestronMount::Goto(const RaDec& radec) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "command sent: %s", cmd.c_str());
 	write(cmd);
 	getprompt();
+
+	// notify the thread that something has changed
+	_mount_condition.notify_all();
 }
 
 /**
  * \brief Parse the Celestron response and read two angles from it
  *
+ * \param response	the response string to parse for angles
  */
 std::pair<double, double>	CelestronMount::parseangles(
 					const std::string& response) {
@@ -360,6 +379,8 @@ bool	CelestronMount::telescopePositionWest() {
 
 /**
  * \brief Convert a 16 bit unsigned integer into an angle in radians
+ *
+ * \param a	the number to convert into a number of radians
  */
 double	CelestronMount::angle(uint16_t a) {
 	return 2 * M_PI * a / 65536.;
@@ -367,6 +388,8 @@ double	CelestronMount::angle(uint16_t a) {
 
 /**
  * \brief Convert a 32 bit unsigned integer into an angle in radians
+ *
+ * \param a	the number to convert into a number of radians
  */
 double	CelestronMount::angle(uint32_t a) {
 	return 2 * M_PI * a / 4294967296.;
@@ -374,6 +397,8 @@ double	CelestronMount::angle(uint32_t a) {
 
 /**
  * \brief Convert an angle into an unsigned 16 bit integer
+ *
+ * \param a	the angle to convert to a number
  */
 uint16_t	CelestronMount::angle16(const Angle& a) {
 	uint16_t	result = 65536 * a.reduced().radians() / (2 * M_PI);
@@ -382,6 +407,8 @@ uint16_t	CelestronMount::angle16(const Angle& a) {
 
 /**
  * \brief Convert an angle into an unsigned 32 bit integer
+ *
+ * \param a	the angle to convert to a number
  */
 uint32_t	CelestronMount::angle32(const Angle& a) {
 	uint32_t	result = 4294967296 * a.reduced().radians() / (2 * M_PI);
@@ -543,10 +570,6 @@ Mount::location_source_type	CelestronMount::location_source() {
  * \find out whether a we can talk to the mount
  */
 bool	CelestronMount::queriable(time_t last) {
-	// if the thread is running, we cannot query
-	if (_mount_thread.joinable()) {
-		return false;
-	}
 	// if in goto, don't bother
 	if (state() == Mount::GOTO) {
 		return false;
@@ -638,12 +661,34 @@ RaDec	CelestronMount::getGuideRates() {
  * \brief Run method for a move 
  */
 void	CelestronMount::run() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "mount thread starting");
+	std::unique_lock<std::recursive_mutex>	lock(_mount_mutex);
+	RaDec	position = getRaDec();
 	while (_running) {
-		// periodically check the mount for a new position and state
-		// XXX implementation missing
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "checking for state");
+		// periodically check the mount state
+		state_type	newstate = get_state();
+		if (newstate != state()) {
+			state(newstate);
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "new state: %s",
+				Mount::state2string(newstate).c_str());
+		}
+
+		// check for the mount position
+		RaDec	newposition = getRaDec();
+		if (position != newposition) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "new position: %s",
+				newposition.toString().c_str());
+			callback(newposition);
+			position = newposition;
+		}
 
 		// if the GOTO has completed, terminate
-		_running = false;
+		auto	delay = std::chrono::seconds(5);
+		if (newstate == Mount::GOTO) {
+			delay = std::chrono::seconds(1);
+		}
+		_mount_condition.wait_for(lock, delay);
 	}
 }
 

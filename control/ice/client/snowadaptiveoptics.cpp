@@ -100,12 +100,19 @@ int	command_list(DevicesPrx devices) {
 }
 
 class AdaptiveOpticsCallbackI : public AdaptiveOpticsCallback {
+	void	timestamp() {
+		astro::PrecisionTime	t;
+		std::cout << t.toString("%T.%.03f:  ");
+	}
 public:
 	virtual void	stop(const Ice::Current& /* current */) {
+		timestamp();
+		std::cout << "stop" << std::endl;
 		exit(EXIT_SUCCESS);
 	}
 	virtual void	point(const Point& newposition,
 				const Ice::Current& /* current */) {
+		timestamp();
 		std::cout << convert(newposition).toString() << std::endl;
 	}
 };
@@ -149,7 +156,7 @@ int	main(int argc, char *argv[]) {
 	int	c;
 	int	longindex;
 	astro::ServerName	servername;
-	putenv("POSIXLY_CORRECT=1");
+	putenv(strdup("POSIXLY_CORRECT=1"));
 	while (EOF != (c = getopt_long(argc, argv, "dh?", longopts,
 		&longindex)))
 		switch (c) {

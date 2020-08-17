@@ -20,6 +20,7 @@ class CelestronMount : public astro::device::Mount,
 			public astro::device::Serial {
 	// mutex to protect serial communication from concurrent commands
 	std::recursive_mutex		_mount_mutex;
+	// the thread monitors the mount 
 	std::thread			_mount_thread;
 	std::condition_variable_any	_mount_condition;
 	std::atomic_bool		_running;

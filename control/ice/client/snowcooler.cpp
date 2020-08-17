@@ -190,7 +190,7 @@ int	main(int argc, char *argv[]) {
 	int	c;
 	int	longindex;
 	astro::ServerName	servername;
-	putenv("POSIXLY_CORRECT=1");
+	putenv(strdup("POSIXLY_CORRECT=1"));
 	while (EOF != (c = getopt_long(argc, argv, "dh", longopts, &longindex)))
 		switch(c) {
 		case 'd':

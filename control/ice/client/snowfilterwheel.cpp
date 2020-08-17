@@ -84,6 +84,10 @@ int	command_info(FilterWheelPrx filterwheel) {
 }
 
 class FilterWheelCallbackI : public FilterWheelCallback {
+	void	timestamp() {
+		astro::PrecisionTime	t;
+		std::cout << t.toString("%T.%.03f: ");
+	}
 public:
 	void	state(snowstar::FilterwheelState s,
 			const Ice::Current& /* current */) {
@@ -102,9 +106,12 @@ public:
 		std::cout << std::endl;
 	}
 	void	position(int filter, const Ice::Current& /* current */) {
+		timestamp();
 		std::cout << "filter change: " << filter << std::endl;
 	}
 	void	stop(const Ice::Current& /* current */) {
+		timestamp();
+		std::cout << "stop" << std::endl;
 		exit(EXIT_SUCCESS);
 	}
 };
@@ -131,7 +138,7 @@ int	main(int argc, char *argv[]) {
 	int	c;
 	int	longindex;
 	astro::ServerName	servername;
-	putenv("POSIXLY_CORRECT=1");
+	putenv(strdup("POSIXLY_CORRECT=1"));
 	while (EOF != (c = getopt_long(argc, argv, "dh", longopts, &longindex)))
 		switch(c) {
 		case 'd':

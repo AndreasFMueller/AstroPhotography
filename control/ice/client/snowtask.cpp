@@ -48,18 +48,23 @@ void	signal_handler(int /* sig */) {
  * \brief A monitor implementation todisplay state changes
  */
 class TaskMonitorI : public TaskMonitor {
+	void	timestamp() {
+		astro::PrecisionTime	t;
+		std::cout << t.toString("%F %T.%.03f");
+	}
 public:
 	TaskMonitorI() {
 		std::cout << "Date       Time         Id new state";
 		std::cout << std::endl;
 	}
 	void	stop(const Ice::Current& /* current */) {	
+		timestamp();
+		std::cout << "stop" << std::endl;
 		completed = true;
 	}
 	void	update(const TaskMonitorInfo& info,
 		const Ice::Current& /* current */) {
-		time_t	t = converttime(info.timeago);
-		std::cout << astro::timeformat("%Y-%m-%d %H:%M:%S", t);
+		timestamp();
 		std::cout << astro::stringprintf(" %6d %s", info.taskid,
 			state2string(info.newstate).c_str());
 		std::cout << std::endl;
