@@ -38,6 +38,7 @@ ChangeLog for the Astro project.
 	* fix putenv arguments
 	* add templates demangle_cstr and demangle_string to silence
 	  clang warnings about side effects of typeid
+	* fix libusb_set_debug deprecation
 
 20200816:
 	* rework ASI driver

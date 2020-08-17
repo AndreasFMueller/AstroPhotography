@@ -662,6 +662,7 @@ public:
 	bool	terminated() const { return _terminated; }
 
 	SyncQueue() : _terminated(false) { }
+	virtual	~SyncQueue() { }
 
 	void	put(T element) {
 		std::unique_lock<std::mutex>	lock(_mutex);
