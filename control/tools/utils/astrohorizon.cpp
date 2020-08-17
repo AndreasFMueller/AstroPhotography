@@ -52,7 +52,7 @@ int	main(int argc, char *argv[]) {
 	int	c;
 	int	longindex;
 	Angle	gridconstant(0.);
-	putenv((char *)"POSIXLY_CORRECT=1");    // cast to silence compiler
+	putenv(strdup("POSIXLY_CORRECT=1"));
 	while (EOF != (c = getopt_long(argc, argv, "dh?i:",
 		longopts, &longindex))) {
 		switch (c) {

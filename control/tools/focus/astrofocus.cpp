@@ -310,7 +310,7 @@ int	main(int argc, char *argv[]) {
 	int	steps = 10;
 	int	c;
 	int	longindex;
-	putenv((char *)"POSIXLY_CORRECT=1");    // cast to silence compiler
+	putenv(strdup("POSIXLY_CORRECT=1"));
 	while (EOF != (c = getopt_long(argc, argv,
 			"C:c:df:F:hm:p:r:s:w?", longopts,
 		&longindex))) {

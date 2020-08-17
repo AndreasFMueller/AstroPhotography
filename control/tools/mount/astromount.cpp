@@ -258,7 +258,7 @@ int main(int argc, char *argv[]) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "mount utility");
 	int	c;
 	int	longindex;
-	putenv((char *)"POSIXLY_CORRECT=1");	// cast to silence compiler
+	putenv(strdup("POSIXLY_CORRECT=1"));
 	while (EOF != (c = getopt_long(argc, argv, "c:dh?", longopts,
 		&longindex))) {
 		switch (c) {

@@ -35,6 +35,7 @@ ChangeLog for the Astro project.
 	* fix warnings in astrosunmoon.cpp, astroephemeris.cpp
 	* add timestamp to monitor functions of snowclient programs
 	* fix CelestronMount rewrite
+	* fix putenv arguments
 
 20200816:
 	* rework ASI driver

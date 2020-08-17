@@ -62,7 +62,7 @@ int	main(int argc, char *argv[]) {
 	::time(&t);
 	int	c;
 	int	longindex;
-	putenv((char *)"POSIXLY_CORRECT=1");    // cast to silence compiler
+	putenv(strdup("POSIXLY_CORRECT=1"));
 	while (EOF != (c = getopt_long(argc, argv, "dh?t:",
 		longopts, &longindex))) {
 		switch (c) {
