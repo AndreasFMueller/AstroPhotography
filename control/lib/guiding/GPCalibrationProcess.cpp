@@ -233,8 +233,7 @@ void	GPCalibrationProcess::main(astro::thread::Thread<GPCalibrationProcess>& _th
 		return;
 	} catch (std::exception& x) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "calibration thread terminated "
-			"by %s: %s", demangle(typeid(x).name()).c_str(),
-			x.what());
+			"by %s: %s", demangle_cstr(x), x.what());
 	} catch (...) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "calibration thread terminated "
 			"by unknown exception");

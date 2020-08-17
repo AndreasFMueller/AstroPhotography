@@ -31,8 +31,9 @@ StackingStep::StackingStep(NodePaths& parent) : ImageStep(parent) {
 {									\
 	Image<Pixel >	*img = dynamic_cast<Image<Pixel >*>(&*image);	\
 	if (img) {							\
+		Pixel	x;						\
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "%s pixel", 		\
-			demangle(typeid(Pixel).name()).c_str());	\
+			demangle_cstr(x));				\
 		for (int x = 0; x < w; x++) {				\
 			for (int y = 0; y < h; y++) {			\
 				Pixel	p = img->pixel(x, y);		\

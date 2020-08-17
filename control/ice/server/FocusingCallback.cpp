@@ -51,7 +51,7 @@ void	callback_adapter<FocusCallbackPrx>(FocusCallbackPrx& prx,
 	}
 
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "not a known type: %s",
-		astro::demangle(typeid(*data).name()).c_str());
+		astro::demangle_cstr(*data));
 }
 
 //////////////////////////////////////////////////////////////////////

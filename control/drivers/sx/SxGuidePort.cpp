@@ -56,7 +56,7 @@ void	SxGuidePort::do_activate(uint8_t active) {
 		}
 	} catch (const std::exception& x) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "%s exception: %s",
-			demangle(typeid(x).name()).c_str(), x.what());
+			demangle_cstr(x), x.what());
 		camera.release("guideport");
 		camera.refresh();
 	} catch (...) {

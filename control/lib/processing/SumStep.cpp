@@ -40,7 +40,7 @@ static void	accumulate_image(Image<float>& sumimg, double weight,
 	if (accumulate_typed_image<double>(sumimg, weight,
 		dynamic_cast<Image<double>*>(&*image))) return;
 	std::string	msg = stringprintf("cannot accumulate %s image",
-				demangle(typeid(*image).name()).c_str());
+				demangle_cstr(*image));
 	debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 	throw std::runtime_error(msg);
 }

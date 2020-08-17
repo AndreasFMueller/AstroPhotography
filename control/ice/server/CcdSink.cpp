@@ -48,7 +48,7 @@ void	CcdSink::operator()(const astro::camera::ImageQueueEntry& entry) {
 		} catch (const std::exception& x) {
 			debug(LOG_DEBUG, DEBUG_LOG, 0,
 				"cannot send image: %s %s",
-				astro::demangle(typeid(x).name()).c_str(),
+				astro::demangle_cstr(x),
 				x.what());
 			sinkprx = NULL;
 		}
@@ -71,7 +71,7 @@ void	CcdSink::stop() {
 			sinkprx->stop();
 		} catch (const std::exception& x) {
 			debug(LOG_DEBUG, DEBUG_LOG, 0, "cannot stop: %s %s",
-				astro::demangle(typeid(x).name()).c_str(),
+				astro::demangle_cstr(x),
 				x.what());
 		}
 	} else {

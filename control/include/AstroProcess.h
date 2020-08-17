@@ -765,6 +765,7 @@ class ProcessorNetwork : public NodePaths {
 	name2idmap_t	_name2ids;
 public:
 	ProcessorNetwork();
+	virtual ~ProcessorNetwork() { }
 	void	add(ProcessingStepPtr step);
 	ProcessingStepPtr	byid(int id) const;
 	ProcessingStepPtr	byname(const std::string& name) const;

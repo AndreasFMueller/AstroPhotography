@@ -52,20 +52,20 @@ public:
 
 	virtual bool	get_boolean() const {
 		std::string	msg = stringprintf("cannot get boolean from %s",
-			demangle(typeid(*this).name()).c_str());
+			demangle_cstr(*this));
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 		throw std::runtime_error(msg);
 		throw std::runtime_error("no boolean value");
 	}
 	virtual float	get_float() const {
 		std::string	msg = stringprintf("cannot get float from %s",
-			demangle(typeid(*this).name()).c_str());
+			demangle_cstr(*this));
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 		throw std::runtime_error(msg);
 	}
 	virtual std::string	get_string() const {
 		std::string	msg = stringprintf("cannot get string from %s",
-			demangle(typeid(*this).name()).c_str());
+			demangle_cstr(*this));
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 		throw std::runtime_error(msg);
 	}
@@ -73,20 +73,20 @@ public:
 	virtual void	set_boolean(bool v) {
 		std::string	msg = stringprintf("cannot set boolean(%s) of %s",
 			(v) ? "true" : "false",
-			demangle(typeid(*this).name()).c_str());
+			demangle_cstr(*this));
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 		throw std::runtime_error(msg);
 	}
 	virtual void	set_float(float v) {
 		std::string	msg = stringprintf("cannot set float(%f) of %s",
-			v, demangle(typeid(*this).name()).c_str());
+			v, demangle_cstr(*this));
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 		throw std::runtime_error(msg);
 		throw std::runtime_error("cannot set float value");
 	}
 	virtual void	set_string(const std::string& s) {
 		std::string	msg = stringprintf("cannot set string(%s) of %s",
-			s.c_str(), demangle(typeid(*this).name()).c_str());
+			s.c_str(), demangle_cstr(*this));
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 		throw std::runtime_error(msg);
 		throw std::runtime_error("cannot set string value");
@@ -198,7 +198,7 @@ public:
 	virtual bool	isvalid(const T& value) const {
 		return (_values.end() != _values.find(value));
 	}
-	virtual void	add(const T& value) {
+	void	add(const T& value) {
 		_values.insert(value);
 	}
 protected:
@@ -224,10 +224,12 @@ public:
 	ParameterDescriptionImplSetFloat(const std::vector<float> values)
 		: ParameterDescriptionImplSet<float>(values) { }
 	virtual ~ParameterDescriptionImplSetFloat() { }
-	virtual void	add(const std::string& value) {
+	// using directive to silence clang warning
+	using ParameterDescriptionImplSet<float>::add;
+	void	add(const std::string& value) {
 		ParameterDescriptionImplSet<float>::add(std::stod(value));
 	}
-	virtual bool	isvalid(const float& value) const;
+	bool	isvalid(const float& value) const;
 	virtual std::set<float>	floatValues() const { return _values; }
 
 	virtual float	get_float() const { return get(); }
@@ -330,11 +332,15 @@ public:
 		: ParameterDescriptionImplSet<std::string>(values) { }
 	ParameterDescriptionImplSetString(const std::vector<std::string> values)
 		: ParameterDescriptionImplSet<std::string>(values) { }
+	// using directive to silence clang warning
+	using ParameterDescriptionImplSet<std::string>::isvalid;
 	virtual bool	isvalid(const float& value) const {
 		std::string	s = convert(value);
 		return ParameterDescriptionImplSet<std::string>::isvalid(s);
 	}
-	virtual void	add(const float& value) {
+	// using directive to silence clang warning
+	using ParameterDescriptionImplSet<std::string>::add;
+	void	add(const float& value) {
 		std::string	s = convert(value);
 		ParameterDescriptionImplSet<std::string>::add(s);
 	}

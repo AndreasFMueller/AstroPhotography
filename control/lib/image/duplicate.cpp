@@ -39,7 +39,7 @@ static ImagePtr	duplicate_image(ImagePtr image) {
 	duplicate_pixel(YUYV<float>, image);
 	duplicate_pixel(YUYV<double>, image);
 	std::string	msg = stringprintf("unknown pixel type: %s",
-		demangle(typeid(image->pixel_type()).name()).c_str());
+		demangle_cstr(image->pixel_type()));
 	throw std::runtime_error("unknown pixel type");
 }
 

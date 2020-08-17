@@ -31,7 +31,7 @@ static void	cooler_main(SxCooler *simcooler) {
 		simcooler->run();
 	} catch (const std::exception& x) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "%s exception in thread: %s",
-			demangle(typeid(x).name()).c_str(), x.what());
+			demangle_cstr(x), x.what());
 	} catch (...) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "unknown exception");
 	}

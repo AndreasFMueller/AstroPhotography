@@ -36,6 +36,8 @@ ChangeLog for the Astro project.
 	* add timestamp to monitor functions of snowclient programs
 	* fix CelestronMount rewrite
 	* fix putenv arguments
+	* add templates demangle_cstr and demangle_string to silence
+	  clang warnings about side effects of typeid
 
 20200816:
 	* rework ASI driver

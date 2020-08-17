@@ -62,7 +62,7 @@ void	FitsTable::setImage(astro::image::ImagePtr image) {
 			image->size().height()), "height of the image");
 		// pixel type
 		metaItem(row, this, "type", 
-			astro::demangle(image->pixel_type().name()),
+			astro::demangle_string(image->pixel_type()),
 			"pixel type of image");
 
 		// read pixel value statistics

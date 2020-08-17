@@ -20,6 +20,7 @@ double	ThresholdExtractor::threshold(const ConstImageAdapter<double>& image) con
 
 	double	level = (min + max) / 2;
 	// XXX real implementation missing
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "implementation should use p = %f", _p);
 
 	return level;
 }

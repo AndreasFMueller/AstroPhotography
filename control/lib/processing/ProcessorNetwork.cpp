@@ -31,7 +31,7 @@ void	ProcessorNetwork::add(ProcessingStepPtr step) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "empty step");
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "adding new step of type %s",
-		astro::demangle(typeid(*step).name()).c_str());
+		astro::demangle_cstr(*step));
 	// add the step
 	int	id = step->id();
 	_steps.insert(std::make_pair(id, step));
@@ -157,7 +157,7 @@ int	ProcessorNetwork::process(int id) {
 	ProcessingStep::state	s = current->status();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "process(%d, %s, %s) %s", id,
 		current->name().c_str(), ProcessingStep::statename(s).c_str(),
-		demangle(typeid(*current).name()).c_str());
+		demangle_cstr(*current));
 	switch (s) {
 		case ProcessingStep::needswork:
 			debug(LOG_DEBUG, DEBUG_LOG, 0, "id=%d needs work", id);

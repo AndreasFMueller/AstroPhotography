@@ -381,7 +381,7 @@ TrackingHistory	GuiderFactoryI::getTrackingHistory(int id,
 	} catch (const std::exception& ex) {
 		std::string	cause = astro::stringprintf(
 			"tracking history %d not found: %s (%s)",
-			astro::demangle(typeid(ex).name()).c_str(), ex.what());
+			astro::demangle_cstr(ex), ex.what());
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s");
 		throw NotFound(cause);
 	} catch (...) {
@@ -424,8 +424,7 @@ TrackingHistory	GuiderFactoryI::getTrackingHistoryType(int id,
 	} catch (const std::exception& ex) {
 		std::string	cause
 			= astro::stringprintf("no history: %s(%s)",
-				astro::demangle(typeid(ex).name()).c_str(),
-					ex.what());
+				astro::demangle_cstr(ex), ex.what());
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", cause.c_str());
 		throw NotFound(cause);
 	} catch (...) {
@@ -455,7 +454,7 @@ TrackingSummary	GuiderFactoryI::getTrackingSummary(int id,
 	} catch (const std::exception& ex) {
 		std::string	cause = astro::stringprintf(
 			"no summary %d: %s(%s)", id, 
-			astro::demangle(typeid(ex).name()).c_str(), ex.what());
+			astro::demangle_cstr(ex), ex.what());
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", cause.c_str());
 		throw NotFound(cause);
 	} catch (...) {

@@ -287,7 +287,7 @@ void	SxCamera::disconnect() {
 		outendpoint.reset();
 	} catch (const std::exception& x) {
 		std::string	msg = stringprintf("failed to destroy %s: %s",
-			demangle(typeid(x).name()).c_str(), x.what());
+			demangle_cstr(x), x.what());
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 	}
 
@@ -296,7 +296,7 @@ void	SxCamera::disconnect() {
 		inendpoint.reset();
 	} catch (const std::exception& x) {
 		std::string	msg = stringprintf("failed to destroy %s: %s",
-			demangle(typeid(x).name()).c_str(), x.what());
+			demangle_cstr(x), x.what());
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 	}
 
@@ -305,7 +305,7 @@ void	SxCamera::disconnect() {
 		interface.reset();
 	} catch (const std::exception& x) {
 		std::string	msg = stringprintf("failed to destroy %s: %s",
-			demangle(typeid(x).name()).c_str(), x.what());
+			demangle_cstr(x), x.what());
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 	}
 
@@ -314,7 +314,7 @@ void	SxCamera::disconnect() {
 		deviceptr.reset();
 	} catch (const std::exception& x) {
 		std::string	msg = stringprintf("failed to destroy %s: %s",
-			demangle(typeid(x).name()).c_str(), x.what());
+			demangle_cstr(x), x.what());
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 	}
 }
@@ -711,7 +711,7 @@ void	SxCamera::refresh() {
 		_locator.forget(enclosurename);
 	} catch (const std::exception& x) {
 		std::string	msg = stringprintf("error during forget: %s %s",
-			demangle(typeid(x).name()).c_str(), x.what());
+			demangle_cstr(x), x.what());
 	}
 
 	// teset the deviceptr 
@@ -723,7 +723,7 @@ void	SxCamera::refresh() {
 	} catch (const std::exception& x) {
 		std::string	msg = stringprintf("error during "
 			"deviceForName: %s %s",
-			demangle(typeid(x).name()).c_str(), x.what());
+			demangle_cstr(x), x.what());
 	}
 
 	// if we could not get the new pointer, we give up at this point
@@ -739,7 +739,7 @@ void	SxCamera::refresh() {
 		reconnect(newdevptr);
 	} catch (const std::exception& x) {
 		std::string	msg = stringprintf("error during reconnect: "
-			"%s %s", demangle(typeid(x).name()).c_str(), x.what());
+			"%s %s", demangle_cstr(x), x.what());
 	}
 }
 

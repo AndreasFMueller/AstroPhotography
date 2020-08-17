@@ -14,7 +14,7 @@ bool	Application::notify(QObject *receiver, 	QEvent *event) {
 	try {
 		return QApplication::notify(receiver, event);
 	} catch (const std::exception& x) {
-		std::string	classname = astro::demangle(typeid(x).name());
+		std::string	classname = astro::demangle_string(x);
 		std::string	msg = astro::stringprintf("exception '%s' "
 			"caught: %s", classname.c_str(), x.what());
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());

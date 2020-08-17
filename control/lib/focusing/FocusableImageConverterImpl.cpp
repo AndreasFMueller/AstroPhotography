@@ -48,7 +48,7 @@ ImageRectangle	FocusableImageConverterImpl::rectangle_to_use(ImagePtr image) {
 	Image<pixel >	*img = dynamic_cast<Image<pixel > *>(&*image);	\
 	if (NULL != img) {						\
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "raw %s",		\
-			demangle(typeid(*img).name()).c_str());		\
+			demangle_cstr(*img));				\
 		adapter::ConvertingAdapter<float, pixel > ca(*img);	\
 		adapter::WindowAdapter<float>	wa(ca, r);		\
 		return FocusableImage(new Image<float>(wa));		\
@@ -71,7 +71,7 @@ FocusableImage	FocusableImageConverterImpl::get_raw(ImagePtr image) {
 	Image<pixel>	*img = dynamic_cast<Image<pixel>*>(&*image);	\
 	if ((NULL != img) && (img->getMosaicType().isMosaic())) {	\
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "bayer %s",		\
-			demangle(typeid(*img).name()).c_str());		\
+			demangle_cstr(*img));				\
 		adapter::BayerGAdapter<pixel, float>	bga(img);	\
 		adapter::WindowAdapter<float>	wa(bga, r);		\
 		return FocusableImage(new Image<float>(wa));		\
@@ -94,8 +94,9 @@ FocusableImage	FocusableImageConverterImpl::get_bayer(ImagePtr image) {
 	Image<YUV<pixel> >	*img					\
 		= dynamic_cast<Image<YUV<pixel> >*>(&*image);		\
 	if (NULL != img) {						\
+		pixel	x;						\
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "yuv Image<YUV<%s>>",	\
-			demangle(typeid(pixel).name()).c_str());	\
+			demangle_cstr(x));				\
 		adapter::YAdapter<pixel, float>	la(*img);		\
 		adapter::WindowAdapter<float>	wa(la, r);		\
 		return FocusableImage(new Image<float>(wa));		\
@@ -117,7 +118,7 @@ FocusableImage	FocusableImageConverterImpl::get_yuv(ImagePtr image) {
 		= dynamic_cast<Image<RGB<pixel> >*>(&*image);		\
 	if (NULL != img) {						\
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "rgb %s",		\
-			demangle(typeid(*img).name()).c_str());		\
+			demangle_cstr(*img));				\
 		adapter::LuminanceAdapter<RGB<pixel>, float>	la(*img);	\
 		adapter::WindowAdapter<float>	wa(la, r);		\
 		return FocusableImage(new Image<float>(wa));		\
@@ -179,7 +180,7 @@ FocusableImage	FocusableImageConverterImpl::operator()(const ImagePtr image) {
 
 	// unknown image type
 	{
-	std::string	imagetype = demangle(typeid(*image).name());
+	std::string	imagetype = demangle_string(*image);
 	std::string	msg = stringprintf("cannot extract focusable image "
 		"from %s", imagetype.c_str());
 	throw std::runtime_error(msg);

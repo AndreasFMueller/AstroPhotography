@@ -36,7 +36,7 @@ static void	taskmain(TaskExecutor *te) {
 		te->main();
 	} catch (const std::exception& x) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "task->main() terminated by "
-			"%s: %s", demangle(typeid(x).name()).c_str(), x.what());
+			"%s: %s", demangle_cstr(x), x.what());
 	} catch (...) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "taskmain terminated by "
 			"unknown exception");

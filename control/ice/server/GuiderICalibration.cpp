@@ -242,7 +242,7 @@ void	GuiderI::registerCalibrationMonitor(const Ice::Identity& calibrationcallbac
 			current);
 	} catch (const std::exception& x) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "cannot register calibration callback: %s %s",
-			astro::demangle(typeid(x).name()).c_str(), x.what());
+			astro::demangle_cstr(x), x.what());
 	} catch (...) {
 		debug(LOG_ERR, DEBUG_LOG, 0,
 			"cannot register calibration callback for unknown reason");

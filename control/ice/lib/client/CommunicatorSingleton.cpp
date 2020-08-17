@@ -113,7 +113,7 @@ Ice::Identity	CommunicatorSingleton::add(Ice::ObjectPtr servant) {
 	// add the servant to the adapter
 	getAdapter()->add(servant, identity);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "registered %s as %s",
-		astro::demangle(typeid(*servant).name()).c_str(),
+		astro::demangle_cstr(*servant),
 		identity.name.c_str());
 
 	// return the identity to the caller
@@ -126,7 +126,7 @@ Ice::Identity	CommunicatorSingleton::add(Ice::ObjectPtr servant) {
 void	CommunicatorSingleton::remove(Ice::Identity identity) {
 	Ice::ObjectPtr	servant = getAdapter()->remove(identity);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "servant %s with identity %s removed",
-		astro::demangle(typeid(*servant).name()).c_str(),
+		astro::demangle_cstr(*servant),
 		identity.name.c_str());
 }
 
@@ -147,7 +147,7 @@ void	CommunicatorSingleton::connect(Ice::ObjectPrx proxy) {
 		throw std::runtime_error(msg);
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "adding adapter to connection of %s",
-		astro::demangle(typeid(*proxy).name()).c_str());
+		astro::demangle_cstr(*proxy));
 	auto	connection = proxy->ice_getConnection();
 	if (!connection) {
 		std::string	msg("no connection available");
@@ -155,7 +155,7 @@ void	CommunicatorSingleton::connect(Ice::ObjectPrx proxy) {
 		throw std::runtime_error(msg);
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "adding adapter to %s",
-		astro::demangle(typeid(connection).name()).c_str());
+		astro::demangle_cstr(connection));
 	connection->setAdapter(getAdapter());
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "connected");
 	connected = true;

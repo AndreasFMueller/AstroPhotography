@@ -26,7 +26,7 @@ InstrumentSetupThread::InstrumentSetupThread(InstrumentWidget *instrumentwidget,
  * \brief Destroy the instrument setup
  */
 InstrumentSetupThread::~InstrumentSetupThread() {
-	std::string	t = astro::demangle(typeid(*_instrumentwidget).name());
+	std::string	t = astro::demangle_string(*_instrumentwidget);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "%s setup thread destroyed", t.c_str());
 }
 
@@ -34,7 +34,7 @@ InstrumentSetupThread::~InstrumentSetupThread() {
  * \brief Work method for the thread
  */
 void	InstrumentSetupThread::run() {
-	std::string	t = astro::demangle(typeid(*_instrumentwidget).name());
+	std::string	t = astro::demangle_string(*_instrumentwidget);
 	try {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "start the work on %s setup", t.c_str());
 		_instrumentwidget->instrumentSetup(_serviceobject, _remoteinstrument);

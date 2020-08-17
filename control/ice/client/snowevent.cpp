@@ -23,7 +23,10 @@ class EventDisplay {
 	bool	_verbose;
 public:
 	EventDisplay(std::ostream& out, bool verbose)
-		: _out(out), _verbose(verbose) { }
+		: _out(out), _verbose(verbose) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "verbose: %s (currently unused",
+			(_verbose) ? "yes" : "no");
+	}
 	void	operator()(const Event& event);
 };
 

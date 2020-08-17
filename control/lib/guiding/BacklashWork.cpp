@@ -158,7 +158,7 @@ void	BacklashWork::main(astro::thread::Thread<BacklashWork>& thread) {
 		msg = stringprintf("backlash characterization with guideport %s "
 			"terminated by exception %s",
 			_guider.guideport()->name().toString().c_str(),
-			demangle(typeid(x).name()).c_str());
+			demangle_cstr(x));
 		astro::event(EVENT_CLASS, astro::events::ERR,
 			astro::events::Event::GUIDE, msg);
 	}

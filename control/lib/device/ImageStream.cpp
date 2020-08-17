@@ -144,7 +144,7 @@ void	ImageStream::operator()(const ImageQueueEntry& entry) {
  */
 void	ImageStream::imagesink(ImageSink *i) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "registered sink %s",
-		demangle(typeid(*i).name()).c_str());
+		demangle_cstr(*i));
 	_imagesink = i;
 }
 

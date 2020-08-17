@@ -177,7 +177,7 @@ void    GuiderI::registerTrackingMonitor(const Ice::Identity& trackingcallback,
 	} catch (const std::exception& x) {
 		debug(LOG_ERR, DEBUG_LOG, 0,
 			"cannot register tracking callback: %s %s",
-			astro::demangle(typeid(x).name()).c_str(), x.what());
+			astro::demangle_cstr(x), x.what());
 	} catch (...) {
 		debug(LOG_ERR, DEBUG_LOG, 0,
 			"cannot register tracking callback for unknown reason");

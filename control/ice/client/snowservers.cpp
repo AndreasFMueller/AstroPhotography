@@ -106,7 +106,7 @@ int	main(int argc, char *argv[]) {
 			inserter(removedkeys, removedkeys.begin()));
 
 		std::for_each(removedkeys.begin(), removedkeys.end(),
-			[sd](const ServiceKey& k) {
+			[](const ServiceKey& k) {
 				std::cout << "deleted: ";
 				std::cout << k.toString();
 				std::cout << std::endl;

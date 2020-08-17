@@ -493,6 +493,7 @@ class LinearLogLuminanceFactor : public LuminanceFactor {
 	double	_s;
 public:
 	LinearLogLuminanceFactor(double crossover, double top, double maximum);
+	virtual ~LinearLogLuminanceFactor() { }
 	virtual double	operator()(double d);
 };
 

@@ -50,8 +50,7 @@ void	AsynchronousAction::execute() {
 			_action->execute();
 		} catch (const std::exception& x) {
 			debug(LOG_ERR, DEBUG_LOG, 0, "error %s in action: %s",
-				demangle(typeid(x).name()).c_str(),
-				x.what());
+				demangle_cstr(x), x.what());
 		} catch (...) {
 			debug(LOG_ERR, DEBUG_LOG, 0, "error in action");
 		}

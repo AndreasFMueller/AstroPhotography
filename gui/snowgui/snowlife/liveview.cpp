@@ -435,7 +435,7 @@ void	LiveView::receiveImage(astro::image::ImagePtr image) {
 	// update the status bar
 	std::string	m = astro::stringprintf("%s of pixel type %s",
 		image->info().c_str(),
-		astro::demangle(image->pixel_type().name()).c_str());
+		astro::demangle_cstr(image->pixel_type()));
 	statusBar()->showMessage(QString(m.c_str()));
 
 	if (_mode == single) {

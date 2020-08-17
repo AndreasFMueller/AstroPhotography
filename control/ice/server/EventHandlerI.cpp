@@ -24,7 +24,7 @@ void    callback_adapter<EventMonitorPrx>(EventMonitorPrx& p,
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "not event callback data");
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "found callback data of type %s",
-		astro::demangle(typeid(cbd).name()).c_str());
+		astro::demangle_cstr(cbd));
 
 	// now send the payload to the registerd clients
 	Event	event = convert(cbd->data());
@@ -142,7 +142,7 @@ void	EventHandlerI::registerMonitor(const Ice::Identity& eventmonitor,
 	} catch (const std::exception& x) {
 		debug(LOG_ERR, DEBUG_LOG, 0,
 			"cannot register event monitor callback: %s %s",
-			astro::demangle(typeid(x).name()).c_str(), x.what());
+			astro::demangle_cstr(x), x.what());
 	} catch (...) {
 		debug(LOG_ERR, DEBUG_LOG, 0,
 			"cannot register event callback for unknown reason");

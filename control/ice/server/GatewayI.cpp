@@ -13,7 +13,7 @@ template<>
 void	callback_adapter<StatusUpdateMonitorPrx>(StatusUpdateMonitorPrx& p,
 		const astro::callback::CallbackDataPtr data) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "message type: %s",
-		astro::demangle(typeid(*data).name()).c_str());
+		astro::demangle_cstr(*data));
 	astro::gateway::TaskUpdateCallbackData	*sap
 		= dynamic_cast<astro::gateway::TaskUpdateCallbackData*>(&*data);
 	if (NULL == sap) {
@@ -29,7 +29,7 @@ public:
 	TaskUpdateForwarder(GatewayI *gateway) : _gateway(gateway) { }
 	CallbackDataPtr	operator()(CallbackDataPtr data) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "forwarding %s",
-			astro::demangle(typeid(*data).name()).c_str());
+			astro::demangle_cstr(*data));
 		astro::gateway::TaskUpdateCallbackData	*tucd
 			= dynamic_cast<astro::gateway::TaskUpdateCallbackData*>(&*data);
 		if (NULL != tucd) {

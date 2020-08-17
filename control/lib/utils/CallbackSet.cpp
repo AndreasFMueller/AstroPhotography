@@ -21,8 +21,8 @@ public:
 
 	CallbackDataPtr	operator()(CallbackPtr callback) {
 		// get type names for callback and data
-		std::string cbdata = demangle(typeid(&*_data).name());
-		std::string cb = demangle(typeid(&*callback).name());
+		std::string cbdata = demangle_string(&*_data);
+		std::string cb = demangle_string(&*callback);
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "callback %s on %s",
 			cb.c_str(),  cbdata.c_str());
 		// check whether the callback actual exists
@@ -34,7 +34,7 @@ public:
 		try {
 			callback->operator()(_data);
 		} catch (const std::exception& x) {
-			std::string xtype = demangle(typeid(x).name());
+			std::string xtype = demangle_string(x);
 			std::string	cause = stringprintf(
 				"callback %s failed on %s: %s, cause: %s",
 				cb.c_str(), cbdata.c_str(), xtype.c_str(),

@@ -50,7 +50,7 @@ ConstImageAdapter<double>	*Tracker::adapter(const ImagePtr image) {
 }
 
 std::string	Tracker::toString() const {
-	return demangle(typeid(this).name());
+	return demangle_string(this);
 }
 
 } // namespace guiding

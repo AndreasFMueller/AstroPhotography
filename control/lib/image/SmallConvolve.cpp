@@ -23,15 +23,15 @@ ImagePtr	convolve(const ConstImageAdapter<double>& small,
 	Image<Pixel >	*img = dynamic_cast<Image<Pixel > *>(&*image);
 	if (NULL == img) {
 		std::string	msg = stringprintf("pixel type %s does not "
-			"match image", demangle(typeid(Pixel).name()).c_str());
+			"match image", demangle_cstr(Pixel()));
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "%s", msg.c_str());
 		throw std::runtime_error(msg);
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "convolving a %s %s with a %s %s",
 		small.getSize().toString().c_str(),
-		demangle(typeid(small).name()).c_str(),
+		demangle_cstr(small),
 		image->size().toString().c_str(),
-		demangle(typeid(*img).name()).c_str());
+		demangle_cstr(*img));
 	adapter::ConvolutionAdapter<Pixel >	ca(*img, small);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "perform the convolution");
 	return ImagePtr(new Image<Pixel >(ca));
@@ -76,7 +76,7 @@ ImagePtr	smallConvolve(const ConstImageAdapter<double>& small,
 	// if we get to this point, we were not able to convolute because
 	// of an unknown Pixel type
 	std::string	cause = stringprintf("unknown pixel type %s",
-		demangle(typeid(*image).name()).c_str());
+		demangle_cstr(*image));
 	debug(LOG_ERR, DEBUG_LOG, 0, "%s", cause.c_str());
 	throw std::runtime_error(cause);
 }

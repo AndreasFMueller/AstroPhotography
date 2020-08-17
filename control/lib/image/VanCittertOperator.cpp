@@ -76,13 +76,13 @@ public:
 {									\
 	Image<Pixel >	*img1 = dynamic_cast<Image<Pixel >*>(&*a1);	\
 	if (NULL != img1) {						\
-		a1type = demangle(typeid(*img1).name());		\
+		a1type = demangle_string(*img1);			\
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "image1: %s",		\
 			a1type.c_str());				\
 	}								\
 	Image<double >	*img2 = dynamic_cast<Image<double >*>(&*a2);	\
 	if (NULL != img2) {						\
-		a2type = demangle(typeid(*img2).name());		\
+		a2type = demangle_string(*img2);			\
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "image2: %s",		\
 			a2type.c_str());				\
 	}								\

@@ -48,7 +48,7 @@ static void	springboard_main(ThreadBase *threadbase) {
 		return;
 	}
 	// get the type of the threadbase for better logging
-	std::string	classname = demangle(typeid(*threadbase).name());
+	std::string	classname = demangle_string(*threadbase);
 	try {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "calling main of %s",
 			classname.c_str());
@@ -58,10 +58,10 @@ static void	springboard_main(ThreadBase *threadbase) {
 	} catch (const std::exception& x) {
 		std::string	msg = stringprintf("main of %s terminated "
 			"by %s: %s",
-			classname.c_str(), demangle(typeid(x).name()).c_str(),
+			classname.c_str(), demangle_cstr(x),
 			x.what());
 		astro::event(__FILE__, __LINE__,
-			astro::demangle(typeid(*threadbase).name()),
+			astro::demangle_string(*threadbase),
 			astro::events::ERR,
 			astro::events::Event::UTILITIES, msg);
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
@@ -69,7 +69,7 @@ static void	springboard_main(ThreadBase *threadbase) {
 		std::string	msg = stringprintf(
 			"main of %s terminated (unknown)", classname.c_str());
 		astro::event(__FILE__, __LINE__,
-			astro::demangle(typeid(*threadbase).name()),
+			astro::demangle_string(*threadbase),
 			astro::events::ERR,
 			astro::events::Event::UTILITIES, msg);
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
@@ -230,7 +230,7 @@ void	ThreadBase::run() {
 		this->main();
 	} catch (std::exception& x) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s exception in thread %p: %s",
-			demangle(typeid(x).name()).c_str(),
+			demangle_cstr(x),
 			std::this_thread::get_id(), x.what());
 		try {
 			this->callback(x);
@@ -259,7 +259,7 @@ void	ThreadBase::run() {
  */
 void	ThreadBase::callback(const std::exception& ex) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "ignoring excetion %s: %s",
-		demangle(typeid(ex).name()).c_str(), ex.what());
+		demangle_cstr(ex), ex.what());
 }
 
 } // namespace thread

@@ -135,7 +135,7 @@ int	ControlDeviceBase::startCalibration(TrackerPtr /* tracker */) {
 	if (NULL == calibrationprocess) {
 		std::string	cause = stringprintf("not a calibration "
 			"process: %s",
-			demangle(typeid(*process).name()).c_str());
+			demangle_cstr(*process));
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", cause.c_str());
 		throw std::runtime_error(cause);
 	}

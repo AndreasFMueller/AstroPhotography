@@ -494,7 +494,7 @@ void	imagercontrollerwidget::retrieveImage() {
 	} catch (const std::exception& x) {
 		std::string	msg = astro::stringprintf("cannot retrieve "
 			"image: exception %s, cause=%s",
-			astro::demangle(typeid(x).name()).c_str(), x.what());
+			astro::demangle_cstr(x), x.what());
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 		ccdFailed(x);
 	}

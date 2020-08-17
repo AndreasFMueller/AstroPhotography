@@ -109,6 +109,7 @@ public:
 					b.toString().c_str());
 			}
 		);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "_min = %f, not used", _min);
 	}
 	float	mean() const {
 		int	counter = 0;

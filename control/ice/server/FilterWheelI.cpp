@@ -121,7 +121,7 @@ void	FilterWheelI::registerCallback(const Ice::Identity& callback,
 		callbacks.registerCallback(callback, current);
 	} catch (const std::exception& x) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "cannot register callback %s: %s",
-			astro::demangle(typeid(x).name()).c_str(), x.what());
+			astro::demangle_cstr(x), x.what());
         } catch (...) {
 		debug(LOG_ERR, DEBUG_LOG, 0,
 			"cannot register callback, unknown reason");
@@ -141,7 +141,7 @@ void	FilterWheelI::unregisterCallback(const Ice::Identity& callback,
 		callbacks.unregisterCallback(callback, current);
 	} catch (const std::exception& x) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "can't unregister callback %s: %s",
-			astro::demangle(typeid(x).name()).c_str(), x.what());
+			astro::demangle_cstr(x), x.what());
         } catch (...) {
 		debug(LOG_ERR, DEBUG_LOG, 0,
 			"cannot register callback, unknown reason");
@@ -158,7 +158,7 @@ void	FilterWheelI::callbackUpdate(const astro::callback::CallbackDataPtr data) {
 		callbacks(data);
 	} catch (const std::exception& x) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "cannot send callback: %s %s",
-		astro::demangle(typeid(x).name()).c_str(), x.what());
+		astro::demangle_cstr(x), x.what());
 	} catch (...) {
 		debug(LOG_ERR, DEBUG_LOG, 0,
 			"cannot send callback, unknown reason");

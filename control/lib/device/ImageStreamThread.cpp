@@ -24,7 +24,7 @@ static void	imagestreammain(ImageStreamThread *ist) {
 		ist->run();
 	} catch (const std::exception& x) {
 		std::string msg = stringprintf("thread terminated by %s: %s",
-			astro::demangle(typeid(x).name()).c_str(), x.what());
+			astro::demangle_cstr(x), x.what());
 	} catch (...) {
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "imagestreammain terminates");

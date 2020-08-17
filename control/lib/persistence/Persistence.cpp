@@ -220,7 +220,7 @@ void	Statement::bind(int colno, const FieldValuePtr& value) {
 		return;
 	}
 	std::string	msg = stringprintf("type %s of value unknown, "
-		"cannot bind", demangle(typeid(&*value).name()).c_str());
+		"cannot bind", demangle_cstr(&*value));
 	debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 	throw std::runtime_error(msg);
 }

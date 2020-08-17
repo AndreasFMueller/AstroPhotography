@@ -206,7 +206,7 @@ void	TrackingProcess::main(thread::Thread<TrackingProcess>& thread) {
 		} catch (const std::runtime_error& ex) {
 			std::string	msg = stringprintf(
 				"TRACK %d terminated by %s: %s", _id,
-				demangle(typeid(ex).name()).c_str(), ex.what());
+				demangle_cstr(ex), ex.what());
 			debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 			throw ex;
 		}
