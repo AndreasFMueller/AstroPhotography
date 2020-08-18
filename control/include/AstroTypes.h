@@ -128,7 +128,8 @@ class Temperature {
 public:
 	typedef enum { KELVIN, CELSIUS } temperature_scale;
 	const static float	zero;
-	Temperature(float temperature = zero, temperature_scale scale = KELVIN);
+	Temperature(float temperature = zero,
+		temperature_scale scale = KELVIN) noexcept;
 	Temperature&	operator=(float t);
 	float	celsius() const;
 	float	temperature() const { return _temperature; }

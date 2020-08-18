@@ -16,7 +16,7 @@ const float	Temperature::zero = 273.15;
  * \param temperature	the temperature value
  * \param scale		the temperature scale
  */
-Temperature::Temperature(float temperature, temperature_scale scale) {
+Temperature::Temperature(float temperature, temperature_scale scale) noexcept {
 	switch (scale) {
 	case KELVIN:	_temperature = temperature;
 			break;
