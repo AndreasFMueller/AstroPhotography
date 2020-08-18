@@ -37,11 +37,11 @@ class Point {
 	double	_x;
 	double	_y;
 public:
-	Point() : _x(0), _y(0) { }
-	Point(double x, double y) : _x(x), _y(y) { }
-	Point(const astro::image::ImagePoint& point)
+	Point() noexcept : _x(0), _y(0) { }
+	Point(double x, double y) noexcept : _x(x), _y(y) { }
+	Point(const astro::image::ImagePoint& point) noexcept
 		: _x(point.x()), _y(point.y()) {}
-	Point(double angle) : _x(cos(angle)), _y(sin(angle)) { }
+	Point(double angle) noexcept : _x(cos(angle)), _y(sin(angle)) { }
 	double	x() const { return _x; }
 	double	y() const { return _y; }
 	double	abs() const;
@@ -82,7 +82,7 @@ class Size {
 	double	_height;
 	void	setup(const Point& lowerleft, const Point& upperright);
 public:
-	Size(double width, double height) : _width(width), _height(height) { }
+	Size(double width, double height) noexcept : _width(width), _height(height) { }
 	Size(const Point& lowerleft, const Point& upperright);
 	Size(const std::set<Point>& points);
 	Size(const std::string& sizestring);
@@ -116,7 +116,7 @@ std::ostream&	operator<<(std::ostream& out, const Rectangle& rectangle);
 class Rotation {
 	double	_alpha;
 public:
-	Rotation(double alpha) : _alpha(alpha) { }
+	Rotation(double alpha) noexcept : _alpha(alpha) { }
 	Point	operator()(const Point& p) const;
 };
 
