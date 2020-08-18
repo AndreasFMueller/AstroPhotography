@@ -36,11 +36,15 @@ public:
 
 	virtual void	reset();
 
+private:
+	CcdPtr	_ccd;
 protected:
 	virtual CcdPtr	getCcd0(size_t id);
 
 public:
 	virtual bool	hasFilterWheel() const;
+private:
+	FilterWheelPtr	_filterwheel;
 protected:
 	virtual FilterWheelPtr	getFilterWheel0();
 

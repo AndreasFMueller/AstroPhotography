@@ -16,10 +16,16 @@ namespace qsi {
 
 class QsiCooler : public Cooler {
 	QsiCamera&	_camera;
-	std::atomic<float>	_actual_temperature;
-	std::atomic_bool	_is_on;
+	// thread for cooler monitoring
+	std::thread			_thread;
+	std::recursive_mutex		_mutex;
+	std::condition_variable_any	_condition;
+	bool				_running;
+	static void	start_main(QsiCooler* cooler) noexcept;
+	void	run();
 public:
 	QsiCooler(QsiCamera& camera);
+	virtual ~QsiCooler();
 	virtual Temperature	getSetTemperature();
 	virtual Temperature	getActualTemperature();
 	virtual void	setTemperature(const float temperature);
@@ -28,6 +34,7 @@ public:
 	virtual std::string	userFriendlyName() const {
 		return _camera.userFriendlyName();
 	}
+	void	stop();
 };
 
 } // namespace qsi

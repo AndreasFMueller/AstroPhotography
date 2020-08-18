@@ -584,9 +584,9 @@ typedef callback::CallbackDataEnvelope<Temperature>	SetTemperatureCallbackData;
  */
 class Cooler : public astro::device::Device {
 protected:
-	Temperature	_actualTemperature;
-	Temperature	_setTemperature;
-	bool	_on;
+	std::atomic<Temperature>	_actualTemperature;
+	std::atomic<Temperature>	_setTemperature;
+	std::atomic_bool	_on;
 public:
 	typedef CoolerPtr	sharedptr;
 	static DeviceName::device_type	devicetype;
@@ -599,6 +599,8 @@ public:
 	virtual Temperature	getActualTemperature();
 protected:
 	virtual void	setTemperature(const float temperature);
+	void	actualTemperature(const float temperature);
+	void	actualTemperature(const Temperature& temperture);
 public:
 	virtual void	setTemperature(const Temperature& temperature);
 	virtual bool	isOn();

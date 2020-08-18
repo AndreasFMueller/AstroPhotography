@@ -23,7 +23,7 @@ const unsigned int	CelestronMount::query_interval = 600;
  *
  * \param mount		the mount to run for
  */
-static void	celestron_run(CelestronMount *mount) {
+void	CelestronMount::launch(CelestronMount *mount) noexcept {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "start a thread");
 	try {
 		mount->run();
@@ -131,7 +131,7 @@ void	CelestronMount::start_thread() {
 	}
 	// launch the thread
 	_running = true;
-	_mount_thread  = std::thread(celestron_run, this);
+	_mount_thread  = std::thread(CelestronMount::launch, this);
 }
 
 void	CelestronMount::stop_thread() {

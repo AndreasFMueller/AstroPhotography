@@ -10,27 +10,34 @@ namespace astro {
 namespace camera {
 namespace qsi {
 
-DeviceName	coolername(const DeviceName& cameraname) {
-	return cameraname
-			.child(DeviceName::Ccd, "ccd")
-			.child(DeviceName::Cooler, "cooler");
-}
-
 /**
  * \brief Create the QsiCooler
  *
- * \param camera	
+ * \param camera	the camera owning this cooler
  */
 QsiCooler::QsiCooler(QsiCamera& camera)
-	: Cooler(coolername(camera.name())), _camera(camera) {
+	: Cooler(DeviceName(camera.name(), DeviceName::Cooler)),
+	  _camera(camera) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "constructing a QsiCooler");
 	std::unique_lock<std::recursive_mutex>	lock(_camera.mutex);
 
-	// get the temperature, this initializes the _actual_temperature
+	// get the temperature
 	getActualTemperature();
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "actual temperature: %.1fºC",		
-		_actual_temperature - Temperature::zero);
-	_is_on = false;
+	getSetTemperature();
+	isOn();
+
+	// start the thread
+	_running = true;
+	_thread = std::thread(start_main, this);
+}
+
+/**
+ * \brief Destroy the cooler
+ *
+ * The destructor has to take care of the thread
+ */
+QsiCooler::~QsiCooler() {
+	stop();
 }
 
 /**
@@ -70,7 +77,7 @@ Temperature	QsiCooler::getActualTemperature() {
 	std::unique_lock<std::recursive_mutex>	lock(_camera.mutex,
 		std::try_to_lock);
 	if (!lock) {
-		return Temperature(_actual_temperature);
+		return Cooler::getActualTemperature();
 	}
 	try {
 		double	temp;
@@ -78,12 +85,12 @@ Temperature	QsiCooler::getActualTemperature() {
 		_camera.camera().get_CCDTemperature(&temp);
 		END_STOPWATCH("get_CCDTemperature()");
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "got temperature %.1f", temp);
-		_actual_temperature = temp + Temperature::zero;
+		actualTemperature(temp + Temperature::zero);
 	} catch (const std::exception& x) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "could not get actual "
 			"temperature: %s", x.what());
 	}
-	return Temperature(_actual_temperature);
+	return Cooler::getActualTemperature();
 }
 
 /**
@@ -101,6 +108,7 @@ void	QsiCooler::setTemperature(const float temperature) {
 	_camera.camera().put_SetCCDTemperature(temp);
 	END_STOPWATCH("put_SetCCDTemperature()");
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "set temperature now %.1f", temp);
+	_condition.notify_all();
 }
 
 /**
@@ -111,23 +119,23 @@ bool	QsiCooler::isOn() {
 	std::unique_lock<std::recursive_mutex>	lock(_camera.mutex,
 		std::try_to_lock);
 	if (!lock) {
-		return _is_on;
+		return _on;
 	}
 	try {
 		bool	cooleron;
 		START_STOPWATCH;
 		_camera.camera().get_CoolerOn(&cooleron);
 		END_STOPWATCH("get_CoolerOn()");
-		if (_is_on != cooleron) {
+		if (_on != cooleron) {
 			debug(LOG_DEBUG, DEBUG_LOG, 0, "cooler now %s",
 				(cooleron) ? "on" : "off");
 		}
-		_is_on = cooleron;
+		_on = cooleron;
 	} catch (const std::exception& x) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "cannot check cooler: %s",
 			x.what());
 	}
-	return _is_on;
+	return _on;
 }
 
 /**
@@ -139,10 +147,55 @@ void	QsiCooler::setOn(bool onoff) {
 	//debug(LOG_DEBUG, DEBUG_LOG, 0, "set cooler state to %s",
 	//	(onoff) ? "on" : "off");
 	std::unique_lock<std::recursive_mutex>	lock(_camera.mutex);
-	_is_on = onoff;
+	_on = onoff;
 	START_STOPWATCH;
 	_camera.camera().put_CoolerOn(onoff);
 	END_STOPWATCH("put_CoolerOn()");
+	Cooler::setOn(onoff);
+}
+
+/**
+ * \brief static trampoline function to launch the cooler thread
+ *
+ * \param cooler	the cooler to monitor
+ */
+void	QsiCooler::start_main(QsiCooler *cooler) noexcept {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "start thread");
+	try {
+		cooler->run();
+	} catch (const std::exception& x) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "thread failed %s: %s",
+			demangle_cstr(x), x.what());
+	} catch (...) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "thread crashed");
+	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "thread terminates");
+}
+
+/**
+ * \brief Cooler monitoring method
+ *
+ * Only this thread every sends callbacks
+ */
+void	QsiCooler::run() {
+	std::unique_lock<std::recursive_mutex>	lock(_mutex);
+	Temperature	previoustemperature;
+	while (_running) {
+		Temperature	newtemperature = this->getActualTemperature();
+		if (previoustemperature != newtemperature) {
+			callback(CoolerInfo(*this));
+		}
+		previoustemperature = newtemperature;
+		_condition.wait_for(lock, std::chrono::seconds(3));
+	}
+}
+
+void	QsiCooler::stop() {
+	_running = false;
+	_condition.notify_all();
+	if (_thread.joinable()) {
+		_thread.join();
+	}
 }
 
 } // namespace qsi

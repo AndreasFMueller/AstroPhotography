@@ -51,6 +51,11 @@ DeviceName::DeviceName(const device_type& type,
 	push_back(unitname);
 }
 
+DeviceName::DeviceName(const DeviceName& other, const device_type& type)
+	: _type(type) {
+	std::copy(other.begin(), other.end(), back_inserter(*this));
+}
+
 DeviceName::DeviceName(const DeviceName& name, const device_type& type,
 	const std::string& unitname) : _type(type) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "copy %d device name components",

@@ -37,9 +37,10 @@ DeviceName	Cooler::defaultname(const DeviceName& parent,
 /**
  * \brief Create a cooler from the name
  */
-Cooler::Cooler(const DeviceName& name) : Device(name, DeviceName::Cooler),
-	_actualTemperature(25, Temperature::CELSIUS),
-	_setTemperature(25, Temperature::CELSIUS), _on(false) {
+Cooler::Cooler(const DeviceName& name) : Device(name, DeviceName::Cooler) {
+	_actualTemperature = Temperature(25, Temperature::CELSIUS);
+	_setTemperature = Temperature(25, Temperature::CELSIUS);
+	_on = false;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "create cooler named %s",
 		Device::name().name().c_str());
 }
@@ -47,9 +48,10 @@ Cooler::Cooler(const DeviceName& name) : Device(name, DeviceName::Cooler),
 /**
  * \brief Create a cooler from the unit name
  */
-Cooler::Cooler(const std::string& name) : Device(name, DeviceName::Cooler),
-	_actualTemperature(25, Temperature::CELSIUS),
-	_setTemperature(25, Temperature::CELSIUS), _on(false) {
+Cooler::Cooler(const std::string& name) : Device(name, DeviceName::Cooler) {
+	_actualTemperature = Temperature(25, Temperature::CELSIUS);
+	_setTemperature = Temperature(25, Temperature::CELSIUS);
+	_on = false;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "create cooler named %s",
 		Device::name().name().c_str());
 }
@@ -94,6 +96,30 @@ void	Cooler::setTemperature(float _temperature) {
 		throw std::range_error("temperature too large: heater?");
 	}
 	_setTemperature = _temperature;
+}
+
+/**
+ * \brief Set the actual temperature
+ *
+ * \param _temperature	the temperature in Kelvin
+ */
+void	Cooler::actualTemperature(float _temperature) {
+	if (_temperature < 0) {
+		throw std::range_error("negative absolute temperature");
+	}
+	if (_temperature > 350) {
+		throw std::range_error("temperature too large: heater?");
+	}
+	_actualTemperature = _temperature;
+}
+
+/**
+ * \brief Set the actual temperature
+ *
+ * \param _temperature	the temperature in Kelvin
+ */
+void	Cooler::actualTemperature(const Temperature& temperature) {
+	_actualTemperature = temperature;
 }
 
 /**
@@ -173,10 +199,11 @@ bool	Cooler::stable() {
 			stablelimit);
 	}
 	float	actualtemperature = this->getActualTemperature().temperature();
-	float	delta = fabs(actualtemperature - _setTemperature.temperature());
+	Temperature	st = _setTemperature;
+	float	delta = fabs(actualtemperature - st.temperature());
 	debug(LOG_DEBUG, DEBUG_LOG, 0,
 		"T_act = %.1f, T_set = %.1f, delta = %.1f, limit = %.1f",
-		actualtemperature, _setTemperature.temperature(),
+		actualtemperature, st.temperature(),
 		delta, stablelimit);
 	return (delta < stablelimit);
 }

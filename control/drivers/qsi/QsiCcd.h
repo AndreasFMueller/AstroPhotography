@@ -16,15 +16,18 @@ namespace qsi {
 
 class QsiCcd : public Ccd {
 	QsiCamera&	_camera;
-	std::atomic<CcdState::State>	_last_state;
 	// thread waiting for the exposure to complete
-	std::thread		*_thread;
-	std::atomic_bool	_exposure_done;
+	std::thread		_thread;
 public:
 	QsiCcd(const CcdInfo&, QsiCamera& camera);
 	virtual ~QsiCcd();
 	virtual void	startExposure(const Exposure& exposure);
+private:
+	// manage the thread
+	static void	start_main(QsiCcd *qsiccd) noexcept;
 	void	run();
+	void	wait_thread();
+public:
 	virtual CcdState::State	exposureStatus();
 	virtual void	cancelExposure();
 
@@ -36,6 +39,7 @@ public:
 	virtual astro::image::ImagePtr	getRawImage();
 
 protected:
+	CoolerPtr	_cooler;
 	virtual CoolerPtr	getCooler0();
 public:
 	virtual bool	hasCooler() const { return true; }
@@ -49,6 +53,8 @@ public:
 	virtual bool	hasGain() { return _cansetgain; }
 	virtual float	getGain();
 	virtual std::pair<float, float>	gainInterval();
+
+	friend class QsiCamera;
 };
 
 } // namespace qsi

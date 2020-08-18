@@ -25,9 +25,9 @@ static void	usage(const std::string& progname) {
 	std::cout << std::endl;
 	std::cout << p << " [ options ] [ <server> ] help" << std::endl;
 	std::cout << p << " [ options ] <server> list" << std::endl;
-	std::cout << p << " [ options ] <server> monitor <filterwheel>" << std::endl;
-	std::cout << p << " [ options ] <server> info <filterwheel>" << std::endl;
-	std::cout << p << " [ options ] <server> select <filterwheel> <filter>"
+	std::cout << p << " [ options ] <server> <filterwheel> monitor" << std::endl;
+	std::cout << p << " [ options ] <server> <filterwheel> info" << std::endl;
+	std::cout << p << " [ options ] <server> <filterwheel> select <filter>"
 		<< std::endl;
 	std::cout << std::endl;
 }
@@ -91,6 +91,7 @@ class FilterWheelCallbackI : public FilterWheelCallback {
 public:
 	void	state(snowstar::FilterwheelState s,
 			const Ice::Current& /* current */) {
+		timestamp();
 		std::cout << "state change: ";
 		switch (s) {
 		case snowstar::FwIDLE:
@@ -180,8 +181,9 @@ int	main(int argc, char *argv[]) {
 	if (argc <= optind) {
 		throw std::runtime_error("no filterwheel name");
 	}
-	std::string	filterwheelname(argv[optind++]);
+	std::string	filterwheelname(command);
 	FilterWheelPrx	filterwheel = devices->getFilterWheel(filterwheelname);
+	command = std::string(argv[optind++]);
 	if (command == "info") {
 		return command_info(filterwheel);
 	}

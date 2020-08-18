@@ -1,5 +1,13 @@
 ChangeLog for the Astro project.
 
+20200818:
+	* moved some thread start functions to class scope
+	* reworked QSI driver
+	* fixed shutdown sequence in QSI driver (proper thread termination 
+	  in dependent classes)
+	* fix snowccd client help message
+	* fix snowfilterwheel client syntax
+
 20200817:
 	* fix warning in debug.cpp
 	* fix warning in GridCalculator.cpp

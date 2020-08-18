@@ -27,8 +27,8 @@ class CelestronMount : public astro::device::Mount,
 	void	stop_thread();
 	void	start_thread();
 	void	check_state();
-public:
 	void	run();
+	static void	launch(CelestronMount *mount) noexcept;
 private:
 	// Goto launches a thread, no other communication with the mount
 	// is allowed until the Goto is completed, and the communication

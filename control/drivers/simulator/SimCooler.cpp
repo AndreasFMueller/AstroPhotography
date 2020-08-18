@@ -113,8 +113,8 @@ void	SimCooler::updateTemperature() {
 
 	// compute time since last info callback and temperature difference
 	double	timepast = simtime() - laststatechange;
-	Temperature	targettemperature
-				= (on) ? _setTemperature : ambient_temperature;
+	Temperature	st = _setTemperature;
+	Temperature	targettemperature = (on) ? st : ambient_temperature;
 	float	delta = targettemperature - lasttemperature;
 
 	// linearly change the temperature. Because we often update
@@ -127,15 +127,16 @@ void	SimCooler::updateTemperature() {
 
 	// this is the new temperature that we register i any case
 	_actualTemperature = actemp;
+	Temperature	at = _actualTemperature;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "updated temperature %.1fºC",
-		_actualTemperature.celsius());
+		at.celsius());
 
 	// now we have to decide whether we should actually send an
 	// update to the callbacks. We do this if the temperature
 	// difference is large enough or the time difference is more
 	// than five seconds
-	float	temperaturedifference
-			= fabs(_actualTemperature - lasttemperature);
+	at = _actualTemperature;
+	float	temperaturedifference = fabs(at - lasttemperature);
 	if ((timepast > 5) || (temperaturedifference > 1))  {
 		sendInfo();
 	}

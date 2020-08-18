@@ -18,7 +18,7 @@ namespace qsi {
 QsiCamera::QsiCamera(const std::string& _name) : Camera(_name) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "constructing camera %s at %p",
 		_name.c_str(), this);
-	std::lock_guard<std::recursive_mutex>	lock(mutex);
+	std::unique_lock<std::recursive_mutex>	lock(mutex);
 	try {
 		DeviceName	devname(name());
 		camera().put_UseStructuredExceptions(true);
@@ -111,7 +111,44 @@ QsiCamera::QsiCamera(const std::string& _name) : Camera(_name) {
  */
 QsiCamera::~QsiCamera() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "disconnect the camera");
-	std::lock_guard<std::recursive_mutex>	lock(mutex);
+
+	if (_ccd) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "stopping CCD");
+		try {
+			if (CcdState::exposing == _ccd->exposureStatus()) {
+				_ccd->cancelExposure();
+				QsiCcd	*ccd = dynamic_cast<QsiCcd*>(&*_ccd);
+				if (ccd) {
+					ccd->wait_thread();
+				}
+			}
+		} catch (const std::exception& x) {
+			debug(LOG_ERR, DEBUG_LOG, 0, "cannot stop ccd: %s",
+				x.what());
+		} catch (...) {
+			debug(LOG_ERR, DEBUG_LOG, 0, "cannot stop ccd");
+		}
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "CCD stopped");
+	}
+
+	if (_filterwheel) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "stopping filterwheel");
+		try {
+			QsiFilterWheel	*fw = dynamic_cast<QsiFilterWheel*>(&*_filterwheel);
+			if (fw) {
+				fw->wait();
+			}
+		} catch (const std::exception& x) {
+			debug(LOG_ERR, DEBUG_LOG, 0, "cannot stop filterwheel:"
+				" %s", x.what());
+		} catch (...) {
+			debug(LOG_ERR, DEBUG_LOG, 0, "cannot stop filterwheel");
+		}
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "filterwheel stopped");
+	}
+
+	// now we can turn of the camera
+	std::unique_lock<std::recursive_mutex>	lock(mutex);
 	camera().put_Connected(false);
 }
 
@@ -127,11 +164,12 @@ void	QsiCamera::reset() {
  */
 CcdPtr	QsiCamera::getCcd0(size_t id) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "get CCD %d from %p", id, this);
-	std::lock_guard<std::recursive_mutex>	lock(mutex);
+	std::unique_lock<std::recursive_mutex>	lock(mutex);
 	if (id > 0) {
 		throw std::invalid_argument("only CCD 0 defined");
 	}
-	return CcdPtr(new QsiCcd(ccdinfo[0], *this));
+	_ccd = CcdPtr(new QsiCcd(ccdinfo[0], *this));
+	return _ccd;
 }
 
 /**
@@ -146,11 +184,12 @@ bool	QsiCamera::hasFilterWheel() const {
  */
 FilterWheelPtr	QsiCamera::getFilterWheel0() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "get the filterwheel from %p", this);
-	std::lock_guard<std::recursive_mutex>	lock(mutex);
+	std::unique_lock<std::recursive_mutex>	lock(mutex);
 	if (!_hasfilterwheel) {
 		throw std::invalid_argument("camera has no filter wheel");
 	}
-	return FilterWheelPtr(new QsiFilterWheel(*this));
+	_filterwheel = FilterWheelPtr(new QsiFilterWheel(*this));
+	return _filterwheel;
 }
 
 /**
@@ -165,7 +204,7 @@ bool	QsiCamera::hasGuidePort() const {
  */
 GuidePortPtr	QsiCamera::getGuidePort0() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "get the guideport");
-	std::lock_guard<std::recursive_mutex>	lock(mutex);
+	std::unique_lock<std::recursive_mutex>	lock(mutex);
 	if (!_hasguideport) {
 		throw std::runtime_error("camera has no guider port");
 	}

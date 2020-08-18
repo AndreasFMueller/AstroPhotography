@@ -55,7 +55,8 @@ SxCooler::SxCooler(SxCamera& _camera)
 	// so we just fake it and assume that the actual temperature
 	// is also the set temperature, however, if the cooler is off, 
 	// we don't know anything.
-	_setTemperature = _actualTemperature;
+	Temperature	at = _actualTemperature;
+	_setTemperature = at;
 
 	// to make sure this is true, we should actually set the temperature
 	// as we believe the set temperature is
@@ -120,13 +121,14 @@ void	SxCooler::cmd() {
 	}
 	camera.release(purpose());
 	Temperature	actual = Temperature(request.data()->temperature / 10.);
+	Temperature	at = _actualTemperature;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "actual temperature = %.1fºC",
-		_actualTemperature.celsius());
+		at.celsius());
 	bool		on = (request.data()->status) ? true : false;
 	if ((on != _on) || (actual != _actualTemperature)) {
-		_actualTemperature = actual;
+		at = actual;
 		_on = on;
-		callback(CoolerInfo(_actualTemperature, _setTemperature, _on));
+		callback(CoolerInfo(at, _setTemperature, _on));
 	}
 }
 

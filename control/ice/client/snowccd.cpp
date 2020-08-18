@@ -32,7 +32,8 @@ static void	usage(const std::string& progname) {
 	std::cout << std::endl;
 	std::cout << p << " [ options ] [ <server> ] help" << std::endl;
 	std::cout << p << " [ options ] <server> list" << std::endl;
-	std::cout << p << " [ options ] <server> <ccd>" << std::endl;
+	std::cout << p << " [ options ] <server> <ccd> [ info ]" << std::endl;
+	std::cout << p << " [ options ] <server> <ccd> monitor" << std::endl;
 	std::cout << p << " [ options ] <server> <ccd> <time> <file>"
 		<< std::endl;
 	std::cout << std::endl;
@@ -78,8 +79,12 @@ int	command_info(CcdPrx ccd) {
 	std::cout << std::endl;
 	if (ccd->hasShutter()) {
 		std::cout << "shutter:     ";
-		std::cout << astro::camera::Shutter::state2string(
-				convert(ccd->getShutterState()));
+		try {
+			std::cout << astro::camera::Shutter::state2string(
+					convert(ccd->getShutterState()));
+		} catch (...) {
+			std::cout << "unknown";
+		}
 		std::cout << std::endl;
 	}
 	std::cout << "has cooler:  ";
@@ -139,7 +144,7 @@ int	command_image(CcdPrx ccd, const astro::camera::Exposure& exposure,
 class CcdCallbackI : public CcdCallback {
 	void	timestamp() {
 		astro::PrecisionTime	t;
-		std::cout << t.toString();
+		std::cout << t.toString("%F %T.%.03f: ");
 	}
 public:
 	virtual void	state(ExposureState s,
@@ -227,6 +232,9 @@ int	main(int argc, char *argv[]) {
 
 	if (optind < argc) {
 		command = std::string(argv[optind++]);
+	}
+	if (command == "info") {
+		return command_info(ccd);
 	}
 	if (command == "monitor") {
 		return command_monitor(ccd);

@@ -124,6 +124,7 @@ public:
 	DeviceName(const device_type& type,
 		const std::string& modulename, const std::string& unitname);
 	DeviceName(const DeviceName& other);
+	DeviceName(const DeviceName& other, const device_type& type);
 	// conversion to child device names of a different type
 	DeviceName(const DeviceName& name, const device_type& type,
 		const std::string& unitname);

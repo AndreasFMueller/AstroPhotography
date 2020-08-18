@@ -24,6 +24,8 @@ static void	usage(const char *progname) {
 	std::cout << "usage:" << std::endl;
 	std::cout << std::endl;
 	std::cout << "    " << p.basename();
+	std::cout << " [ options ] [ <filterwheel> ] list " << std::endl;
+	std::cout << "    " << p.basename();
 	std::cout << " [ options ] <filterwheel> list " << std::endl;
 	std::cout << "    " << p.basename();
 	std::cout << " [ options ] <filterwheel> goto <n>" << std::endl;
@@ -137,9 +139,12 @@ int	main(int argc, char *argv[]) {
 		std::cerr << "not enough arguments" << std::endl;
 		return EXIT_FAILURE;
 	}
-	DeviceName	name(argv[optind++]);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "working with device name: %s",
-		name.toString().c_str());
+	std::string	command(argv[optind++]);
+	if (command == "help") {
+		usage(argv[0]);
+		return EXIT_SUCCESS;
+	}
+	DeviceName	name(command);
 
 	// create a repository
 	auto	repository = module::ModuleRepository::get();
@@ -154,7 +159,7 @@ int	main(int argc, char *argv[]) {
 		std::cerr << "no command" << std::endl;
 		return EXIT_FAILURE;
 	}
-	std::string	command(argv[optind++]);
+	command = std::string(argv[optind++]);
 
 	if (command == "list") {
 		return list_command(filterwheel);

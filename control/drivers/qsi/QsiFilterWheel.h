@@ -29,8 +29,7 @@ class QsiFilterWheel : public FilterWheel {
 	std::atomic<FilterWheel::State>	lastState;
 
 	// auxiliary variables for moving the filter wheel
-	std::thread	*_thread;
-	volatile std::atomic_bool	_movement_done;
+	std::thread	_thread;
 public:
 	QsiFilterWheel(QsiCamera& camera);
 	virtual ~QsiFilterWheel();
@@ -47,10 +46,13 @@ public:
 		return _camera.userFriendlyName();
 	}
 
-	// methods associated with moving the filterwheel, this must
-	// be public because the main function of the thread must be
-	// able to access it.
+private:
+	// methods associated with moving the filterwheel.
 	void	move(size_t newposition);
+	static void	moveposition(QsiFilterWheel *filterwheel,
+				size_t newposition) noexcept;
+	void	wait();
+	friend class QsiCamera;
 };
 
 } // namespace qsi

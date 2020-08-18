@@ -108,22 +108,18 @@ public:
  */
 std::string	QsiLocator::name(const std::string& serial,
 			DeviceName::device_type device) {
+	DeviceName	name("qsi", serial);
 	switch (device) {
 	case DeviceName::Camera:
-		return std::string("camera:qsi/" + serial);
-		break;
+		return DeviceName(name, DeviceName::Camera);
 	case DeviceName::Ccd:
-		return std::string("ccd:qsi/" + serial + "/ccd");
-		break;
+		return DeviceName(name, DeviceName::Ccd);
 	case DeviceName::Cooler:
-		return std::string("cooler:qsi/" + serial + "/ccd/cooler");
-		break;
+		return DeviceName(name, DeviceName::Cooler);
 	case DeviceName::Filterwheel:
-		return std::string("filterwheel:qsi/" + serial + "/filterwheel");
-		break;
+		return DeviceName(name, DeviceName::Filterwheel);
 	case DeviceName::Guideport:
-		return std::string("guideport:qsi/" + serial + "/guideport");
-		break;
+		return DeviceName(name, DeviceName::Guideport);
 	default:
 		break;
 	}
@@ -198,17 +194,7 @@ CameraPtr	QsiLocator::getCamera0(const DeviceName& name) {
 CcdPtr	QsiLocator::getCcd0(const DeviceName& ccdname) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "locating ccd %s",
 		ccdname.toString().c_str());
-	if (ccdname.size() < 2) {
-		std::string	msg = stringprintf("bad name: %s",
-			ccdname.toString().c_str());
-		throw std::runtime_error(msg);
-	}
-	if (ccdname.unitname() != "ccd") {
-		std::string	msg = stringprintf("not a valid unit name: %s",
-			ccdname.toString().c_str());
-		throw std::runtime_error(msg);
-	}
-	DeviceName	cameraname = ccdname.parent(DeviceName::Camera);
+	DeviceName	cameraname(ccdname, DeviceName::Camera);
 	return getCamera(cameraname)->getCcd(0);
 }
 
@@ -222,17 +208,7 @@ CcdPtr	QsiLocator::getCcd0(const DeviceName& ccdname) {
 CoolerPtr	QsiLocator::getCooler0(const DeviceName& coolername) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "locating cooler %s",
 		coolername.toString().c_str());
-	if (coolername.size() < 2) {
-		std::string	msg = stringprintf("bad name: %s",
-			coolername.toString().c_str());
-		throw std::runtime_error(msg);
-	}
-	if (coolername.unitname() != "cooler") {
-		std::string	msg = stringprintf("not a valid unit name: %s",
-			coolername.toString().c_str());
-		throw std::runtime_error(msg);
-	}
-	DeviceName	ccdname = coolername.parent(DeviceName::Ccd);
+	DeviceName	ccdname(coolername, DeviceName::Ccd);
 	return getCcd(ccdname)->getCooler();
 }
 
@@ -246,17 +222,7 @@ FilterWheelPtr	QsiLocator::getFilterWheel0(
 			const DeviceName& filterwheelname) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "locating filterwheel %s",
 			filterwheelname.toString().c_str());
-	if (filterwheelname.size() < 2) {
-		std::string	msg = stringprintf("bad name: %s",
-			filterwheelname.toString().c_str());
-		throw std::runtime_error(msg);
-	}
-	if (filterwheelname.unitname() != "filterwheel") {
-		std::string	msg = stringprintf("not a valid unit name: %s",
-			filterwheelname.toString().c_str());
-		throw std::runtime_error(msg);
-	}
-	DeviceName	cameraname = filterwheelname.parent(DeviceName::Camera);
+	DeviceName	cameraname(filterwheelname, DeviceName::Camera);
 	return getCamera(cameraname)->getFilterWheel();
 }
 
@@ -269,17 +235,7 @@ FilterWheelPtr	QsiLocator::getFilterWheel0(
 GuidePortPtr	QsiLocator::getGuidePort0(const DeviceName& guideportname) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "locating guideport %s",
 		guideportname.toString().c_str());
-	if (guideportname.size() < 2) {
-		std::string	msg = stringprintf("bad name: %s",
-			guideportname.toString().c_str());
-		throw std::runtime_error(msg);
-	}
-	if (guideportname.unitname() != "guideport") {
-		std::string	msg = stringprintf("not a valid unit name: %s",
-			guideportname.toString().c_str());
-		throw std::runtime_error(msg);
-	}
-	DeviceName	cameraname = guideportname.parent(DeviceName::Camera);
+	DeviceName	cameraname(guideportname, DeviceName::Camera);
 	return getCamera(cameraname)->getGuidePort();
 }
 

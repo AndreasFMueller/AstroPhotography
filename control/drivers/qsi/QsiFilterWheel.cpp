@@ -25,11 +25,7 @@ QsiFilterWheel::QsiFilterWheel(QsiCamera& camera)
 	  _camera(camera) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "construction of QSI filterwheel");
 	// lock the device
-	std::lock_guard<std::recursive_mutex>	lock(_camera.mutex);
-
-	// initialize the thread variables used for filter movement
-	_thread = NULL;
-	_movement_done = true;
+	std::unique_lock<std::recursive_mutex>	lock(_camera.mutex);
 
 	// get the number of filters
 	int	filtercount = 0;
@@ -64,11 +60,15 @@ QsiFilterWheel::QsiFilterWheel(QsiCamera& camera)
  * \brief Destroy the filter wheel
  */
 QsiFilterWheel::~QsiFilterWheel() {
-	// make sure the thread has terminated and is properly destroyed
-	std::lock_guard<std::recursive_mutex>	lock(_camera.mutex);
-	if (_thread) {
-		_thread->join();
-		delete _thread;
+	wait();
+}
+
+/**
+ * \brief Wait for the move thread to complete
+ */
+void	QsiFilterWheel::wait() {
+	if (_thread.joinable()) {
+		_thread.join();
 	}
 }
 
@@ -83,25 +83,27 @@ unsigned int	QsiFilterWheel::nFilters0() {
  * \brief find the current position
  */
 unsigned int	QsiFilterWheel::currentPosition() {
-	std::unique_lock<std::recursive_mutex>	lock(_camera.mutex,
-		std::try_to_lock);
-	if (!lock) {
+	FilterWheel::State	state = lastState;
+	switch (state) {
+	case idle:
 		return lastPosition;
+	case moving:
+		throw BadState("filter wheel moving");
+	case unknown:
+		// fall through to query state
+		break;
 	}
-	try {
-		short	position = 0;
-		START_STOPWATCH;
-		_camera.camera().get_Position(&position);
-		END_STOPWATCH("get_Position");
-		if (position < 0) {
-			throw astro::camera::BadState("filter wheel moving");
-		}
-		lastPosition = position;
-	} catch (const std::exception& x) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "cannot get the position: %s",
-			x.what());
+
+	// at this point we need to get the state, but this ist most easily
+	// done by querying the state. If the state is idle after we call
+	// getState(), we also have a position
+	switch (getState()) {
+	case idle:
+		return lastPosition;
+	case moving:
+	case unknown:
+		throw BadState("filter wheel moving");
 	}
-	return lastPosition;
 }
 
 /**
@@ -110,24 +112,39 @@ unsigned int	QsiFilterWheel::currentPosition() {
  * \param newposition	position we have to move to
  */
 void	QsiFilterWheel::move(size_t newposition) {
+	// lock the camera
+	std::unique_lock<std::recursive_mutex>	lock(_camera.mutex);
+
+	// change the state to moving
 	callback(FilterWheel::moving);
-	std::lock_guard<std::recursive_mutex>	lock(_camera.mutex);
-	short	position = newposition;
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "put position %d", position);
-	START_STOPWATCH;
-	_camera.camera().put_Position(position);
-	END_STOPWATCH("put_Position()");
-	position = 0;
-	_camera.camera().get_Position(&position);
-	if ((size_t)position != newposition) {
-		debug(LOG_ERR, DEBUG_LOG, 0, "wrong position");
-		lastState = FilterWheel::unknown;
+
+	try {
+		// send the new position to the camera
+		short	position = newposition;
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "put position %d", position);
+		START_STOPWATCH;
+		_camera.camera().put_Position(position);
+		END_STOPWATCH("put_Position()");
+
+		// read back the position to ensure that it has worked
+		position = 0;
+		_camera.camera().get_Position(&position);
+		if ((size_t)position != newposition) {
+			debug(LOG_ERR, DEBUG_LOG, 0, "wrong position: "
+				"%hd != %u", position, newposition);
+			callback(lastState = FilterWheel::unknown);
+			return;
+		}
+
+		// everything is OK
+		callback(lastState = FilterWheel::idle);
+		lastPosition = position;
+		callback(position);
+	} catch (const std::exception& x) {
+		std::string	msg = stringprintf("movement failed: %s",
+			x.what());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 	}
-	_movement_done = true;
-	lastState = FilterWheel::idle;
-	callback(position);
-	callback(FilterWheel::idle);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "put position return");
 }
 
 /**
@@ -136,9 +153,17 @@ void	QsiFilterWheel::move(size_t newposition) {
  * \param filterwheel 	FilterWheel object on which this thread operates
  * \param newposition	the filterwheel position to move to
  */
-void	moveposition(QsiFilterWheel *filterwheel, size_t newposition) {
+void	QsiFilterWheel::moveposition(QsiFilterWheel *filterwheel,
+		size_t newposition) noexcept {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "launch filterwheel thread");
-	filterwheel->move(newposition);
+	try {
+		filterwheel->move(newposition);
+	} catch (const std::exception& x) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "thread crashed by %s: %s",
+			demangle_cstr(x), x.what());
+	} catch (...) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "thread crashed");
+	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "filterwheel thread completes");
 }
 
@@ -158,8 +183,10 @@ void	QsiFilterWheel::select(size_t filterindex) {
 		throw std::invalid_argument("filter index too large");
 	}
 
-	// lock the filterwheel
-	std::lock_guard<std::recursive_mutex>	lock(_camera.mutex);
+	// lock the camera, this i necessary to ensure that
+	// no other thread starts moving the filterwheel while we are
+	// interpreting the state
+	std::unique_lock<std::recursive_mutex>	lock(_camera.mutex);
 
 	// find the filterwheel state, if it is moving, we cannot
 	// initiate another move, i.e. we want to throw a bad state
@@ -172,14 +199,18 @@ void	QsiFilterWheel::select(size_t filterindex) {
 	case FilterWheel::unknown:
 		throw BadState("filterwheel in unknown state");
 	}
-	// if we get here, then the filterwheel is idle.
 
-	// start moving
+	// if we get here, then the filterwheel is idle. However, there
+	// still could be a thread maybe in terminated state, so we do
+	// the cleanup
+	wait();
+
+	// start moving by starting the thread that does the moving
 	debug(LOG_DEBUG, DEBUG_LOG, 0,
 		"start a thread to move the filter wheel");
 	lastState = FilterWheel::moving;
-	_movement_done = false;
-	_thread = new std::thread(moveposition, this, filterindex);
+	_thread = std::thread(moveposition, this, filterindex);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "select method complete");
 }
 
 /**
@@ -188,20 +219,28 @@ void	QsiFilterWheel::select(size_t filterindex) {
  * \param filtername	name of the filter
  */
 void	QsiFilterWheel::select(const std::string& filtername) {
+	// try to find the filter name in the list of valid filter names
 	for (unsigned int index = 0; index < nfilters; index++) {
 		if (filternames[index] == filtername) {
 			select(index);
 			return;
 		}
 	}
+
+	// interpret the filter name as a number
+	int	index;
 	try {
-		select(std::stoi(filtername));
+		index = std::stoi(filtername);
 	} catch (...) {
+		std::string	msg = stringprintf("filter '%s' not found",
+			filtername.c_str());
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw std::runtime_error(msg);
 	}
-	std::string	msg = stringprintf("filter '%s' not found",
-		filtername.c_str());
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "%s", msg.c_str());
-	throw std::runtime_error(msg);
+
+	// if the filtername was a number, try to select it
+	select(index);
+	return;
 }
 
 /**
@@ -220,6 +259,11 @@ std::string	QsiFilterWheel::filterName(size_t filterindex) {
  * \brief Get the state of the filter wheel
  */
 FilterWheel::State	QsiFilterWheel::getState() {
+	// we only need to query the state if the last state is 'unknown'
+	if (lastState != unknown) {
+		return lastState;
+	}
+
 	//debug(LOG_DEBUG, DEBUG_LOG, 0, "getState()");
 	std::unique_lock<std::recursive_mutex>	lock(_camera.mutex,
 		std::try_to_lock);
@@ -227,14 +271,13 @@ FilterWheel::State	QsiFilterWheel::getState() {
 		return lastState;
 	}
 
-	// first cleanup a thread that has already completed
-	if ((NULL != _thread) && (_movement_done)) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "cleanup filterwheel thread");
-		_thread->join();
-		delete _thread;
-		_thread = NULL;
-	}
 
+	// if we get to this point the last known state was 'unknown', and
+	// we are recovering from some accident that may have happend in 
+	// the filterwheel thread. Normally, the filterwheel thread would
+	// set the position and the state
+
+	// query the position
 	try {
 		// check the position
 		//debug(LOG_DEBUG, DEBUG_LOG, 0, "check position");
@@ -243,9 +286,15 @@ FilterWheel::State	QsiFilterWheel::getState() {
 		_camera.camera().get_Position(&position);
 		END_STOPWATCH("get_Position()");
 		if (position < 0) {
-			return lastState = FilterWheel::moving;
+			lastState = FilterWheel::moving;
+			callback(lastState);
+			return lastState;
 		}
-		return lastState = FilterWheel::idle;
+		// if we get a position, then we remember this as the last
+		// position and we inform all the callbacks
+		lastPosition = position;
+		callback(lastState = FilterWheel::idle);
+		callback(lastPosition);
 	} catch (const std::exception& x) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "cannot get current state: %s",
 			x.what());

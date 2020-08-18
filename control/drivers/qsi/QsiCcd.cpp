@@ -25,9 +25,7 @@ QsiCcd::QsiCcd(const CcdInfo& info, QsiCamera& camera)
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "construct CCD %s",
 		getInfo().name().toString().c_str());
 	// initialize the state variables
-	std::lock_guard<std::recursive_mutex>	lock(_camera.mutex);
-	_last_state = CcdState::idle;
-	_thread = NULL;
+	std::unique_lock<std::recursive_mutex>	lock(_camera.mutex);
 
 	// find out whether we can set the gain
 	_cansetgain = false;
@@ -38,16 +36,58 @@ QsiCcd::QsiCcd(const CcdInfo& info, QsiCamera& camera)
  * \brief Destroy the CCD
  */
 QsiCcd::~QsiCcd() {
+	// turn off dependent devices
+	if (_cooler) {
+		QsiCooler	*cooler = dynamic_cast<QsiCooler*>(&*_cooler);
+		if (cooler) {
+			try {
+				cooler->stop();
+			} catch (const std::exception& x) {
+				debug(LOG_ERR, DEBUG_LOG, 0, "cannot stop %s",
+					x.what());
+			} catch (...) {
+				debug(LOG_ERR, DEBUG_LOG, 0, "cannot stop");
+			}
+		}
+	}
+
 	// abort an exposure in progress, if any
 	try {
-		cancelExposure();
+		if (CcdState::exposing == state()) {
+			cancelExposure();
+			wait();
+		}
+	} catch (const std::exception& x) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "cannot cancel: %s", x.what());
 	} catch (...) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "cannot cancel");
 	}
-	// XXX turn off the cooler
 }
 
-static void	start_main(QsiCcd *qsiccd) {
-	qsiccd->run();
+/**
+ * \brief static trampoline method to run the thread
+ */
+void	QsiCcd::start_main(QsiCcd *qsiccd) noexcept {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "starting exposure thread");
+	try {
+		qsiccd->run();
+	} catch (const std::exception& x) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "thread throws %s: %s",
+			demangle_cstr(x), x.what());
+	} catch (...) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "thread crashed");
+	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "exposure thread completes");
+}
+
+/**
+ * \brief Wait for the exposurethread to complete
+ */
+void	QsiCcd::wait_thread() {
+	if (_thread.joinable()) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "waiting for thread");
+		_thread.join();
+	}
 }
 
 /**
@@ -56,27 +96,17 @@ static void	start_main(QsiCcd *qsiccd) {
  * \param exposure	exposure parameters
  */
 void	QsiCcd::startExposure(const Exposure& exposure) {
-	std::unique_lock<std::recursive_mutex>	lock(_camera.mutex);
+	// before starting a new exposure, we should clean up the thread
+	// if it is still around. The thread will set the state to exposed.
+	wait_thread();
 
 	// set the state to exposure, this also ensures we actually
 	// are in a state where we could start a new exposure. The
 	// base class method also sets the state to exposing
 	Ccd::startExposure(exposure);
 
-	// before starting a new exposure, we should clean up the thread
-	// if it is still around. The thread will set the state to exposed.
-	if (_thread) {
-		if (_thread->joinable()) {
-			// if the thread is still running, then we must 
-			// unlock because the thread would otherwise not
-			// be able to continue
-			lock.unlock();
-			_thread->join();
-			lock.lock();
-		}
-		delete _thread;
-		_thread = NULL;
-	}
+	// protect communication with the camera
+	std::unique_lock<std::recursive_mutex>	lock(_camera.mutex);
 
 	// now set up the exposure
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "start QSI exposure");
@@ -155,8 +185,7 @@ void	QsiCcd::startExposure(const Exposure& exposure) {
 	}
 
 	// launch a thread waiting for the camera
-	_exposure_done = false;
-	_thread = new std::thread(start_main, this);
+	_thread = std::thread(start_main, this);
 }
 
 /**
@@ -186,13 +215,21 @@ std::string	state2string(QSICamera::CameraState qsistate) {
  * \brief main method for the exposure thread
  */
 void	QsiCcd::run() {
+	// find the time to completion
+	double	endtime = Timer::gettime() + Ccd::exposure.exposuretime();
+
 	//debug(LOG_DEBUG, DEBUG_LOG, 0, "get Ccd state");
 	bool	imageReady = false;
 	while (!imageReady) {
-		Timer::sleep(0.1);
+		// compute how long to sleep
+		double	remaining = endtime - Timer::gettime();
+		if (remaining < 0.1) {
+			remaining = 0.1;
+		}
+		Timer::sleep(remaining);
 		
-		std::unique_lock<std::recursive_mutex>	lock(
-			_camera.mutex);
+		// lock the communication
+		std::unique_lock<std::recursive_mutex>	lock(_camera.mutex);
 
 		// get the camera state
 		START_STOPWATCH;
@@ -204,8 +241,6 @@ void	QsiCcd::run() {
 	// now the image is ready and we should indiate that with
 	// the state going to exposed
 	state(CcdState::exposed);
-		
-	_exposure_done = true;
 }
 
 /**
@@ -214,35 +249,18 @@ void	QsiCcd::run() {
  * \return the current QSI state
  */
 CcdState::State	QsiCcd::exposureStatus() {
-	// while the exposure thread is running, we don't need to check
-	// the camera status, the update thread will do that for us.
-	if (_thread) {
-		if (_exposure_done) {
-			_thread->join();
-			delete _thread;
-			_thread = NULL;
-		}
-//		return _last_state = state();
+	if (state() != CcdState::exposing) {
+		wait_thread();
 	}
-
-#if 0
-	//debug(LOG_DEBUG, DEBUG_LOG, 0, "checking exopsure status");
-	std::unique_lock<std::recursive_mutex>	lock(_camera.mutex,
-		std::try_to_lock);
-	if (!lock) {
-		//debug(LOG_DEBUG, DEBUG_LOG, 0, "return last state %d",
-		//	(int)_last_state);
-		return _last_state;
-	}
-#endif
-	return _last_state = state();
+	return state();
 }
 
 /**
  * \brief Cancel the current exposure
  */
 void	QsiCcd::cancelExposure() {
-	std::lock_guard<std::recursive_mutex>	lock(_camera.mutex);
+	state(CcdState::cancelling);
+	std::unique_lock<std::recursive_mutex>	lock(_camera.mutex);
 	_camera.camera().AbortExposure();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "turn LED on");
 	_camera.camera().put_LEDEnabled(true);
@@ -251,7 +269,7 @@ void	QsiCcd::cancelExposure() {
 }
 
 /**
- * \brief Get the stateu of the shutter
+ * \brief Get the state of the shutter
  */
 Shutter::state	QsiCcd::getShutterState() {
 	throw std::runtime_error("cannot query current shutter state");
@@ -272,7 +290,7 @@ void	QsiCcd::setShutterState(const Shutter::state& /* state */) {
  * work.
  */
 ImagePtr	QsiCcd::getRawImage() {
-	std::lock_guard<std::recursive_mutex>	lock(_camera.mutex);
+	std::unique_lock<std::recursive_mutex>	lock(_camera.mutex);
 	int	x, y, z;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "turn LED on");
 	START_STOPWATCH;
@@ -309,14 +327,15 @@ ImagePtr	QsiCcd::getRawImage() {
  */
 CoolerPtr	QsiCcd::getCooler0() {
 	QsiCooler	*cooler = new QsiCooler(_camera);
-	return CoolerPtr(cooler);
+	_cooler = CoolerPtr(cooler);
+	return _cooler;
 }
 
 /**
  * \brief Retrieve the current gain value
  */
 float	QsiCcd::getGain() {
-	std::lock_guard<std::recursive_mutex>	lock(_camera.mutex);
+	std::unique_lock<std::recursive_mutex>	lock(_camera.mutex);
 	QSICamera::CameraGain	gainvalue;
 	_camera.camera().get_CameraGain(&gainvalue);
 	switch (gainvalue) {

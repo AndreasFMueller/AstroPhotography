@@ -120,7 +120,8 @@ void	SbigCooler::set() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "set parameters");
 	SetTemperatureRegulationParams2	params;
 	params.regulation = (_on) ? REGULATION_ON : REGULATION_OFF;
-	params.ccdSetpoint = _setTemperature.celsius();
+	Temperature	st = _setTemperature;
+	params.ccdSetpoint = st.celsius();
 	set_temperature_regulation2(&params);
 }
 
