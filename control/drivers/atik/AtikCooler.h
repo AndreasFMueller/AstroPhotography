@@ -19,6 +19,14 @@ class AtikCooler : public Cooler {
 	Temperature	_lastTemperature;
 	Temperature	_lastSetTemperature;
 	// XXX we need a monitoring thread for the cooler
+	std::thread			_thread;
+	std::recursive_mutex		_mutex;
+	std::condition_variable_any	_condition;
+	bool	_running;
+	static void	main(AtikCooler *cooler) noexcept;
+	void	run();
+	void	stop();
+	friend class AtikCamera;
 public:
 	AtikCooler(AtikCamera&);
 	virtual ~AtikCooler();

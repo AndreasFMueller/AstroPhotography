@@ -29,6 +29,9 @@ public:
 	virtual ~QhyCcd();
 public:
 	virtual void	startExposure(const Exposure& exposure);
+private:
+	static void	main(QhyCcd *ccd) noexcept;
+public:
 	virtual void	getImage0();
 	virtual ImagePtr	getRawImage();
 	virtual bool	hasCooler() const { return true; }

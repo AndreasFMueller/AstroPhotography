@@ -25,14 +25,23 @@ QhyCcd::QhyCcd(const CcdInfo& info, const ::qhy::DevicePtr devptr,
  * \brief Destroy the QHY CCD object
  */
 QhyCcd::~QhyCcd() {
+	if (thread.joinable()) {
+		thread.join();
+	}
 }
 
 /**
  * \brief main function for the thread
  */
-void	start_routine(QhyCcd *ccd) {
+void	QhyCcd::main(QhyCcd *ccd) noexcept {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "start exposure thread");
-	ccd->getImage0();
+	try {
+		ccd->getImage0();
+	} catch (const std::exception& x) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "cannot expose: %s", x.what());
+	} catch (...) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "cannot expose");
+	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "end exposure thread");
 }
 
@@ -42,7 +51,7 @@ void	start_routine(QhyCcd *ccd) {
 void	QhyCcd::startExposure(const Exposure& exposure) {
 	Ccd::startExposure(exposure);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "launch a new thread");
-	thread = std::thread(start_routine, this);
+	thread = std::thread(main, this);
 }
 
 /**

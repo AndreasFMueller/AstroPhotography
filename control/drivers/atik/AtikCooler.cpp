@@ -17,8 +17,13 @@ namespace atik {
  * \param camera	the camera to which this cooler belongs
  */
 AtikCooler::AtikCooler(AtikCamera& camera)
-	: Cooler(coolername(camera)), _camera(camera) {
+	: Cooler(DeviceName(camera.name(), DeviceName::Cooler)),
+	  _camera(camera) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "creating ATIK cooler");
+
+	// start the monitoring thread
+	_running = true;
+	_thread = std::thread(main, this);
 }
 
 /**
@@ -30,6 +35,7 @@ AtikCooler::~AtikCooler() {
 	} catch (...) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "cannot initiate WarmUp");
 	}
+	stop();
 }
 
 /**
@@ -66,6 +72,7 @@ Temperature	AtikCooler::getActualTemperature() {
 void	AtikCooler::setTemperature(const float temperature) {
 	_camera.setTemperature(temperature, *this);
 	_lastSetTemperature = temperature;
+	Cooler::setTemperature(_lastSetTemperature);
 }
 
 /**
@@ -89,11 +96,67 @@ bool	AtikCooler::isOn() {
 void	AtikCooler::setOn(bool onoff) {
 	_camera.setOn(onoff, *this);
 	_lastIsOn = onoff;
+	_condition.notify_all();
 }
 
+/**
+ * \brief Override the temperature
+ *
+ * \param temperature	the new set temperature
+ */
 void	AtikCooler::overrideSetTemperature(float temperature) {
 	Cooler::setTemperature(temperature);
 }
+
+/**
+ * \brief static trampoline function to launch the thread
+ *
+ * \param cooler	the cooler to monitor
+ */
+void	AtikCooler::main(AtikCooler *cooler) noexcept {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "start thread");
+	try {
+		cooler->run();
+	} catch (const std::exception& x) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "cooler crashed: %s", x.what());
+	} catch (...) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "cooler crashed");
+	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "thread terminates");
+}
+
+/**
+ * \brief Do the actual monitoring
+ */
+void	AtikCooler::run() {
+	std::unique_lock<std::recursive_mutex>	lock(_mutex);
+	Temperature	actual = getActualTemperature();
+	while (_running) {
+		Temperature	newtemp = getActualTemperature();
+		if (actual != newtemp) {
+			// call the callback
+			CoolerInfo	ci(*this);
+			callback(ci);
+		}
+		_condition.wait_for(lock, std::chrono::seconds(3));
+	}
+}
+
+/**
+ * \brief Stop the monitoring thread
+ */
+void	AtikCooler::stop() {
+	{
+		std::unique_lock<std::recursive_mutex>	lock(_mutex);
+		_running = false;
+	}
+	_condition.notify_all();
+	if (_thread.joinable()) {
+		_thread.join();
+	}
+}
+
+
 
 } // namespace atik
 } // namespace camera

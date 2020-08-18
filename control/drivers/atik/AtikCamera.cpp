@@ -93,6 +93,23 @@ AtikCamera::AtikCamera(::AtikCamera *camera)
  * \brief Destroy the Atik camera object
  */
 AtikCamera::~AtikCamera() {
+	// stop the cooler thread
+	if (_cooler) {
+		AtikCooler	*ac = dynamic_cast<AtikCooler*>(&*_cooler);
+		try {
+			ac->stop();
+		} catch (...) {
+		}
+	}
+	// XXX stop the CCD thread
+}
+
+CoolerPtr	AtikCamera::getCooler0() {
+	if (_cooler) {
+		return _cooler;
+	}
+	_cooler = CoolerPtr(new AtikCooler(*this));
+	return _cooler;
 }
 
 /**
@@ -426,6 +443,7 @@ ImagePtr	AtikCamera::multiExposure(const ImagePoint& offset,
  * \brief Abort the exposure
  */
 void    AtikCamera::abortExposure() {
+	std::unique_lock<std::recursive_mutex>	lock(_mutex);
 	_camera->abortExposure();
 }
 

@@ -28,7 +28,15 @@ AtikCcd::AtikCcd(CcdInfo& info, astro::camera::atik::AtikCamera& camera)
  * \brief destroy the atik camera
  */
 AtikCcd::~AtikCcd() {
+	stop();
+}
+
+/**
+ * \brief stop the thread
+ */
+void	AtikCcd::stop() {
 	if (_thread.joinable()) {
+		_camera.abortExposure();
 		_thread.join();
 	}
 }
@@ -123,7 +131,7 @@ bool	AtikCcd::hasCooler() const {
  * \brief retrieve the cooler object
  */
 CoolerPtr	AtikCcd::getCooler0() {
-	return CoolerPtr(new AtikCooler(_camera));
+	return _camera.getCooler0();
 }
 
 /**

@@ -35,45 +35,20 @@ DeviceName	ccdname(::AtikCamera *camera, const std::string& name) {
 
 
 DeviceName	filterwheelname(AtikCamera& camera) {
-	unsigned int serial = camera.getSerialNumber();
-	return DeviceName(DeviceName::Filterwheel, "atik",
-		astro::stringprintf("%u", serial));
+	return DeviceName(camera.name(), DeviceName::Filterwheel);
 }
 
 DeviceName	filterwheelname(::AtikCamera *camera) {
-	unsigned int serial = camera->getSerialNumber();
-	return DeviceName(DeviceName::Filterwheel, "atik",
-		astro::stringprintf("%u", serial));
+	return DeviceName(cameraname(camera), DeviceName::Filterwheel);
 }
 
 
 DeviceName	guideportname(AtikCamera& camera) {
-	unsigned int serial = camera.getSerialNumber();
-	return DeviceName(DeviceName::Guideport, "atik",
-		astro::stringprintf("%u", serial));
+	return DeviceName(camera.name(), DeviceName::Guideport);
 }
 
 DeviceName	guideportname(::AtikCamera *camera) {
-	unsigned int serial = camera->getSerialNumber();
-	return DeviceName(DeviceName::Guideport, "atik",
-		astro::stringprintf("%u", serial));
-}
-
-
-DeviceName	coolername(AtikCamera& camera) {
-	DeviceName	cn = cameraname(camera);
-	cn.push_back("Imaging");
-	cn.push_back("cooler");
-	cn.type(DeviceName::Cooler);
-	return cn;
-}
-
-DeviceName	coolername(::AtikCamera *camera) {
-	DeviceName	cn = cameraname(camera);
-	cn.push_back("Imaging");
-	cn.push_back("cooler");
-	cn.type(DeviceName::Cooler);
-	return cn;
+	return DeviceName(cameraname(camera), DeviceName::Guideport);
 }
 
 } // namespace atik

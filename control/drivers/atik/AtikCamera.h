@@ -52,6 +52,10 @@ public:
 
 	// cooler related stuff
 private:
+	CoolerPtr	_cooler;
+protected:
+	CoolerPtr	getCooler0();
+private:
 	int	_tempSensorCount;
 	std::atomic_bool	_is_on;
 	std::atomic<float>	_last_actual_temperature;

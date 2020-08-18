@@ -37,7 +37,7 @@ protected:
 	CoolerPtr	getCooler0();
 public:
 	bool	hasCooler() const;
-
+	void	stop();
 private:
 	static void	main(AtikCcd *atikccd) noexcept;
 	void	run();
