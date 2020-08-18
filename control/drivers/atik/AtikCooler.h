@@ -18,6 +18,7 @@ class AtikCooler : public Cooler {
 	bool	_lastIsOn;
 	Temperature	_lastTemperature;
 	Temperature	_lastSetTemperature;
+	// XXX we need a monitoring thread for the cooler
 public:
 	AtikCooler(AtikCamera&);
 	virtual ~AtikCooler();

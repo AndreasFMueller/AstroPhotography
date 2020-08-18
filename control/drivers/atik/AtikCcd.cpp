@@ -28,6 +28,9 @@ AtikCcd::AtikCcd(CcdInfo& info, astro::camera::atik::AtikCamera& camera)
  * \brief destroy the atik camera
  */
 AtikCcd::~AtikCcd() {
+	if (_thread.joinable()) {
+		_thread.join();
+	}
 }
 
 /**
@@ -44,7 +47,7 @@ void	AtikCcd::run() {
  *
  * \param atikccd	the CCD object on which the thread should operate
  */
-static void	main(AtikCcd *atikccd) {
+void	AtikCcd::main(AtikCcd *atikccd) noexcept {
 	try {
 		atikccd->run();
 	} catch (std::exception& ex) {
@@ -67,7 +70,7 @@ static void	main(AtikCcd *atikccd) {
 void	AtikCcd::startExposure(const Exposure& exposure) {
 	Ccd::startExposure(exposure);
 	state(CcdState::exposing);
-	_thread = std::shared_ptr<std::thread>(new std::thread(main, this));
+	_thread = std::thread(main, this);
 }
 
 /**
@@ -90,7 +93,9 @@ ImagePtr	AtikCcd::getRawImage() {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "%s", msg.c_str());
 		throw BadState("no exposure available");
 	}
-	_thread->join();
+	if (_thread.joinable()) {
+		_thread.join();
+	}
 	if (!_image) {
 		std::string	msg("no image: exposure failed");
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "%s", msg.c_str());

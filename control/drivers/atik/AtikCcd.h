@@ -22,7 +22,7 @@ class AtikCcd : public Ccd {
 public:
 	void	image(ImagePtr);
 private:
-	std::shared_ptr<std::thread>	_thread;
+	std::thread	_thread;
 public:
 	AtikCcd(CcdInfo&, astro::camera::atik::AtikCamera&);
 	~AtikCcd();
@@ -38,9 +38,10 @@ protected:
 public:
 	bool	hasCooler() const;
 
-public:
+private:
+	static void	main(AtikCcd *atikccd) noexcept;
 	void	run();
-
+public:
 	void	updatestate(CcdState::State s) { state(s); }
 	virtual std::string	userFriendlyName() const {
 		return _camera.userFriendlyName();
