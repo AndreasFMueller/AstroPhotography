@@ -48,6 +48,8 @@ protected:
 	virtual void	doFlood(const Exposure& exposure);
 public:
 	virtual void	startExposure(const Exposure& exposure);
+private:
+	static void	main(SxCcd *ccd) noexcept;
 	virtual void	getImage0();
 public:
 	virtual ImagePtr	getRawImage();

@@ -17,16 +17,18 @@ namespace sx {
 /**
  * \brief tranmpoline function to jump into the thread run function
  */
-static void	filterwheel_main(SxFilterWheel *filterwheel) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "starting filterwheel_main(%s)",
+void	SxFilterWheel::main(SxFilterWheel *filterwheel) noexcept {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "starting main(%s)",
 		filterwheel->name().toString().c_str());
 	try {
 		filterwheel->run();
 	} catch (std::exception& x) {
-		debug(LOG_ERR, DEBUG_LOG, 0, "error in filterwheel_main: %s",
+		debug(LOG_ERR, DEBUG_LOG, 0, "error in main: %s",
 			x.what());
+	} catch (...) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "main crashed");
 	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "filterwheel_main terminated");
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "main terminated");
 }
 
 /**
@@ -202,7 +204,7 @@ SxFilterWheel::SxFilterWheel(const DeviceName& name)
 
 	// start the thread
 	_terminate = false;
-	_thread = new std::thread(filterwheel_main, this);
+	_thread = std::thread(SxFilterWheel::main, this);
 
 	// release the thread
 	_barrier.await(); // release the thread
@@ -213,16 +215,24 @@ SxFilterWheel::SxFilterWheel(const DeviceName& name)
  */
 SxFilterWheel::~SxFilterWheel() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "destroy FilterWheel");
-	// wait for the thread to terminate
-	_terminate = true;
-	_condition.notify_all();
-	_thread->join();
-	delete _thread;
+	stop();
 
 	// close connection to the filter wheel
 	std::unique_lock<std::mutex>	lock(SxCameraLocator::_hid_mutex);
 	hid_close(_hid);
 	_hid = NULL;
+}
+
+void	SxFilterWheel::stop() {
+	// wait for the thread to terminate
+	{
+		std::unique_lock<std::recursive_mutex>	lock(_mutex);
+		_terminate = true;
+	}
+	_condition.notify_all();
+	if (_thread.joinable()) {
+		_thread.join();
+	}
 }
 
 unsigned int	SxFilterWheel::nFilters0() {

@@ -9,7 +9,7 @@
 #include <AstroCamera.h>
 #include <BasicGuideport.h>
 #include <AstroUSB.h>
-#include <thread>
+#include <mutex>
 
 namespace astro {
 namespace camera {

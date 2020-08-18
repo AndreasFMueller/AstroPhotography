@@ -1,6 +1,7 @@
 ChangeLog for the Astro project.
 
 20200818:
+	* fix thread interface in Sx, ensure threads are terminated
 	* moved some thread start functions to class scope
 	* reworked QSI driver
 	* fixed shutdown sequence in QSI driver (proper thread termination 

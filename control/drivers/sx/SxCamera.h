@@ -85,7 +85,8 @@ public:
 	// ccd access
 protected:
 	virtual CcdPtr	getCcd0(size_t id);
-
+private:
+	CoolerPtr	_cooler;
 public:
 	// cooler access
 	bool	hasCooler();
@@ -94,6 +95,8 @@ public:
 	// guider port access
 public:
 	virtual bool	hasGuidePort() const { return _hasGuidePort; }
+private:
+	GuidePortPtr	_guideport;
 protected:
 	virtual GuidePortPtr	getGuidePort0();
 

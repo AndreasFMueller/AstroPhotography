@@ -31,6 +31,8 @@ class SxCooler : public Cooler {
 	std::condition_variable_any	_cond;
 	bool			_terminate;
 	std::string	purpose() const;
+	static void	cooler_main(SxCooler *cooler) noexcept;
+	void	run();
 public:
 	SxCooler(SxCamera& camera);
 	virtual	~SxCooler();
@@ -39,7 +41,7 @@ public:
 	virtual void	setTemperature(float temperature);
 	virtual bool	isOn();
 	virtual	void	setOn(bool onoff);
-	void	run();
+	void	stop();
 };
 
 } // namespace sx

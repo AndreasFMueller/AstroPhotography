@@ -24,11 +24,12 @@ class SxFilterWheel : public FilterWheel {
 	std::vector<std::string>	filternames;
 	hid_device	*_hid;
 	astro::thread::Barrier		_barrier;
-	std::thread	*_thread;
+	std::thread	_thread;
 	bool	_terminate;
 	std::recursive_mutex	_mutex;
 	std::condition_variable_any	_condition;
-public:
+	void	stop();
+	static void	main(SxFilterWheel *filterwheel) noexcept;
 	void	run();
 private:
 

@@ -39,7 +39,10 @@ SxCcd::SxCcd(const CcdInfo& info, SxCamera& _camera, int _ccdindex)
  * \brief Destroy an SxCcd
  */
 SxCcd::~SxCcd() {
-	// XXX here we should really destroy the thread
+	// we have to wait for the thread to terminate
+	if (thread.joinable()) {
+		thread.join();
+	}
 }
 
 /**
@@ -47,15 +50,8 @@ SxCcd::~SxCcd() {
  *
  * \param ccd	the SxCcd to use for the exposure
  */
-void	start_routine(SxCcd *ccd) {
+void	SxCcd::main(SxCcd *ccd) noexcept {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "start exposure thread");
-#if 0
-	pthread_attr_t	attr;
-	pthread_attr_init(&attr);
-	size_t	stacksize = 0;
-	pthread_attr_getstacksize(&attr, &stacksize);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "stack size: %lu", stacksize);
-#endif
 
 	try {
 		ccd->getImage0();
@@ -96,7 +92,7 @@ void	SxCcd::startExposure(const Exposure& exposure) {
 
 	// create a new thread
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "launch a new thread");
-	thread = std::thread(start_routine, this);
+	thread = std::thread(main, this);
 }
 
 /**

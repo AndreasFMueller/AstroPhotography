@@ -152,7 +152,6 @@ BasicGuideport::BasicGuideport(const std::string& devicename)
  */
 BasicGuideport::~BasicGuideport() {
 	stop();
-	thread.join();
 }
 
 /**
@@ -219,9 +218,14 @@ void	BasicGuideport::start() {
  * The thread will exit when it has processed the notification
  */
 void	BasicGuideport::stop() {
-	std::unique_lock<std::mutex>	lock(mtx);
-	_running = false;
+	{
+		std::unique_lock<std::mutex>	lock(mtx);
+		_running = false;
+	}
 	cond.notify_one();
+	if (thread.joinable()) {
+		thread.join();
+	}
 }
 
 } // namespace camera

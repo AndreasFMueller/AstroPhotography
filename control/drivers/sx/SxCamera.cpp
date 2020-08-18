@@ -367,6 +367,42 @@ SxCamera::SxCamera(SxCameraLocator& locator, DevicePtr _deviceptr)
  * This method releases the data interface of the camera.
  */
 SxCamera::~SxCamera() {
+	// fix the cooler
+	if (_cooler) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "stopping cooler");
+		try {
+			SxCooler	*cooler
+				= dynamic_cast<SxCooler*>(&*_cooler);
+			if (cooler) {
+				cooler->stop();
+			}
+		} catch (const std::exception& x) {
+			debug(LOG_ERR, DEBUG_LOG, 0, "cannot stop cooler: %s",
+				x.what());
+		} catch (...) {
+			debug(LOG_ERR, DEBUG_LOG, 0, "cannot stop cooler");
+		}
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "cooler stopped");
+	}
+
+	// stop the guideport
+	if (_guideport) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "stopping guideport");
+		try {
+			SxGuidePort	*guideport
+				= dynamic_cast<SxGuidePort*>(&*_guideport);
+			if (guideport) {
+				guideport->stop();
+			}
+		} catch (const std::exception& x) {
+			debug(LOG_ERR, DEBUG_LOG, 0, "cannot stop guideport:"
+				" %s", x.what());
+		} catch (...) {
+			debug(LOG_ERR, DEBUG_LOG, 0, "cannot stop guideport");
+		}
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "guideport stopped");
+	}
+
 	try {
 		interface->release();
 	} catch (std::exception& x) {
@@ -574,16 +610,17 @@ bool	SxCamera::hasCooler() {
 /**
  * \brief Get the cooler for this camera, if it exists.
  */
-CoolerPtr	SxCamera::getCooler(int ccdindex) {
-	if (ccdindex > 0) {
-		throw NotImplemented("only imaging CCD has cooler");
+CoolerPtr	SxCamera::getCooler(int /* ccdindex */) {
+	if (_cooler) {
+		return _cooler;
 	}
 	if (!_hasCooler) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "this camera has no cooler");
 		throw NotImplemented("this camera has no cooler");
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "creating cooler object");
-	return CoolerPtr(new SxCooler(*this));
+	_cooler = CoolerPtr(new SxCooler(*this));
+	return _cooler;
 }
 
 /**
@@ -595,7 +632,8 @@ GuidePortPtr	SxCamera::getGuidePort0() {
 		throw NotImplemented("this camera has no guider port");
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "creating guider port object");
-	return GuidePortPtr(new SxGuidePort(*this));
+	_guideport = GuidePortPtr(new SxGuidePort(*this));
+	return _guideport;
 }
 
 /**

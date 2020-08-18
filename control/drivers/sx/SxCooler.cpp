@@ -22,13 +22,13 @@ static DeviceName	sx_coolername(const DeviceName& cameraname) {
 /**
  * \brief Trampoline function to start the run() method in the cooler
  *
- * \param simcooler	the cooler to run this thread for
+ * \param cooler	the cooler to run this thread for
  */
-static void	cooler_main(SxCooler *simcooler) {
+void	SxCooler::cooler_main(SxCooler *cooler) noexcept {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "start %s thread",
-		simcooler->name().toString().c_str());
+		cooler->name().toString().c_str());
 	try {
-		simcooler->run();
+		cooler->run();
 	} catch (const std::exception& x) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "%s exception in thread: %s",
 			demangle_cstr(x), x.what());
@@ -36,7 +36,7 @@ static void	cooler_main(SxCooler *simcooler) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "unknown exception");
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "%s thread terminates",
-		simcooler->name().toString().c_str());
+		cooler->name().toString().c_str());
 }
 
 /**
@@ -72,13 +72,7 @@ SxCooler::SxCooler(SxCamera& _camera)
  * \brief Destroy the cooler
  */
 SxCooler::~SxCooler() {
-	// XXX we should turn the cooler off
-	{
-		std::unique_lock<std::recursive_mutex>	lock(_mutex);
-		_terminate = true;
-	}
-	_cond.notify_all();
-	_thread.join();
+	stop();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "cooler thread completed");
 }
 
@@ -247,6 +241,20 @@ void	SxCooler::run() {
 
 	} while (!_terminate);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "run() terminates");
+}
+
+/**
+ * \brief stop the cooler thread
+ */
+void	SxCooler::stop() {
+	{
+		std::unique_lock<std::recursive_mutex>	lock(_mutex);
+		_terminate = true;
+	}
+	_cond.notify_all();
+	if (_thread.joinable()) {
+		_thread.join();
+	}
 }
 
 } // namespace sx
