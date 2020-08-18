@@ -1,6 +1,8 @@
 ChangeLog for the Astro project.
 
 20200818:
+	* fix threads in simulator driver
+	* fix threads in Asi driver
 	* fix thread interface in Sx, ensure threads are terminated
 	* moved some thread start functions to class scope
 	* reworked QSI driver

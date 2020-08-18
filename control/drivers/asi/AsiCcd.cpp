@@ -161,7 +161,7 @@ void	AsiCcd::setExposure(const Exposure& e) {
  *
  * \param asiccd	the ccd to run for
  */
-static void     asi_ccd_main(AsiCcd *asiccd) {
+void     AsiCcd::main(AsiCcd *asiccd) noexcept {
 	try {
 		asiccd->run();
 	} catch (const std::exception& x) {
@@ -204,7 +204,7 @@ void	AsiCcd::startExposure(const Exposure& exposure) {
 	//exposureStatus();
 
 	_exposure_done = false;
-	_thread = std::thread(asi_ccd_main, this);
+	_thread = std::thread(main, this);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "exposure started");
 }
 

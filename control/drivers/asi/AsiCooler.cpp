@@ -15,7 +15,7 @@ namespace asi {
  *
  * \param cooler	the cooler to run the thread for
  */
-static void	asi_cooler_main(AsiCooler *cooler) {
+void	AsiCooler::main(AsiCooler *cooler) noexcept {
 	std::string	name = cooler->name().toString();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "%s thread starts", name.c_str());
 	try {
@@ -51,7 +51,7 @@ AsiCooler::AsiCooler(AsiCamera& camera)
 	float	t = getActualTemperature().temperature();
 	_camera.settemperature(t);
 	_running = true;
-	_thread = std::thread(asi_cooler_main, this);
+	_thread = std::thread(main, this);
 }
 
 /**

@@ -37,7 +37,10 @@ public:
 	virtual void	startExposure(const Exposure& exposure);
 	virtual CcdState::State	exposureStatus();
 	virtual void	cancelExposure();
+private:
+	static void	main(AsiCcd *ccd) noexcept;
 	void	run();
+public:
 
 	// image retrieval
 	virtual astro::image::ImagePtr	getRawImage();

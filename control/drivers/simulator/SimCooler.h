@@ -35,6 +35,8 @@ public:
 	virtual void	setOn(bool onoff);
 	virtual bool	isOn() { return on; }
 	int	belowambient();
+private:
+	static void	main(SimCooler *cooler) noexcept;
 	void	run();
 private:
 	float	_dewheatervalue;

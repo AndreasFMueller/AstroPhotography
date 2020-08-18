@@ -21,7 +21,7 @@ const static Temperature	ambient_temperature(Temperature::zero + 13.2);
  *
  * \param simcooler 	the cooler to run for
  */
-static void	cooler_main(SimCooler *simcooler) {
+void	SimCooler::main(SimCooler *simcooler) noexcept {
 	try {
 		simcooler->run();
 	} catch (...) {
@@ -44,7 +44,7 @@ SimCooler::SimCooler(SimLocator& locator)
 	// start the thread to update the temperature at regular intervals
 	_terminate = false;
 	std::unique_lock<std::recursive_mutex>	lock(_mutex);
-	_thread = std::thread(cooler_main, this);
+	_thread = std::thread(main, this);
 }
 
 /**

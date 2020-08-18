@@ -17,7 +17,7 @@ namespace simulator {
  *
  * \param filterwheel	the filterwheel implementation
  */
-static void	start_filterwheel(SimFilterWheel *filterwheel) {
+void	SimFilterWheel::main(SimFilterWheel *filterwheel) noexcept {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "start the filterwheel thread for %s",
 		filterwheel->name().toString().c_str());
 	try {
@@ -44,7 +44,7 @@ SimFilterWheel::SimFilterWheel(SimLocator& locator)
 	// setting the changetime to a future point of time makes sure
 	// that the 
 	_terminate = false;
-	_thread = std::thread(start_filterwheel, this);
+	_thread = std::thread(main, this);
 }
 
 /**
@@ -53,7 +53,10 @@ SimFilterWheel::SimFilterWheel(SimLocator& locator)
  * The destructor has to wait for the thread to terminate
  */
 SimFilterWheel::~SimFilterWheel() {
-	_terminate = true;
+	{
+		std::unique_lock<std::mutex>	lock(_mutex);
+		_terminate = true;
+	}
 	_cond.notify_all();
 	if (_thread.joinable()) {
 		_thread.join();

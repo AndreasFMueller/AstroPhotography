@@ -21,7 +21,7 @@ long	SimFocuser::variance() {
 	return (max() - min()) / 4;
 }
 
-static void	focuser_monitor(SimFocuser *focuser) {
+void	SimFocuser::main(SimFocuser *focuser) noexcept {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "start focuser thread");
 	try {
 		focuser->run();
@@ -39,11 +39,14 @@ debug(LOG_DEBUG, DEBUG_LOG, 0, "focuser set to %d", _value);
 	target = _value;
 	lastset = 0;
 	_terminate = false;
-	_thread = std::thread(focuser_monitor, this);
+	_thread = std::thread(main, this);
 }
 
 SimFocuser::~SimFocuser() {
-	_terminate = true;
+	{
+		std::unique_lock<std::mutex>	lock(_mutex);
+		_terminate = true;
+	}
 	_cond.notify_all();
 	if (_thread.joinable()) {
 		_thread.join();

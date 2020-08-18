@@ -39,8 +39,11 @@ public:
 	virtual float	dewHeater();
 	virtual void	dewHeater(float dewheatervalue);
 	virtual std::pair<float, float>	dewHeaterRange();
+private:
+	static void	main(AsiCooler *cooler) noexcept;
 	void	run();
 	void	stop();
+	friend class AsiCamera;
 };
 
 } // namespace asi

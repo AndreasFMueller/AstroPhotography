@@ -14,7 +14,7 @@ namespace asi {
 /**
  * \brief trampoline function to start the run function of the class
  */
-static void	asi_guideport_main(AsiGuidePort *port) {
+void	AsiGuidePort::main(AsiGuidePort *port) noexcept {
 	std::string	portname = port->name();
 	try {
 		port->run();
@@ -43,7 +43,7 @@ AsiGuidePort::AsiGuidePort(AsiCamera& camera)
 	_ra = 0;
 	_dec = 0;
 	_running = true;
-	_thread = std::thread(asi_guideport_main, this);
+	_thread = std::thread(main, this);
 }
 
 /**

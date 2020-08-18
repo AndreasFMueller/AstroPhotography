@@ -29,6 +29,8 @@ class SimFilterWheel : public FilterWheel {
 public:
 	SimFilterWheel(SimLocator& locator);
 	virtual ~SimFilterWheel();
+private:
+	static void	main(SimFilterWheel *filterwheel) noexcept;
 	void	run();
 protected:
 	virtual unsigned int	nFilters0() { return 5; }

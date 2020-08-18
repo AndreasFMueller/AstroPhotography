@@ -34,6 +34,8 @@ public:
 	virtual void	set(long value);
 	double	radius();
 	void	randomposition();	
+private:
+	static void	main(SimFocuser* focuser) noexcept;
 	void	run();	// XXX main method for movement monitoring thread
 };
 

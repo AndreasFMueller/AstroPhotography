@@ -41,7 +41,10 @@ public:
 	virtual uint8_t	active();
 	virtual void	activate(float raplus, float raminus,
 				float decplus, float decminus);
+private:
+	static void	main(AsiGuidePort *guideport) noexcept;
 	void	run();
+public:
 	void	stop();
 };
 

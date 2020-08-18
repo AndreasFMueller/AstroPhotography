@@ -53,9 +53,18 @@ SimCcd::SimCcd(const CcdInfo& _info, SimLocator& locator)
 	_last_direction.ra().degrees(-1);
 }
 
-static void	imageconstruction_main(SimCcd *simccd) {
+SimCcd::~SimCcd() {
+	if (_thread.joinable()) {
+		_thread.join();
+	}
+}
+
+void	SimCcd::main(SimCcd *simccd) noexcept {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "starting image construction");
-	simccd->createimage();
+	try {
+		simccd->createimage();
+	} catch (...) {
+	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "image construction complete");
 }
 
@@ -103,7 +112,7 @@ void    SimCcd::startExposure(const Exposure& exposure) {
 	shutter = exposure.shutter();
 
 	// start the image construction thread
-	_thread = new std::thread(imageconstruction_main, this);
+	_thread = std::thread(main, this);
 }
 
 /**
@@ -308,8 +317,9 @@ static int	imagecounter = 0;
  */
 ImagePtr  SimCcd::getRawImage() {
 	// wait for the thread 
-	_thread->join();
-	delete _thread;
+	if (_thread.joinable()) {
+		_thread.join();
+	}
 
 	// if the debug directory is present, write the image there
 	struct stat	sb;

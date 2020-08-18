@@ -17,7 +17,7 @@ namespace simulator {
 
 class SimCcd : public Ccd {
 	SimLocator&	_locator;
-	std::thread	*_thread;
+	std::thread	_thread;
 	double	starttime;
 	Shutter::state	shutter;
 	StarField	starfield;
@@ -26,6 +26,7 @@ class SimCcd : public Ccd {
 	void	catalogStarfield(const RaDec& direction);
 public:
 	SimCcd(const CcdInfo& _info, SimLocator& locator);
+	virtual	~SimCcd();
 
 	virtual void	startExposure(const Exposure& exposure);
 	virtual CcdState::State	exposureStatus();
@@ -42,7 +43,7 @@ public:
 
 private:
 	astro::image::ImagePtr	_image;
-public:
+	static void	main(SimCcd *simccd) noexcept;
 	void	createimage();
 };
 

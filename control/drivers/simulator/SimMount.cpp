@@ -14,7 +14,7 @@ namespace simulator {
 /**
  * \brief Trampoline function to start the mount thread
  */
-static void	mount_main(SimMount *_mount) {
+void	SimMount::main(SimMount *_mount) noexcept {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "start the mount thread");
 	try {
 		_mount->move();
@@ -53,6 +53,7 @@ SimMount::~SimMount() {
 	std::unique_lock<std::recursive_mutex>	lock(_sim_mutex);
 	if (Mount::GOTO == Mount::state()) {
 		Mount::state(Mount::TRACKING);
+		lock.unlock();
 		_sim_condition.notify_all();
 		// wait for the thread to terminate
 		if (_sim_thread.joinable()) {
@@ -130,7 +131,7 @@ void	SimMount::Goto(const RaDec& radec) {
 	// here we should also start a thread that will periodically send
 	// RaDec updates to the callback and reset the state at the
 	// end of the move
-	_sim_thread = std::thread(mount_main, this);
+	_sim_thread = std::thread(main, this);
 }
 
 /**

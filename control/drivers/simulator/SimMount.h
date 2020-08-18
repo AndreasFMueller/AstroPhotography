@@ -28,8 +28,9 @@ class SimMount : public astro::device::Mount {
 	double			_when;
 	static const double	_movetime;
 	std::thread		_sim_thread;
-public:
+	static void	main(SimMount *mount) noexcept;
 	virtual void	move();
+public:
 	SimMount(/*SimLocator &locator*/);
 	virtual ~SimMount();
 	virtual RaDec	getRaDec();
