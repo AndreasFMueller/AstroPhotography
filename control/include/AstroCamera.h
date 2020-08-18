@@ -592,8 +592,8 @@ public:
 	static DeviceName::device_type	devicetype;
 	static DeviceName	defaultname(const DeviceName& parent,
 					const std::string& unitname);
-	Cooler(const DeviceName& name);
-	Cooler(const std::string& name);
+	Cooler(const DeviceName& name) noexcept;
+	Cooler(const std::string& name) noexcept;
 	virtual ~Cooler();
 	virtual Temperature	getSetTemperature();
 	virtual Temperature	getActualTemperature();
