@@ -234,8 +234,8 @@ class Device : public Properties {
 protected:
 	DeviceName	_name;
 public:
-	Device(const std::string& name, DeviceName::device_type type);
-	Device(const DeviceName& name, DeviceName::device_type type);
+	Device(const std::string& name, DeviceName::device_type type) noexcept;
+	Device(const DeviceName& name, DeviceName::device_type type) noexcept;
 	// make sure devices cannot get copied or assigned
 	Device(const Device& other) = delete;
 	Device&	operator=(const Device& other) = delete;

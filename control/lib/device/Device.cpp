@@ -14,30 +14,17 @@ namespace device {
 /**
  * \brief Construct a device
  */
-Device::Device(const std::string& devname, DeviceName::device_type type)
+Device::Device(const std::string& devname, DeviceName::device_type type) noexcept
 	: Properties(devname), _name(devname) {
-	if (name().type() != type) {
-		std::string	msg
-			= stringprintf("name '%s' does not match type %s",
-			devname.c_str(), DeviceName::type2string(type).c_str());
-		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
-		throw std::runtime_error(msg);
-	}
+	_name.type(type);
 }
 
 /**
  * \brief Construct a device from a device name
  */
-Device::Device(const DeviceName& devname, DeviceName::device_type type)
+Device::Device(const DeviceName& devname, DeviceName::device_type type) noexcept
 	: Properties(devname), _name(devname) {
-	if (name().type() != type) {
-		std::string	msg
-			= stringprintf("name '%s' does not match type %s",
-				devname.toString().c_str(),
-				DeviceName::type2string(type).c_str());
-		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
-		throw std::runtime_error(msg);
-	}
+	_name.type(type);
 }
 
 /**
