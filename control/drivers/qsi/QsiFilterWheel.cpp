@@ -20,8 +20,7 @@ namespace qsi {
  * \param camera	camera containing the filter wheel.
  */
 QsiFilterWheel::QsiFilterWheel(QsiCamera& camera)
-	: FilterWheel(DeviceName(camera.name(), DeviceName::Filterwheel,
-		"filterwheel")),
+	: FilterWheel(DeviceName(camera.name(), DeviceName::Filterwheel)),
 	  _camera(camera) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "construction of QSI filterwheel");
 	// lock the device

@@ -183,9 +183,11 @@ void	coolercontrollerwidget::setupCooler() {
 			ui->dewHeaterSlider->setValue(v);
 			ui->dewHeaterSlider->setEnabled(true);
 			ui->dewHeaterValue->setHidden(false);
+			ui->dewHeaterLabel->setEnabled(true);
 		} else {
 			ui->dewHeaterSlider->setEnabled(false);
 			ui->dewHeaterValue->setHidden(true);
+			ui->dewHeaterLabel->setEnabled(false);
 		}
 	} catch (std::exception& x) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "dew heater problem: %s",

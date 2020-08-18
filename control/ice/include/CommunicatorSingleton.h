@@ -27,6 +27,10 @@ public:
 	// maintaining the adapter and adding/removing servants 
 	static Ice::ObjectAdapterPtr	getAdapter();
 	static Ice::Identity	add(Ice::ObjectPtr servant);
+	static Ice::Identity	add(Ice::ObjectPrx proxy,
+					Ice::ObjectPtr servant);
+	static void	add(Ice::ObjectPrx proxy, Ice::ObjectPtr servant,
+				const Ice::Identity& identity);
 	static void	remove(Ice::Identity servantidentity);
 
 	// adding the adapter to a proxy's connection

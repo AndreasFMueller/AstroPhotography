@@ -15,6 +15,7 @@
 #include <HideWidget.h>
 #include <HideProgress.h>
 #include <ImagerRectangle.h>
+#include <QMessageBox>
 
 namespace snowgui {
 
@@ -239,6 +240,24 @@ public slots:
 	// allow the ImageRetrieverThread access to private methods
 	friend class ImageRetrieverThread;
 	friend class StateMonitoringWork;
+
+private:
+	template<typename exception>
+	void	ccdFailure(const exception& x) {
+		QMessageBox     message;
+		message.setText(QString("CCD failed"));
+		std::ostringstream      out;
+		out << "Communication with the CCD '";
+		out << _ccdinfo.name;
+		out << "' failed." << std::endl;
+		out << "The reason for the failure was: ";
+		out << x.cause;
+		out << std::endl;
+		message.setInformativeText(QString(out.str().c_str()));
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "ccdFailed: %s", out.str().c_str());
+		message.exec();
+	}
+
 };
 
 } // namespace snowgui

@@ -369,7 +369,7 @@ void	ccdcontrollerwidget::setupCcd() {
 			ccdinfo.minexposuretime(), ccdinfo.maxexposuretime());
 		ui->exposureSpinBox->setMinimum(ccdinfo.minexposuretime());
 		ui->exposureSpinBox->setMaximum(ccdinfo.maxexposuretime());
-		int	dec = round(log10(ccdinfo.minexposuretime()));
+		int	dec = floor(log10(ccdinfo.minexposuretime()));
 		if (dec > 0) { dec = 0; } else { dec = -dec; }
 		ui->exposureSpinBox->setDecimals(dec);
 
@@ -401,7 +401,8 @@ void	ccdcontrollerwidget::setupCcd() {
 				this,
 				SLOT(statusUpdate(snowstar::ExposureState)));
 			_ccd_callback = ccdcallback;
-			_ccd_identity = snowstar::CommunicatorSingleton::add(_ccd_callback);
+			_ccd_identity = snowstar::CommunicatorSingleton::add(_ccd,
+				_ccd_callback);
 			_ccd->registerCallback(_ccd_identity);
 		} catch (const std::exception& x) {
 			debug(LOG_ERR, DEBUG_LOG, 0,
@@ -831,10 +832,16 @@ void	ccdcontrollerwidget::captureClicked() {
 				? "open" : "closed");
 		try {
 			_ccd->startExposure(snowstar::convert(_exposure));
+		} catch (const snowstar::BadParameter& x) {
+			ccdFailure(x);
+			return;
+		} catch (const snowstar::DeviceException& x) {
+			ccdFailure(x);
+			return;
 		} catch (const std::exception& x) {
 			debug(LOG_DEBUG, DEBUG_LOG, 0,
 				"cannot start exposure: %s", x.what());
-			ccdFailed(x);
+			//ccdFailed(x);
 			return;
 		}
 		ourexposure = true;
@@ -1141,18 +1148,23 @@ void	ccdcontrollerwidget::hideButtons(bool b) {
  * \param x	exception to construct an error message from
  */
 void	ccdcontrollerwidget::ccdFailed(const std::exception& x) {
+#if 0
 	_ccd = NULL;
 	ui->ccdInfo->setEnabled(false);
 	ui->frameWidget->setEnabled(false);
 	ui->buttonArea->setEnabled(false);
+#endif
 	QMessageBox	message;
 	message.setText(QString("CCD failed"));
 	std::ostringstream	out;
 	out << "Communication with the CCD '";
 	out << ui->ccdSelectionBox->currentText().toLatin1().data();
 	out << "' failed." << std::endl;
-	out << "The reason for the failure was: " << x.what() << std::endl;
+	out << "The reason for the failure was: " << x.what();
+	out << std::endl;
+#if 0
 	out << "The CCD has been disabled and can no longer be used.";
+#endif
 	message.setInformativeText(QString(out.str().c_str()));
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "ccdFailed: %s", out.str().c_str());
 	message.exec();

@@ -81,7 +81,7 @@ AutoGain::AutoGain(const ImagePtr image, const ImageRectangle& rectangle) {
 		if (NULL == ia) {
 			std::string	msg = astro::stringprintf(
 				"cannot convert %s to luminance",
-				astro::demangle_cstr(image->pixel_type()));
+				astro::demangle(image->pixel_type().name()).c_str());
 			debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 			throw std::runtime_error(msg);
 		}

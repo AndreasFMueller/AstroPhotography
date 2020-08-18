@@ -87,11 +87,15 @@ void	CcdI::startExposure(const Exposure& exposure,
 		_ccd->startExposure(convert(exposure));
 	} catch (astro::BadParameter& x) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "bad parameter: %s", x.what());
-		throw BadParameter(x.what());
+		BadParameter	y;
+		y.cause = x.what();
+		throw y;
 	} catch (astro::DeviceException& x) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "startExposure error: %s",
 			x.what());
-		throw DeviceException(x.what());
+		DeviceException	y;
+		y.cause = x.what();
+		throw y;
 	}
 	laststart = time(NULL);
 }

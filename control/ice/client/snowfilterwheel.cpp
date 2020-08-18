@@ -178,11 +178,12 @@ int	main(int argc, char *argv[]) {
 		return command_list(devices);
 	}
 
-	if (argc <= optind) {
-		throw std::runtime_error("no filterwheel name");
-	}
 	std::string	filterwheelname(command);
 	FilterWheelPrx	filterwheel = devices->getFilterWheel(filterwheelname);
+
+	if (argc <= optind) {
+		return command_info(filterwheel);
+	}
 	command = std::string(argv[optind++]);
 	if (command == "info") {
 		return command_info(filterwheel);

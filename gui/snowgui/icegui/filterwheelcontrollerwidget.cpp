@@ -42,8 +42,17 @@ filterwheelcontrollerwidget::filterwheelcontrollerwidget(QWidget *parent)
 		this, SLOT(filterwheelNewPosition(int)));
 
 	// create the callback 
-	_filterwheel_callback = new FilterWheelCallbackI(*this);
-	_filterwheel_identity = snowstar::CommunicatorSingleton::add(_filterwheel_callback);
+	_filterwheel_cb = new FilterWheelCallbackI(*this);
+	_filterwheel_ptr = _filterwheel_cb;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "callback: %s",
+		_filterwheel_cb->identity().name.c_str());
+
+	connect(this, SIGNAL(callbackStateChanged(snowstar::FilterwheelState)),
+		this, SLOT(filterwheelNewState(snowstar::FilterwheelState)),
+		Qt::QueuedConnection);
+	connect(this, SIGNAL(callbackPositionChanged(int)),
+		this, SLOT(filterwheelNewPosition(int)),
+		Qt::QueuedConnection);
 }
 
 /**
@@ -51,12 +60,11 @@ filterwheelcontrollerwidget::filterwheelcontrollerwidget(QWidget *parent)
  */
 filterwheelcontrollerwidget::~filterwheelcontrollerwidget() {
 	if (_filterwheel) {
-		_filterwheel->unregisterCallback(_filterwheel_identity);
+		_filterwheel->unregisterCallback(_filterwheel_cb->identity());
 	}
-	if (_filterwheel_callback) {
-		snowstar::CommunicatorSingleton::remove(_filterwheel_identity);
-		_filterwheel_callback = NULL;
-	}
+	snowstar::CommunicatorSingleton::remove(_filterwheel_cb->identity());
+
+	_filterwheel_ptr = NULL;
 	delete ui;
 }
 
@@ -69,7 +77,7 @@ void	filterwheelcontrollerwidget::instrumentSetup(
 	// parent setup
 	InstrumentWidget::instrumentSetup(serviceobject, instrument);
 
-	// read the information about filterwheels on this instrumetn, and
+	// read the information about filterwheels on this instrument, and
 	// remember the first cooler you can find
 	int	index = 0;
 	while(_instrument.has(snowstar::InstrumentFilterWheel, index)) {
@@ -104,7 +112,12 @@ void	filterwheelcontrollerwidget::instrumentSetup(
  */
 void	filterwheelcontrollerwidget::setupComplete() {
 	// set the filterwheel up
-	setupFilterwheel();
+	try {
+		setupFilterwheel();
+	} catch (const std::exception& x) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "setupFilterwheel fails: %s",
+			x.what());
+	}
 }
 
 /**
@@ -115,6 +128,7 @@ void	filterwheelcontrollerwidget::setupComplete() {
  * remote server and initializes the GUI elements with it.
  */
 void	filterwheelcontrollerwidget::setupFilterwheel() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "setupFilterwheel()");
 	ui->filterBox->blockSignals(true);
 
 	// remove previous content of the filterwheel
@@ -147,14 +161,20 @@ void	filterwheelcontrollerwidget::setupFilterwheel() {
 		// store the current state
 		_previousstate = snowstar::FwUNKNOWN;
 
+		// install 
+		snowstar::CommunicatorSingleton::add(_filterwheel,
+			_filterwheel_ptr, _filterwheel_cb->identity());
+
 		// register the callback with the server
-		_filterwheel->registerCallback(_filterwheel_identity);
+		_filterwheel->registerCallback(_filterwheel_cb->identity());
 	}
 	ui->filterBox->blockSignals(false);
 
 	// emit the filterwheel selected signal
 	emit filterwheelSelected(_filterwheel);
 	emit filterwheelSelected(ui->filterwheelSelectionBox->currentIndex());
+
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "setupFilterwheel() completed");
 }
 
 /**
@@ -163,6 +183,7 @@ void	filterwheelcontrollerwidget::setupFilterwheel() {
  * This method does not send any signals
  */
 void	filterwheelcontrollerwidget::displayFilter(int index) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "displayFilter(%d)", index);
 	ui->filterBox->blockSignals(true);
 	ui->filterBox->setCurrentIndex(index);
 	ui->filterBox->blockSignals(false);
@@ -182,11 +203,16 @@ void    filterwheelcontrollerwidget::setFilter(int index) {
  * This slot is activate when the user chooses a different filter wheel.
  */
 void    filterwheelcontrollerwidget::filterwheelChanged(int index) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "filterwheelChanged(%d)", index);
 	if (_filterwheel) {
-		_filterwheel->unregisterCallback(_filterwheel_identity);
+		_filterwheel->unregisterCallback(_filterwheel_cb->identity());
 	}
 	_filterwheel = _instrument.filterwheel(index);
-	setupFilterwheel();
+	try {
+		setupFilterwheel();
+	} catch (const std::exception& x) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "cannot set up: %s", x.what());
+	}
 }
 
 /**
@@ -195,6 +221,7 @@ void    filterwheelcontrollerwidget::filterwheelChanged(int index) {
  * This slot is connected to the timeout() signal of the status timer.
  */
 void    filterwheelcontrollerwidget::statusUpdate() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "statusUpdate()");
 	if (!_filterwheel) {
 		return;
 	}
@@ -260,6 +287,17 @@ void	filterwheelcontrollerwidget::positionUpdate() {
  */
 void	filterwheelcontrollerwidget::filterwheelNewState(
 		snowstar::FilterwheelState newstate) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "filterwheelNewState(%d)", newstate);
+	// update the turn indicator
+	switch (newstate) {
+	case snowstar::FwMOVING:
+		emit filterwheelStart();
+		break;
+	case snowstar::FwIDLE:
+	case snowstar::FwUNKNOWN:
+		emit filterwheelStop();
+		break;
+	}
 	// update user interface elements
 	switch (newstate) {
 	case snowstar::FwIDLE:
@@ -273,9 +311,31 @@ void	filterwheelcontrollerwidget::filterwheelNewState(
 	}
 }
 
+/**
+ * \brief Slot to handle new position
+ */
 void	filterwheelcontrollerwidget::filterwheelNewPosition(int position) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "filterwheelNewPosiion(%d)", position);
 	_position = position;
-	// update the menu position
+	displayFilter(_position);
+}
+
+/**
+ * \brief callback slot for the callback to signal a state change
+ */
+void	filterwheelcontrollerwidget::callbackState(snowstar::FilterwheelState state) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "received state callback %d", state);
+	emit callbackStateChanged(state);
+	emit filterwheelStateChanged(state);
+}
+
+/**
+ * \brief callback sltop for the callback to signal a position change
+ */
+void	filterwheelcontrollerwidget::callbackPosition(int position) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "received position callback %d",
+		position);
+	emit callbackPositionChanged(position);
 }
 
 } // namespace snowgui

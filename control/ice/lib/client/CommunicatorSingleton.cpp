@@ -14,7 +14,6 @@
 namespace snowstar {
 
 static bool	initialized = false;
-static bool	connected = false;
 Ice::CommunicatorPtr	CommunicatorSingleton::_communicator;
 
 /**
@@ -137,9 +136,6 @@ void	CommunicatorSingleton::remove(Ice::Identity identity) {
  * over the connection of this proxy
  */
 void	CommunicatorSingleton::connect(Ice::ObjectPrx proxy) {
-	if (connected) {
-		debug(LOG_WARNING, DEBUG_LOG, 0, "already connected");
-	}
 	if (!proxy) {
 		std::string	msg = astro::stringprintf("cannot connect "
 			"without a proxy");
@@ -156,9 +152,46 @@ void	CommunicatorSingleton::connect(Ice::ObjectPrx proxy) {
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "adding adapter to %s",
 		astro::demangle_cstr(connection));
-	connection->setAdapter(getAdapter());
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "connected");
-	connected = true;
+	if (!connection->getAdapter()) {
+		connection->setAdapter(getAdapter());
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "connected");
+	}
+}
+
+Ice::Identity	CommunicatorSingleton::add(Ice::ObjectPrx proxy,
+			Ice::ObjectPtr servant) {
+	auto	connection = proxy->ice_getConnection();
+	if (!connection) {
+		std::string	msg("no connection available");
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw std::runtime_error(msg);
+	}
+	if (!connection->getAdapter()) {
+		connection->setAdapter(getAdapter());
+	}
+	return add(servant);
+}
+
+/**
+ * \brief add a servant to a connection
+ */
+void	CommunicatorSingleton::add(Ice::ObjectPrx proxy, Ice::ObjectPtr servant,
+		const Ice::Identity& identity) {
+	// get the connection
+	auto	connection = proxy->ice_getConnection();
+	if (!connection) {
+		std::string	msg("no connection available");
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw std::runtime_error(msg);
+	}
+	// make sure the connection has an adapter
+	if (!connection->getAdapter()) {
+		connection->setAdapter(getAdapter());
+	}
+	// add the servant with the identity specified
+	if (!getAdapter()->find(identity)) {
+		getAdapter()->add(servant, identity);
+	}
 }
 
 } // namespace snowstar

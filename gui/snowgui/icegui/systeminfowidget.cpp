@@ -87,7 +87,7 @@ void	SystemInfoWidget::setDaemon(snowstar::DaemonPrx daemon) {
 		// get the identity
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "get identity");
 		_heartbeat_identity = snowstar::CommunicatorSingleton::add(
-			_heartbeat_monitor);
+			_daemon, _heartbeat_monitor);
 		// register the monitor
 		_daemon->registerHeartbeatMonitor(_heartbeat_identity);
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "monitor registered");
@@ -169,11 +169,6 @@ void	SystemInfoWidget::heartbeat_lost() {
 	ui->heartWidget->dead();
 	try {
 		_daemon->unregisterHeartbeatMonitor(_heartbeat_identity);
-#if 0
-		snowstar::CommunicatorSingleton::remove(_heartbeat_identity);
-		_heartbeat_identity = snowstar::CommunicatorSingleton::add(
-			_heartbeat_monitor);
-#endif
 		_daemon->registerHeartbeatMonitor(_heartbeat_identity);
 	} catch (const std::exception& x) {
 	}

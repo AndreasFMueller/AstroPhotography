@@ -520,7 +520,7 @@ void	imagedisplaywidget::processNewImageInfo(ImagePtr image) {
 
 	// pixel type
 	std::string	pixeltype
-		= astro::demangle_string(image->pixel_type());
+		= astro::demangle(image->pixel_type().name());
 	if (0 == pixeltype.compare(0, 14, "astro::image::")) {
 		pixeltype = pixeltype.substr(14);
 	}

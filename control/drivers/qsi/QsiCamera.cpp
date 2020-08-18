@@ -28,7 +28,13 @@ QsiCamera::QsiCamera(const std::string& _name) : Camera(_name) {
 	}
 
 	// connect to the camera
-	_camera.put_Connected(true);
+	try {
+		_camera.put_Connected(true);
+	} catch (const std::exception& x) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "cannot open connection: %s",
+			x.what());
+		throw x;
+	}
 
 	// get the name
 	_camera.get_Name(_userFriendlyName);
@@ -46,7 +52,7 @@ QsiCamera::QsiCamera(const std::string& _name) : Camera(_name) {
 	long	xsize, ysize;
 	camera().get_CameraXSize(&xsize);
 	camera().get_CameraYSize(&ysize);
-	DeviceName	ccdname(name(), DeviceName::Ccd, "ccd");
+	DeviceName	ccdname(name(), DeviceName::Ccd);
 	CcdInfo	info(ccdname, astro::image::ImageSize(xsize, ysize), 0);
 
 	// get pixel dimensions
@@ -59,7 +65,7 @@ QsiCamera::QsiCamera(const std::string& _name) : Camera(_name) {
 	// get the exposure time limits
 	double	minexposuretime;
 	camera().get_MinExposureTime(&minexposuretime);
-	info.minexposuretime(minexposuretime);
+	info.minexposuretime(minexposuretime + 0.01);
 	double	maxexposuretime;
 	camera().get_MaxExposureTime(&maxexposuretime);
 	info.maxexposuretime(maxexposuretime);

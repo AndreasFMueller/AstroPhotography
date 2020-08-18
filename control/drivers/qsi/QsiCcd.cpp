@@ -178,10 +178,12 @@ void	QsiCcd::startExposure(const Exposure& exposure) {
 			Ccd::exposure.exposuretime(),
 			(light) ? "light" : "dark");
 	} catch (const std::exception& x) {
-		debug(LOG_ERR, DEBUG_LOG, 0, "bad exposure parameters: %s",
-			x.what());
+		std::string	msg = stringprintf("exposure %s: %s",
+			Ccd::exposure.toString().c_str(), x.what());
+			
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 		cancelExposure();
-		throw BadParameter(x.what());
+		throw BadParameter(msg.c_str());
 	}
 
 	// launch a thread waiting for the camera

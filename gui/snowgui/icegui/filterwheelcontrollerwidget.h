@@ -20,9 +20,11 @@ class filterwheelcontrollerwidget;
 
 class FilterWheelCallbackI : public snowstar::FilterWheelCallback {
 	filterwheelcontrollerwidget&	_filterwheelcontrollerwidget;
+	Ice::Identity	_identity;
 public:
 	FilterWheelCallbackI(filterwheelcontrollerwidget& f);
 	~FilterWheelCallbackI();
+	const Ice::Identity	identity() const { return _identity; }
 	void	state(const snowstar::FilterwheelState state,
 			const Ice::Current& current);
 	void	position(const int position,
@@ -40,8 +42,8 @@ class filterwheelcontrollerwidget : public InstrumentWidget {
 	snowstar::FilterwheelState	_previousstate;
 	int				_position;
 
-	Ice::ObjectPtr	_filterwheel_callback;
-	Ice::Identity	_filterwheel_identity;
+	FilterWheelCallbackI	*_filterwheel_cb;
+	Ice::ObjectPtr	_filterwheel_ptr;
 public:
 	explicit filterwheelcontrollerwidget(QWidget *parent = 0);
 	~filterwheelcontrollerwidget();
@@ -62,6 +64,10 @@ signals:
 	void	filterwheelStateChanged(snowstar::FilterwheelState);
 	void	filterwheelPositionChanged(int filterindex);
 
+	// signals emiited by the callbacks
+	void	callbackStateChanged(snowstar::FilterwheelState);
+	void	callbackPositionChanged(int);
+
 private:
 	Ui::filterwheelcontrollerwidget *ui;
 
@@ -73,6 +79,11 @@ public slots:
 	void	filterwheelChanged(int);
 	void	filterwheelNewState(snowstar::FilterwheelState);
 	void	filterwheelNewPosition(int);
+
+private:
+	void	callbackState(snowstar::FilterwheelState);
+	void	callbackPosition(int);
+	friend class FilterWheelCallbackI;
 };
 
 } // namespace snowgui
