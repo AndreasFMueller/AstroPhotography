@@ -8,6 +8,7 @@
 #include <AtikCcd.h>
 #include <AtikCooler.h>
 #include <AtikGuideport.h>
+#include <AtikFilterwheel.h>
 #include <atikccdusb.h>
 #include <includes.h>
 
@@ -101,6 +102,14 @@ AtikCamera::~AtikCamera() {
 		} catch (...) {
 		}
 	}
+	// stop the filterwheel monitoring thread
+	if (_filterwheel) {
+		AtikFilterwheel	*fw = dynamic_cast<AtikFilterwheel*>(&*_filterwheel);
+		try {
+			fw->stop();
+		} catch (...) {
+		}
+	}
 	// XXX stop the CCD thread
 }
 
@@ -110,6 +119,30 @@ CoolerPtr	AtikCamera::getCooler0() {
 	}
 	_cooler = CoolerPtr(new AtikCooler(*this));
 	return _cooler;
+}
+
+/**
+ * \brief Get information about the filterwheel
+ *
+ * \param filtercount	how many filters there are
+ * \param moving	whether the filterwheel is moving
+ * \param current	the current filter position
+ * \param target	the target filter position
+ */
+void	AtikCamera::getFilterWheelStatus(unsigned int *filtercount,
+		bool *moving, unsigned int *current, unsigned int *target) {
+	std::unique_lock<std::recursive_mutex>	lock(_mutex);
+        _camera->getFilterWheelStatus(filtercount, moving, current, target);
+}
+
+/**
+ * \brief Set the filter 
+ *
+ * \param filterindex	the filter to select
+ */
+void	AtikCamera::setFilter(unsigned int filterindex) {
+	std::unique_lock<std::recursive_mutex>	lock(_mutex);
+        _camera->setFilter(filterindex);
 }
 
 /**
@@ -125,6 +158,8 @@ std::string	AtikCamera::getLastError() {
 
 /**
  * \brief get a AtikCcd object from the camera
+ *
+ * \param ccdid		the ccd index (8bit mode is a separate index)
  */
 CcdPtr	AtikCamera::getCcd0(size_t ccdid) {
 	if (ccdid >= ccdinfo.size()) {
@@ -157,7 +192,8 @@ bool	AtikCamera::hasFilterWheel() const {
  */
 FilterWheelPtr	AtikCamera::getFilterWheel0() {
 	debug(LOG_WARNING, DEBUG_LOG, 0, "the filter wheel is not implemented");
-	return FilterWheelPtr(NULL);
+	FilterWheelPtr	_filterwheel = FilterWheelPtr(new AtikFilterwheel(*this));
+	return _filterwheel;
 }
 
 /**

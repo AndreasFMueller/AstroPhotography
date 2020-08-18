@@ -66,10 +66,16 @@ private:
 	void	setOn(bool onoff, AtikCooler& cooler);
 	void	initiateWarmUp();
 
+private:
+	FilterWheelPtr	_filterwheel;
 protected:
 	virtual FilterWheelPtr	getFilterWheel0();
 public:
 	bool	hasFilterWheel() const;
+private:
+	void	getFilterWheelStatus(unsigned int *filtercount, bool *moving,
+			unsigned int *current, unsigned int *target);
+	void	setFilter(unsigned int filterindex);
 
 protected:
 	virtual GuidePortPtr	getGuidePort0();
@@ -78,6 +84,7 @@ public:
 
 friend class AtikCcd;
 friend class AtikCooler;
+friend class AtikFilterwheel;
 };
 
 } // namespace atik
