@@ -9,6 +9,7 @@
 #include <InstrumentWidget.h>
 #include <QTimer>
 #include <camera.h>
+#include "CallbackIdentity.h"
 
 namespace snowgui {
 
@@ -18,18 +19,20 @@ namespace Ui {
 
 class filterwheelcontrollerwidget;
 
-class FilterWheelCallbackI : public snowstar::FilterWheelCallback {
-	filterwheelcontrollerwidget&	_filterwheelcontrollerwidget;
-	Ice::Identity	_identity;
+class FilterWheelCallbackI : public QObject,
+	public snowstar::FilterWheelCallback, public CallbackIdentity {
+	Q_OBJECT
+
 public:
-	FilterWheelCallbackI(filterwheelcontrollerwidget& f);
-	~FilterWheelCallbackI();
-	const Ice::Identity	identity() const { return _identity; }
+	FilterWheelCallbackI();
 	void	state(const snowstar::FilterwheelState state,
 			const Ice::Current& current);
 	void	position(const int position,
 			const Ice::Current& current);
 	void	stop(const Ice::Current& current);
+signals:
+	void	callbackState(snowstar::FilterwheelState);
+	void	callbackPosition(int);
 };
 
 /**
@@ -42,8 +45,8 @@ class filterwheelcontrollerwidget : public InstrumentWidget {
 	snowstar::FilterwheelState	_previousstate;
 	int				_position;
 
-	FilterWheelCallbackI	*_filterwheel_cb;
-	Ice::ObjectPtr	_filterwheel_ptr;
+	Ice::ObjectPtr	_filterwheel_callback;
+	Ice::Identity	identity();
 public:
 	explicit filterwheelcontrollerwidget(QWidget *parent = 0);
 	~filterwheelcontrollerwidget();
@@ -64,10 +67,6 @@ signals:
 	void	filterwheelStateChanged(snowstar::FilterwheelState);
 	void	filterwheelPositionChanged(int filterindex);
 
-	// signals emiited by the callbacks
-	void	callbackStateChanged(snowstar::FilterwheelState);
-	void	callbackPositionChanged(int);
-
 private:
 	Ui::filterwheelcontrollerwidget *ui;
 
@@ -80,7 +79,6 @@ public slots:
 	void	filterwheelNewState(snowstar::FilterwheelState);
 	void	filterwheelNewPosition(int);
 
-private:
 	void	callbackState(snowstar::FilterwheelState);
 	void	callbackPosition(int);
 	friend class FilterWheelCallbackI;

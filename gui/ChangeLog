@@ -1,5 +1,11 @@
 ChangeLog for the Qt GUI to Astrophotography
 
+20200819:
+	* add CallbackIdentity mixin class
+	* turn callback classes into QObjects and use messages instead
+	  of method calls to references (which run the danger of the
+	  instance going away and the call crashing the system)
+
 20200802:
 	* convert filterwheel to use callbacks
 	* Add heartbeat lost logic to the HeartBeat class

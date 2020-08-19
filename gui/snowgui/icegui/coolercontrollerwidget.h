@@ -8,6 +8,7 @@
 
 #include <InstrumentWidget.h>
 #include <QTimer>
+#include "CallbackIdentity.h"
 
 namespace snowgui {
 
@@ -20,10 +21,12 @@ class coolercontrollerwidget;
 /**
  * \brief The cooler callback implementation class
  */
-class CoolerCallbackI : public snowstar::CoolerCallback {
-	coolercontrollerwidget&	_coolercontrollerwidget;
+class CoolerCallbackI : public QObject, public snowstar::CoolerCallback,
+			public CallbackIdentity {
+	Q_OBJECT
+
 public:
-	CoolerCallbackI(coolercontrollerwidget& c);
+	CoolerCallbackI();
 	~CoolerCallbackI();
 
 	void	updateCoolerInfo(const snowstar::CoolerInfo& info,
@@ -34,6 +37,10 @@ public:
 
 	void	updateDewHeater(float dewheater,
                                 const Ice::Current& current);
+signals:
+	void	callbackCoolerInfo(snowstar::CoolerInfo);
+	void	callbackSetTemperature(float settemperature);
+	void	callbackDewHeater(float dewheater);
 };
 
 /**
@@ -46,7 +53,7 @@ class coolercontrollerwidget : public InstrumentWidget {
 	std::vector<std::string>	_cooler_names;
 
 	Ice::ObjectPtr	_cooler_callback;
-	Ice::Identity	_cooler_identity;
+	Ice::Identity	identity();
 
 	std::pair<float,float>	_dewheaterinterval;
 public:
@@ -89,6 +96,11 @@ public slots:
 	// set the dewheater state
 	void	setDewHeater(float dewheatervalue);
 	void	setDewHeaterSlider(float dewheatervalue);
+
+	// callback slots
+	void	callbackCoolerInfo(snowstar::CoolerInfo);
+	void	callbackSetTemperature(float settemperature);
+	void	callbackDewHeater(float dewheater);
 };
 
 } // namespace snowgui

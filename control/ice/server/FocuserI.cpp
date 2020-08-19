@@ -102,7 +102,7 @@ void    FocuserI::callbackUpdate(const astro::callback::CallbackDataPtr data) {
  * \param data          the callback data
  */
 template<>
-void    callback_adapter<FocuserCallbackPrx>(FocuserCallbackPrx& /* p */,
+void    callback_adapter<FocuserCallbackPrx>(FocuserCallbackPrx /* p */,
                 const astro::callback::CallbackDataPtr /* data */) {
         debug(LOG_DEBUG, DEBUG_LOG, 0, "callback");
 	return;

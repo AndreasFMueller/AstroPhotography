@@ -279,7 +279,7 @@ void	GuiderI::calibrationUpdate(const astro::callback::CallbackDataPtr data) {
  * \param data	the callback data to formard
  */
 template<>
-void	callback_adapter<CalibrationMonitorPrx>(CalibrationMonitorPrx& p,
+void	callback_adapter<CalibrationMonitorPrx>(CalibrationMonitorPrx p,
 		const astro::callback::CallbackDataPtr data) {
 	// handle a calibration point callback call
 	astro::guiding::CalibrationPointCallbackData	*calibrationpoint

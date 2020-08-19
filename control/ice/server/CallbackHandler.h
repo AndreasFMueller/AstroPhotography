@@ -11,6 +11,7 @@
 #include <Ice/Connection.h>
 #include <AstroDebug.h>
 #include <AstroUtils.h>
+#include <mutex>
 
 namespace snowstar {
 
@@ -24,7 +25,7 @@ namespace snowstar {
  * and sends it to the proxy.
  */
 template<typename proxy>
-void	callback_adapter(proxy& /* p */,
+void	callback_adapter(proxy /* p */,
 	const astro::callback::CallbackDataPtr /* d */) {
 	std::string	msg
 		= std::string("specialization for callback_adapter needed: ")
@@ -44,6 +45,7 @@ void	callback_adapter(proxy& /* p */,
 template<typename proxy>
 class SnowCallback {
 	std::map<Ice::Identity, proxy>	callbacks;
+	std::recursive_mutex	_mutex;
 public:
 	void	registerCallback(const Ice::Identity& identity,
 			const Ice::Current& current);
@@ -82,7 +84,13 @@ void	SnowCallback<proxy>::registerCallback(const Ice::Identity& identity,
 template<typename proxy>
 void	SnowCallback<proxy>::unregisterCallback(const Ice::Identity& identity,
 		const Ice::Current& /* current */) {
-	callbacks.erase(identity);
+	{
+		std::unique_lock<std::recursive_mutex>	lock(_mutex);
+		auto	i = callbacks.find(identity);
+		if (i != callbacks.end()) {
+			callbacks.erase(i);
+		}
+	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "%s callback uninstalled, %d clients", 
 		astro::demangle(typeid(proxy).name()).c_str(), size());
 }
@@ -93,7 +101,13 @@ void	SnowCallback<proxy>::unregisterCallback(const Ice::Identity& identity,
 template<typename proxy>
 void	SnowCallback<proxy>::cleanup(const std::list<Ice::Identity>& todelete) {
 	for (auto ptr = todelete.begin(); ptr != todelete.end(); ptr++) {
-		callbacks.erase(*ptr);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "removing %s",
+			ptr->name.c_str());
+		std::unique_lock<std::recursive_mutex>	lock(_mutex);
+		auto	i = callbacks.find(*ptr);
+		if (i != callbacks.end()) {
+			callbacks.erase(i);
+		}
 	}
 }
 
@@ -124,6 +138,8 @@ astro::callback::CallbackDataPtr	SnowCallback<proxy>::operator()(
 	std::list<Ice::Identity>	todelete;
 
 	// go through all callbacks, and try to send them the data
+	{
+	std::unique_lock<std::recursive_mutex>	lock(_mutex);
 	for (auto ptr = callbacks.begin(); ptr != callbacks.end(); ptr++) {
 		try {
 			debug(LOG_DEBUG, DEBUG_LOG, 0,
@@ -139,6 +155,7 @@ astro::callback::CallbackDataPtr	SnowCallback<proxy>::operator()(
 			// delete it later
 			todelete.push_back(ptr->first);
 		}
+	}
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "%d callbacks called, %d to delete",
 		size(), todelete.size());

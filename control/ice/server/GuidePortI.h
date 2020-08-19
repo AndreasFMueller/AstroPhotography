@@ -14,7 +14,7 @@
 namespace snowstar {
 
 template<>
-void	callback_adapter<GuidePortCallbackPrx>(GuidePortCallbackPrx& p,
+void	callback_adapter<GuidePortCallbackPrx>(GuidePortCallbackPrx p,
 		const astro::callback::CallbackDataPtr data);
 
 class GuidePortICallback;

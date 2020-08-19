@@ -92,7 +92,7 @@ void	GuidePortI::callbackActivate(const astro::callback::CallbackDataPtr data) {
 }
 
 template<>
-void	callback_adapter<GuidePortCallbackPrx>(GuidePortCallbackPrx& p,
+void	callback_adapter<GuidePortCallbackPrx>(GuidePortCallbackPrx p,
 		const astro::callback::CallbackDataPtr data) {
 	astro::camera::ActivationCallbackData	*gpa
 		= dynamic_cast<astro::camera::ActivationCallbackData*>(&*data);

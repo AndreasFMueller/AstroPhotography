@@ -440,7 +440,7 @@ void	CcdI::stateUpdate(const astro::callback::CallbackDataPtr data) {
  * \param data		the callback data to use as argument in the call
  */
 template<>
-void	callback_adapter<CcdCallbackPrx>(CcdCallbackPrx& p,
+void	callback_adapter<CcdCallbackPrx>(CcdCallbackPrx p,
 		const astro::callback::CallbackDataPtr data) {
 	astro::camera::CcdStateCallbackData	*cs
 		= dynamic_cast<astro::camera::CcdStateCallbackData*>(&*data);

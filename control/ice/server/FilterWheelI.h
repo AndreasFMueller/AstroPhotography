@@ -14,7 +14,7 @@
 namespace snowstar {
 
 template<>
-void	callback_adapter<FilterWheelCallbackPrx>(FilterWheelCallbackPrx& p,
+void	callback_adapter<FilterWheelCallbackPrx>(FilterWheelCallbackPrx p,
 	const astro::callback::CallbackDataPtr data);
 
 class FilterWheelICallback;

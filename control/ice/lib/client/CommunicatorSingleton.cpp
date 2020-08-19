@@ -123,10 +123,16 @@ Ice::Identity	CommunicatorSingleton::add(Ice::ObjectPtr servant) {
  * \brief Remove a servant from the adapter
  */
 void	CommunicatorSingleton::remove(Ice::Identity identity) {
-	Ice::ObjectPtr	servant = getAdapter()->remove(identity);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "servant %s with identity %s removed",
-		astro::demangle_cstr(*servant),
-		identity.name.c_str());
+	try {
+		Ice::ObjectPtr	servant = getAdapter()->remove(identity);
+		debug(LOG_DEBUG, DEBUG_LOG, 0,
+			"servant %s with identity %s removed",
+			astro::demangle_cstr(*servant),
+			identity.name.c_str());
+	} catch (const std::exception& x) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "cannot remove %s: %s",
+			identity.name.c_str(), x.what());
+	}
 }
 
 /**
@@ -134,6 +140,8 @@ void	CommunicatorSingleton::remove(Ice::Identity identity) {
  *
  * This step is required for the server to be able to send callbacks back
  * over the connection of this proxy
+ *
+ * \param proxy		the proxy to take the connection from
  */
 void	CommunicatorSingleton::connect(Ice::ObjectPrx proxy) {
 	if (!proxy) {
@@ -174,6 +182,10 @@ Ice::Identity	CommunicatorSingleton::add(Ice::ObjectPrx proxy,
 
 /**
  * \brief add a servant to a connection
+ *
+ * \param proxy		the proxy to take the connection from
+ * \param servant	the servant to install
+ * \param identity	the identity of the servant
  */
 void	CommunicatorSingleton::add(Ice::ObjectPrx proxy, Ice::ObjectPtr servant,
 		const Ice::Identity& identity) {
@@ -190,7 +202,12 @@ void	CommunicatorSingleton::add(Ice::ObjectPrx proxy, Ice::ObjectPtr servant,
 	}
 	// add the servant with the identity specified
 	if (!getAdapter()->find(identity)) {
-		getAdapter()->add(servant, identity);
+		try {
+			getAdapter()->add(servant, identity);
+		} catch (const std::exception& x) {
+			debug(LOG_ERR, DEBUG_LOG, 0, "cannot add servant: %s",
+				x.what());
+		}
 	}
 }
 

@@ -14,7 +14,7 @@
 namespace snowstar {
 
 template<>
-void    callback_adapter<EventMonitorPrx>(EventMonitorPrx& p,
+void    callback_adapter<EventMonitorPrx>(EventMonitorPrx p,
                 const astro::callback::CallbackDataPtr d);
 
 class EventHandlerI : virtual public EventHandler, public StatisticsI {

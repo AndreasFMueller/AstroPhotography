@@ -15,7 +15,7 @@ namespace snowstar {
  * \brief calback adapter for Event monitor
  */
 template<>
-void    callback_adapter<EventMonitorPrx>(EventMonitorPrx& p,
+void    callback_adapter<EventMonitorPrx>(EventMonitorPrx p,
 	const astro::callback::CallbackDataPtr data) {
 	// convert the callback data to the original data
 	astro::events::EventCallbackData	*cbd 

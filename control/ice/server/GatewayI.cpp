@@ -10,7 +10,7 @@
 namespace snowstar {
 
 template<>
-void	callback_adapter<StatusUpdateMonitorPrx>(StatusUpdateMonitorPrx& p,
+void	callback_adapter<StatusUpdateMonitorPrx>(StatusUpdateMonitorPrx p,
 		const astro::callback::CallbackDataPtr data) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "message type: %s",
 		astro::demangle_cstr(*data));

@@ -292,6 +292,7 @@ void	Mount::callback(state_type newstate) {
 		state2string(newstate).c_str());
 	callback::CallbackDataPtr	data(new StateCallbackData(newstate));
 	_statechangecallback(data);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "state change callback compelte");
 }
 
 /**

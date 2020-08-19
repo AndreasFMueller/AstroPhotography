@@ -17,7 +17,7 @@ namespace snowstar {
  * \brief Callback adapter for adaptive optics proxy
  */
 template<>
-void	callback_adapter<AdaptiveOpticsPrx>(AdaptiveOpticsPrx& p,
+void	callback_adapter<AdaptiveOpticsPrx>(AdaptiveOpticsPrx p,
 	const astro::callback::CallbackDataPtr data);
 
 class AdaptiveOpticsICallback;

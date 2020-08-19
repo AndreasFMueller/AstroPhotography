@@ -13,7 +13,7 @@ namespace snowstar {
  * \brief Specialization of the callback_adapter for HeartbeatMonitorPrx
  */
 template<>
-void	callback_adapter<HeartbeatMonitorPrx>(HeartbeatMonitorPrx& p,
+void	callback_adapter<HeartbeatMonitorPrx>(HeartbeatMonitorPrx p,
 		const astro::callback::CallbackDataPtr data) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "adapter");
 	astro::callback::IntegerCallbackData	*icd

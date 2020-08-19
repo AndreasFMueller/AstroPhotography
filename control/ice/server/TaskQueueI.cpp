@@ -20,7 +20,7 @@ namespace snowstar {
  * \brief Spezialization of the callback_adapter for TaskMonitorPrx
  */
 template<>
-void	callback_adapter<TaskMonitorPrx>(TaskMonitorPrx& p,
+void	callback_adapter<TaskMonitorPrx>(TaskMonitorPrx p,
 		const astro::callback::CallbackDataPtr data) {
 	// sending information about a deleted task
 	astro::task::TaskDeletedCallbackData	*tdcd

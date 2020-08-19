@@ -14,7 +14,7 @@
 namespace snowstar {
 
 template<>
-void	callback_adapter<StatusUpdateMonitorPrx>(StatusUpdateMonitorPrx& p,
+void	callback_adapter<StatusUpdateMonitorPrx>(StatusUpdateMonitorPrx p,
 		const astro::callback::CallbackDataPtr d);
 
 class GatewayI : virtual public Gateway, public StatisticsI {

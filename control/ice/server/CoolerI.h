@@ -14,7 +14,7 @@
 namespace snowstar {
 
 template<>
-void	callback_adapter<CoolerCallbackPrx>(CoolerCallbackPrx& p,
+void	callback_adapter<CoolerCallbackPrx>(CoolerCallbackPrx p,
 	const astro::callback::CallbackDataPtr data);
 
 class CoolerICallback;

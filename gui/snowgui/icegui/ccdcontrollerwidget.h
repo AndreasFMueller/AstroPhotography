@@ -16,6 +16,7 @@
 #include <HideProgress.h>
 #include <ImagerRectangle.h>
 #include <QMessageBox>
+#include "CallbackIdentity.h"
 
 namespace snowgui {
 
@@ -87,7 +88,8 @@ signals:
 /**
  * \brief Callback for CCD state updates
  */
-class CcdCallbackI : public QObject, public snowstar::CcdCallback {
+class CcdCallbackI : public QObject, public snowstar::CcdCallback,
+	public CallbackIdentity {
 	Q_OBJECT
 	ccdcontrollerwidget&	_ccdcontrollerwidget;
 public:
@@ -117,7 +119,6 @@ class ccdcontrollerwidget : public InstrumentWidget {
 	snowstar::ImagePrx	_imageproxy;
 
 	Ice::ObjectPtr	_ccd_callback;
-	Ice::Identity	_ccd_identity;
 
 	bool	_guiderccdonly;
 	bool	_nosubframe;
@@ -131,11 +132,6 @@ class ccdcontrollerwidget : public InstrumentWidget {
 	HideWidget	*_hide;
 	HideProgress	*_hideprogress;
 
-#if 0
-	StateMonitoringWork	*_statemonitoringwork;
-	QThread	*_statemonitoringthread;
-	QTimer	_statemonitoringTimer;
-#endif
 public:
 	explicit ccdcontrollerwidget(QWidget *parent = NULL);
 	~ccdcontrollerwidget();

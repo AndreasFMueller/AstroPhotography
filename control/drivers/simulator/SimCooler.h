@@ -38,6 +38,8 @@ public:
 private:
 	static void	main(SimCooler *cooler) noexcept;
 	void	run();
+	void	start();
+	void	stop();
 private:
 	float	_dewheatervalue;
 public:
@@ -45,6 +47,7 @@ public:
 	virtual float	dewHeater();
 	virtual void	dewHeater(float d);
 	virtual std::pair<float, float>	dewHeaterRange();
+	friend class SimLocator;
 };
 
 } // namespace simulator

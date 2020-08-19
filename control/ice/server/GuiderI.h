@@ -18,20 +18,20 @@
 namespace snowstar {
 
 template<>
-void	callback_adapter<TrackingMonitorPrx>(TrackingMonitorPrx& p,
+void	callback_adapter<TrackingMonitorPrx>(TrackingMonitorPrx p,
 		const astro::callback::CallbackDataPtr d);
 
 template<>
-void	callback_adapter<ImageMonitorPrx>(ImageMonitorPrx& p,
+void	callback_adapter<ImageMonitorPrx>(ImageMonitorPrx p,
 		const astro::callback::CallbackDataPtr d);
 
 template<>
-void	callback_adapter<CalibrationMonitorPrx>(CalibrationMonitorPrx& p,
+void	callback_adapter<CalibrationMonitorPrx>(CalibrationMonitorPrx p,
 		const astro::callback::CallbackDataPtr d);
 
 template<>
 void	callback_adapter<CalibrationImageMonitorPrx>(
-		CalibrationImageMonitorPrx& p,
+		CalibrationImageMonitorPrx p,
 		const astro::callback::CallbackDataPtr d);
 
 /**

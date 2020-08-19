@@ -15,7 +15,7 @@ namespace snowstar {
 // Focusing callback adapter
 //////////////////////////////////////////////////////////////////////
 template<>
-void	callback_adapter<FocusCallbackPrx>(FocusCallbackPrx& prx,
+void	callback_adapter<FocusCallbackPrx>(FocusCallbackPrx prx,
 		const astro::callback::CallbackDataPtr data) {
 	// Handle FocusElementCallbackData
 	astro::focusing::FocusElementCallbackData	*fedata

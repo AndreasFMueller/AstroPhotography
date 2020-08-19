@@ -14,7 +14,7 @@
 namespace snowstar {
 
 template<>
-void	callback_adapter<MountCallbackPrx>(MountCallbackPrx& p,
+void	callback_adapter<MountCallbackPrx>(MountCallbackPrx p,
 		const astro::callback::CallbackDataPtr data);
 
 class MountICallback;

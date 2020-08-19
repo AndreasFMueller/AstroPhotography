@@ -253,6 +253,8 @@ CoolerPtr	SimLocator::getCooler0(const DeviceName& name) {
 			sname.c_str());
 		throw NotFound("no such cooler");
 	}
+	SimCooler	*simcooler = dynamic_cast<SimCooler*>(&*_cooler);
+	simcooler->start();
 	return _cooler;
 }
 

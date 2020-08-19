@@ -172,7 +172,7 @@ void	FilterWheelI::callbackUpdate(const astro::callback::CallbackDataPtr data) {
  * \param data		the callback data
  */
 template<>
-void	callback_adapter<FilterWheelCallbackPrx>(FilterWheelCallbackPrx& p,
+void	callback_adapter<FilterWheelCallbackPrx>(FilterWheelCallbackPrx p,
 		const astro::callback::CallbackDataPtr data) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "callback");
 	// check for filter state

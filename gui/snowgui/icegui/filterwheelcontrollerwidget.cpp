@@ -42,16 +42,15 @@ filterwheelcontrollerwidget::filterwheelcontrollerwidget(QWidget *parent)
 		this, SLOT(filterwheelNewPosition(int)));
 
 	// create the callback 
-	_filterwheel_cb = new FilterWheelCallbackI(*this);
-	_filterwheel_ptr = _filterwheel_cb;
+	FilterWheelCallbackI	*_callback = new FilterWheelCallbackI();
+	_filterwheel_callback = _callback;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "callback: %s",
-		_filterwheel_cb->identity().name.c_str());
-
-	connect(this, SIGNAL(callbackStateChanged(snowstar::FilterwheelState)),
-		this, SLOT(filterwheelNewState(snowstar::FilterwheelState)),
+		_callback->identity().name.c_str());
+	connect(_callback, SIGNAL(callbackState(snowstar::FilterwheelState)),
+		this, SLOT(callbackState(snowstar::FilterwheelState)),
 		Qt::QueuedConnection);
-	connect(this, SIGNAL(callbackPositionChanged(int)),
-		this, SLOT(filterwheelNewPosition(int)),
+	connect(_callback, SIGNAL(callbackPosition(int)),
+		this, SLOT(callbackPosition(int)),
 		Qt::QueuedConnection);
 }
 
@@ -59,13 +58,28 @@ filterwheelcontrollerwidget::filterwheelcontrollerwidget(QWidget *parent)
  * \brief Destroy the filterwheelcontrollerwidget
  */
 filterwheelcontrollerwidget::~filterwheelcontrollerwidget() {
-	if (_filterwheel) {
-		_filterwheel->unregisterCallback(_filterwheel_cb->identity());
-	}
-	snowstar::CommunicatorSingleton::remove(_filterwheel_cb->identity());
+	FilterWheelCallbackI	*_callback
+		= dynamic_cast<FilterWheelCallbackI*>(&*_filterwheel_callback);
+	disconnect(_callback, SIGNAL(callbackState(snowstar::FilterwheelState)),
+		0, 0);
+	disconnect(_callback, SIGNAL(callbackPosition(int)),
+		0, 0);
 
-	_filterwheel_ptr = NULL;
+	Ice::Identity	_identity = identity();
+
+	if (_filterwheel) {
+		_filterwheel->unregisterCallback(_identity);
+	}
+	snowstar::CommunicatorSingleton::remove(_identity);
+
 	delete ui;
+}
+
+/**
+ * \brief Get the identity of the callback
+ */
+Ice::Identity	filterwheelcontrollerwidget::identity() {
+	return CallbackIdentity::identity(_filterwheel_callback);
 }
 
 /**
@@ -163,10 +177,10 @@ void	filterwheelcontrollerwidget::setupFilterwheel() {
 
 		// install 
 		snowstar::CommunicatorSingleton::add(_filterwheel,
-			_filterwheel_ptr, _filterwheel_cb->identity());
+			_filterwheel_callback, identity());
 
 		// register the callback with the server
-		_filterwheel->registerCallback(_filterwheel_cb->identity());
+		_filterwheel->registerCallback(identity());
 	}
 	ui->filterBox->blockSignals(false);
 
@@ -205,7 +219,7 @@ void    filterwheelcontrollerwidget::setFilter(int index) {
 void    filterwheelcontrollerwidget::filterwheelChanged(int index) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "filterwheelChanged(%d)", index);
 	if (_filterwheel) {
-		_filterwheel->unregisterCallback(_filterwheel_cb->identity());
+		_filterwheel->unregisterCallback(identity());
 	}
 	_filterwheel = _instrument.filterwheel(index);
 	try {
@@ -325,8 +339,7 @@ void	filterwheelcontrollerwidget::filterwheelNewPosition(int position) {
  */
 void	filterwheelcontrollerwidget::callbackState(snowstar::FilterwheelState state) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "received state callback %d", state);
-	emit callbackStateChanged(state);
-	emit filterwheelStateChanged(state);
+	statusUpdate();
 }
 
 /**
@@ -335,7 +348,7 @@ void	filterwheelcontrollerwidget::callbackState(snowstar::FilterwheelState state
 void	filterwheelcontrollerwidget::callbackPosition(int position) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "received position callback %d",
 		position);
-	emit callbackPositionChanged(position);
+	positionUpdate();
 }
 
 } // namespace snowgui

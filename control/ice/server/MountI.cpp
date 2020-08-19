@@ -152,6 +152,7 @@ void	MountI::GotoRaDec(const RaDec& radec,
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", except.cause.c_str());
 		throw except;
 	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "goto complete");
 }
 
 mountstate	MountI::state(const Ice::Current& current) {
@@ -240,7 +241,7 @@ void	MountI::callbackUpdate(const astro::callback::CallbackDataPtr data) {
  * \brief Specialization of the callback_adapter for the MountPrx
  */
 template<>
-void	callback_adapter<MountCallbackPrx>(MountCallbackPrx& p,
+void	callback_adapter<MountCallbackPrx>(MountCallbackPrx p,
 		const astro::callback::CallbackDataPtr data) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "callback_adapter<MountCallbackPrx> called");
 	// find out what kinde of data is contained in the envelope
@@ -248,7 +249,10 @@ void	callback_adapter<MountCallbackPrx>(MountCallbackPrx& p,
 		= dynamic_cast<astro::device::Mount::StateCallbackData*>(&*data);
 	if (scd != NULL) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "state change received");
-		p->statechange(convert(scd->data()));
+		snowstar::mountstate	newstate = convert(scd->data());
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "new state %d", newstate);
+		p->statechange(newstate);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "callback complete");
 		return;
 	}
 
@@ -256,7 +260,11 @@ void	callback_adapter<MountCallbackPrx>(MountCallbackPrx& p,
 		= dynamic_cast<astro::device::Mount::PositionCallbackData*>(&*data);
 	if (pcd != NULL) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "position callback received");
-		p->position(convert(pcd->data()));
+		snowstar::RaDec	newposition = convert(pcd->data());
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "new position %s",
+			convert(newposition).toString().c_str());
+		p->position(newposition);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "callback complete");
 		return;
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "unknown data in callback");

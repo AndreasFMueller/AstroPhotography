@@ -15,7 +15,7 @@
 namespace snowstar {
 
 template<>
-void	callback_adapter<TaskMonitorPrx>(TaskMonitorPrx& p,
+void	callback_adapter<TaskMonitorPrx>(TaskMonitorPrx p,
 		const astro::callback::CallbackDataPtr d);
 
 class TaskQueueI : virtual public TaskQueue, public StatisticsI {

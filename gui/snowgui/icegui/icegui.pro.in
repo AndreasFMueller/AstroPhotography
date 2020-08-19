@@ -134,6 +134,7 @@ SOURCES += 								\
 	CalibrationDisplayWidget.cpp					\
 	CalibrationImageMonitor.cpp					\
 	calibrationimagewidget.cpp					\
+	CallbackIdentity.cpp						\
 	ccddata.cpp							\
 	CoolerActive.cpp						\
 	CoolerCallbackI.cpp						\
@@ -166,6 +167,7 @@ HEADERS  += 								\
 	BacklashMonitor.h						\
 	CalibrationDisplayWidget.h					\
 	calibrationimagewidget.h					\
+	CallbackIdentity.h						\
 	CoolerActive.h							\
 	EventMonitor.h							\
 	FilterWheelBusy.h						\

@@ -21,7 +21,7 @@ namespace snowstar {
  * \brief callback adapter for Image Calibration Monitor
  */
 template<>
-void	callback_adapter<CalibrationImageMonitorPrx>(CalibrationImageMonitorPrx& p,
+void	callback_adapter<CalibrationImageMonitorPrx>(CalibrationImageMonitorPrx p,
 		const astro::callback::CallbackDataPtr data) {
 	astro::camera::CalibrationImageProgressData	*calimgp
 		= dynamic_cast<astro::camera::CalibrationImageProgressData*>(&*data);

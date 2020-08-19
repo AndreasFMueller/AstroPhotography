@@ -34,7 +34,7 @@ typedef std::shared_ptr<CcdSink>	CcdSinkPtr;
  * \brief The callback adapter for ccd state callbacks
  */
 template<>
-void	callback_adapter<CcdCallbackPrx>(CcdCallbackPrx& p,
+void	callback_adapter<CcdCallbackPrx>(CcdCallbackPrx p,
 		const astro::callback::CallbackDataPtr data);
 
 class CcdICallback;

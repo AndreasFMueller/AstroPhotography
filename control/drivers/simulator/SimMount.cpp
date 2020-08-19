@@ -122,6 +122,9 @@ void	SimMount::Goto(const RaDec& radec) {
 	if (Mount::GOTO == Mount::state()) {
 		return;
 	}
+	if (_sim_thread.joinable()) {
+		_sim_thread.join();
+	}
 
 	// set the state to GOTO, this ensures that the thread will
 	// start running

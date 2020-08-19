@@ -13,6 +13,7 @@
 #include <catalogdialog.h>
 #include <device.h>
 #include <CommonClientTasks.h>
+#include <CallbackIdentity.h>
 
 namespace snowgui {
 
@@ -25,14 +26,19 @@ class mountcontrollerwidget;
 /**
  * \brief A callback class for mount monitoring
  */
-class MountCallbackI : public snowstar::MountCallback {
-	mountcontrollerwidget&	_mountcontrollerwidget;
+class MountCallbackI : public QObject, public snowstar::MountCallback,
+			public CallbackIdentity {
+	Q_OBJECT
 public:
-	MountCallbackI(mountcontrollerwidget& m);
+	MountCallbackI();
 	void	statechange(snowstar::mountstate newstate,
 			const Ice::Current& current);
 	void	position(const snowstar::RaDec& newposition,
 			const Ice::Current& current);
+
+signals:
+	void	callbackStatechange(snowstar::mountstate newstate);
+	void	callbackPosition(snowstar::RaDec newposition);
 };
 
 /**
@@ -47,7 +53,6 @@ class mountcontrollerwidget : public InstrumentWidget {
 	snowstar::MountPrx	_mount;
 
 	Ice::ObjectPtr		_mount_callback;
-	Ice::Identity		_mount_identity;
 
 	snowstar::RaDec		_telescope;
 	astro::LongLat		_location;
@@ -94,6 +99,9 @@ public slots:
 	void	catalogDestroyed();
 	void	targetRaChanged(const QString&);
 	void	targetDecChanged(const QString&);
+
+	void	callbackStatechange(snowstar::mountstate newstate);
+	void	callbackPosition(snowstar::RaDec newposition);
 };
 
 } // namespace snowgui

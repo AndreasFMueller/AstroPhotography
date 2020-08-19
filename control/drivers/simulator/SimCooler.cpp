@@ -43,8 +43,25 @@ SimCooler::SimCooler(SimLocator& locator)
 	_dewheatervalue = 0.;
 	// start the thread to update the temperature at regular intervals
 	_terminate = false;
+}
+
+void	SimCooler::start() {
 	std::unique_lock<std::recursive_mutex>	lock(_mutex);
+	if (_thread.joinable()) {
+		return;
+	}
 	_thread = std::thread(main, this);
+}
+
+void	SimCooler::stop() {
+	{
+		std::unique_lock<std::recursive_mutex>	lock(_mutex);
+		_terminate = true;
+	}
+	_cond.notify_all();
+	if (_thread.joinable()) {
+		_thread.join();
+	}
 }
 
 /**
@@ -54,12 +71,7 @@ SimCooler::SimCooler(SimLocator& locator)
  * the thread to 
  */
 SimCooler::~SimCooler() {
-	{
-		std::unique_lock<std::recursive_mutex>	lock(_mutex);
-		_terminate = true;
-	}
-	_cond.notify_all();
-	_thread.join();
+	stop();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "cooler thread comleted");
 }
 

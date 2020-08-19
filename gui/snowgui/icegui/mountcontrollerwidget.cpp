@@ -44,6 +44,18 @@ mountcontrollerwidget::mountcontrollerwidget(QWidget *parent)
 	connect(ui->targetDecField, SIGNAL(textEdited(const QString &)),
 		this, SLOT(targetDecChanged(const QString &)));
 
+	// construct the callback
+	qRegisterMetaType<snowstar::mountstate>("snowstar::mountstate");
+	qRegisterMetaType<snowstar::RaDec>("snowstar::RaDec");
+	MountCallbackI	*_callback = new MountCallbackI();
+	connect(_callback, SIGNAL(callbackStatechange(snowstar::mountstate)),
+		this, SLOT(callbackStatechange(snowstar::mountstate)),
+		Qt::QueuedConnection);
+	connect(_callback, SIGNAL(callbackPosition(snowstar::RaDec)),
+		this, SLOT(callbackPosition(snowstar::RaDec)),
+		Qt::QueuedConnection);
+	_mount_callback = _callback;
+
 	// auxiliary window initialization
 	_skydisplay = NULL;
 	_catalogdialog = NULL;
@@ -60,14 +72,21 @@ mountcontrollerwidget::~mountcontrollerwidget() {
 	if (_catalogdialog) {
 		delete _catalogdialog;
 	}
-	if (_mount_callback) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "unregister mount");
-		if (_mount) {
-			_mount->unregisterCallback(_mount_identity);
+	Ice::Identity	_identity = CallbackIdentity::identity(_mount_callback);
+	snowstar::CommunicatorSingleton::remove(_identity);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "unregister mount");
+	if (_mount) {
+		try {
+			_mount->unregisterCallback(_identity);
+		} catch (...) {
 		}
-		snowstar::CommunicatorSingleton::remove(_mount_identity);
-		_mount_callback = NULL;
-	} 
+	}
+	MountCallbackI	*_callback = dynamic_cast<MountCallbackI*>(
+							&*_mount_callback);
+	disconnect(_callback, SIGNAL(callbackStatechange(snowstar::mountstate)),
+		0, 0);
+	disconnect(_callback, SIGNAL(callbackPosition(snowstar::RaDec)),
+		0, 0);
 	delete ui;
 }
 
@@ -195,10 +214,11 @@ void	mountcontrollerwidget::setupMount() {
 	// register a callback for monitoring
 	try {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "registering callback");
-		MountCallbackI	*_callback = new MountCallbackI(*this);
-		_mount_callback = _callback;
-		_mount_identity = snowstar::CommunicatorSingleton::add(_mount_callback);
-		_mount->registerCallback(_mount_identity);
+		Ice::Identity	_identity
+			= CallbackIdentity::identity(_mount_callback);
+		snowstar::CommunicatorSingleton::add(_mount, _mount_callback,
+			_identity);
+		_mount->registerCallback(_identity);
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "callback registered");
 	} catch (const std::exception& x) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "failed to register as a "
@@ -357,14 +377,12 @@ void	mountcontrollerwidget::currentUpdate() {
 void	mountcontrollerwidget::mountChanged(int index) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "mount changed to %d", index);
 	// unregister the mount we already have
+	Ice::Identity	_identity = CallbackIdentity::identity(_mount_callback);
 	if (_mount) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "unregister previous mount");
-		_mount->unregisterCallback(_mount_identity);
+		debug(LOG_DEBUG, DEBUG_LOG, 0,
+			"unregister previous mount");
+		_mount->unregisterCallback(_identity);
 	} 
-	if (_mount_callback) {
-		snowstar::CommunicatorSingleton::remove(_mount_identity);
-		_mount_callback = NULL;
-	}
 
 	// get the mount and set it put
 	_mount = _instrument.mount(index);
@@ -552,6 +570,18 @@ void	mountcontrollerwidget::targetRaChanged(const QString& /* value */) {
 void	mountcontrollerwidget::targetDecChanged(const QString& /* value */) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "DEC change");
 	targetChangedCommon();
+}
+
+void	mountcontrollerwidget::callbackStatechange(
+		snowstar::mountstate newstate) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "new state = %d", newstate);
+	statusUpdate();
+}
+
+void	mountcontrollerwidget::callbackPosition(snowstar::RaDec newposition) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "new position: %s",
+		convert(newposition).toString().c_str());
+	statusUpdate();
 }
 
 } // namespace snowgui

@@ -9,26 +9,21 @@
 
 namespace snowgui {
 
-FilterWheelCallbackI::FilterWheelCallbackI(filterwheelcontrollerwidget& f)
-	: _filterwheelcontrollerwidget(f) {
-	_identity.name = IceUtil::generateUUID();
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "identity constructed: %s",
-		_identity.name.c_str());
-}
-
-FilterWheelCallbackI::~FilterWheelCallbackI() {
+FilterWheelCallbackI::FilterWheelCallbackI() {
 }
 
 void	FilterWheelCallbackI::state(const snowstar::FilterwheelState state,
 		const Ice::Current& /* current */) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "new state");
-	_filterwheelcontrollerwidget.callbackState(state);
+	//_filterwheelcontrollerwidget.callbackState(state);
+	emit callbackState(state);
 }
 
 void	FilterWheelCallbackI::position(const int position,
 		const Ice::Current& /* current */) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "new position %d", position);
-	_filterwheelcontrollerwidget.callbackPosition(position);
+	//_filterwheelcontrollerwidget.callbackPosition(position);
+	emit callbackPosition(position);
 }
 
 void	FilterWheelCallbackI::stop(const Ice::Current& /* current */) {

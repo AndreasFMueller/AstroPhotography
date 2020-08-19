@@ -14,7 +14,7 @@
 namespace snowstar {
 
 template<>
-void	callback_adapter<HeartbeatMonitorPrx>(HeartbeatMonitorPrx& p,
+void	callback_adapter<HeartbeatMonitorPrx>(HeartbeatMonitorPrx p,
 		const astro::callback::CallbackDataPtr d);
 
 /**

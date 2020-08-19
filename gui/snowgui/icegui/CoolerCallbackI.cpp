@@ -11,8 +11,7 @@ namespace snowgui {
 /**
  * \brief Construct a new cooler callback
  */
-CoolerCallbackI::CoolerCallbackI(coolercontrollerwidget& c)
-	: _coolercontrollerwidget(c) {
+CoolerCallbackI::CoolerCallbackI() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "coolercallback constructed");
 }
 
@@ -29,10 +28,10 @@ CoolerCallbackI::~CoolerCallbackI() {
  * \param info		the updated info
  * \param current	the current call context
  */
-void	CoolerCallbackI::updateCoolerInfo(const snowstar::CoolerInfo& /* info */,
+void	CoolerCallbackI::updateCoolerInfo(const snowstar::CoolerInfo& info,
 			const Ice::Current& /* current */) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "cooler info update received");
-	_coolercontrollerwidget.statusUpdate();
+	emit callbackCoolerInfo(info);
 }
 
 /**
@@ -44,8 +43,8 @@ void	CoolerCallbackI::updateCoolerInfo(const snowstar::CoolerInfo& /* info */,
 void	CoolerCallbackI::updateSetTemperature(float settemperature,
 			const Ice::Current& /* current */) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "cooler set temperature update received");
-	astro::Temperature	temperature(settemperature);
-	_coolercontrollerwidget.displaySetTemperature(temperature.celsius());
+
+	emit callbackSetTemperature(settemperature);
 }
 
 /**
@@ -57,7 +56,7 @@ void	CoolerCallbackI::updateSetTemperature(float settemperature,
 void	CoolerCallbackI::updateDewHeater(float dewheater,
 			const Ice::Current& /* current */) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "cooler dewheater update received");
-	_coolercontrollerwidget.setDewHeaterSlider(dewheater);
+	emit callbackDewHeater(dewheater);
 }
 
 } // namespace snowgui

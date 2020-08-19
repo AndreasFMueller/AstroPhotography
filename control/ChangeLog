@@ -1,6 +1,8 @@
 ChangeLog for the Astro project.
 
 20200819:
+	* protect Callback from races
+	* make SimCooler start only when it is actually requested
 	* fix missing includes in astrotime and astrofocus
 
 20200818:

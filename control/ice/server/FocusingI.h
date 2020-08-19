@@ -15,7 +15,7 @@
 namespace snowstar {
 
 template<>
-void	callback_adapter<FocusCallbackPrx>(FocusCallbackPrx& p,
+void	callback_adapter<FocusCallbackPrx>(FocusCallbackPrx p,
 		const astro::callback::CallbackDataPtr d);
 
 /**

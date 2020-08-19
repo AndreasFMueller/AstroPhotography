@@ -49,6 +49,20 @@ coolercontrollerwidget::coolercontrollerwidget(QWidget *parent) :
 	// connect the dew heater slider
 	connect(ui->dewHeaterSlider, SIGNAL(valueChanged(int)),
 		this, SLOT(dewHeaterChanged(int)));
+
+	// create the callback
+	qRegisterMetaType<snowstar::CoolerInfo>("snowstar::CoolerInfo");
+	CoolerCallbackI	*_callback = new CoolerCallbackI();
+	connect(_callback, SIGNAL(callbackCoolerInfo(snowstar::CoolerInfo)),
+		this, SLOT(callbackCoolerInfo(snowstar::CoolerInfo)),
+		Qt::QueuedConnection);
+	connect(_callback, SIGNAL(callbackSetTemperature(float)),
+		this, SLOT(callbackSetTemperature(float)),
+		Qt::QueuedConnection);
+	connect(_callback, SIGNAL(callbackDewHeater(float)),
+		this, SLOT(callbackDewHeater(float)),
+		Qt::QueuedConnection);
+	_cooler_callback = _callback;
 }
 
 /**
@@ -102,19 +116,35 @@ void	coolercontrollerwidget::setupComplete() {
  */
 coolercontrollerwidget::~coolercontrollerwidget() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "destroy the cooler controller widget");
-	if (_cooler_callback) {
-		if (_cooler) {
-			_cooler->unregisterCallback(_cooler_identity);
-			debug(LOG_DEBUG, DEBUG_LOG, 0, "unregister callback");
-		}
-		snowstar::CommunicatorSingleton::remove(_cooler_identity);
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "cooler callback removed");
-		_cooler_callback = NULL;
+	// disconnect the callback
+	CoolerCallbackI	*_callback = dynamic_cast<CoolerCallbackI*>(
+		&*_cooler_callback);
+	disconnect(_callback, SIGNAL(callbackCoolerInfo(snowstar::CoolerInfo)),
+		0, 0);
+	disconnect(_callback, SIGNAL(callbackSetTemperature(float)),
+		0, 0);
+	disconnect(_callback, SIGNAL(callbackDewHeater(float)),
+		0, 0);
+	
+	// unregister the callback
+	Ice::Identity	_identity = identity();
+	if (_cooler) {
+		_cooler->unregisterCallback(_identity);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "unregister callback");
 	}
+
+	// remove the callback
+	snowstar::CommunicatorSingleton::remove(_identity);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "cooler callback removed");
+	_cooler_callback = NULL;
 	if (ui) {
 		delete ui;
 	}
 	ui = NULL;
+}
+
+Ice::Identity	coolercontrollerwidget::identity() {
+	return CallbackIdentity::identity(_cooler_callback);
 }
 
 /**
@@ -132,8 +162,8 @@ void	coolercontrollerwidget::setupCooler() {
 	// if we already have a cooler and a callback, we should
 	// destroy them
 	if ((_cooler) && (_cooler_callback)) {
-		_cooler->unregisterCallback(_cooler_identity);
-		snowstar::CommunicatorSingleton::remove(_cooler_identity);
+		_cooler->unregisterCallback(identity());
+		snowstar::CommunicatorSingleton::remove(identity());
 	}
 
 	// enable all input widgets
@@ -196,10 +226,10 @@ void	coolercontrollerwidget::setupCooler() {
 
 	try {   
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "registering callback");
-		CoolerCallbackI  *_callback = new CoolerCallbackI(*this);
-		_cooler_callback = _callback;
-		_cooler_identity = snowstar::CommunicatorSingleton::add(_cooler_callback);
-		_cooler->registerCallback(_cooler_identity);
+		Ice::Identity	_identity = identity();
+		snowstar::CommunicatorSingleton::add(_cooler,
+				_cooler_callback, _identity);
+		_cooler->registerCallback(_identity);
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "callback registered");
 	} catch (const std::exception& x) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "failed to register as a "
@@ -434,6 +464,19 @@ void    coolercontrollerwidget::setDewHeaterSlider(float /* dewheatervalue */) {
 	//setDewHeater(dewheatervalue);
 	int     v = m * (d - i.min) + ui->dewHeaterSlider->minimum();
 	ui->dewHeaterSlider->setValue(v);
+}
+
+void    coolercontrollerwidget::callbackCoolerInfo(snowstar::CoolerInfo) {
+	statusUpdate();
+}
+
+void    coolercontrollerwidget::callbackSetTemperature(float settemperature) {
+	astro::Temperature    temperature(settemperature);
+	displaySetTemperature(temperature.celsius());
+}
+
+void    coolercontrollerwidget::callbackDewHeater(float dewheater) {
+	setDewHeaterSlider(dewheater);
 }
 
 } // namespace snowgui

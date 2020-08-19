@@ -247,7 +247,7 @@ TrackingSummary	GuiderI::getTrackingSummary(const Ice::Current& current) {
  * \brief calback adapter for Tracking monitor
  */
 template<>
-void	callback_adapter<TrackingMonitorPrx>(TrackingMonitorPrx& p,
+void	callback_adapter<TrackingMonitorPrx>(TrackingMonitorPrx p,
 		const astro::callback::CallbackDataPtr data) {
 	// check whether the info we got is 
 	astro::guiding::TrackingPoint   *trackinginfo
@@ -268,7 +268,7 @@ void	callback_adapter<TrackingMonitorPrx>(TrackingMonitorPrx& p,
  * \brief calback adapter for Tracking monitor
  */
 template<>
-void	callback_adapter<ImageMonitorPrx>(ImageMonitorPrx& p,
+void	callback_adapter<ImageMonitorPrx>(ImageMonitorPrx p,
 		const astro::callback::CallbackDataPtr data) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "image callback called");
 	// first check whether we really got an image

@@ -91,7 +91,7 @@ void	GuiderI::setLastPoints(int n, const Ice::Current& current) {
 
 
 template<>
-void	callback_adapter<BacklashMonitorPrx>(BacklashMonitorPrx& p,
+void	callback_adapter<BacklashMonitorPrx>(BacklashMonitorPrx p,
 		const astro::callback::CallbackDataPtr data) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0,
 		"callback_adapter<BacklashMonitorPrx> called");
