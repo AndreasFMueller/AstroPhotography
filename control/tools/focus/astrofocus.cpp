@@ -15,6 +15,7 @@
 #include <AstroFocus.h>
 #include <ImageWriter.h>
 #include <string>
+#include <string.h>
 #include <list>
 
 using namespace astro::focusing;

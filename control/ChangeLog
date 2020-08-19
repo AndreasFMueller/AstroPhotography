@@ -1,5 +1,8 @@
 ChangeLog for the Astro project.
 
+20200819:
+	* fix missing includes in astrotime and astrofocus
+
 20200818:
 	* add monitoring thread to AtikCooler, stop to AtikCcd
 	* fix threads in QHY driver
