@@ -51,6 +51,14 @@ DeviceName	guideportname(::AtikCamera *camera) {
 	return DeviceName(cameraname(camera), DeviceName::Guideport);
 }
 
+DeviceName	coolername(AtikCamera& camera) {
+	return DeviceName(camera.name(), DeviceName::Cooler);
+}
+
+DeviceName	coolername(::AtikCamera *camera) {
+	return DeviceName(cameraname(camera), DeviceName::Cooler);
+}
+
 } // namespace atik
 } // namespace camera
 } // namespace astro
