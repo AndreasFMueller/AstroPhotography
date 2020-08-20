@@ -14,12 +14,12 @@ namespace nice {
 void	NiceFocuserCallback::stop(const Ice::Current& /* current */) {
 }
 
-void	NiceFocuserCallback::movement(long fromposition, long toposition,
-		 const Ice::Current& /* current */) {
-	_focuser.callback(fromposition, toposition);
+void	NiceFocuserCallback::movement(Ice::Long fromposition,
+		Ice::Long toposition, const Ice::Current& /* current */) {
+	_focuser.callback((long)fromposition, (long)toposition);
 }
 
-void	NiceFocuserCallback::info(long position, bool on_target,
+void	NiceFocuserCallback::info(Ice::Long position, bool on_target,
 		 const Ice::Current& /* current */) {
 	_focuser.callback(position, on_target);
 }
@@ -56,7 +56,7 @@ long	NiceFocuser::backlash() {
 	return _focuser->backlash();
 }
 
-void	NiceFocuser::set(long value) {
+void	NiceFocuser::set(Ice::Long value) {
 	_focuser->set(value);
 }
 

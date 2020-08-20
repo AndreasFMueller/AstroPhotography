@@ -20,9 +20,9 @@ class NiceFocuserCallback : public snowstar::FocuserCallback {
 	NiceFocuser&	_focuser;
 public:
 	NiceFocuserCallback(NiceFocuser& focuser) : _focuser(focuser) { }
-	virtual void	movement(long fromposition, long toposition,
+	virtual void	movement(Ice::Long fromposition, Ice::Long toposition,
 				const Ice::Current& current);
-	virtual void	info(long fromposition, bool on_target,
+	virtual void	info(Ice::Long fromposition, bool on_target,
 				const Ice::Current& current);
 	virtual void	stop(const Ice::Current& current);
 };
@@ -38,7 +38,7 @@ public:
 	virtual long	max();
 	virtual long	current();
 	virtual long	backlash();
-	virtual void	set(long value);
+	virtual void	set(Ice::Long value);
 };
 
 } // namespace nice
