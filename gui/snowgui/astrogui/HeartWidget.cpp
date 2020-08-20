@@ -6,6 +6,7 @@
 #include <HeartWidget.h>
 #include <QPainter>
 #include <QPainterPath>
+#include <cmath>
 
 namespace snowgui {
 

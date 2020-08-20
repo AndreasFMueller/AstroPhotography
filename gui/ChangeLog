@@ -1,5 +1,8 @@
 ChangeLog for the Qt GUI to Astrophotography
 
+20200820:
+	* portability in HeartBeat.cpp
+
 20200819:
 	* add CallbackIdentity mixin class
 	* turn callback classes into QObjects and use messages instead

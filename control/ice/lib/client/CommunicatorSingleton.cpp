@@ -127,7 +127,7 @@ void	CommunicatorSingleton::remove(Ice::Identity identity) {
 		Ice::ObjectPtr	servant = getAdapter()->remove(identity);
 		debug(LOG_DEBUG, DEBUG_LOG, 0,
 			"servant %s with identity %s removed",
-			astro::demangle_cstr(*servant),
+			astro::demangle_string(*servant).c_str(),
 			identity.name.c_str());
 	} catch (const std::exception& x) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "cannot remove %s: %s",
