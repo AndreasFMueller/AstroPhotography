@@ -27,7 +27,11 @@ void	ContextHolder::debug(int level) {
 	if (level < 0) {
 		level = 0;
 	}
+#ifdef LIBUSB_OPTION_LOG_LEVEL
 	libusb_set_option(_context, LIBUSB_OPTION_LOG_LEVEL, level);
+#else
+	libusb_set_debug(_context, level);
+#endif
 }
 
 } // namespace usb

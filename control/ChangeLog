@@ -1,5 +1,8 @@
 ChangeLog for the Astro project.
 
+20200820:
+	* allow for older libusb in USBContextHolder.cpp
+
 20200819:
 	* protect Callback from races
 	* make SimCooler start only when it is actually requested
