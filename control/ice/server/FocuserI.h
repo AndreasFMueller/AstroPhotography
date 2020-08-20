@@ -22,6 +22,7 @@ typedef std::shared_ptr<FocuserICallback>	FocuserICallbackPtr;
 
 class FocuserI : virtual public Focuser, virtual public DeviceI {
 	astro::camera::FocuserPtr	_focuser;
+	FocuserICallbackPtr	focusercallbackptr;
 public:
 	FocuserI(astro::camera::FocuserPtr focuser);
 	virtual ~FocuserI();

@@ -10,9 +10,13 @@ namespace snowstar {
 
 FocuserI::FocuserI(astro::camera::FocuserPtr focuser)
 	: DeviceI(*focuser), _focuser(focuser) {
+	FocuserICallback	*focusercallback = new FocuserICallback(*this);
+	focusercallbackptr = FocuserICallbackPtr(focusercallback);
+	_focuser->addCallback(focusercallbackptr);
 }
 
 FocuserI::~FocuserI() {
+	_focuser->removeCallback(focusercallbackptr);
 }
 
 int	FocuserI::min(const Ice::Current& current) {
@@ -102,10 +106,25 @@ void    FocuserI::callbackUpdate(const astro::callback::CallbackDataPtr data) {
  * \param data          the callback data
  */
 template<>
-void    callback_adapter<FocuserCallbackPrx>(FocuserCallbackPrx /* p */,
-                const astro::callback::CallbackDataPtr /* data */) {
+void    callback_adapter<FocuserCallbackPrx>(FocuserCallbackPrx p,
+                const astro::callback::CallbackDataPtr data) {
         debug(LOG_DEBUG, DEBUG_LOG, 0, "callback");
-	return;
+
+	astro::camera::FocuserPositionInfoCallbackData	*pi
+		= dynamic_cast<astro::camera::FocuserPositionInfoCallbackData*>(&*data);
+	if (NULL != pi) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "position info callback");
+		p->info(pi->data().position(), pi->data().on_target());
+		return;
+	}
+
+	astro::camera::FocuserMovementInfoCallbackData	*mi
+		= dynamic_cast<astro::camera::FocuserMovementInfoCallbackData*>(&*data);
+	if (NULL != mi) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "movement info callback");
+		p->movement(mi->data().fromposition(), mi->data().toposition());
+		return;
+	}
 
         debug(LOG_DEBUG, DEBUG_LOG, 0, "unknown callback type");
         return;

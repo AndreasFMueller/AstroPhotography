@@ -17,7 +17,7 @@ bin_PROGRAMS = snowscan snowimages snowfocus snowmount snowrepo \
 	snowtask snowproject snowinstrument snowao snowservers \
 	snowevent snowconfig snowstream snowfiles snowdaemon \
 	snowgateway snowguideport snowcooler snowheartbeat snowfilterwheel \
-	snowadaptiveoptics snowcamera snowccd
+	snowadaptiveoptics snowcamera snowccd snowfocuser
 noinst_PROGRAMS = snowflake 
 
 noinst_HEADERS = FocusCallbackI.h
@@ -131,6 +131,11 @@ snowheartbeat_SOURCES = snowheartbeat.cpp
 snowheartbeat_DEPENDENCIES = $(ICEDEPENDENCIES)
 snowheartbeat_LDADD = $(ICELDADD)
 snowheartbeat_CPPFLAGS = $(ICECPPFLAGS)
+
+snowfocuser_SOURCES = snowfocuser.cpp
+snowfocuser_DEPENDENCIES = $(ICEDEPENDENCIES)
+snowfocuser_LDADD = $(ICELDADD)
+snowfocuser_CPPFLAGS = $(ICECPPFLAGS)
 
 snowfilterwheel_SOURCES = snowfilterwheel.cpp
 snowfilterwheel_DEPENDENCIES = $(ICEDEPENDENCIES)

@@ -42,9 +42,9 @@ void GuiderI::useCalibration(Ice::Int calid, bool /* flipped */,
 			astro::events::Event::GUIDE,
 			astro::stringprintf("%s now uses calibration %d",
 			guider->instrument().c_str(), calid));
-	} catch (const astro::guiding::BadState x) {
+	} catch (const astro::guiding::BadState& x) {
 		throw BadState(x.what());
-	} catch (const astro::guiding::NotFound x) {
+	} catch (const astro::guiding::NotFound& x) {
 		throw NotFound(x.what());
 	}
 }

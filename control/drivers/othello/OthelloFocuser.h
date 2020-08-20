@@ -17,9 +17,16 @@ namespace othello {
 class OthelloFocuser : public astro::camera::Focuser {
 	astro::usb::DevicePtr	deviceptr;
 	std::recursive_mutex	_mutex;
+	std::condition_variable_any	_condition;
+	std::thread	_thread;
 	OthelloFocuser(const OthelloFocuser& other);
 	OthelloFocuser&	operator=(const OthelloFocuser& other);
 	long	_current;
+	bool	_running;
+	static void	main(OthelloFocuser *focuser) noexcept;
+	void	run();
+	void	stop();
+	void	start();
 public:
 	OthelloFocuser(astro::usb::DevicePtr _deviceptr);
 	~OthelloFocuser();

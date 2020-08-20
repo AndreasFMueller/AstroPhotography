@@ -79,13 +79,13 @@ static int	goto_command(astro::camera::FilterWheelPtr filterwheel,
 		filterwheel->select(pos);
 		filterwheel->wait(60);
 		return EXIT_SUCCESS;
-	} catch (std::exception) {
+	} catch (const std::exception& x) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "not a numeric position");
 	}
 	try {
 		filterwheel->select(position);
 		filterwheel->wait(60);
-	} catch (std::exception) {
+	} catch (const std::exception& x) {
 	}
 	return EXIT_SUCCESS;
 }

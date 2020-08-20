@@ -15,10 +15,15 @@ namespace camera {
 namespace nice {
 
 class NiceFocuser;
+
 class NiceFocuserCallback : public snowstar::FocuserCallback {
 	NiceFocuser&	_focuser;
 public:
 	NiceFocuserCallback(NiceFocuser& focuser) : _focuser(focuser) { }
+	virtual void	movement(long fromposition, long toposition,
+				const Ice::Current& current);
+	virtual void	info(long fromposition, bool on_target,
+				const Ice::Current& current);
 	virtual void	stop(const Ice::Current& current);
 };
 

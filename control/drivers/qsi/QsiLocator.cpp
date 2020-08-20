@@ -162,7 +162,7 @@ std::vector<std::string>	QsiLocator::getDevicelist(
 			try {
 				std::string	devname = name(serial, device);
 				names.push_back(devname);
-			} catch (unsupported) {
+			} catch (const unsupported&) {
 				// skip this device
 			}
 		}

@@ -44,7 +44,7 @@ void	Device::open() {
 	if (rc != LIBUSB_SUCCESS) {
 		std::string	msg = stringprintf("cannot open device: %s",
 			libusb_error_name(rc));
-		USBdebug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		USBdebug(LOG_DEBUG, DEBUG_LOG, 0, "%s", msg.c_str());
 		throw USBError(msg);
 	}
 }

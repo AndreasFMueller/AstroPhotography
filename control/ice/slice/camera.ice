@@ -425,6 +425,8 @@ module snowstar {
  	 * \brief Callback interface for focusers
 	 */
 	interface FocuserCallback extends Callback {
+		void	movement(long fromposition, long toposition);
+		void	info(long fromposition, bool ontarget);
 	};
 
 	/**

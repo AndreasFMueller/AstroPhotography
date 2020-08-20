@@ -7,7 +7,7 @@
 
 bin_PROGRAMS = astroscan devicemapper getimages imageloop focus focustest \
 	dark flat focusing getstream astrofilterwheel astrocooler \
-	astroguideport
+	astroguideport astrofocuser
 
 astroscan_SOURCES = astroscan.cpp
 astroscan_DEPENDENCIES = $(top_builddir)/lib/libastro.la
@@ -60,6 +60,10 @@ astrocooler_LDADD = -L$(top_builddir)/lib -lastro
 astroguideport_SOURCES = astroguideport.cpp
 astroguideport_DEPENDENCIES = $(top_builddir)/lib/libastro.la
 astroguideport_LDADD = -L$(top_builddir)/lib -lastro 
+
+astrofocuser_SOURCES = astrofocuser.cpp
+astrofocuser_DEPENDENCIES = $(top_builddir)/lib/libastro.la
+astrofocuser_LDADD = -L$(top_builddir)/lib -lastro 
 
 # full night with the Starlight Express Oculus all sky camera.
 looptest:	imageloop

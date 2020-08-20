@@ -29,7 +29,7 @@ RaDec	MountI::getRaDec(const Ice::Current& current) {
 	CallStatistics::count(current);
 	try {
 		return convert(_mount->getRaDec());
-	} catch (std::exception x) {
+	} catch (const std::exception& x) {
 		DeviceException	except;
 		except.cause = astro::stringprintf(
 			"cannot call getRaDec(): %s", x.what());
@@ -42,7 +42,7 @@ AzmAlt	MountI::getAzmAlt(const Ice::Current& current) {
 	CallStatistics::count(current);
 	try {
 		return convert(_mount->getAzmAlt());
-	} catch (std::exception x) {
+	} catch (const std::exception& x) {
 		DeviceException	except;
 		except.cause = astro::stringprintf(
 			"cannot call getAzmAlt(): %s", x.what());
@@ -58,7 +58,7 @@ LongLat	MountI::getLocation(const Ice::Current& current) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "got location: %s",
 			loc.toString().c_str());
 		return convert(loc);
-	} catch (std::exception x) {
+	} catch (const std::exception& x) {
 		DeviceException	except;
 		except.cause = astro::stringprintf("cannot call location(): %s",
 			x.what());
@@ -76,7 +76,7 @@ locationtype	MountI::getLocationSource(const Ice::Current& current) {
 		default:
 			throw std::logic_error("unknown location source");
 		}
-	} catch (std::exception x) {
+	} catch (const std::exception& x) {
 		DeviceException	except;
 		except.cause = astro::stringprintf("cannot call location(): %s",
 			x.what());
@@ -90,7 +90,7 @@ Ice::Long	MountI::getTime(const Ice::Current& current) {
 	CallStatistics::count(current);
 	try {
 		return _mount->time();
-	} catch (std::exception x) {
+	} catch (const std::exception& x) {
 		DeviceException	except;
 		except.cause = astro::stringprintf("cannot call time(): %s",
 			x.what());
@@ -103,7 +103,7 @@ void	MountI::cancel(const Ice::Current& current) {
 	CallStatistics::count(current);
 	try {
 		_mount->cancel();
-	} catch (std::exception x) {
+	} catch (const std::exception& x) {
 		DeviceException	except;
 		except.cause = astro::stringprintf("cannot call cancel(): %s",
 			x.what());
@@ -116,7 +116,7 @@ bool	MountI::telescopePositionWest(const Ice::Current& current) {
 	CallStatistics::count(current);
 	try {
 		return _mount->telescopePositionWest();
-	} catch (std::exception x) {
+	} catch (const std::exception& x) {
 		DeviceException	except;
 		except.cause = astro::stringprintf(
 			"cannot call telescopePositionWest(): %s",
@@ -131,7 +131,7 @@ void	MountI::GotoAzmAlt(const AzmAlt& azmalt,
 	CallStatistics::count(current);
 	try {
 		_mount->Goto(convert(azmalt));
-	} catch (std::exception x) {
+	} catch (const std::exception& x) {
 		DeviceException	except;
 		except.cause = astro::stringprintf(
 			"cannot call Goto(AzmAlt): %s", x.what());
@@ -145,7 +145,7 @@ void	MountI::GotoRaDec(const RaDec& radec,
 	CallStatistics::count(current);
 	try {
 		_mount->Goto(convert(radec));
-	} catch (std::exception x) {
+	} catch (const std::exception& x) {
 		DeviceException	except;
 		except.cause = astro::stringprintf(
 			"cannot call Goto(RaDec): %s", x.what());
@@ -161,7 +161,7 @@ mountstate	MountI::state(const Ice::Current& current) {
 		astro::device::Mount::state_type	s = _mount->state();
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "got state %d", s);
 		return convert(s);
-	} catch (std::exception x) {
+	} catch (const std::exception& x) {
 		DeviceException	except;
 		except.cause = astro::stringprintf(
 			"cannot call state(): %s", x.what());
@@ -174,7 +174,7 @@ bool	MountI::hasGuideRates(const Ice::Current& current) {
 	CallStatistics::count(current);
 	try {
 		return _mount->hasGuideRates();
-	} catch (std::exception x) {
+	} catch (const std::exception& x) {
 		DeviceException	except;
 		except.cause = astro::stringprintf(
 			"cannot call hasGuideRates(): %s", x.what());
@@ -187,7 +187,7 @@ RaDec	MountI::getGuideRates(const Ice::Current& current) {
 	CallStatistics::count(current);
 	try {
 		return convert(_mount->getGuideRates());
-	} catch (std::exception x) {
+	} catch (const std::exception& x) {
 		DeviceException	except;
 		except.cause = astro::stringprintf(
 			"cannot call getGuideRates(): %s", x.what());

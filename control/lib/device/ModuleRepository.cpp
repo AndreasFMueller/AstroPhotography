@@ -228,9 +228,10 @@ std::vector<ModulePtr>	ModuleRepositoryBackend::modules() const {
 			try {
 				result.push_back(ModulePtr(new Module(path(),
 					modulename)));
-			} catch (std::exception) {
+			} catch (const std::exception& x) {
 				std::cerr << "module " << modulename <<
-					" corrupt" << std::endl;
+					" corrupt: ";
+				std::cerr << x.what() << std::endl;
 			}
 		}
 	} while (direntp != NULL);

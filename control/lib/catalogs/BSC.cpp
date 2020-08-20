@@ -62,7 +62,7 @@ void	BSC::setup() {
 			try {
 				BSCStar	star(line);
 				stars.insert(std::make_pair(star.number, star));
-			} catch (std::exception& x) {
+			} catch (const std::exception& x) {
 				debug(LOG_DEBUG, DEBUG_LOG, 0,
 					"object '%4.4s' skipped: %s",
 					line, x.what());
@@ -189,7 +189,7 @@ Catalog::starsetptr	BSC::findLike(const std::string& name,
 			debug(LOG_DEBUG, DEBUG_LOG, 0, "get BSC %d", i);
 			Star	star = find(i);
 			result->insert(star);
-		} catch (const std::exception x) {
+		} catch (const std::exception& x) {
 		}
 		i++;
 	}

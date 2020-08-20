@@ -103,6 +103,8 @@ unsigned int	QsiFilterWheel::currentPosition() {
 	case unknown:
 		throw BadState("filter wheel moving");
 	}
+	throw std::logic_error("should not get to this point in "
+		"QsiFilterWheel::currentPosition()");
 }
 
 /**

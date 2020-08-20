@@ -88,7 +88,7 @@ bool	ImageStep::precursorSizesConsistent(std::vector<int> exclude) const {
 				}
 			}
 		);
-	} catch (inconsistent_size) {
+	} catch (const inconsistent_size&) {
 		return false;
 	}
 	return true;

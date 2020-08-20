@@ -59,8 +59,11 @@ void	SimFocuser::run() {
 	do {
 		long	c = current();
 		if (previous != c) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "focuser update: %ld",
+				c);
 			callback(c, (target != c));
 		}
+		previous = c;
 		_cond.wait_for(lock, std::chrono::milliseconds(100));
 	} while (!_terminate);
 }

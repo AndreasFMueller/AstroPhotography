@@ -47,6 +47,18 @@ long	Focuser::backlash() {
 }
 
 void	Focuser::set(long value) {
+	if (value < this->min()) {
+		std::string	msg = stringprintf("%ld too small (< %ld)",
+			value, this->min());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw std::range_error(msg);
+	}
+	if (value > this->max()) {
+		std::string	msg = stringprintf("%ld too large (> %ld)",
+			value, this->max());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw std::range_error(msg);
+	}
 	_targetposition = value;
 	callback(this->current(), value);
 }

@@ -1,6 +1,10 @@
 ChangeLog for the Astro project.
 
 20200820:
+	* add snowfocuser client program
+	* complete callback implementation in FocuserI.cpp
+	* add the astrofocuser program
+	* rework the othello focuser driver, add monitoring thread
 	* allow for older libusb in USBContextHolder.cpp
 
 20200819:

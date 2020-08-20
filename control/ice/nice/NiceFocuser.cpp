@@ -14,6 +14,18 @@ namespace nice {
 void	NiceFocuserCallback::stop(const Ice::Current& /* current */) {
 }
 
+void	NiceFocuserCallback::movement(long fromposition, long toposition,
+		 const Ice::Current& /* current */) {
+	_focuser.callback(fromposition, toposition);
+}
+
+void	NiceFocuserCallback::info(long position, bool on_target,
+		 const Ice::Current& /* current */) {
+	_focuser.callback(position, on_target);
+}
+
+
+
 NiceFocuser::NiceFocuser(snowstar::FocuserPrx focuser,
 	const DeviceName& devicename)
 	: Focuser(devicename), NiceDevice(devicename), _focuser(focuser) {
