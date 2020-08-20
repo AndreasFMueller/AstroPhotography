@@ -1,6 +1,7 @@
 ChangeLog for the Astro project.
 
 20200820:
+	* portability fix in snowfocuser
 	* add snowfocuser client program
 	* complete callback implementation in FocuserI.cpp
 	* add the astrofocuser program

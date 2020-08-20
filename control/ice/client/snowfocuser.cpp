@@ -105,14 +105,14 @@ class FocuserCallbackI : public FocuserCallback {
 		std::cout << t.toString("%T.%.03f: ");
 	}
 public:
-	virtual void	movement(long fromposition, long toposition,
+	virtual void	movement(Ice::Long fromposition, Ice::Long toposition,
 				const Ice::Current& /* current */) {
 		timestamp();
 		std::cout << "from=" << fromposition;
 		std::cout << ", to=" << toposition;
 		std::cout << std::endl;
 	}
-	virtual void	info(long currentposition, bool on_target,
+	virtual void	info(Ice::Long currentposition, bool on_target,
 				const Ice::Current& /* current */) {
 		timestamp();
 		std::cout << "current=" << currentposition;
