@@ -116,6 +116,10 @@ void	SimMount::Goto(const RaDec& radec) {
 	// target and the arrival time according to the new data
 	_when = Timer::gettime() + _movetime;
 	_target = radec;
+
+	// the great circle used for the movement
+	_greatcircle = GreatCircle(_target, _direction);
+
 	// first find out whether we alread have a thread. This is the
 	// case if the state is GOTO. In this case redirecting was good
 	// enough
@@ -196,7 +200,10 @@ void	SimMount::move() {
 				return;
 			} else {
 				double	t = (_when - _now) / _movetime;
-				direction(_target * (1 - t) + _direction * t);
+				if (t == 0) {
+					t = 0.001;
+				}
+				direction(_greatcircle(t));
 			}
 		} else {
 			debug(LOG_DEBUG, DEBUG_LOG, 0, "thread cancelled");

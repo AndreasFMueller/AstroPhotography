@@ -25,6 +25,7 @@ class SimMount : public astro::device::Mount {
 	std::recursive_mutex	_sim_mutex; // protect the state variables
 	std::condition_variable	_sim_condition;
 	RaDec			_target;	// where the movement is headed
+	GreatCircle		_greatcircle;
 	double			_when;
 	static const double	_movetime;
 	std::thread		_sim_thread;

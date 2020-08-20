@@ -186,6 +186,28 @@ static const RaDec	south_pole;
 std::ostream&	operator<<(std::ostream& out, const RaDec& radec);
 
 /**
+ * \brief Class to parametrize a great circle
+ */
+class GreatCircle {
+	RaDec	_A;
+	RaDec	_B;
+	Angle	_a;
+	Angle	_b;
+	Angle	_c;
+	Angle	_alpha;
+	Angle	_beta;
+	Angle	_gamma;
+	int	_sign;
+public:
+	GreatCircle() { }
+	GreatCircle(const RaDec& A, const RaDec& B);
+	Angle	c(double t) const;
+	Angle	a(double t) const;
+	Angle	gamma(double t) const;
+	RaDec	operator()(double t) const;
+};
+
+/**
  * \brief Ecliptic coordinates
  */
 class Ecliptic : public TwoAngles {
