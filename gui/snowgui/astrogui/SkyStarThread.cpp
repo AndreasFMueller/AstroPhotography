@@ -15,7 +15,8 @@ namespace snowgui {
 /**
  * \brief Create the star retrieval thread
  */
-SkyStarThread::SkyStarThread(QObject *parent) : QThread(parent) {
+SkyStarThread::SkyStarThread(QObject *parent, bool send_tile)
+	: QThread(parent), _send_tile(send_tile) {
 }
 
 /**
@@ -36,12 +37,21 @@ void	SkyStarThread::run() {
 		CatalogPtr catalog = CatalogFactory::get();
 		SkyWindow	windowall;
 		MagnitudeRange  magrange(-30, 6);
-		Catalog::starsetptr	_stars = catalog->find(windowall, magrange);
-		astro::Precession	precession;
-		_stars = precess(precession, _stars);
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "star retrieval complete");
-		emit stars(_stars);
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "stars sent to main thread");
+		if (_send_tile) {
+			StarTilePtr	startile = catalog->findTile(windowall,
+							magrange);
+			emit stars(startile);
+		} else {
+			Catalog::starsetptr	_stars
+				= catalog->find(windowall, magrange);
+			astro::Precession	precession;
+			_stars = precess(precession, _stars);
+			debug(LOG_DEBUG, DEBUG_LOG, 0,
+				"star retrieval complete");
+			emit stars(_stars);
+			debug(LOG_DEBUG, DEBUG_LOG, 0,
+				"stars sent to main thread");
+		}
 	} catch (const std::exception& x) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "no catalog available: %s", x.what());
 	}

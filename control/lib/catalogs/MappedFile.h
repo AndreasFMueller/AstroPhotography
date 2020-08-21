@@ -32,6 +32,7 @@ public:
 	MappedFile(const std::string& filename, size_t recordlength);
 	~MappedFile();
 	std::string	get(size_t record_number) const;
+	unsigned char	*record(size_t record_number) const;
 };
 
 } // namespace catalog

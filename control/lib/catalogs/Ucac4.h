@@ -90,6 +90,7 @@ public:
 	Ucac4Zone(uint16_t zone, const std::string& zonefilename);
 	bool	touches(const SkyWindow& window) const;
 	Ucac4Star	get(uint32_t number) const;
+	LightWeightStar	getLightWeight(uint32_t number) const;
 	uint32_t	first(const Angle& ra) const;
 	starsetptr	find(const SkyWindow& window,
 				const MagnitudeRange& magrange);
@@ -101,6 +102,8 @@ public:
 
 	CatalogIterator	begin();
 	CatalogIterator	end();
+	StarTilePtr	findTile(const SkyWindow& window,
+				const MagnitudeRange& magrange);
 };
 typedef std::shared_ptr<Ucac4Zone>	Ucac4ZonePtr;
 
@@ -162,6 +165,8 @@ public:
 					const MagnitudeRange& magrange);
 	virtual unsigned long	numberOfStars();
 	virtual CatalogIterator	begin();
+	virtual StarTilePtr	findTile(const SkyWindow& window,
+					const MagnitudeRange& magrange);
 };
 typedef std::shared_ptr<Ucac4>	Ucac4Ptr;
 

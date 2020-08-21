@@ -13,6 +13,7 @@
 #include <AstroImage.h>
 #include <AstroTypes.h>
 #include <typeinfo>
+#include <array>
 
 namespace astro {
 namespace catalog {
@@ -49,9 +50,39 @@ public:
 };
 
 /**
- * \brief Celestial objects have position and proper motion
+ * \brief LightWeightStar class as the smallest class useful for stars
  */
-class CelestialObject : public RaDec {
+class LightWeightStar : public RaDec {
+protected:
+	float	_mag;
+public:
+	const float&	mag() const { return _mag; }
+	void	mag(float m) { _mag = m; }
+	LightWeightStar(const RaDec& position, float mag = 0)
+		: RaDec(position), _mag(mag) { }
+	LightWeightStar() { _mag = 0; }
+};
+
+/**
+ * \brief a StarTile contains light weight stars in a small RA/DEC rectangle
+ *
+ * StarTiles are intended to improve the retrieval of large sets of stars
+ * for the sky display widget
+ */
+class StarTile : public std::vector<LightWeightStar> {
+	SkyWindow	_window;
+public:
+	StarTile(const SkyWindow& window) : _window(window) { }
+	StarTile(const SkyWindow& window, size_t size)
+		: std::vector<LightWeightStar>(size), _window(window) { }
+};
+
+typedef std::shared_ptr<StarTile>	StarTilePtr;
+
+/**
+ * \brief Celestial objects have proper motion in addition to position and mag
+ */
+class CelestialObject : public LightWeightStar {
 protected:
 	RaDec	_pm; // proper motion in ra/yr dec/yr
 public:
@@ -59,11 +90,6 @@ public:
 	RaDec&	pm() { return _pm; }
 
 	RaDec	position(const double epoch) const;
-protected:
-	float	_mag;
-public:
-	const float&	mag() const { return _mag; }
-	void	mag(float m) { _mag = m; }
 };
 
 class Star;
@@ -72,7 +98,7 @@ typedef std::shared_ptr<Star>	StarPtr;
 /**
  * \brief Star base class
  *
- * Stars are celestial objects that in addition have a magnitude
+ * Stars are celestial objects that in addition have a name
  */
 class Star : public CelestialObject {
 	std::string	_name;
@@ -281,6 +307,10 @@ public:
 	// iterator interface for traversing the catalog
 	virtual CatalogIterator	begin();
 	CatalogIterator	end();
+
+	// interface for retrieving tiles
+	virtual StarTilePtr	findTile(const SkyWindow& window,
+				const MagnitudeRange& magrange);
 };
 
 Catalog::starsetptr	precess(const Precession& precession,

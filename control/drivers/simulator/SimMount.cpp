@@ -190,7 +190,7 @@ void	SimMount::move() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "Simulator move thread starts %s",
 		_target.toString().c_str());
 	while (true) {
-		Timer::sleep(1);
+		Timer::sleep(0.1);
 		std::unique_lock<std::recursive_mutex>	lock(_sim_mutex);
 		if (Mount::GOTO == Mount::state()) {
 			double	_now = Timer::gettime();

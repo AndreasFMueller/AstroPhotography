@@ -40,6 +40,7 @@ static const int	_dial_maxsize = 100;
  */
 SkyDisplayWidget::SkyDisplayWidget(QWidget *parent) : QWidget(parent) {
 	qRegisterMetaType<astro::catalog::Catalog::starsetptr>("astro::catalog::Catalog::starsetptr");
+	qRegisterMetaType<astro::catalog::StarTilePtr>("astro::catalog::StarTilePtr");
 
 	// context menu
 	setContextMenuPolicy(Qt::CustomContextMenu);
@@ -79,11 +80,15 @@ SkyDisplayWidget::SkyDisplayWidget(QWidget *parent) : QWidget(parent) {
 	setMouseTracking(true);
 
 	// get all the stars from the BSC catalog
-	SkyStarThread	*_skystarthread = new SkyStarThread(this);
+	SkyStarThread	*_skystarthread = new SkyStarThread(this, true);
 	connect(_skystarthread,
 		SIGNAL(stars(astro::catalog::Catalog::starsetptr)),
 		this,
 		SLOT(useStars(astro::catalog::Catalog::starsetptr)));
+	connect(_skystarthread,
+		SIGNAL(stars(astro::catalog::StarTilePtr)),
+		this,
+		SLOT(useStars(astro::catalog::StarTilePtr)));
 	connect(_skystarthread, SIGNAL(finished()),
 		_skystarthread, SLOT(deleteLater()));
 	_skystarthread->start();
@@ -243,6 +248,11 @@ void	SkyDisplayWidget::update() {
 }
 
 void	SkyDisplayWidget::useStars(Catalog::starsetptr stars) {
+	show_telescope(true);
+	SkyDrawing::useStars(stars);
+}
+
+void	SkyDisplayWidget::useStars(StarTilePtr stars) {
 	show_telescope(true);
 	SkyDrawing::useStars(stars);
 }

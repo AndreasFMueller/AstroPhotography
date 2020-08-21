@@ -26,6 +26,7 @@ class StarChartRetriever : public QThread {
 	void	run() override;
 	float	_limit_magnitude;
 	astro::catalog::SkyWindow	_window;
+	bool	_use_tile;
 public:
 	void	limit_magnitude(float l) { _limit_magnitude = l; }
 	float	limit_magnitude() const { return _limit_magnitude; }
@@ -33,9 +34,10 @@ public:
 	const astro::catalog::SkyWindow& window() const { return _window; }
 	void	window(const astro::catalog::SkyWindow& w) { _window = w; }
 
-	StarChartRetriever(QObject *parent = NULL);
+	StarChartRetriever(QObject *parent = NULL, bool use_tile = false);
 signals:
 	void	starsReady(astro::catalog::Catalog::starsetptr);
+	void	starsReady(astro::catalog::StarTilePtr);
 };
 
 /**
@@ -67,6 +69,7 @@ class StarChartWidget : public QWidget, public PlanetDrawing {
 
 	astro::catalog::Catalog::starsetptr	_stars;
 	astro::catalog::Catalog::starsetptr	_sky;
+	astro::catalog::StarTilePtr	_skytile;
 	astro::catalog::DeepSkyObjectSetPtr	_deepsky;
 	astro::catalog::OutlineCatalogPtr	_outlines;
 	astro::Angle	_resolution;	// angle per pixel
@@ -195,6 +198,8 @@ signals:
 private:
 	void	draw();
 	void	drawStar(QPainter& painter, const astro::catalog::Star& star);
+	void	drawStar(QPainter& painter,
+			const astro::catalog::LightWeightStar& star);
 	void	drawStars(QPainter& painter);
 	void	drawDeepSkyObject(QPainter& painter,
 			const astro::catalog::DeepSkyObject& deepskyobject);
@@ -244,6 +249,7 @@ public slots:
 	void	stateChanged(astro::device::Mount::state_type);
 	void	useStars(astro::catalog::Catalog::starsetptr);
 	void	useSky(astro::catalog::Catalog::starsetptr);
+	void	useSky(astro::catalog::StarTilePtr);
 	void	useDeepSky(astro::catalog::DeepSkyObjectSetPtr);
 	void	workerFinished();
 	void	guiderResolution(astro::Angle);

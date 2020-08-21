@@ -40,6 +40,7 @@ public:
 	virtual void	select(size_t filterindex);
 	virtual std::string	filterName(size_t filterindex);
 	virtual State	getState();
+	virtual bool	wait(float timeout);
 };
 
 } // namespace simulator

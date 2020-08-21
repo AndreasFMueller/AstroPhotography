@@ -29,12 +29,16 @@ class SkyDisplayWidget;
 class SkyStarThread : public QThread {
 	Q_OBJECT
 	SkyDisplayWidget	*_skydisplaywidget;
+	bool	_send_tile;
 public:
-	explicit SkyStarThread(QObject *parent = NULL);
+	bool	send_tile() const { return _send_tile; }
+	void	send_tile(bool s) { _send_tile = s; }
+	explicit SkyStarThread(QObject *parent = NULL, bool send_tile = false);
 	virtual ~SkyStarThread();
 	void	run();
 signals:
 	void	stars(astro::catalog::Catalog::starsetptr);
+	void	stars(astro::catalog::StarTilePtr);
 };
 
 /**
@@ -82,6 +86,7 @@ public slots:
 	void	positionChanged(astro::LongLat);
 	void	update();
 	void	useStars(astro::catalog::Catalog::starsetptr);
+	void	useStars(astro::catalog::StarTilePtr);
 
 	void	setAltAzmGridVisible(bool);
 	void	setRaDecGridVisible(bool);

@@ -13,7 +13,8 @@ namespace snowgui {
 /**
  * \brief Construct a star chart retriever thread
  */
-StarChartRetriever::StarChartRetriever(QObject *parent) : QThread(parent) {
+StarChartRetriever::StarChartRetriever(QObject *parent, bool use_tile)
+	: QThread(parent), _use_tile(use_tile) {
 }
 
 /**
@@ -24,12 +25,18 @@ void	StarChartRetriever::run() {
 		window().toString().c_str());
 	CatalogPtr catalog = CatalogFactory::get();
         MagnitudeRange  magrange(-30, limit_magnitude());
-        astro::catalog::Catalog::starsetptr	stars
-		= catalog->find(window(), magrange);
-	astro::Precession	precession;
-	stars = precess(precession, stars);
-        debug(LOG_DEBUG, DEBUG_LOG, 0, "%d stars found", stars->size());
-	emit starsReady(stars);
+	if (_use_tile) {
+		astro::catalog::StarTilePtr	stars 
+			= catalog->findTile(window(), magrange);
+		emit starsReady(stars);
+	} else {
+		astro::catalog::Catalog::starsetptr	stars
+			= catalog->find(window(), magrange);
+		astro::Precession	precession;
+		stars = precess(precession, stars);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "%d stars found", stars->size());
+		emit starsReady(stars);
+	}
 }
 
 } // namespace snowgui

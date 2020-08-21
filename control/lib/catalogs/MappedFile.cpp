@@ -85,5 +85,12 @@ std::string	MappedFile::get(size_t record_number) const {
 		_recordlength);
 }
 
+unsigned char	*MappedFile::record(size_t record_number) const {
+	if (record_number >= _nrecords) {
+		throw std::runtime_error("record number too large");
+	}
+	return &((unsigned char *)data_ptr)[_recordlength * record_number];
+}
+
 } // namespace catalog
 } // namespace astro

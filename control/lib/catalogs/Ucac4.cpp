@@ -174,5 +174,19 @@ CatalogIterator	Ucac4::begin() {
 	return CatalogIterator(impl);
 }
 
+StarTilePtr	Ucac4::findTile(const SkyWindow& window,
+			const MagnitudeRange& magrange) {
+	StarTile	*tile = new StarTile(window);
+	// iterate through zones
+	for (uint16_t zi = 1; zi <= 900; zi++) {
+		Ucac4ZonePtr	_zone = zone(zi);
+		StarTilePtr	zonetile = _zone->findTile(window, magrange);
+		// copy the zone to the result
+		std::copy(zonetile->begin(), zonetile->end(),
+			back_inserter(*tile));
+	}
+	return StarTilePtr(tile);
+}
+
 } // namespace catalog
 } // namespace astro

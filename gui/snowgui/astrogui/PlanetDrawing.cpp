@@ -19,6 +19,9 @@ namespace snowgui {
  */
 PlanetDrawing::PlanetDrawing() {
 	_radius = 10;
+	_cache_time = 0;
+	_moon_time = 0;
+	_sun_time = 0;
 }
 
 /**
@@ -37,13 +40,15 @@ PlanetDrawing::~PlanetDrawing() {
  */
 void	PlanetDrawing::drawSolarsystemBody(QPainter& painter,
 		const astro::RaDec& pos,
-		double radius, QColor color, QString label) {
+		double radius, QColor color, QString label,
+		const std::string& logname) {
 	QPointF	center;
 	try {
 		center = this->position(pos);
 	} catch (const std::exception& x) {
-		std::string	msg = astro::stringprintf("cannot draw %s: %s",
-			label.unicode(), x.what());
+		std::string	msg = astro::stringprintf(
+			"cannot draw %s at %s: %s", logname.c_str(),
+			pos.toString().c_str(), x.what());
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "%s", msg.c_str());
 		return;
 	}
@@ -70,15 +75,24 @@ void	PlanetDrawing::drawSolarsystemBody(QPainter& painter,
  * \param painter	QPainter to draw on
  */
 void	PlanetDrawing::drawMoon(QPainter& painter, time_t t) {
-	astro::solarsystem::Moon	moon;
-	astro::RaDec	moonposition = moon.ephemeris(displaytime(t));
+	if (_moon_time != displaytime(t)) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "compute moon position");
+		_moon_time = displaytime(t);
+		astro::solarsystem::Moon	moon;
+		_moon_position = moon.ephemeris(_moon_time);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "moon at %s",
+			_moon_position.toString().c_str());
+	} else {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "draw cached moon");
+	};
 
 	// prepare for drawing
 	QColor	moonblue(0,204,255);
 	double	mr = _radius;
 	if (mr < 7) { mr = 7.; }
 
-	drawSolarsystemBody(painter, moonposition, mr, moonblue, QString());
+	drawSolarsystemBody(painter, _moon_position, mr, moonblue, QString(),
+		std::string("moon"));
 }
 
 /**
@@ -87,15 +101,24 @@ void	PlanetDrawing::drawMoon(QPainter& painter, time_t t) {
  * \param painter	QPainter to draw on
  */
 void	PlanetDrawing::drawSun(QPainter& painter, time_t t) {
-	astro::solarsystem::Sun	sun;
-	astro::RaDec	sunposition = sun.ephemeris(displaytime(t));
+	if (_sun_time != displaytime(t)) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "compute sun position");
+		_sun_time = displaytime(t);
+		astro::solarsystem::Sun	sun;
+		_sun_position = sun.ephemeris(_sun_time);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "sun at %s",
+			_sun_position.toString().c_str());
+	} else {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "draw cached sun");
+	}
 
 	// prepare for drawing
 	QColor	sunyellow(255,255,0);
 	double	sr = _radius;
 	if (sr < 7) { sr = 7.; }
 
-	drawSolarsystemBody(painter, sunposition, sr, sunyellow, QString());
+	drawSolarsystemBody(painter, _sun_position, sr, sunyellow, QString(),
+		std::string("sun"));
 }
 
 /**
@@ -109,13 +132,36 @@ void	PlanetDrawing::drawSun(QPainter& painter, time_t t) {
  * \param label			the label to place next to the planet
  */
 void	PlanetDrawing::drawPlanet(QPainter& painter,
-		astro::solarsystem::RelativePosition& rp,
-		astro::solarsystem::Planetoid *planet,
+		const astro::RaDec& planetposition,
+		astro::solarsystem::PlanetoidPtr planet,
 		double pr, QColor planetcolor, QString label) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "drawing %s", planet->name().c_str());
-	astro::RaDec	planetposition = rp.radec(planet);
-	drawSolarsystemBody(painter, planetposition, pr, planetcolor, label);
-	delete planet;
+	drawSolarsystemBody(painter, planetposition, pr, planetcolor, label,
+		planet->name());
+}
+
+void	PlanetDrawing::drawPlanet(QPainter& painter, PlanetDataPtr planet) {
+	drawPlanet(painter, planet->position, planet->planetoid,
+		planet->radius, planet->color, planet->label);
+}
+
+void	PlanetDrawing::drawCachedPlanets(QPainter& painter) {
+	for (auto p = _cache.begin(); p != _cache.end(); p++) {
+		drawPlanet(painter, *p);
+	}
+}
+
+PlanetDataPtr	PlanetDrawing::makePlanet(
+	astro::solarsystem::RelativePosition& rp,
+	astro::solarsystem::PlanetoidPtr planetoid,
+	double radius, QColor color, QString label) {
+	PlanetData	*data = new PlanetData();
+	data->position = rp.radec(&*planetoid);
+	data->planetoid = planetoid;
+	data->radius = radius;
+	data->color = color;
+	data->label = label;
+	return PlanetDataPtr(data);
 }
 
 /**
@@ -124,7 +170,18 @@ void	PlanetDrawing::drawPlanet(QPainter& painter,
  * \param painter	QPainter to draw on
  */
 void	PlanetDrawing::drawPlanets(QPainter& painter, time_t t) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "drawing planets for time %d", t);
+	time_t	dt = displaytime(t);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "drawing planets for time %d", dt);
+
+	// check whether we can draw cached positions
+	if ((dt == _cache_time) || (_cache.size() != 0)) {
+		// draw planets from the cache
+		drawCachedPlanets(painter);
+		return;
+	}
+	_cache.clear();
+	_cache_time = dt;
+
 	astro::solarsystem::JulianCenturies	T(displaytime(t));
 	astro::solarsystem::Earth	earth;
 	astro::solarsystem::EclipticalCoordinates	earthpos
@@ -135,36 +192,52 @@ void	PlanetDrawing::drawPlanets(QPainter& painter, time_t t) {
 	double	pr = 0.5 * _radius;
 	if (pr < 4) { pr = 4.; }
 
-	astro::solarsystem::Planetoid	*mercury = new astro::solarsystem::Mercury();
-	drawPlanet(painter, rp, mercury, 4, QColor(255,255,204), QString("☿"));
+	astro::solarsystem::PlanetoidPtr	mercury(
+		new astro::solarsystem::Mercury());
+	_cache.push_back(makePlanet(rp, mercury, 4, QColor(255,255,204),
+		QString("☿")));
 
-	astro::solarsystem::Planetoid	*venus = new astro::solarsystem::Venus();
-	drawPlanet(painter, rp, venus, 4, QColor(255,255,204), QString("♀︎"));
+	astro::solarsystem::PlanetoidPtr	venus(
+		new astro::solarsystem::Venus());
+	_cache.push_back(makePlanet(rp, venus, 4, QColor(255,255,204),
+		QString("♀︎")));
 
-	astro::solarsystem::Planetoid	*mars = new astro::solarsystem::Mars();
-	drawPlanet(painter, rp, mars, 4, QColor(255,51,51), QString("♂︎"));
+	astro::solarsystem::PlanetoidPtr	mars(
+		new astro::solarsystem::Mars());
+	_cache.push_back(makePlanet(rp, mars, 4, QColor(255,51,51),
+		QString("♂︎")));
 
-	astro::solarsystem::Planetoid	*jupiter = new astro::solarsystem::Jupiter();
-	drawPlanet(painter, rp, jupiter, 4, QColor(255,255,204), QString("♃"));
+	astro::solarsystem::PlanetoidPtr	jupiter(
+		new astro::solarsystem::Jupiter());
+	_cache.push_back(makePlanet(rp, jupiter, 4, QColor(255,255,204),
+		QString("♃")));
 
-	astro::solarsystem::Planetoid	*saturn = new astro::solarsystem::Saturn();
-	drawPlanet(painter, rp, saturn, 4, QColor(255,153,153), QString("♄"));
+	astro::solarsystem::PlanetoidPtr	saturn(
+		new astro::solarsystem::Saturn());
+	_cache.push_back(makePlanet(rp, saturn, 4, QColor(255,153,153),
+		QString("♄")));
 
-	astro::solarsystem::Planetoid	*uranus = new astro::solarsystem::Uranus();
-	drawPlanet(painter, rp, uranus, 4, QColor(0,204,102), QString("⛢"));
+	astro::solarsystem::PlanetoidPtr	uranus(
+		new astro::solarsystem::Uranus());
+	_cache.push_back(makePlanet(rp, uranus, 4, QColor(0,204,102),
+		QString("⛢")));
 
-	astro::solarsystem::Planetoid	*neptune = new astro::solarsystem::Neptune();
-	drawPlanet(painter, rp, neptune, 4, QColor(51,153,255), QString("♆"));
+	astro::solarsystem::PlanetoidPtr	neptune(
+		new astro::solarsystem::Neptune());
+	_cache.push_back(makePlanet(rp, neptune, 4, QColor(51,153,255),
+		QString("♆")));
 
-	astro::solarsystem::Planetoid	*pluto = new astro::solarsystem::Pluto();
-	drawPlanet(painter, rp, pluto, 4, QColor(102,0,0), QString("♇"));
+	astro::solarsystem::PlanetoidPtr	pluto(
+		new astro::solarsystem::Pluto());
+	_cache.push_back(makePlanet(rp, pluto, 4, QColor(102,0,0),
+		QString("♇")));
 }
 
 time_t	PlanetDrawing::displaytime(time_t t) const {
-	if (t) {
-		return t;
+	if (t == 0) {
+		time(&t);
 	}
-	time(&t);
+	t -= t % 60; // round to minutes
 	return t;
 }
 

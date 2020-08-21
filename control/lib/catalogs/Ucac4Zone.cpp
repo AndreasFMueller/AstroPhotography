@@ -78,6 +78,13 @@ static Ucac4Star	UCAC4_to_Ucac4Star(uint16_t zone, uint32_t index,
 	return result;
 }
 
+static LightWeightStar	UCAC4_to_LightWeightStar(const UCAC4_STAR *star) {
+	return LightWeightStar(RaDec(
+		Angle(MARCSEC_to_RADIANS*star->ra, Angle::Radians),
+		Angle(MARCSEC_to_RADIANS*star->spd - M_PI / 2, Angle::Radians)),
+		star->mag1 * 0.001);
+}
+
 /* Note: sizeof( UCAC4_STAR) = 78 bytes */
 
 Ucac4Zone::Ucac4Zone(uint16_t zone, const std::string& zonefilename)
@@ -94,6 +101,17 @@ Ucac4Star	Ucac4Zone::get(uint32_t number) const {
 	//debug(LOG_DEBUG, DEBUG_LOG, 0, "getting star %u", number);
 	std::string	line = MappedFile::get(number - 1);
 	return UCAC4_to_Ucac4Star(_zone, number, (UCAC4_STAR *)line.data());
+}
+
+/**
+ * \brief get a particular star from the zone as a light weight star
+ */
+LightWeightStar	Ucac4Zone::getLightWeight(uint32_t number) const {
+	if (number == 0) {
+		throw std::runtime_error("cannot get star number 0");
+	}
+	void	*record = MappedFile::record(number - 1);
+	return UCAC4_to_LightWeightStar((UCAC4_STAR *)record);
 }
 
 /**
@@ -183,6 +201,41 @@ unsigned long	Ucac4Zone::numberOfStars() {
 
 bool	Ucac4Zone::touches(const SkyWindow& window) const {
 	return Ucac4::touches(_zone, window);
+}
+
+StarTilePtr	Ucac4Zone::findTile(const SkyWindow& window,
+			const MagnitudeRange& magrange) {
+	StarTile	*tile = new StarTile(window);
+	uint32_t	minindex = first(window.leftra());
+	uint32_t	maxindex = first(window.rightra());
+	if (minindex < maxindex) {
+		for (uint32_t number = minindex; number < maxindex; number++) {
+			LightWeightStar	star = getLightWeight(number);
+			if (magrange.contains(star.mag())) {
+				tile->push_back(star);
+			}
+		}
+	}
+	if (maxindex < minindex) {
+		for (uint32_t number = 1; number < maxindex; number++) {
+			LightWeightStar	star = getLightWeight(number);
+			if (magrange.contains(star.mag())) {
+				tile->push_back(star);
+			}
+		}
+		for (uint32_t number = minindex; number < nstars(); number++) {
+			LightWeightStar	star = getLightWeight(number);
+			if (magrange.contains(star.mag())) {
+				tile->push_back(star);
+			}
+		}
+	}
+
+	// return stars
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "%u stars from zone %hu", tile->size(),
+		_zone);
+	
+	return StarTilePtr(tile);
 }
 
 } // namespace catalog

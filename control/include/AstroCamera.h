@@ -653,7 +653,7 @@ public:
 	virtual void	select(const std::string& name);
 	virtual std::string	filterName(size_t filterindex);
 	virtual State	getState() = 0;
-	bool	wait(float timeout);
+	virtual bool	wait(float timeout);
 private:
 	callback::CallbackSet	_callback;
 public:

@@ -108,5 +108,22 @@ std::set<std::string>	Catalog::starlist(const Catalog::starsetptr stars) {
 	return result;
 }
 
+/**
+ * \brief Basic implementation of Tile retrieval
+ *
+ * This method is quite inefficient because it retrieves stars first
+ * then turns them light weight stars. But it helps migration to fully
+ * implemented light weight stars, because it makes tiles available in
+ * all catalogs immediately.
+ */
+StarTilePtr	Catalog::findTile(const SkyWindow& window,
+			const MagnitudeRange& magrange) {
+	starsetptr	stars = find(window, magrange);
+	StarTile	*tile = new StarTile(window, stars->size());
+	// copy light weight stars
+	std::copy(stars->begin(), stars->end(), tile->begin());
+	return StarTilePtr(tile);
+}
+
 } // namespace catalog
 } // namespace astro

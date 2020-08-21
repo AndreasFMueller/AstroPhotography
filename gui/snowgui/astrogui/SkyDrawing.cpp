@@ -229,6 +229,37 @@ void	SkyDrawing::drawLine(QPainter& painter, const astro::RaDec& from,
 	}
 }
 
+void	SkyDrawing::drawStar(QPainter& painter, const LightWeightStar& star) {
+	// find azimuth and altitude
+	astro::AzmAlt	azmalt = convert((astro::RaDec)star);
+
+	// decide whether to draw the star at all
+	if (!visible(azmalt)) {
+		//debug(LOG_DEBUG, DEBUG_LOG, 0, "skipping star %s",
+		//	star.toString().c_str());
+		return;
+	}
+
+	// compute coordinates where to draw the star
+	QPointF	starcenter = convert(azmalt);
+
+	// compute the radius of the circle from the magnitude of the star
+	float	sr = 4 - star.mag() / 1.8;
+	if (sr < 0.8) {
+		sr = 0.8;
+	}
+	//debug(LOG_DEBUG, DEBUG_LOG, 0, "drawing star %s at %s r=%.1f",
+	//	star.toString().c_str(), S(azmalt).c_str(), sr);
+
+	// now prepare a path for the star
+	QPainterPath	starcircle;
+	starcircle.addEllipse(starcenter, sr, sr);
+
+	// draw the star
+	QColor	white(255, 255, 255);
+	painter.fillPath(starcircle, white);
+}
+
 /**
  * \brief Draw a star
  *
@@ -702,6 +733,12 @@ void	SkyDrawing::draw(QPainter& painter, QSize& size) {
 				drawStar(painter, *i);
 			}
 		}
+		if (_startile) {
+			for (auto i = _startile->begin(); i !=_startile->end();
+				i++) {
+				drawStar(painter, *i);
+			}
+		}
 	}
 
 	// draw solar system objects
@@ -808,6 +845,13 @@ void	SkyDrawing::useStars(Catalog::starsetptr stars) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "got stars");
 	std::lock_guard<std::recursive_mutex>	lock(_mutex);
 	_stars = stars;
+	redraw();
+}
+
+void	SkyDrawing::useStars(StarTilePtr startile) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "got stars");
+	std::lock_guard<std::recursive_mutex>	lock(_mutex);
+	_startile = startile;
 	redraw();
 }
 

@@ -66,16 +66,18 @@ SimFilterWheel::~SimFilterWheel() {
 /**
  * \brief Get the current filterwheel position
  *
- * This method has as a side effect to wait for the filterwheel to be idle
  */
 unsigned int	SimFilterWheel::currentPosition() {
 	std::unique_lock<std::mutex>	lock(_mutex);
 	// wait for the filterwheel to become idle
-	while (_currentstate != FilterWheel::idle) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "bad state, so we wait");
-		_idle_condition.wait(lock);
+	switch (_currentstate) {
+	case FilterWheel::idle:
+		return _currentposition;
+	case FilterWheel::moving:
+		throw BadState("Filterwheel moving");
+	case FilterWheel::unknown:
+		throw BadState("Filterwheel in unknown state");
 	}
-	return _currentposition;
 }
 
 /**
@@ -93,23 +95,23 @@ void    SimFilterWheel::select(size_t filterindex) {
 			"of filters");
 	}
 
-	// lock the data structures
-	std::unique_lock<std::mutex>	lock(_mutex);
+	{
+		// lock the data structures
+		std::unique_lock<std::mutex>	lock(_mutex);
 
-	// if the filterwheel is not idle, we cannot select
-	if (_currentstate != FilterWheel::idle) {
-		throw BadState("bad filter state");
+		// if the filterwheel is not idle, we cannot select
+		if (_currentstate != FilterWheel::idle) {
+			throw BadState("bad filter state");
+		}
+
+		// change the state to moving
+		_nextposition = filterindex;
 	}
-
-	// change the state to moving
-	_nextposition = filterindex;
-	_currentstate = FilterWheel::moving;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "moving from %d to %d", _currentposition,
+		_nextposition);
 
 	// notify all threads of the data change
 	_cond.notify_all();
-
-	// update the callback
-	callback(_currentstate);
 }
 
 /**
@@ -140,42 +142,57 @@ FilterWheel::State	SimFilterWheel::getState() {
 void	SimFilterWheel::run() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "sleep for 3 seconds until FW is ready");
 	std::unique_lock<std::mutex>	lock(_mutex);
-	while (!_terminate) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "new loop");
-		bool	check_new = true;
-		// check the current state
-		switch (_currentstate) {
-		case FilterWheel::idle:
-			// wait until something happens
-			check_new = false;
-			_idle_condition.notify_all();
-			_cond.wait(lock);
-			break;
-		case FilterWheel::moving:
-			// wait for move to complete
-			_cond.wait_for(lock, std::chrono::seconds(5));
-			debug(LOG_DEBUG, DEBUG_LOG, 0, "move complete");
-			break;
-		case FilterWheel::unknown:
-			// wait for fw to initialize
-			_cond.wait_for(lock, std::chrono::seconds(3));
-			debug(LOG_DEBUG, DEBUG_LOG, 0,
-				"FilterWheel initialized");
-			break;
-		}
-		// handle the case that the state has changed to terminate
-		if (_terminate) {
-			return;
-		}
-		// if we were moving or unknown, set the new idle state
-		if (check_new) {
-			debug(LOG_DEBUG, DEBUG_LOG, 0, "setting new state");
-			_currentstate = FilterWheel::idle;
-			_currentposition = _nextposition;
-			callback(_currentstate);
-			callback(_currentposition);
-		}
+	int	movetime = 0;
+	callback(_currentposition);
+	callback(_currentstate);
+
+	// initialization of the filterwheel
+	if (_currentstate == FilterWheel::unknown) {
+		_cond.wait_for(lock, std::chrono::seconds(3));
+		_currentstate = FilterWheel::idle;
+		_idle_condition.notify_all();
+		callback(_currentposition);
+		callback(_currentstate);
 	}
+
+	while (!_terminate) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "new selection");
+		if (_nextposition != _currentposition) {
+			callback(_nextposition);
+			_currentstate = FilterWheel::moving;
+			callback(_currentstate);
+			movetime = _nextposition - _currentposition;
+			while (movetime <= 0) {
+				movetime += 5;
+			}
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "movetime = %d",
+				movetime);
+			_cond.wait_for(lock, std::chrono::seconds(movetime));
+			_currentposition = _nextposition;
+			if (_terminate) {
+				return;
+			}
+			_currentstate = FilterWheel::idle;
+			_idle_condition.notify_all();
+		}
+		callback(_currentstate);
+		_cond.wait(lock);
+	}
+}
+
+/**
+ * \brief Reimplementation of wait
+ *
+ * This is possible because we have a more efficient way to find out whether
+ * the move is complete
+ *
+ * \param timeout	the time to wait at most for the wait
+ */
+bool	SimFilterWheel::wait(float timeout) {
+	int	milliseconds = 1000 * timeout;
+	std::unique_lock<std::mutex>	lock(_mutex);
+	return (std::cv_status::timeout == _idle_condition.wait_for(lock,
+		std::chrono::milliseconds(milliseconds)));
 }
 
 } // namespace simulator

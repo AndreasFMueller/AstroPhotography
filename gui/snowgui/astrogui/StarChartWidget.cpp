@@ -57,10 +57,15 @@ StarChartWidget::StarChartWidget(QWidget *parent) : QWidget(parent),
 	_gridstep_pixels = 128;
 	_time = 0;
 
-	qRegisterMetaType<astro::catalog::Catalog::starsetptr>("astro::catalog::Catalog::starsetptr");
-	qRegisterMetaType<astro::catalog::DeepSkyObjectSetPtr>("astro::catalog::DeepSkyObjectSetPtr");
+	qRegisterMetaType<astro::catalog::Catalog::starsetptr>(
+		"astro::catalog::Catalog::starsetptr");
+	qRegisterMetaType<astro::catalog::StarTilePtr>(
+		"astro::catalog::StarTilePtr");
+	qRegisterMetaType<astro::catalog::DeepSkyObjectSetPtr>(
+		"astro::catalog::DeepSkyObjectSetPtr");
 	qRegisterMetaType<astro::Angle>("astro::Angle");
-	qRegisterMetaType<snowgui::ImagerRectangle>("snowgui::ImagerRectangle");
+	qRegisterMetaType<snowgui::ImagerRectangle>(
+		"snowgui::ImagerRectangle");
 
 	setMouseTracking(true);
 
@@ -71,11 +76,15 @@ StarChartWidget::StarChartWidget(QWidget *parent) : QWidget(parent),
 
 
 	// launch a thread to retrieve the stars
-	SkyStarThread	*skystarthread = new SkyStarThread(this);
+	SkyStarThread	*skystarthread = new SkyStarThread(this, true);
 	connect(skystarthread,
 		SIGNAL(stars(astro::catalog::Catalog::starsetptr)),
 		this,
 		SLOT(useSky(astro::catalog::Catalog::starsetptr)));
+	connect(skystarthread,
+		SIGNAL(stars(astro::catalog::StarTilePtr)),
+		this,
+		SLOT(useSky(astro::catalog::StarTilePtr)));
 	connect(skystarthread, SIGNAL(finished()),
 		skystarthread, SLOT(deleteLater()));
 	skystarthread->start();
@@ -209,9 +218,20 @@ QPointF	StarChartWidget::convert(const astro::RaDec& radec) {
  * \param star		the star object to display
  */
 void	StarChartWidget::drawStar(QPainter& painter, const Star& star) {
+	drawStar(painter, LightWeightStar(star.position(2000), star.mag()));
+}
+
+/**
+ * \brief Draw a star
+ *
+ * \param painter	the QPainter to draw on
+ * \param star		the star object to display
+ */
+void	StarChartWidget::drawStar(QPainter& painter,
+	const LightWeightStar& star) {
 	//debug(LOG_DEBUG, DEBUG_LOG, 0, "draw star %s", star.toString().c_str());
 	// convert the position into a x/y coordinates
-	QPointF	p = convert(star.position(2000));
+	QPointF	p = convert((astro::RaDec)star);
 	//debug(LOG_DEBUG, DEBUG_LOG, 0, "Point: %s", p.toString().c_str());
 
 	// if the point is outside the widget rectangle, we quit
@@ -424,8 +444,8 @@ void	StarChartWidget::drawGrid(QPainter& painter) {
 	// draw RA grid lines
 	for (int ra = gridcalculator.minra(); ra <= gridcalculator.maxra(); ra++) {
 		astro::Angle	raangle = gridcalculator.ra(ra);
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "drawing ra grid line for RA %s",
-			raangle.hms().c_str());
+		//debug(LOG_DEBUG, DEBUG_LOG, 0, "drawing ra grid line for RA %s",
+		//	raangle.hms().c_str());
 		astro::TwoAngles	decrange = gridcalculator.angleRangeDEC(ra);
 		astro::Angle	step = (decrange.a2() - decrange.a1()) / steps;
 		for (int dec = 0; dec < steps; dec++) {
@@ -437,8 +457,8 @@ void	StarChartWidget::drawGrid(QPainter& painter) {
 	// draw DEC grid lines
 	for (int dec = gridcalculator.mindec(); dec <= gridcalculator.maxdec(); dec++) {
 		astro::Angle	decangle = gridcalculator.dec(dec);
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "drawing dec grid line for DEC %s",
-			decangle.dms().c_str());
+		//debug(LOG_DEBUG, DEBUG_LOG, 0, "drawing dec grid line for DEC %s",
+		//	decangle.dms().c_str());
 		astro::TwoAngles	rarange = gridcalculator.angleRangeRA(dec);
 		astro::Angle	step = (rarange.a2() - rarange.a1()) / steps;
 		for (int ra = 0; ra < steps; ra++) {
@@ -618,6 +638,12 @@ void	StarChartWidget::draw() {
 			drawStar(painter, *i);
 		}
 	}
+	if ((_state == astro::device::Mount::GOTO) && (_skytile)) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "adding sky stars");
+		for (auto i = _skytile->begin(); i != _skytile->end(); i++) {
+			drawStar(painter, *i);
+		}
+	}
 
 	// draw the rectangles
 	if (show_finder_rectangle()) {
@@ -740,12 +766,14 @@ void	StarChartWidget::directionChanged(astro::RaDec direction) {
 		startRetrieval();
 
 		// start the busy widget
+#if 0
 		const int busysize = 100;
 		_busywidget = new BusyWidget(this);
 		_busywidget->resize(busysize, busysize);
 		_busywidget->move(width()/2 - busysize/2,
 			height()/2 - busysize/2);
 		_busywidget->setVisible(true);
+#endif
 	}
 
 	// let the repaint event handle the redrawing. Doing the repainting
@@ -870,6 +898,13 @@ void	StarChartWidget::useSky(astro::catalog::Catalog::starsetptr sky) {
 	repaint();
 }
 
+void	StarChartWidget::useSky(astro::catalog::StarTilePtr skytile) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "receiving sky with %d stars",
+		skytile->size());
+	_skytile = skytile;
+	repaint();
+}
+
 /**
  * \brief Receive a set of deep sky objects
  *
@@ -891,6 +926,9 @@ void	StarChartWidget::workerFinished() {
 	// disconnect the retriever
 	disconnect(_retriever,
 		SIGNAL(starsReady(astro::catalog::Catalog::starsetptr)),
+		0, 0);
+	disconnect(_retriever,
+		SIGNAL(starsReady(astro::catalog::StarTilePtr)),
 		0, 0);
 	disconnect(_retriever, SIGNAL(finished()),
 		0, 0);

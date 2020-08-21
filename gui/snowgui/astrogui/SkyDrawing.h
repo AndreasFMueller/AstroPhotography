@@ -114,6 +114,7 @@ public:
 class SkyDrawing : public PlanetDrawing {
 	Q_GADGET
 	astro::catalog::Catalog::starsetptr	_stars;
+	astro::catalog::StarTilePtr	_startile;
 	std::recursive_mutex	_mutex;
 protected:
 	astro::AzmAltConverter	*_converter;
@@ -215,6 +216,7 @@ public:
 	virtual void	targetChanged(astro::RaDec);
 	virtual void	positionChanged(astro::LongLat);
 	virtual void	useStars(astro::catalog::Catalog::starsetptr);
+	virtual void	useStars(astro::catalog::StarTilePtr);
 
 protected:
 	float	_radius;
@@ -224,6 +226,7 @@ private:
 	void	drawLine(QPainter& painter, const astro::RaDec& from,
 			const astro::RaDec& to);
 	void	drawStar(QPainter& painter, const astro::catalog::Star& star);
+	void	drawStar(QPainter& painter, const astro::catalog::LightWeightStar& star);
 	void	drawTelescope(QPainter& painter);
 	void	drawTelescopeCoord(QPainter& painter);
 	void	drawAltaz(QPainter& painter);
