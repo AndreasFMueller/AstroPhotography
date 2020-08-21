@@ -68,8 +68,8 @@ class StarChartWidget : public QWidget, public PlanetDrawing {
 	Q_OBJECT
 
 	astro::catalog::Catalog::starsetptr	_stars;
+	astro::catalog::StarTilePtr		_startile;
 	astro::catalog::Catalog::starsetptr	_sky;
-	astro::catalog::StarTilePtr	_skytile;
 	astro::catalog::DeepSkyObjectSetPtr	_deepsky;
 	astro::catalog::OutlineCatalogPtr	_outlines;
 	astro::Angle	_resolution;	// angle per pixel
@@ -248,8 +248,8 @@ public slots:
 	void	orientationChanged(bool west);
 	void	stateChanged(astro::device::Mount::state_type);
 	void	useStars(astro::catalog::Catalog::starsetptr);
+	void	useStars(astro::catalog::StarTilePtr);
 	void	useSky(astro::catalog::Catalog::starsetptr);
-	void	useSky(astro::catalog::StarTilePtr);
 	void	useDeepSky(astro::catalog::DeepSkyObjectSetPtr);
 	void	workerFinished();
 	void	guiderResolution(astro::Angle);

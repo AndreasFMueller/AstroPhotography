@@ -1,5 +1,8 @@
 ChangeLog for the Qt GUI to Astrophotography
 
+20200821:
+	* switch to StarTile in StarChartWidget
+
 20200820:
 	* portability in HeartBeat.cpp
 

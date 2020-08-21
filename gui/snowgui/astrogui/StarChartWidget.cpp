@@ -81,10 +81,6 @@ StarChartWidget::StarChartWidget(QWidget *parent) : QWidget(parent),
 		SIGNAL(stars(astro::catalog::Catalog::starsetptr)),
 		this,
 		SLOT(useSky(astro::catalog::Catalog::starsetptr)));
-	connect(skystarthread,
-		SIGNAL(stars(astro::catalog::StarTilePtr)),
-		this,
-		SLOT(useSky(astro::catalog::StarTilePtr)));
 	connect(skystarthread, SIGNAL(finished()),
 		skystarthread, SLOT(deleteLater()));
 	skystarthread->start();
@@ -565,6 +561,10 @@ void	StarChartWidget::drawStars(QPainter& painter) {
 		for (auto i = _stars->begin(); i != _stars->end(); i++) {
 			drawStar(painter, *i);
 		}
+	} else if (_startile) {
+		for (auto i = _startile->begin(); i != _startile->end(); i++) {
+			drawStar(painter, *i);
+		}
 	} else {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "no stars");
 	}
@@ -638,12 +638,6 @@ void	StarChartWidget::draw() {
 			drawStar(painter, *i);
 		}
 	}
-	if ((_state == astro::device::Mount::GOTO) && (_skytile)) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "adding sky stars");
-		for (auto i = _skytile->begin(); i != _skytile->end(); i++) {
-			drawStar(painter, *i);
-		}
-	}
 
 	// draw the rectangles
 	if (show_finder_rectangle()) {
@@ -696,13 +690,17 @@ void	StarChartWidget::startRetrieval() {
 	// if no retriever is running, start one
 	if (NULL == _retriever) {
 		// get the stars from the catalog
-		_retriever = new StarChartRetriever();
+		_retriever = new StarChartRetriever(NULL, true);
 		_retriever->limit_magnitude(limit_magnitude());
 		_retriever->window(window);
 		connect(_retriever,
 			SIGNAL(starsReady(astro::catalog::Catalog::starsetptr)),
 			this,
 			SLOT(useStars(astro::catalog::Catalog::starsetptr)));
+		connect(_retriever,
+			SIGNAL(starsReady(astro::catalog::StarTilePtr)),
+			this,
+			SLOT(useStars(astro::catalog::StarTilePtr)));
 		connect(_retriever,
 			SIGNAL(finished()),
 			this,
@@ -898,10 +896,10 @@ void	StarChartWidget::useSky(astro::catalog::Catalog::starsetptr sky) {
 	repaint();
 }
 
-void	StarChartWidget::useSky(astro::catalog::StarTilePtr skytile) {
+void	StarChartWidget::useStars(astro::catalog::StarTilePtr startile) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "receiving sky with %d stars",
-		skytile->size());
-	_skytile = skytile;
+		startile->size());
+	_startile = startile;
 	repaint();
 }
 
