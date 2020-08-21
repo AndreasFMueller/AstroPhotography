@@ -1,6 +1,8 @@
 ChangeLog for the Astro project.
 
 20200821:
+	* introduce StarTile for lightweight stars
+	* fix SimMount movement logic
 	* fix locking error in SimFilterwheel
 
 20200820:
