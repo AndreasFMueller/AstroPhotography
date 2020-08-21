@@ -73,7 +73,7 @@ unsigned int	SimFilterWheel::currentPosition() {
 	// wait for the filterwheel to become idle
 	while (_currentstate != FilterWheel::idle) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "bad state, so we wait");
-		_cond.wait(lock);
+		_idle_condition.wait(lock);
 	}
 	return _currentposition;
 }
@@ -142,12 +142,13 @@ void	SimFilterWheel::run() {
 	std::unique_lock<std::mutex>	lock(_mutex);
 	while (!_terminate) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "new loop");
-		bool	has_new = true;
+		bool	check_new = true;
 		// check the current state
 		switch (_currentstate) {
 		case FilterWheel::idle:
 			// wait until something happens
-			has_new = false;
+			check_new = false;
+			_idle_condition.notify_all();
 			_cond.wait(lock);
 			break;
 		case FilterWheel::moving:
@@ -167,7 +168,7 @@ void	SimFilterWheel::run() {
 			return;
 		}
 		// if we were moving or unknown, set the new idle state
-		if (has_new) {
+		if (check_new) {
 			debug(LOG_DEBUG, DEBUG_LOG, 0, "setting new state");
 			_currentstate = FilterWheel::idle;
 			_currentposition = _nextposition;

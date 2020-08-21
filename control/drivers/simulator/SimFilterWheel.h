@@ -25,6 +25,7 @@ class SimFilterWheel : public FilterWheel {
 	std::thread	_thread;
 	std::mutex	_mutex;
 	std::condition_variable	_cond;
+	std::condition_variable	_idle_condition;
 	bool	_terminate;
 public:
 	SimFilterWheel(SimLocator& locator);
