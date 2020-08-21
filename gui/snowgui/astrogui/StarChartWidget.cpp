@@ -897,7 +897,7 @@ void	StarChartWidget::useSky(astro::catalog::Catalog::starsetptr sky) {
 }
 
 void	StarChartWidget::useStars(astro::catalog::StarTilePtr startile) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "receiving sky with %d stars",
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "receiving star tile with %d stars",
 		startile->size());
 	_startile = startile;
 	repaint();
