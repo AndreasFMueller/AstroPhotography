@@ -34,9 +34,20 @@ QsiCcd::QsiCcd(const CcdInfo& info, QsiCamera& camera)
 
 /**
  * \brief Destroy the CCD
+ *
+ * The destructor has to take care of the problem that the cooler may have
+ * a monitoring thread running and an exposure may be ongoing. The stop 
+ * method takes care of both of them
  */
 QsiCcd::~QsiCcd() {
-	// turn off dependent devices
+	stop();
+}
+
+/**
+ * \brief stop eny dependent threads
+ */
+void	QsiCcd::stop() {
+	// stop the cooler
 	if (_cooler) {
 		QsiCooler	*cooler = dynamic_cast<QsiCooler*>(&*_cooler);
 		if (cooler) {
@@ -298,6 +309,24 @@ ImagePtr	QsiCcd::getRawImage() {
 	START_STOPWATCH;
 	_camera.camera().put_LEDEnabled(true);
 	END_STOPWATCH("put_LEDEnabled()");
+
+	START_STOPWATCH;
+	try {
+		int	rc = 0;
+		switch (exposure.quality()) {
+		case Exposure::high:
+			rc = _camera.camera().put_ReadoutSpeed(QSICamera::FastReadout);
+			break;
+		case Exposure::fast:
+			rc = _camera.camera().put_ReadoutSpeed(QSICamera::HighImageQuality);
+			break;
+		}
+	} catch (const std::exception& x) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "cannot set readout speed: %s",
+			x.what());
+	}
+	END_STOPWATCH("put_ReadoutSpeed()");
+
 	START_STOPWATCH;
 	_camera.camera().get_ImageArraySize(x, y, z);
 	END_STOPWATCH("put_ImageArraySize()");

@@ -31,9 +31,7 @@ void	SimFocuser::main(SimFocuser *focuser) noexcept {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "end focuser thread");
 }
 
-SimFocuser::SimFocuser(SimLocator& locator)
-	: Focuser(DeviceName("focuser:simulator/focuser")),
-	  _locator(locator) {
+SimFocuser::SimFocuser() : Focuser(DeviceName("focuser:simulator/focuser")) {
 	_value = /* 10000 + */ (max() + min()) / 2;
 debug(LOG_DEBUG, DEBUG_LOG, 0, "focuser set to %d", _value);
 	target = _value;

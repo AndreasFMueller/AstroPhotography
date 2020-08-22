@@ -97,12 +97,16 @@ astro::camera::CcdState::State  convert(const ExposureState& state);
 
 ShutterState	convert(const astro::camera::Shutter::state& state);
 astro::camera::Shutter::state	convert(const ShutterState& state);
-
 std::string	state2string(ShutterState s);
 ShutterState	string2shutterstate(const std::string& s);
 
 ExposurePurpose	convert(const astro::camera::Exposure::purpose_t& state);
 astro::camera::Exposure::purpose_t	convert(const ExposurePurpose& state);
+
+astro::camera::Exposure::quality_t	convert(const ExposureQuality quality);
+ExposureQuality	convert(const astro::camera::Exposure::quality_t& quality);
+std::string	quality2string(const ExposureQuality& quality);
+ExposureQuality	string2quality(const std::string& s);
 
 typedef std::shared_ptr<ImageQueueEntry>	ImageQueueEntryPtr;
 

@@ -97,7 +97,7 @@ SimLocator::SimLocator() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "guideport: %s",
 		_guideport->name().toString().c_str());
 
-	_filterwheel = FilterWheelPtr(new SimFilterWheel(*this));
+	_filterwheel = FilterWheelPtr(new SimFilterWheel());
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "filterwheel: %s",
 		_filterwheel->name().toString().c_str());
 
@@ -105,7 +105,7 @@ SimLocator::SimLocator() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "cooler: %s",
 		_cooler->name().toString().c_str());
 
-	_focuser = FocuserPtr(new SimFocuser(*this));
+	_focuser = FocuserPtr(new SimFocuser());
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "focuser: %s",
 		_focuser->name().toString().c_str());
 

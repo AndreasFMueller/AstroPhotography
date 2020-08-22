@@ -32,12 +32,9 @@ void	SimFilterWheel::main(SimFilterWheel *filterwheel) noexcept {
 
 /**
  * \brief Construct a new Filterwheel object
- *
- * \param locator	the locator for simulator devices
  */
-SimFilterWheel::SimFilterWheel(SimLocator& locator)
-	: FilterWheel(DeviceName("filterwheel:simulator/filterwheel")),
-	  _locator(locator) {
+SimFilterWheel::SimFilterWheel()
+	: FilterWheel(DeviceName("filterwheel:simulator/filterwheel")) {
 	_currentposition = 0;
 	_nextposition = 0;
 	_currentstate = FilterWheel::unknown;

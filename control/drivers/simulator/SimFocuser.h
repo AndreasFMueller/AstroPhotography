@@ -14,7 +14,9 @@ namespace camera {
 namespace simulator {
 
 class SimFocuser : public Focuser {
+#if 0
 	SimLocator&	_locator;
+#endif
 	double	lastset;
 	long	target;
 	long	_value;
@@ -25,7 +27,7 @@ class SimFocuser : public Focuser {
 	std::mutex		_mutex;
 	std::condition_variable	_cond;
 public:
-	SimFocuser(SimLocator& locator);
+	SimFocuser();
 	virtual ~SimFocuser();
 	long	min();
 	long	max();

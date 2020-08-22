@@ -18,7 +18,6 @@ namespace simulator {
  * \brief The simulated filterwheel
  */
 class SimFilterWheel : public FilterWheel {
-	SimLocator&	_locator;
 	int	_currentposition;
 	int	_nextposition;
 	State	_currentstate;
@@ -28,7 +27,7 @@ class SimFilterWheel : public FilterWheel {
 	std::condition_variable	_idle_condition;
 	bool	_terminate;
 public:
-	SimFilterWheel(SimLocator& locator);
+	SimFilterWheel();
 	virtual ~SimFilterWheel();
 private:
 	static void	main(SimFilterWheel *filterwheel) noexcept;

@@ -23,6 +23,10 @@ module snowstar {
 		ExFLOOD,
 		ExPREVIEW
 	};
+	enum ExposureQuality {
+		ExQualityHIGH,
+		ExQualityFAST
+	};
 
 	/**
 	 * \brief Exposure request structure
@@ -76,6 +80,13 @@ module snowstar {
 		 * mode is 0x0, 1x1 is assumed.
 		 */
 		BinningMode	mode;
+		/**
+		 * \brief The exposure quality
+		 *
+		 * The quality can be either high or the image can be retrieved
+		 * quickly.
+		 */
+		ExposureQuality	quality;
 	};
 
 	// Device objects

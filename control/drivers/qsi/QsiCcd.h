@@ -27,6 +27,7 @@ private:
 	static void	start_main(QsiCcd *qsiccd) noexcept;
 	void	run();
 	void	wait_thread();
+	void	stop();
 public:
 	virtual CcdState::State	exposureStatus();
 	virtual void	cancelExposure();

@@ -144,6 +144,16 @@ public:
 static std::string	purpose2string(purpose_t p);
 static purpose_t	string2purpose(const std::string& p);
 
+	typedef enum quality_s { high, fast } quality_t;
+private:
+	quality_t	_quality;
+public:
+	void	quality(quality_t q) { _quality = q; }
+	quality_t	quality() const { return _quality; }
+
+static std::string	quality2string(quality_t q);
+static quality_t	string2quality(const std::string& q);
+
 	// Constructors
 	Exposure();
 	Exposure(const astro::image::ImageRectangle& _frame,

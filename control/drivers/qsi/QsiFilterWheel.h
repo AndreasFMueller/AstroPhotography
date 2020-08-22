@@ -51,7 +51,7 @@ private:
 	void	move(size_t newposition);
 	static void	moveposition(QsiFilterWheel *filterwheel,
 				size_t newposition) noexcept;
-	void	wait();
+	void	threadwait();
 	friend class QsiCamera;
 };
 

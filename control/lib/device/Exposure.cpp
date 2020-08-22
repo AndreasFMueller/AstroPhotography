@@ -15,14 +15,15 @@ namespace astro {
 namespace camera {
 
 Exposure::Exposure() : _exposuretime(1.), _gain(-1.), _limit(INFINITY),
-	_mode(1,1), _shutter(Shutter::OPEN), _purpose(Exposure::light) {
+	_mode(1,1), _shutter(Shutter::OPEN), _purpose(Exposure::light),
+	_quality(Exposure::fast) {
 }
 
 Exposure::Exposure(const ImageRectangle& frame,
 	float exposuretime)
                 : _frame(frame), _exposuretime(exposuretime), _gain(-1.),
 		  _limit(INFINITY), _shutter(Shutter::OPEN),
-		  _purpose(Exposure::light) {
+		  _purpose(Exposure::light), _quality(Exposure::fast) {
 }
 
 std::string	Exposure::toString() const {
@@ -80,6 +81,10 @@ void	Exposure::addToImage(ImageBase& image) const {
 	// purpose information
 	image.setMetadata(FITSKeywords::meta(std::string("PURPOSE"),
 		purpose2string(_purpose)));
+
+	// quality information
+	image.setMetadata(FITSKeywords::meta(std::string("QUALITY"),
+		quality2string(_quality)));
 }
 
 bool	Exposure::needsshutteropen() const {
@@ -150,6 +155,28 @@ Exposure::purpose_t	Exposure::string2purpose(const std::string& p) {
 		return preview;
 	}
 	std::string	msg = stringprintf("unknown purpose %s", p.c_str());
+	throw std::runtime_error(msg);
+}
+
+std::string	Exposure::quality2string(quality_t q) {
+	switch (q) {
+	case high:
+		return std::string("high");
+	case fast:
+		return std::string("flat");
+	}
+	std::string	msg = stringprintf("unknown quality %d", q);
+	throw std::runtime_error(msg);
+}
+
+Exposure::quality_t	Exposure::string2quality(const std::string& q) {
+	if (q == "high") {
+		return high;
+	}
+	if (q == "fast") {
+		return fast;
+	}
+	std::string	msg = stringprintf("unknown quality %s", q.c_str());
 	throw std::runtime_error(msg);
 }
 

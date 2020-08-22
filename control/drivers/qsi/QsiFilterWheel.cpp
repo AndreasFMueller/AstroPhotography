@@ -17,6 +17,12 @@ namespace qsi {
 /**
  * \brief Construct the QsiFilterWheel
  *
+ * During the construction of the filterwheel object, the names of the
+ * filters are retrieved through the API. But the names are not stored
+ * in the camera, but instead in ~/.QSIConfig configuration file in the
+ * users home directory. This also means that the filter names need to
+ * be set on each system on which the camera is used.
+ *
  * \param camera	camera containing the filter wheel.
  */
 QsiFilterWheel::QsiFilterWheel(QsiCamera& camera)
@@ -59,13 +65,17 @@ QsiFilterWheel::QsiFilterWheel(QsiCamera& camera)
  * \brief Destroy the filter wheel
  */
 QsiFilterWheel::~QsiFilterWheel() {
-	wait();
+	threadwait();
 }
 
 /**
  * \brief Wait for the move thread to complete
+ *
+ * The movement of the filterwheel cannot be cancelled, so we have to wait
+ * for completion. But since the movement usually last less than a second,
+ * isn't really much of an issue.
  */
-void	QsiFilterWheel::wait() {
+void	QsiFilterWheel::threadwait() {
 	if (_thread.joinable()) {
 		_thread.join();
 	}
@@ -80,6 +90,11 @@ unsigned int	QsiFilterWheel::nFilters0() {
 
 /**
  * \brief find the current position
+ *
+ * This method usually returns the cache filter position, the exception
+ * being if the camera is in an unknown state, which it is after startup.
+ * In that case the camera is queried and the filter wheel position is
+ * retrieved from the camera.
  */
 unsigned int	QsiFilterWheel::currentPosition() {
 	FilterWheel::State	state = lastState;
@@ -203,8 +218,8 @@ void	QsiFilterWheel::select(size_t filterindex) {
 
 	// if we get here, then the filterwheel is idle. However, there
 	// still could be a thread maybe in terminated state, so we do
-	// the cleanup
-	wait();
+	// the cleanup just for good measure
+	threadwait();
 
 	// start moving by starting the thread that does the moving
 	debug(LOG_DEBUG, DEBUG_LOG, 0,
@@ -276,7 +291,7 @@ FilterWheel::State	QsiFilterWheel::getState() {
 	// if we get to this point the last known state was 'unknown', and
 	// we are recovering from some accident that may have happend in 
 	// the filterwheel thread. Normally, the filterwheel thread would
-	// set the position and the state
+	// set the position and the state.
 
 	// query the position
 	try {

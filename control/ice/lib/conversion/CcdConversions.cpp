@@ -75,6 +75,7 @@ Exposure	convert(const astro::camera::Exposure& exp) {
 	exposure.shutter = convert(exp.shutter());
 	exposure.purpose = convert(exp.purpose());
 	exposure.mode = convert(exp.mode());
+	exposure.quality = convert(exp.quality());
 	return exposure;
 }
 
@@ -87,6 +88,7 @@ astro::camera::Exposure	convert(const Exposure& exposure) {
 	exp.shutter(convert(exposure.shutter));
 	exp.purpose(convert(exposure.purpose));
 	exp.mode(convert(exposure.mode));
+	exp.quality(convert(exposure.quality));
 	return exp;
 }
 
@@ -211,6 +213,46 @@ astro::camera::Exposure::purpose_t      convert(const ExposurePurpose& purpose) 
 		return astro::camera::Exposure::preview;
 	}
 	throw std::runtime_error("unknown exposure purpose");
+}
+
+astro::camera::Exposure::quality_t	convert(const ExposureQuality& quality) {
+	switch (quality) {
+	case ExQualityHIGH:
+		return astro::camera::Exposure::high;
+	case ExQualityFAST:
+		return astro::camera::Exposure::fast;
+	}
+	throw std::runtime_error("unknown quality");
+}
+
+ExposureQuality	convert(const astro::camera::Exposure::quality_t quality) {
+	switch (quality) {
+	case astro::camera::Exposure::high:
+		return ExQualityHIGH;
+	case astro::camera::Exposure::fast:
+		return ExQualityFAST;
+	}
+	throw std::runtime_error("unknown quality");
+}
+
+std::string	quality2string(const ExposureQuality& quality) {
+	switch (quality) {
+	case ExQualityHIGH:
+		return std::string("high");
+	case ExQualityFAST:
+		return std::string("fast");
+	}
+	throw std::runtime_error("unknown quality");
+}
+
+ExposureQuality	string2quality(const std::string& s) {
+	if (s == "high") {
+		return ExQualityHIGH;
+	}
+	if (s == "fast") {
+		return ExQualityFAST;
+	}
+	throw std::runtime_error("unknown quality");
 }
 
 std::pair<float, float>	convert(const Interval& interval) {

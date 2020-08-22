@@ -121,12 +121,9 @@ QsiCamera::~QsiCamera() {
 	if (_ccd) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "stopping CCD");
 		try {
-			if (CcdState::exposing == _ccd->exposureStatus()) {
-				_ccd->cancelExposure();
-				QsiCcd	*ccd = dynamic_cast<QsiCcd*>(&*_ccd);
-				if (ccd) {
-					ccd->wait_thread();
-				}
+			QsiCcd	*qsiccd = dynamic_cast<QsiCcd*>(&*_ccd);
+			if (NULL != qsiccd) {
+				qsiccd->stop();
 			}
 		} catch (const std::exception& x) {
 			debug(LOG_ERR, DEBUG_LOG, 0, "cannot stop ccd: %s",
@@ -142,7 +139,7 @@ QsiCamera::~QsiCamera() {
 		try {
 			QsiFilterWheel	*fw = dynamic_cast<QsiFilterWheel*>(&*_filterwheel);
 			if (fw) {
-				fw->wait();
+				fw->threadwait();
 			}
 		} catch (const std::exception& x) {
 			debug(LOG_ERR, DEBUG_LOG, 0, "cannot stop filterwheel:"
