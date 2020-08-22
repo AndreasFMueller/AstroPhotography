@@ -78,7 +78,7 @@ size_t	FITS::writeFITS(ImagePtr image, void **buffer, size_t *buffersize) {
 	char	filename[1024];
 	char	*tmpdir = getenv("TMPDIR");
 	if (tmpdir) {
-		stringprintf(filename, "%s/XXXXXX.fits", tmpdir);
+		snprintf(filename, sizeof(filename), "%s/XXXXXX.fits", tmpdir);
 	} else {
 		strcpy(filename, "/var/tmp/XXXXXX.fits");
 	}

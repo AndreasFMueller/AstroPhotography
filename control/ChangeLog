@@ -1,5 +1,11 @@
 ChangeLog for the Astro project.
 
+20200822:
+	* add quality to exposure in CCD, simulator, qsi, tasks (task table
+	  needs to be upgraded)
+	* fix some bugs in noise model of simulator
+	* fix a bug in FITS.cpp
+
 20200821:
 	* introduce StarTile for lightweight stars
 	* fix SimMount movement logic
