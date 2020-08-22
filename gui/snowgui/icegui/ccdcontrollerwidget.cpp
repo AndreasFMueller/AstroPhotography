@@ -674,10 +674,10 @@ void	ccdcontrollerwidget::displayQuality(Exposure::quality_t q) {
 	switch (q) {
 	case astro::camera::Exposure::fast:
 		ui->qualityBox->setCurrentIndex(0);
-		return;
+		break;
 	case astro::camera::Exposure::high:
 		ui->qualityBox->setCurrentIndex(1);
-		return;
+		break;
 	}
 	ui->qualityBox->blockSignals(false);
 }
