@@ -137,6 +137,10 @@ void	ImageRepo::scan_file(const std::string& filename) {
 	try {
 		imageinfo.purpose = (std::string)infile.getMetadata("PURPOSE");
 	} catch (...) { }
+	imageinfo.quality = "high";
+	try {
+		imageinfo.purpose = (std::string)infile.getMetadata("QUALITY");
+	} catch (...) { }
 	imageinfo.bayer = "    ";
 	try {
 		imageinfo.bayer
@@ -314,6 +318,7 @@ static ImageEnvelope	convert(const ImageRecord& imageinfo,
 	result.exposuretime(imageinfo.exposuretime);
 	result.temperature(imageinfo.temperature);
 	result.purpose(Exposure::string2purpose(imageinfo.purpose));
+	result.quality(Exposure::string2quality(imageinfo.quality));
 	result.filter(imageinfo.filter);
 	result.bayer(imageinfo.bayer);
 	result.observation((time_t)FITSdate(imageinfo.observation));
@@ -405,6 +410,10 @@ long	ImageRepo::save(ImagePtr image) {
 	try {
 		imageinfo.purpose
 			= (std::string)image->getMetadata("PURPOSE");
+	} catch (...) { }
+	try {
+		imageinfo.quality
+			= (std::string)image->getMetadata("QUALITY");
 	} catch (...) { }
 	try {
 		imageinfo.filter

@@ -22,6 +22,7 @@ ImageInfo::ImageInfo() {
 	exposuretime = 0;
 	temperature = 0;
 	purpose = "light";
+	quality = "high";
 	bayer = "    ";
 	observation = "1970-01-01T00:00:00.000";
 	xbin = 1;
@@ -43,6 +44,7 @@ bool	ImageInfo::operator==(const ImageInfo& other) const {
 	if (exposuretime != other.exposuretime) { return false; }
 	if (temperature != other.temperature) { return false; }
 	if (purpose != other.purpose) { return false; }
+	if (quality != other.quality) { return false; }
 	if (filter != other.filter) { return false; }
 	if (bayer != other.bayer) { return false; }
 	if (observation != other.observation) { return false; }
@@ -76,6 +78,7 @@ std::string	ImageTableAdapter::createstatement() {
 		"    exposuretime float not null default 1,\n"
 		"    temperature float not null default 0,\n"
 		"    purpose char(5) not null default 'light',\n"
+		"    quality char(5) not null default 'high',\n"
 		"    filter varchar(128) not null default '',\n"
 		"    bayer char(4) not null default '    ',\n"
 		"    focus int not null default 0,\n"
@@ -104,6 +107,7 @@ ImageRecord	ImageTableAdapter::row_to_object(int objectid,
 	record.exposuretime = row["exposuretime"]->doubleValue();
 	record.temperature = row["temperature"]->doubleValue();
 	record.purpose = row["purpose"]->stringValue();
+	record.quality = row["quality"]->stringValue();
 	record.filter = row["filter"]->stringValue();
 	record.bayer = row["bayer"]->stringValue();
 	record.focus = row["focus"]->intValue();
@@ -128,6 +132,7 @@ UpdateSpec	ImageTableAdapter::object_to_updatespec(const ImageRecord& imagerec) 
 	spec.insert(Field("exposuretime", factory.get(imagerec.exposuretime)));
 	spec.insert(Field("temperature", factory.get(imagerec.temperature)));
 	spec.insert(Field("purpose", factory.get(imagerec.purpose)));
+	spec.insert(Field("quality", factory.get(imagerec.quality)));
 	spec.insert(Field("filter", factory.get(imagerec.filter)));
 	spec.insert(Field("bayer", factory.get(imagerec.bayer)));
 	spec.insert(Field("focus", factory.get(imagerec.focus)));
