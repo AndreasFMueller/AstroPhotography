@@ -26,6 +26,12 @@ public:
 	astro::camera::Exposure::purpose_t	purpose() const { return _purpose; }
 	void	purpose(astro::camera::Exposure::purpose_t p) { _purpose = p; }
 
+private:
+	astro::camera::Exposure::quality_t	_quality;
+public:
+	astro::camera::Exposure::quality_t	quality() const { return _quality; }
+	void	quality(astro::camera::Exposure::quality_t p) { _quality = p; }
+
 	// name of the camera that took the image
 private:
 	std::string	_camera;
@@ -143,6 +149,13 @@ private:
 public:
 	astro::camera::Exposure::purpose_t	purpose() const { return _purpose; }
 	void	purpose(astro::camera::Exposure::purpose_t c) { _purpose = c; }
+
+	// quality
+private:
+	astro::camera::Exposure::quality_t	_quality;
+public:
+	astro::camera::Exposure::quality_t	quality() const { return _quality; }
+	void	quality(astro::camera::Exposure::quality_t c) { _quality = c; }
 
 private:
 	std::string	_filter;

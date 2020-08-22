@@ -37,6 +37,7 @@ public:
 	int	biny;
 	int	shutter;
 	int	purpose;
+	int	quality;
 	std::string	filtername;
 	double	temperature;
 	std::string	taskserver;

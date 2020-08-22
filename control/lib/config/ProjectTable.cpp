@@ -174,6 +174,7 @@ std::string	PartTableAdapter::createstatement() {
 		"    biny integer not null,\n"
 		"    shutter integer not null,\n"
 		"    purpose integer not null,\n"
+		"    quality integer not null,\n"
 		"    filtername varchar(32) not null,\n"
 		"    temperature float not null,\n"
 		"    taskserver varchar(64) not null,\n"
@@ -204,6 +205,7 @@ PartRecord	PartTableAdapter::row_to_object(int objectid, const Row& row) {
 	record.biny = row["biny"]->intValue();
 	record.shutter = row["shutter"]->intValue();
 	record.purpose = row["purpose"]->intValue();
+	record.quality = row["quality"]->intValue();
 	record.filtername = row["filtername"]->stringValue();
 	record.temperature = row["temperature"]->doubleValue();
 	record.taskserver = row["taskserver"]->stringValue();
@@ -229,6 +231,7 @@ UpdateSpec	PartTableAdapter::object_to_updatespec(const PartRecord& part) {
 	spec.insert(Field("biny", factory.get(part.biny)));
 	spec.insert(Field("shutter", factory.get(part.shutter)));
 	spec.insert(Field("purpose", factory.get(part.purpose)));
+	spec.insert(Field("quality", factory.get(part.quality)));
 	spec.insert(Field("filtername", factory.get(part.filtername)));
 	spec.insert(Field("temperature", factory.get(part.temperature)));
 	spec.insert(Field("taskserver", factory.get(part.taskserver)));
@@ -256,6 +259,7 @@ PartInfo::operator	Part() const {
 	exposure.shutter((shutter)	? astro::camera::Shutter::OPEN
 					: astro::camera::Shutter::CLOSED);
 	exposure.purpose((astro::camera::Exposure::purpose_t)purpose);
+	exposure.quality((astro::camera::Exposure::quality_t)quality);
 	part.exposure(exposure);
 	part.filtername(filtername);
 	part.temperature(temperature);
@@ -289,6 +293,7 @@ PartInfo::PartInfo(const Part& part) {
 		break;
 	}
 	purpose = part.exposure().purpose();
+	quality = part.exposure().quality();
 	filtername = part.filtername();
 	temperature = part.temperature();
 	taskserver = part.taskserver();
