@@ -163,7 +163,7 @@ std::string	Exposure::quality2string(quality_t q) {
 	case high:
 		return std::string("high");
 	case fast:
-		return std::string("flat");
+		return std::string("fast");
 	}
 	std::string	msg = stringprintf("unknown quality %d", q);
 	throw std::runtime_error(msg);

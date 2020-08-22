@@ -54,6 +54,8 @@ ccdcontrollerwidget::ccdcontrollerwidget(QWidget *parent) :
 		this, SLOT(guiChanged()));
 	connect(ui->purposeBox, SIGNAL(currentIndexChanged(int)),
 		this, SLOT(guiChanged()));
+	connect(ui->qualityBox, SIGNAL(currentIndexChanged(int)),
+		this, SLOT(guiChanged()));
 
 	connect(ui->captureButton, SIGNAL(clicked()),
 		this, SLOT(captureClicked()));
@@ -405,6 +407,7 @@ void	ccdcontrollerwidget::displayExposure(Exposure e) {
 	displayBinning(e.mode());
 	displayExposureTime(e.exposuretime());
 	displayPurpose(e.purpose());
+	displayQuality(e.quality());
 	displayShutter(e.shutter());
 }
 
@@ -611,6 +614,24 @@ Exposure::purpose_t	ccdcontrollerwidget::getPurpose(int index) {
 }
 
 /**
+ * \brief Get the quality from the menu index
+ *
+ * \param index		image quality as entry number in the combo box list
+ */
+Exposure::quality_t	ccdcontrollerwidget::getQuality(int index) {
+	switch (index) {
+	case 0:	return Exposure::fast;
+	case 1:	return Exposure::high;
+	default:
+		break;
+	}
+	std::string	msg = astro::stringprintf("invalid quality index: %d",
+		index);
+	debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+	throw std::range_error(msg);
+}
+
+/**
  * \brief Display the new purpose
  *
  * This method does not send any signals
@@ -637,6 +658,43 @@ void	ccdcontrollerwidget::setPurpose(Exposure::purpose_t p) {
 		return;
 	}
 	displayPurpose(p);
+	emit exposureChanged(_exposure);
+}
+
+/**
+ * \brief Display the new quality
+ *
+ * This method does not send any signals
+ *
+ * \param q	quality
+ */
+void	ccdcontrollerwidget::displayQuality(Exposure::quality_t q) {
+	_exposure.quality(q);
+	ui->qualityBox->blockSignals(true);
+	switch (q) {
+	case astro::camera::Exposure::fast:
+		ui->qualityBox->setCurrentIndex(0);
+		return;
+	case astro::camera::Exposure::high:
+		ui->qualityBox->setCurrentIndex(1);
+		return;
+	}
+	ui->qualityBox->blockSignals(false);
+}
+
+/**
+ * \brief Set a new quality for the next exposure
+ *
+ * This method sets the new quality and then sends the exposureChanged()
+ * signal.
+ *
+ * \param q	quality
+ */
+void	ccdcontrollerwidget::setQuality(Exposure::quality_t q) {
+	if (_exposure.quality() == q) {
+		return;
+	}
+	displayQuality(q);
 	emit exposureChanged(_exposure);
 }
 
@@ -689,6 +747,9 @@ void	ccdcontrollerwidget::guiChanged() {
 	}
 	if (sender() == ui->purposeBox) {
 		displayPurpose(getPurpose(ui->purposeBox->currentIndex()));
+	}
+	if (sender() == ui->qualityBox) {
+		displayQuality(getQuality(ui->qualityBox->currentIndex()));
 	}
 	if (sender() == ui->shutterOpenBox) {
 		displayShutter(ui->shutterOpenBox->isChecked()

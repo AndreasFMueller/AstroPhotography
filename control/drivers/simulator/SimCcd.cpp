@@ -166,8 +166,11 @@ void	SimCcd::createimage() {
 	// color (filterwheel)
 	starcamera.colorfactor(_locator.filterwheel()->currentPosition());
 
-	// temperature influence on noise
-	starcamera.noise(0.2 * exp2(-_locator.simcooler()->belowambient()));
+	// temperature influence on noise, but also the requested quality
+	double	nf = (exposure.quality() == Exposure::high) ? 0.01 : 0.04;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "quality %s: noise %f",
+		Exposure::quality2string(exposure.quality()).c_str(), nf);
+	starcamera.noise(nf * exp2(-_locator.simcooler()->belowambient()));
 
 	// focuser effect
 	double	radius = _locator.simfocuser()->radius();

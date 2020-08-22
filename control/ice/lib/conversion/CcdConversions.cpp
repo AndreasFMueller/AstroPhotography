@@ -225,7 +225,7 @@ astro::camera::Exposure::quality_t	convert(const ExposureQuality& quality) {
 	throw std::runtime_error("unknown quality");
 }
 
-ExposureQuality	convert(const astro::camera::Exposure::quality_t quality) {
+ExposureQuality	convert(const astro::camera::Exposure::quality_t& quality) {
 	switch (quality) {
 	case astro::camera::Exposure::high:
 		return ExQualityHIGH;

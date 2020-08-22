@@ -178,6 +178,8 @@ private:
 	void	displayExposureTime(double);
 	astro::camera::Exposure::purpose_t	getPurpose(int index);
 	void	displayPurpose(astro::camera::Exposure::purpose_t);
+	astro::camera::Exposure::quality_t	getQuality(int index);
+	void	displayQuality(astro::camera::Exposure::quality_t);
 	void	displayShutter(astro::camera::Shutter::state);
 	void	displayFrame(astro::image::ImageRectangle);
 
@@ -194,6 +196,7 @@ public slots:
 	void	setBinning(astro::image::Binning);
 	void	setExposureTime(double);
 	void	setPurpose(astro::camera::Exposure::purpose_t);
+	void	setQuality(astro::camera::Exposure::quality_t);
 	void	setShutter(astro::camera::Shutter::state);
 	void	setFrame(astro::image::ImageRectangle);
 	void	setSubframe(astro::image::ImageRectangle);

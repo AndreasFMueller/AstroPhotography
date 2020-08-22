@@ -76,21 +76,25 @@ void	StarCameraBase::addHotPixels(unsigned int npixels) {
 
 static double	inverf(double y) {
 	//debug(LOG_DEBUG, DEBUG_LOG, 0, "y = %f", y);
-	double	x = y - 0.5;
-	double	m = 2 / sqrt(M_PI);
+	double	z = y - 0.5;
+	double	x = 0;
+	const double	m = 2 / sqrt(M_PI);
 	double	delta = 1;
 	int	counter = 0;
-	while ((counter++ < maxiterations) && (delta > epsilon)) {
-		delta = (erf(x) - y) / (m * exp(-x * x));
+	while ((counter++ < maxiterations) && (fabs(delta) > epsilon)) {
+		delta = (erf(x) - z) / (m * exp(-x * x));
 		x -= delta;
 		//debug(LOG_DEBUG, DEBUG_LOG, 0, "x = erf(y) = %f", x);
 	}
+	//debug(LOG_DEBUG, DEBUG_LOG, 0, "x = %f, erf(x) = %f, y = %f (%d)", x,
+	//	erf(x), y, counter);
+	//debug(LOG_DEBUG, DEBUG_LOG, 0, "y = %f, x = %f", y, x);
 	return x;
 }
 
 double	StarCameraBase::noisevalue() const {
-	double	x = random() / (double)0xffffffff;
-	return _noise * inverf(x);
+	double	y = random() / (double)RAND_MAX;
+	return _noise * (1 + inverf(y)) * 0.1;
 }
 
 
@@ -364,8 +368,11 @@ void	StarCameraBase::addStarIntensities(Image<double>& image,
 
 /**
  * \brief Add noise to the image
+ *
+ * \param image		the image to be modified with noise
  */
 void	StarCameraBase::addnoise(Image<double>& image) const {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "adding noise %f", _noise);
 	int	width = image.size().width();
 	int	height = image.size().height();
 	for (int x = 0; x < width; x++) {
@@ -382,6 +389,9 @@ void	StarCameraBase::addnoise(Image<double>& image) const {
  * Rescale the image so that all pixel values lie between 0 and the
  * scale argument. This is done by cutting of all values below 0
  * and above <scale>
+ *
+ * \param image		the image to be modified
+ * \param scale		the scale factor
  */
 void	StarCameraBase::rescale(Image<double>& image, double scale) const {
 	int	width = image.size().width();
