@@ -181,13 +181,15 @@ void	QsiCcd::startExposure(const Exposure& exposure) {
 
 		// get shutter info
 		bool	light = (Ccd::exposure.shutter() == Shutter::OPEN);
+		// round the exposure time to 100us to make sure we are inside
+		// the limits of the library
+		double	exposuretime
+			= round(10000 * Ccd::exposure.exposuretime()) / 10000.;
 		START_STOPWATCH;
-		_camera.camera().StartExposure(Ccd::exposure.exposuretime(),
-			light);
-		END_STOPWATCH("StartExposure()()");
+		_camera.camera().StartExposure(exposuretime, light);
+		END_STOPWATCH("StartExposure()");
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "%.2fsec %s exposure started",
-			Ccd::exposure.exposuretime(),
-			(light) ? "light" : "dark");
+			exposuretime, (light) ? "light" : "dark");
 	} catch (const std::exception& x) {
 		std::string	msg = stringprintf("exposure %s: %s",
 			Ccd::exposure.toString().c_str(), x.what());

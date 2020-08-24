@@ -32,6 +32,8 @@ SimCamera::SimCamera(SimLocator& locator)
 		ccdi.shutter(true);
 		ccdi.pixelwidth(0.000006);
 		ccdi.pixelheight(0.000006);
+		ccdi.minexposuretime(0.032);
+		ccdi.maxexposuretime(7200);
 		ccdinfo.push_back(ccdi);
 	}
 	// guide CCD
@@ -55,6 +57,8 @@ SimCamera::SimCamera(SimLocator& locator)
 		ccdi.shutter(false);
 		ccdi.pixelwidth(0.000003);
 		ccdi.pixelheight(0.000003);
+		ccdi.minexposuretime(0.03);
+		ccdi.maxexposuretime(3000);
 		ccdinfo.push_back(ccdi);
 	}
 }

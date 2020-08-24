@@ -76,7 +76,7 @@ void	StarCameraBase::addHotPixels(unsigned int npixels) {
 
 static double	inverf(double y) {
 	//debug(LOG_DEBUG, DEBUG_LOG, 0, "y = %f", y);
-	double	z = y - 0.5;
+	double	z = 2 * (y - 0.5);
 	double	x = 0;
 	const double	m = 2 / sqrt(M_PI);
 	double	delta = 1;
@@ -94,7 +94,7 @@ static double	inverf(double y) {
 
 double	StarCameraBase::noisevalue() const {
 	double	y = random() / (double)RAND_MAX;
-	return _noise * (1 + inverf(y)) * 0.1;
+	return _noise * (4 + inverf(y)) * 0.1;
 }
 
 

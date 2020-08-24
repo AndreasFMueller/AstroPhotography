@@ -1,5 +1,11 @@
 ChangeLog for the Astro project.
 
+20200824:
+	* fix a problem with the QSI library that results from the use of
+	  double for exposure time in the QSI library and float in this project
+	* fix a problem with the computation of the noise distribution in
+	  the simulator driver
+
 20200822:
 	* add quality to exposure in CCD, simulator, qsi, tasks (task table
 	  needs to be upgraded)

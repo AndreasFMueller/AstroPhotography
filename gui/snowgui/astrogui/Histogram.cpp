@@ -51,7 +51,7 @@ int	HistogramBase::bucketindex(int width, int x) const {
 
 double	HistogramBase::value(int y) const {
 	if (_logarithmic) {
-		if (y > 0) {
+		if (y > 1) {
 			return log10(y);
 		}
 		return 0;
@@ -64,7 +64,8 @@ double	HistogramBase::value(int y) const {
 //////////////////////////////////////////////////////////////////////
 template<>
 Histogram<double>::Histogram(int size) : HistogramBase(size) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "creating new mono histogram");
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "creating new mono histogram size %d",
+		size);
 	int	l = size;
 	_buckets = new std::atomic<int>[l];
 	for (int i = 0; i < l; i++) {

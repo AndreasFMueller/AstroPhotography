@@ -696,11 +696,13 @@ void	StarChartWidget::startRetrieval() {
 		connect(_retriever,
 			SIGNAL(starsReady(astro::catalog::Catalog::starsetptr)),
 			this,
-			SLOT(useStars(astro::catalog::Catalog::starsetptr)));
+			SLOT(useStars(astro::catalog::Catalog::starsetptr)),
+			Qt::QueuedConnection);
 		connect(_retriever,
 			SIGNAL(starsReady(astro::catalog::StarTilePtr)),
 			this,
-			SLOT(useStars(astro::catalog::StarTilePtr)));
+			SLOT(useStars(astro::catalog::StarTilePtr)),
+			Qt::QueuedConnection);
 		connect(_retriever,
 			SIGNAL(finished()),
 			this,

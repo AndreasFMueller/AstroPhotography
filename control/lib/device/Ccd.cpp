@@ -194,6 +194,7 @@ void    Ccd::startExposure(const Exposure& _exposure) {
 		exposure.frame(info.size().containing(exposure.frame()));
         }
 
+#if 1
 	// make sure the exposure time is in the interval specified in 
 	// the ccdinfo
 	if (exposure.exposuretime() > info.maxexposuretime()) {
@@ -202,6 +203,16 @@ void    Ccd::startExposure(const Exposure& _exposure) {
 	if (exposure.exposuretime() < info.minexposuretime()) {
 		exposure.exposuretime(info.minexposuretime());
 	}
+#else
+	if ((exposure.exposuretime() < info.minexposuretime())
+		|| (exposure.exposuretime() > info.maxexposuretime())) {
+		std::string	msg = stringprintf("exposure time %f out of "
+			"range [%f,%f]",  exposure.exposuretime(),
+			info.minexposuretime(),
+			info.maxexposuretime());
+		debug(LOG_ERR, DEBUG_LOG, 0, "bad exposure time range");
+	}
+#endif
 
 	// remember the start time of the exposure, this will be useful
 	// if we later want to wait for the exposure to complete.

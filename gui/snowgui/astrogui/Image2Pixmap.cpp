@@ -187,7 +187,13 @@ class GainAdapter : public BasicGainAdapter {
 		int	startx = x << -_scale;
 		int	starty = y << -_scale;
 		int	endx = startx + (1 << -_scale);
+		if (endx > _image.getSize().width()) {
+			endx = _image.getSize().width();
+		}
 		int	endy = starty + (1 << -_scale);
+		if (endy > _image.getSize().height()) {
+			endy = _image.getSize().height();
+		}
 		double	s = 0;
 		int	counter = 0;
 		for (int x = startx; x < endx; x++) {

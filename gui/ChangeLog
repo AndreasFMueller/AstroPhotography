@@ -1,5 +1,9 @@
 ChangeLog for the Qt GUI to Astrophotography
 
+20200824:
+	* make sure image resizing still works if the image dimensions are
+	  no longer divisible by a high power of 2
+
 20200822:
 	* add quality to ccdwidgetcontroller
 

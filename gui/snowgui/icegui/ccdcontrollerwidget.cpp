@@ -855,6 +855,14 @@ void	ccdcontrollerwidget::captureClicked() {
 			x.what());
 	}
 
+	// make sure the exposure time is not outside the admissible range
+	if (_exposure.exposuretime() > _ccdinfo.maxexposuretime) {
+		_exposure.exposuretime(_ccdinfo.maxexposuretime);
+	}
+	if (_exposure.exposuretime() < _ccdinfo.minexposuretime) {
+		_exposure.exposuretime(_ccdinfo.minexposuretime);
+	}
+
 	// now try to start a new exposure
 	try {
 		debug(LOG_DEBUG, DEBUG_LOG, 0,
