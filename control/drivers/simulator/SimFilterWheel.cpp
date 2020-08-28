@@ -75,6 +75,7 @@ unsigned int	SimFilterWheel::currentPosition() {
 	case FilterWheel::unknown:
 		throw BadState("Filterwheel in unknown state");
 	}
+	throw std::logic_error("unknown filterwheel state");
 }
 
 /**

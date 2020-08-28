@@ -323,6 +323,10 @@ ImagePtr	QsiCcd::getRawImage() {
 			rc = _camera.camera().put_ReadoutSpeed(QSICamera::HighImageQuality);
 			break;
 		}
+		if (0 != rc) {
+			debug(LOG_ERR, DEBUG_LOG, 0, "cannot set the readout "
+				"speed: %d", rc);
+		}
 	} catch (const std::exception& x) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "cannot set readout speed: %s",
 			x.what());
