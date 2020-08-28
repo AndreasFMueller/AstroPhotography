@@ -65,7 +65,8 @@ QsiCamera::QsiCamera(const std::string& _name) : Camera(_name) {
 	// get the exposure time limits
 	double	minexposuretime;
 	camera().get_MinExposureTime(&minexposuretime);
-	info.minexposuretime(minexposuretime + 0.01);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "min exposure: %.25f", minexposuretime);
+	info.minexposuretime(minexposuretime);
 	double	maxexposuretime;
 	camera().get_MaxExposureTime(&maxexposuretime);
 	info.maxexposuretime(maxexposuretime);

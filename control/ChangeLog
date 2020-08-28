@@ -1,5 +1,12 @@
 ChangeLog for the Astro project.
 
+20200828:
+	* fix a bug in the guide port implementation of the ASI driver
+	* fix mixed up fast/high in the QSI driver
+	* add more debugging to the QSI driver to help analyze the float/double
+	  problem
+	* fix two warnings
+
 20200824:
 	* fix a problem with the QSI library that results from the use of
 	  double for exposure time in the QSI library and float in this project

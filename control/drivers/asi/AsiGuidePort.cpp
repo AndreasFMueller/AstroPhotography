@@ -117,8 +117,8 @@ void	AsiGuidePort::north() {
 void	AsiGuidePort::south() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "%s south movement",
 		name().toString().c_str());
-	_camera.pulseGuideOff(AsiCamera::asi_guide_south);
-	_camera.pulseGuideOn(AsiCamera::asi_guide_north);
+	_camera.pulseGuideOff(AsiCamera::asi_guide_north);
+	_camera.pulseGuideOn(AsiCamera::asi_guide_south);
 }
 
 /**

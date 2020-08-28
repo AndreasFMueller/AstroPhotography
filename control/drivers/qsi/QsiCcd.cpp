@@ -183,8 +183,13 @@ void	QsiCcd::startExposure(const Exposure& exposure) {
 		bool	light = (Ccd::exposure.shutter() == Shutter::OPEN);
 		// round the exposure time to 100us to make sure we are inside
 		// the limits of the library
-		double	exposuretime
-			= round(10000 * Ccd::exposure.exposuretime()) / 10000.;
+		double	exposuretime = Ccd::exposure.exposuretime();
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "float exposure time: %.25f",
+			exposuretime);
+		exposuretime = round(10000 * Ccd::exposure.exposuretime())
+			/ 10000.;
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "rounded exposure time: %.25f",
+			exposuretime);
 		START_STOPWATCH;
 		_camera.camera().StartExposure(exposuretime, light);
 		END_STOPWATCH("StartExposure()");
@@ -317,10 +322,10 @@ ImagePtr	QsiCcd::getRawImage() {
 		int	rc = 0;
 		switch (exposure.quality()) {
 		case Exposure::high:
-			rc = _camera.camera().put_ReadoutSpeed(QSICamera::FastReadout);
+			rc = _camera.camera().put_ReadoutSpeed(QSICamera::HighImageQuality);
 			break;
 		case Exposure::fast:
-			rc = _camera.camera().put_ReadoutSpeed(QSICamera::HighImageQuality);
+			rc = _camera.camera().put_ReadoutSpeed(QSICamera::FastReadout);
 			break;
 		}
 		if (0 != rc) {
