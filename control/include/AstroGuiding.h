@@ -312,6 +312,7 @@ class GuiderName {
 public:
 	GuiderName(const std::string& n);
 	GuiderName(const GuiderName& other);
+	GuiderName&	operator=(const GuiderName& other);
 
 	const std::string&	instrument() const { return _instrument; }
 

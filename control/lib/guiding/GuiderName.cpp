@@ -37,6 +37,11 @@ GuiderName::GuiderName(const GuiderName& other) {
 	_instrument = other._instrument;
 }
 
+GuiderName&	GuiderName::operator=(const GuiderName& other) {
+	_instrument = other.instrument();
+	return *this;
+}
+
 /**
  * \brief Does this guider have a guideport
  */

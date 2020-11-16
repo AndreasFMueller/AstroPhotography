@@ -16,9 +16,10 @@ ControlDeviceName::ControlDeviceName(const ControlDeviceName& other)
 	: GuiderName(other), _type(other._type) {
 }
 
-ControlDeviceName&	ControlDeviceName::operator=(const ControlDeviceName& other) {
+ControlDeviceName&	ControlDeviceName::operator=(
+				const ControlDeviceName& other) {
 	GuiderName::operator=(other);
-	_type = other.type;
+	_type = other._type;
 	return *this;
 }
 
