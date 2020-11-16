@@ -342,6 +342,7 @@ public:
 	ControlDeviceName(const GuiderName& guidername,
 		ControlDeviceType type = GP);
 	ControlDeviceName(const ControlDeviceName& other);
+	ControlDeviceName&	operator=(const ControlDeviceName& other);
 	ControlDeviceType	controldevicetype() const;
 	void	controldevicetype(ControlDeviceType t);
 	void	checktype(ControlDeviceType t);

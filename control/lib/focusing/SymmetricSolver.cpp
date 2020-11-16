@@ -30,6 +30,12 @@ void	FunctionPoint::samex(const FunctionPoint& other) const {
 	}
 }
 
+FunctionPoint&	FunctionPoint::operator=(const FunctionPoint& other) {
+	x = other.x;
+	y = other.y;
+	return *this;
+}
+
 FunctionPoint	FunctionPoint::operator+(const FunctionPoint& other) const {
 	samex(other);
 	return FunctionPoint(x, y + other.y);

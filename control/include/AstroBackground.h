@@ -240,6 +240,7 @@ protected:
 public:
 	QuadraticFunction(const ImagePoint& center, bool symmetric);
 	QuadraticFunction(const LinearFunction& linear);
+	QuadraticFunction(const QuadraticFunction& other);
 	virtual ~QuadraticFunction() { }
 	virtual double	evaluate(const Point& point) const;
 	virtual double	operator[](int i) const;

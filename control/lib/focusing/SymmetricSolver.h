@@ -20,6 +20,7 @@ public:
 	float	y;
 	FunctionPoint(float _x, float _y) : x(_x), y(_y) { }
 	FunctionPoint(const FunctionPoint& other) { x = other.x; y = other.y; }
+	FunctionPoint&	operator=(const FunctionPoint& other);
 	bool	operator<(const FunctionPoint& other) const {
 		return x < other.x;
 	}

@@ -234,6 +234,13 @@ QuadraticFunction::QuadraticFunction(const LinearFunction& lin)
 	}
 }
 
+QuadraticFunction::QuadraticFunction(const QuadraticFunction& other)
+	: LinearFunction(other) {
+	for (int i = 0; i < 3; i++) {
+		q[i] = other.q[i];
+	}
+}
+
 double	QuadraticFunction::evaluate(const Point& point) const {
 	double	value = LinearFunction::evaluate(point);
 	if (gradient()) {
