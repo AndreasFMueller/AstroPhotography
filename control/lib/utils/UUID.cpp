@@ -20,6 +20,10 @@ UUID::UUID() {
 UUID::UUID(const std::string& uuid) : _uuid(uuid) {
 }
 
+UUID::UUID(const UUID& other) {
+	_uuid = other._uuid;
+}
+
 bool	UUID::operator==(const UUID& other) const {
 	uuid_t	a, b;
 	uuid_parse(_uuid.c_str(), a);

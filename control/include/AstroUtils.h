@@ -321,6 +321,7 @@ class UUID {
 public:
 	UUID();
 	UUID(const std::string& uuid);
+	UUID(const UUID& other);
 	bool	operator==(const UUID& other) const;
 	bool	operator<(const UUID& other) const;
 	UUID&	operator=(const UUID& other);
