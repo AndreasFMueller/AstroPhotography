@@ -60,3 +60,5 @@ libastroutils_la_SOURCES = 						\
 
 libastroutils_la_CPPFLAGS = -DPKGLIBDIR=\"$(pkglibdir)\" \
 	-DDEVICEPROPERTIES=\"@DEVICEPROPERTIES@\"
+
+libastroutils_la_debug_o_CFLAGS = $(CFLAGS) -Wno-format-truncation

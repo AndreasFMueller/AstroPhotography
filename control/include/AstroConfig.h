@@ -146,6 +146,7 @@ public:
 	ConfigurationEntry(const ConfigurationKey& key,
 		const std::string& _value);
 	ConfigurationEntry&	operator=(const ConfigurationEntry& other);
+	ConfigurationEntry(const ConfigurationEntry& other);
 	bool	operator==(const ConfigurationEntry& other) const;
 	bool	operator<(const ConfigurationEntry& other) const;
 };

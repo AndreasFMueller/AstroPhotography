@@ -153,6 +153,7 @@ public:
 	// constructors
 	ImageRectangle(unsigned int w = 0, unsigned int h = 0) : _size(w, h) { }
 	ImageRectangle(const ImageSize& size, int boundarydistance = 0);
+	ImageRectangle(const ImageRectangle& other);
 	ImageRectangle(const ImagePoint& origin, const ImageSize& size)
 		: _origin(origin), _size(size) { }
 	ImageRectangle(const ImageRectangle& rectangle,
@@ -1456,6 +1457,7 @@ public:
 public:
 	Binning(int x = 1, int y = 1);
 	Binning(const Binning& other) : _x(other._x), _y(other._y) { }
+	Binning&	operator=(const Binning& other);
 	Binning(const std::string& binning);
 	Binning(const ImageBase* imagebase);
 	Binning(const ImagePtr imagebase);

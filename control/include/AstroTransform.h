@@ -261,6 +261,7 @@ public:
 	Transform(const Transform& other);
 	Transform(double angle, const Point& translation,
 		double scalefactor = 1);
+	Transform&	operator=(const Transform& other);
 
 	// return some quality measure for how far away from an aspect
 	// preserving 

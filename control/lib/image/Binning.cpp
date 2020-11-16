@@ -64,6 +64,12 @@ Binning::Binning(const ImagePtr image) : _x(1), _y(1) {
 	}
 }
 
+Binning&	Binning::operator=(const Binning& other) {
+	_x = other.x();
+	_y = other.y();
+	return *this;
+}
+
 /**
  * \brief Compare binning modes: equality
  *

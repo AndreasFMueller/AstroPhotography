@@ -23,6 +23,11 @@ ImageRectangle::ImageRectangle(const ImageSize& size, int boundarydistance)
 		size.height() - 2 * boundarydistance) {
 }
 
+ImageRectangle::ImageRectangle(const ImageRectangle& other) {
+	_origin = other.origin();
+	_size = other.size();
+}
+
 /**
  * \brief Construct a translated rectangle
  *

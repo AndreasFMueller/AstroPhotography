@@ -23,6 +23,11 @@ ConfigurationEntry::ConfigurationEntry(const ConfigurationKey& key,
 	_value = value;
 }
 
+ConfigurationEntry::ConfigurationEntry(const ConfigurationEntry& other)
+	: ConfigurationKey(other) {
+	_value = other.value();
+}
+
 ConfigurationEntry&	ConfigurationEntry::operator=(const ConfigurationEntry& other) {
 	ConfigurationKey::operator=(other);
 	_value = other.value();

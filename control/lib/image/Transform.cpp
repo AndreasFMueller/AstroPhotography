@@ -93,6 +93,13 @@ Transform::Transform(double angle, const Point& translation, double scale) {
 	a[5] = translation.y();
 }
 
+Transform&	Transform::operator=(const Transform& other) {
+	for (auto i = 0; i < 6; i++) {
+		a[i] = other.a[i];
+	}
+	return *this;
+}
+
 /**
  * \brief Compute the inverse transformation
  */
