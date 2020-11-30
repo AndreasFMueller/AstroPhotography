@@ -1,13 +1,13 @@
 /*
- * QhyCcd.cpp -- implementation of a QHY ccd object
+ * Qhy2Ccd.cpp -- implementation of a QHY ccd object
  *
  * (c) 2015 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
-#include <QhyCcd.h>
+#include <Qhy2Ccd.h>
 #include <AstroDebug.h>
 #include <AstroUtils.h>
 #include <AstroExceptions.h>
-#include <QhyCooler.h>
+#include <Qhy2Cooler.h>
 
 namespace astro {
 namespace camera {
@@ -16,15 +16,14 @@ namespace qhy2 {
 /**
  * \brief Construct an QHY CCD object
  */
-QhyCcd::QhyCcd(const CcdInfo& info, const ::qhy::DevicePtr devptr,
-	QhyCamera& _camera)
-	: Ccd(info), deviceptr(devptr), camera(_camera) {
+Qhy2Ccd::Qhy2Ccd(const CcdInfo& info, Qhy2Camera& _camera)
+	: Ccd(info), camera(_camera) {
 }
 
 /**
  * \brief Destroy the QHY CCD object
  */
-QhyCcd::~QhyCcd() {
+Qhy2Ccd::~Qhy2Ccd() {
 	if (thread.joinable()) {
 		thread.join();
 	}
@@ -33,7 +32,7 @@ QhyCcd::~QhyCcd() {
 /**
  * \brief main function for the thread
  */
-void	QhyCcd::main(QhyCcd *ccd) noexcept {
+void	Qhy2Ccd::main(Qhy2Ccd *ccd) noexcept {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "start exposure thread");
 	try {
 		ccd->getImage0();
@@ -48,7 +47,7 @@ void	QhyCcd::main(QhyCcd *ccd) noexcept {
 /**
  * \brief Start an exposure
  */
-void	QhyCcd::startExposure(const Exposure& exposure) {
+void	Qhy2Ccd::startExposure(const Exposure& exposure) {
 	Ccd::startExposure(exposure);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "launch a new thread");
 	thread = std::thread(main, this);
@@ -57,8 +56,9 @@ void	QhyCcd::startExposure(const Exposure& exposure) {
 /**
  * \brief class specific image retrieval from the QHY camera
  */
-void	QhyCcd::getImage0() {
+void	Qhy2Ccd::getImage0() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "starting getImage0()");
+#if 0
 	state(CcdState::exposing);
 	this->exposure = exposure;
 	::qhy::BinningMode	mode(exposure.mode().x(), exposure.mode().y());
@@ -85,6 +85,7 @@ void	QhyCcd::getImage0() {
 	if (b.size() > 0) {
 		image->setMosaicType(MosaicType(b));
 	}
+#endif
 
 	// that's it
 	state(CcdState::exposed);
@@ -94,7 +95,7 @@ void	QhyCcd::getImage0() {
 /**
  * \brief collect the image when exposure is done
  */
-ImagePtr	QhyCcd::getRawImage() {
+ImagePtr	Qhy2Ccd::getRawImage() {
 	if (state() != CcdState::exposed) {
 		throw BadState("no exposure available");
 	}
@@ -106,8 +107,8 @@ ImagePtr	QhyCcd::getRawImage() {
 /**
  * \brief construct a cooler
  */
-CoolerPtr	QhyCcd::getCooler0() {
-	return CoolerPtr(new QhyCooler(camera, deviceptr));
+CoolerPtr	Qhy2Ccd::getCooler0() {
+	return CoolerPtr(new Qhy2Cooler(camera));
 }
 
 } // namespace qhy2

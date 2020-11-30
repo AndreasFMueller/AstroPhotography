@@ -1,10 +1,10 @@
 /*
- * QhyUtils.h -- utilities for QHY cameras
+ * Qhy2Utils.h -- utilities for QHY cameras
  *
  * (c) 2015 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
-#ifndef _QhyUtils_h
-#define _QhyUtils_h
+#ifndef _Qhy2Utils_h
+#define _Qhy2Utils_h
 
 #include <AstroUSB.h>
 #include <AstroDevice.h>
@@ -22,14 +22,14 @@ namespace qhy2 {
  * This class encapsulates all the name related functions used in the QHY
  * driver
  */
-class QhyName : public device::DeviceNameUSB {
+class Qhy2Name : public device::DeviceNameUSB {
 public:
-	QhyName(astro::usb::DevicePtr deviceptr);
-	QhyName(const astro::DeviceName& devicename);
+	Qhy2Name(astro::usb::DevicePtr deviceptr);
+	Qhy2Name(const astro::DeviceName& devicename);
 };
 
 } // namespace qhy2
 } // namespace camera
 } // namespace astro
 
-#endif /* _QhyUtils_h */
+#endif /* _Qhy2Utils_h */

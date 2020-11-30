@@ -33,7 +33,7 @@ fi
 
 # check whether the libqhyccd library is installed, and build the qhy2
 # driver if it is
-if [ -f /usr/local/include/qhylib.h ]
+if [ -f /usr/local/include/qhyccd.h ]
 then
 	commonflags="${commonflags} --enable-qhy2"
 fi

@@ -1,14 +1,14 @@
 /*
- * QhyCamera.h -- QHY camera interface
+ * Qhy2Camera.h -- QHY camera interface
  *
  * (c) 2015 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
-#ifndef _QhyCamera_h
-#define _QhyCamera_h
+#ifndef _Qhy2Camera_h
+#define _Qhy2Camera_h
 
 #include <AstroCamera.h>
 #include <AstroUSB.h>
-#include <qhylib.h>
+#include <qhyccd.h>
 
 namespace astro {
 namespace camera {
@@ -20,15 +20,10 @@ namespace qhy2 {
  * This is mainly a wrapper class that is used to forward commands to
  * the device class from the QHY library
  */
-class QhyCamera : public astro::camera::Camera {
-	usb::DevicePtr	deviceptr;
-	usb::InterfacePtr	interface;
-	::qhy::DevicePtr	qhydeviceptr;
-	unsigned short	idVendor;
-	unsigned short	idProduct;
+class Qhy2Camera : public astro::camera::Camera {
 public:
-	QhyCamera(usb::DevicePtr& devptr);
-	virtual ~QhyCamera();
+	Qhy2Camera(usb::DevicePtr& devptr);
+	virtual ~Qhy2Camera();
 protected:
 	virtual CcdPtr	getCcd0(size_t id);
 	// we currently don't know how to control the guider port of
@@ -40,4 +35,4 @@ protected:
 } // namespace camera
 } // namespace astro
 
-#endif /* _QhyCamera_h */
+#endif /* _Qhy2Camera_h */

@@ -3,7 +3,7 @@
  *
  * (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
-#include <QhyLocator.h>
+#include <Qhy2Locator.h>
 #include <AstroIO.h>
 #include <AstroFilter.h>
 #include <cppunit/TestFixture.h>
@@ -31,7 +31,7 @@ extern "C" const char	*default_targetdirectory;
 extern "C" const char	*default_prefix;
 
 class qhytest : public CppUnit::TestFixture {
-	static QhyCameraLocator	*locator;
+	static Qhy2CameraLocator	*locator;
 public:
 	void	setUp();
 	void	tearDown();
@@ -42,13 +42,13 @@ public:
 	CPPUNIT_TEST_SUITE_END();
 };
 
-QhyCameraLocator	*qhytest::locator = NULL;
+Qhy2CameraLocator	*qhytest::locator = NULL;
 
 CPPUNIT_TEST_SUITE_REGISTRATION(qhytest);
 
 void	qhytest::setUp() {
 	if (NULL == locator) {
-		locator = new QhyCameraLocator();
+		locator = new Qhy2CameraLocator();
 	}
 }
 

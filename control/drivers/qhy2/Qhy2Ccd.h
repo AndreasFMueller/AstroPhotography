@@ -1,15 +1,15 @@
 /*
- * QhyCcd.h -- QHY device
+ * Qhy2Ccd.h -- QHY device
  *
  * (c) 2015 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
-#ifndef _QhyCcd_h
-#define _QhyCcd_h
+#ifndef _Qhy2Ccd_h
+#define _Qhy2Ccd_h
 
 #include <AstroCamera.h>
-#include <QhyCamera.h>
-#include <qhylib.h>
-#include <QhyUtils.h>
+#include <Qhy2Camera.h>
+#include <qhyccd.h>
+#include <Qhy2Utils.h>
 
 namespace astro {
 namespace camera {
@@ -18,19 +18,17 @@ namespace qhy2 {
 /**
  * \brief QHY ccd class
  */
-class QhyCcd : public Ccd {
+class Qhy2Ccd : public Ccd {
 	std::thread	thread;
 	ImagePtr	image;
-	::qhy::DevicePtr	deviceptr;
-	QhyCamera&	camera;
+	Qhy2Camera&	camera;
 public:
-	QhyCcd(const CcdInfo& info, const ::qhy::DevicePtr devptr,
-		QhyCamera& _camera);
-	virtual ~QhyCcd();
+	Qhy2Ccd(const CcdInfo& info, Qhy2Camera& _camera);
+	virtual ~Qhy2Ccd();
 public:
 	virtual void	startExposure(const Exposure& exposure);
 private:
-	static void	main(QhyCcd *ccd) noexcept;
+	static void	main(Qhy2Ccd *ccd) noexcept;
 public:
 	virtual void	getImage0();
 	virtual ImagePtr	getRawImage();
@@ -43,4 +41,4 @@ protected:
 } // namespace camera
 } // namespace astro
 
-#endif /* _QhyCcd_h */
+#endif /* _Qhy2Ccd_h */

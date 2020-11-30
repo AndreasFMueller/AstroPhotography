@@ -1,11 +1,11 @@
 /*
- * QhyCooler.cpp -- implementation of the QHY cooler class
+ * Qhy2Cooler.cpp -- implementation of the QHY cooler class
  *
  * (c) 2015 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
-#include <QhyCooler.h>
-#include <QhyUtils.h>
-#include <qhylib.h>
+#include <Qhy2Cooler.h>
+#include <Qhy2Utils.h>
+#include <qhyccd.h>
 #include <AstroDebug.h>
 
 namespace astro {
@@ -16,30 +16,32 @@ namespace qhy2 {
  * \brief Compute the name of the cooler
  */
 static DeviceName	qhy_coolername(const DeviceName& cameraname) {
-	QhyName	qhyname(cameraname);
+	Qhy2Name	qhyname(cameraname);
 	return qhyname.coolername();
 }
 
 /**
  * \brief Create the cooler
  */
-QhyCooler::QhyCooler(QhyCamera& _camera, ::qhy::DevicePtr devptr)
-	: Cooler(qhy_coolername(_camera.name())), deviceptr(devptr) {
+Qhy2Cooler::Qhy2Cooler(Qhy2Camera& _camera)
+	: Cooler(qhy_coolername(_camera.name())) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "create a QHY cooler");
 }
 
 /**
  * \brief Destroy the cooler object
  */
-QhyCooler::~QhyCooler() {
+Qhy2Cooler::~Qhy2Cooler() {
 	setOn(false);
 }
 
 /**
  * \brief Get the actual temperature of the cooler
  */
-Temperature	QhyCooler::getActualTemperature() {
+Temperature	Qhy2Cooler::getActualTemperature() {
+#if 0
 	return Temperature(deviceptr->dc201().temperature());
+#endif
 }
 
 /**
@@ -47,17 +49,21 @@ Temperature	QhyCooler::getActualTemperature() {
  *
  * \param temperature	temperature set for the cooler
  */
-void	QhyCooler::setTemperature(float temperature) {
+void	Qhy2Cooler::setTemperature(float temperature) {
+#if 0
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "setting the temperature to %.1f",
 		temperature);
 	deviceptr->dc201().settemperature(temperature);
+#endif
 }
 
 /**
  * \brief Test whether the cooler is on
  */
-bool	QhyCooler::isOn() {
+bool	Qhy2Cooler::isOn() {
+#if 0
 	return deviceptr->dc201().cooler();
+#endif
 }
 
 /**
@@ -65,7 +71,8 @@ bool	QhyCooler::isOn() {
  *
  * \param onnotoff	whether the cooler is to be turned or off
  */
-void	QhyCooler::setOn(bool onnotoff) {
+void	Qhy2Cooler::setOn(bool onnotoff) {
+#if 0
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "turing the cooler %s",
 		(onnotoff) ? "on" : "off");
 	if (onnotoff) {
@@ -79,6 +86,7 @@ void	QhyCooler::setOn(bool onnotoff) {
 		}
 		deviceptr->dc201().stopCooler();
 	}
+#endif
 }
 
 } // namespace qhy2

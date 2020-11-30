@@ -1,9 +1,9 @@
 /*
- * QhyUtils.cpp -- utility functions for QHY cameras
+ * Qhy2Utils.cpp -- utility functions for QHY cameras
  *
  * (c) 2015 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
-#include <QhyUtils.h>
+#include <Qhy2Utils.h>
 #include <AstroDebug.h>
 #include <AstroFormat.h>
 #include <AstroUtils.h>
@@ -22,14 +22,14 @@ namespace qhy2 {
  *
  * \param deviceptr	USB device ptr to construct the 
  */
-QhyName::QhyName(astro::usb::DevicePtr deviceptr)
+Qhy2Name::Qhy2Name(astro::usb::DevicePtr deviceptr)
 	: DeviceNameUSB(QHY_VENDOR_NAME, QHY_VENDOR_ID, deviceptr) {
 }
 
 /**
  * \brief Construct a QHY name basd on the device name
  */
-QhyName::QhyName(const DeviceName& devicename)
+Qhy2Name::Qhy2Name(const DeviceName& devicename)
 	: DeviceNameUSB(QHY_VENDOR_NAME, QHY_VENDOR_ID, devicename) {
 }
 
