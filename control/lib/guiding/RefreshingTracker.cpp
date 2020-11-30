@@ -49,7 +49,7 @@ bool	RefreshingTracker::refreshNeeded() {
  */
 std::string	RefreshingTracker::toString() const {
 	return stringprintf("%s %s refresh=%d offset=%s",
-		demangle_cstr(*this),
+		demangle_string(*this).c_str(),
 		(_image) ? _image->size().toString().c_str() : "(no image)",
 		_refreshinterval, _offset.toString().c_str());
 }

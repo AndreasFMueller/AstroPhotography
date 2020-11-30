@@ -1,5 +1,15 @@
 ChangeLog for the Astro project.
 
+20201130:
+	* fix some auto const variables
+	* fix some typeid warnings
+	* fix demangle_cstr function
+	* add qhy2 driver
+	* rename our own qhylib to qhylib0 in order to prevent name
+	  conflicts with QHYs library
+	* there still is a naming conflict with the config.h in the
+	  QHYCCD library
+
 20201116:
 	* add some copy constructor and assignment operators in cases where
 	  implicit definition is deprecated

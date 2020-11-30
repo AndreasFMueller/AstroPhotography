@@ -121,8 +121,8 @@ void	PhaseCorrelator::write(const Image<double>& image) {
 	} catch (const std::exception& x) {
 		debug(LOG_ERR, DEBUG_LOG, 0,
 			"exception %s while writing %s: %s",
-			demangle_cstr(x), filename.c_str(),
-			 x.what());
+			demangle_string(x).c_str(), filename.c_str(),
+			x.what());
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "file %s written, counter = %d",
 		filename.c_str(), correlation_counter);

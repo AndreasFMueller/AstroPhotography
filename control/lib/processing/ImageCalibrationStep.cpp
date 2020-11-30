@@ -97,7 +97,7 @@ ProcessingStep::state	ImageCalibrationStep::do_work() {
 	_image = astro::image::ops::duplicate(imagestep->image());
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "precursor image duplicate: %s, %s",
 		_image->size().toString().c_str(),
-		demangle_cstr(_image->pixel_type()));
+		demangle_string(_image->pixel_type()).c_str());
 
 	// perform interpolation
 	imager.interpolate(_interpolate);

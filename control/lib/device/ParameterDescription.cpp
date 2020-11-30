@@ -52,20 +52,20 @@ public:
 
 	virtual bool	get_boolean() const {
 		std::string	msg = stringprintf("cannot get boolean from %s",
-			demangle_cstr(*this));
+			demangle_string(*this).c_str());
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 		throw std::runtime_error(msg);
 		throw std::runtime_error("no boolean value");
 	}
 	virtual float	get_float() const {
 		std::string	msg = stringprintf("cannot get float from %s",
-			demangle_cstr(*this));
+			demangle_string(*this).c_str());
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 		throw std::runtime_error(msg);
 	}
 	virtual std::string	get_string() const {
 		std::string	msg = stringprintf("cannot get string from %s",
-			demangle_cstr(*this));
+			demangle_string(*this).c_str());
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 		throw std::runtime_error(msg);
 	}
@@ -73,20 +73,20 @@ public:
 	virtual void	set_boolean(bool v) {
 		std::string	msg = stringprintf("cannot set boolean(%s) of %s",
 			(v) ? "true" : "false",
-			demangle_cstr(*this));
+			demangle_string(*this).c_str());
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 		throw std::runtime_error(msg);
 	}
 	virtual void	set_float(float v) {
 		std::string	msg = stringprintf("cannot set float(%f) of %s",
-			v, demangle_cstr(*this));
+			v, demangle_string(*this).c_str());
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 		throw std::runtime_error(msg);
 		throw std::runtime_error("cannot set float value");
 	}
 	virtual void	set_string(const std::string& s) {
 		std::string	msg = stringprintf("cannot set string(%s) of %s",
-			s.c_str(), demangle_cstr(*this));
+			s.c_str(), demangle_string(*this).c_str());
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 		throw std::runtime_error(msg);
 		throw std::runtime_error("cannot set string value");

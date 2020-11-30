@@ -44,7 +44,7 @@ void	ThreadCcd::run0() {
 		this->run();
 	} catch (const std::exception& x) {
 		std::string msg = stringprintf("run() terminated by %s: %s",
-			astro::demangle_cstr(x), x.what());
+			astro::demangle_string(x).c_str(), x.what());
 	} catch (...) {
 	}
 	_running = false;

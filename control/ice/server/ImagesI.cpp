@@ -94,7 +94,7 @@ ImagePrx	getImage(const std::string& filename,
 	astro::image::ImageDirectory	imagedirectory;
 	std::type_index	type = imagedirectory.pixelType(filename);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "pixel type: %s",
-		astro::demangle_cstr(type));
+		astro::demangle_string(type).c_str());
 
 	// create the proxy
 	return getImage(filename, type, current);

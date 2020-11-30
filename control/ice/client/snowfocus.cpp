@@ -396,7 +396,7 @@ int	main(int argc, char *argv[]) {
 	// ensure that focuser is ready
 	FocusState	state = focusing->status();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "current state = %d", state);
-	if ((state == FocusMOVING) && (state == FocusMEASURING)) {
+	if ((state == FocusMOVING) || (state == FocusMEASURING)) {
 		short_usage(argv[0]);
 		throw std::runtime_error("already focusing");
 	}

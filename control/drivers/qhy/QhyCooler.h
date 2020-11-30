@@ -7,7 +7,7 @@
 #define _QhyCooler_h
 
 #include <QhyCamera.h>
-#include <qhylib.h>
+#include <qhylib0.h>
 
 namespace astro {
 namespace camera {

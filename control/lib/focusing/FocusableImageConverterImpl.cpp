@@ -48,7 +48,7 @@ ImageRectangle	FocusableImageConverterImpl::rectangle_to_use(ImagePtr image) {
 	Image<pixel >	*img = dynamic_cast<Image<pixel > *>(&*image);	\
 	if (NULL != img) {						\
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "raw %s",		\
-			demangle_cstr(*img));				\
+			demangle_string(*img).c_str());			\
 		adapter::ConvertingAdapter<float, pixel > ca(*img);	\
 		adapter::WindowAdapter<float>	wa(ca, r);		\
 		return FocusableImage(new Image<float>(wa));		\
@@ -71,7 +71,7 @@ FocusableImage	FocusableImageConverterImpl::get_raw(ImagePtr image) {
 	Image<pixel>	*img = dynamic_cast<Image<pixel>*>(&*image);	\
 	if ((NULL != img) && (img->getMosaicType().isMosaic())) {	\
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "bayer %s",		\
-			demangle_cstr(*img));				\
+			demangle_string(*img).c_str());			\
 		adapter::BayerGAdapter<pixel, float>	bga(img);	\
 		adapter::WindowAdapter<float>	wa(bga, r);		\
 		return FocusableImage(new Image<float>(wa));		\
@@ -96,7 +96,7 @@ FocusableImage	FocusableImageConverterImpl::get_bayer(ImagePtr image) {
 	if (NULL != img) {						\
 		pixel	x;						\
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "yuv Image<YUV<%s>>",	\
-			demangle_cstr(x));				\
+			demangle_string(x).c_str());			\
 		adapter::YAdapter<pixel, float>	la(*img);		\
 		adapter::WindowAdapter<float>	wa(la, r);		\
 		return FocusableImage(new Image<float>(wa));		\
@@ -118,7 +118,7 @@ FocusableImage	FocusableImageConverterImpl::get_yuv(ImagePtr image) {
 		= dynamic_cast<Image<RGB<pixel> >*>(&*image);		\
 	if (NULL != img) {						\
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "rgb %s",		\
-			demangle_cstr(*img));				\
+			demangle_string(*img).c_str());			\
 		adapter::LuminanceAdapter<RGB<pixel>, float>	la(*img);	\
 		adapter::WindowAdapter<float>	wa(la, r);		\
 		return FocusableImage(new Image<float>(wa));		\

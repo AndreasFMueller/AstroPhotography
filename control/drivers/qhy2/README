@@ -1,0 +1,4 @@
+This directory contains source code for the driver for the new QHYCCD 
+cameras like the 60 Mpixel camera QHY600. It is based on QHYCCds own
+library.
+

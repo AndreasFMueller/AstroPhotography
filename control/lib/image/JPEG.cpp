@@ -365,7 +365,7 @@ size_t	JPEG::writeJPEG(const ConstImageAdapter<unsigned char>& monoimage,
  */
 size_t	JPEG::writeJPEG(ImagePtr image, const std::string& filename) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "writing %s image to %s",
-		demangle_cstr(*image), filename.c_str());
+		demangle_string(*image).c_str(), filename.c_str());
 	{
 		Image<unsigned char>	*img
 			= dynamic_cast<Image<unsigned char> *>(&*image);

@@ -58,7 +58,7 @@ void	SxCcd::main(SxCcd *ccd) noexcept {
 	} catch (USBError& x) {
 		// construct an error message
 		std::string	msg = stringprintf("getImage0 failed: %s %s",
-			demangle_cstr(x), x.what());
+			demangle_string(x).c_str(), x.what());
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 
 		// refresh the connection
@@ -66,7 +66,7 @@ void	SxCcd::main(SxCcd *ccd) noexcept {
 	} catch (DeviceTimeout& x) {
 		// construct an error message
 		std::string	msg = stringprintf("getImage0 failed: %s %s",
-			demangle_cstr(x), x.what());
+			demangle_string(x).c_str(), x.what());
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 
 		// refresh the connection
@@ -74,7 +74,7 @@ void	SxCcd::main(SxCcd *ccd) noexcept {
 	} catch (const std::exception& x) {
 		// construct an error message
 		std::string	msg = stringprintf("getImage0 failed: %s %s",
-			demangle_cstr(x), x.what());
+			demangle_string(x).c_str(), x.what());
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "end exposure thread");

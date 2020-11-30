@@ -33,7 +33,7 @@ static void	queuemain(TaskQueue *queue) {
 	} catch (const std::exception& x) {
 		debug(LOG_ERR, DEBUG_LOG, 0,
 			"task queue thread killed by %s exception: %s",
-			demangle_cstr(x), x.what());
+			demangle_string(x).c_str(), x.what());
 	} catch (...) {
 		debug(LOG_ERR, DEBUG_LOG, 0,
 			"task queue thread killed by unknown exception");
@@ -581,7 +581,7 @@ void	TaskQueue::remove(taskid_t queueid) {
 	} catch (const std::exception& x) {
 		debug(LOG_ERR, DEBUG_LOG, 0,
 			"cannot remove entry %d from table: %s %s",
-			queueid, demangle_cstr(x), x.what());
+			queueid, demangle_string(x).c_str(), x.what());
 	} catch (...) {
 		debug(LOG_ERR, DEBUG_LOG, 0,
 			"cannot remove entry %d for unknown reason", queueid);
@@ -601,7 +601,7 @@ void	TaskQueue::remove(taskid_t queueid) {
 			debug(LOG_ERR, DEBUG_LOG, 0,
 				"could not remove %s: %s %s",
 				taskinfo.filename().c_str(),
-				demangle_cstr(x), x.what());
+				demangle_string(x).c_str(), x.what());
 		} catch (...) {
 			debug(LOG_ERR, DEBUG_LOG, 0,
 				"could not remove %s for unknown reason",

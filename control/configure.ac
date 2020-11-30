@@ -504,6 +504,45 @@ AC_ARG_ENABLE(qhy,
 	enable_qhy=no
 ])
 # try various possible locations for the QHY library
+tryqhy0libs () {
+	if test -r /usr/local/lib64/libqhyccd0.la
+	then
+		QHYLIB0=/usr/local/lib64/libqhyccd0.la
+		return
+	fi
+	if test -r /usr/local/lib/libqhyccd0.la
+	then
+		QHYLIB0=/usr/local/lib/libqhyccd0.la
+		return
+	fi
+	if test -r /usr/lib64/libqhyccd0.la
+	then
+		QHYLIB0=/usr/lib64/libqhyccd0.la
+		return
+	fi
+	if test -r /usr/lib/libqhyccd0.la
+	then
+		QHYLIB0=/usr/lib/libqhyccd0.la
+		return
+	fi
+}
+if test ${enable_qhy} = yes
+then
+	tryqhy0libs
+fi
+AC_SUBST(QHYLIB0)
+AM_CONDITIONAL(ENABLE_QHY, test x$enable_qhy = xyes)
+
+## QHY2 ##############################################################
+# enable the qhy2 driver
+AC_ARG_ENABLE(qhy2,
+[AS_HELP_STRING([--enable-qhy2], [build the QHY2 driver])],
+[
+	enable_qhy2=yes
+],[
+	enable_qhy2=no
+])
+# try various possible locations for the QHY library
 tryqhylibs () {
 	if test -r /usr/local/lib64/libqhyccd.la
 	then
@@ -526,12 +565,12 @@ tryqhylibs () {
 		return
 	fi
 }
-if test ${enable_qhy} = yes
+if test ${enable_qhy2} = yes
 then
 	tryqhylibs
 fi
 AC_SUBST(QHYLIB)
-AM_CONDITIONAL(ENABLE_QHY, test x$enable_qhy = xyes)
+AM_CONDITIONAL(ENABLE_QHY2, test x$enable_qhy2 = xyes)
 
 ## UNICAP ############################################################
 # check for the Unicap library
@@ -667,6 +706,7 @@ AC_CONFIG_FILES([Makefile include/Makefile
 	drivers/sbig/Makefile drivers/othello/Makefile
 	drivers/uvc/Makefile drivers/unicap/Makefile 
 	drivers/microtouch/Makefile drivers/qsi/Makefile drivers/qhy/Makefile
+	drivers/qhy2/Makefile
 	drivers/celestron/Makefile drivers/gpio/Makefile
 	drivers/asi/Makefile drivers/atik/Makefile
 	ice/Makefile ice/slice/Makefile ice/include/Makefile

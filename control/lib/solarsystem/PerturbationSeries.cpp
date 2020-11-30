@@ -80,7 +80,7 @@ PerturbationTerm	PerturbationSeries::add(
 EclipticalCoordinates   PerturbationSeries::perturbations(
 	const JulianCenturies& T) const {
 	EclipticalCoordinates	result;
-	for (const auto t : *this) {
+	for (const PerturbationTerm& t : *this) {
 		result = result + t(T);
 	}
 	return result;

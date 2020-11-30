@@ -37,6 +37,17 @@ ControlDeviceBase::~ControlDeviceBase() {
 }
 
 /**
+ * \brief template to wrap around typeid to silence clang
+ *
+ * see the calibrationid method below
+ */
+template<typename T>
+std::type_index	get_type_index(T const& obj) {
+	std::type_index	idx = typeid(obj);
+	return idx;
+}
+
+/**
  * \brief Retrieve the calibration
  */
 void	ControlDeviceBase::calibrationid(int calid) {
@@ -57,12 +68,12 @@ void	ControlDeviceBase::calibrationid(int calid) {
 	CalibrationStore	store(_database);
 	
 	// get the type of the calibration
-	std::type_index	type = typeid(*_calibration);
+	std::type_index	type = get_type_index(*_calibration);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "calibration type: %s", type.name());
 
 	// get the calibration from the store
 	CalibrationPtr	storedcal = store.getCalibration(calid);
-	std::type_index	storedtype = typeid(*storedcal);
+	std::type_index	storedtype = get_type_index(*storedcal);
 
 	// we have a problem if they are different
 	if (type != storedtype) {
@@ -135,7 +146,7 @@ int	ControlDeviceBase::startCalibration(TrackerPtr /* tracker */) {
 	if (NULL == calibrationprocess) {
 		std::string	cause = stringprintf("not a calibration "
 			"process: %s",
-			demangle_cstr(*process));
+			demangle_string(*process).c_str());
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", cause.c_str());
 		throw std::runtime_error(cause);
 	}

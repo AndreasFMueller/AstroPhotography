@@ -191,7 +191,7 @@ void	ImageBase::dump_metadata() const {
 
 
 std::string	ImageBase::info() const {
-	return stringprintf("%s image size=%s", demangle_cstr(*this),
+	return stringprintf("%s image size=%s", demangle_string(*this).c_str(),
 		size().toString().c_str());
 }
 

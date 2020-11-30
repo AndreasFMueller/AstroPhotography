@@ -17,7 +17,7 @@ namespace filter {
 template<typename Pixel, typename Adapter>
 static double	sum_adapter(const ConstImageAdapter<Pixel>& image) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "filtering %s",
-		demangle_cstr(image));
+		demangle_string(image).c_str());
 	Sum<double>	sum;
 	Adapter	ba(image);
 	return sum.filter(ba);
@@ -94,7 +94,8 @@ double	focus_squaredbrenner(const ImagePtr image) {
 
 template<typename Pixel, typename Adapter>
 static FocusInfo sum_adapter_extended(const ConstImageAdapter<Pixel>& image) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "filtering %s", demangle_cstr(image));
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "filtering %s",
+		demangle_string(image).c_str());
 	Adapter	ba(image);
 	FocusInfo	result;	
 	Image<double>	*edges = new Image<double>(ba);

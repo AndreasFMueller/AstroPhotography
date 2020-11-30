@@ -341,7 +341,7 @@ void	StarDetectorBase::drawCross(const ImagePoint& point, int length,
  */
 void	StarDetectorBase::drawHotpixels(const std::list<ImagePoint>& hotpixels) {
 	RGB<unsigned char>	red((unsigned char)255, 0, 0);
-	for (const auto hotpixel : hotpixels) {
+	for (const ImagePoint& hotpixel : hotpixels) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "add hot pixel at %s",
 			hotpixel.toString().c_str());
 		drawCross(hotpixel, 1, red);

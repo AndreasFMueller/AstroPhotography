@@ -311,10 +311,10 @@ void	ProcessingStep::work() {
 	// if there is need for work, do the work
 	try {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "%d calling %s::do_work()",
-			id(), demangle_cstr(*this));
+			id(), demangle_string(*this).c_str());
 		_resultstate = do_work();
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "%d %s::do_work() completed: %s",
-			id(), demangle_cstr(*this),
+			id(), demangle_string(*this).c_str(),
 			ProcessingStep::statename(_resultstate).c_str());
 	} catch (const std::exception& x) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "processing step failed: %s",
@@ -389,7 +389,7 @@ ProcessingStep::state	ProcessingStep::precursorstate() const {
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0,
 		"'%s' (%d) %s minimum precursor state for %d precursors: %s",
-		_name.c_str(), _id, demangle_cstr(*this),
+		_name.c_str(), _id, demangle_string(*this).c_str(),
 		_precursors.size(), statename(minstate).c_str());
 	return minstate;
 }
@@ -424,7 +424,8 @@ time_t	ProcessingStep::when() const {
 	if (_precursors.size() == 0) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0,
 			"step %d '%s' (%s) no precursors, when = %d",
-			_id, _name.c_str(), demangle_cstr(*this), _when);
+			_id, _name.c_str(), demangle_string(*this).c_str(),
+			_when);
 		return _when;
 	}
 
@@ -441,7 +442,7 @@ time_t	ProcessingStep::when() const {
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0,
 		"step %d '%s' (%s) has %d prec, when = %d",
-		_id, _name.c_str(), demangle_cstr(*this),
+		_id, _name.c_str(), demangle_string(*this).c_str(),
 		_precursors.size(), maxtime);
 	return maxtime;
 }
@@ -451,7 +452,7 @@ time_t	ProcessingStep::when() const {
  */
 ProcessingStep::state	ProcessingStep::status() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "find status of '%s' (%d) %s",
-		_name.c_str(), _id, demangle_cstr(*this));
+		_name.c_str(), _id, demangle_string(*this).c_str());
 		
 	// if we have no precursors, then our own style decides
 	if (0 == _precursors.size()) {
@@ -488,14 +489,14 @@ ProcessingStep::state	ProcessingStep::status() {
 	case working:
 		debug(LOG_DEBUG, DEBUG_LOG, 0,
 			"not all precursors of '%s' (%d) %s are complete",
-			_name.c_str(), _id, demangle_cstr(*this));
+			_name.c_str(), _id, demangle_string(*this).c_str());
 			debug(LOG_DEBUG, DEBUG_LOG, 0, "%s is idle",
 				_name.c_str());
 		return ProcessingStep::idle;
 	case complete:
 		debug(LOG_DEBUG, DEBUG_LOG, 0,
 			"precursors of '%s' (%d) %s are all complete",
-			_name.c_str(), _id, demangle_cstr(*this));
+			_name.c_str(), _id, demangle_string(*this).c_str());
 		if (_status != complete) {
 			debug(LOG_DEBUG, DEBUG_LOG, 0, "%s needs work",
 				_name.c_str());
@@ -537,7 +538,7 @@ void	ProcessingStep::dumpPrecursors(std::ostream& out) const {
 
 std::string	ProcessingStep::info() const {
 	return stringprintf("%s(%d) %s", _name.c_str(), _id,
-		demangle_cstr(*this));
+		demangle_string(*this).c_str());
 }
 
 std::string	ProcessingStep::verboseinfo() const {

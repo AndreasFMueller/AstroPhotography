@@ -15,7 +15,7 @@ ImagePtr	extract_multiplane(Image<Multiplane<Pixel, n> >*image, int i) {
 	}
 
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "try extract plane %d from %s", i,
-		demangle_cstr(*image));
+		demangle_string(*image).c_str());
 
 	// create the target image
 	int	w = image->size().width();
@@ -40,7 +40,7 @@ ImagePtr	extract_rgb(Image<RGB<Pixel> >*image, int i) {
 	}
 
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "try extract plane %d from %s", i,
-		demangle_cstr(*image));
+		demangle_string(*image).c_str());
 
 	// create the target image
 	int	w = image->size().width();
@@ -73,7 +73,7 @@ ImagePtr	extract_rgb(Image<RGB<Pixel> >*image, int i) {
 template<typename Pixel>
 ImagePtr	extract(ImagePtr image, int i) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "try pixel type %s",
-		demangle_cstr(Pixel()));
+		demangle_string(Pixel()).c_str());
 	ImagePtr	result;
 	if ((result = extract_rgb(dynamic_cast<Image<RGB<Pixel> >*>(&*image),
 		i))) return result;
@@ -101,7 +101,7 @@ ImagePtr	extract(ImagePtr image, int i) {
 ProcessingStep::state	ImagePlaneStep::do_work() {
 	ImagePtr	pre = precursorimage();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "extract plane %d from %s", _n,
-		demangle_cstr(*pre));
+		demangle_string(*pre).c_str());
 
 	if ((_image = extract<unsigned char>(pre, _n)))
 		return ProcessingStep::complete;
@@ -117,7 +117,7 @@ ProcessingStep::state	ImagePlaneStep::do_work() {
 		return ProcessingStep::complete;
 
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "cannot extract %s",
-		demangle_cstr(*_image));
+		demangle_string(*_image).c_str());
 
 	return ProcessingStep::failed;
 }

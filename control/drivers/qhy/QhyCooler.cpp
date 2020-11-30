@@ -5,7 +5,7 @@
  */
 #include <QhyCooler.h>
 #include <QhyUtils.h>
-#include <qhylib.h>
+#include <qhylib0.h>
 #include <AstroDebug.h>
 
 namespace astro {

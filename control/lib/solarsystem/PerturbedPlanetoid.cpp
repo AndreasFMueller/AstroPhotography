@@ -71,7 +71,7 @@ EclipticalCoordinates	PerturbedPlanetoid::ecliptical(
 EclipticalCoordinates	PerturbedPlanetoid::perturbations(
 	const JulianCenturies& T) const {
 	EclipticalCoordinates	result;
-	for (auto const s : _perturbers) {
+	for (const PerturbationSeriesPtr& s : _perturbers) {
 		result = result + s->perturbations(T);
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "perturbations: %s", result.toString().c_str());

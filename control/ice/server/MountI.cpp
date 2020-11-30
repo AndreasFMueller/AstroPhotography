@@ -204,7 +204,7 @@ void	MountI::registerCallback(const Ice::Identity& mountcallback,
 		callbacks.registerCallback(mountcallback, current);
 	} catch (const std::exception& x) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "cannot register callback: %s %s",
-			astro::demangle_cstr(x), x.what());
+			astro::demangle_string(x).c_str(), x.what());
 	} catch (...) {
 		debug(LOG_ERR, DEBUG_LOG, 0,
 			"cannot register callback, unknown reason");
@@ -218,7 +218,7 @@ void	MountI::unregisterCallback(const Ice::Identity& mountcallback,
 		callbacks.unregisterCallback(mountcallback, current);
 	} catch (const std::exception& x) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "cannot unregister callback: %s %s",
-			astro::demangle_cstr(x), x.what());
+			astro::demangle_string(x).c_str(), x.what());
 	} catch (...) {
 		debug(LOG_ERR, DEBUG_LOG, 0,
 			"cannot unregister callback, unknown reason");
@@ -231,7 +231,7 @@ void	MountI::callbackUpdate(const astro::callback::CallbackDataPtr data) {
 		callbacks(data);
 	} catch (const std::exception& x) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "cannot send callback: %s %s",
-			astro::demangle_cstr(x), x.what());
+			astro::demangle_string(x).c_str(), x.what());
 	} catch (...) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "cannot send callback, unknown reason");
 	}

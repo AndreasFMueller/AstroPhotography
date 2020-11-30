@@ -92,7 +92,7 @@ void TaskQueueI::start(const Ice::Current& current) {
 	} catch (const std::exception& x) {
 		std::string	 cause = astro::stringprintf(
 			"cannot start: %s %s",
-			astro::demangle_cstr(x), x.what());
+			astro::demangle_string(x).c_str(), x.what());
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", cause.c_str());
 		throw BadState(cause);
 	}
@@ -109,7 +109,7 @@ void TaskQueueI::stop(const Ice::Current& current) {
 	} catch (const std::exception& x) {
 		std::string	 cause = astro::stringprintf(
 			"cannot stop: %s %s",
-			astro::demangle_cstr(x), x.what());
+			astro::demangle_string(x).c_str(), x.what());
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", cause.c_str());
 		throw BadState(cause);
 	}
@@ -224,7 +224,7 @@ int TaskQueueI::submit(const TaskParameters& parameters,
 	} catch (const std::exception& x) {
 		std::string	 cause = astro::stringprintf(
 			"cannot submit: %s %s",
-			astro::demangle_cstr(x), x.what());
+			astro::demangle_string(x).c_str(), x.what());
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", cause.c_str());
 		throw BadParameter(cause);
 	}
@@ -250,7 +250,7 @@ TaskParameters TaskQueueI::parameters(int taskid, const Ice::Current& current) {
 	} catch (const std::exception& x) {
 		std::string	 cause = astro::stringprintf(
 			"cannot get parameters for task %d: %s %s", taskid,
-			astro::demangle_cstr(x), x.what());
+			astro::demangle_string(x).c_str(), x.what());
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", cause.c_str());
 		throw NotFound(cause);
 	}
@@ -274,7 +274,7 @@ TaskInfo TaskQueueI::info(int taskid, const Ice::Current& current) {
 	} catch (const std::exception& x) {
 		std::string	 cause = astro::stringprintf(
 			"cannot get info for task %d: %s %s", taskid,
-			astro::demangle_cstr(x), x.what());
+			astro::demangle_string(x).c_str(), x.what());
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", cause.c_str());
 		throw NotFound(cause);
 	}
@@ -300,7 +300,7 @@ void TaskQueueI::cancel(int taskid, const Ice::Current& current) {
 	} catch (const std::exception& x) {
 		std::string	 cause = astro::stringprintf(
 			"cannot cancel task %d: %s %s", taskid,
-			astro::demangle_cstr(x), x.what());
+			astro::demangle_string(x).c_str(), x.what());
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", cause.c_str());
 		throw BadParameter(cause);
 	}
@@ -326,7 +326,7 @@ void TaskQueueI::remove(int taskid, const Ice::Current& current) {
 	} catch (const std::exception& x) {
 		std::string	 cause = astro::stringprintf(
 			"cannot remove task %d: %s %s", taskid,
-			astro::demangle_cstr(x), x.what());
+			astro::demangle_string(x).c_str(), x.what());
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", cause.c_str());
 		throw BadParameter(cause);
 	}
@@ -388,7 +388,7 @@ void	TaskQueueI::registerMonitor(const Ice::Identity& callback,
 		callbacks.registerCallback(callback, current);
 	} catch (const std::exception& x) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "cannot register callback: %s %s",
-			astro::demangle_cstr(x), x.what());
+			astro::demangle_string(x).c_str(), x.what());
 	} catch (...) {
 		debug(LOG_ERR, DEBUG_LOG, 0,
 			"cannot register callback for unknown reason");
@@ -403,7 +403,7 @@ void	TaskQueueI::unregisterMonitor(const Ice::Identity& callback,
 		callbacks.unregisterCallback(callback, current);
 	} catch (const std::exception& x) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "cannot register callback: %s %s",
-			astro::demangle_cstr(x), x.what());
+			astro::demangle_string(x).c_str(), x.what());
 	} catch (...) {
 		debug(LOG_ERR, DEBUG_LOG, 0,
 			"cannot register callback for unknown reason");
@@ -416,7 +416,7 @@ void	TaskQueueI::taskUpdate(const astro::callback::CallbackDataPtr data) {
 		callbacks(data);
 	} catch (const std::exception& x) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "cannot send callback: %s %s",
-			astro::demangle_cstr(x), x.what());
+			astro::demangle_string(x).c_str(), x.what());
 	} catch (...) {
 		debug(LOG_ERR, DEBUG_LOG, 0,
 			"cannot send callback for unknown reason");

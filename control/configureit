@@ -24,11 +24,18 @@ commonflags="${commonflags} --enable-microtouch"
 # build that on the test systems
 commonflags="${commonflags} --enable-sx"
 
-# check whether the libqhyccd library is installed, and build the qhy
+# check whether the libqhyccd0 library is installed, and build the qhy
+# driver if it is
+if [ -f /usr/local/include/qhylib0.h ]
+then
+	commonflags="${commonflags} --enable-qhy"
+fi
+
+# check whether the libqhyccd library is installed, and build the qhy2
 # driver if it is
 if [ -f /usr/local/include/qhylib.h ]
 then
-	commonflags="${commonflags} --enable-qhy"
+	commonflags="${commonflags} --enable-qhy2"
 fi
 
 # find out whether we have the QSI library installed, and trigger building

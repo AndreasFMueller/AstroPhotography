@@ -136,9 +136,14 @@ Project	ProjectTable::projectById(long objectid) {
 
 void	ProjectTable::update(const Project& project) {
 	long	projectid = getid(project.name());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "working on project %ld", projectid);
+#if 0
 	ProjectRecord	projectrecord(projectid, project);
 	update(projectrecord);
 	// XXX update all the parts too
+#else
+	throw std::runtime_error("incomplete implementation of ProjectTable");
+#endif
 }
 
 //////////////////////////////////////////////////////////////////////

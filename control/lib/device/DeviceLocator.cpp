@@ -94,7 +94,7 @@ DeviceLocator::DeviceLocator() :
 	guideportcache(this),
 	mountcache(this) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "constructing DeviceLocator %s at %p",
-		demangle_cstr(*this), this);
+		demangle_string(*this).c_str(), this);
 }
 
 DeviceLocator::~DeviceLocator() {

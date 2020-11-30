@@ -84,7 +84,7 @@ void	QsiCcd::start_main(QsiCcd *qsiccd) noexcept {
 		qsiccd->run();
 	} catch (const std::exception& x) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "thread throws %s: %s",
-			demangle_cstr(x), x.what());
+			demangle_string(x).c_str(), x.what());
 	} catch (...) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "thread crashed");
 	}

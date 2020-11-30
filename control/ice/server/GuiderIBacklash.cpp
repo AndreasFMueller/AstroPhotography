@@ -127,7 +127,7 @@ void	callback_adapter<BacklashMonitorPrx>(BacklashMonitorPrx p,
 	}
 
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "unknown type data type: %s",
-		typeid(*data).name());
+		astro::demangle_string(*data).c_str());
 }
 
 BacklashDirection	GuiderI::getBacklashDirection(const Ice::Current& current) {

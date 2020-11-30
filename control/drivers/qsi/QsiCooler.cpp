@@ -165,7 +165,7 @@ void	QsiCooler::start_main(QsiCooler *cooler) noexcept {
 		cooler->run();
 	} catch (const std::exception& x) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "thread failed %s: %s",
-			demangle_cstr(x), x.what());
+			demangle_string(x).c_str(), x.what());
 	} catch (...) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "thread crashed");
 	}

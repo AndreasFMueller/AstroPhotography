@@ -112,7 +112,7 @@ Ice::Identity	CommunicatorSingleton::add(Ice::ObjectPtr servant) {
 	// add the servant to the adapter
 	getAdapter()->add(servant, identity);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "registered %s as %s",
-		astro::demangle_cstr(*servant),
+		astro::demangle_string(*servant).c_str(),
 		identity.name.c_str());
 
 	// return the identity to the caller
@@ -151,7 +151,7 @@ void	CommunicatorSingleton::connect(Ice::ObjectPrx proxy) {
 		throw std::runtime_error(msg);
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "adding adapter to connection of %s",
-		astro::demangle_cstr(*proxy));
+		astro::demangle_string(*proxy).c_str());
 	auto	connection = proxy->ice_getConnection();
 	if (!connection) {
 		std::string	msg("no connection available");
@@ -159,7 +159,7 @@ void	CommunicatorSingleton::connect(Ice::ObjectPrx proxy) {
 		throw std::runtime_error(msg);
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "adding adapter to %s",
-		astro::demangle_cstr(connection));
+		astro::demangle_string(connection).c_str());
 	if (!connection->getAdapter()) {
 		connection->setAdapter(getAdapter());
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "connected");

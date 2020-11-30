@@ -59,7 +59,7 @@ static void	basicguideport_main(BasicGuideport *guideport) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "thread ended");
 	} catch (const std::exception& x) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "guideport terminated by "
-			"%s: %s", demangle_cstr(x), x.what());
+			"%s: %s", demangle_string(x).c_str(), x.what());
 	} catch (...) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "guideport terminated by "
 			"unknown exception");

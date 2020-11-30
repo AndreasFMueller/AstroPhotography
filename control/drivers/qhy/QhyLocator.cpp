@@ -10,7 +10,7 @@
 #include <AstroDebug.h>
 #include <AstroLoader.h>
 #include <includes.h>
-#include <qhylib.h>
+#include <qhylib0.h>
 
 namespace astro {
 namespace module {

@@ -61,7 +61,7 @@ void	AtikCcd::main(AtikCcd *atikccd) noexcept {
 	} catch (std::exception& ex) {
 		std::string	msg = stringprintf("atik exposure thread "
 			"terminated by %s: %s",
-			demangle_cstr(ex), ex.what());
+			demangle_string(ex).c_str(), ex.what());
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 	} catch (...) {
 		std::string	msg("atik exposure thread terminated by "

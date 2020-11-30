@@ -386,7 +386,7 @@ void	CcdI::registerCallback(const Ice::Identity& callback,
 		callbacks.registerCallback(callback, current);
 	} catch (const std::exception& x) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "cannot register callback %s: %s",
-			astro::demangle_cstr(x), x.what());
+			astro::demangle_string(x).c_str(), x.what());
 	} catch (...) {
 		debug(LOG_ERR, DEBUG_LOG, 0,
 			"cannot register callback %s, unknown reason",
@@ -408,7 +408,7 @@ void	CcdI::unregisterCallback(const Ice::Identity& callback,
 		callbacks.unregisterCallback(callback, current);
 	} catch (const std::exception& x) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "cannot unregister callback %s: %s",
-			astro::demangle_cstr(x), x.what());
+			astro::demangle_string(x).c_str(), x.what());
 	} catch (...) {
 		debug(LOG_ERR, DEBUG_LOG, 0,
 			"cannot unregister callback %s, unknown reason",

@@ -170,7 +170,7 @@ ProcessingStep::state	WritableFileImageStep::do_work() {
 	if (NULL == imagestep) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0,
 			"precursorstep ist no an image step: %s",
-			demangle_cstr(*precursor));
+			demangle_string(*precursor).c_str());
 		return ProcessingStep::failed;
 	}
 

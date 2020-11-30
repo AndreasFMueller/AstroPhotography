@@ -347,14 +347,6 @@ public:
 std::string	demangle(const std::string& mangled_name) throw();
 
 /**
- * \brief Template to get type c-string of an object without Clang warning
- */
-template <typename T>
-char const	*demangle_cstr(T const& obj) {
-	return demangle(typeid(obj).name()).c_str();
-}
-
-/**
  * \brief Template to get type string of an object without Clang warning
  */
 template <typename T>

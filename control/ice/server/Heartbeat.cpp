@@ -49,7 +49,7 @@ void	callback_adapter<HeartbeatMonitorPrx>(HeartbeatMonitorPrx p,
 	}
 
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "don't know how to handle %s data",
-		astro::demangle_cstr(*data));
+		astro::demangle_string(*data).c_str());
 }
 
 /**
@@ -243,7 +243,7 @@ void    Heartbeat::doregister(
 		send_interval();
 	} catch (const std::exception& x) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "cannot register callback: %s %s",
-			astro::demangle_cstr(x), x.what());
+			astro::demangle_string(x).c_str(), x.what());
 	} catch (...) {
 		debug(LOG_ERR, DEBUG_LOG, 0,
 			"cannot register callback for unknown reason");
@@ -264,7 +264,7 @@ void    Heartbeat::unregister(
 		callbacks.unregisterCallback(heartbeatmonitor, current);
 	} catch (const std::exception& x) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "cannot unregister callback: %s %s",
-			astro::demangle_cstr(x), x.what());
+			astro::demangle_string(x).c_str(), x.what());
 	} catch (...) {
 		debug(LOG_ERR, DEBUG_LOG, 0,
 			"cannot unregister callback for unknown reason");

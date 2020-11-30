@@ -134,7 +134,7 @@ void	Device::add(ParameterDescription parameter) {
 std::string	Device::userFriendlyName() const {
 	debug(LOG_DEBUG, DEBUG_LOG, 0,
 		"%s does not override userFriendlyName()",
-		astro::demangle_cstr(*this));
+		astro::demangle_string(*this).c_str());
 	return name().toString();
 }
 

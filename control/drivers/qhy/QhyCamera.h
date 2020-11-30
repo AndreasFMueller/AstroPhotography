@@ -8,7 +8,7 @@
 
 #include <AstroCamera.h>
 #include <AstroUSB.h>
-#include <qhylib.h>
+#include <qhylib0.h>
 
 namespace astro {
 namespace camera {
