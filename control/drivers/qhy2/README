@@ -2,3 +2,12 @@ This directory contains source code for the driver for the new QHYCCD
 cameras like the 60 Mpixel camera QHY600. It is based on QHYCCds own
 library.
 
+
+There are some errors in the API
+
+- the argument to the function OpenQHYCCD(char *camid) should be declared
+  const, or does the function actually modify the name of the device
+  when it opens it. This seems highyl illogical, because it would mean
+  that the device can later no longer be found because it has changed
+  name.
+

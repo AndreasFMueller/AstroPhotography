@@ -20,13 +20,19 @@ namespace qhy2 {
  * in the deviceptr member.
  */
 class Qhy2Cooler : public Cooler {
+	Qhy2Camera&	camera;
+	bool	_running;
+	std::thread	_thread;
+	std::condition_variable	_cond;
+	std::mutex	_mutex;
 public:
 	Qhy2Cooler(Qhy2Camera& _camera);
 	virtual ~Qhy2Cooler();
 	virtual Temperature	getActualTemperature();
-	virtual void	setTemperature(float temperature);
-	virtual bool	isOn();
 	virtual void	setOn(bool onoff);
+	// the thread main function
+	void	run();
+	static void	start_thread(Qhy2Cooler *cooler);
 };
 
 } // namespace qhy2

@@ -22,6 +22,7 @@ class Qhy2Ccd : public Ccd {
 	std::thread	thread;
 	ImagePtr	image;
 	Qhy2Camera&	camera;
+	double	getExposuretime(float exposuretime);
 public:
 	Qhy2Ccd(const CcdInfo& info, Qhy2Camera& _camera);
 	virtual ~Qhy2Ccd();

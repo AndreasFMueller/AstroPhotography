@@ -8,6 +8,7 @@
 #include <AstroUtils.h>
 #include <AstroExceptions.h>
 #include <Qhy2Cooler.h>
+#include <qhyccd.h>
 
 namespace astro {
 namespace camera {
@@ -53,39 +54,214 @@ void	Qhy2Ccd::startExposure(const Exposure& exposure) {
 	thread = std::thread(main, this);
 }
 
+double	Qhy2Ccd::getExposuretime(float exposuretime) {
+	double	min, max, step;
+	if (QHYCCD_SUCCESS == GetQHYCCDParamMinMaxStep(camera.handle(),
+			CONTROL_EXPOSURE, &min, &max, &step)) {
+		if (exposuretime < min / 1000000.) {
+			return min / 1000000.;
+		}
+		if (exposuretime > max / 1000000.) {
+			return max / 1000000.;
+		}
+		return (min + round((1000000 * exposuretime - min) / step) * step);
+	} else {
+		if (exposuretime < info.minexposuretime()) {
+			return info.minexposuretime();
+		}
+		if (exposuretime > info.maxexposuretime()) {
+			return info.maxexposuretime();
+		}
+		return exposuretime;
+	}
+}
+
 /**
  * \brief class specific image retrieval from the QHY camera
  */
 void	Qhy2Ccd::getImage0() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "starting getImage0()");
-#if 0
 	state(CcdState::exposing);
-	this->exposure = exposure;
-	::qhy::BinningMode	mode(exposure.mode().x(), exposure.mode().y());
-	deviceptr->camera().mode(mode);
-	deviceptr->camera().exposuretime(exposure.exposuretime());
-	deviceptr->camera().startExposure();
 
-	// get the image and convert to an image
-	::qhy::ImageBufferPtr	buffer = deviceptr->camera().getImage()
-						->active_buffer();
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "got image of size %dx%d",
-		buffer->width(), buffer->height());
-	Image<unsigned short>	*imagecontent
-		= new Image<unsigned short>(buffer->width(), buffer->height());
-	image = ImagePtr(imagecontent);
-	for (unsigned int x = 0; x < buffer->width(); x++) {
-		for (unsigned int y = 0; y < buffer->height(); y++) {
-			imagecontent->pixel(x, y) = buffer->p(x, y);
+	// set single frame mode
+	int	rc = SetQHYCCDStreamMode(camera.handle(), 0);
+	if (rc != QHYCCD_SUCCESS) {
+		std::string	msg = stringprintf("cannot set stream mode "
+			"in %s", camera.qhyname().c_str());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		state(CcdState::idle);
+		throw Qhy2Error(msg, rc);
+	}
+
+	// find and set the correct exposure time
+	double	exposuretime = getExposuretime(exposure.exposuretime());
+	rc = SetQHYCCDParam(camera.handle(), CONTROL_EXPOSURE,
+			1000000. * exposuretime);
+	if (rc != QHYCCD_SUCCESS) {
+		std::string	msg = stringprintf("cannot set exposure time "
+			"in %s", camera.qhyname().c_str());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		state(CcdState::idle);
+		throw Qhy2Error(msg, rc);
+	}
+	exposure.exposuretime(exposuretime);
+
+	// apply the gain setting, if available
+	if (IsQHYCCDControlAvailable(camera.handle(), CONTROL_GAIN)) {
+		rc = SetQHYCCDParam(camera.handle(), CONTROL_GAIN,
+			exposure.gain());
+		if (rc != QHYCCD_SUCCESS) {
+			std::string	msg = stringprintf("cannot set gain "
+				"in %s", camera.qhyname().c_str());
+			debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+			state(CcdState::idle);
+			throw Qhy2Error(msg, rc);
 		}
 	}
 
-	// if the camera is a color camera, add the bayer type to the image
-	std::string	b = deviceptr->camera().bayer();
-	if (b.size() > 0) {
-		image->setMosaicType(MosaicType(b));
+	// XXX apply the offset setting, if available
+
+	// find the region of interest and set it, if possible. Also
+	// remember whether we will have to extract the region of interest
+	// after reading the image from the camera
+	rc = SetQHYCCDResolution(camera.handle(), exposure.x(), exposure.y(),
+		exposure.width(), exposure.height());
+	if (rc != QHYCCD_SUCCESS) {
+		std::string	msg = stringprintf("cannot set image size %s "
+			"in %s", exposure.frame().toString().c_str(),
+			camera.qhyname().c_str());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		state(CcdState::idle);
+		throw Qhy2Error(msg, rc);
 	}
-#endif
+
+	// set the binning mode
+	rc = SetQHYCCDBinMode(camera.handle(), exposure.mode().x(),
+		exposure.mode().y());
+	if (rc != QHYCCD_SUCCESS) {
+		std::string	msg = stringprintf("cannot set binning mode "
+			"in %s", camera.qhyname().c_str());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		state(CcdState::idle);
+		throw Qhy2Error(msg, rc);
+	}
+
+	// find and set the transfer bit mode
+	if (IsQHYCCDControlAvailable(camera.handle(), CONTROL_TRANSFERBIT)) {
+		int	bits = std::stoi(name().unitname());
+		rc = SetQHYCCDBitsMode(camera.handle(), bits);
+		if (rc != QHYCCD_SUCCESS) {
+			std::string	msg = stringprintf("cannot set bit "
+				"depth in %s", camera.qhyname().c_str());
+			debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+			state(CcdState::idle);
+			throw Qhy2Error(msg, rc);
+		}
+	}
+
+	// start the actual exposure
+	rc = ExpQHYCCDSingleFrame(camera.handle());
+	if (rc == 0) {
+		std::string	msg = stringprintf("cannot start exposure "
+			"in %s", camera.qhyname().c_str());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		state(CcdState::idle);
+		throw Qhy2Error(msg, rc);
+	}
+
+	// get the memory size needed for the buffer
+	uint32_t	length = GetQHYCCDMemLength(camera.handle());
+	if (length == 0) {
+		std::string	msg = stringprintf("cannot get length for '%s'",
+			camera.qhyname().c_str());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		state(CcdState::idle);
+		throw Qhy2Error(msg, rc);
+	}
+	unsigned char	*imagedata = new unsigned char[length];
+
+	// read the image from the camera
+	unsigned int	imagewidth, imageheight, bpp, channels;
+	rc = GetQHYCCDSingleFrame(camera.handle(), &imagewidth, &imageheight,
+		&bpp, &channels, imagedata);
+	if (rc != QHYCCD_SUCCESS) {
+		std::string	msg = stringprintf("cannot get image data for "
+			"'%s'", camera.qhyname().c_str());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		state(CcdState::idle);
+		throw Qhy2Error(msg, rc);
+	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "found %ux%u image bpp=%u channels=%u",
+		imagewidth, imageheight, bpp, channels);
+
+	// throw away an old image
+	image.reset();
+
+	// convert the image data to an image
+	ImageSize	resultsize(imagewidth, imageheight);
+	switch (bpp) {
+	case 8:	{
+		Image<unsigned char>	*imagecontent
+			= new Image<unsigned char>(resultsize);
+		for (unsigned int x = 0; x < imagewidth; x++) {
+			for (unsigned int y = 0; y < imageheight; y++) {
+				imagecontent->pixel(x, y)
+					= imagedata[y * imagewidth + x];
+			}
+		}
+		image = ImagePtr(imagecontent);
+		}
+		break;
+	case 16:{
+		Image<unsigned short>	*imagecontent
+			= new Image<unsigned short>(resultsize);
+		unsigned short	*shortimagedata = (unsigned short *)imagedata;
+		for (unsigned int x = 0; x < imagewidth; x++) {
+			for (unsigned int y = 0; y < imageheight; y++) {
+				imagecontent->pixel(x, y)
+					= shortimagedata[y * imagewidth + x];
+			}
+		}
+		image = ImagePtr(imagecontent);
+		}
+		break;
+	}
+
+	// what to do if we have no image
+	if (!image) {
+		std::string	msg = stringprintf("no image found");
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		state(CcdState::idle);
+		throw Qhy2Error(msg, -1);
+	}
+	
+	// add the color mosaic code if present
+	switch (IsQHYCCDControlAvailable(camera.handle(), CAM_COLOR)) {
+	case BAYER_GB:
+		image->setMosaicType(MosaicType(MosaicType::BAYER_GBRG));
+		break;
+	case BAYER_GR:
+		image->setMosaicType(MosaicType(MosaicType::BAYER_GRBG));
+		break;
+	case BAYER_BG:
+		image->setMosaicType(MosaicType(MosaicType::BAYER_BGGR));
+		break;
+	case BAYER_RG:
+		image->setMosaicType(MosaicType(MosaicType::BAYER_RGGB));
+		break;
+	default:
+		image->setMosaicType(MosaicType(MosaicType::NONE));
+		break;
+	}
+
+	// terminate the process on the camera size
+	rc = CancelQHYCCDExposingAndReadout(camera.handle());
+	if (rc != QHYCCD_SUCCESS) {
+		std::string	msg = stringprintf("cannot get image data for "
+			"'%s'", camera.qhyname().c_str());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw Qhy2Error(msg, rc);
+	}
 
 	// that's it
 	state(CcdState::exposed);

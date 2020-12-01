@@ -7,10 +7,11 @@
 if ENABLE_QHY2
 
 pkglib_LTLIBRARIES = qhy2.la 
-noinst_HEADERS = Qhy2Locator.h Qhy2Utils.h Qhy2Camera.h Qhy2Ccd.h Qhy2Cooler.h
+noinst_HEADERS = Qhy2Locator.h Qhy2Utils.h Qhy2Camera.h Qhy2Ccd.h \
+	Qhy2Cooler.h Qhy2GuidePort.h
 
 SRCFILES = Qhy2Locator.cpp Qhy2Utils.cpp Qhy2Camera.cpp Qhy2Ccd.cpp \
-	Qhy2Cooler.cpp
+	Qhy2Cooler.cpp Qhy2GuidePort.cpp
 
 if USE_UDEV
 if ENABLE_NONROOT

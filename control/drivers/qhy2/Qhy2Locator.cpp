@@ -1,5 +1,5 @@
 /*
- * Qhy2Locator.cpp -- camera locator class for QSI cameras
+ * Qhy2Locator.cpp -- camera locator class for QHYCCD cameras
  *
  * (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
@@ -11,6 +11,7 @@
 #include <AstroLoader.h>
 #include <includes.h>
 #include <qhyccd.h>
+#include <atomic>
 
 namespace astro {
 namespace module {
@@ -19,7 +20,7 @@ namespace qhy2 {
 #define QHY_VENDOR_ID	0x1618
 
 //////////////////////////////////////////////////////////////////////
-// Implementation of the QSI Module Descriptor
+// Implementation of the QHYCCD Module Descriptor
 //////////////////////////////////////////////////////////////////////
 
 static std::string      qhy_name("qhy2");
@@ -67,14 +68,54 @@ namespace camera {
 namespace qhy2 {
 
 //////////////////////////////////////////////////////////////////////
-// Implementation of the Camera Locator for QSI
+// Implementation of the Camera Locator for QHYCCD
 //////////////////////////////////////////////////////////////////////
 
-Qhy2CameraLocator::Qhy2CameraLocator() {
-	// context.setDebugLevel(0);
+static int	initialize_counter;
+static std::recursive_mutex	initialize_mutex;
+static std::once_flag	initialize_once;
+
+static void	initialize() {
+	initialize_counter = 0;
 }
 
+/**
+ * \brief Constructor for the QhyLocator
+ *
+ * This constructor is responsible for initializing the QHYCCD resources
+ * through the InitQHYCCDResource call. Each time the constructor is
+ * called, the initialize_counter is increased, the InitQHYCCDResource
+ * call is only needed when the counter is zero.
+ */
+Qhy2CameraLocator::Qhy2CameraLocator() {
+	std::call_once(initialize_once, initialize);
+	std::unique_lock<std::recursive_mutex>	lock(initialize_mutex);
+	if (initialize_counter == 0) {
+		int	rc = InitQHYCCDResource();
+		if (rc != QHYCCD_SUCCESS) {
+			throw Qhy2Error("InitQHYCCDResource failed", rc);
+		}
+		initialize_counter++;
+	}
+}
+
+/**
+ * \brief Destructor for the Qhy2 locator
+ *
+ * This destructor decrements initialize_counter each time it is called.
+ * as soon as it reaches zero, it calls ReleaseQHYCCDResource(). 
+ */
 Qhy2CameraLocator::~Qhy2CameraLocator() {
+	std::unique_lock<std::recursive_mutex>	lock(initialize_mutex);
+	initialize_counter--;
+	if (0 == initialize_counter) {
+		int	rc = ReleaseQHYCCDResource();
+		if (rc != QHYCCD_SUCCESS) {
+			debug(LOG_ERR, DEBUG_LOG, 0,
+				"ReleaseQHYCCDResource() failed %d (ignored)",
+				rc);
+		}
+	}
 }
 
 /**
@@ -91,28 +132,33 @@ std::string	Qhy2CameraLocator::getVersion() const {
 	return astro::module::qhy2::qhy_version;
 }
 
-static void	addname(std::vector<std::string>& names, usb::DevicePtr devptr,
-	DeviceName::device_type device) {
-#if 0
-	Qhy2Name	qhyname(devptr);
-	switch (device) {
-	case DeviceName::Camera:
-		names.push_back(qhyname.cameraname());
-		break;
-	case DeviceName::Ccd:
-		names.push_back(qhyname.ccdname());
-		break;
-	case DeviceName::Cooler:
-		names.push_back(qhyname.coolername());
-		break;
-	case DeviceName::Guideport:
-		names.push_back(qhyname.guideportname());
-		break;
-	default:
-		// unknown components
-		break;
+/**
+ * \brief Retreive the handle for this camera
+ *
+ * \param qhyname	the camera name used in the QHYCCD api
+ */
+qhyccd_handle	*Qhy2CameraLocator::handleForName(const std::string& qhyname) {
+	auto	i = _camera_handles.find(qhyname);
+	if (i != _camera_handles.end()) {
+		return i->second;
 	}
-#endif
+	qhyccd_handle	*handle = OpenQHYCCD(const_cast<char *>(qhyname.c_str()));
+	if (NULL == handle) {
+		std::string	msg = stringprintf("'%s' not found",
+			qhyname.c_str());
+		throw Qhy2Error(msg, -1);
+	}
+	_camera_handles.insert(std::make_pair(qhyname, handle));
+	return handle;
+}
+
+/**
+ * \brief Retrieve the camera handle for this device 
+ *
+ * \param devicename	the device name of the device
+ */
+qhyccd_handle	*Qhy2CameraLocator::handleForName(const DeviceName& devicename) {
+	return handleForName(devicename[1]);
 }
 
 /**
@@ -124,31 +170,45 @@ static void	addname(std::vector<std::string>& names, usb::DevicePtr devptr,
 std::vector<std::string>	Qhy2CameraLocator::getDevicelist(DeviceName::device_type device) {
 	std::vector<std::string>	names;
 
-#if 0
-	// list all devices from the context
-	std::vector<usb::DevicePtr>	d = context.devices();
-	std::vector<usb::DevicePtr>::const_iterator	i;
-	for (i = d.begin(); i != d.end(); i++) {
-		usb::DevicePtr	devptr = *i;
-		// try to open all devices, and check whether they have
-		// the right vendor id
-		try {
-			devptr->open();
-			try {
-				addname(names, devptr, device);
-			} catch (std::runtime_error& x) {
-				debug(LOG_DEBUG, DEBUG_LOG, 0, "found a non "
-					"QHY device: %s", x.what());
+	// scan for cameras
+	int	camCount = ScanQHYCCD();
+	for (int i = 0; i < camCount; i++) {
+		// try to get the camera name
+		char	camId[32];
+		if (QHYCCD_SUCCESS != GetQHYCCDId(i, camId)) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "%d not a QHYCCD", i);
+			continue;
+		}
+
+		// use the camera name and id to build the name
+		Qhy2Name	qhyname(i);
+		if (device == DeviceName::Camera) {
+			// add the camera name
+			names.push_back(qhyname);
+			continue;
+		}
+
+		// we have to further investigate whether the camera has
+		// a cooler or a filter wheel
+		qhyccd_handle	*handle = handleForName(qhyname);
+		switch (device) {
+		case DeviceName::Cooler:
+			if (IsQHYCCDControlAvailable(handle, CONTROL_COOLER)) {
+				names.push_back(qhyname.coolername());
 			}
-		} catch (std::exception& x) {
-			std::string	msg = stringprintf("cannot work with "
-				"device at bus=%d and addr=%d",
-				devptr->getBusNumber(),
-				devptr->getDeviceAddress());
-			debug(LOG_ERR, DEBUG_LOG, 0, msg.c_str());
+			break;
+		case DeviceName::Guideport:
+			if (IsQHYCCDControlAvailable(handle, CONTROL_ST4PORT)) {
+				names.push_back(qhyname.guideportname());
+			}
+			break;
+		case DeviceName::Filterwheel:
+			if (IsQHYCCDControlAvailable(handle, CONTROL_CFWPORT)) {
+				names.push_back(qhyname.filterwheelname());
+			}
+			break;
 		}
 	}
-#endif
 
 	// return the list of devices
 	return names;
