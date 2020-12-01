@@ -58,7 +58,7 @@ extern "C"
 astro::module::ModuleDescriptor	*getDescriptor() {
         std::call_once(astro::module::qhy2::descriptor_once,
                 astro::module::qhy2::setup_descriptor);
-        debug(LOG_DEBUG, DEBUG_LOG, 0, "QsiDescriptor: %p",
+        debug(LOG_DEBUG, DEBUG_LOG, 0, "Qhy2Descriptor: %p",
                 astro::module::qhy2::descriptor);
         return astro::module::qhy2::descriptor;
 }
@@ -74,6 +74,7 @@ namespace qhy2 {
 static int	initialize_counter;
 static std::recursive_mutex	initialize_mutex;
 static std::once_flag	initialize_once;
+std::map<std::string, qhyccd_handle*>	Qhy2CameraLocator::_camera_handles;
 
 static void	initialize() {
 	initialize_counter = 0;
@@ -97,6 +98,11 @@ Qhy2CameraLocator::Qhy2CameraLocator() {
 		}
 		initialize_counter++;
 	}
+
+	// make sure we enumerate the devices or the search functions
+	// will fail to find them
+	int	camCount = ScanQHYCCD();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "%d devices foudn", camCount);
 }
 
 /**
@@ -138,17 +144,22 @@ std::string	Qhy2CameraLocator::getVersion() const {
  * \param qhyname	the camera name used in the QHYCCD api
  */
 qhyccd_handle	*Qhy2CameraLocator::handleForName(const std::string& qhyname) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "handleForName(%s)", qhyname.c_str());
 	auto	i = _camera_handles.find(qhyname);
 	if (i != _camera_handles.end()) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "%s found in cache",
+			qhyname.c_str());
 		return i->second;
 	}
 	qhyccd_handle	*handle = OpenQHYCCD(const_cast<char *>(qhyname.c_str()));
 	if (NULL == handle) {
 		std::string	msg = stringprintf("'%s' not found",
 			qhyname.c_str());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 		throw Qhy2Error(msg, -1);
 	}
 	_camera_handles.insert(std::make_pair(qhyname, handle));
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "handle %p cached", handle);
 	return handle;
 }
 
@@ -172,6 +183,7 @@ std::vector<std::string>	Qhy2CameraLocator::getDevicelist(DeviceName::device_typ
 
 	// scan for cameras
 	int	camCount = ScanQHYCCD();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "found %d qhy2 cameras", camCount);
 	for (int i = 0; i < camCount; i++) {
 		// try to get the camera name
 		char	camId[32];
@@ -179,6 +191,7 @@ std::vector<std::string>	Qhy2CameraLocator::getDevicelist(DeviceName::device_typ
 			debug(LOG_DEBUG, DEBUG_LOG, 0, "%d not a QHYCCD", i);
 			continue;
 		}
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "length: %d", strlen(camId));
 
 		// use the camera name and id to build the name
 		Qhy2Name	qhyname(i);
@@ -193,9 +206,14 @@ std::vector<std::string>	Qhy2CameraLocator::getDevicelist(DeviceName::device_typ
 		qhyccd_handle	*handle = handleForName(qhyname);
 		switch (device) {
 		case DeviceName::Cooler:
-			if (IsQHYCCDControlAvailable(handle, CONTROL_COOLER)) {
+			// XXX here is a problem in the API, apparently we
+			// XXX cannot test whether the cooler is available,
+			// XXX so we just assume it is
+			//if (IsQHYCCDControlAvailable(handle, CONTROL_COOLER)) {
+			//	debug(LOG_DEBUG, DEBUG_LOG, 0,
+			//		"cooler present");
 				names.push_back(qhyname.coolername());
-			}
+			//}
 			break;
 		case DeviceName::Guideport:
 			if (IsQHYCCDControlAvailable(handle, CONTROL_ST4PORT)) {
@@ -206,6 +224,39 @@ std::vector<std::string>	Qhy2CameraLocator::getDevicelist(DeviceName::device_typ
 			if (IsQHYCCDControlAvailable(handle, CONTROL_CFWPORT)) {
 				names.push_back(qhyname.filterwheelname());
 			}
+			break;
+		case DeviceName::Ccd:
+			if (IsQHYCCDControlAvailable(handle,
+				CONTROL_TRANSFERBIT)) {
+				double  min, max, step;
+                		int	rc = GetQHYCCDParamMinMaxStep(handle,
+					CONTROL_TRANSFERBIT, &min, &max, &step);
+				if (rc != QHYCCD_SUCCESS) {
+					std::string     msg
+						= stringprintf("cannot get "
+						"transfer range");
+					debug(LOG_ERR, DEBUG_LOG, 0, "%s",
+						msg.c_str());
+					throw Qhy2Error(msg, rc);
+                		}
+				int     bitstep = step;
+				int     maxbits = max;
+				int     ccdindex = 0;
+				for (int bits = min; bits <= maxbits;
+						bits += bitstep, ccdindex++) {
+					DeviceName	name(qhyname,
+						DeviceName::Ccd,
+						stringprintf("%d", bits));
+					names.push_back(name);
+				}
+			} else {
+				DeviceName	name(qhyname, DeviceName::Ccd,
+							"ccd");
+				names.push_back(name);
+			}
+			break;
+		default:
+			// no such device known
 			break;
 		}
 	}
@@ -221,37 +272,12 @@ std::vector<std::string>	Qhy2CameraLocator::getDevicelist(DeviceName::device_typ
  * \return 		Camera with that name
  */
 CameraPtr	Qhy2CameraLocator::getCamera0(const DeviceName& name) {
-#if 0
-	Qhy2Name	qhyname(name);
-	if (!qhyname.isCamera(name)) {
-		std::string	msg = stringprintf("%s is not a Camera name",
-			name.toString().c_str());
-		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
-		throw std::runtime_error(msg);
-	}
-
-	// scan the devices and get 
-	std::vector<usb::DevicePtr>	d = context.devices();
-	std::vector<usb::DevicePtr>::const_iterator	i;
-	for (i = d.begin(); i != d.end(); i++) {
-		usb::DevicePtr	dptr = *i;
-		int	busnumber = dptr->getBusNumber();
-		int	deviceaddress = dptr->getDeviceAddress();
-		if ((busnumber == qhyname.busnumber()) &&
-			(deviceaddress == qhyname.deviceaddress())) {
-			dptr->open();
-			return CameraPtr(new Qhy2Camera(dptr));
-		}
-	}
-
-	// failure to construct the camera
-	std::string	msg = stringprintf("cannot create camera from '%s'",
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "getting camera %s",
 		name.toString().c_str());
-	throw std::runtime_error(msg);
-#else
-	CameraPtr	camera;
-	return camera;
-#endif
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "camid = %s", name[1].c_str());
+	Qhy2Camera	*camera = new Qhy2Camera(name[1]);
+	CameraPtr	cameraptr(camera);
+	return cameraptr;
 }
 
 /**
@@ -260,86 +286,35 @@ CameraPtr	Qhy2CameraLocator::getCamera0(const DeviceName& name) {
  * \param name	devicename for a cooler
  */
 CoolerPtr	Qhy2CameraLocator::getCooler0(const DeviceName& name) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "get QHY cooler named: %s",
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "get QHY2 cooler named: %s",
 		name.toString().c_str());
-#if 0
-	Qhy2Name	qhyname(name);
-	if (!qhyname.isCooler(name)) {
-		std::string	msg = stringprintf("%s is not a Cooler name",
-			name.toString().c_str());
-		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
-		throw std::runtime_error(msg);
-	}
-	DeviceName	cameraname = qhyname.cameraname();
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "looking for cooler of camera %s",
+	DeviceName	cameraname(name, DeviceName::Camera);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "get camera named %s",
 		cameraname.toString().c_str());
 	CameraPtr	camera = this->getCamera(cameraname);
-	CcdPtr	ccd = camera->getCcd(0);
-	if (!ccd->hasCooler()) {
-		debug(LOG_ERR, DEBUG_LOG, 0, "camera has no cooler");
-		throw NotFound("camera does not have a cooler");
-	}
-	CoolerPtr	result = ccd->getCooler();
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "got cooler named '%s'",
-		result->name().toString().c_str());
-	return result;
-#else
-	CoolerPtr	cooler;
-	return cooler;
-#endif
+	return camera->getCcd(0)->getCooler();
 }
 
 /**
  * \brief Get a CCD device for a camera
  */
 CcdPtr	Qhy2CameraLocator::getCcd0(const DeviceName& name) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "get QHY ccd named: %s",
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "get QHY2 ccd named: %s",
 		name.toString().c_str());
-#if 0
-	Qhy2Name	qhyname(name);
-	if (!qhyname.isCcd(name)) {
-		std::string	msg = stringprintf("%s is not a CCD name",
-			name.toString().c_str());
-		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
-		throw std::runtime_error(msg);
-	}
-
-	DeviceName	cameraname = qhyname.cameraname();
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "looking for CCD of camera %s",
-		cameraname.toString().c_str());
+	DeviceName	cameraname(name, DeviceName::Camera);
 	CameraPtr	camera = this->getCamera(cameraname);
-	return camera->getCcd(0);
-#else
-	CcdPtr	ccd;
-	return ccd;
-#endif
+	return camera->getCcd(name);
 }
 
 /**
  * \brief Get a guider port by name
  */
 GuidePortPtr	Qhy2CameraLocator::getGuidePort0(const DeviceName& name) {
-#if 0
-	Qhy2Name	qhyname(name);
-	if (!qhyname.isGuideport(name)) {
-		std::string	msg = stringprintf("%s is not a Guideport name",
-			name.toString().c_str());
-		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
-		throw std::runtime_error(msg);
-	}
-	DeviceName	cameraname = qhyname.cameraname();
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "looking for guider port of camera %s",
-		cameraname.toString().c_str());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "get QHY2 guideport named: %s",
+		name.toString().c_str());
+	DeviceName	cameraname(name, DeviceName::Camera);
 	CameraPtr	camera = this->getCamera(cameraname);
-	if (!camera->hasGuidePort()) {
-		debug(LOG_ERR, DEBUG_LOG, 0, "camera has no guider port");
-		throw NotFound("camera does not have a guider port");
-	}
-	return GuidePortPtr();
-#else
-	GuidePortPtr	guideport;
-	return guideport;
-#endif
+	return camera->getGuidePort();
 }
 
 } // namespace qhy2

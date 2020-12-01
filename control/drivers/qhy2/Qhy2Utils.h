@@ -45,6 +45,7 @@ public:
 	DeviceName	coolername() const;
 	DeviceName	filterwheelname() const;
 	DeviceName	guideportname() const;
+	DeviceName	ccdname(const std::string& ccd) const;
 };
 
 } // namespace qhy2

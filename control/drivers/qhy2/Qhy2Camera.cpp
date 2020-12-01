@@ -10,6 +10,7 @@
 #include <Qhy2Utils.h>
 #include <Qhy2Ccd.h>
 #include <Qhy2Locator.h>
+#include <Qhy2GuidePort.h>
 
 namespace astro {
 namespace camera {
@@ -17,15 +18,21 @@ namespace qhy2 {
 
 /**
  * \brief Construct a camera object
+ *
+ * \param qhyname	QHY the name of the device
  */
 Qhy2Camera::Qhy2Camera(const std::string& qhyname)
 	: astro::camera::Camera(Qhy2Name(qhyname).cameraname()) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "constructing camera '%s'",
+		name().toString().c_str());
+
 	_handle = Qhy2CameraLocator::handleForName(qhyname);
 
 	// get CCD information
 
 	// we can only work with CCDs that allow single frame mode
-	if (!IsQHYCCDControlAvailable(_handle, CAM_SINGLEFRAMEMODE)) {
+	if (QHYCCD_ERROR == IsQHYCCDControlAvailable(_handle,
+		CAM_SINGLEFRAMEMODE)) {
 		debug(LOG_WARNING, DEBUG_LOG, 0, "camera %s does not know "
 			"single frame mode, no CCDs", qhyname.c_str());
 		return;
@@ -45,6 +52,8 @@ Qhy2Camera::Qhy2Camera(const std::string& qhyname)
 		}
 		size = ImageSize(sizeX, sizeY);
 	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "image size: %s",
+		size.toString().c_str());
 
 	// get pixel dimensions
 	double	pixelwidth, pixelheight;
@@ -61,6 +70,8 @@ Qhy2Camera::Qhy2Camera(const std::string& qhyname)
 			throw Qhy2Error(msg, rc);
 		}
 	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "pixel dimensions: %.1fum x %.1fum",
+		pixelwidth, pixelheight);
 
 	// get the available binning modes
 	BinningSet	binningmodes;
@@ -74,6 +85,8 @@ Qhy2Camera::Qhy2Camera(const std::string& qhyname)
 	if (IsQHYCCDControlAvailable(_handle, CAM_BIN4X4MODE)) {
 		binningmodes.insert(Binning(4,4));
 	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "added %d binning modes",
+		binningmodes.size());
 
 	// find out whether the camera has a shutter
 	bool	shutter = (IsQHYCCDControlAvailable(_handle,
@@ -81,6 +94,8 @@ Qhy2Camera::Qhy2Camera(const std::string& qhyname)
 	int	rc = IsQHYCCDControlAvailable(_handle, CAM_COLOR);
 	bool	color = (rc == BAYER_GB) || (rc == BAYER_GR)
 			|| (rc == BAYER_BG) || (rc == BAYER_RG);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "%s is %sa color camera",
+		qhyname.c_str(), (color) ? "" : "not ");
 
 	// find the valid range of exposure times
 	double	minexposuretime, maxexposuretime;
@@ -95,12 +110,20 @@ Qhy2Camera::Qhy2Camera(const std::string& qhyname)
 			throw Qhy2Error(msg, rc);
 		}
 	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "exposure times between %.3fs and %.3fs",
+		minexposuretime / 1000000., maxexposuretime / 1000000.);
 
 	// find bit depth of the camera
 	if (IsQHYCCDControlAvailable(_handle, CONTROL_TRANSFERBIT)) {
 		double	min, max, step;
 		int	rc = GetQHYCCDParamMinMaxStep(_handle,
 				CONTROL_TRANSFERBIT, &min, &max, &step);
+		if (rc != QHYCCD_SUCCESS) {
+			std::string	msg = stringprintf("cannot get "
+				"transfer range");
+			debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+			throw Qhy2Error(msg, rc);
+		}
 		int	bitstep = step;
 		int	maxbits = max;
 		int	ccdindex = 0;
@@ -118,8 +141,10 @@ Qhy2Camera::Qhy2Camera(const std::string& qhyname)
 				info.toString(true).c_str());
 		}
 	} else {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "creating default ccd");
 		// just create the default CCDinfo
-		CcdInfo	defaultinfo("ccd", size, 0);
+		CcdInfo	defaultinfo(CcdInfo::defaultname(name(), "ccd"),
+			size, 0);
 		defaultinfo.addModes(binningmodes);
 		defaultinfo.shutter(shutter);
 		defaultinfo.pixelwidth(pixelwidth);
@@ -142,22 +167,23 @@ Qhy2Camera::~Qhy2Camera() {
 }
 
 /**
+ * \brief Get the qhyname from the camera
+ */
+std::string	Qhy2Camera::qhyname() const {
+	return name()[1];
+}
+
+/**
  * \brief Get the Ccd
  */
 CcdPtr	Qhy2Camera::getCcd0(size_t ccdindex) {
-	if (ccdindex) {
+	if (ccdindex > ccdinfo.size()) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "CCD index %u out of range",
 			ccdindex);
 		throw NotFound("ccd id out of range");
 	}
-#if 0
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "create QHY ccd: %s",
-		ccdinfo[0].toString().c_str());
-	return CcdPtr(new Qhy2Ccd(ccdinfo[0], qhydeviceptr, *this));
-#else
-	CcdPtr	ccd;
+	CcdPtr	ccd(new Qhy2Ccd(ccdinfo[ccdindex], *this));
 	return ccd;
-#endif
 }
 
 /**
@@ -165,7 +191,8 @@ CcdPtr	Qhy2Camera::getCcd0(size_t ccdindex) {
  */
 GuidePortPtr	Qhy2Camera::getGuidePort0() {
 	if (IsQHYCCDControlAvailable(_handle, CONTROL_ST4PORT)) {
-		GuidePortPtr	guideport;
+		
+		GuidePortPtr	guideport(new Qhy2GuidePort(*this));
 		return guideport;
 	}
 	throw Qhy2Error("guide port not present", -1);

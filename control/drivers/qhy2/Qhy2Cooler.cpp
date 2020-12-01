@@ -27,6 +27,8 @@ void	Qhy2Cooler::start_thread(Qhy2Cooler *cooler) {
 void	Qhy2Cooler::run() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "the cooler thread for %s starts",
 		name().toString().c_str());
+	setTemperature(Temperature(15, Temperature::CELSIUS));
+	setOn(true);
 
 	// get the current temperature
 	Temperature	previoustemperature = getActualTemperature();

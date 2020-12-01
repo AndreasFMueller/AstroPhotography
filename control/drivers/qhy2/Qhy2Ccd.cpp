@@ -159,6 +159,8 @@ void	Qhy2Ccd::getImage0() {
 		}
 	}
 
+	// XXX handle the shutter
+
 	// start the actual exposure
 	rc = ExpQHYCCDSingleFrame(camera.handle());
 	if (rc == 0) {

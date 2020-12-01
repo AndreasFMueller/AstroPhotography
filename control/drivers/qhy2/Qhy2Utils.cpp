@@ -73,26 +73,31 @@ DeviceName	Qhy2Name::cameraname() const {
  * \brief Construct a cooler name
  */
 DeviceName	Qhy2Name::coolername() const {
-	DeviceName	result = *this;
-	result.type(DeviceName::Cooler);
+	return DeviceName(*this, DeviceName::Cooler);
 }
 
 /**
  * \brief Construct a filterwheel name
  */
 DeviceName	Qhy2Name::filterwheelname() const {
-	DeviceName	result = *this;
-	result.type(DeviceName::Filterwheel);
+	return DeviceName(*this, DeviceName::Filterwheel);
 }
 
 /**
  * \brief Construct a guideport name
  */
 DeviceName	Qhy2Name::guideportname() const {
-	DeviceName	result = *this;
-	result.type(DeviceName::Guideport);
+	return DeviceName(*this, DeviceName::Guideport);
 }
 
+/**
+ * \brief Construct a ccd name
+ *
+ * \param ccd	the name of the ccd
+ */
+DeviceName	Qhy2Name::ccdname(const std::string& ccd) const {
+	return DeviceName(*this, DeviceName::Ccd, ccd);
+}
 
 } // namespace qhy2
 } // namespace camera

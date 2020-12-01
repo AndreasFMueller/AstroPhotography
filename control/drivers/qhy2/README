@@ -11,3 +11,6 @@ There are some errors in the API
   that the device can later no longer be found because it has changed
   name.
 
+- a libqhyccd.la file is not provided, but would be very helpful to make
+  platform independen linking easier
+

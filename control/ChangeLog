@@ -1,5 +1,8 @@
 ChangeLog for the Astro project.
 
+20201201:
+	* complete the Qhy2 driver
+
 20201130:
 	* fix some auto const variables
 	* fix some typeid warnings
