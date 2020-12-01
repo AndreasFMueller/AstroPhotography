@@ -102,7 +102,7 @@ Qhy2CameraLocator::Qhy2CameraLocator() {
 	// make sure we enumerate the devices or the search functions
 	// will fail to find them
 	int	camCount = ScanQHYCCD();
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "%d devices foudn", camCount);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "%d devices found", camCount);
 }
 
 /**

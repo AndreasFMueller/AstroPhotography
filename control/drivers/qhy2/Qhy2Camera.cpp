@@ -182,6 +182,7 @@ CcdPtr	Qhy2Camera::getCcd0(size_t ccdindex) {
 			ccdindex);
 		throw NotFound("ccd id out of range");
 	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "find ccd %d", ccdindex);
 	CcdPtr	ccd(new Qhy2Ccd(ccdinfo[ccdindex], *this));
 	return ccd;
 }
@@ -191,7 +192,6 @@ CcdPtr	Qhy2Camera::getCcd0(size_t ccdindex) {
  */
 GuidePortPtr	Qhy2Camera::getGuidePort0() {
 	if (IsQHYCCDControlAvailable(_handle, CONTROL_ST4PORT)) {
-		
 		GuidePortPtr	guideport(new Qhy2GuidePort(*this));
 		return guideport;
 	}

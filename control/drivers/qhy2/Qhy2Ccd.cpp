@@ -64,7 +64,10 @@ double	Qhy2Ccd::getExposuretime(float exposuretime) {
 		if (exposuretime > max / 1000000.) {
 			return max / 1000000.;
 		}
-		return (min + round((1000000 * exposuretime - min) / step) * step);
+		double	result = (min + round((1000000 * exposuretime - min) / step) * step);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "conditionned exposuretime: %f",
+			result);
+		return result / 1000000.;
 	} else {
 		if (exposuretime < info.minexposuretime()) {
 			return info.minexposuretime();
@@ -105,9 +108,12 @@ void	Qhy2Ccd::getImage0() {
 		throw Qhy2Error(msg, rc);
 	}
 	exposure.exposuretime(exposuretime);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "using exposure time %.6f",
+		exposuretime);
 
 	// apply the gain setting, if available
-	if (IsQHYCCDControlAvailable(camera.handle(), CONTROL_GAIN)) {
+	if ((IsQHYCCDControlAvailable(camera.handle(), CONTROL_GAIN))
+		&& (exposure.gain() > 0)) {
 		rc = SetQHYCCDParam(camera.handle(), CONTROL_GAIN,
 			exposure.gain());
 		if (rc != QHYCCD_SUCCESS) {
@@ -117,6 +123,10 @@ void	Qhy2Ccd::getImage0() {
 			state(CcdState::idle);
 			throw Qhy2Error(msg, rc);
 		}
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "gain set to %f",
+			exposure.gain());
+	} else {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "no gain setting");
 	}
 
 	// XXX apply the offset setting, if available
@@ -134,6 +144,8 @@ void	Qhy2Ccd::getImage0() {
 		state(CcdState::idle);
 		throw Qhy2Error(msg, rc);
 	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "resolution: %s",
+		exposure.frame().toString().c_str());
 
 	// set the binning mode
 	rc = SetQHYCCDBinMode(camera.handle(), exposure.mode().x(),
@@ -145,6 +157,8 @@ void	Qhy2Ccd::getImage0() {
 		state(CcdState::idle);
 		throw Qhy2Error(msg, rc);
 	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "set bin %s",
+		exposure.mode().toString().c_str());
 
 	// find and set the transfer bit mode
 	if (IsQHYCCDControlAvailable(camera.handle(), CONTROL_TRANSFERBIT)) {
@@ -158,18 +172,23 @@ void	Qhy2Ccd::getImage0() {
 			throw Qhy2Error(msg, rc);
 		}
 	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "ready for exposure");
 
 	// XXX handle the shutter
 
 	// start the actual exposure
 	rc = ExpQHYCCDSingleFrame(camera.handle());
-	if (rc == 0) {
+	if (rc == QHYCCD_ERROR) {
 		std::string	msg = stringprintf("cannot start exposure "
-			"in %s", camera.qhyname().c_str());
+			"in %s: %d", camera.qhyname().c_str(), rc);
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 		state(CcdState::idle);
 		throw Qhy2Error(msg, rc);
 	}
+	if (rc != QHYCCD_READ_DIRECTLY) {
+		Timer::sleep(1);
+	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "exposure started");
 
 	// get the memory size needed for the buffer
 	uint32_t	length = GetQHYCCDMemLength(camera.handle());
@@ -181,9 +200,16 @@ void	Qhy2Ccd::getImage0() {
 		throw Qhy2Error(msg, rc);
 	}
 	unsigned char	*imagedata = new unsigned char[length];
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "%d memory allocated: %p", length,
+		imagedata);
 
 	// read the image from the camera
 	unsigned int	imagewidth, imageheight, bpp, channels;
+	imagewidth = exposure.width();
+	imageheight = exposure.height();
+	bpp = 16;
+	channels = 1;
+	
 	rc = GetQHYCCDSingleFrame(camera.handle(), &imagewidth, &imageheight,
 		&bpp, &channels, imagedata);
 	if (rc != QHYCCD_SUCCESS) {

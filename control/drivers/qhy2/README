@@ -14,3 +14,12 @@ There are some errors in the API
 - a libqhyccd.la file is not provided, but would be very helpful to make
   platform independen linking easier
 
+- apparently it is not possible to turn off the cooler except by setting
+  the set temperature to environment temperature
+
+- the guide port is detected on the QHY600C allthough that camera does
+  not have a guide port
+
+
+
+
