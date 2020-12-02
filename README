@@ -8,6 +8,12 @@ have at least one of the following problems:
   any tools that can, with suitable drivers of course, work with any
   camera.
 
+- Distributed architecture. This system is geared towards a distributed
+  application using a network. It allows to have small computers on telescopes
+  and mounts and to control everything from a WiFi connected notebook
+  computer. This eliminates all potentially flexing cables (except power)
+  and thus image shifts and bad contacts.
+
 This repository contains the following components:
 
 1. Control: A library written that provides access to cameras and accessories.
