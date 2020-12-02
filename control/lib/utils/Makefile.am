@@ -58,7 +58,8 @@ libastroutils_la_SOURCES = 						\
 	Vector.cpp							\
 	Version.cpp
 
+libastroutils_la_CXXFLAGS = $(CXXFLAGS) -Wformat-truncation=0
+
 libastroutils_la_CPPFLAGS = -DPKGLIBDIR=\"$(pkglibdir)\" \
 	-DDEVICEPROPERTIES=\"@DEVICEPROPERTIES@\"
 
-libastroutils_la_debug_o_CFLAGS = $(CFLAGS) -Wno-format-truncation

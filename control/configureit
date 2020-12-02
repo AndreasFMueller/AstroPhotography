@@ -210,7 +210,7 @@ Linux)
 	./configure --prefix=${prefix} ${commonflags} ${sbigoption} --enable-unittests
 	;;
 Debian)
-	CXXFLAGS="${CXXFLAGS} --std=c++11"
+	CXXFLAGS="${CXXFLAGS} --std=c++11 -Wno-psabi"
 	LDFLAGS="${LDFLAGS} -Wl,-rpath -Wl,/usr/local/lib"
 	export CXXFLAGS LDFLAGS
 	set -x
