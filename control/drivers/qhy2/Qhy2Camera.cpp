@@ -58,7 +58,7 @@ Qhy2Camera::Qhy2Camera(const std::string& qhyname)
 	// get pixel dimensions
 	double	pixelwidth, pixelheight;
 	{
-		double	width, height;
+		double	width, height;	// width 
 		uint32_t	imagew, imageh, bpp;
 		int	rc = GetQHYCCDChipInfo(_handle, &width, &height,
 				&imagew, &imageh,
@@ -69,9 +69,11 @@ Qhy2Camera::Qhy2Camera(const std::string& qhyname)
 			debug(LOG_ERR, DEBUG_LOG, 0, "%s: %d", msg.c_str(), rc);
 			throw Qhy2Error(msg, rc);
 		}
+		pixelwidth = pixelwidth / 1000000.;
+		pixelheight = pixelheight / 1000000.;
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "pixel dimensions: %.1fum x %.1fum",
-		pixelwidth, pixelheight);
+		1000000. * pixelwidth, 1000000. * pixelheight);
 
 	// get the available binning modes
 	BinningSet	binningmodes;
