@@ -1,7 +1,7 @@
 /*
  * Qhy2Utils.h -- utilities for QHY cameras
  *
- * (c) 2015 Prof Dr Andreas Mueller, Hochschule Rapperswil
+ * (c) 2020 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
 #ifndef _Qhy2Utils_h
 #define _Qhy2Utils_h

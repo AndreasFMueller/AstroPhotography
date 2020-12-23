@@ -1,7 +1,7 @@
 /*
  * Qhy2Cooler.h -- cooler class
  *
- * (c) 2015 Prof Dr Andreas Mueller, Hochschule Rapperswil
+ * (c) 2020 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
 #ifndef _Qhy2Cooler_h
 #define _Qhy2Cooler_h

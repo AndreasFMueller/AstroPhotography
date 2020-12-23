@@ -1,7 +1,7 @@
 /*
  * Qhy2Camera.cpp -- QHY camera implementation
  *
- * (c) 2015 Prof Dr Andreas Mueller, Hochschule Rapperswil
+ * (c) 2020 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
 #include <Qhy2Camera.h>
 #include <AstroDebug.h>

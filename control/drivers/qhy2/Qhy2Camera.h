@@ -1,7 +1,7 @@
 /*
  * Qhy2Camera.h -- QHY camera interface
  *
- * (c) 2015 Prof Dr Andreas Mueller, Hochschule Rapperswil
+ * (c) 2020 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
 #ifndef _Qhy2Camera_h
 #define _Qhy2Camera_h

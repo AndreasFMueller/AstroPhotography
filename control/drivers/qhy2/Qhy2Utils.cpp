@@ -1,7 +1,7 @@
 /*
  * Qhy2Utils.cpp -- utility functions for QHY cameras
  *
- * (c) 2015 Prof Dr Andreas Mueller, Hochschule Rapperswil
+ * (c) 2020 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
 #include <Qhy2Utils.h>
 #include <Qhy2Locator.h>

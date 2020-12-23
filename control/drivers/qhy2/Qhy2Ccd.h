@@ -1,7 +1,7 @@
 /*
  * Qhy2Ccd.h -- QHY device
  *
- * (c) 2015 Prof Dr Andreas Mueller, Hochschule Rapperswil
+ * (c) 2020 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
 #ifndef _Qhy2Ccd_h
 #define _Qhy2Ccd_h

@@ -1,7 +1,7 @@
 /*
  * Qhy2Cooler.cpp -- implementation of the QHY cooler class
  *
- * (c) 2015 Prof Dr Andreas Mueller, Hochschule Rapperswil
+ * (c) 2020 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
 #include <Qhy2Cooler.h>
 #include <Qhy2Utils.h>

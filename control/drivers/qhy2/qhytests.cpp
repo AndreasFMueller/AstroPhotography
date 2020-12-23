@@ -1,7 +1,7 @@
 /*
  * qhytests.cpp
  *
- * (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
+ * (c) 2020 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
 #include <includes.h>
 #include <cppunit/extensions/TestFactoryRegistry.h>

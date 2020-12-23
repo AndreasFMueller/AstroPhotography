@@ -1,7 +1,7 @@
 /*
  * Qhy2Locator.cpp -- camera locator class for QHYCCD cameras
  *
- * (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
+ * (c) 2020 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
 #include <Qhy2Locator.h>
 #include <Qhy2Utils.h>

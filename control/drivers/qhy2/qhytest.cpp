@@ -1,7 +1,7 @@
 /*
  * qhytest.cpp -- tests for the QHY driver
  *
- * (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
+ * (c) 2020 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
 #include <Qhy2Locator.h>
 #include <AstroIO.h>

@@ -1,7 +1,7 @@
 /*
  * Qhy2Ccd.cpp -- implementation of a QHY ccd object
  *
- * (c) 2015 Prof Dr Andreas Mueller, Hochschule Rapperswil
+ * (c) 2020 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
 #include <Qhy2Ccd.h>
 #include <AstroDebug.h>

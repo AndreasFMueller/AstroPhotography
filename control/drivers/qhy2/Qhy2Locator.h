@@ -1,7 +1,7 @@
 /*
  * Qhy2Locator.h
  *
- * (c) 2013 Prof Dr Andreas Mueller, QSI camera locator
+ * (c) 2020 Prof Dr Andreas Mueller, QSI camera locator
  */
 #ifndef _Qhy2Locator_h
 #define _Qhy2Locator_h
