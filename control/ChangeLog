@@ -1,6 +1,7 @@
 ChangeLog for the Astro project.
 
 20201226:
+	* added ssh key for development gurin
 	* make repo directory installation configurable so that we don't 
 	  have to turn of autofs during installation on production raspis
 
