@@ -129,13 +129,13 @@ const Color<unsigned int>::value_type
         Color<unsigned int>::limit = 0xffffffff;
 template<>
 const Color<unsigned long>::value_type 
-        Color<unsigned long>::limit = 0xffffffffffffffff;
+        Color<unsigned long>::limit = 0xffffffff; // unsigned long is 32bit
 template<>
 const Color<float>::value_type 
         Color<float>::limit = 0xffffffff;
 template<>
 const Color<double>::value_type 
-        Color<double>::limit = 0xffffffffffffffff;
+        Color<double>::limit = 0xffffffff; // unsigned long is 32bit
 
 template<>
 unsigned char   conversionFunction<unsigned char, float>(const float& src) {
