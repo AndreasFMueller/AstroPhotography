@@ -16,7 +16,7 @@ namespace astro {
 namespace device {
 namespace celestron {
 
-const unsigned int	CelestronMount::query_interval = 600;
+const int	CelestronMount::query_interval = 600;
 
 /**
  * \brief run method for the celestron mount

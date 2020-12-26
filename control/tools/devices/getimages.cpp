@@ -185,6 +185,7 @@ int	main(int argc, char *argv[]) {
 					longindex);
 				break;
 			}
+			break;
 		default:
 			throw std::runtime_error("unknown option");
 		}

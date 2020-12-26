@@ -67,10 +67,10 @@ bool	SxAO::move(char d, int steps) {
 		throw std::runtime_error("steps must be positive");
 	}
 	//debug(LOG_DEBUG, DEBUG_LOG, 0, "%c move", d);
-	char	cmd[8] = "G 00001";
-	cmd[1] = d;
-	snprintf(cmd + 2, 6, "%05d", steps);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "command: %s", cmd);
+	char	cmd[16];
+	memset(cmd, 0, sizeof(cmd));
+	snprintf(cmd, sizeof(cmd), "G%c%05d", d, steps);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "command: '%s'", cmd);
 	if (7 != write(serial, cmd, 7)) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "cannot write command %s: %s",
 			cmd, strerror(errno));

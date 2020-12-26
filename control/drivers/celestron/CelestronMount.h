@@ -56,7 +56,7 @@ private:
 	typedef struct { int hour; int minute; int seconds; } gps_time_t;
 	gps_time_t	gps_time();
 
-	static const unsigned int	query_interval;
+	static const int	query_interval;
 
 	// the time() method could be called very often which might 
 	// interfere with the telescope operation. 

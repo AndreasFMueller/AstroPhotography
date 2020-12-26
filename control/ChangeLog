@@ -1,6 +1,9 @@
 ChangeLog for the Astro project.
 
 20201226:
+	* many portability fixes to get rid of compiler warnings
+	* fix the liusb_set_debug deprecation, we now require that libusb be
+	  at least 1.0.2x, wherever libusb_set_option appeared
 	* fix size for unsigned long and double pixel maximum
 	* added ssh key for development gurin
 	* make repo directory installation configurable so that we don't 
