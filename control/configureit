@@ -202,6 +202,19 @@ then
 	commonflags="${commonflags} --enable-systemd"
 fi
 
+# find out whether the /usr/local/astro/repo directory is automounted
+# (i.e. on production systems) and disable the installation of the 
+repoflag="--enable-repodir"
+if [ -r /etc/auto.repo ]
+then
+	repopath=${prefix}/repo
+	if grep -e "^${repopath}" /etc/auto.repo
+	then
+		repoflag="--disable-repodir"
+	fi
+fi
+commonflags="${commonflags} ${repoflag}"
+
 # now that we have all the information, run the configure script
 case ${systemtype} in
 Linux)

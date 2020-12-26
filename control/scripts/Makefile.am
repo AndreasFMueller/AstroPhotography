@@ -17,9 +17,6 @@ systemd_DATA = snowstar.service
 varlogdir = ${prefix}/var/log
 varlog_DATA = README.log
 
-repodir = ${prefix}/repo
-repo_DATA = README.repo
-
 imagesdir = ${prefix}/var/images
 images_DATA = README.images
 
@@ -32,6 +29,13 @@ database-dist.db:	database.sql
 
 sharedir = ${prefix}/share
 share_DATA = README.starcatalogs
+
+endif
+
+if ENABLE_REPODIR
+
+repodir = ${prefix}/repo
+repo_DATA = README.repo
 
 endif
 
