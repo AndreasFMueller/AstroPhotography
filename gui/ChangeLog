@@ -1,5 +1,9 @@
 ChangeLog for the Qt GUI to Astrophotography
 
+20201227:
+	* trying to find out why the client crashes if the daemon is not
+	  running but the service has been advertised via zeroconf
+
 20200824:
 	* make sure image resizing still works if the image dimensions are
 	  no longer divisible by a high power of 2
