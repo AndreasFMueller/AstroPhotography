@@ -4,6 +4,7 @@ ChangeLog for the Astro project.
 	* move configuration database into a subdirectory so that we can
 	  give the subdirectory to the owner
 	* move the snowstar.service script to the right place
+	* fix a debug message in Outline.cpp that caused a crash
 
 20201226:
 	* many portability fixes to get rid of compiler warnings

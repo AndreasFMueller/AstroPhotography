@@ -3,7 +3,7 @@
 
 AC_PREREQ(2.57)
 AC_REVISION([1.0])
-AC_INIT([snowgui], [1.0], [andreas.mueller@hsr.ch])
+AC_INIT([snowgui], [1.0], [andreas.mueller@ost.ch])
 AC_CONFIG_SRCDIR([snowgui/common.h])
 AC_CANONICAL_TARGET([])
 AM_INIT_AUTOMAKE()
