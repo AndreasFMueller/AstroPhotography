@@ -14,6 +14,8 @@
 #include <algorithm>
 #include <stdexcept>
 #include <sys/time.h>
+#include <AstroFormat.h>
+#include <AstroDebug.h>
 
 namespace astro {
 
@@ -122,7 +124,10 @@ public:
 		std::vector<Field>::const_iterator	i
 			= std::find(begin(), end(), fieldname);
 		if (i == end()) {
-			throw NotFound("column name not found");
+			std::string	msg = stringprintf("column '%s' not "
+				"found", fieldname.c_str());
+			debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+			throw NotFound(msg);
 		}
 		return i->second;
 	}
