@@ -54,7 +54,7 @@ Outline::Outline(const std::string& name, const astro::RaDec& center,
 		steps = maxsteps;
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "drawing ellipse with %d points (%s,%s)",
-		Angle(a).dms().c_str(), Angle(b).dms().c_str());
+		steps, Angle(a).dms().c_str(), Angle(b).dms().c_str());
 	
 	// create points on an ellipse
 	float	anglestep = M_PI / steps;

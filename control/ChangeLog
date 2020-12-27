@@ -1,5 +1,8 @@
 ChangeLog for the Astro project.
 
+20201227:
+	* fix a debug message in Outline.cpp that caused a crash
+
 20201226:
 	* many portability fixes to get rid of compiler warnings
 	* fix the liusb_set_debug deprecation, we now require that libusb be
