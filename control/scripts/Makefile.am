@@ -11,8 +11,10 @@ noinst_SCRIPTS = snowstar.service sky.png.php status.php status.php astrofb \
 
 if ENABLE_SYSTEMD
 
-systemddir = /etc/systemd/system
+systemddir = /lib/systemd/system
 systemd_DATA = snowstar.service
+
+endif
 
 varlogdir = ${prefix}/var/log
 varlog_DATA = README.log
@@ -20,7 +22,7 @@ varlog_DATA = README.log
 imagesdir = ${prefix}/var/images
 images_DATA = README.images
 
-databasedir = ${prefix}/var
+databasedir = ${prefix}/var/db
 database_DATA = README.database database-dist.db
 
 database-dist.db:	database.sql
@@ -29,8 +31,6 @@ database-dist.db:	database.sql
 
 sharedir = ${prefix}/share
 share_DATA = README.starcatalogs
-
-endif
 
 if ENABLE_REPODIR
 

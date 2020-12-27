@@ -1,4 +1,9 @@
 <?php
+//
+// status.php.in -- report the curretn system status 
+//
+// (c) 2020 Prof Dr Andreas Müller, Hochschule Rapperswil
+//
 
 if (isset($_GET['id'])) {
 	$id = $_GET['id'];

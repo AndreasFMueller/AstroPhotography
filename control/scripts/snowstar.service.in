@@ -12,7 +12,7 @@ User=@ASTROUSER@
 Group=@ASTROGROUP@
 Environment="LD_LIBRARY_PATH=@ICELIBDIR@"
 WorkingDirectory=@prefix@
-ExecStart=@prefix@/sbin/snowstar --debug --base=@prefix@/var/images --database=@prefix@/var/database.db --config=@prefix@/var/database.db --logfile=@prefix@/var/log/snowstar.log --lines=100000 --files=10 --foreground
+ExecStart=@prefix@/sbin/snowstar --debug --base=@prefix@/var/images --database=@prefix@/var/db/database.db --config=@prefix@/var/db/database.db --logfile=@prefix@/var/log/snowstar.log --lines=100000 --files=10 --foreground
 StandardOutput=syslog
 StandardError=syslog
 ExecStartPre=/bin/sleep 10
