@@ -1,6 +1,7 @@
 ChangeLog for the Astro project.
 
 20201227:
+	* exclude non-fits files from ImageDirectory
 	* move configuration database into a subdirectory so that we can
 	  give the subdirectory to the owner
 	* move the snowstar.service script to the right place

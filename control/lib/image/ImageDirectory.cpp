@@ -210,6 +210,14 @@ std::list<std::string>	ImageDirectory::fileList() {
 			// skip files that start with a .
 			continue;
 		}
+
+		// skip all files that do not end in .fits
+		if (filename.size() <= 5)
+			continue;
+		if (filename.substr(filename.size() - 5) != ".fits")
+			continue;
+
+		// check that the name actually is a file
 		if (isFile(filename)) {
 			names.push_back(filename);
 		}
