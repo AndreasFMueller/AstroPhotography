@@ -61,7 +61,11 @@ fi
 
 # the next few sections are about whether or not to build the ICE components
 # add ICE PATH for Mac OS X
-if [ -d /usr/local/Ice ]
+if [ -d /usr/local/opt/ice ]
+then
+	ICEDIR=/usr/local/opt/ice
+	SLICEDIR=/usr/local/opt/share/ice/slice
+elif [ -d /usr/local/Ice ]
 then
 	ICEDIR=/usr/local/Ice
 	SLICEDIR=/usr/local/Ice/share/ice/slice

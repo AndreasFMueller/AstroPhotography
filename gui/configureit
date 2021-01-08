@@ -36,7 +36,10 @@ Linux)	if [ -r /etc/debian_version ]
 esac
 
 # add ICE PATH for an ICE that we compiled ourselves
-if [ -d /usr/local/Ice ]
+if [ -d /usr/local/opt/ice ]
+then
+	ICEDIR=/usr/local/opt/ice
+elif [ -d /usr/local/Ice ]
 then
 	ICEDIR=/usr/local/Ice
 fi

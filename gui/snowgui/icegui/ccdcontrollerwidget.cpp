@@ -1045,7 +1045,7 @@ void	ccdcontrollerwidget::retrieveImageWork() {
 	} catch (const std::exception& x) {
 		std::string	msg = astro::stringprintf("cannot retrieve "
 			"image: exception %s, cause=%s",
-			astro::demangle_cstr(x), x.what());
+			astro::demangle_string(x).c_str(), x.what());
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 		emit imageNotReceived(QString(msg.c_str()));
 	}
