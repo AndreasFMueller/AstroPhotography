@@ -21,6 +21,7 @@ WindowsMenu::WindowsMenu(QMenu *menu) : QObject(NULL), _menu(menu) {
 }
 
 WindowsMenu::~WindowsMenu() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "destroying windows menu");
 	_windowsmenu = NULL;
 }
 
@@ -88,6 +89,7 @@ void	WindowsMenu::remove(QWidget *_victim) {
 			//delete *actionp;
 			auto	windowp = _windows.begin() + i;
 			_windows.erase(windowp);
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "done removing widget");
 			return;
 		}
 	}

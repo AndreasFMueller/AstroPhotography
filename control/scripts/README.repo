@@ -12,7 +12,8 @@ The file /etc/auto.astro must be referenced from /etc/auto.master
 
 	/-	/etc/auto.astro
 
-Note that you need to turn of autofs during 'make install' because
-without a USB stick available, the install will fail.
-
+During installation, if no USB stick is available, autofs should be
+turned off because otherwise the installation may fail. Alternatively,
+the option --disable-repodir can be using during configure to disable
+installation of the repo directory.
 

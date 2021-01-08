@@ -9,6 +9,7 @@
 #include <AstroUtils.h>
 #include <AstroDebug.h>
 #include <mutex>
+#include <fstream>
 
 namespace astro {
 namespace module {
@@ -68,13 +69,21 @@ ModuleRepository::ModuleRepository(const std::string& path) : _path(path) {
  * \brief Repository backend class
  *
  * The repository backend is what the Repositories class returns.
+ *
+ * This backend implementation also includes a blacklisting mechanism.
+ * A file named 'blacklist' with names of modules to ignore prevents
+ * these modules from being loaded. The file can contain comment
+ * lines starting with #.
  */
 class ModuleRepositoryBackend : public ModuleRepository {
 private:
 	std::recursive_mutex	_mutex;	// protect the map
 	typedef	std::map<std::string, ModulePtr>	modulemap;
+	std::list<std::string>	blacklisted;
 	modulemap	modulecache;
 	void	checkpath(const std::string& path) const;
+	void	readblacklist();
+	bool	isblacklisted(const std::string& name) const;
 	ModuleRepositoryBackend(const ModuleRepositoryBackend&) = delete;
 	ModuleRepositoryBackend&	operator=(
 		const ModuleRepositoryBackend&) = delete;
@@ -157,6 +166,61 @@ ModuleRepositoryBackend::ModuleRepositoryBackend(const std::string& p)
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "creating repository backend at %s",
 		path().c_str());
 	checkpath(path());
+	readblacklist();
+}
+
+/**
+ * \brief Read the blacklist file
+ */
+void	ModuleRepositoryBackend::readblacklist() {
+	// build the path the the blacklist file
+	std::string	blacklistfile = path() + std::string("/blacklist");
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "path to blacklist: '%s'",
+		blacklistfile.c_str());
+
+	// find out whether the blacklist file exists
+	try {
+		std::ifstream	in(blacklistfile.c_str());
+		if (in.bad()) {
+			debug(LOG_ERR, DEBUG_LOG, 0, "could not open '%s'",
+				blacklistfile.c_str());
+		}
+
+		// read the blacklist file
+		while (in.good() && !in.eof()) {
+			char	b[1024];
+			in.getline(b, sizeof(b));
+			std::string	modulename = trim(std::string(b));
+			// check for empty lines
+			if (modulename.size() == 0) {
+				continue;
+			}
+			// check for comments
+			if (modulename[0] == '#') {
+				continue;
+			}
+			debug(LOG_DEBUG, DEBUG_LOG, 0,
+				"blacklisted module: '%s'", modulename.c_str());
+			blacklisted.push_back(modulename);
+		}
+	} catch (const std::exception& x) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "could not parse %s: %s",
+			blacklistfile.c_str(), x.what());
+	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "blacklist file read");
+}
+
+/**
+ * \brief Find out whether a module is blacklisted
+ *
+ * \param modulename	name of the module to check
+ */
+bool	ModuleRepositoryBackend::isblacklisted(const std::string& modulename) const {
+	for (auto a : blacklisted) {
+		if (a == modulename)
+			return true;
+	}
+	return false;
 }
 
 /**
@@ -191,6 +255,8 @@ std::vector<std::string>	ModuleRepositoryBackend::moduleNames() const {
 			std::string	modulename
 				= std::string(direntp->d_name).substr(0,
 					namelen - 3);
+			if (isblacklisted(modulename))
+				continue;
 			result.push_back(modulename);
 		}
 	} while (direntp != NULL);
@@ -225,6 +291,9 @@ std::vector<ModulePtr>	ModuleRepositoryBackend::modules() const {
 			std::string	modulename
 				= std::string(direntp->d_name).substr(0,
 					namelen - 3);
+			// skip if module is blacklisted
+			if (isblacklisted(modulename))
+				continue;
 			try {
 				result.push_back(ModulePtr(new Module(path(),
 					modulename)));
@@ -254,6 +323,11 @@ bool	ModuleRepositoryBackend::contains(const std::string& modulename) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "check for module %s",
 		modulename.c_str());
 	std::unique_lock<std::recursive_mutex>	lock(_mutex);
+
+	// if the module is blacklisted, give up
+	if (isblacklisted(modulename)) {
+		return false;
+	}
 
 	// first find out whether we have already checked this module
 	if (modulecache.find(modulename) != modulecache.end()) {
@@ -288,6 +362,15 @@ bool	ModuleRepositoryBackend::contains(const std::string& modulename) {
  *				is missing.
  */
 ModulePtr	ModuleRepositoryBackend::getModule(const std::string& modulename) {
+	// make sure a blacklisted modules are not requested
+	if (isblacklisted(modulename)) {
+		std::string	msg = stringprintf("module '%s' blacklisted",
+			modulename.c_str());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw repository_error(msg);
+	}
+
+	// now get the module
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "get module '%s'", modulename.c_str());
 	std::unique_lock<std::recursive_mutex>	lock(_mutex);
 	if (contains(modulename)) {

@@ -87,7 +87,7 @@ void	Qhy2Ccd::getImage0() {
 	state(CcdState::exposing);
 
 	// set single frame mode
-	int	rc = SetQHYCCDStreamMode(camera.handle(), 0);
+	auto	rc = SetQHYCCDStreamMode(camera.handle(), 0);
 	if (rc != QHYCCD_SUCCESS) {
 		std::string	msg = stringprintf("cannot set stream mode "
 			"in %s", camera.qhyname().c_str());

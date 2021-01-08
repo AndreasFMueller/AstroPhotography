@@ -22,7 +22,7 @@ logdir=${localstatedir}/log
 configdb=${sysconfdir}/config.db
 imagedir=${datadir}/images
 
-# make sure that all images are present
+# make sure that all directories are present and are writable
 if [ ! -d ${imagedir} ]
 then
 	mkdir -p ${imagedir}

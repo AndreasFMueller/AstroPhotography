@@ -620,6 +620,23 @@ AC_ARG_ENABLE([systemd],
 [enable_systemd=yes], [enable_systemd=no])
 AM_CONDITIONAL(ENABLE_SYSTEMD, test ${enable_systemd} = yes)
 
+# whether or not we should try to install the repo directory (because
+# this causes an error if the repo directorry is automounted)
+AC_ARG_ENABLE([repodir],
+[AS_HELP_STRING([--disable-repodir],  [do not install image repo directory])],
+[], [enable_repodir=yes])
+echo enable_repodir ${enable_repodir}
+AM_CONDITIONAL(ENABLE_REPODIR, test ${enable_repodir} = yes)
+
+if test ${enable_repodir} = yes
+then
+        AC_MSG_WARN([repo directory will be installed, make sure it is])
+	AC_MSG_WARN([accepssible during the make install phase])
+else
+	AC_MSG_WARN([repo directory not installed, make sure it exists/is])
+	AC_MSG_WARN([automounted before running snowstar daemon])
+fi
+
 # default pid file location
 PIDDIR=${localstatedir}/run
 AC_SUBST(PIDDIR)
@@ -655,7 +672,7 @@ else
 fi
 AC_SUBST(ASTROGROUP)
 
-# 
+# Enable installation as a nonroot user
 AC_ARG_ENABLE([nonroot],
 [AS_HELP_STRING([--enable-nonroot], [enable install as nonroot])],
 [

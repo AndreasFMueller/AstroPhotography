@@ -133,6 +133,7 @@ pointingwindow::pointingwindow(QWidget *parent)
 pointingwindow::~pointingwindow() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "destroy pointingwindow");
 	delete ui;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "pointingwindow destroyed");
 }
 
 /**

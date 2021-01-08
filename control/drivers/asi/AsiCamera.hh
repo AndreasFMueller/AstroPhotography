@@ -109,7 +109,7 @@ public:
 	image::MosaicType	mosaic() const { return _mosaic; }
 
 private:
-	float	_settemperature;
+	float	_settemperature;	// temperature in degrees Kelvin
 public:
 	float	settemperature() const { return _settemperature; }
 	void	settemperature(float s) { _settemperature = s; }

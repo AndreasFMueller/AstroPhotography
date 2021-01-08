@@ -72,14 +72,15 @@ AsiCooler::~AsiCooler() {
  * \brief Get the set temperature
  */
 Temperature	AsiCooler::getSetTemperature() {
-	return Temperature(_camera.settemperature());
+	return Temperature(_camera.settemperature(), Temperature::KELVIN);
 }
 
 /**
  * \brief Get the current temperature
  */
 Temperature	AsiCooler::getActualTemperature() {
-	return Temperature(_camera.getControlValue(AsiTemperature).value / 10.);
+	return Temperature(_camera.getControlValue(AsiTemperature).value / 10.,
+		Temperature::CELSIUS);
 }
 
 /**
