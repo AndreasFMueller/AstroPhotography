@@ -19,6 +19,26 @@ namespace qhy2 {
  */
 Qhy2Ccd::Qhy2Ccd(const CcdInfo& info, Qhy2Camera& _camera)
 	: Ccd(info), camera(_camera) {
+	_gain = 1.;
+	if (QHYCCD_SUCCESS == IsQHYCCDControlAvailable(camera.handle(),
+		CONTROL_GAIN)) {
+		_hasgain = true;
+		double	gainmin, gainmax, gainstep;
+		if (QHYCCD_SUCCESS == GetQHYCCDParamMinMaxStep(camera.handle(),
+			CONTROL_GAIN, &gainmin, &gainmax, &gainstep)) {
+			_gaininterval.first = gainmin;
+			_gaininterval.second = gainmax;
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "gain range: %f - %f",
+				gainmin, gainmax);
+			if (_gain > gainmax) { _gain = gainmax; }
+			if (_gain < gainmin) { _gain = gainmin; }
+		} else {
+			_hasgain = false;
+		}
+	} else {
+		_hasgain = false;
+		_gaininterval = std::make_pair(0.f, 1.f);
+	}
 }
 
 /**
@@ -32,6 +52,8 @@ Qhy2Ccd::~Qhy2Ccd() {
 
 /**
  * \brief main function for the thread
+ *
+ * \param ccd	the Qhy2Ccd object to run in
  */
 void	Qhy2Ccd::main(Qhy2Ccd *ccd) noexcept {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "start exposure thread");
@@ -47,6 +69,8 @@ void	Qhy2Ccd::main(Qhy2Ccd *ccd) noexcept {
 
 /**
  * \brief Start an exposure
+ *
+ * \param exposure	the exposure data structure
  */
 void	Qhy2Ccd::startExposure(const Exposure& exposure) {
 	Ccd::startExposure(exposure);
@@ -54,6 +78,11 @@ void	Qhy2Ccd::startExposure(const Exposure& exposure) {
 	thread = std::thread(main, this);
 }
 
+/**
+ * \brief Get the exposure time
+ *
+ * \param exposuretime	the exposure time in seconds
+ */
 double	Qhy2Ccd::getExposuretime(float exposuretime) {
 	double	min, max, step;
 	if (QHYCCD_SUCCESS == GetQHYCCDParamMinMaxStep(camera.handle(),
@@ -64,7 +93,8 @@ double	Qhy2Ccd::getExposuretime(float exposuretime) {
 		if (exposuretime > max / 1000000.) {
 			return max / 1000000.;
 		}
-		double	result = (min + round((1000000 * exposuretime - min) / step) * step);
+		double	result
+		= (min + round((1000000 * exposuretime - min) / step) * step);
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "conditionned exposuretime: %f",
 			result);
 		return result / 1000000.;
@@ -79,6 +109,9 @@ double	Qhy2Ccd::getExposuretime(float exposuretime) {
 	}
 }
 
+
+
+
 /**
  * \brief class specific image retrieval from the QHY camera
  */
@@ -86,8 +119,26 @@ void	Qhy2Ccd::getImage0() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "starting getImage0()");
 	state(CcdState::exposing);
 
+	// make rc available
+	uint32_t	rc = 0;
+
+	// find the bits per pixel from the name
+	unsigned int	bpp = 16;
+	if (QHYCCD_SUCCESS == IsQHYCCDControlAvailable(camera.handle(),
+		CONTROL_TRANSFERBIT)) {
+		bpp = std::stoi(name().unitname());
+		rc = SetQHYCCDBitsMode(camera.handle(), bpp);
+		if (rc != QHYCCD_SUCCESS) {
+			std::string	msg = stringprintf("cannot set bit "
+				"depth in %s", camera.qhyname().c_str());
+			debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+			state(CcdState::idle);
+			throw Qhy2Error(msg, rc);
+		}
+	}
+
 	// set single frame mode
-	auto	rc = SetQHYCCDStreamMode(camera.handle(), 0);
+	rc = SetQHYCCDStreamMode(camera.handle(), 0);
 	if (rc != QHYCCD_SUCCESS) {
 		std::string	msg = stringprintf("cannot set stream mode "
 			"in %s", camera.qhyname().c_str());
@@ -112,8 +163,8 @@ void	Qhy2Ccd::getImage0() {
 		exposuretime);
 
 	// apply the gain setting, if available
-	if ((IsQHYCCDControlAvailable(camera.handle(), CONTROL_GAIN))
-		&& (exposure.gain() > 0)) {
+	if ((QHYCCD_SUCCESS == IsQHYCCDControlAvailable(camera.handle(),
+		CONTROL_GAIN)) && (exposure.gain() > 0)) {
 		rc = SetQHYCCDParam(camera.handle(), CONTROL_GAIN,
 			exposure.gain());
 		if (rc != QHYCCD_SUCCESS) {
@@ -123,6 +174,7 @@ void	Qhy2Ccd::getImage0() {
 			state(CcdState::idle);
 			throw Qhy2Error(msg, rc);
 		}
+		_gain = exposure.gain();
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "gain set to %f",
 			exposure.gain());
 	} else {
@@ -160,21 +212,9 @@ void	Qhy2Ccd::getImage0() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "set bin %s",
 		exposure.mode().toString().c_str());
 
-	// find and set the transfer bit mode
-	if (IsQHYCCDControlAvailable(camera.handle(), CONTROL_TRANSFERBIT)) {
-		int	bits = std::stoi(name().unitname());
-		rc = SetQHYCCDBitsMode(camera.handle(), bits);
-		if (rc != QHYCCD_SUCCESS) {
-			std::string	msg = stringprintf("cannot set bit "
-				"depth in %s", camera.qhyname().c_str());
-			debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
-			state(CcdState::idle);
-			throw Qhy2Error(msg, rc);
-		}
-	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "ready for exposure");
-
 	// XXX handle the shutter
+
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "ready for exposure");
 
 	// start the actual exposure
 	rc = ExpQHYCCDSingleFrame(camera.handle());
@@ -190,6 +230,19 @@ void	Qhy2Ccd::getImage0() {
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "exposure started");
 
+	// wait for the exposure to complete
+	uint32_t	remaining = 1000;
+	while (remaining > 100) {
+		remaining = GetQHYCCDExposureRemaining(camera.handle());
+		if (remaining > 100) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0,
+				"sleeping for additional %u", remaining);
+			Timer::sleep(remaining * 0.000001);
+		} else {
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "exposure complete");
+		}
+	}
+
 	// get the memory size needed for the buffer
 	uint32_t	length = GetQHYCCDMemLength(camera.handle());
 	if (length == 0) {
@@ -204,10 +257,9 @@ void	Qhy2Ccd::getImage0() {
 		imagedata);
 
 	// read the image from the camera
-	unsigned int	imagewidth, imageheight, bpp, channels;
+	unsigned int	imagewidth, imageheight, channels;
 	imagewidth = exposure.width();
 	imageheight = exposure.height();
-	bpp = 16;
 	channels = 1;
 	
 	rc = GetQHYCCDSingleFrame(camera.handle(), &imagewidth, &imageheight,

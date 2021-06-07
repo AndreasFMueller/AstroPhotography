@@ -191,6 +191,11 @@ int	main(int argc, char *argv[]) {
 		}
 	}
 
+	// get the configuration, this ensures that in debug mode, we will
+	// see what configuration database will be used
+	ConfigurationPtr	config = Configuration::get();
+	InstrumentBackend	instrumentbackend;
+
 	// next argument must be the instrument name
 	if (optind >= argc) {
 		throw std::runtime_error("missing instrument name");
@@ -204,9 +209,7 @@ int	main(int argc, char *argv[]) {
 		throw std::runtime_error("instrument name not set");
 	}
 
-	// get the configuration
-	ConfigurationPtr	config = Configuration::get();
-	InstrumentBackend	instrumentbackend;
+	// get the instrument from the backend
 	InstrumentPtr	instrument = instrumentbackend.get(instrumentname);
 
 	// make sure we have a repository, because we would not know

@@ -31,7 +31,7 @@ Qhy2Camera::Qhy2Camera(const std::string& qhyname)
 	// get CCD information
 
 	// we can only work with CCDs that allow single frame mode
-	if (QHYCCD_ERROR == IsQHYCCDControlAvailable(_handle,
+	if (QHYCCD_SUCCESS != IsQHYCCDControlAvailable(_handle,
 		CAM_SINGLEFRAMEMODE)) {
 		debug(LOG_WARNING, DEBUG_LOG, 0, "camera %s does not know "
 			"single frame mode, no CCDs", qhyname.c_str());
@@ -78,20 +78,23 @@ Qhy2Camera::Qhy2Camera(const std::string& qhyname)
 	// get the available binning modes
 	BinningSet	binningmodes;
 	binningmodes.insert(Binning(1,1));
-	if (IsQHYCCDControlAvailable(_handle, CAM_BIN2X2MODE)) {
+	if (QHYCCD_SUCCESS == IsQHYCCDControlAvailable(_handle,
+		CAM_BIN2X2MODE)) {
 		binningmodes.insert(Binning(2,2));
 	}
-	if (IsQHYCCDControlAvailable(_handle, CAM_BIN3X3MODE)) {
+	if (QHYCCD_SUCCESS == IsQHYCCDControlAvailable(_handle,
+		CAM_BIN3X3MODE)) {
 		binningmodes.insert(Binning(3,3));
 	}
-	if (IsQHYCCDControlAvailable(_handle, CAM_BIN4X4MODE)) {
+	if (QHYCCD_SUCCESS == IsQHYCCDControlAvailable(_handle,
+		CAM_BIN4X4MODE)) {
 		binningmodes.insert(Binning(4,4));
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "added %d binning modes",
 		binningmodes.size());
 
 	// find out whether the camera has a shutter
-	bool	shutter = (IsQHYCCDControlAvailable(_handle,
+	bool	shutter = (QHYCCD_SUCCESS == IsQHYCCDControlAvailable(_handle,
 				CAM_MECHANICALSHUTTER)) ? true : false;
 	int	rc = IsQHYCCDControlAvailable(_handle, CAM_COLOR);
 	bool	color = (rc == BAYER_GB) || (rc == BAYER_GR)
@@ -116,7 +119,10 @@ Qhy2Camera::Qhy2Camera(const std::string& qhyname)
 		minexposuretime / 1000000., maxexposuretime / 1000000.);
 
 	// find bit depth of the camera
-	if (IsQHYCCDControlAvailable(_handle, CONTROL_TRANSFERBIT)) {
+	if (QHYCCD_SUCCESS == IsQHYCCDControlAvailable(_handle,
+		CONTROL_TRANSFERBIT)) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0,
+			"creating ccds with different bit depths");
 		double	min, max, step;
 		int	rc = GetQHYCCDParamMinMaxStep(_handle,
 				CONTROL_TRANSFERBIT, &min, &max, &step);
@@ -131,7 +137,11 @@ Qhy2Camera::Qhy2Camera(const std::string& qhyname)
 		int	ccdindex = 0;
 		for (int bits = min; bits <= maxbits;
 				bits += bitstep, ccdindex++) {
-			CcdInfo	info(stringprintf("%d", bits), size, ccdindex);
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "creating %d bits ccd",
+				bits);
+			DeviceName	ccdname = name().child(DeviceName::Ccd,
+				stringprintf("%d", bits));
+			CcdInfo	info(ccdname, size, ccdindex);
 			info.addModes(binningmodes);
 			info.shutter(shutter);
 			info.pixelwidth(pixelwidth);
@@ -193,7 +203,8 @@ CcdPtr	Qhy2Camera::getCcd0(size_t ccdindex) {
  * \brief Get the guide port
  */
 GuidePortPtr	Qhy2Camera::getGuidePort0() {
-	if (IsQHYCCDControlAvailable(_handle, CONTROL_ST4PORT)) {
+	if (QHYCCD_SUCCESS == IsQHYCCDControlAvailable(_handle,
+		CONTROL_ST4PORT)) {
 		GuidePortPtr	guideport(new Qhy2GuidePort(*this));
 		return guideport;
 	}

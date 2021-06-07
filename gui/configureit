@@ -87,7 +87,11 @@ SuSE)
 	EXTRA_CXXFLAGS="-fopenmp"
 	;;
 Darwin)
-	if [ -d /Applications/Qt5/Qt5.15/5.15.2/clang_64/bin ]
+	if [ -d /usr/local/opt/qt5/bin ]
+	then
+		PATH=${PATH}:/usr/local/opt/qt5/bin
+		export PATH
+	elif [ -d /Applications/Qt5/Qt5.15/5.15.2/clang_64/bin ]
 	then
 		PATH=${PATH}:/Applications/Qt5/Qt5.15/5.15.2/clang_64/bin
 		export PATH

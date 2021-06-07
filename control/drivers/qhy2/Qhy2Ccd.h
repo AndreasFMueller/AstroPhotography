@@ -19,6 +19,14 @@ namespace qhy2 {
  * \brief QHY ccd class
  */
 class Qhy2Ccd : public Ccd {
+	bool	_hasgain;
+	float	_gain;
+	std::pair<float,float>	_gaininterval;
+public:
+	bool	hasGain() { return _hasgain; }
+	float	getGain() { return _gain; }
+	std::pair<float,float>	gainInterval() { return _gaininterval; }
+private:
 	std::thread	thread;
 	ImagePtr	image;
 	Qhy2Camera&	camera;

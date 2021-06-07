@@ -145,19 +145,35 @@ std::string	Qhy2CameraLocator::getVersion() const {
  */
 qhyccd_handle	*Qhy2CameraLocator::handleForName(const std::string& qhyname) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "handleForName(%s)", qhyname.c_str());
+
+	// first try to find the handle
 	auto	i = _camera_handles.find(qhyname);
 	if (i != _camera_handles.end()) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "%s found in cache",
 			qhyname.c_str());
 		return i->second;
 	}
-	qhyccd_handle	*handle = OpenQHYCCD(const_cast<char *>(qhyname.c_str()));
+
+	// open a new handle
+	qhyccd_handle	*handle
+		= OpenQHYCCD(const_cast<char *>(qhyname.c_str()));
 	if (NULL == handle) {
 		std::string	msg = stringprintf("'%s' not found",
 			qhyname.c_str());
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 		throw Qhy2Error(msg, -1);
 	}
+
+	// initialize the handle
+	auto	rc = InitQHYCCD(handle);
+	if (rc != QHYCCD_SUCCESS) {
+		std::string	msg = stringprintf("cannot initialize '%s': %d",
+			qhyname.c_str(), rc);
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw Qhy2Error(msg, rc);
+	}
+
+	// store the handle
 	_camera_handles.insert(std::make_pair(qhyname, handle));
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "handle %p cached", handle);
 	return handle;
@@ -206,27 +222,27 @@ std::vector<std::string>	Qhy2CameraLocator::getDevicelist(DeviceName::device_typ
 		qhyccd_handle	*handle = handleForName(qhyname);
 		switch (device) {
 		case DeviceName::Cooler:
-			// XXX here is a problem in the API, apparently we
-			// XXX cannot test whether the cooler is available,
-			// XXX so we just assume it is
-			//if (IsQHYCCDControlAvailable(handle, CONTROL_COOLER)) {
-			//	debug(LOG_DEBUG, DEBUG_LOG, 0,
-			//		"cooler present");
+			if (QHYCCD_SUCCESS == IsQHYCCDControlAvailable(handle,
+				CONTROL_COOLER)) {
+				debug(LOG_DEBUG, DEBUG_LOG, 0,
+					"cooler present");
 				names.push_back(qhyname.coolername());
-			//}
+			}
 			break;
 		case DeviceName::Guideport:
-			if (IsQHYCCDControlAvailable(handle, CONTROL_ST4PORT)) {
+			if (QHYCCD_SUCCESS == IsQHYCCDControlAvailable(handle,
+				CONTROL_ST4PORT)) {
 				names.push_back(qhyname.guideportname());
 			}
 			break;
 		case DeviceName::Filterwheel:
-			if (IsQHYCCDControlAvailable(handle, CONTROL_CFWPORT)) {
+			if (QHYCCD_SUCCESS == IsQHYCCDControlAvailable(handle,
+				CONTROL_CFWPORT)) {
 				names.push_back(qhyname.filterwheelname());
 			}
 			break;
 		case DeviceName::Ccd:
-			if (IsQHYCCDControlAvailable(handle,
+			if (QHYCCD_SUCCESS == IsQHYCCDControlAvailable(handle,
 				CONTROL_TRANSFERBIT)) {
 				double  min, max, step;
                 		int	rc = GetQHYCCDParamMinMaxStep(handle,

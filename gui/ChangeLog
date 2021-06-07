@@ -1,6 +1,9 @@
 ChangeLog for the Qt GUI to Astrophotography
 
-20200108:
+20210109:
+	* switch to homebrew provided qt5
+
+20210108:
 	* fix bad demangle_cstr calls
 
 20201227:

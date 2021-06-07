@@ -1,5 +1,13 @@
 ChangeLog for the Astro project.
 
+20210607:
+	* get qhyccd driver to work (InitQHYCCD), still open are window
+	  heating
+
+20210109:
+	* fixes for moving to homebrew-provided libraries
+	* switch to ost.ch address
+
 20201227:
 	* improve logging in AstroPersistence.h
 	* exclude non-fits files from ImageDirectory

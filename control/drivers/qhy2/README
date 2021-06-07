@@ -7,12 +7,12 @@ There are some errors in the API
 
 - the argument to the function OpenQHYCCD(char *camid) should be declared
   const, or does the function actually modify the name of the device
-  when it opens it. This seems highyl illogical, because it would mean
+  when it opens it. This seems highly illogical, because it would mean
   that the device can later no longer be found because it has changed
   name.
 
 - a libqhyccd.la file is not provided, but would be very helpful to make
-  platform independen linking easier
+  platform independent linking easier
 
 - apparently it is not possible to turn off the cooler except by setting
   the set temperature to environment temperature
