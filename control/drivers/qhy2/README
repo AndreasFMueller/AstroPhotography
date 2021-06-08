@@ -20,6 +20,25 @@ There are some errors in the API
 - the guide port is detected on the QHY600C allthough that camera does
   not have a guide port
 
+TODO
 
+- gain curves are available in the online documentation and give some
+  insight into the meaning of the values
 
+- It is not possible to read the gain values, so the driver has to take
+  care of this. The recommended initial gain setting seems to be camera
+  dependent, so the constructor may have to take care of this.
+
+- The QHY600 camera has four different readout modes. Readout modes
+  may change the available size of the device, so we have no choice but
+  to add the readout mode to the device path name:
+
+     ccd:qhy2/cameraname/readout0/8
+     ccd:qhy2/cameraname/readout1/8
+     ccd:qhy2/cameraname/readout2/8
+     ccd:qhy2/cameraname/readout3/8
+     ccd:qhy2/cameraname/readout0/16
+     ccd:qhy2/cameraname/readout1/16
+     ccd:qhy2/cameraname/readout2/16
+     ccd:qhy2/cameraname/readout3/16
 
