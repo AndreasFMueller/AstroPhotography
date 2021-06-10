@@ -438,7 +438,8 @@ void	MainWindow::browseDirectory() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "open browser");
 	QFileDialog     filedialog(this);
 	filedialog.setAcceptMode(QFileDialog::AcceptOpen);
-	filedialog.setFileMode(QFileDialog::DirectoryOnly);
+	filedialog.setFileMode(QFileDialog::Directory);
+	filedialog.setOption(QFileDialog::ShowDirsOnly, true);
 	if (!filedialog.exec()) {
 		return;
 	}

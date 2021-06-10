@@ -80,7 +80,8 @@ int main(int argc, char *argv[]) {
 	} else {
 		QFileDialog     filedialog;
 		filedialog.setAcceptMode(QFileDialog::AcceptOpen);
-		filedialog.setFileMode(QFileDialog::DirectoryOnly);
+		filedialog.setFileMode(QFileDialog::Directory);
+		filedialog.setOption(QFileDialog::ShowDirsOnly, true);
 		if (!filedialog.exec()) {
 			return EXIT_FAILURE;
 		}
