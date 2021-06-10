@@ -52,8 +52,8 @@ static void	usage(const std::string& progname) {
 	std::cout << std::endl;
 	std::cout << "add <type> <service> <deviceurl>" << std::endl;
 	std::cout << "    Add a component to an instrument, this also creates the instrument." << std::endl;
-	std::cout << "    The following component types are available: Camera, CCD, GuiderCCD, Cooler," << std::endl;
-	std::cout << "    GuidePort, Focuser, AdaptiveOptics, FilterWheel" << std::endl;
+	std::cout << "    The following component types are available: Camera, CCD, GuiderCCD," << std::endl;
+	std::cout << "    Cooler, GuidePort, Focuser, AdaptiveOptics, FilterWheel" << std::endl;
 	std::cout << std::endl;
 	std::cout << "remove <type> <index>" << std::endl;
 	std::cout << "    remove a component" << std::endl;
@@ -149,16 +149,21 @@ static int	cmd_list_instrument(InstrumentBackend& instrumentbackend,
  */
 static int	cmd_add(InstrumentBackend& instrumentbackend,
 		const std::string& instrumentname,
-		const std::vector<std::string>& args) {
+		std::list<std::string>& args) {
 	if (args.size() < 3) {
 		std::cerr << "not enough arguments for add command";
 		std::cerr << std::endl;
 		return EXIT_FAILURE;
 	}
 	discover::InstrumentComponentKey::Type	type
-		= discover::InstrumentComponentKey::string2type(args[0]);
+		= discover::InstrumentComponentKey::string2type(args.front());
+	args.pop_front();
+	std::string	servicename = args.front();
+	args.pop_front();
+	std::string	deviceurl = args.front();
+	args.pop_front();
 	discover::InstrumentComponent	component(instrumentname, type,
-		args[1], args[2]);
+		servicename, deviceurl);
 	discover::InstrumentPtr	instrument
 		= instrumentbackend.get(instrumentname);
 	instrument->add(component);
@@ -170,15 +175,16 @@ static int	cmd_add(InstrumentBackend& instrumentbackend,
  */
 static int	cmd_remove(InstrumentBackend& instrumentbackend,
 		const std::string& instrumentname,
-		const std::vector<std::string>& args) {
+		std::list<std::string>& args) {
 	if (args.size() < 2) {
 		std::cerr << "not enough arguments for remove command";
 		std::cerr << std::endl;
 		return EXIT_FAILURE;
 	}
 	discover::InstrumentComponentKey::Type	type
-		= discover::InstrumentComponentKey::string2type(args[0]);
-	int	index = std::stoi(args[1]);
+		= discover::InstrumentComponentKey::string2type(args.front());
+	args.pop_front();
+	int	index = std::stoi(args.front());
 	discover::InstrumentPtr	instrument
 		= instrumentbackend.get(instrumentname);
 	instrument->remove(type, index);
@@ -190,7 +196,7 @@ static int	cmd_remove(InstrumentBackend& instrumentbackend,
  */
 static int	cmd_property(InstrumentBackend& instrumentbackend,
 		const std::string& instrumentname,
-		const std::vector<std::string>& args) {
+		std::list<std::string>& args) {
 	if (args.size() < 1) {
 		std::cerr << "not enough arguments for remove command";
 		std::cerr << std::endl;
@@ -198,7 +204,8 @@ static int	cmd_property(InstrumentBackend& instrumentbackend,
 	}
 	discover::InstrumentPtr	instrument
 		= instrumentbackend.get(instrumentname);
-	std::string	propertyname = args[0];
+	std::string	propertyname = args.front();
+	args.pop_front();
 	if (args.size() == 1) {
 		discover::InstrumentProperty	property
 			= instrument->getProperty(propertyname);
@@ -215,12 +222,14 @@ static int	cmd_property(InstrumentBackend& instrumentbackend,
 		return EXIT_SUCCESS;
 	}
 	std::string	value;
-	if (args.size() > 1) {
-		value = args[1];
+	if (args.size() > 0) {
+		value = args.front();
+		args.pop_front();
 	}
 	std::string	description;
-	if (args.size() > 2) {
-		description = args[2];
+	if (args.size() > 0) {
+		description = args.front();
+		args.pop_front();
 	}
 	if (instrument->hasProperty(propertyname)) {
 		discover::InstrumentProperty	property
@@ -280,12 +289,13 @@ static int	cmd_destroy(InstrumentBackend& instrumentbackend,
 /**
  * \brief Interpret the various subcommands that astroinstrument implements
  */
-static int	commands(const std::vector<std::string>& arguments) {
-	std::vector<std::string>	args = arguments;
+static int	commands(const std::list<std::string>& arguments) {
+	std::list<std::string>	args = arguments;
 	if (args.size() < 1) {
 		throw std::runtime_error("not enought arguments");
 	}
-	std::string	command = arguments[0];
+	std::string	command = args.front();
+	args.pop_front();
 	if (command == "help") {
 		return cmd_help();
 	}
@@ -300,9 +310,16 @@ static int	commands(const std::vector<std::string>& arguments) {
 
 	// all other commands need an instrument name
 	std::string	instrumentname = command;
-	args.erase(args.begin());
-	command = args[0];
-	args.erase(args.begin());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "instrument name: %s",
+		instrumentname.c_str());
+	if (args.size() == 0) {
+		std::cerr << "missing command" << std::endl;
+		return EXIT_FAILURE;
+	}
+
+	// remove the first element and check
+	command = args.front();
+	args.pop_front();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "command now %s", command.c_str());
 
 	// now call the individual commands
@@ -319,12 +336,12 @@ static int	commands(const std::vector<std::string>& arguments) {
 		switch (args.size()) {
 		case 1:
 			return cmd_remove_property(instrumentbackend,
-				instrumentname, args[0]);
+				instrumentname, args.front());
 		case 2:
 			return cmd_remove(instrumentbackend,
 				instrumentname, args);
 		default:
-			std::cerr << "wroong number of arguments" << std::endl;
+			std::cerr << "wrong number of arguments" << std::endl;
 			return EXIT_FAILURE;
 		}
 	}
@@ -363,7 +380,7 @@ int	main(int argc, char *argv[]) {
 	}
 
 	// remaining arguments are 
-	std::vector<std::string>	arguments;
+	std::list<std::string>	arguments;
 	while (optind < argc) {
 		arguments.push_back(argv[optind++]);
 	}
