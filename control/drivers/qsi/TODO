@@ -1,0 +1,5 @@
+TODOs for the QSI driver
+
+- the qsi camera supports readout speeds for improved quality. However,
+  there currently is no way to specify different readout qualities.
+

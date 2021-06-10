@@ -1,0 +1,10 @@
+#
+# device properties for the filterwheel
+#
+filterwheel:sx/080 filter-1 = L
+filterwheel:sx/080 filter-2 = R
+filterwheel:sx/080 filter-3 = G
+filterwheel:sx/080 filter-4 = B
+filterwheel:sx/080 filter-5 = H-alpha
+filterwheel:sx/080 filter-6 = O-III
+filterwheel:sx/080 filter-7 = S-II

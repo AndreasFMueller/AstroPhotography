@@ -1,0 +1,25 @@
+#
+# device.properties -- device properties for the celestron mount
+#
+# (c) 2018 Prof Dr Andreas Müller, Hochschule Rapperswil
+#
+
+# MacOS:
+mount:celestron/0 device = /dev/cu.usbserial
+
+# Linux
+mount:celestron/0 device = /dev/ttyUSB0
+
+# Sattelegg
+mount:celestron/0 longitude = 8.84666
+mount:celestron/0 latitude = 47.12722
+
+# Bosco Gurin
+#mount:celestron/0 longitude = 8.49388
+#mount:celestron/0 latitude = 46.31805
+
+# Rapperswil
+#mount:celestron/0 longitude = 8.81833
+#mount:celestron/0 latitude = 47.22666
+
+
