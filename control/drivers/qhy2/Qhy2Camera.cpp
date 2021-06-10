@@ -26,6 +26,7 @@ Qhy2Camera::Qhy2Camera(const std::string& qhyname)
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "constructing camera '%s'",
 		name().toString().c_str());
 
+	// retrieve the handle
 	_handle = Qhy2CameraLocator::handleForName(qhyname);
 
 	// get CCD information
@@ -118,54 +119,51 @@ Qhy2Camera::Qhy2Camera(const std::string& qhyname)
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "exposure times between %.3fs and %.3fs",
 		minexposuretime / 1000000., maxexposuretime / 1000000.);
 
+	// read the readout modes and names
+	_readoutmode_names = Qhy2CameraLocator::readmodelist(_handle);
+
 	// find bit depth of the camera
-	if (QHYCCD_SUCCESS == IsQHYCCDControlAvailable(_handle,
-		CONTROL_TRANSFERBIT)) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0,
-			"creating ccds with different bit depths");
-		double	min, max, step;
-		int	rc = GetQHYCCDParamMinMaxStep(_handle,
-				CONTROL_TRANSFERBIT, &min, &max, &step);
-		if (rc != QHYCCD_SUCCESS) {
-			std::string	msg = stringprintf("cannot get "
-				"transfer range");
-			debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
-			throw Qhy2Error(msg, rc);
-		}
-		int	bitstep = step;
-		int	maxbits = max;
+	std::vector<int>	bitlist = Qhy2CameraLocator::bitlist(_handle);
+	if (bitlist.size() > 0) {
 		int	ccdindex = 0;
-		for (int bits = min; bits <= maxbits;
-				bits += bitstep, ccdindex++) {
-			debug(LOG_DEBUG, DEBUG_LOG, 0, "creating %d bits ccd",
-				bits);
-			DeviceName	ccdname = name().child(DeviceName::Ccd,
-				stringprintf("%d", bits));
-			CcdInfo	info(ccdname, size, ccdindex);
+		for (auto bits : bitlist) {
+			for (uint32_t mode = 0;
+					mode < _readoutmode_names.size();
+					mode++) {
+				debug(LOG_DEBUG, DEBUG_LOG, 0,
+					"creating %d bits ccd, read mode %d",
+					bits, mode);
+				CcdInfo	info = getinfo(mode, bits, ccdindex);
+				info.addModes(binningmodes);
+				info.shutter(shutter);
+				info.pixelwidth(pixelwidth);
+				info.pixelheight(pixelheight);
+				info.minexposuretime(minexposuretime/1000000.);
+				info.maxexposuretime(maxexposuretime/1000000.);
+				ccdinfo.push_back(info);
+				ccdindex++;
+				debug(LOG_DEBUG, DEBUG_LOG, 0, "added CCD %s",
+					info.toString(true).c_str());
+			}
+		}
+	} else {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "creating default ccd");
+		// just create the default CCDinfo
+		int	ccdindex = 0;
+		for (uint32_t mode = 0; mode < _readoutmode_names.size();
+				mode++) {
+			CcdInfo	info = getinfo(mode, 0, ccdindex);
 			info.addModes(binningmodes);
 			info.shutter(shutter);
 			info.pixelwidth(pixelwidth);
 			info.pixelheight(pixelheight);
 			info.minexposuretime(minexposuretime / 1000000.);
 			info.maxexposuretime(maxexposuretime / 1000000.);
+			ccdindex++;
 			ccdinfo.push_back(info);
 			debug(LOG_DEBUG, DEBUG_LOG, 0, "added CCD %s",
 				info.toString(true).c_str());
 		}
-	} else {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "creating default ccd");
-		// just create the default CCDinfo
-		CcdInfo	defaultinfo(CcdInfo::defaultname(name(), "ccd"),
-			size, 0);
-		defaultinfo.addModes(binningmodes);
-		defaultinfo.shutter(shutter);
-		defaultinfo.pixelwidth(pixelwidth);
-		defaultinfo.pixelheight(pixelheight);
-		defaultinfo.minexposuretime(minexposuretime / 1000000.);
-		defaultinfo.maxexposuretime(maxexposuretime / 1000000.);
-		ccdinfo.push_back(defaultinfo);
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "added CCD %s",
-			defaultinfo.toString(true).c_str());
 	}
 
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "camera with %d CCDs created",
@@ -209,6 +207,83 @@ GuidePortPtr	Qhy2Camera::getGuidePort0() {
 		return guideport;
 	}
 	throw Qhy2Error("guide port not present", -1);
+}
+
+/**
+ * \brief Get the name of the readout mode from the mode number
+ *
+ * \param mode		the mode number used by the QHYCCD library
+ */
+std::string	Qhy2Camera::readoutmode(uint32_t mode) const {
+	if (mode >= _readoutmode_names.size()) {
+		std::string	msg = stringprintf("mode %d argument too large",
+			mode);
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw Qhy2Error(msg, -1);
+	}
+	return _readoutmode_names[mode];
+}
+
+/**
+ * \brief Get the mode number from the name
+ *
+ * \param name		name of the readout mode
+ */
+uint32_t	Qhy2Camera::readoutmode(const std::string& name) const {
+	for (uint32_t mode = 0; mode < _readoutmode_names.size(); mode++) {
+		if (_readoutmode_names[mode] == name) {
+			return mode;
+		}
+	}
+	std::string	msg = stringprintf("readout mode '%s' not found",
+		name.c_str());
+	debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+	throw Qhy2Error(msg, -1);
+}
+
+/**
+ * \brief Get a CcdInfo object for a readout mode and bit depth
+ *
+ * \param mode		the readout mode number
+ * \param bits		the pixel bit size
+ * \param ccdindex	the index of the device
+ */
+CcdInfo	Qhy2Camera::getinfo(uint32_t mode, int bits, int ccdindex) {
+	// build the name
+	std::string	modename = readoutmode(mode);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "creating mode %s, %d bits ccd",
+		modename.c_str(), bits);
+	DeviceName	ccdname = name().child(DeviceName::Ccd, modename)
+			.child(DeviceName::Ccd, stringprintf("%d", bits));
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "new ccd: %s",
+		ccdname.toString().c_str());
+
+	// retrieve the size
+	uint32_t	width;
+	uint32_t	height;
+	int	rc = GetQHYCCDReadModeResolution(_handle, mode,
+			&width, &height);
+	if (QHYCCD_SUCCESS != rc) {
+		std::string	msg = stringprintf("no resolution for mode %s",
+			modename.c_str());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw Qhy2Error(msg, rc);
+	}
+	ImageSize	size(width, height);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "size for mode %s: %s", modename.c_str(),
+		size.toString().c_str());
+
+	// append the name based on the bit depth
+	return CcdInfo(ccdname, size, ccdindex);
+}
+
+/**
+ * \brief Retrieve the readout mode from the CCD info
+ *
+ * \param info		the CCD info
+ */
+uint32_t	Qhy2Camera::readoutmode(const CcdInfo& info) const {
+	return readoutmode(info.name()[2]);
 }
 
 } // namespace qhy2

@@ -242,33 +242,14 @@ std::vector<std::string>	Qhy2CameraLocator::getDevicelist(DeviceName::device_typ
 			}
 			break;
 		case DeviceName::Ccd:
-			if (QHYCCD_SUCCESS == IsQHYCCDControlAvailable(handle,
-				CONTROL_TRANSFERBIT)) {
-				double  min, max, step;
-                		int	rc = GetQHYCCDParamMinMaxStep(handle,
-					CONTROL_TRANSFERBIT, &min, &max, &step);
-				if (rc != QHYCCD_SUCCESS) {
-					std::string     msg
-						= stringprintf("cannot get "
-						"transfer range");
-					debug(LOG_ERR, DEBUG_LOG, 0, "%s",
-						msg.c_str());
-					throw Qhy2Error(msg, rc);
-                		}
-				int     bitstep = step;
-				int     maxbits = max;
-				int     ccdindex = 0;
-				for (int bits = min; bits <= maxbits;
-						bits += bitstep, ccdindex++) {
-					DeviceName	name(qhyname,
-						DeviceName::Ccd,
-						stringprintf("%d", bits));
-					names.push_back(name);
+			{
+				DeviceName	cameraname(qhyname,
+							DeviceName::Ccd);
+				std::list<DeviceName>	cl = ccdlist(handle,
+					cameraname);
+				for (auto ccd : cl) {
+					names.push_back(ccd);
 				}
-			} else {
-				DeviceName	name(qhyname, DeviceName::Ccd,
-							"ccd");
-				names.push_back(name);
 			}
 			break;
 		default:
@@ -331,6 +312,108 @@ GuidePortPtr	Qhy2CameraLocator::getGuidePort0(const DeviceName& name) {
 	DeviceName	cameraname(name, DeviceName::Camera);
 	CameraPtr	camera = this->getCamera(cameraname);
 	return camera->getGuidePort();
+}
+
+std::string	canonicalname(char *buffer) {
+	char	*p = buffer;
+	while (*p) {
+		if ((*p == ' ') || (*p == '/')) {
+			*p = '_';
+		}
+		p++;
+	}
+	return std::string(buffer);
+}
+
+/**
+ * \brief Retrieve a list of readout modes from a camera identified by handle
+ *
+ * \param handle	the QHYCCD camera handle
+ */
+std::vector<std::string>	Qhy2CameraLocator::readmodelist(
+					qhyccd_handle *handle) {
+	std::vector<std::string>	modes;
+	// read the readout modes and names
+	uint32_t	number_of_modes = 0;
+	int	rc = GetQHYCCDNumberOfReadModes(handle, &number_of_modes);
+	if (QHYCCD_SUCCESS == rc) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "number of readout modes: %u",
+			number_of_modes);
+		for (uint32_t mode = 0; mode < number_of_modes; mode++) {
+			char	buffer[1024];
+			GetQHYCCDReadModeName(handle, mode, buffer);
+			std::string	mode_name = canonicalname(buffer);
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "new mode '%s' found",
+				mode_name.c_str());
+			modes.push_back(mode_name);
+		}
+	} else {
+		number_of_modes = 1;
+		modes.push_back(std::string("STD"));
+	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "found %d modes", modes.size());
+	return modes;
+}
+
+/**
+ * \brief Retrieve a list of bit depths available for the camera
+ *
+ * \param handle	the QHYCCD camera handle
+ */
+std::vector<int>	Qhy2CameraLocator::bitlist(qhyccd_handle *handle) {
+	std::vector<int>	bits;
+	if (QHYCCD_SUCCESS == IsQHYCCDControlAvailable(handle,
+		CONTROL_TRANSFERBIT)) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0,
+			"creating ccds with different bit depths");
+		double	min, max, step;
+		int	rc = GetQHYCCDParamMinMaxStep(handle,
+				CONTROL_TRANSFERBIT, &min, &max, &step);
+		if (rc != QHYCCD_SUCCESS) {
+			std::string	msg = stringprintf("cannot get "
+				"transfer range");
+			debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+			throw Qhy2Error(msg, rc);
+		}
+		debug(LOG_DEBUG, DEBUG_LOG, 0,
+			"bits from %.0f to %.0f in %.0f steps", min, max, step);
+		for (int bit = min; bit <= max + 0.1; bit += step) {
+			bits.push_back(bit);
+		}
+	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "found %d bit depths", bits.size());
+	return bits;
+}
+
+/**
+ * \brief Build a list of CCD device names
+ *
+ * \param handle	the QHYCCD camera handle
+ * \param camera	the name of the camera
+ */
+std::list<DeviceName>	Qhy2CameraLocator::ccdlist(qhyccd_handle *handle,
+		const DeviceName& camera) {
+	std::list<DeviceName>	result;
+	std::vector<std::string>	modes = readmodelist(handle);
+	std::vector<int>	bits = bitlist(handle);
+	for (auto mode : modes) {
+		if (bits.size() > 0) {
+			for (auto bit : bits) {
+				std::string	bitname
+					= stringprintf("%d", bit);
+				DeviceName	ccdname
+					= camera.child(DeviceName::Ccd, mode)
+					    .child(DeviceName::Ccd, bitname);
+				result.push_back(ccdname);
+			}
+		} else {
+			DeviceName	ccdname = camera.child(DeviceName::Ccd,
+						std::string("STD"));
+			result.push_back(ccdname);
+		}
+	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "found %d ccds", result.size());
+	return result;
 }
 
 } // namespace qhy2

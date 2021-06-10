@@ -35,9 +35,20 @@ Qhy2Ccd::Qhy2Ccd(const CcdInfo& info, Qhy2Camera& _camera)
 		} else {
 			_hasgain = false;
 		}
+		_gain = GetQHYCCDParam(camera.handle(), CONTROL_GAIN);
 	} else {
 		_hasgain = false;
 		_gaininterval = std::make_pair(0.f, 1.f);
+	}
+
+	// parse the name to find the readout mode
+	_readoutmode = camera.readoutmode(info);
+
+	// find the bit size of the pixels
+	if (name().size() > 3) {
+		_bits = std::stoi(name()[3]);
+	} else {
+		_bits = 0;
 	}
 }
 
@@ -126,8 +137,7 @@ void	Qhy2Ccd::getImage0() {
 	unsigned int	bpp = 16;
 	if (QHYCCD_SUCCESS == IsQHYCCDControlAvailable(camera.handle(),
 		CONTROL_TRANSFERBIT)) {
-		bpp = std::stoi(name().unitname());
-		rc = SetQHYCCDBitsMode(camera.handle(), bpp);
+		rc = SetQHYCCDBitsMode(camera.handle(), _bits);
 		if (rc != QHYCCD_SUCCESS) {
 			std::string	msg = stringprintf("cannot set bit "
 				"depth in %s", camera.qhyname().c_str());
@@ -135,6 +145,7 @@ void	Qhy2Ccd::getImage0() {
 			state(CcdState::idle);
 			throw Qhy2Error(msg, rc);
 		}
+		bpp = _bits;
 	}
 
 	// set single frame mode
@@ -182,6 +193,16 @@ void	Qhy2Ccd::getImage0() {
 	}
 
 	// XXX apply the offset setting, if available
+
+	// set the readout mode
+	rc = SetQHYCCDReadMode(camera.handle(), _readoutmode);
+	if (rc != QHYCCD_SUCCESS) {
+		std::string	msg = stringprintf("cannot set mode %s",
+			camera.readoutmode(_readoutmode).c_str());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		state(CcdState::idle);
+		throw Qhy2Error(msg, rc);
+	}
 
 	// find the region of interest and set it, if possible. Also
 	// remember whether we will have to extract the region of interest

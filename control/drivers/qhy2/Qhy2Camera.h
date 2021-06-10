@@ -37,6 +37,13 @@ protected:
 	friend class Qhy2Ccd;
 	friend class Qhy2Cooler;
 	friend class Qhy2GuidePort;
+private:
+	std::vector<std::string>	_readoutmode_names;
+public:
+	std::string	readoutmode(uint32_t mode) const;
+	uint32_t	readoutmode(const std::string& mode) const;
+	CcdInfo		getinfo(uint32_t mode, int bits, int ccdindex);
+	uint32_t	readoutmode(const CcdInfo& info) const;
 };
 
 } // namespace qhy2

@@ -27,6 +27,12 @@ public:
 	float	getGain() { return _gain; }
 	std::pair<float,float>	gainInterval() { return _gaininterval; }
 private:
+	uint32_t	_readoutmode;
+	int	_bits;
+public:
+	uint32_t	readoutmode() const { return _readoutmode; }
+	void	readoutmode(uint32_t r) { _readoutmode = r; }
+private:
 	std::thread	thread;
 	ImagePtr	image;
 	Qhy2Camera&	camera;

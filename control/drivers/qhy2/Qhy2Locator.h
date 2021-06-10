@@ -36,6 +36,11 @@ protected:
 	virtual CoolerPtr	getCooler0(const DeviceName& name);
 	virtual CcdPtr	getCcd0(const DeviceName& name);
 	virtual GuidePortPtr	getGuidePort0(const DeviceName& name);
+public:
+	static std::vector<std::string>	readmodelist(qhyccd_handle *handle);
+	static std::vector<int>	bitlist(qhyccd_handle *handle);
+	static std::list<DeviceName>	ccdlist(qhyccd_handle *handle,
+		const DeviceName& camera);
 };
 
 } // namespace qhy2
