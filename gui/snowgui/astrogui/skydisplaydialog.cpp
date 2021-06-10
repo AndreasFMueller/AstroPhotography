@@ -36,7 +36,7 @@ SkyDisplayDialog::SkyDisplayDialog(QWidget *parent)
 	// set the background color
 	// (from https://wiki.qt.io/How_to_Change_the_Background_Color_of_QWidget/de
 	QPalette	pal;
-	pal.setColor(QPalette::Background, Qt::black);
+	pal.setColor(QPalette::Window, Qt::black);
 	this->setPalette(pal);
 }
 

@@ -9,7 +9,7 @@ QT       += core gui widgets
 TARGET = astrosky
 TEMPLATE = app
 
-QMAKE_MAC_SDK = @MACSDK@
+# QMAKE_MAC_SDK = @MACSDK@
 
 QMAKE_CXXFLAGS += @EXTRA_CXXFLAGS@
 QMAKE_LFLAGS += @EXTRA_LDFLAGS@

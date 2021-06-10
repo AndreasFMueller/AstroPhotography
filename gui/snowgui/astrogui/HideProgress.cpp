@@ -22,7 +22,7 @@ HideProgress::HideProgress(float duration, QWidget *parent)
 	setAutoFillBackground(true);
 	QPalette	pal;
 	QColor	mask(0, 0, 0, 50);
-	pal.setColor(QPalette::Background, mask);
+	pal.setColor(QPalette::Window, mask);
 	setPalette(pal);
 
 	// create the progress bar

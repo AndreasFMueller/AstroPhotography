@@ -229,7 +229,9 @@ void	SkyDisplayWidget::mouseMoveEvent(QMouseEvent *event) {
 		QString tiptext(astro::stringprintf("RA: %s DEC: %s",
 				t.ra().hms(':', -1).c_str(),
 				t.dec().dms(':', -1).c_str()).c_str());
-		QToolTip::showText(event->globalPos(), tiptext);
+		QPointF	wheref = event->globalPosition();
+		QPoint	where(wheref.x(), wheref.y());
+		QToolTip::showText(where, tiptext);
 	} catch (...) { }
 }
 

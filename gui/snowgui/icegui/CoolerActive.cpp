@@ -171,7 +171,7 @@ void	CoolerActive::draw() {
 
 	sectors = 6;
 	angle = M_PI / 2;
-	QColor	transparent(0, 0, 0, 0);
+//	QColor	transparent(0, 0, 0, 0);
 	while (sectors--) {
 		QPainterPath	opening;
 		double	x, y;

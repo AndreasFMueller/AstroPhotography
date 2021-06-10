@@ -87,7 +87,11 @@ SuSE)
 	EXTRA_CXXFLAGS="-fopenmp"
 	;;
 Darwin)
-	if [ -d /usr/local/opt/qt5/bin ]
+	if [ -d /usr/local/opt/qt/bin ]
+	then
+		PATH=${PATH}:/usr/local/opt/qt/bin
+		export PATH
+	elif [ -d /usr/local/opt/qt5/bin ]
 	then
 		PATH=${PATH}:/usr/local/opt/qt5/bin
 		export PATH
@@ -121,7 +125,8 @@ Darwin)
 		export PATH
 	fi
 	LDFLAGS="-L/usr/local/lib -lusb-1.0"
-	CXXFLAGS="${CFLAGS} --std=c++11"
+	#CXXFLAGS="${CFLAGS} --std=c++11"
+	CXXFLAGS="${CFLAGS}"
 	export CFLAGS CXXFLAGS LDFLAGS
 	CXXFLAGS="${CXXFLAGS} -stdlib=libc++"
 	;;

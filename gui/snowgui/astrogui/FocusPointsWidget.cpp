@@ -139,9 +139,9 @@ void	FocusPointsWidget::paintEvent(QPaintEvent * /* event */) {
  */
 int	FocusPointsWidget::showPositionAsTooltip(QMouseEvent *event) {
 	int	position = scaler.inverse(event->pos()).x();
-	QToolTip::showText(event->globalPos(),
-		QString::number(position),
-		this, rect() );
+	QPointF	wheref = event->globalPosition();
+	QPoint	where(wheref.x(), wheref.y());
+	QToolTip::showText(where, QString::number(position), this, rect() );
 	QWidget::mouseMoveEvent(event);
 	return position;
 }

@@ -1,6 +1,9 @@
 ChangeLog for the Qt GUI to Astrophotography
 
 20210109:
+	* fix deprecated {g,s}etTime_t(), use QDateTime arithmetic
+	* fix event->globalPos(), replace by event->globalPosition()
+	* fix QPalette::Background -> QPalette::Window
 	* switch to homebrew provided qt5
 
 20210108:

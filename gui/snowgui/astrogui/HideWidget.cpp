@@ -20,7 +20,7 @@ HideWidget::HideWidget(QString text, QWidget *parent)
 	setAutoFillBackground(true);
 	QPalette pal;
 	QColor	clear(0, 0, 0, 0);
-	pal.setColor(QPalette::Background, clear);
+	pal.setColor(QPalette::Window, clear);
 	setPalette(pal);
 	_hide = false;
 
@@ -76,7 +76,7 @@ void	HideWidget::timeout() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "hiding");
 	QPalette pal;
 	QColor	mask(0, 0, 0, 100);
-	pal.setColor(QPalette::Background, mask);
+	pal.setColor(QPalette::Window, mask);
 	setPalette(pal);
 	_hide = true;
 	repaint();

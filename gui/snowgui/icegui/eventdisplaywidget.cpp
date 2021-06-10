@@ -56,13 +56,10 @@ EventDisplayWidget::EventDisplayWidget(QWidget *parent,
 	this->setWindowTitle(QString(title.c_str()));
 
 	// time span
-	time_t	now;
-	time(&now);
-	QDateTime	fromdatetime;
-	fromdatetime.setTime_t(now - 3600);
+	QDateTime	now = QDateTime::currentDateTime();
+	QDateTime	fromdatetime = now.addSecs(-3600);
 	ui->fromTime->setDateTime(fromdatetime);
-	QDateTime	todatetime;
-	todatetime.setTime_t(now + 3600);
+	QDateTime	todatetime = now.addSecs(3600);
 	ui->toTime->setDateTime(todatetime);
 
 	// make sure we  have no detail widget
@@ -195,10 +192,11 @@ void	EventDisplayWidget::addPastEvents() {
 	try {
 		time_t	now;
 		time(&now);
+		time_t	from = now - ui->fromTime->dateTime().toSecsSinceEpoch();
+		time_t	to = now - ui->toTime->dateTime().toSecsSinceEpoch();
+	
 		snowstar::eventlist	list
-			= _events->eventsBetween(
-				now - ui->fromTime->dateTime().toTime_t(),
-				now - ui->toTime->dateTime().toTime_t());
+			= _events->eventsBetween(from, to);
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "got %d events", list.size());
 		ui->eventTable->setRowCount(list.size());
 		EventDisplayWidget	*myself = this;
