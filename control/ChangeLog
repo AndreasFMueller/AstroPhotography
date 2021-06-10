@@ -1,6 +1,7 @@
 ChangeLog for the Astro project.
 
 20210610:
+	* fix a bug in astroinstrument
 	* new naming scheme for QHY2 CCDs
 	* add a QHY2 ccd for each readout mode
 	* retrieve gain from QHY2 camera
