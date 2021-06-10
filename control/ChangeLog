@@ -1,7 +1,9 @@
 ChangeLog for the Astro project.
 
 20210610:
-	* retrieve gain from camera
+	* new naming scheme for QHY2 CCDs
+	* add a QHY2 ccd for each readout mode
+	* retrieve gain from QHY2 camera
 
 20210607:
 	* get qhyccd driver to work (InitQHYCCD), still open are window
