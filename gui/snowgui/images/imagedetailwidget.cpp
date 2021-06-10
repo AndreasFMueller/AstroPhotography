@@ -153,7 +153,6 @@ void	imagedetailwidget::saveImage() {
 	filedialog.setDefaultSuffix(QString("fits"));
 	if (filedialog.exec()) {
 		QStringList	list = filedialog.selectedFiles();
-		QStringList::const_iterator	i;
 		std::string	filename(list.begin()->toLatin1().data());
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "filename: %s");
 		astro::io::FITSout	out(filename);
