@@ -688,7 +688,8 @@ void	exposewidget::downloadClicked() {
 
 	QFileDialog	filedialog(this);
 	filedialog.setAcceptMode(QFileDialog::AcceptOpen);
-	filedialog.setFileMode(QFileDialog::DirectoryOnly);
+	filedialog.setFileMode(QFileDialog::Directory);
+	filedialog.setOption(QFileDialog::ShowDirsOnly, true);
 	if (!filedialog.exec()) {
 		return;
 	}
