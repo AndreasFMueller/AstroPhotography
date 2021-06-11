@@ -36,7 +36,7 @@ CommunicatorSingleton::CommunicatorSingleton(int& argc, char *argv[]) {
 
 	// the large message size is required because we have cases
 	// where we transfer entire images as messages
-	props->setProperty("Ice.MessageSizeMax", "65536");
+	props->setProperty("Ice.MessageSizeMax", "262144");
 
 	// large image files should be compressed, and because the network
 	// is slow, it is OK to trade off some CPU cycles for this

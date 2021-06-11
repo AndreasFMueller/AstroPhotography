@@ -18,7 +18,7 @@ modulesdisplay::modulesdisplay(QWidget *parent)
 	ui->setupUi(this);
 
 	// connections
-	connect(ui->moduleselectionBox, SIGNAL(currentIndexChanged(QString)),
+	connect(ui->moduleselectionBox, SIGNAL(currentTextChanged(QString)),
 		this, SLOT(moduleChanged(QString)));
 }
 

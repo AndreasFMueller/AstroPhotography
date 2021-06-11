@@ -95,37 +95,37 @@ Darwin)
 	then
 		PATH=${PATH}:/usr/local/opt/qt5/bin
 		export PATH
-	elif [ -d /Applications/Qt5/Qt5.15/5.15.2/clang_64/bin ]
-	then
-		PATH=${PATH}:/Applications/Qt5/Qt5.15/5.15.2/clang_64/bin
-		export PATH
-	elif [ -d /Applications/Qt5/Qt5.14/5.14.0/clang_64/bin ]
-	then
-		PATH=${PATH}:/Applications/Qt5/Qt5.14/5.14.0/clang_64/bin
-		export PATH
-	elif [ -d /Applications/Qt5/Qt5.13/5.13.1/clang_64/bin ]
-	then
-		PATH=${PATH}:/Applications/Qt5/Qt5.13/5.13.1/clang_64/bin
-		export PATH
-	elif [ -d /Applications/Qt5/Qt5.12/5.12.4/clang_64/bin ]
-	then
-		PATH=${PATH}:/Applications/Qt5/Qt5.12/5.12.4/clang_64/bin
-		export PATH
-	elif [ -d /Applications/Qt5/Qt5.12/5.12.3/clang_64/bin ]
-	then
-		PATH=${PATH}:/Applications/Qt5/Qt5.12/5.12.3/clang_64/bin
-		export PATH
-	elif [ -d /Applications/Qt5/Qt5.11/5.11.2/clang_64/bin ]
-	then
-		PATH=${PATH}:/Applications/Qt5/Qt5.11/5.11.2/clang_64/bin
-		export PATH
-	elif [ -d /Applications/Qt5/Qt5.7/5.7/clang_64/bin ]
-	then
-		PATH=${PATH}:/Applications/Qt5/Qt5.7/5.7/clang_64/bin
-		export PATH
+#	elif [ -d /Applications/Qt5/Qt5.15/5.15.2/clang_64/bin ]
+#	then
+#		PATH=${PATH}:/Applications/Qt5/Qt5.15/5.15.2/clang_64/bin
+#		export PATH
+#	elif [ -d /Applications/Qt5/Qt5.14/5.14.0/clang_64/bin ]
+#	then
+#		PATH=${PATH}:/Applications/Qt5/Qt5.14/5.14.0/clang_64/bin
+#		export PATH
+#	elif [ -d /Applications/Qt5/Qt5.13/5.13.1/clang_64/bin ]
+#	then
+#		PATH=${PATH}:/Applications/Qt5/Qt5.13/5.13.1/clang_64/bin
+#		export PATH
+#	elif [ -d /Applications/Qt5/Qt5.12/5.12.4/clang_64/bin ]
+#	then
+#		PATH=${PATH}:/Applications/Qt5/Qt5.12/5.12.4/clang_64/bin
+#		export PATH
+#	elif [ -d /Applications/Qt5/Qt5.12/5.12.3/clang_64/bin ]
+#	then
+#		PATH=${PATH}:/Applications/Qt5/Qt5.12/5.12.3/clang_64/bin
+#		export PATH
+#	elif [ -d /Applications/Qt5/Qt5.11/5.11.2/clang_64/bin ]
+#	then
+#		PATH=${PATH}:/Applications/Qt5/Qt5.11/5.11.2/clang_64/bin
+#		export PATH
+#	elif [ -d /Applications/Qt5/Qt5.7/5.7/clang_64/bin ]
+#	then
+#		PATH=${PATH}:/Applications/Qt5/Qt5.7/5.7/clang_64/bin
+#		export PATH
 	fi
 	LDFLAGS="-L/usr/local/lib -lusb-1.0"
-	#CXXFLAGS="${CFLAGS} --std=c++11"
+#	CXXFLAGS="${CFLAGS} --std=c++11"
 	CXXFLAGS="${CFLAGS}"
 	export CFLAGS CXXFLAGS LDFLAGS
 	CXXFLAGS="${CXXFLAGS} -stdlib=libc++"

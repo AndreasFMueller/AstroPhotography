@@ -1,6 +1,10 @@
 ChangeLog for the Qt GUI to Astrophotography
 
-20210109:
+20210611:
+	* fix connect for nonexistent currentIndexChange(QString)
+	  -> currentTextChanged(QString)
+
+20210609:
 	* QFileDialog::DirectoryOnly removed
 	* fix an unused variable
 	* fix deprecated {g,s}etTime_t(), use QDateTime arithmetic

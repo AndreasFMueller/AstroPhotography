@@ -31,10 +31,10 @@ instrumentswindow::instrumentswindow(QWidget *parent,
 
 	// connections
 	connect(ui->instrumentselectionBox,
-		SIGNAL(currentIndexChanged(QString)),
+		SIGNAL(currentTextChanged(QString)),
 		this, SLOT(instrumentSelected(QString)));
 	connect(ui->serverselectionBox,
-		SIGNAL(currentIndexChanged(QString)),
+		SIGNAL(currentTextChanged(QString)),
 		this, SLOT(serviceSelected(QString)));
 	connect(ui->deleteinstrumentButton, SIGNAL(clicked()),
 		this, SLOT(deleteInstrument()));

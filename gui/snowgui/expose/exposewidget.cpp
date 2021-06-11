@@ -51,7 +51,7 @@ exposewidget::exposewidget(QWidget *parent)
 	ui->repositoryTree->header()->resizeSection(7, 60);
 
 	// connections
-	connect(ui->repositoryBox, SIGNAL(currentIndexChanged(QString)),
+	connect(ui->repositoryBox, SIGNAL(currentTextChanged(QString)),
 		this, SLOT(repositoryChanged(QString)));
 	connect(ui->projectBox, SIGNAL(activated(QString)),
 		this, SLOT(projectChanged(QString)));
