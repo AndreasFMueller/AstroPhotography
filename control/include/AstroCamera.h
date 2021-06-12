@@ -565,6 +565,7 @@ public:
 	CoolerInfo(const Temperature& actualTemperature,
 		const Temperature& setTemperature,  bool on);
 	CoolerInfo(Cooler& cooler);
+	std::string	toString() const;
 };
 
 typedef callback::CallbackDataEnvelope<CoolerInfo>	CoolerInfoCallbackData;

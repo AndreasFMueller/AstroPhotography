@@ -1,5 +1,9 @@
 ChangeLog for the Astro project.
 
+20210611:
+	* fix Qhy2Cooler class
+	* add toString method to CoolerInfo
+
 20210610:
 	* increase maximum message size to accomodate large chip cameras
 	* fix a bug in astroinstrument

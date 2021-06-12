@@ -25,6 +25,8 @@ class Qhy2Cooler : public Cooler {
 	std::thread	_thread;
 	std::condition_variable	_cond;
 	std::mutex	_mutex;
+protected:
+	virtual void	setTemperature(const float _temperature);
 public:
 	Qhy2Cooler(Qhy2Camera& _camera);
 	virtual ~Qhy2Cooler();

@@ -18,7 +18,14 @@ namespace qhy2 {
  * \param cooler	the cooler to control
  */
 void	Qhy2Cooler::start_thread(Qhy2Cooler *cooler) {
-	cooler->run();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "cooler thread launch");
+	try {
+		cooler->run();
+	} catch (const std::exception x) {
+		debug(LOG_ERR, DEBUG_LOG, 0,
+			"exception thrown in cooler thread: %s", x.what());
+	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "cooler thread returns");
 }
 
 /**
@@ -27,7 +34,7 @@ void	Qhy2Cooler::start_thread(Qhy2Cooler *cooler) {
 void	Qhy2Cooler::run() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "the cooler thread for %s starts",
 		name().toString().c_str());
-	setTemperature(Temperature(15, Temperature::CELSIUS));
+	Cooler::setTemperature(Temperature(15, Temperature::CELSIUS));
 	setOn(true);
 
 	// get the current temperature
@@ -36,6 +43,7 @@ void	Qhy2Cooler::run() {
 	// protect common data
 	std::unique_lock<std::mutex>	lock(_mutex);
 	while (_running) {
+		//debug(LOG_DEBUG, DEBUG_LOG, 0, "cooler loop");
 		// handle the temperature control call
 		if (isOn()) {
 			double	celsiustemp = getSetTemperature().celsius();
@@ -43,9 +51,21 @@ void	Qhy2Cooler::run() {
 					celsiustemp);
 			if (rc != QHYCCD_SUCCESS) {
 				debug(LOG_ERR, DEBUG_LOG, 0, "cannot control "
-					"thetemperature at %.1f (rc=%d)",
+					"the temperature %.1f (rc=%d)",
 					 celsiustemp, rc);
+			} else {
+				//debug(LOG_DEBUG, DEBUG_LOG, 0,
+				//	"ON: temperature: %.1f", celsiustemp);
 			}
+		} else {
+			// control temperature with an extremely high 
+			// temperature, which 
+			int	rc = ControlQHYCCDTemp(camera.handle(), 30.);
+			if (rc != QHYCCD_SUCCESS) {
+				debug(LOG_ERR, DEBUG_LOG, 0, "OFF: cannot NOT "
+					"control temperature: %d", rc);
+			}
+			//debug(LOG_DEBUG, DEBUG_LOG, 0, "not controlling");
 		}
 
 		// wait for a second or shorter if something happens
@@ -57,14 +77,18 @@ void	Qhy2Cooler::run() {
 				getSetTemperature().celsius());
 		}
 
+		// retrieve the actual temperature
+		Temperature	a = getActualTemperature();
+		//debug(LOG_DEBUG, DEBUG_LOG, 0, "actual: %.1f, previous: %.1f",
+		//	a.celsius(), previoustemperature.celsius());
+
 		// if the temperature has changed enough, we send a new
 		// coolerinfo to the callback
-		Temperature	difference
-			= getActualTemperature() - previoustemperature;
-		if (difference.celsius() > 0.1) {
-			previoustemperature = _actualTemperature;
-			CoolerInfo	coolerinfo(_actualTemperature,
-						_setTemperature, isOn());
+		if (fabs(a - previoustemperature) > 0.1) {
+			previoustemperature = a;
+			CoolerInfo	coolerinfo(a, _setTemperature, isOn());
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "sending callback(%s)",
+				coolerinfo.toString().c_str());
 			callback(coolerinfo);
 		}
 	}
@@ -119,6 +143,14 @@ Temperature	Qhy2Cooler::getActualTemperature() {
 void	Qhy2Cooler::setOn(bool onnotoff) {
 	std::unique_lock<std::mutex>	lock(_mutex);
 	_on = onnotoff;
+	_cond.notify_all();
+}
+
+/**
+ * \brief Set a new 
+ */
+void	Qhy2Cooler::setTemperature(const float _temperature) {
+	Cooler::setTemperature(_temperature);
 	_cond.notify_all();
 }
 
