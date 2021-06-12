@@ -1,9 +1,9 @@
 #
 # Process this file with autoconf to produce a configure script.
 
-AC_PREREQ(2.57)
+AC_PREREQ([2.69])
 AC_REVISION([1.4])
-AC_INIT([astro], [1.0], [andreas.mueller@ost.ch])
+AC_INIT([astro],[1.0],[andreas.mueller@ost.ch])
 m4_ifdef([AM_PROG_AR], [AM_PROG_AR])
 LT_INIT
 AC_CONFIG_SRCDIR([include/AstroImage.h])
@@ -18,7 +18,7 @@ AC_CONFIG_HEADERS(include/config.h)
 AC_PROG_CXX
 AC_PROG_CC
 AC_OPENMP
-AC_PROG_LIBTOOL
+LT_INIT
 AC_CHECK_TOOL(FLEX, flex)
 AC_CHECK_TOOL(BISON, bison)
 AC_PATH_TOOL(MOUNT, mount)
@@ -34,7 +34,6 @@ fi
 AM_CONDITIONAL([HAVE_PDFLATEX], test -n "$PDFLATEX")
 
 # Checks for header files
-AC_HEADER_STDC
 AC_CHECK_HEADERS([stdlib.h stdio.h unistd.h math.h errno.h string.h stdarg.h libintl.h locale.h syslog.h sys/types.h sys/stat.h sys/time.h dirent.h fcntl.h sys/file.h dlfcn.h fftw3.h Accelerate/Accelerate.h termios.h sys/mman.h execinfo.h sys/select.h poll.h signal.h sys/param.h getopt.h uuid/uuid.h netdb.h assert.h])
 
 # We want to use backtrace API for stack dumps, this requires the use of
