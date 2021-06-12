@@ -288,7 +288,7 @@ void	Qhy2Ccd::getImage0() {
 	imagewidth = exposure.width();
 	imageheight = exposure.height();
 	channels = 1;
-	
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieving image data");
 	rc = GetQHYCCDSingleFrame(camera.handle(), &imagewidth, &imageheight,
 		&bpp, &channels, imagedata);
 	if (rc != QHYCCD_SUCCESS) {

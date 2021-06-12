@@ -88,6 +88,8 @@ void	ImageSize::setHeight(int height) {
  * \brief Compare two size objects: equality
  *
  * Two size objects are equal if width and height are identical
+ *
+ * \param other		the size to compare with
  */
 bool	ImageSize::operator==(const ImageSize& other) const {
 	return (_width == other.width()) && (_height == other.height());
@@ -97,9 +99,22 @@ bool	ImageSize::operator==(const ImageSize& other) const {
  * \brief Compare two size objects: inequality
  *
  * Two size objects are unequal if width or height are unequal
+ *
+ * \param other		the size to compare with
  */
 bool	ImageSize::operator!=(const ImageSize& other) const {
 	return (_width != other.width()) || (_height != other.height());
+}
+
+/**
+ * \brief Size comparison 
+ *
+ * returns true if width and height are at least as large as those of other
+ *
+ * \param other		the size to compare with
+ */
+bool	ImageSize::operator>=(const ImageSize& other) const {
+	return (_width >= other.width()) && (_height >= other.height());
 }
 
 /**

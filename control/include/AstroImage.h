@@ -91,9 +91,10 @@ public:
 	ImageSize(const ImageSize& other);
 	ImageSize&	operator=(const ImageSize& other);
 	virtual ~ImageSize();
-	// comparision
+	// comparison
 	bool	operator==(const ImageSize& other) const;
 	bool	operator!=(const ImageSize& other) const;
+	bool	operator>=(const ImageSize& other) const;
 	// relationships
 	bool	bounds(const ImagePoint& point) const;
 	bool	bounds(const ImageRectangle& rectangle) const;

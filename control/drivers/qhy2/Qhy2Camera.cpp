@@ -275,6 +275,9 @@ CcdInfo	Qhy2Camera::getinfo(uint32_t mode, int bits, int ccdindex) {
 		throw Qhy2Error(msg, rc);
 	}
 	ImageSize	size(width, height);
+	if (size >= effectivearea()) {
+		size = effectivearea();
+	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "size for mode %s: %s", modename.c_str(),
 		size.toString().c_str());
 
