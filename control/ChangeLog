@@ -1,6 +1,7 @@
 ChangeLog for the Astro project.
 
 20210611:
+	* fix effective area
 	* fix Bayer mosaic code for qhy2
 	* mirror image vertically (different coordinate systems)
 	* add offset computation for effective area
