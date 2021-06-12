@@ -319,10 +319,14 @@ public:
 	 */
 	typedef enum mosaic_e {
 		NONE = 0,
-		BAYER_RGGB = 4,
-		BAYER_GRBG = 5,
-		BAYER_GBRG = 6,
-		BAYER_BGGR = 7
+		BAYER_RGGB = 4,	/* G B
+				   R G */
+		BAYER_GRBG = 5,	/* B G
+				   G R */
+		BAYER_GBRG = 6,	/* R G
+				   G B */
+		BAYER_BGGR = 7	/* G R
+				   B G */
 	} mosaic_type;
 private:
 	mosaic_type	mosaic;

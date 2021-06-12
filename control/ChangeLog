@@ -1,6 +1,10 @@
 ChangeLog for the Astro project.
 
 20210611:
+	* fix Bayer mosaic code for qhy2
+	* mirror image vertically (different coordinate systems)
+	* add offset computation for effective area
+	* add OSXInitQHYCCDFirmwareArray for OSX
 	* fix Qhy2Cooler class
 	* add toString method to CoolerInfo
 

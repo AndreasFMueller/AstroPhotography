@@ -19,6 +19,7 @@ namespace qhy2 {
  * \brief QHY ccd class
  */
 class Qhy2Ccd : public Ccd {
+	// gain stuff
 	bool	_hasgain;
 	float	_gain;
 	std::pair<float,float>	_gaininterval;
@@ -26,12 +27,19 @@ public:
 	bool	hasGain() { return _hasgain; }
 	float	getGain() { return _gain; }
 	std::pair<float,float>	gainInterval() { return _gaininterval; }
+	// read mode stuff
 private:
 	uint32_t	_readoutmode;
 	int	_bits;
 public:
 	uint32_t	readoutmode() const { return _readoutmode; }
 	void	readoutmode(uint32_t r) { _readoutmode = r; }
+private:
+	ImagePoint	_offset;
+public:
+	const ImagePoint&	offset() const { return _offset; }
+	void	offset(const ImagePoint& o) { _offset = o; }
+	// private stuff for exposing
 private:
 	std::thread	thread;
 	ImagePtr	image;

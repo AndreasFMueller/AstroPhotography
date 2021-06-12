@@ -92,12 +92,22 @@ Qhy2CameraLocator::Qhy2CameraLocator() {
 	std::call_once(initialize_once, initialize);
 	std::unique_lock<std::recursive_mutex>	lock(initialize_mutex);
 	if (initialize_counter == 0) {
-		int	rc = InitQHYCCDResource();
+		auto	rc = InitQHYCCDResource();
 		if (rc != QHYCCD_SUCCESS) {
 			throw Qhy2Error("InitQHYCCDResource failed", rc);
 		}
 		initialize_counter++;
 	}
+
+	// make sure firmware is initialized on OSX
+#ifdef __APPLE__
+	{
+		auto	rc = OSXInitQHYCCDFirmwareArray();
+		if (QHYCCD_ERROR != rc) {
+			throw Qhy2Error("cannot load firmware", rc);
+		}
+	}
+#endif /* __APPLE__ */
 
 	// make sure we enumerate the devices or the search functions
 	// will fail to find them

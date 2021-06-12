@@ -148,6 +148,8 @@ void	Qhy2Cooler::setOn(bool onnotoff) {
 
 /**
  * \brief Set a new 
+ *
+ * \param _temperature	the temperature in Kelvin to set in the cooler
  */
 void	Qhy2Cooler::setTemperature(const float _temperature) {
 	Cooler::setTemperature(_temperature);

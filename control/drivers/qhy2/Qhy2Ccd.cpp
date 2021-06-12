@@ -192,7 +192,13 @@ void	Qhy2Ccd::getImage0() {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "no gain setting");
 	}
 
-	// XXX apply the offset setting, if available
+	// apply the offset setting
+	ImagePoint	start(exposure.x() + camera.offset().x(),
+		(int)(camera.start().y() + camera.effectivearea().height() -
+			(exposure.y() + exposure.height())));
+	debug(LOG_DEBUG, DEBUG_LOG, 0,
+		"start point for image: %s (eff.area start: %s)",
+		start.toString().c_str(), camera._start.toString().c_str());
 
 	// set the readout mode
 	rc = SetQHYCCDReadMode(camera.handle(), _readoutmode);
@@ -207,7 +213,7 @@ void	Qhy2Ccd::getImage0() {
 	// find the region of interest and set it, if possible. Also
 	// remember whether we will have to extract the region of interest
 	// after reading the image from the camera
-	rc = SetQHYCCDResolution(camera.handle(), exposure.x(), exposure.y(),
+	rc = SetQHYCCDResolution(camera.handle(), start.x(), start.y(),
 		exposure.width(), exposure.height());
 	if (rc != QHYCCD_SUCCESS) {
 		std::string	msg = stringprintf("cannot set image size %s "
@@ -306,7 +312,7 @@ void	Qhy2Ccd::getImage0() {
 			= new Image<unsigned char>(resultsize);
 		for (unsigned int x = 0; x < imagewidth; x++) {
 			for (unsigned int y = 0; y < imageheight; y++) {
-				imagecontent->pixel(x, y)
+				imagecontent->pixel(x, imageheight - y - 1)
 					= imagedata[y * imagewidth + x];
 			}
 		}
@@ -319,7 +325,7 @@ void	Qhy2Ccd::getImage0() {
 		unsigned short	*shortimagedata = (unsigned short *)imagedata;
 		for (unsigned int x = 0; x < imagewidth; x++) {
 			for (unsigned int y = 0; y < imageheight; y++) {
-				imagecontent->pixel(x, y)
+				imagecontent->pixel(x, imageheight - y - 1)
 					= shortimagedata[y * imagewidth + x];
 			}
 		}
@@ -336,24 +342,30 @@ void	Qhy2Ccd::getImage0() {
 		throw Qhy2Error(msg, -1);
 	}
 	
-	// add the color mosaic code if present
+	// add the color mosaic code if present. 
+	// Note that QHYCCD color codes start in the upper left corner of a
+	// 2x2 square, but our color codes start in the lower left corner.
+	// this leads to the somewhat surprising assignment of color code
+	// assignments
 	switch (IsQHYCCDControlAvailable(camera.handle(), CAM_COLOR)) {
 	case BAYER_GB:
-		image->setMosaicType(MosaicType(MosaicType::BAYER_GBRG));
+		image->setMosaicType(MosaicType(MosaicType::BAYER_RGGB, start));
 		break;
 	case BAYER_GR:
-		image->setMosaicType(MosaicType(MosaicType::BAYER_GRBG));
+		image->setMosaicType(MosaicType(MosaicType::BAYER_BGGR, start));
 		break;
 	case BAYER_BG:
-		image->setMosaicType(MosaicType(MosaicType::BAYER_BGGR));
+		image->setMosaicType(MosaicType(MosaicType::BAYER_GRBG, start));
 		break;
 	case BAYER_RG:
-		image->setMosaicType(MosaicType(MosaicType::BAYER_RGGB));
+		image->setMosaicType(MosaicType(MosaicType::BAYER_GBRG, start));
 		break;
 	default:
 		image->setMosaicType(MosaicType(MosaicType::NONE));
 		break;
 	}
+
+	// XXX correct the color mosaic for the start point of the image
 
 	// terminate the process on the camera size
 	rc = CancelQHYCCDExposingAndReadout(camera.handle());

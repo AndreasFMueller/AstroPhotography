@@ -44,6 +44,16 @@ public:
 	uint32_t	readoutmode(const std::string& mode) const;
 	CcdInfo		getinfo(uint32_t mode, int bits, int ccdindex);
 	uint32_t	readoutmode(const CcdInfo& info) const;
+private:
+	ImageSize	_totalsize;
+	ImageSize	_effectivearea;
+	ImagePoint	_start;
+	ImagePoint	_offset;
+public:
+	const ImageSize	totalsize() const { return _totalsize; }
+	const ImageSize effectivearea() const { return _effectivearea; }
+	const ImagePoint	start() const { return _start; }
+	const ImagePoint	offset() const { return _offset; }
 };
 
 } // namespace qhy2

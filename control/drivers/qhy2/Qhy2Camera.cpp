@@ -39,23 +39,6 @@ Qhy2Camera::Qhy2Camera(const std::string& qhyname)
 		return;
 	}
 
-	// get the size
-	ImageSize	size;
-	{
-		uint32_t	startX, startY, sizeX, sizeY;
-		int	rc = GetQHYCCDEffectiveArea(_handle, &startX, &startY,
-				&sizeX, &sizeY);
-		if (rc != QHYCCD_SUCCESS) {
-			std::string	msg = stringprintf("cannot get "
-				"effective area from '%s'", qhyname.c_str());
-			debug(LOG_ERR, DEBUG_LOG, 0, "%s: %d", msg.c_str(), rc);
-			throw Qhy2Error(msg, rc);
-		}
-		size = ImageSize(sizeX, sizeY);
-	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "image size: %s",
-		size.toString().c_str());
-
 	// get pixel dimensions
 	double	pixelwidth, pixelheight;
 	{
@@ -72,9 +55,31 @@ Qhy2Camera::Qhy2Camera(const std::string& qhyname)
 		}
 		pixelwidth = pixelwidth / 1000000.;
 		pixelheight = pixelheight / 1000000.;
+		_totalsize = ImageSize(imagew, imageh);
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "pixel dimensions: %.1fum x %.1fum",
 		1000000. * pixelwidth, 1000000. * pixelheight);
+
+	// get the effective area
+	{
+		uint32_t	startX, startY, sizeX, sizeY;
+		int	rc = GetQHYCCDEffectiveArea(_handle, &startX, &startY,
+				&sizeX, &sizeY);
+		if (rc != QHYCCD_SUCCESS) {
+			std::string	msg = stringprintf("cannot get "
+				"effective area from '%s'", qhyname.c_str());
+			debug(LOG_ERR, DEBUG_LOG, 0, "%s: %d", msg.c_str(), rc);
+			throw Qhy2Error(msg, rc);
+		}
+		_effectivearea = ImageSize(sizeX, sizeY);
+		_start = ImagePoint((int)startX, (int)startY);
+		_offset = ImagePoint((int)startX,
+				_totalsize.height() - startY - sizeY);
+	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0,
+		"effective image size: %s @ %s (start = %s)",
+		_effectivearea.toString().c_str(), _offset.toString().c_str(),
+		_start.toString().c_str());
 
 	// get the available binning modes
 	BinningSet	binningmodes;
