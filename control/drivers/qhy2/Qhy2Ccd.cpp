@@ -259,12 +259,15 @@ void	Qhy2Ccd::getImage0() {
 
 	// wait for the exposure to complete
 	uint32_t	remaining = 1000;
-	while (remaining > 100) {
+	while (remaining > 1) {
 		remaining = GetQHYCCDExposureRemaining(camera.handle());
-		if (remaining > 100) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "remaining: %u", remaining);
+		if (remaining > 0) {
 			debug(LOG_DEBUG, DEBUG_LOG, 0,
 				"sleeping for additional %u", remaining);
-			Timer::sleep(remaining * 0.000001);
+			//Timer::sleep(remaining * 0.000001);
+			Timer::sleep(exposure.exposuretime() * remaining/100.);
+			//Timer::sleep(1);
 		} else {
 			debug(LOG_DEBUG, DEBUG_LOG, 0, "exposure complete");
 		}
