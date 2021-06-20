@@ -99,8 +99,11 @@ Qhy2CameraLocator::Qhy2CameraLocator() {
 		initialize_counter++;
 	}
 
-	// make sure firmware is initialized on OSX
+#if 0
+	// according to QHYCCD, this part of the api no longer needs to
+	// be called, it has been integrated in the rest of the API
 #ifdef __APPLE__
+	// make sure firmware is initialized on OSX
 	{
 		auto	rc = OSXInitQHYCCDFirmwareArray();
 		if (QHYCCD_ERROR != rc) {
@@ -108,6 +111,7 @@ Qhy2CameraLocator::Qhy2CameraLocator() {
 		}
 	}
 #endif /* __APPLE__ */
+#endif
 
 	// make sure we enumerate the devices or the search functions
 	// will fail to find them

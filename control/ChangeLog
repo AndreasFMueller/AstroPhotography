@@ -3,6 +3,7 @@ ChangeLog for the Astro project.
 20210620:
 	* fix a bug in the qhy2 driver caused by incorrect documentation
 	  of the GetQHYCCDExposureRemaining method
+	* remove OSXInitQHYCCDFirmwareArray as it is no longer needed
 
 20210611:
 	* fix effective area
