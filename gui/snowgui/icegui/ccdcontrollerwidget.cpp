@@ -404,6 +404,7 @@ void	ccdcontrollerwidget::setupCcd() {
  * This method does not send any signals
  */
 void	ccdcontrollerwidget::displayExposure(Exposure e) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "displaying new exposure");
 	displayBinning(e.mode());
 	displayExposureTime(e.exposuretime());
 	displayPurpose(e.purpose());
@@ -1035,11 +1036,17 @@ void	ccdcontrollerwidget::retrieveImageWork() {
 
 		// if the image size does not match the size requested, get the
 		// subimage
+		// XXX this code is incorrect, because it will often happen
+		// XXX that the camera has to modify the frame, especially 
+		// XXX when binning...
+#if 0
 		if (_image->getFrame() != _exposure.frame()) {
 			debug(LOG_DEBUG, DEBUG_LOG, 0, "cutting image to %s",
 				_exposure.frame().toString().c_str());
-			_image = astro::image::ops::cut(_image, _exposure.frame());
+			_image = astro::image::ops::cut(_image,
+				_exposure.frame());
 		}
+#endif
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "image dimensions now %s",
 			_image->getFrame().toString().c_str());
 	} catch (const std::exception& x) {
