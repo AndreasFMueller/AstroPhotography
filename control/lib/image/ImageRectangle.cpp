@@ -53,8 +53,14 @@ ImageRectangle::ImageRectangle(const ImageRectangle& rectangle,
 	const ImageRectangle& subrectangle)
 	: _origin(rectangle.origin() + subrectangle.origin()),
 	  _size(subrectangle.size()) {
-	if (!rectangle.contains(subrectangle)) {
-		throw std::range_error("subrectangle not contained in rectangle");
+	if ((!rectangle.size().contains(subrectangle.origin()))
+		|| (!rectangle.size().contains(subrectangle.upperright()))) {
+		std::string	msg = stringprintf(
+			"subrectangle %s not contained in %s",
+			subrectangle.toString().c_str(),
+			rectangle.toString().c_str());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw std::range_error(msg);
 	}
 }
 
@@ -95,6 +101,15 @@ ImageRectangle&	ImageRectangle::operator=(const ImageRectangle& other) {
 }
 
 /**
+ * \brief Get a subrectangle of a rectangle
+ *
+ * \param sub	the rectangle to get within the rectangle
+ */
+ImageRectangle	ImageRectangle::subrectangle(const ImageRectangle& sub) const {
+	return ImageRectangle(*this, sub);
+}
+
+/**
  * \brief Rectangle comparison
  *
  * rectangles are considered equal if the have the same origin and the same
@@ -116,6 +131,8 @@ bool	ImageRectangle::operator!=(const ImageRectangle& other) const {
 
 /**
  * \brief Test whether a point is contained within a rectangle
+ *
+ * \param point		the point to test whether it is contained in the rect
  */
 bool	ImageRectangle::contains(const ImagePoint& point) const {
 	return	(_origin.x() <= point.x()) &&
@@ -126,6 +143,9 @@ bool	ImageRectangle::contains(const ImagePoint& point) const {
 
 /**
  * \brief check whether coordinates are inside the rectangle
+ *
+ * \param x	the x coordinate of the point to test
+ * \param y	the y coordinate of the point to test
  */
 bool	ImageRectangle::contains(int x, int y) const {
 	return	(_origin.x() <= x) &&
@@ -144,6 +164,11 @@ bool	ImageRectangle::contains(const ImageRectangle& other) const {
 		(_origin.y() + _size.height() >= other.origin().y() + other.size().height());
 }
 
+/**
+ * \brief Find out whether a rectangle fits inside a size
+ *
+ * \param size	the size within which the rectangle has to fit
+ */
 bool	ImageRectangle::fits(const ImageSize& size) const {
 	if ((_origin.x() < 0) || (_origin.y() < 0)) {
 		debug(LOG_ERR, DEBUG_LOG, 0,
@@ -252,7 +277,11 @@ ImagePoint	ImageRectangle::center() const {
 
 ImagePoint	ImageRectangle::subimage(int x, int y) const {
 	if (!_size.contains(x, y)) {
-		throw std::runtime_error("outside image");
+		std::string	msg = stringprintf("%s outside image %s",
+			ImagePoint(x, y).toString().c_str(),
+			toString().c_str());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw std::range_error(msg);
 	}
 	return ImagePoint(_origin.x() + x, _origin.y() + y);
 }

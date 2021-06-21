@@ -40,6 +40,7 @@ Qhy2Camera::Qhy2Camera(const std::string& qhyname)
 	}
 
 	// get pixel dimensions
+	ImageSize	_totalsize;
 	double	pixelwidth, pixelheight;
 	{
 		double	width, height;	// width 
@@ -71,15 +72,11 @@ Qhy2Camera::Qhy2Camera(const std::string& qhyname)
 			debug(LOG_ERR, DEBUG_LOG, 0, "%s: %d", msg.c_str(), rc);
 			throw Qhy2Error(msg, rc);
 		}
-		_effectivearea = ImageSize(sizeX, sizeY);
-		_start = ImagePoint((int)startX, (int)startY);
-		_offset = ImagePoint((int)startX,
-				_totalsize.height() - startY - sizeY);
+		_effectivearea = TopLeftRectangle(ImagePoint(startX, startY),
+			ImageSize(sizeX, sizeY), _totalsize);
 	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0,
-		"effective image size: %s @ %s (start = %s)",
-		_effectivearea.toString().c_str(), _offset.toString().c_str(),
-		_start.toString().c_str());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "effective image size: %s",
+		_effectivearea.toString().c_str());
 
 	// get the available binning modes
 	BinningSet	binningmodes;
@@ -275,8 +272,8 @@ CcdInfo	Qhy2Camera::getinfo(uint32_t mode, int bits, int ccdindex) {
 		throw Qhy2Error(msg, rc);
 	}
 	ImageSize	size(width, height);
-	if (size >= effectivearea()) {
-		size = effectivearea();
+	if (size >= _effectivearea.size()) {
+		size = _effectivearea.size();
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "size for mode %s: %s", modename.c_str(),
 		size.toString().c_str());

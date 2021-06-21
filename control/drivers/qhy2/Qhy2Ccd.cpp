@@ -120,15 +120,14 @@ double	Qhy2Ccd::getExposuretime(float exposuretime) {
 	}
 }
 
-
-
-
 /**
  * \brief class specific image retrieval from the QHY camera
  */
 void	Qhy2Ccd::getImage0() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "starting getImage0()");
 	state(CcdState::exposing);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "request for exposure %s",
+		exposure.toString().c_str());
 
 	// make rc available
 	uint32_t	rc = 0;
@@ -192,6 +191,7 @@ void	Qhy2Ccd::getImage0() {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "no gain setting");
 	}
 
+#if 0
 	// apply the offset setting
 	ImagePoint	start(exposure.x() + camera.offset().x(),
 		(int)(camera.start().y() + camera.effectivearea().height() -
@@ -199,6 +199,7 @@ void	Qhy2Ccd::getImage0() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0,
 		"start point for image: %s (eff.area start: %s)",
 		start.toString().c_str(), camera._start.toString().c_str());
+#endif
 
 	// set the readout mode
 	rc = SetQHYCCDReadMode(camera.handle(), _readoutmode);
@@ -209,22 +210,6 @@ void	Qhy2Ccd::getImage0() {
 		state(CcdState::idle);
 		throw Qhy2Error(msg, rc);
 	}
-
-	// find the region of interest and set it, if possible. Also
-	// remember whether we will have to extract the region of interest
-	// after reading the image from the camera
-	rc = SetQHYCCDResolution(camera.handle(), start.x(), start.y(),
-		exposure.width(), exposure.height());
-	if (rc != QHYCCD_SUCCESS) {
-		std::string	msg = stringprintf("cannot set image size %s "
-			"in %s", exposure.frame().toString().c_str(),
-			camera.qhyname().c_str());
-		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
-		state(CcdState::idle);
-		throw Qhy2Error(msg, rc);
-	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "resolution: %s",
-		exposure.frame().toString().c_str());
 
 	// set the binning mode
 	rc = SetQHYCCDBinMode(camera.handle(), exposure.mode().x(),
@@ -238,6 +223,50 @@ void	Qhy2Ccd::getImage0() {
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "set bin %s",
 		exposure.mode().toString().c_str());
+
+	// depending on the binning mode, we have to adapt the region of
+	// interest that we want to retrieve
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "get %s inside effective %s",
+		exposure.frame().toString().c_str(),
+		camera.effectivearea().toString().c_str());
+	TopLeftRectangle	roi = camera.effectivearea().subrectangle(
+					exposure.frame());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieving image with unbinned roi %s",
+		roi.toString().c_str());
+
+	// apply binning transformation
+	roi = roi / exposure.mode(); // this is in QHYCCD coordinates that
+		// include pixels outside the effecrive area of the chip
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "binned roi: %s",
+		roi.toString().c_str());
+
+	// remember the info in the exposure structure so we can add the
+	// correct metadata later to the image
+	{
+		ImagePoint	o = roi.origin()
+					- camera.origin() / exposure.mode();
+		ImageRectangle	r(o, roi.size());
+		exposure.frame(r);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "image size metadata: %s",
+			exposure.frame().toString().c_str());
+	}
+
+	// find the region of interest and set it, if possible. Also
+	// remember whether we will have to extract the region of interest
+	// after reading the image from the camera
+	rc = SetQHYCCDResolution(camera.handle(),
+		roi.topleft().x(), roi.topleft().y(),
+		roi.size().width(), roi.size().height());
+	if (rc != QHYCCD_SUCCESS) {
+		std::string	msg = stringprintf("cannot set image size %s "
+			"in %s", roi.toString().c_str(),
+			camera.qhyname().c_str());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		state(CcdState::idle);
+		throw Qhy2Error(msg, rc);
+	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "resolution: %s",
+		roi.toString().c_str());
 
 	// XXX handle the shutter
 
@@ -288,10 +317,11 @@ void	Qhy2Ccd::getImage0() {
 
 	// read the image from the camera
 	unsigned int	imagewidth, imageheight, channels;
-	imagewidth = exposure.width();
-	imageheight = exposure.height();
+	imagewidth = roi.size().width();
+	imageheight = roi.size().height();
 	channels = 1;
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieving image data");
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieving image data roi=%s",
+		roi.toString().c_str());
 	rc = GetQHYCCDSingleFrame(camera.handle(), &imagewidth, &imageheight,
 		&bpp, &channels, imagedata);
 	if (rc != QHYCCD_SUCCESS) {
@@ -350,25 +380,35 @@ void	Qhy2Ccd::getImage0() {
 	// 2x2 square, but our color codes start in the lower left corner.
 	// this leads to the somewhat surprising assignment of color code
 	// assignments
-	switch (IsQHYCCDControlAvailable(camera.handle(), CAM_COLOR)) {
-	case BAYER_GB:
-		image->setMosaicType(MosaicType(MosaicType::BAYER_RGGB, start));
-		break;
-	case BAYER_GR:
-		image->setMosaicType(MosaicType(MosaicType::BAYER_BGGR, start));
-		break;
-	case BAYER_BG:
-		image->setMosaicType(MosaicType(MosaicType::BAYER_GRBG, start));
-		break;
-	case BAYER_RG:
-		image->setMosaicType(MosaicType(MosaicType::BAYER_GBRG, start));
-		break;
-	default:
-		image->setMosaicType(MosaicType(MosaicType::NONE));
-		break;
-	}
 
-	// XXX correct the color mosaic for the start point of the image
+	if ((exposure.mode().x() > 1) || (exposure.mode().y() > 1)) {
+		// for binned images, there is no reasonable definition of a
+		// color mosaic
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "binned image: no bayer mosaic");
+		image->setMosaicType(MosaicType(MosaicType::NONE));
+	} else {
+		switch (IsQHYCCDControlAvailable(camera.handle(), CAM_COLOR)) {
+		case BAYER_GB:
+			image->setMosaicType(MosaicType(MosaicType::BAYER_RGGB,
+				roi.origin()));
+			break;
+		case BAYER_GR:
+			image->setMosaicType(MosaicType(MosaicType::BAYER_BGGR,
+				roi.origin()));
+			break;
+		case BAYER_BG:
+			image->setMosaicType(MosaicType(MosaicType::BAYER_GRBG,
+				roi.origin()));
+			break;
+		case BAYER_RG:
+			image->setMosaicType(MosaicType(MosaicType::BAYER_GBRG,
+				roi.origin()));
+			break;
+		default:
+			image->setMosaicType(MosaicType(MosaicType::NONE));
+			break;
+		}
+	}
 
 	// terminate the process on the camera size
 	rc = CancelQHYCCDExposingAndReadout(camera.handle());

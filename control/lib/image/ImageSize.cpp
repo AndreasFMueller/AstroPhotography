@@ -11,6 +11,9 @@
 namespace astro {
 namespace image {
 
+ImageSize::ImageSize() : _width(0), _height(0) {
+}
+
 /**
  * \brief Construct a size oject based on width and height
  *
@@ -18,6 +21,9 @@ namespace image {
  * pixels contained in it. Since this number is used very
  * often, keeping a it redundantly in memory saves a large
  * number of multiplications
+ *
+ * \param width		the width of the size rectangle
+ * \param height	the height of the size rectangle
  */
 ImageSize::ImageSize(unsigned int width, unsigned int height)
 	: _width(width), _height(height), pixels(width * height) {

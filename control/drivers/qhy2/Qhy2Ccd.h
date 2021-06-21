@@ -35,6 +35,7 @@ public:
 	uint32_t	readoutmode() const { return _readoutmode; }
 	void	readoutmode(uint32_t r) { _readoutmode = r; }
 private:
+	TopLeftRectangle	_effectivearea;
 	ImagePoint	_offset;
 public:
 	const ImagePoint&	offset() const { return _offset; }

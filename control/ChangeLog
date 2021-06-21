@@ -1,5 +1,12 @@
 ChangeLog for the Astro project.
 
+20210621:
+	* implement binned coordinates
+	* add TopLeftRectangle class to simplify coordinate computations
+	  in QHY2 driver
+	* fix subrectangle condition in ImageRectangle
+	* add some more exception reporting
+
 20210620:
 	* fix a bug in the qhy2 driver caused by incorrect documentation
 	  of the GetQHYCCDExposureRemaining method

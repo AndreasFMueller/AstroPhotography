@@ -45,6 +45,7 @@ public:
 	void	x(int x) { _x = x; }
 	void	y(int y) { _y = y; }
 	ImagePoint(int x = 0, int y = 0) : _x(x), _y(y) { }
+	ImagePoint(unsigned int x, unsigned int y) : _x(x), _y(y) { }
 	ImagePoint(double x, double y) : _x(floor(x)), _y(floor(y)) { }
 	ImagePoint(const std::string& pointspec);
 	bool	operator==(const ImagePoint& other) const;
@@ -85,9 +86,10 @@ private:
 public:
 	unsigned int	getPixels() const { return pixels; }
 	// constructors
+	ImageSize();
 	ImageSize(unsigned int width, unsigned int height);
 	ImageSize(const std::string& sizespec);
-	ImageSize(unsigned int width_and_height = 0);
+	ImageSize(unsigned int width_and_height);
 	ImageSize(const ImageSize& other);
 	ImageSize&	operator=(const ImageSize& other);
 	virtual ~ImageSize();
@@ -161,6 +163,7 @@ public:
 		const ImagePoint& translatedby);
 	ImageRectangle(const ImageRectangle& rectangle,
 		const ImageRectangle& subrectangle);
+	ImageRectangle	subrectangle( const ImageRectangle& s) const;
 	ImageRectangle(const std::string& rectanglespec);
 	ImageRectangle&	operator=(const ImageRectangle& other);
 	// operators
@@ -201,6 +204,27 @@ public:
 
 std::ostream&	operator<<(std::ostream& out, const ImageRectangle& rectangle);
 std::istream&	operator>>(std::istream& in, ImageRectangle& rectangle);
+
+/**
+ * \brief A rectangle within a larger rectangle specified by a topleft point
+ *
+ * The topleft point is calculated from the top left corner of the image
+ */
+class TopLeftRectangle : public ImageRectangle {
+	ImageSize	_within;
+	void	check() const;
+public:
+	const ImageSize&	within() const { return _within; }
+	TopLeftRectangle();
+	TopLeftRectangle(const ImagePoint& topleft, const ImageSize& size,
+		const ImageSize& within);
+	TopLeftRectangle(const ImageRectangle& rectangle,
+		const ImageSize& within);
+	ImagePoint	topleft() const;
+	TopLeftRectangle	subrectangle(const ImageRectangle& rect) const;
+	std::string	toString() const;
+};
+
 
 /**
  * \brief Object representing a date in a FITS header
@@ -1482,6 +1506,8 @@ ImageSize	operator*(const ImageSize& size, const Binning& mode);
 ImageSize	operator/(const ImageSize& size, const Binning& mode);
 ImageRectangle	operator*(const ImageRectangle& rect, const Binning& mode);
 ImageRectangle	operator/(const ImageRectangle& rect, const Binning& mode);
+TopLeftRectangle	operator/(const TopLeftRectangle& r, const Binning& b);
+TopLeftRectangle	operator*(const TopLeftRectangle& r, const Binning& b);
 
 /**
  * \brief An Image that only has a partial backing store

@@ -153,6 +153,7 @@ libastroimage_la_SOURCES = 						\
 	Subgrid.cpp							\
 	SmallConvolve.cpp						\
 	ThresholdExtractor.cpp						\
+	TopLeftRectangle.cpp						\
 	Transform.cpp							\
 	TransformAnalyzer.cpp						\
 	TransformBuilder.cpp						\
