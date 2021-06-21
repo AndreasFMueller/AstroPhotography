@@ -6,6 +6,8 @@ ccdcontrollerwidget:
       -	add controls for image quality and other special properties that
 	depend on the camera. They should only be visible for cameras that
 	have them
+      - Bug: when an image of different size is returned than requested,
+	don't be surprised and crash the system
 
 guidercontrollerwidget:
       - Allow to view calibration details during guiding, e.g. by letting
