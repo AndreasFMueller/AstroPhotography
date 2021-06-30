@@ -157,7 +157,7 @@ void	instrumentswindow::checkdiscovery() {
 	QComboBox	*ssb = ui->serverselectionBox;
 
 	// if the number of entries has not changed, we stay where we are
-	if (ssb->count() == keys.size()) {
+	if (ssb->count() == (int)keys.size()) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "no change in discovery");
 		return;
 	}

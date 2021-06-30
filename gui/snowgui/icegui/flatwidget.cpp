@@ -109,6 +109,7 @@ void	flatwidget::statusUpdate() {
 		ui->exposureBox->setEnabled(false);
 		ui->numberBox->setEnabled(false);
 		ui->usedarkBox->setEnabled(false);
+		[[fallthrough]];
 	case snowstar::GuiderCALIBRATING:
 	case snowstar::GuiderGUIDING:
 	case snowstar::GuiderDARKACQUIRE:

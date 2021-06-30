@@ -104,6 +104,7 @@ void	darkwidget::statusUpdate() {
 		ui->exposureBox->setEnabled(false);
 		ui->hotlimitBox->setEnabled(false);
 		ui->numberBox->setEnabled(false);
+		[[fallthrough]];
 	case snowstar::GuiderCALIBRATING:
 	case snowstar::GuiderGUIDING:
 	case snowstar::GuiderFLATACQUIRE:

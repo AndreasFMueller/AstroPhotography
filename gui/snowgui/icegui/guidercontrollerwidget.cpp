@@ -550,6 +550,7 @@ void	guidercontrollerwidget::statusUpdate() {
 			ui->decBacklashButton->setEnabled(false);
 			ui->raBacklashButton->setEnabled(true);
 		}
+		[[fallthrough]];
 	case snowstar::GuiderIMAGING:
 	case snowstar::GuiderDARKACQUIRE:
 	case snowstar::GuiderFLATACQUIRE:

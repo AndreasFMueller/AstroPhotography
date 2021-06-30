@@ -25,7 +25,7 @@ void	OffsetDial::paintEvent(QPaintEvent * event) {
 	int	hours = tens / 60;
 	int	mins = (tens - hours * 60);
 	if (mins < 0) { mins = -mins; }
-	char	buffer[10];
+	char	buffer[22];
 	snprintf(buffer, sizeof(buffer), "%c%d:%02d", (tens < 0) ? '-' : '+',
 		(hours < 0) ? -hours : hours, mins);
 	QPen	pen(Qt::SolidLine);

@@ -103,7 +103,7 @@ void	trackselectiondialog::setGuider(
  */
 void	trackselectiondialog::trackAccepted() {
 	int	selected = ui->tracklistWidget->currentRow();
-	if ((selected < 0) || (selected >= _tracks.size())) {
+	if ((selected < 0) || (selected >= (int)_tracks.size())) {
 		return;
 	}
 	int	trackid = _tracks[selected].trackid;

@@ -218,7 +218,7 @@ void	calibrationwidget::setupState() {
 	if (!_guider) {
 		return;
 	}
-	snowstar::GuiderState	state;
+	snowstar::GuiderState	state = snowstar::GuiderUNCONFIGURED;
 	try {
 		state = _guider->getState();
 	} catch (const std::exception& x) {
