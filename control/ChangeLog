@@ -1,5 +1,8 @@
 ChangeLog for the Astro project.
 
+20210630:
+	* improve configure.ac detection of required libraries
+
 20210621:
 	* implement binned coordinates
 	* add TopLeftRectangle class to simplify coordinate computations

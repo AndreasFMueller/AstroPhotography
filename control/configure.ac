@@ -45,10 +45,7 @@ AC_CHECK_LIB([m], [sqrt])
 AC_CHECK_LIB([dl], [dlopen])
 AC_CHECK_LIB([lapack], [dgels_], [LIBS="-llapack $LIBS"],
 	AC_MSG_ERROR([required library LAPACK not found]))
-AC_CHECK_LIB([fftw3], [fftw_malloc])
 AC_CHECK_LIB([pthread], [pthread_create])
-AC_CHECK_LIB([glpk], [glp_create_prob])
-AC_CHECK_LIB([sqlite3], [sqlite3_initialize])
 
 ## Type of date command ##############################################
 if ${DATE} --version >/dev/null 2>&1
@@ -59,6 +56,34 @@ else
 fi
 CFLAGS="${CFLAGS} -DBSD_DATE=${BSD_DATE}"
 CXXFLAGS="${CXXFLAGS} -DBSD_DATE=${BSD_DATE}"
+
+## GLPK ##############################################################
+AC_CHECK_LIB([glpk], [glp_create_prob], [], [
+	AC_MSG_ERROR("required package glpk missing")
+])
+AC_CHECK_HEADER([glpk.h], [], [
+	AC_MSG_ERROR("required package glpk missing")
+])
+
+## FFTW3 #############################################################
+if pkg-config --exists fftw3
+then
+	LIBS="${LIBS} `pkg-config --libs fftw3`"
+	CFLAGS="${CFLAGS} `pkg-config --cflags fftw3`"
+	CXXFLAGS="${CXXFLAGS} `pkg-config --cflags fftw3`"
+else
+	AC_MSG_ERROR([required fftw3 package not found])
+fi
+
+## SQLITE3 ###########################################################
+if pkg-config --exists sqlite3
+then
+	LIBS="${LIBS} `pkg-config --libs sqlite3`"
+	CFLAGS="${CFLAGS} `pkg-config --cflags sqlite3`"
+	CXXFLAGS="${CXXFLAGS} `pkg-config --cflags sqlite3`"
+else
+	AC_MSG_ERROR([required sqlite3 package not found])
+fi
 
 ## LIBUSB ############################################################
 if pkg-config --exists libusb-1.0
@@ -78,7 +103,7 @@ then
 	LIBS="${LIBS} `pkg-config --libs cfitsio`"
 	CXXFLAGS="${CXXFLAGS} `pkg-config --cflags cfitsio`"
 else
-AC_CHECK_LIB([cfitsio], [ftffrw_])
+	AC_MSG_ERROR("required package cfitsio missing")
 fi
 
 ## LIBJPEG ###########################################################
