@@ -32,6 +32,8 @@ calibrationselectiondialog::calibrationselectiondialog(QWidget *parent) :
 
 	// set the title
 	setWindowTitle(QString("Select Calibration"));
+
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "calibrationselectiondialog created");
 }
 
 /**
@@ -78,6 +80,7 @@ void	calibrationselectiondialog::setGuider(snowstar::ControlType controltype,
 	_calibrations.clear();
 
 	// get all the calibration ids for this guider descriptor
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "getting ids for this guider");
 	snowstar::idlist	ids
 		= _guiderfactory->getCalibrations(_guiderdescriptor,
 			controltype);

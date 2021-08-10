@@ -57,7 +57,7 @@ std::list<long>	CalibrationStore::getCalibrations(
 			const GuiderDescriptor& guider,
 			ControlDeviceType type) {
 	std::ostringstream	out;
-	out << " name = '" << guider.instrument() << "'";
+	out << " instrument = '" << guider.instrument() << "'";
 	out << " and controltype = ";
 	switch (type) {
 	case GP:	out << 0; break;

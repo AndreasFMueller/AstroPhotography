@@ -68,11 +68,10 @@ Drivers:
       - When there is a problem with the SX camera, we should try to reset
 	the camera and retry the operation. It should not be necessary to
 	disconnect and reconnect the camera to reset it.
-      - SX Camera names change too often (they are essentially bus numbers,
-	but when one has to restart the camera, the bus position may change).
-	Can we have persistent names for these devices?
       -	It should be possible to reread the devices of a module, just in
 	case a new device was added during runtime.
+      -	othello focuser seems to fail very often, maybe need update of 
+	firmware
 
 ICE client/server:
       - USB Timeout in a driver should always be converted to a decent timeout

@@ -96,11 +96,15 @@ void	calibrationwidget::databaseClicked() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "create a calibration selection");
 	calibrationselectiondialog	*selection
 		= new calibrationselectiondialog(this);
+#if 0
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "set guider '%s' in the cal selection",
 		convert(_guiderdescriptor).toString().c_str());
+#endif
 	selection->setGuider(_controltype, _guiderdescriptor, _guiderfactory);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "guider set");
 	connect(selection, SIGNAL(calibrationSelected(snowstar::Calibration)),
 		this, SLOT(setCalibration(snowstar::Calibration)));
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "showing selection");
 	selection->show();
 }
 
