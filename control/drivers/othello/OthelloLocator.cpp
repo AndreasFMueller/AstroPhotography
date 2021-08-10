@@ -166,6 +166,9 @@ static std::string	getSerial(astro::usb::DevicePtr dptr,
 				= dptr->descriptor()->iSerialNumber();
 			debug(LOG_DEBUG, DEBUG_LOG, 0, "device serial: %s",
 				devserial.c_str());
+			if (devserial == std::string("")) {
+				devserial = "000000";
+			}
 			return devserial;
 		} catch (const std::exception& x) {
 			debug(LOG_DEBUG, DEBUG_LOG, 0, "read failed: %s",

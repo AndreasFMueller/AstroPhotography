@@ -25,6 +25,9 @@ std::string	othelloname(astro::usb::DevicePtr& deviceptr) {
 	std::string	name;
 	try {
 		name = descriptor->iSerialNumber();
+		if (name == std::string("")) {
+			name = "000000";
+		}
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "Othello device %s found",
 			name.c_str());
 	} catch (const std::exception& x) {
