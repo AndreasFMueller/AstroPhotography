@@ -172,9 +172,9 @@ module snowstar {
 
 	struct Sysinfo {
 		long	uptime;
-		long	load1min;
-		long	load5min;
-		long	load15min;
+		float	load1min;
+		float	load5min;
+		float	load15min;
 		float	totalram;
 		float	freeram;
 		float	sharedram;
