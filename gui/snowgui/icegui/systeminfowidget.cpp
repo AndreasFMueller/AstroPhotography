@@ -106,7 +106,7 @@ void	SystemInfoWidget::update() {
 	}
 	// daemon uptime
 	try {
-		QString	uptimestring(astro::stringprintf("%.2f",
+		QString	uptimestring(astro::stringprintf("%d",
 			_daemon->daemonUptime()).c_str());
 		ui->daemonUptimeField->setText(uptimestring);
 	} catch (...) {
@@ -129,7 +129,7 @@ void	SystemInfoWidget::update() {
 	try {
 		snowstar::Sysinfo	sysinfo = _daemon->getSysinfo();
 		// load
-		QString	loadstring(astro::stringprintf("%d/%d/%d",
+		QString	loadstring(astro::stringprintf("%.2f/%.2f/%.2f",
 			sysinfo.load1min, sysinfo.load5min,
 			sysinfo.load15min).c_str());
 		ui->loadField->setText(loadstring);
