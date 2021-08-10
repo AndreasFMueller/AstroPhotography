@@ -367,7 +367,7 @@ void	Device::setInterfaceAltSetting(uint8_t interface, uint8_t altsetting) {
  * \param request	pointer to the control request
  */
 void	Device::controlRequest(RequestBase *request) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "processing %p", request);
+	//debug(LOG_DEBUG, DEBUG_LOG, 0, "processing %p", request);
 	if (NULL == request) {
 		std::runtime_error("no request structure for control request");
 	}
