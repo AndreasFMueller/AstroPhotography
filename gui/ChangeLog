@@ -1,5 +1,8 @@
 ChangeLog for the Qt GUI to Astrophotography
 
+20210811:
+	* add gain control to snowlife app
+
 20210611:
 	* fix connect for nonexistent currentIndexChange(QString)
 	  -> currentTextChanged(QString)
