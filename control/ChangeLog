@@ -1,5 +1,12 @@
 ChangeLog for the Astro project.
 
+20210811:
+	* fix some typos in tools
+
+20210810:
+	* get everything back in working order
+	* fix bug that we could not access the calibration database
+
 20210630:
 	* improve configure.ac detection of required libraries
 
