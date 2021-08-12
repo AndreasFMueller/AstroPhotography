@@ -46,6 +46,14 @@ void	ProcessorParser::startTransform(const attr_t& attrs) {
 		std::string	value = i->second;
 		its->scale(-std::stoi(value));
 	}
+	if (attrs.end() != (i = attrs.find("xshift"))) {
+		std::string	value = i->second;
+		its->xshift(std::stof(value));
+	}
+	if (attrs.end() != (i = attrs.find("yshift"))) {
+		std::string	value = i->second;
+		its->yshift(std::stof(value));
+	}
 
 	startCommon(attrs);
 }

@@ -1,4 +1,7 @@
 ChangeLog for the Astro project.
+20210812:
+	* add xshift and yshift options to the transform image processing
+	  element
 
 20210811:
 	* fix some typos in tools

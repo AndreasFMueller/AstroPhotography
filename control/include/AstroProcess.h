@@ -510,6 +510,8 @@ class ImageTransformationStep : public ImageStep {
 	bool	_vertical_flip;
 	bool	_horizontal_flip;
 	int	_scale;
+	double	_xshift;
+	double	_yshift;
 public:
 	bool	vertical_flip() const { return _vertical_flip; }
 	bool	horizontal_flip() const { return _horizontal_flip; }
@@ -517,6 +519,10 @@ public:
 	void	horizontal_flip(bool h) { _horizontal_flip = h; }
 	int	scale() const { return _scale; }
 	void	scale(int s) { _scale = s; }
+	double	xshift() const { return _xshift; }
+	void	xshift(double x) { _xshift = x; }
+	double	yshift() const { return _yshift; }
+	void	yshift(double y) { _yshift = y; }
 	ImageTransformationStep(NodePaths& parent);
 	virtual ProcessingStep::state	do_work();
 	virtual std::string	what() const;

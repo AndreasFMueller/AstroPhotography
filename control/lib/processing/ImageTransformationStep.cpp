@@ -18,23 +18,30 @@ ImageTransformationStep::ImageTransformationStep(NodePaths& parent)
 	_vertical_flip = false;
 	_horizontal_flip = false;
 	_scale = 0;
+	_xshift = 0.;
+	_yshift = 0.;
 }
 
-#define transformadapter(image, Pixel)					\
+#define transformadapter(inputimage, Pixel)				\
 {									\
-	Image<Pixel >	*img = dynamic_cast<Image<Pixel >*>(&*image);	\
+	Image<Pixel >	*img = dynamic_cast<Image<Pixel >*>(&*inputimage);	\
 	if (NULL != img) {						\
 		adapter::FlipAdapter<Pixel >	flap(*img, 		\
 			_vertical_flip,	_horizontal_flip);		\
+		astro::image::ConstImageAdapter<Pixel >	*adp = &flap;		\
+		astro::image::transform::TranslationAdapter<Pixel >	oa(flap, Point(_xshift, _yshift));\
+		if ((_xshift != 0) || (_yshift != 0.)) {		\
+			adp = &oa;					\
+		}							\
 		if (_scale == 0) {					\
-			_image = ImagePtr(new Image<Pixel>(flap));	\
+			_image = ImagePtr(new Image<Pixel>(*adp));	\
 		}							\
 		if (_scale > 0) {					\
-			UpscaleAdapter<Pixel>	ua(flap, _scale + 1);	\
+			UpscaleAdapter<Pixel>	ua(*adp, _scale + 1);	\
 			_image = ImagePtr(new Image<Pixel>(ua));	\
 		}							\
 		if (_scale < 0) {					\
-			DownscaleAdapter<Pixel>	ua(flap, 1 - _scale);	\
+			DownscaleAdapter<Pixel>	ua(*adp, 1 - _scale);	\
 			_image = ImagePtr(new Image<Pixel>(ua));	\
 		}							\
 	}								\
