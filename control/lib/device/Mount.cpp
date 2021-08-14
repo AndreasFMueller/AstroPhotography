@@ -129,6 +129,13 @@ bool	Mount::telescopePositionWest() {
 }
 
 /**
+ * \brief Default tracking mode for north
+ */
+bool	Mount::trackingNorth() {
+	return true;
+}
+
+/**
  * \brief Use the position 
  */
 LongLat	Mount::location() {

@@ -38,6 +38,7 @@ public:
 	virtual void	GotoAzmAlt(const AzmAlt& azmalt,
 				const Ice::Current& current);
 	virtual bool	telescopePositionWest(const Ice::Current& current);
+	virtual bool	trackingNorth(const Ice::Current& current);
 	virtual void	cancel(const Ice::Current& current);
 	virtual mountstate	state(const Ice::Current& current);
 	virtual bool	hasGuideRates(const Ice::Current& current);

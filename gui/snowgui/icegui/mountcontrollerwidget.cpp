@@ -178,6 +178,13 @@ void	mountcontrollerwidget::setupMount() {
 	}
 
 	try {
+		ui->positionIndicator->north(_mount->trackingNorth());
+	} catch (const std::exception& x) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "problem getting tracking: %s",
+			x.what());
+	}
+
+	try {
 		// make sure the star chart knows the orientation
 		_previouswest = _mount->telescopePositionWest();
 		ui->positionIndicator->update(!_previouswest);

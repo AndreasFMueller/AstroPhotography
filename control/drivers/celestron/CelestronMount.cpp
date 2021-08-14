@@ -119,8 +119,46 @@ CelestronMount::CelestronMount(const std::string& devicename)
 	_last_location_queried = 0;
 	_last_location_source = Mount::LOCAL;
 
+	// ask for tracking mode
+	_north = trackingNorth();
+
 	// start the thread
 	start_thread();
+}
+
+bool	CelestronMount::trackingNorth() {
+	return (getTrackingMode() == NORTH);
+}
+
+CelestronMount::tracking_mode	CelestronMount::getTrackingMode() {
+	std::unique_lock<std::recursive_mutex>	lock(_mount_mutex);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "requesting tracking mode (t command)");
+	write("t");
+	std::string	v = readto('#');
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "got %d bytes, %02x", v.size(), v[0]);
+	switch (v[0]) {
+	case 0x00:
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "tracking OFF detected");
+		return OFF;
+	case 0x01:
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "tracking ALTAZ detected");
+		return ALTAZ;
+	case 0x02:
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "tracking NORTH detected");
+		_north = true;
+		return NORTH;
+	case 0x03:
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "tracking SOUTH detected");
+		_north = false;
+		return SOUTH;
+	}
+	std::string	msg = stringprintf("unknown tracking mode char '%s'",
+		v.c_str());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "%s", msg.c_str());
+	//throw std::runtime_error(msg);
+	// to be on the safe side, return NORTH, as this is the most probably
+	// mode
+	return NORTH;
 }
 
 void	CelestronMount::start_thread() {
@@ -345,39 +383,36 @@ AzmAlt	CelestronMount::getAzmAlt() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "sending get AzmAlt (z) command");
 	write("z");
 	std::pair<double, double>	a = parseangles(readto('#'));
-	return AzmAlt(Angle(a.first), Angle(a.second));
+	AzmAlt	result(Angle(a.first), Angle(a.second));
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "current AzmAlt: %s",
+		result.toString().c_str());
+	return result;
 }
 
 /**
  * \brief Find out whether the telescope is on the east or the west
  */
 bool	CelestronMount::telescopePositionWest() {
-	// XXX use the location on earth and the azm angle to find out
-	// XXX on which side the telescope currently is, at least for
-	// XXX GE mounts
+	// use the location on earth and the azm angle to find out
+	// on which side the telescope currently is, at least for
+	// GE mounts
+	_north = trackingNorth();
 	
-#if 1
-	// first query the mount to find out whether the telescope is 
-	// actually equatorial by using the "t" command 
-	bool	north = true; // XXX use t command
-
 	// depending on the orientation, use the azm angle to decide whether
 	// or not we are on the east/west side
 	AzmAlt	azmalt = getAzmAlt();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "got AzmAlt: %s",
 		azmalt.toString().c_str());
-	if (north) {
-		return azmalt.azm() > Angle::right_angle;
+	bool	_west_for_north_tracking
+		= ((-Angle::right_angle <= azmalt.alt()) &&
+			(azmalt.alt() <= Angle::right_angle));
+	if (_north) {
+		return _west_for_north_tracking;
 	} else {
-		return azmalt.azm() < Angle::right_angle;
+		return !_west_for_north_tracking;
 	}
-#endif
 
-	// XXX probably the best method to decide this is to compute the
-	// XXX direction of the telescope and if it points below the
-	// XXX horizon, then we probably got the wrong orientation
-
-	// XXX until that is implemented, use the default method
+	// until that is implemented, use the default method
 	return Mount::telescopePositionWest();
 }
 
@@ -681,11 +716,16 @@ void	CelestronMount::run() {
 		// check for the mount position
 		RaDec	newposition = getRaDec();
 		if (position != newposition) {
-			debug(LOG_DEBUG, DEBUG_LOG, 0, "new position: %s",
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "new ra/dec: %s",
 				newposition.toString().c_str());
 			callback(newposition);
 			position = newposition;
 		}
+
+		// get AzmAlt, to research how to get the east/west distinction
+		AzmAlt	azmalt = getAzmAlt();
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "new azm/alt: %s",
+			azmalt.toString().c_str());
 
 		// if the GOTO has completed, terminate
 		auto	delay = std::chrono::seconds(5);

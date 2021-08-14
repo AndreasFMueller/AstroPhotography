@@ -1,6 +1,7 @@
 ChangeLog for the Qt GUI to Astrophotography
 
 20210814:
+	* add north/south tracking modes
 	* debug flip settings
 
 20210813:

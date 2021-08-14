@@ -126,6 +126,20 @@ bool	MountI::telescopePositionWest(const Ice::Current& current) {
 	}
 }
 
+bool	MountI::trackingNorth(const Ice::Current& current) {
+	CallStatistics::count(current);
+	try {
+		return _mount->trackingNorth();
+	} catch (const std::exception& x) {
+		DeviceException	except;
+		except.cause = astro::stringprintf(
+			"cannot call trackingNorth(): %s",
+			x.what());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", except.cause.c_str());
+		throw except;
+	}
+}
+
 void	MountI::GotoAzmAlt(const AzmAlt& azmalt,
 		const Ice::Current& current) {
 	CallStatistics::count(current);

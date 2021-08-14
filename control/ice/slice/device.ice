@@ -29,6 +29,7 @@ module snowstar {
 		void	GotoRaDec(RaDec radecposition) throws DeviceException;
 		void	GotoAzmAlt(AzmAlt azmaltposition) throws DeviceException;
 		bool	telescopePositionWest() throws DeviceException;
+		bool	trackingNorth() throws DeviceException;
 		void	cancel() throws DeviceException;
 		LongLat	getLocation() throws DeviceException;
 		locationtype	getLocationSource() throws DeviceException;
