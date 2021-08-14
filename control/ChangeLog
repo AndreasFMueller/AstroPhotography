@@ -1,6 +1,8 @@
 ChangeLog for the Astro project.
 
 20210814:
+	* fix initialization of CelestronMount class
+	* fix API for the NiceMount
 	* add north/south tracking modes to Mount device and CelestronMount
 	* correctly implement east/west for CelestronMount
 	* correctly implement east/west  in SimCcd, StarCamera and

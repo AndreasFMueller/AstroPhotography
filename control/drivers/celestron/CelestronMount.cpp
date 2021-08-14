@@ -83,6 +83,7 @@ CelestronMount::CelestronMount(const std::string& devicename)
 	: Mount(devicename), Serial(getserialname(devicename)) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "creating Celestron mount on %s",
 		serialdevice().c_str());
+	_running = false;
 
 	// lock the serial line
 	std::unique_lock<std::recursive_mutex>	lock(_mount_mutex);
