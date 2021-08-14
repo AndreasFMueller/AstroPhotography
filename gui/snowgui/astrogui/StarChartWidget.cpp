@@ -32,6 +32,7 @@ const astro::Angle	StarChartWidget::_wide_resolution(1 / 50.,
 StarChartWidget::StarChartWidget(QWidget *parent) : QWidget(parent),
 	_converter(astro::RaDec(), astro::Angle((M_PI / 180) / 100.),
 		astro::Angle(0)) {
+	_busywidget = NULL;
 	_resolution = _standard_resolution;
 	_limit_magnitude = 10;
 	_negative = false;
@@ -691,6 +692,11 @@ void	StarChartWidget::startRetrieval() {
 	if (NULL == _retriever) {
 		// get the stars from the catalog
 		_retriever = new StarChartRetriever(NULL, true);
+		if (NULL == _retriever) {
+			debug(LOG_ERR, DEBUG_LOG, 0,
+				"could not start retriever");
+			return;
+		}
 		_retriever->limit_magnitude(limit_magnitude());
 		_retriever->window(window);
 		connect(_retriever,
@@ -706,7 +712,8 @@ void	StarChartWidget::startRetrieval() {
 		connect(_retriever,
 			SIGNAL(finished()),
 			this,
-			SLOT(workerFinished()));
+			SLOT(workerFinished()),
+			Qt::QueuedConnection);
 		_retriever->start();
 		_retrieval_necessary = false;
 	} else {
@@ -766,7 +773,7 @@ void	StarChartWidget::directionChanged(astro::RaDec direction) {
 		startRetrieval();
 
 		// start the busy widget
-#if 0
+#if 1
 		const int busysize = 100;
 		_busywidget = new BusyWidget(this);
 		_busywidget->resize(busysize, busysize);
@@ -935,13 +942,18 @@ void	StarChartWidget::workerFinished() {
 		0, 0);
 	disconnect(_retriever, SIGNAL(finished()),
 		0, 0);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "destroying the retriever");
 	delete _retriever;
 	_retriever = NULL;
 
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "cleanup and potential restart");
+
 	// remove the busy widget
 	if (_busywidget) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "destroying the busy widget");
 		delete _busywidget;
 		_busywidget = NULL;
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "busywidget destroyed");
 	}
 
 	// start a new thread if necessary
@@ -1577,7 +1589,5 @@ void    StarChartWidget::drawConstellations(QPainter& painter) {
 		}
 	}
 }
-
-
 
 } // namespace snowgui

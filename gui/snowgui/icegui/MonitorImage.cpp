@@ -46,8 +46,8 @@ MonitorImage::~MonitorImage() {
 void	MonitorImage::setScale(int s) {
 	if (s > 3) {
 		_scale = 3;
-	} else if (s < 0) {
-		_scale = 0;
+	} else if (s < -3) {
+		_scale = -3;
 	} else {
 		_scale = s;
 	}
