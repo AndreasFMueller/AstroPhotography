@@ -86,7 +86,7 @@ void	calibrationdetaildialog::setCalibration(snowstar::Calibration calibration) 
 	char	buffer[100];
 	time_t	when = snowstar::converttime(_calibration.timeago);
 	struct tm	*tmp = localtime(&when);
-	strftime(buffer, sizeof(buffer), "%F", tmp);
+	strftime(buffer, sizeof(buffer), "%F %T", tmp);
 	ui->dateField->setText(QString(buffer));
 	ui->qualityField->setText(QString(astro::stringprintf("%.1f%%",
 		100 * _calibration.quality).c_str()));
@@ -95,6 +95,17 @@ void	calibrationdetaildialog::setCalibration(snowstar::Calibration calibration) 
 		_calibration.points.size()).c_str()));
 	ui->angleField->setText(QString(astro::stringprintf("%.1f˚",
 		angle(_calibration) * 180 / M_PI).c_str()));
+	ui->detField->setText(QString(astro::stringprintf("%.1f",
+		_calibration.det).c_str()));
+
+	int	eastsign = (_calibration.east) ? 1 : -1;
+	QString	stylesheet(((eastsign * _calibration.det) < 0)
+			? "{ color: red }" : "{ color: black }");
+	// XXX the color stylesheet does not work
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "stylesheet: %s",
+		stylesheet.toLatin1().data());
+	ui->eastField->setStyleSheet(stylesheet);
+	ui->eastField->setText(QString((_calibration.east) ? "east" : "west"));
 
 	// give the data to the calibration display
 	ui->calibrationdisplayWidget->setCalibration(_calibration);
