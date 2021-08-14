@@ -62,6 +62,9 @@ public:
 	void	setupFilter();
 	void	updateParameters();
 
+	void	checkGPFlipped();
+	void	checkAOFlipped();
+
 signals:
 	void	exposureChanged(astro::camera::Exposure);
 
@@ -103,6 +106,12 @@ public slots:
 
 	void	setTelescope(astro::RaDec);
 	void	setOrientation(bool);
+
+	void	gpFlipStateChanged(int);
+	void	aoFlipStateChanged(int);
+
+	void	gpCalibrationChanged();
+	void	aoCalibrationChanged();
 };
 
 } // namespace snowgui

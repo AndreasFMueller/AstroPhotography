@@ -89,6 +89,7 @@ calibrationcalculatordialog::calibrationcalculatordialog(
 	_cal.interval = 0;
 	_cal.type = type;
 	_cal.flipped = false;
+	_cal.meridianFlipped = false;
 
 	// connect elements
 	connect(ui->angleSpinBox, SIGNAL(valueChanged(double)),
@@ -210,6 +211,7 @@ void	calibrationcalculatordialog::setTelescope(astro::RaDec radec) {
 
 void	calibrationcalculatordialog::setOrientation(bool west) {
 	_telescopewest = west;
+	_cal.east = !west;
 	ui->westCheckBox->setChecked(_telescopewest);
 	updateCalibration();
 }

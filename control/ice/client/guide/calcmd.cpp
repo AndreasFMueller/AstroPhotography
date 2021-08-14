@@ -196,7 +196,7 @@ newcalibration:
 	// try to interpret the argument as a calibration type
 	try {
 		ControlType	caltype = string2calibrationtype(calarg);
-		calibrationid = guider->startCalibration(caltype, 0.);
+		calibrationid = guider->startCalibration(caltype, 0., false);
 		std::cout << "new calibration " << calibrationid;
 		std::cout << " in progress" << std::endl;
 		return EXIT_SUCCESS;
@@ -224,7 +224,7 @@ int	Guide::uncalibrate_command(GuiderPrx guider, ControlType type) {
 
 int	Guide::flip_command(GuiderPrx guider, ControlType type) {
 	try {
-		guider->flipCalibration(type);
+		guider->meridianFlipCalibration(type);
 		return EXIT_SUCCESS;
 	} catch (const std::exception& x) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "cannot uncalibrate: %s",

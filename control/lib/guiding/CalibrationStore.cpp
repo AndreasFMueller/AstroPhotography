@@ -115,6 +115,7 @@ CalibrationPtr	CalibrationStore::getCalibration(long id) {
 	for (int i = 0; i < 6; i++) {
 		calibration->a[i] = r.a[i];
 	}
+	calibration->east((r.east) ? true : false);
 	calibration->complete((r.complete) ? true : false);
 	calibration->focallength(r.focallength);
 	calibration->masPerPixel(r.masPerPixel);

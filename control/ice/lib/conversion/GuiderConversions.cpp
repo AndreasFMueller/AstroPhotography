@@ -294,6 +294,7 @@ Calibration     convert(const astro::guiding::CalibrationPtr cal) {
 	Calibration	result;
 	result.id = cal->calibrationid();
 	result.timeago = converttime(cal->when());
+	result.east = (cal->east()) ? 1 : 0;
 	result.guider = convertname(cal->name());
 	result.type = convertcontroltype(cal->calibrationtype());
 	result.focallength = cal->focallength();
@@ -305,6 +306,7 @@ Calibration     convert(const astro::guiding::CalibrationPtr cal) {
 	}
 	result.complete = cal->complete();
 	result.flipped = cal->flipped();
+	result.meridianFlipped = cal->meridian_flipped();
 	result.det  = cal->det();
 	result.quality = cal->quality();
 
@@ -331,6 +333,7 @@ astro::guiding::CalibrationPtr	convert(const Calibration& cal) {
 	}
 	result->calibrationid(cal.id);
 	result->when(converttime(cal.timeago));
+	result->east((cal.east == 1) ? true : false);
 	//result->calibrationtype(convertcontroltype(cal.type));
 
 	for (int i = 0; i < 6; i++) {
@@ -338,6 +341,7 @@ astro::guiding::CalibrationPtr	convert(const Calibration& cal) {
 	}
 	result->complete(cal.complete);
 	result->flipped(cal.flipped);
+	result->meridian_flipped(cal.meridianFlipped);
 	result->masPerPixel(cal.masPerPixel);
 	result->focallength(cal.focallength);
 	result->interval(cal.interval);

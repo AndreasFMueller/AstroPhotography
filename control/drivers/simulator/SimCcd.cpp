@@ -44,7 +44,7 @@ SimCcd::SimCcd(const CcdInfo& _info, SimLocator& locator)
 	: Ccd(_info), _locator(locator),
 	  starfield(_info.size(), STARFIELD_OVERSHOOT,
 			number_of_stars(_info.size())),
-	  starcamera(ImageRectangle(_info.size())) {
+	  starcamera(ImageRectangle(_info.size()), _info.size()) {
 	starcamera.addHotPixels(6);
 
 	// set the last direction to an impossible direction to ensure

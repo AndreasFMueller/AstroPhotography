@@ -1,5 +1,15 @@
 ChangeLog for the Qt GUI to Astrophotography
 
+20210814:
+	* debug flip settings
+
+20210813:
+	* add flip check boxes to guidercontrollerwidget
+	* add east/west to calibration display
+	* calibrate button sends east/west to guider
+	* calibration calculator stores east/west in the calibration
+	* add EastWestIndicator widget
+
 20210811:
 	* add gain control to snowlife app
 

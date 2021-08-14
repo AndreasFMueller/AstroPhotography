@@ -46,13 +46,13 @@
         <property name="minimumSize">
          <size>
           <width>500</width>
-          <height>313</height>
+          <height>333</height>
          </size>
         </property>
         <property name="maximumSize">
          <size>
           <width>16777215</width>
-          <height>313</height>
+          <height>333</height>
          </size>
         </property>
        </widget>
@@ -110,8 +110,8 @@
           <rect>
            <x>0</x>
            <y>0</y>
-           <width>98</width>
-           <height>28</height>
+           <width>338</width>
+           <height>389</height>
           </rect>
          </property>
          <attribute name="label">
@@ -123,8 +123,8 @@
           <rect>
            <x>0</x>
            <y>0</y>
-           <width>98</width>
-           <height>28</height>
+           <width>338</width>
+           <height>389</height>
           </rect>
          </property>
          <attribute name="label">
@@ -136,8 +136,8 @@
           <rect>
            <x>0</x>
            <y>0</y>
-           <width>98</width>
-           <height>28</height>
+           <width>338</width>
+           <height>389</height>
           </rect>
          </property>
          <attribute name="label">
@@ -149,8 +149,8 @@
           <rect>
            <x>0</x>
            <y>0</y>
-           <width>98</width>
-           <height>28</height>
+           <width>338</width>
+           <height>389</height>
           </rect>
          </property>
          <attribute name="label">
@@ -162,8 +162,8 @@
           <rect>
            <x>0</x>
            <y>0</y>
-           <width>98</width>
-           <height>28</height>
+           <width>338</width>
+           <height>389</height>
           </rect>
          </property>
          <attribute name="label">

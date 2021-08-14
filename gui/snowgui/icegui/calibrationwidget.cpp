@@ -39,6 +39,13 @@ calibrationwidget::calibrationwidget(QWidget *parent) :
 	_statusTimer.setInterval(100);
 	connect(&_statusTimer, SIGNAL(timeout()),
 		this, SLOT(statusUpdate()));
+
+	ui->calibrationIDField->setText(QString(""));
+	ui->numberField->setText(QString(""));
+	ui->positionField->setText(QString(""));
+	ui->resolutionField->setText(QString(""));
+	ui->qualityField->setText(QString(""));
+	ui->intervalField->setText(QString(""));
 }
 
 /**
@@ -112,13 +119,19 @@ void	calibrationwidget::databaseClicked() {
  * \brief Set the calibration
  */
 void	calibrationwidget::setCalibration(snowstar::Calibration cal) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "calibration %d selected", cal.id);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "calibration %d selected, position %s",
+		cal.id, (cal.east) ? "east" : "west");
 	_calibration = cal;
-	ui->calibrationdisplayWidget->setCalibration(cal);
+	ui->calibrationdisplayWidget->setCalibration(_calibration);
 	displayCalibration();
 	if (_guider) {
-		_guider->useCalibration(cal.id, false);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "set cal %d in guider",
+			_calibration.id);
+		_guider->useCalibration(_calibration.id, false);
 	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "emit calibrationChanged(), cal = %d",
+		_calibration.id);
+	emit calibrationChanged();
 }
 
 /**
@@ -137,6 +150,7 @@ void	calibrationwidget::displayCalibration() {
 	}
 	ui->calibrationIDField->setText(QString::number(_calibration.id));
 	ui->numberField->setText(QString::number(_calibration.points.size()));
+	ui->positionField->setText(QString((_calibration.east) ? "east" : "west"));
 	ui->qualityField->setText(QString(astro::stringprintf("%.1f%%",
 		_calibration.quality * 100).c_str()));
 	ui->resolutionField->setText(QString(astro::stringprintf("%.0f\"/px",
@@ -174,7 +188,7 @@ void	calibrationwidget::calibrateClicked() {
 		try {
 			// XXX we should get the gridpixels from the
 			// XXX gui, value 0 means ignore it
-			_guider->startCalibration(_controltype, 0.);
+			_guider->startCalibration(_controltype, 0., !_west);
 		} catch (const std::exception& x) {
 		}
 	}
@@ -197,12 +211,14 @@ void	calibrationwidget::detailClicked() {
  * \brief Timer upate
  */
 void	calibrationwidget::statusUpdate() {
+	//debug(LOG_DEBUG, DEBUG_LOG, 0, "status update");
 	try {
 		// find out whether something has changed in the state
 		setupState();
 
 		// check whether the calibration has changed
-		snowstar::Calibration	cal = _guider->getCalibration(_controltype);
+		snowstar::Calibration	cal
+			= _guider->getCalibration(_controltype);
 		if ((_calibration.id == cal.id)
 			&& (_calibration.points.size() == cal.points.size())) {
 			return;
@@ -210,6 +226,7 @@ void	calibrationwidget::statusUpdate() {
 		_calibration = cal;
 		ui->calibrationdisplayWidget->setCalibration(_calibration);
 		displayCalibration();
+		emit calibrationChanged();
 	} catch (...) {
 
 	}
@@ -237,6 +254,7 @@ void	calibrationwidget::setupState() {
 			_calibration = _guider->getCalibration(_controltype);
 			ui->calibrationdisplayWidget->setCalibration(_calibration);
 			displayCalibration();
+			emit calibrationChanged();
 		} catch (const std::exception& x) {
 		}
 	}

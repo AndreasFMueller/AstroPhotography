@@ -69,6 +69,7 @@ private:
 signals:
 	void	telescopeChanged(astro::RaDec);
 	void	orientationChanged(bool);
+	void	calibrationChanged();
 };
 
 } // namespace snowgui

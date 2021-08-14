@@ -1,4 +1,16 @@
 ChangeLog for the Astro project.
+
+20210814:
+	* correctly implement east/west  in SimCcd, StarCamera and
+	  SimGuideport
+
+20210813:
+	* change simulator implementation to just rotate the image
+	* add east/west display to snowguide calibration command
+	* add meridian_flipped and east members to the calibration
+	* add east/west to the persistent calibration
+	* add meridian_flip methods to the Ice protocol
+
 20210812:
 	* add xshift and yshift options to the transform image processing
 	  element

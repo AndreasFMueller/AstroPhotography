@@ -41,16 +41,7 @@ AdaptiveOpticsCalibration::AdaptiveOpticsCalibration(const BasicCalibration& oth
  */
 AdaptiveOpticsCalibration&	AdaptiveOpticsCalibration::operator=(
 				const BasicCalibration& other) {
-	copy(other);
-	// copy other fields
-	// copy the coefficients
-	for (int i = 0; i < 6; i++) {
-		a[i] = other.a[i];
-	}
-
-	// copy the points and copy the points from other
-	clear();
-	std::copy(other.begin(), other.end(), back_inserter(*this));
+	BasicCalibration::operator=(other);
 
 	// that's all
 	return *this;

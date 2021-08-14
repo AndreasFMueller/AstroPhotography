@@ -89,12 +89,18 @@ public:
 	virtual void useCalibration(Ice::Int, bool, const Ice::Current& current);
 	virtual Calibration getCalibration(ControlType,
 				const Ice::Current& current);
+	virtual bool calibrationFlipped(ControlType,
+				const Ice::Current& current);
 	virtual void flipCalibration(ControlType, const Ice::Current& current);
+	virtual bool calibrationMeridianFlipped(ControlType,
+				const Ice::Current& current);
+	virtual void meridianFlipCalibration(ControlType,
+				const Ice::Current& current);
 	virtual void unCalibrate(ControlType, const Ice::Current& current);
 
 	// control calibration process
 	virtual Ice::Int startCalibration(ControlType caltype,
-				Ice::Float gridpixels,
+				Ice::Float gridpixels, bool east,
 				const Ice::Current& current);
 	virtual Ice::Double calibrationProgress(const Ice::Current& current);
 	virtual void cancelCalibration(const Ice::Current& current);

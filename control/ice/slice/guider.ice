@@ -116,6 +116,7 @@ module snowstar {
 		int	id;
 		double	timeago;
 		GuiderDescriptor	guider;
+		bool	east;
 		calibrationcoefficients	coefficients;
 		double	quality;
 		double	det;
@@ -126,6 +127,7 @@ module snowstar {
 		double	interval;
 		ControlType	type;
 		bool	flipped;
+		bool	meridianFlipped;
 		CalibrationSequence	points;
 	};
 
@@ -303,12 +305,17 @@ module snowstar {
 					throws BadState, NotFound;
 		Calibration	getCalibration(ControlType caltype)
 					throws BadState;
+		bool	calibrationFlipped(ControlType caltype) throws BadState;
 		void	flipCalibration(ControlType caltype) throws BadState;
+		bool	calibrationMeridianFlipped(ControlType caltype)
+					throws BadState;
+		void	meridianFlipCalibration(ControlType caltype)
+					throws BadState;
 		void	unCalibrate(ControlType type) throws BadState;
 
 		// methods to perform a calibration asynchronously
-		int	startCalibration(ControlType caltype, float gridpixels)
-					throws BadState;
+		int	startCalibration(ControlType caltype, float gridpixels,
+				bool east) throws BadState;
 		double	calibrationProgress() throws BadState;
 		void	cancelCalibration() throws BadState;
 		bool	waitCalibration(double timeout) throws BadState;

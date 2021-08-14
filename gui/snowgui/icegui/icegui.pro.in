@@ -139,6 +139,7 @@ SOURCES += 								\
 	CoolerActive.cpp						\
 	CoolerCallbackI.cpp						\
 	CcdCallbackI.cpp						\
+	EastWestIndicator.cpp						\
 	EventMonitor.cpp						\
 	FilterWheelBusy.cpp						\
 	FilterWheelCallbackI.cpp					\
@@ -169,6 +170,7 @@ HEADERS  += 								\
 	calibrationimagewidget.h					\
 	CallbackIdentity.h						\
 	CoolerActive.h							\
+	EastWestIndicator.h						\
 	EventMonitor.h							\
 	FilterWheelBusy.h						\
 	FocusButton.h							\

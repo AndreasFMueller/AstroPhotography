@@ -120,6 +120,11 @@ guidercontrollerwidget::guidercontrollerwidget(QWidget *parent)
 		this, SLOT(windowradiusChanged(int)));
 	_windowradius = 50;
 
+	connect(ui->gpFlipBox, SIGNAL(stateChanged(int)),
+		this, SLOT(gpFlipStateChanged(int)));
+	connect(ui->aoFlipBox, SIGNAL(stateChanged(int)),
+		this, SLOT(aoFlipStateChanged(int)));
+
 	connect(ui->guideButton, SIGNAL(clicked()),
 		this, SLOT(startGuiding()));
 	connect(ui->databaseButton, SIGNAL(clicked()),
@@ -140,6 +145,11 @@ guidercontrollerwidget::guidercontrollerwidget(QWidget *parent)
 		ui->gpcalibrationWidget, SLOT(setOrientation(bool)));
 	connect(this, SIGNAL(orientationChanged(bool)),
 		ui->aocalibrationWidget, SLOT(setOrientation(bool)));
+
+	connect(ui->gpcalibrationWidget, SIGNAL(calibrationChanged()),
+		this, SLOT(gpCalibrationChanged()));
+	connect(ui->aocalibrationWidget, SIGNAL(calibrationChanged()),
+		this, SLOT(aoCalibrationChanged()));
 
 	// create the tracking monitor
 	_trackingmonitordialog = NULL;
@@ -311,6 +321,26 @@ void	guidercontrollerwidget::setupGuider() {
 	}
 	ui->trackingMethodBox->blockSignals(false);
 
+	// get some information about the 
+	try {
+		snowstar::Calibration	gpcalibration
+			= _guider->getCalibration(snowstar::ControlGuidePort);
+		ui->gpFlipBox->setCheckState((gpcalibration.meridianFlipped)
+			? Qt::Checked : Qt::Unchecked);
+		ui->gpFlipBox->setEnabled(true);
+	} catch (...) {
+		ui->gpFlipBox->setEnabled(false);
+	}
+	try {
+		snowstar::Calibration	gpcalibration
+			= _guider->getCalibration(snowstar::ControlAdaptiveOptics);
+		ui->aoFlipBox->setCheckState((gpcalibration.meridianFlipped)
+			? Qt::Checked : Qt::Unchecked);
+		ui->aoFlipBox->setEnabled(true);
+	} catch (...) {
+		ui->aoFlipBox->setEnabled(false);
+	}
+
 	// get the exposure information
 	_exposure = snowstar::convert(_guider->getExposure());
 	astro::Point	ps = snowstar::convert(_guider->getStar());
@@ -471,6 +501,11 @@ void	guidercontrollerwidget::startGuiding() {
 		}
 	} catch (...) {
 	}
+
+	// make sure that the calibration is correctly flipped if necessary
+	checkGPFlipped();
+
+	// prepare the tracker
 	try {
 		setupTracker();
 		_guider->startGuiding(_gpupdateinterval, _aoupdateinterval,
@@ -514,6 +549,8 @@ void	guidercontrollerwidget::statusUpdate() {
 		ui->monitorButton->setEnabled(false);
 		ui->decBacklashButton->setEnabled(true);
 		ui->raBacklashButton->setEnabled(true);
+		ui->gpFlipBox->setEnabled(false);
+		ui->aoFlipBox->setEnabled(false);
 		break;
 	case snowstar::GuiderUNCONFIGURED:
 		ui->guideButton->setText(QString("Guide"));
@@ -521,6 +558,8 @@ void	guidercontrollerwidget::statusUpdate() {
 		ui->monitorButton->setEnabled(false);
 		ui->decBacklashButton->setEnabled(true);
 		ui->raBacklashButton->setEnabled(true);
+		ui->gpFlipBox->setEnabled(false);
+		ui->aoFlipBox->setEnabled(false);
 		break;
 	case snowstar::GuiderCALIBRATING:
 		ui->guideButton->setText(QString("Guide"));
@@ -528,12 +567,16 @@ void	guidercontrollerwidget::statusUpdate() {
 		ui->monitorButton->setEnabled(true);
 		ui->decBacklashButton->setEnabled(false);
 		ui->raBacklashButton->setEnabled(false);
+		ui->gpFlipBox->setEnabled(false);
+		ui->aoFlipBox->setEnabled(false);
 		break;
 	case snowstar::GuiderCALIBRATED:
 		ui->guideButton->setText(QString("Guide"));
 		ui->guideButton->setEnabled(true);
 		ui->decBacklashButton->setEnabled(true);
 		ui->raBacklashButton->setEnabled(true);
+		ui->gpFlipBox->setEnabled(true);
+		ui->aoFlipBox->setEnabled(true);
 		break;
 	case snowstar::GuiderGUIDING:
 		ui->guideButton->setText(QString("Stop Guiding"));
@@ -541,6 +584,8 @@ void	guidercontrollerwidget::statusUpdate() {
 		ui->monitorButton->setEnabled(true);
 		ui->decBacklashButton->setEnabled(false);
 		ui->raBacklashButton->setEnabled(false);
+		ui->gpFlipBox->setEnabled(true);
+		ui->aoFlipBox->setEnabled(true);
 		break;
 	case snowstar::GuiderBACKLASH:
 		if (_guider->getBacklashDirection() == snowstar::BacklashDEC) {
@@ -550,6 +595,8 @@ void	guidercontrollerwidget::statusUpdate() {
 			ui->decBacklashButton->setEnabled(false);
 			ui->raBacklashButton->setEnabled(true);
 		}
+		ui->gpFlipBox->setEnabled(false);
+		ui->aoFlipBox->setEnabled(false);
 		[[fallthrough]];
 	case snowstar::GuiderIMAGING:
 	case snowstar::GuiderDARKACQUIRE:
@@ -557,6 +604,8 @@ void	guidercontrollerwidget::statusUpdate() {
 		ui->guideButton->setText(QString("Guide"));
 		ui->guideButton->setEnabled(false);
 		ui->monitorButton->setEnabled(false);
+		ui->gpFlipBox->setEnabled(false);
+		ui->aoFlipBox->setEnabled(false);
 		break;
 	}
 	_previousstate = state;
@@ -867,6 +916,80 @@ void	guidercontrollerwidget::setOrientation(bool west) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "got new orientation: %s",
 		(west) ? "west" : "east");
 	emit orientationChanged(west);
+}
+
+void	guidercontrollerwidget::gpFlipStateChanged(int /* state */) {
+	if (_guider) {
+		return;
+	}
+	gpCalibrationChanged();
+}
+
+void	guidercontrollerwidget::aoFlipStateChanged(int /* state */) {
+	if (_guider) {
+		return;
+	}
+	aoCalibrationChanged();
+}
+
+/**
+ * \brief Make sure the GP calibration is properly flipped
+ */
+void	guidercontrollerwidget::checkGPFlipped() {
+	bool	meridianFlipped = (ui->gpFlipBox->checkState() == Qt::Checked);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "check whether GP cal is %sflipped",
+		(meridianFlipped) ? "" : "not ");
+	try {
+		snowstar::Calibration	calibration
+			= _guider->getCalibration(snowstar::ControlGuidePort);
+		if (calibration.meridianFlipped != meridianFlipped) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0,
+				 "need to flip the GP calibration");
+			_guider->meridianFlipCalibration(
+				snowstar::ControlGuidePort);
+		}
+		calibration = _guider->getCalibration(
+			snowstar::ControlGuidePort);
+		if (meridianFlipped != calibration.meridianFlipped) {
+			std::string	msg("cannot change flip state for GP");
+			debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+			throw std::logic_error(msg);
+		}
+		ui->gpFlipBox->setEnabled(true);
+	} catch (...) {
+		ui->gpFlipBox->setEnabled(false);
+	}
+}
+
+void	guidercontrollerwidget::gpCalibrationChanged() {
+	checkGPFlipped();
+}
+
+/**
+ * \brief Make sure the AO calibration is properly flipped
+ */
+void	guidercontrollerwidget::checkAOFlipped() {
+	bool	meridianFlipped = (ui->aoFlipBox->checkState() == Qt::Checked);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "check whether AO cal is %sflipped",
+		(meridianFlipped) ? "" : "not ");
+	try {
+		snowstar::Calibration	calibration
+			= _guider->getCalibration(
+				snowstar::ControlAdaptiveOptics);
+		if (calibration.meridianFlipped != meridianFlipped) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0,
+				 "need to flip the AO calibration");
+			_guider->meridianFlipCalibration(
+				snowstar::ControlAdaptiveOptics);
+		}
+		ui->aoFlipBox->setEnabled(true);
+	} catch (...) {
+		ui->aoFlipBox->setEnabled(false);
+	}
+}
+
+void	guidercontrollerwidget::aoCalibrationChanged() {
+	checkAOFlipped();
 }
 
 } // namespade snowgui

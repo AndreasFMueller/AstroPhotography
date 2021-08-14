@@ -373,6 +373,10 @@ bool	CelestronMount::telescopePositionWest() {
 	}
 #endif
 
+	// XXX probably the best method to decide this is to compute the
+	// XXX direction of the telescope and if it points below the
+	// XXX horizon, then we probably got the wrong orientation
+
 	// XXX until that is implemented, use the default method
 	return Mount::telescopePositionWest();
 }

@@ -31,6 +31,7 @@ ImageTransformationStep::ImageTransformationStep(NodePaths& parent)
 		astro::image::ConstImageAdapter<Pixel >	*adp = &flap;		\
 		astro::image::transform::TranslationAdapter<Pixel >	oa(flap, Point(_xshift, _yshift));\
 		if ((_xshift != 0) || (_yshift != 0.)) {		\
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "xshift=%.2f, yshift=%.2f", _xshift, _yshift); \
 			adp = &oa;					\
 		}							\
 		if (_scale == 0) {					\
@@ -74,10 +75,11 @@ std::string	ImageTransformationStep::what() const {
 	if (_scale < 0) {
 		scaleinfo = stringprintf("upscale %d->1", 1 - _scale);
 	}
-	return stringprintf("transform image hflip=%s vflip=%s %s",
+	return stringprintf("transform image hflip=%s vflip=%s scale=%s, xshift=%.1f, yshift=%1.f",
 		(_vertical_flip) ? "yes" : "no",
 		(_horizontal_flip) ? "yes" : "no",
-		scaleinfo.c_str());
+		scaleinfo.c_str(),
+		xshift(), yshift());
 }
 
 std::string	ImageTransformationStep::verboseinfo() const {
