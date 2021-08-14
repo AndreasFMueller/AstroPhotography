@@ -153,7 +153,7 @@ void	MainWindow::launchPreview() {
 		is->setWindowTitle(QString("Select instrument for Preview "
 			"application"));
 		is->exec();
-		delete is;
+		//delete is;
 	} catch (const std::exception& x) {
 		QMessageBox	message;
 		message.setText(QString("Cannot launch Preview"));
@@ -174,7 +174,7 @@ void	MainWindow::launchFocusing() {
 		is->setWindowTitle(QString("Select instrument for Focusing "
 			"application"));
 		is->exec();
-		delete is;
+		//delete is;
 	} catch (const std::exception& x) {
 		QMessageBox	message;
 		message.setText(QString("Cannot launch Focusing"));
@@ -195,7 +195,7 @@ void	MainWindow::launchGuiding() {
 		is->setWindowTitle(QString("Select instrument for Guiding "
 			"application"));
 		is->exec();
-		delete is;
+		//delete is;
 	} catch (const std::exception& x) {
 		QMessageBox	message;
 		message.setText(QString("Cannot launch Guiding"));
@@ -216,7 +216,7 @@ void	MainWindow::launchPointing() {
 		is->setWindowTitle(QString("Select instrument for Pointing "
 			"application"));
 		is->exec();
-		delete is;
+		//delete is;
 	} catch (const std::exception& x) {
 		QMessageBox	message;
 		message.setText(QString("Cannot launch Pointing"));
@@ -351,7 +351,7 @@ void	MainWindow::launchTasks() {
 			= new InstrumentSelectionApplication<snowgui::taskwindow>(this, _serviceobject);
 		is->setWindowTitle(QString("Select instrument for Task application"));
 		is->exec();
-		delete is;
+		//delete is;
 	} catch (const std::exception& x) {
 		QMessageBox	message(this);
 		message.setText(QString("Connection failure"));
@@ -375,7 +375,7 @@ void	MainWindow::launchExpose() {
 			= new InstrumentSelectionApplication<snowgui::exposewindow>(this, _serviceobject);
 		is->setWindowTitle(QString("Select instrument for Expose application"));
 		is->exec();
-		delete is;
+		//delete is;
 	} catch (const std::exception& x) {
 		QMessageBox	message;
 		message.setText(QString("Cannot launch Expose"));

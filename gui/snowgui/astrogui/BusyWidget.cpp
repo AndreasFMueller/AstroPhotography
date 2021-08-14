@@ -7,6 +7,7 @@
 #include <QTimer>
 #include <QPainter>
 #include <QPainterPath>
+#include <QPalette>
 #include <AstroDebug.h>
 #include <cmath>
 
@@ -21,6 +22,14 @@ BusyWidget::BusyWidget(QWidget *parent) : QWidget(parent) {
 	_timer.setInterval(50);
 	connect(&_timer, SIGNAL(timeout()), this, SLOT(update()));
 	_timer.start();
+
+#if 0
+	setAttribute(Qt::WA_OpaquePaintEvent);
+
+	QPalette	pal = palette();
+	pal.setColor(QPalette::Window, Qt::transparent);
+	setPalette(pal);
+#endif
 
 	// start the clock
 	_start.start();
@@ -48,19 +57,21 @@ void	BusyWidget::draw() {
 	float	l = ((width() > height()) ? width() : height()) / 2.;
 
 	// fill the rectangle
+#if 0
 	QPainterPath	rectangle;
 	rectangle.moveTo(0,0);
 	rectangle.lineTo(width(), 0);
 	rectangle.lineTo(width(), height());
 	rectangle.lineTo(0, height());
 	rectangle.lineTo(0, 0);
-	QColor	black(0, 0, 0);
+	QColor	black(0, 0, 0, 0);
 	painter.fillPath(rectangle, black);
+#endif
 
 	// draw a circle
 	QPainterPath	circle;
 	circle.addEllipse(center, l, l);
-	QColor	dark(0, 0, 0);
+	QColor	dark(0, 0, 0, 128);
 	painter.fillPath(circle, dark);
 
 	// dimensions of the rotating stars
@@ -84,7 +95,7 @@ void	BusyWidget::draw() {
 		star.lineTo(high);
 		i++;
 	}
-	QColor	gray(204, 204, 204);
+	QColor	gray(255, 255, 255, 196);
 	painter.fillPath(star, gray);
 }
 

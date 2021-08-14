@@ -773,14 +773,12 @@ void	StarChartWidget::directionChanged(astro::RaDec direction) {
 		startRetrieval();
 
 		// start the busy widget
-#if 1
 		const int busysize = 100;
 		_busywidget = new BusyWidget(this);
 		_busywidget->resize(busysize, busysize);
 		_busywidget->move(width()/2 - busysize/2,
 			height()/2 - busysize/2);
 		_busywidget->setVisible(true);
-#endif
 	}
 
 	// let the repaint event handle the redrawing. Doing the repainting
