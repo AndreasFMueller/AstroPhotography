@@ -23,14 +23,6 @@ BusyWidget::BusyWidget(QWidget *parent) : QWidget(parent) {
 	connect(&_timer, SIGNAL(timeout()), this, SLOT(update()));
 	_timer.start();
 
-#if 0
-	setAttribute(Qt::WA_OpaquePaintEvent);
-
-	QPalette	pal = palette();
-	pal.setColor(QPalette::Window, Qt::transparent);
-	setPalette(pal);
-#endif
-
 	// start the clock
 	_start.start();
 }
@@ -55,18 +47,6 @@ void	BusyWidget::draw() {
 	// find the center and the dimensions
 	QPointF	center(width() / 2., height() / 2.);
 	float	l = ((width() > height()) ? width() : height()) / 2.;
-
-	// fill the rectangle
-#if 0
-	QPainterPath	rectangle;
-	rectangle.moveTo(0,0);
-	rectangle.lineTo(width(), 0);
-	rectangle.lineTo(width(), height());
-	rectangle.lineTo(0, height());
-	rectangle.lineTo(0, 0);
-	QColor	black(0, 0, 0, 0);
-	painter.fillPath(rectangle, black);
-#endif
 
 	// draw a circle
 	QPainterPath	circle;
