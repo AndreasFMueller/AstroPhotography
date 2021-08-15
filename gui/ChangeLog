@@ -1,6 +1,8 @@
 ChangeLog for the Qt GUI to Astrophotography
 
 20210815:
+	* fixes for declination, interval and guiderate
+	* add declination to calibration and to startCalibration interface
 	* add parameter refresh function for guider
 	* relocate some functions into a popup menu in the
 	  guidercontrollerwidget

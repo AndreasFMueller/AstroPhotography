@@ -402,6 +402,12 @@ public:
 	bool	east() const { return _east; }
 	void	east(bool e) { _east = e; }
 
+private:
+	Angle	_declination;
+public:
+	Angle	declination() const { return _declination; }
+	void	declination(const Angle& d) { _declination = d; }
+
 	// calibration coefficients
 public:
 	double	a[6];
@@ -1115,11 +1121,12 @@ public:
 	 * \param tracker	The tracker used for tracking. 
 	 * \param gridpixels	number of pixels to dimension the grid
 	 * \param east		telescope position
+	 * \param declination	the declination of the calibration
 	 * \return		the id of the calibration run
 	 */
 	int	startCalibration(ControlDeviceType type,
 			TrackerPtr tracker, float gridpixels,
-			bool east = false);
+			bool east = false, Angle declination = Angle());
 private:
 	void	checkCalibrationState();
 public:
@@ -1309,15 +1316,16 @@ public:
 	std::string	ccd;
 	std::string	controldevice;
 	int	east;
+	double	declination;	// degrees
 	double	a[6];
-	double	focallength;
+	double	focallength;	// meter
 	double	quality;
 	double	det;
 	int	complete;
 	double	masPerPixel;
 	int	controltype;
-	double	interval;
-	double	guiderate;
+	double	interval;	// seconds
+	double	guiderate;	// multiples of the siderial rate
 	PersistentCalibration();
 	PersistentCalibration(const BasicCalibration& other);
 	PersistentCalibration&	operator=(const BasicCalibration& other);

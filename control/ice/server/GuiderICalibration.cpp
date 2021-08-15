@@ -223,11 +223,13 @@ Calibration GuiderI::getCalibration(ControlType calibrationtype,
  * \param current	current call context
  */
 Ice::Int GuiderI::startCalibration(ControlType caltype,
-		Ice::Float gridpixels, bool east,
+		Ice::Float gridpixels, bool east, Ice::Float declination,
 		const Ice::Current& current ) {
 	CallStatistics::count(current);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "start calibration, type = %s",
 		calibrationtype2string(caltype).c_str());
+
+	astro::Angle	dec(declination, astro::Angle::Degrees);
 
 	// construct a tracker
 	astro::guiding::TrackerPtr	tracker = getTracker();
@@ -240,14 +242,14 @@ Ice::Int GuiderI::startCalibration(ControlType caltype,
 			astro::stringprintf("start GP %s calibration",
 			guider->instrument().c_str()));
 		return guider->startCalibration(astro::guiding::GP, tracker,
-			gridpixels, east);
+			gridpixels, east, dec);
 	case ControlAdaptiveOptics:
 		astro::event(EVENT_CLASS, astro::events::INFO,
 			astro::events::Event::GUIDE,
 			astro::stringprintf("start AO %s calibration",
 			guider->instrument().c_str()));
 		return guider->startCalibration(astro::guiding::AO, tracker,
-			gridpixels, east);
+			gridpixels, east, dec);
 	}
 	debug(LOG_ERR, DEBUG_LOG, 0,
 		"control type is invalid (should not happen)");

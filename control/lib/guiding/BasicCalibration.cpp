@@ -287,9 +287,11 @@ void	BasicCalibration::copy(const BasicCalibration& other) {
 	_flipped = other._flipped;
 	_meridian_flipped = other._meridian_flipped;
 	_east = other._east;
+	_declination = other._declination;
 	_masPerPixel = other._masPerPixel;
 	_focallength = other._focallength;
 	_interval = other._interval;
+	_guiderate = other._guiderate;
 
 	// copy points
 	clear();

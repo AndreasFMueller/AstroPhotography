@@ -107,6 +107,7 @@ module snowstar {
 		double	timeago;
 		string	instrument;
 		bool	east;
+		double	declination; // degrees
 		calibrationcoefficients	coefficients;
 		double	quality;
 		double	det;
@@ -306,7 +307,7 @@ module snowstar {
 
 		// methods to perform a calibration asynchronously
 		int	startCalibration(ControlType caltype, float gridpixels,
-				bool east) throws BadState;
+				bool east, float declination) throws BadState;
 		double	calibrationProgress() throws BadState;
 		void	cancelCalibration() throws BadState;
 		bool	waitCalibration(double timeout) throws BadState;

@@ -25,6 +25,7 @@ PersistentCalibration::PersistentCalibration() {
 	controltype = 0;
 	interval = 0;
 	guiderate = 0.5;
+	declination = 0;
 }
 
 PersistentCalibration::PersistentCalibration(const BasicCalibration& other) {
@@ -53,6 +54,7 @@ PersistentCalibration::PersistentCalibration(const BasicCalibration& other) {
 	masPerPixel = other.masPerPixel();
 	interval = other.interval();
 	guiderate = other.guiderate();
+	declination = other.declination().degrees();
 }
 
 PersistentCalibration&	PersistentCalibration::operator=(
@@ -68,6 +70,7 @@ PersistentCalibration&	PersistentCalibration::operator=(
 	masPerPixel = other.masPerPixel();
 	interval = other.interval();
 	guiderate = other.guiderate();
+	declination = other.declination().degrees();
 	return *this;
 }
 
@@ -87,6 +90,7 @@ std::string	CalibrationTableAdapter::createstatement() {
 	"    controldevice varchar(256) not null,\n"
 	"    whenstarted datettime not null,\n"
 	"    east integer not null default 0,\n"
+	"    declination double not null default 0,\n"
 	"    a0 double not null default 0,\n"
 	"    a1 double not null default 0,\n"
 	"    a2 double not null default 0,\n"
@@ -114,8 +118,7 @@ CalibrationRecord	CalibrationTableAdapter::row_to_object(int objectid,
 	result.controldevice = row["controldevice"]->stringValue();
 	result.when = row["whenstarted"]->timeValue();
 	result.east = row["east"]->intValue();
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "read position %s from database",
-		(result.east == 1) ? "east" : "west");
+	result.declination = row["declination"]->doubleValue();
 	result.a[0] = row["a0"]->doubleValue();
 	result.a[1] = row["a1"]->doubleValue();
 	result.a[2] = row["a2"]->doubleValue();
@@ -128,8 +131,8 @@ CalibrationRecord	CalibrationTableAdapter::row_to_object(int objectid,
 	result.focallength = row["focallength"]->doubleValue();
 	result.masPerPixel = row["masperpixel"]->doubleValue();
 	result.controltype = row["controltype"]->intValue();
-	result.interval = row["interval"]->intValue();
-	result.guiderate = row["guiderate"]->intValue();
+	result.interval = row["interval"]->doubleValue();
+	result.guiderate = row["guiderate"]->doubleValue();
 	return result;
 }
 
@@ -141,6 +144,7 @@ UpdateSpec	CalibrationTableAdapter::object_to_updatespec(const CalibrationRecord
 	spec.insert(Field("controldevice", factory.get(calibration.controldevice)));
 	spec.insert(Field("whenstarted", factory.getTime(calibration.when)));
 	spec.insert(Field("east", factory.get(calibration.east)));
+	spec.insert(Field("declination", factory.get(calibration.declination)));
 	spec.insert(Field("a0", factory.get(calibration.a[0])));
 	spec.insert(Field("a1", factory.get(calibration.a[1])));
 	spec.insert(Field("a2", factory.get(calibration.a[2])));

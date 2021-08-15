@@ -47,12 +47,20 @@ calibrationselectiondialog::~calibrationselectiondialog() {
  * \brief Create a label for the calibration
  */
 static std::string	formatlabel(const snowstar::Calibration& cal) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "calibration %d: dec=%.1f", cal.id,
+		cal.declination);
 	time_t	when = snowstar::converttime(cal.timeago);
 	struct tm	*tmp = localtime(&when);
 	char	buffer[100];
 	strftime(buffer, sizeof(buffer), "%F %T", tmp);
-	return astro::stringprintf("%03d: %s, %5.1f%%, %s", cal.id, buffer,
-		100 * cal.quality, (cal.east) ? "east" : "west");
+	return astro::stringprintf(
+		"%03d: %s, q=%5.1f%%, %s, det=%6.1f, 𝛿=%.1f",
+		cal.id,
+		buffer,
+		100 * cal.quality,
+		(cal.east) ? "east" : "west",
+		cal.det,
+		cal.declination);
 }
 
 /**
@@ -93,8 +101,9 @@ void	calibrationselectiondialog::setGuider(snowstar::ControlType controltype,
 		try {
 			snowstar::Calibration	cal
 				= _guiderfactory->getCalibration(*i);
-			debug(LOG_DEBUG, DEBUG_LOG, 0, "%d: type %d, time %.1f",
-				*i, cal.type, cal.timeago);
+			debug(LOG_DEBUG, DEBUG_LOG, 0,
+				"%d: type %d, time %.1f, dec=%.1f",
+				*i, cal.type, cal.timeago, cal.declination);
 			if ((cal.type == _controltype) && (cal.complete)) {
 				_calibrations.push_back(cal);
 				std::string	label = formatlabel(cal);

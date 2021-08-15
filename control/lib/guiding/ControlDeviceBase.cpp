@@ -194,6 +194,9 @@ int	ControlDeviceBase::startCalibration(TrackerPtr /* tracker */) {
 	_calibration->east(parameter(std::string("telescope_east"), 1.) > 0);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "telescope position %s",
 		_calibration->east() ? "east" : "west");
+	double	declination = parameter(std::string("declination"), 0.0);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "declination=%.1f", declination);
+	_calibration->declination(Angle(declination, Angle::Degrees));
 
 	// compute angular size of pixels
 	_calibration->masPerPixel(

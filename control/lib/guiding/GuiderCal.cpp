@@ -61,9 +61,10 @@ void	Guider::calibrationCleanup() {
  * \param tracker	the imaging/tracking device
  * \param gridpixels	the suggested grid pixel size to use for the calibration
  * \param east		telescope position
+ * \param declination	declination of the calibration
  */
 int	Guider::startCalibration(ControlDeviceType type, TrackerPtr tracker,
-		float gridpixels, bool east) {
+		float gridpixels, bool east, Angle declination) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "start calibration for %s",
 		type2string(type).c_str());
 	// make sure we have a tracker
@@ -88,6 +89,10 @@ int	Guider::startCalibration(ControlDeviceType type, TrackerPtr tracker,
 		guidePortDevice->setParameter("gridpixels", gridpixels);
 		guidePortDevice->setParameter("telescope_east",
 			(east) ? 1 : 0);
+		guidePortDevice->setParameter("declination",
+			declination.degrees());
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "use declination=%.1f",
+			declination.degrees());
 		return guidePortDevice->startCalibration(tracker);
 	}
 

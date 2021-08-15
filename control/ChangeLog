@@ -1,6 +1,9 @@
 ChangeLog for the Astro project.
 
 20210815:
+	* fix interval and guiderate in the calibration
+	* add declination to the calibration and the startCalibration
+	  interface
 	* add refreshParameters method to guider.ice interface
 	* remove the GuiderDescriptor class from the Guider interface
 	* rename Guider::getDescriptor() to Guider::getInstrumentName()

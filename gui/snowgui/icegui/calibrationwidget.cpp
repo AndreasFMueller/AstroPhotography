@@ -146,14 +146,17 @@ void	calibrationwidget::displayCalibration() {
 	}
 	ui->calibrationIDField->setText(QString::number(_calibration.id));
 	ui->numberField->setText(QString::number(_calibration.points.size()));
-	ui->positionField->setText(QString((_calibration.east) ? "east" : "west"));
+	std::string	positionlabel = astro::stringprintf("%s/𝛿=%.1fº",
+		(_calibration.east) ? "east" : "west",
+		_calibration.declination);
+;	ui->positionField->setText(QString(positionlabel.c_str()));
 	ui->qualityField->setText(QString(astro::stringprintf("%.1f%%",
 		_calibration.quality * 100).c_str()));
 	ui->resolutionField->setText(QString(astro::stringprintf("%.0f\"/px",
 		_calibration.masPerPixel / 1000.).c_str()));
 
 	// compute the number of pixels offset we expect from the interval
-	double	speed = _calibration.guiderate * (360 * 3600 / 86400.); // as/s
+	double	speed = _calibration.guiderate * (360. * 3600. / 86400.); // as/s
 	double	offset = _calibration.interval * speed;	// arcsec
 	int	pixeloffset = offset / (_calibration.masPerPixel / 1000.);
 	ui->intervalField->setText(QString(astro::stringprintf("%.1fs/%dpx",
@@ -182,9 +185,13 @@ void	calibrationwidget::calibrateClicked() {
 			_guidercontroller->setupTracker();
 		}
 		try {
+			debug(LOG_DEBUG, DEBUG_LOG, 0,
+				"current declination=%.f",
+				_radec.dec().degrees());
 			// XXX we should get the gridpixels from the
 			// XXX gui, value 0 means ignore it
-			_guider->startCalibration(_controltype, 0., !_west);
+			_guider->startCalibration(_controltype, 0., !_west,
+				_radec.dec().degrees());
 		} catch (const std::exception& x) {
 		}
 	}

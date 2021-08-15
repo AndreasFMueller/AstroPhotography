@@ -239,6 +239,7 @@ Calibration     convert(const astro::guiding::CalibrationPtr cal) {
 	result.id = cal->calibrationid();
 	result.timeago = converttime(cal->when());
 	result.east = (cal->east()) ? 1 : 0;
+	result.declination = cal->declination().degrees();
 	result.instrument = convertname(cal->name());
 	result.type = convertcontroltype(cal->calibrationtype());
 	result.focallength = cal->focallength();
@@ -263,7 +264,8 @@ Calibration     convert(const astro::guiding::CalibrationPtr cal) {
 }
 
 astro::guiding::CalibrationPtr	convert(const Calibration& cal) {
-	astro::guiding::GuiderName	guidername = convertnameGuiderName(cal.instrument);
+	astro::guiding::GuiderName	guidername
+		= convertnameGuiderName(cal.instrument);
 	astro::guiding::ControlDeviceName	cdname(guidername,
 		convertcontroltype(cal.type));
 	astro::guiding::BasicCalibration	*result = NULL;
@@ -278,7 +280,9 @@ astro::guiding::CalibrationPtr	convert(const Calibration& cal) {
 	result->calibrationid(cal.id);
 	result->when(converttime(cal.timeago));
 	result->east((cal.east == 1) ? true : false);
-	//result->calibrationtype(convertcontroltype(cal.type));
+	result->declination(astro::Angle(cal.declination,
+		astro::Angle::Degrees));
+	result->calibrationtype(convertcontroltype(cal.type));
 
 	for (int i = 0; i < 6; i++) {
 		result->a[i] = cal.coefficients[i];
