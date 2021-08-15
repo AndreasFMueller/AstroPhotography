@@ -405,7 +405,7 @@ void	imagercontrollerwidget::darkClicked() {
 	std::ostringstream	out;
 	out << "dark image for ";
 	astro::guiding::GuiderDescriptor	gd
-		= convert(_guider->getDescriptor());
+		= snowstar::convertGuiderDescriptor(_guider->getInstrumentName());
 	out << gd.instrument();
 	
 	_darkwidget->setWindowTitle(QString(out.str().c_str()));
@@ -441,7 +441,7 @@ void	imagercontrollerwidget::flatClicked() {
 
 	std::ostringstream	out;
 	out << "flat image for ";
-	astro::guiding::GuiderDescriptor	gd = convert(_guider->getDescriptor());
+	astro::guiding::GuiderDescriptor	gd = snowstar::convertGuiderDescriptor(_guider->getInstrumentName());
 	out << gd.instrument();
 	
 	_flatwidget->setWindowTitle(QString(out.str().c_str()));

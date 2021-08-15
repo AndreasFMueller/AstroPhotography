@@ -8,16 +8,6 @@
 
 module snowstar {
 	/**
-	 * \brief guiders are described by an Instrument name and indices
-	 *
-	 * A guider is defined by the instrument name and the indices of the
-	 * guider ccd, guider port and adaptive optics unit.
-	 */
-	struct GuiderDescriptor {
-		string	instrumentname;
-	};
-
-	/**
 	 * \brief Control device type selection 
 	 *
 	 * The guider can use guider ports or tip-tilt adaptive optics units.
@@ -56,7 +46,7 @@ module snowstar {
 		double	timeago;
 		int	guideportcalid;
 		int	adaptiveopticscalid;
-		GuiderDescriptor	guider;
+		string	instrument;
 		TrackingPoints	points;
 	};
 
@@ -73,7 +63,7 @@ module snowstar {
 		double	since;
 		int	guideportcalid;
 		int	adaptiveopticscalid;
-		GuiderDescriptor	guider;
+		string	instrument;
 		int	points;
 		Point	lastoffset;
 		Point	averageoffset;
@@ -115,7 +105,7 @@ module snowstar {
 	struct Calibration {
 		int	id;
 		double	timeago;
-		GuiderDescriptor	guider;
+		string	instrument;
 		bool	east;
 		calibrationcoefficients	coefficients;
 		double	quality;
@@ -269,7 +259,7 @@ module snowstar {
 		/**
 		 * \brief return the descriptor that created the guider
 		 */
-		GuiderDescriptor	getDescriptor();
+		string	getInstrumentName();
 
 		// information about the guider
 		float	getFocallength();
@@ -447,14 +437,14 @@ module snowstar {
 	 * or the tracking data. The camera may no longer be connected
 	 * to the server, but the data should still be accessible.
 	 */
-	sequence<GuiderDescriptor> GuiderList;
+	sequence<string> GuiderList;
 	interface GuiderFactory extends Statistics {
 		GuiderList	list();
 
 		/**
 		 * \brief Get a guider based on a guider descriptor
 		 */
-		Guider*	get(GuiderDescriptor descriptor) throws NotFound;
+		Guider*	get(string instrument) throws NotFound;
 
 
 		/**
@@ -465,7 +455,7 @@ module snowstar {
 		/**
 		 * \brief Retrieve a list of valid calibration ids for a guider
 		 */
-		idlist	getCalibrations(GuiderDescriptor guider,
+		idlist	getCalibrations(string instrument,
 				ControlType type);
 
 		/**
@@ -491,7 +481,7 @@ module snowstar {
 		/**
 		 * \brief Retrieve a list of valid guide run ids for a guider
 		 */
-		idlist	getTracks(GuiderDescriptor guider);
+		idlist	getTracks(string instrument);
 
 		/**
 		 * \brief Retrieve a track summary

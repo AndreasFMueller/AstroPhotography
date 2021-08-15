@@ -46,9 +46,9 @@ GuiderList	GuiderFactoryI::list(const Ice::Current& current) {
 	std::vector<astro::guiding::GuiderDescriptor>	l
 		= guiderfactory()->list();
 	GuiderList	result;
-	std::vector<astro::guiding::GuiderDescriptor>::const_iterator	i;
-	for (i = l.begin(); i != l.end(); i++) {
-		result.push_back(convert(*i));
+	//std::vector<std::string>::const_iterator	i;
+	for (auto i = l.begin(); i != l.end(); i++) {
+		result.push_back(i->instrument());
 	}
 	return result;
 }
@@ -63,25 +63,23 @@ GuiderList	GuiderFactoryI::list(const Ice::Current& current) {
  *
  * \param descriptor	descriptor giving the name of the guider
  */
-GuiderPrx	GuiderFactoryI::get(const GuiderDescriptor& descriptor,
+GuiderPrx	GuiderFactoryI::get(const std::string& instrument,
 			const Ice::Current& current) {
 	CallStatistics::count(current);
 	// name of the guider
-	astro::guiding::GuiderDescriptor	d = convert(descriptor);
-	std::string	gn = guiderdescriptor2name(descriptor);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "request for guider named %s",
-		gn.c_str());
+	astro::guiding::GuiderDescriptor	d
+		= convertGuiderDescriptor(instrument);
 
 	// if the locator does not have the guide port, we have to create it
-	if (locator->has(gn)) {
+	if (locator->has(instrument)) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "guider '%s' already exists",
-			gn.c_str());
+			instrument.c_str());
 	} else {
-		buildnewguider(descriptor);
+		buildnewguider(instrument);
 	}
 
 	// create a proxy
-	std::string	ename = NameConverter::urlencode(gn);
+	std::string	ename = NameConverter::urlencode(instrument);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "name for guider: %s", ename.c_str());
 	GuiderPrx	guiderprx = createProxy<GuiderPrx>("guider/" + ename,
 				current, false);
@@ -98,20 +96,19 @@ GuiderPrx	GuiderFactoryI::get(const GuiderDescriptor& descriptor,
  *
  * \param descriptor	the descriptor for the guider
  */
-void	GuiderFactoryI::buildnewguider(const GuiderDescriptor& descriptor) {
-	std::string	gn = guiderdescriptor2name(descriptor).c_str();
+void	GuiderFactoryI::buildnewguider(const std::string& instrumentname) {
+	std::string	gn = instrumentname;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "building new guider for '%s'",
 		gn.c_str());
 
 	// get a GuiderPtr from the original factory
 	astro::guiding::GuiderPtr	guider
-		= guiderfactory()->get(convert(descriptor));
+		= guiderfactory()->get(convertGuiderDescriptor(instrumentname));
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "got the guider");
 
 	// query the instrument for a guide rate
 	astro::discover::InstrumentPtr	instrument
-		= astro::discover::InstrumentBackend::get(
-			descriptor.instrumentname);
+		= astro::discover::InstrumentBackend::get(instrumentname);
 
 	// find the local service name 
 	std::string	localservice
@@ -227,13 +224,14 @@ idlist	GuiderFactoryI::getAllCalibrations(const Ice::Current& current) {
 /**
  * \brief Get all the calibrations for a specific guider
  */
-idlist	GuiderFactoryI::getCalibrations(const GuiderDescriptor& guider,
+idlist	GuiderFactoryI::getCalibrations(const std::string& instrument,
 			ControlType type, const Ice::Current& current) {
 	CallStatistics::count(current);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "get calibrations");
 	astro::guiding::CalibrationStore	store;
-	std::list<long> calibrations = store.getCalibrations(convert(guider),
-						convertcontroltype(type));
+	std::list<long> calibrations = store.getCalibrations(
+					convertGuiderDescriptor(instrument),
+					convertcontroltype(type));
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "got %d calibrations",
 		calibrations.size());
 	idlist	result;
@@ -284,7 +282,7 @@ int	GuiderFactoryI::addCalibration(const Calibration& calibration,
 	astro::guiding::PersistentCalibration	pcal(*cal);
 
 	// get the Instrument Backend
-	std::string	instrumentname = calibration.guider.instrumentname;
+	std::string	instrumentname = calibration.instrument;
 	astro::discover::InstrumentBackend	instruments;
 	if (!instruments.has(instrumentname)) {
 		std::string	msg = astro::stringprintf("no instrument '%s'",
@@ -347,11 +345,11 @@ idlist	GuiderFactoryI::getAllTracks(const Ice::Current& current) {
 /**
  * \brief Get the guide run ids for a specific guider
  */
-idlist	GuiderFactoryI::getTracks(const GuiderDescriptor& guider,
+idlist	GuiderFactoryI::getTracks(const std::string& instrument,
 			const Ice::Current& current) {
 	CallStatistics::count(current);
 	astro::guiding::TrackingStore	store;
-	std::list<long>	trackings = store.getTrackings(convert(guider));
+	std::list<long>	trackings = store.getTrackings(convertGuiderDescriptor(instrument));
 	idlist	result;
 	std::copy(trackings.begin(), trackings.end(), back_inserter(result));
 	return result;

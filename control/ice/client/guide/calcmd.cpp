@@ -107,9 +107,9 @@ void	Guide::calibration_show(const Calibration& cal) {
  * \brief Implementation of the list command
  */
 int	Guide::list_command(GuiderFactoryPrx guiderfactory,
-		GuiderDescriptor descriptor) {
+		const std::string& instrument) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "get calibrations from remote server");
-	idlist	l = guiderfactory->getCalibrations(descriptor,
+	idlist	l = guiderfactory->getCalibrations(instrument,
 			ControlGuidePort);
 	std::cout << "number of guider port calibrations: " << l.size()
 		<< std::endl;
@@ -120,7 +120,7 @@ int	Guide::list_command(GuiderFactoryPrx guiderfactory,
 		cd.verbose(verbose);
 		cd(cal);
 	}
-	l = guiderfactory->getCalibrations(descriptor, ControlAdaptiveOptics);
+	l = guiderfactory->getCalibrations(instrument, ControlAdaptiveOptics);
 	std::cout << "number of adaptive optics calibrations: " << l.size()
 		<< std::endl;
 	for (i = l.begin(); i != l.end(); i++) {

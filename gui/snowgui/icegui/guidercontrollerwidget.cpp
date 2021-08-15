@@ -215,7 +215,7 @@ void	guidercontrollerwidget::instrumentSetup(
 	}
 
 	// now build a GuiderDescriptor for the guider
-	_guiderdescriptor.instrumentname = _instrument.name();
+	_instrumentname = _instrument.name();
 }
 
 /**
@@ -230,8 +230,7 @@ void	guidercontrollerwidget::setupComplete() {
  * \brief Setup a guider
  */
 void	guidercontrollerwidget::setupGuider() {
-	std::string	guidername = astro::stringprintf("%s",
-		_guiderdescriptor.instrumentname.c_str());
+	std::string	guidername = _instrumentname;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "setting up the guider %s",
 		guidername.c_str());
 	statusTimer.stop();
@@ -251,7 +250,7 @@ void	guidercontrollerwidget::setupGuider() {
 
 	// get the guider based on the descriptor
 	try {
-		_guider = _guiderfactory->get(_guiderdescriptor);
+		_guider = _guiderfactory->get(_instrumentname);
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "got the guider %s",
 			guidername.c_str());
 	} catch (const std::exception& x) {
@@ -272,11 +271,11 @@ void	guidercontrollerwidget::setupGuider() {
 
 	// also propagate the information to the calibration widgets
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "setting guider '%s' in calwidgets",
-		_guiderdescriptor.instrumentname.c_str());
+		_instrumentname.c_str());
 	ui->gpcalibrationWidget->setGuider(snowstar::ControlGuidePort,
-		_guiderdescriptor, _guider, _guiderfactory, this);
+		_instrumentname, _guider, _guiderfactory, this);
 	ui->aocalibrationWidget->setGuider(snowstar::ControlAdaptiveOptics,
-		_guiderdescriptor, _guider, _guiderfactory, this);
+		_instrumentname, _guider, _guiderfactory, this);
 
 	// we cannot do much more without a guider
 	if (!_guider) {
@@ -720,7 +719,7 @@ void	guidercontrollerwidget::windowradiusChanged(int w) {
  */
 void	guidercontrollerwidget::selectTrack() {
 	trackselectiondialog	*tsd = new trackselectiondialog(this);
-	tsd->setGuider(_guiderdescriptor, _guiderfactory);
+	tsd->setGuider(_instrumentname, _guiderfactory);
 	tsd->show();
 	connect(tsd, SIGNAL(trackSelected(snowstar::TrackingHistory)),
 		this, SLOT(trackSelected(snowstar::TrackingHistory)));

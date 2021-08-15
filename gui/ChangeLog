@@ -1,5 +1,8 @@
 ChangeLog for the Qt GUI to Astrophotography
 
+20210815:
+	* remove the GuiderDescriptor class from guider.ice interface
+
 20210814:
 	* more segementation fault problems eliminated?
 	* allow for the monitor images to be scaled down

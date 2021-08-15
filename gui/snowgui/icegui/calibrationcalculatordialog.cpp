@@ -70,7 +70,7 @@ calibrationcalculatordialog::calibrationcalculatordialog(
 	_cal.id = 0;
 	_cal.timeago = 0;
 	if (_guider) {
-		_cal.guider = _guider->getDescriptor();
+		_cal.instrument = _guider->getInstrumentName();
 	}
 	_cal.coefficients = std::vector<float>(6);
 	_cal.coefficients[0] = 1;

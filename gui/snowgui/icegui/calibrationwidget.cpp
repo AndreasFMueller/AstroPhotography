@@ -60,14 +60,14 @@ calibrationwidget::~calibrationwidget() {
  * \brief set the guider information
  */
 void	calibrationwidget::setGuider(snowstar::ControlType controltype,
-		snowstar::GuiderDescriptor guiderdescriptor,
+		const std::string& instrumentname,
 		snowstar::GuiderPrx guider,
 		snowstar::GuiderFactoryPrx guiderfactory,
 		guidercontrollerwidget *guidercontroller) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "set up the guider %s",
-		_guiderdescriptor.instrumentname.c_str());
+		instrumentname.c_str());
 	_controltype = controltype;
-	_guiderdescriptor = guiderdescriptor;
+	_instrumentname = instrumentname;
 	_guider = guider;
 	_guiderfactory = guiderfactory;
 	_guidercontroller = guidercontroller;
@@ -103,11 +103,7 @@ void	calibrationwidget::databaseClicked() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "create a calibration selection");
 	calibrationselectiondialog	*selection
 		= new calibrationselectiondialog(this);
-#if 0
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "set guider '%s' in the cal selection",
-		convert(_guiderdescriptor).toString().c_str());
-#endif
-	selection->setGuider(_controltype, _guiderdescriptor, _guiderfactory);
+	selection->setGuider(_controltype, _instrumentname, _guiderfactory);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "guider set");
 	connect(selection, SIGNAL(calibrationSelected(snowstar::Calibration)),
 		this, SLOT(setCalibration(snowstar::Calibration)));

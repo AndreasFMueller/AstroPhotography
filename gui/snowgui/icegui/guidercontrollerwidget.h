@@ -25,7 +25,7 @@ class guidercontrollerwidget : public InstrumentWidget {
 	Q_OBJECT
 
 	snowstar::GuiderFactoryPrx	_guiderfactory;
-	snowstar::GuiderDescriptor	_guiderdescriptor;
+	std::string			_instrumentname;
 	snowstar::GuiderPrx		_guider;
 
 	double	_gpupdateinterval;

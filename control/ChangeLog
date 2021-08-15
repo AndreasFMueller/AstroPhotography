@@ -1,5 +1,9 @@
 ChangeLog for the Astro project.
 
+20210815:
+	* remove the GuiderDescriptor class from the Guider interface
+	* rename Guider::getDescriptor() to Guider::getInstrumentName()
+
 20210814:
 	* fix initialization of CelestronMount class
 	* fix API for the NiceMount

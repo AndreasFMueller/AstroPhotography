@@ -104,7 +104,7 @@ GuidePortPrx GuiderI::getGuidePort(const Ice::Current& current) {
 	return GuidePortI::createProxy(name, current);
 }
 
-GuiderDescriptor GuiderI::getDescriptor(const Ice::Current& current) {
+std::string GuiderI::getInstrumentName(const Ice::Current& current) {
 	CallStatistics::count(current);
 	return convert(guider->getDescriptor());
 }

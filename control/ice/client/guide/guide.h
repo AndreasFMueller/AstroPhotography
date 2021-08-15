@@ -86,7 +86,7 @@ public:
 
 	int	cancel_command(GuiderPrx guider);
 	int	list_command(GuiderFactoryPrx guiderfactory,
-			GuiderDescriptor descriptor);
+			const std::string& instrument);
 	int	trash_command(GuiderFactoryPrx guiderfactory,
 			std::list<int> ids);
 
@@ -94,7 +94,7 @@ public:
 	int	guide_command(GuiderPrx guider);
 	int	stop_command(GuiderPrx guider);
 	int	tracks_command(GuiderFactoryPrx guiderfactory,
-			GuiderDescriptor descriptor);
+			const std::string& instrument);
 	int	history_command(GuiderFactoryPrx guiderfactory, long historyid);
 	int	history_command(GuiderFactoryPrx guiderfactory, long historyid,
 			ControlType type);

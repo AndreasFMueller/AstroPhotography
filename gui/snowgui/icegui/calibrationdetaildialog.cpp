@@ -78,7 +78,7 @@ void	calibrationdetaildialog::setCalibration(snowstar::Calibration calibration) 
 
 	// update fields
 	ui->instrumentField->setText(QString(
-		_calibration.guider.instrumentname.c_str()));
+		_calibration.instrument.c_str()));
 	ui->resolutionField->setText(QString(astro::stringprintf("%.1f\"/px",
 		_calibration.masPerPixel / 1000).c_str()));
 	ui->intervalField->setText(QString(astro::stringprintf("%.1fs",

@@ -50,17 +50,17 @@ static std::string	formatlabel(const snowstar::TrackingSummary& track) {
  * particular guider.
  */
 void	trackselectiondialog::setGuider(
-		snowstar::GuiderDescriptor guiderdescriptor,
+		const std::string& instrumentname,
 		snowstar::GuiderFactoryPrx guiderfactory) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "set the track selection %s",
-		guiderdescriptor.instrumentname.c_str());
+		instrumentname.c_str());
 
-	_guiderdescriptor = guiderdescriptor;
+	_instrumentname = instrumentname;
 	_guiderfactory = guiderfactory;
 
 	// update the title
 	std::string	title = astro::stringprintf("Select Track %s",
-		_guiderdescriptor.instrumentname.c_str());
+		_instrumentname.c_str());
 	setWindowTitle(QString(title.c_str()));
 
 	// empty the track list and also the contents of the tracklistWidget
@@ -77,7 +77,7 @@ void	trackselectiondialog::setGuider(
 
 	// read all tracks for that guider
 	snowstar::idlist	trackids
-		= _guiderfactory->getTracks(_guiderdescriptor);
+		= _guiderfactory->getTracks(_instrumentname);
 	snowstar::idlist::const_iterator	i;
 	for (i = trackids.begin(); i != trackids.end(); i++) {
 		snowstar::TrackingSummary		track

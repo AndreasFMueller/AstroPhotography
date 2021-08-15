@@ -59,21 +59,21 @@ static std::string	formatlabel(const snowstar::Calibration& cal) {
  * \brief Set the calibration selection for the guider
  */
 void	calibrationselectiondialog::setGuider(snowstar::ControlType controltype,
-		snowstar::GuiderDescriptor guiderdescriptor,
+		const std::string& instrumentname,
 		snowstar::GuiderFactoryPrx guiderfactory) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "set the calibration selection %s, %s",
-		guiderdescriptor.instrumentname.c_str(),
+		instrumentname.c_str(),
 		(controltype == snowstar::ControlGuidePort) ? "GP" : "AO");
 	// remember the guider parameters
 	_controltype = controltype;
-	_guiderdescriptor = guiderdescriptor;
+	_instrumentname = instrumentname;
 	_guiderfactory = guiderfactory;
 
 	// update the title
 	std::string	title = astro::stringprintf("Select calibration for %s of instrument %s",
 		(_controltype == snowstar::ControlGuidePort)
 			? "Guide Port" : "AO",
-		_guiderdescriptor.instrumentname.c_str());
+		_instrumentname.c_str());
 	setWindowTitle(QString(title.c_str()));
 
 	// empty the calibration list
@@ -82,8 +82,7 @@ void	calibrationselectiondialog::setGuider(snowstar::ControlType controltype,
 	// get all the calibration ids for this guider descriptor
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "getting ids for this guider");
 	snowstar::idlist	ids
-		= _guiderfactory->getCalibrations(_guiderdescriptor,
-			controltype);
+		= _guiderfactory->getCalibrations(_instrumentname, controltype);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "guider found %d ids", ids.size());
 
 	// now retrieve each calibration and decide whether to display it
@@ -119,7 +118,7 @@ void	calibrationselectiondialog::setGuider(snowstar::ControlType controltype,
 			astro::stringprintf("searching for calibrations for %s for guider %s returned no calibrations",
 				(_controltype == snowstar::ControlGuidePort)
 					? "Guide Port" : "Adaptive Optics",
-				_guiderdescriptor.instrumentname.c_str()).c_str()));
+				_instrumentname.c_str()).c_str()));
 		messagebox->exec();
 		delete messagebox;
 	}

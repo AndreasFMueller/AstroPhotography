@@ -70,7 +70,7 @@ public:
 	// devices making up the guider
 	virtual CcdPrx getCcd(const Ice::Current& current);
 	virtual GuidePortPrx getGuidePort(const Ice::Current& current);
-	virtual GuiderDescriptor getDescriptor(const Ice::Current& current);
+	virtual std::string getInstrumentName(const Ice::Current& current);
 
 	// get parameters
 	virtual Ice::Float	getFocallength(const Ice::Current& current);

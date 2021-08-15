@@ -60,7 +60,7 @@ void	Calibration_display::operator()(const Calibration& cal) {
 	_out << std::endl;
 	if (_verbose) {
 		_out << std::string("      guider: ");
-		_out << guiderdescriptor2name(cal.guider);
+		_out << cal.instrument;
 		_out << std::endl;
 	}
 
