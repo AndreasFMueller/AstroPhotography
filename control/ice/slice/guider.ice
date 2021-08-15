@@ -264,6 +264,7 @@ module snowstar {
 		// information about the guider
 		float	getFocallength();
 		float	getGuiderate();
+		void	refreshParameters() throws BadState;
 
 		// The guider needs to know how to expose an image, where
 		// to look for the guide star and where to lock it.

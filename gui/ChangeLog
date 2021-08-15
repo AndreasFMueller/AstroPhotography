@@ -1,6 +1,10 @@
 ChangeLog for the Qt GUI to Astrophotography
 
 20210815:
+	* add parameter refresh function for guider
+	* relocate some functions into a popup menu in the
+	  guidercontrollerwidget
+	* fix default for guidercontroller
 	* remove the GuiderDescriptor class from guider.ice interface
 
 20210814:

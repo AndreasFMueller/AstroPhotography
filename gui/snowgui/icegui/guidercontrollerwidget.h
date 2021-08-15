@@ -65,6 +65,8 @@ public:
 	void	checkGPFlipped();
 	void	checkAOFlipped();
 
+	void	showMore(QWidget *parent);
+
 signals:
 	void	exposureChanged(astro::camera::Exposure);
 
@@ -112,6 +114,9 @@ public slots:
 
 	void	gpCalibrationChanged();
 	void	aoCalibrationChanged();
+
+	void	refreshClicked();
+	void	showMoreMenu();
 };
 
 } // namespace snowgui

@@ -97,9 +97,8 @@ GuiderPrx	GuiderFactoryI::get(const std::string& instrument,
  * \param descriptor	the descriptor for the guider
  */
 void	GuiderFactoryI::buildnewguider(const std::string& instrumentname) {
-	std::string	gn = instrumentname;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "building new guider for '%s'",
-		gn.c_str());
+		instrumentname.c_str());
 
 	// get a GuiderPtr from the original factory
 	astro::guiding::GuiderPtr	guider
@@ -201,10 +200,10 @@ void	GuiderFactoryI::buildnewguider(const std::string& instrumentname) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "got the guiderptr");
 
 	// add the guider we have constructed to the D
-	locator->add(gn, guiderptr);
+	locator->add(instrumentname, guiderptr);
 	astro::event(EVENT_CLASS, astro::events::INFO,
 		astro::events::Event::GUIDE,
-		astro::stringprintf("new guider: %s", gn.c_str()));
+		astro::stringprintf("new guider: %s", instrumentname.c_str()));
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "guider servant activated");
 }
 

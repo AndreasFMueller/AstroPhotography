@@ -7,6 +7,8 @@
 #include "ui_guidercontrollerwidget.h"
 #include <QTimer>
 #include <QMessageBox>
+#include <QMenu>
+#include <QAction>
 #include <CommunicatorSingleton.h>
 #include <IceConversions.h>
 #include <AstroCamera.h>
@@ -108,6 +110,7 @@ guidercontrollerwidget::guidercontrollerwidget(QWidget *parent)
 	ui->filterMethodBox->addItem(QString("None"));
 	ui->filterMethodBox->addItem(QString("Gain"));
 	ui->filterMethodBox->addItem(QString("Kalman"));
+	ui->filterMethodBox->setCurrentIndex(1);
 	connect(ui->filterMethodBox, SIGNAL(currentIndexChanged(int)),
 		this, SLOT(filterMethodChanged(int)));
 
@@ -127,8 +130,8 @@ guidercontrollerwidget::guidercontrollerwidget(QWidget *parent)
 
 	connect(ui->guideButton, SIGNAL(clicked()),
 		this, SLOT(startGuiding()));
-	connect(ui->databaseButton, SIGNAL(clicked()),
-		this, SLOT(selectTrack()));
+	connect(ui->moreButton, SIGNAL(clicked()),
+		this, SLOT(showMoreMenu()));
 
 	connect(ui->xGainDial, SIGNAL(valueChanged(int)),
 		this, SLOT(xGainChanged(int)));
@@ -171,11 +174,6 @@ guidercontrollerwidget::guidercontrollerwidget(QWidget *parent)
 	connect(_trackingmonitorimage, SIGNAL(imageUpdated()),
 		this, SLOT(imageUpdated()));
 
-	connect(ui->decBacklashButton, SIGNAL(clicked()),
-		this, SLOT(backlashDECClicked()));
-	connect(ui->raBacklashButton, SIGNAL(clicked()),
-		this, SLOT(backlashRAClicked()));
-
 	// set the font for the time
 	QFont	f("Microsoft Sans Serif");;
 	f.setStyleHint(QFont::Monospace);
@@ -186,7 +184,7 @@ guidercontrollerwidget::guidercontrollerwidget(QWidget *parent)
 	_previousstate = snowstar::GuiderIDLE;
 	statusTimer.setInterval(100);
 	connect(&statusTimer, SIGNAL(timeout()), this, SLOT(statusUpdate()));
-	_gpupdateinterval = 10;
+	_gpupdateinterval = 3;
 	_aoupdateinterval = 1;
 	_stepping = false;
 }
@@ -320,15 +318,17 @@ void	guidercontrollerwidget::setupGuider() {
 	}
 	ui->trackingMethodBox->blockSignals(false);
 
-	// get some information about the 
+	// get some information about the configuration
 	try {
 		snowstar::Calibration	gpcalibration
 			= _guider->getCalibration(snowstar::ControlGuidePort);
 		ui->gpFlipBox->setCheckState((gpcalibration.meridianFlipped)
 			? Qt::Checked : Qt::Unchecked);
 		ui->gpFlipBox->setEnabled(true);
+		ui->gpupdateintervalSpinBox->setEnabled(true);
 	} catch (...) {
 		ui->gpFlipBox->setEnabled(false);
+		ui->gpupdateintervalSpinBox->setEnabled(false);
 	}
 	try {
 		snowstar::Calibration	gpcalibration
@@ -336,8 +336,10 @@ void	guidercontrollerwidget::setupGuider() {
 		ui->aoFlipBox->setCheckState((gpcalibration.meridianFlipped)
 			? Qt::Checked : Qt::Unchecked);
 		ui->aoFlipBox->setEnabled(true);
+		ui->aoupdateintervalSpinBox->setEnabled(true);
 	} catch (...) {
 		ui->aoFlipBox->setEnabled(false);
+		ui->aoupdateintervalSpinBox->setEnabled(false);
 	}
 
 	// get the exposure information
@@ -546,54 +548,47 @@ void	guidercontrollerwidget::statusUpdate() {
 		ui->guideButton->setText(QString("Guiding"));
 		ui->guideButton->setEnabled(false);
 		ui->monitorButton->setEnabled(false);
-		ui->decBacklashButton->setEnabled(true);
-		ui->raBacklashButton->setEnabled(true);
 		ui->gpFlipBox->setEnabled(false);
 		ui->aoFlipBox->setEnabled(false);
+		ui->gpupdateintervalSpinBox->setEnabled(false);
+		ui->aoupdateintervalSpinBox->setEnabled(false);
 		break;
 	case snowstar::GuiderUNCONFIGURED:
 		ui->guideButton->setText(QString("Guide"));
 		ui->guideButton->setEnabled(false);
 		ui->monitorButton->setEnabled(false);
-		ui->decBacklashButton->setEnabled(true);
-		ui->raBacklashButton->setEnabled(true);
 		ui->gpFlipBox->setEnabled(false);
 		ui->aoFlipBox->setEnabled(false);
+		ui->gpupdateintervalSpinBox->setEnabled(false);
+		ui->aoupdateintervalSpinBox->setEnabled(false);
 		break;
 	case snowstar::GuiderCALIBRATING:
 		ui->guideButton->setText(QString("Guide"));
 		ui->guideButton->setEnabled(false);
 		ui->monitorButton->setEnabled(true);
-		ui->decBacklashButton->setEnabled(false);
-		ui->raBacklashButton->setEnabled(false);
 		ui->gpFlipBox->setEnabled(false);
 		ui->aoFlipBox->setEnabled(false);
+		ui->gpupdateintervalSpinBox->setEnabled(false);
+		ui->aoupdateintervalSpinBox->setEnabled(false);
 		break;
 	case snowstar::GuiderCALIBRATED:
 		ui->guideButton->setText(QString("Guide"));
 		ui->guideButton->setEnabled(true);
-		ui->decBacklashButton->setEnabled(true);
-		ui->raBacklashButton->setEnabled(true);
 		ui->gpFlipBox->setEnabled(true);
 		ui->aoFlipBox->setEnabled(true);
+		ui->gpupdateintervalSpinBox->setEnabled(true);
+		ui->aoupdateintervalSpinBox->setEnabled(true);
 		break;
 	case snowstar::GuiderGUIDING:
 		ui->guideButton->setText(QString("Stop Guiding"));
 		ui->guideButton->setEnabled(true);
 		ui->monitorButton->setEnabled(true);
-		ui->decBacklashButton->setEnabled(false);
-		ui->raBacklashButton->setEnabled(false);
 		ui->gpFlipBox->setEnabled(true);
 		ui->aoFlipBox->setEnabled(true);
+		ui->gpupdateintervalSpinBox->setEnabled(true);
+		ui->aoupdateintervalSpinBox->setEnabled(true);
 		break;
 	case snowstar::GuiderBACKLASH:
-		if (_guider->getBacklashDirection() == snowstar::BacklashDEC) {
-			ui->decBacklashButton->setEnabled(true);
-			ui->raBacklashButton->setEnabled(false);
-		} else {
-			ui->decBacklashButton->setEnabled(false);
-			ui->raBacklashButton->setEnabled(true);
-		}
 		ui->gpFlipBox->setEnabled(false);
 		ui->aoFlipBox->setEnabled(false);
 		[[fallthrough]];
@@ -605,6 +600,8 @@ void	guidercontrollerwidget::statusUpdate() {
 		ui->monitorButton->setEnabled(false);
 		ui->gpFlipBox->setEnabled(false);
 		ui->aoFlipBox->setEnabled(false);
+		ui->gpupdateintervalSpinBox->setEnabled(false);
+		ui->aoupdateintervalSpinBox->setEnabled(false);
 		break;
 	}
 	_previousstate = state;
@@ -989,6 +986,44 @@ void	guidercontrollerwidget::checkAOFlipped() {
 
 void	guidercontrollerwidget::aoCalibrationChanged() {
 	checkAOFlipped();
+}
+
+void	guidercontrollerwidget::showMore(QWidget *parent) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "show a pop menu");
+	QMenu	popupmenu("More...", parent);
+
+	QAction	actionRefresh(QString("Refresh"), parent);
+	popupmenu.addAction(&actionRefresh);
+	connect(&actionRefresh, SIGNAL(triggered()),
+		this, SLOT(refreshClicked()));
+
+	QAction	actionDatabase(QString("Track Database"), parent);
+	popupmenu.addAction(&actionDatabase);
+	connect(&actionDatabase, SIGNAL(triggered()),
+		this, SLOT(selectTrack()));
+
+	QAction	actionDECBacklash(QString("DEC Backlash"), parent);
+	popupmenu.addAction(&actionDECBacklash);
+	connect(&actionDECBacklash, SIGNAL(triggered()),
+		this, SLOT(backlashDECClicked()));
+
+	QAction	actionRABacklash(QString("RA Backlash"), parent);
+	popupmenu.addAction(&actionRABacklash);
+	connect(&actionRABacklash, SIGNAL(triggered()),
+		this, SLOT(backlashRAClicked()));
+
+	popupmenu.exec(parent->mapToGlobal(QPoint(0,0)));
+}
+
+void	guidercontrollerwidget::showMoreMenu() {
+	showMore(ui->moreButton);
+}
+
+void	guidercontrollerwidget::refreshClicked() {
+	if (!_guider) {
+		return;
+	}
+	_guider->refreshParameters();
 }
 
 } // namespade snowgui

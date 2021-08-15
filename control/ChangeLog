@@ -1,6 +1,7 @@
 ChangeLog for the Astro project.
 
 20210815:
+	* add refreshParameters method to guider.ice interface
 	* remove the GuiderDescriptor class from the Guider interface
 	* rename Guider::getDescriptor() to Guider::getInstrumentName()
 

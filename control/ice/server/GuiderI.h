@@ -75,6 +75,7 @@ public:
 	// get parameters
 	virtual Ice::Float	getFocallength(const Ice::Current& current);
 	virtual	Ice::Float	getGuiderate(const Ice::Current& current);
+	virtual void	refreshParameters(const Ice::Current& current);
 
 	// parametrization of the guiding process
 	virtual void setExposure(const Exposure&, const Ice::Current& current);
