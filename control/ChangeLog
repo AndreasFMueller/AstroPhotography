@@ -1,5 +1,9 @@
 ChangeLog for the Astro project.
 
+20210816:
+	* fix SimCcd to handle exception when star catalogs are not present
+	* add error messages if star catalog files are missing
+
 20210815:
 	* fix interval and guiderate in the calibration
 	* add declination to the calibration and the startCalibration
