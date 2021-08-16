@@ -54,7 +54,7 @@ static std::string	formatlabel(const snowstar::Calibration& cal) {
 	char	buffer[100];
 	strftime(buffer, sizeof(buffer), "%F %T", tmp);
 	return astro::stringprintf(
-		"%03d: %s, q=%5.1f%%, %s, det=%6.1f, 𝛿=%.1f",
+		"%03d: %s, q=%5.1f%%, %s, 𝛥=%6.1f, 𝛿=%.1f",
 		cal.id,
 		buffer,
 		100 * cal.quality,
