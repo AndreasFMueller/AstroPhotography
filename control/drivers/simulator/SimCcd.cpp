@@ -63,7 +63,11 @@ void	SimCcd::main(SimCcd *simccd) noexcept {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "starting image construction");
 	try {
 		simccd->createimage();
+	} catch (const std::exception& x) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "cannot create image: %s",
+			x.what());
 	} catch (...) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "cannot create image, unknown exception");
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "image construction complete");
 }
