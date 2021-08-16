@@ -52,6 +52,9 @@ imagercontrollerwidget::imagercontrollerwidget(QWidget *parent) :
 	connect(ui->interpolateBox, SIGNAL(clicked(bool)),
 		this, SLOT(toggleInterpolate(bool)));
 
+	connect(ui->gainSlider, SIGNAL(valueChanged(int)),
+		this, SLOT(gainChanged(int)));
+
 	// initialize widget points
 	_flatwidget = NULL;
 	_darkwidget = NULL;
@@ -131,7 +134,8 @@ void	imagercontrollerwidget::setupCcd() {
 	// propagate the information from the ccdinfo structure
 	if (_guider) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "get info");
-		_ccdinfo = _guider->getCcd()->getInfo();
+		snowstar::CcdPrx	_ccd = _guider->getCcd();
+		_ccdinfo = _ccd->getInfo();
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "got info");
 
 		// set name
@@ -158,6 +162,23 @@ void	imagercontrollerwidget::setupCcd() {
 
 		// use the frame size as the default rectangle
 		displayFrame(ImageRectangle(ccdinfo.size()));
+
+		// find out about the gain
+		if (_ccd->hasGain()) {
+			_gaincalculator.interval(_ccd->gainInterval());
+			ui->gainSlider->setEnabled(true);
+			float	gain = _ccd->getGain();
+			ui->gainValue->setText(QString(astro::stringprintf(
+				"%.1f", gain).c_str()));
+			int	v = _gaincalculator.gainToSlider(gain);
+			
+			ui->gainSlider->setValue(v);
+		} else {
+			ui->gainSlider->setEnabled(false);
+			ui->gainSlider->setValue(0);
+			ui->gainValue->setEnabled(false);
+			ui->gainValue->setText(QString());
+		}
 
 		// start the timer
 		statusTimer.start();
@@ -628,6 +649,18 @@ void	imagercontrollerwidget::darkClosed() {
 
 void	imagercontrollerwidget::flatClosed() {
 	_flatwidget = NULL;
+}
+
+void	imagercontrollerwidget::setGain(float gain) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "new gain: %f", gain);
+	_exposure.gain(gain);
+	ui->gainValue->setText(QString(astro::stringprintf("%.1f", gain).c_str()));
+	emit exposureChanged(_exposure);
+}
+
+void	imagercontrollerwidget::gainChanged(int newvalue) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "new gain slider: %d", newvalue);
+	setGain(_gaincalculator.sliderToGain(newvalue));
 }
 
 } // namespace snowgui

@@ -352,11 +352,10 @@ void	ccdcontrollerwidget::setupCcd() {
 		// set the gain range
 		if (_ccd->hasGain()) {
 			snowstar::Interval	i = _ccd->gainInterval();
-			_gaininterval = std::make_pair(i.min, i.max);
-			float	m = (ui->gainSlider->maximum() - ui->gainSlider->minimum())
-				/ (i.max - i.min);
-			float	g = _ccd->getGain();
-			int	v = m * (g - i.min) + ui->gainSlider->minimum();
+			_gaincalculator.interval(i);
+			float	gain = _ccd->getGain();
+			_exposure.gain(gain);
+			int	v = _gaincalculator.gainToSlider(gain);
 			ui->gainSlider->setValue(v);
 			ui->gainSlider->setEnabled(true);
 			ui->gainValue->setHidden(false);
@@ -1253,11 +1252,8 @@ void	ccdcontrollerwidget::subframeOriginY(int y) {
 }
 
 void	ccdcontrollerwidget::gainChanged(int newvalue) {
-	float	m = (_gaininterval.second - _gaininterval.first) /
-			(ui->gainSlider->maximum() - ui->gainSlider->minimum());
-	float	g = _gaininterval.first
-			+ m * (newvalue - ui->gainSlider->minimum());
-	setGain(g);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "new gain slider: %d", newvalue);
+	setGain(_gaincalculator.sliderToGain(newvalue));
 }
 
 void	ccdcontrollerwidget::setGain(float gain) {
@@ -1273,13 +1269,9 @@ void	ccdcontrollerwidget::setGainSlider(float gain) {
 	}
 	if (_ccd->hasGain()) {
 		snowstar::Interval	i = _ccd->gainInterval();
-		_gaininterval = std::make_pair(i.min, i.max);
-		float	m = (ui->gainSlider->maximum() - ui->gainSlider->minimum())
-			/ (i.max - i.min);
-		float	g = _ccd->getGain();
+		_gaincalculator.interval(i);
 		setGain(gain);
-		int	v = m * (g - i.min) + ui->gainSlider->minimum();
-		ui->gainSlider->setValue(v);
+		ui->gainSlider->setValue(_gaincalculator.gainToSlider(gain));
 	}
 }
 

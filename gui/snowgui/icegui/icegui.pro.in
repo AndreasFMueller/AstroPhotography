@@ -146,6 +146,7 @@ SOURCES += 								\
 	FocusButton.cpp							\
 	focuselementstack.cpp						\
 	FocusingCallbackI.cpp						\
+	gaincalculator.cpp						\
 	GuidePortCallbackI.cpp						\
 	GuiderButton.cpp						\
 	HeartbeatMonitor.cpp						\
@@ -176,6 +177,7 @@ HEADERS  += 								\
 	FocusButton.h							\
 	focuselementstack.h						\
 	FocusingCallbackI.h						\
+	gaincalculator.h						\
 	GuiderButton.h							\
 	HeartbeatMonitor.h						\
 	ImageForwarder.h						\

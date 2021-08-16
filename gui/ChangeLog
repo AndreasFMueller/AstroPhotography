@@ -1,5 +1,9 @@
 ChangeLog for the Qt GUI to Astrophotography
 
+20210816:
+	* unify gain computations into GainCalculator class
+	* add gain to guider (needed to efficiently use ASI cameras)
+
 20210815:
 	* fixes for declination, interval and guiderate
 	* add declination to calibration and to startCalibration interface
