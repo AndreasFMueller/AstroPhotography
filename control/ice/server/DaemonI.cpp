@@ -430,7 +430,8 @@ float	DaemonI::daemonUptime(const Ice::Current& current) {
 	CallStatistics::count(current);
 	long	ticks = sysconf(_SC_CLK_TCK);
 	struct tms	t;
-	return (times(&t) - _server.start_clock()) / (float)ticks;
+	clock_t	now = times(&t);
+	return (now - _server.start_clock()) / (float)ticks;
 }
 
 float	DaemonI::cputime(const Ice::Current& current) {

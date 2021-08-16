@@ -8,16 +8,6 @@
 
 module snowstar {
 	/**
-	 * \brief guiders are described by an Instrument name and indices
-	 *
-	 * A guider is defined by the instrument name and the indices of the
-	 * guider ccd, guider port and adaptive optics unit.
-	 */
-	struct GuiderDescriptor {
-		string	instrumentname;
-	};
-
-	/**
 	 * \brief Control device type selection 
 	 *
 	 * The guider can use guider ports or tip-tilt adaptive optics units.
@@ -56,7 +46,7 @@ module snowstar {
 		double	timeago;
 		int	guideportcalid;
 		int	adaptiveopticscalid;
-		GuiderDescriptor	guider;
+		string	instrument;
 		TrackingPoints	points;
 	};
 
@@ -73,7 +63,7 @@ module snowstar {
 		double	since;
 		int	guideportcalid;
 		int	adaptiveopticscalid;
-		GuiderDescriptor	guider;
+		string	instrument;
 		int	points;
 		Point	lastoffset;
 		Point	averageoffset;
@@ -115,7 +105,9 @@ module snowstar {
 	struct Calibration {
 		int	id;
 		double	timeago;
-		GuiderDescriptor	guider;
+		string	instrument;
+		bool	east;
+		double	declination; // degrees
 		calibrationcoefficients	coefficients;
 		double	quality;
 		double	det;
@@ -126,6 +118,7 @@ module snowstar {
 		double	interval;
 		ControlType	type;
 		bool	flipped;
+		bool	meridianFlipped;
 		CalibrationSequence	points;
 	};
 
@@ -267,11 +260,12 @@ module snowstar {
 		/**
 		 * \brief return the descriptor that created the guider
 		 */
-		GuiderDescriptor	getDescriptor();
+		string	getInstrumentName();
 
 		// information about the guider
 		float	getFocallength();
 		float	getGuiderate();
+		void	refreshParameters() throws BadState;
 
 		// The guider needs to know how to expose an image, where
 		// to look for the guide star and where to lock it.
@@ -303,12 +297,17 @@ module snowstar {
 					throws BadState, NotFound;
 		Calibration	getCalibration(ControlType caltype)
 					throws BadState;
+		bool	calibrationFlipped(ControlType caltype) throws BadState;
 		void	flipCalibration(ControlType caltype) throws BadState;
+		bool	calibrationMeridianFlipped(ControlType caltype)
+					throws BadState;
+		void	meridianFlipCalibration(ControlType caltype)
+					throws BadState;
 		void	unCalibrate(ControlType type) throws BadState;
 
 		// methods to perform a calibration asynchronously
-		int	startCalibration(ControlType caltype, float gridpixels)
-					throws BadState;
+		int	startCalibration(ControlType caltype, float gridpixels,
+				bool east, float declination) throws BadState;
 		double	calibrationProgress() throws BadState;
 		void	cancelCalibration() throws BadState;
 		bool	waitCalibration(double timeout) throws BadState;
@@ -440,14 +439,14 @@ module snowstar {
 	 * or the tracking data. The camera may no longer be connected
 	 * to the server, but the data should still be accessible.
 	 */
-	sequence<GuiderDescriptor> GuiderList;
+	sequence<string> GuiderList;
 	interface GuiderFactory extends Statistics {
 		GuiderList	list();
 
 		/**
 		 * \brief Get a guider based on a guider descriptor
 		 */
-		Guider*	get(GuiderDescriptor descriptor) throws NotFound;
+		Guider*	get(string instrument) throws NotFound;
 
 
 		/**
@@ -458,7 +457,7 @@ module snowstar {
 		/**
 		 * \brief Retrieve a list of valid calibration ids for a guider
 		 */
-		idlist	getCalibrations(GuiderDescriptor guider,
+		idlist	getCalibrations(string instrument,
 				ControlType type);
 
 		/**
@@ -484,7 +483,7 @@ module snowstar {
 		/**
 		 * \brief Retrieve a list of valid guide run ids for a guider
 		 */
-		idlist	getTracks(GuiderDescriptor guider);
+		idlist	getTracks(string instrument);
 
 		/**
 		 * \brief Retrieve a track summary

@@ -68,9 +68,9 @@ int	Guide::stop_command(GuiderPrx guider) {
  * be a performance issue from this.
  */
 int	Guide::tracks_command(GuiderFactoryPrx guiderfactory,
-		GuiderDescriptor descriptor) {
+		const std::string& instrument) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "get tracks from remote server");
-	idlist	l = guiderfactory->getTracks(descriptor);
+	idlist	l = guiderfactory->getTracks(instrument);
 	std::cout << l.size() << " tracks" << std::endl;
 	for (auto ptr = l.begin(); ptr != l.end(); ptr++) {
 		int	id = *ptr;
@@ -84,7 +84,7 @@ int	Guide::tracks_command(GuiderFactoryPrx guiderfactory,
 			std::cout << astro::timeformat("%Y-%m-%d %H:%M ",
 				converttime((double)history.timeago));
 			// guider used
-			std::cout << guiderdescriptor2name(history.guider);
+			std::cout << history.instrument;
 
 			// points/duration
 			if (history.points.size() > 1) {

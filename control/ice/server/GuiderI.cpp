@@ -104,7 +104,7 @@ GuidePortPrx GuiderI::getGuidePort(const Ice::Current& current) {
 	return GuidePortI::createProxy(name, current);
 }
 
-GuiderDescriptor GuiderI::getDescriptor(const Ice::Current& current) {
+std::string GuiderI::getInstrumentName(const Ice::Current& current) {
 	CallStatistics::count(current);
 	return convert(guider->getDescriptor());
 }
@@ -117,6 +117,34 @@ Ice::Float	GuiderI::getFocallength(const Ice::Current& current) {
 Ice::Float	GuiderI::getGuiderate(const Ice::Current& current) {
 	CallStatistics::count(current);
 	return guider->guiderate();
+}
+
+void	GuiderI::refreshParameters(const Ice::Current& current) {
+	CallStatistics::count(current);
+	// get an instrument name
+	std::string	instrumentname = guider->getDescriptor().instrument();
+
+	// get the instrument
+	astro::discover::InstrumentPtr	instrument
+		= astro::discover::InstrumentBackend::get(instrumentname);
+
+	// try to update the guiderate
+	try {
+		double	gr = instrument->getDouble("guiderate");
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "found guiderate: %.3f", gr);
+		guider->guiderate(gr);
+	} catch (...) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "no guide rate found");
+	}
+
+	// try to update the focal length
+	try {
+		double	fl = instrument->getDouble("guiderfocallength");
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "found focallength: %.3f", fl);
+		guider->focallength(fl);
+	} catch (...) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "no guider focal length found");
+	}
 }
 
 void GuiderI::setExposure(const Exposure& exposure,

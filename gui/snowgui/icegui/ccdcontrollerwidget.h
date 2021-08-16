@@ -17,6 +17,7 @@
 #include <ImagerRectangle.h>
 #include <QMessageBox>
 #include "CallbackIdentity.h"
+#include "gaincalculator.h"
 
 namespace snowgui {
 
@@ -111,7 +112,8 @@ class ccdcontrollerwidget : public InstrumentWidget {
 	snowstar::CcdInfo	_ccdinfo;
 	astro::camera::Exposure	_exposure;
 
-	std::pair<float,float>	_gaininterval;
+	//std::pair<float,float>	_gaininterval;
+	GainCalculator	_gaincalculator;
 
 	std::recursive_mutex	_mutex;	// mutex to protect image state
 	astro::image::ImagePtr	_image;

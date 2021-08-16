@@ -28,10 +28,10 @@ public:
 	// conversions
 
 	GuiderList	list(const Ice::Current& current);
-	GuiderPrx	get(const GuiderDescriptor& descriptor,
+	GuiderPrx	get(const std::string& instrument,
 				const Ice::Current& current);
 	idlist	getAllCalibrations(const Ice::Current& current);
-	idlist	getCalibrations(const GuiderDescriptor& guider,
+	idlist	getCalibrations(const std::string& instrument,
 				ControlType type,
 				const Ice::Current& current);
 	Calibration	getCalibration(int id,
@@ -40,7 +40,7 @@ public:
 	int	addCalibration(const Calibration& calibration,
 			const Ice::Current& current);
 	idlist	getAllTracks(const Ice::Current& current);
-	idlist	getTracks(const GuiderDescriptor& guider,
+	idlist	getTracks(const std::string& instrument,
 				const Ice::Current& current);
 	TrackingHistory	getTrackingHistory(int id, const Ice::Current& current);
 	TrackingHistory	getTrackingHistoryType(int id, ControlType type,
@@ -51,7 +51,7 @@ public:
 	void	deleteTrackingHistory(int id, const Ice::Current& current);
 	astro::guiding::GuiderFactoryPtr	guiderfactory();
 private:
-	void	buildnewguider(const GuiderDescriptor& descriptor);
+	void	buildnewguider(const std::string& instrument);
 };
 
 } // namespace snowstar

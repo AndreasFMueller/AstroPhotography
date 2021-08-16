@@ -262,34 +262,12 @@ GuiderPrx	RemoteInstrument::guider() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "got a guider factory");
 
 	// now build the descriptor
-	GuiderDescriptor	guiderdescriptor;
-	guiderdescriptor.instrumentname = name();
-
-#if 0
-	// check guideport
-	guiderdescriptor.guideportIndex = guideportindex;
-	unsigned int	n = _instrument->nComponentsOfType(InstrumentGuidePort);
-	if (guideportindex >= n) {
-		guiderdescriptor.guideportIndex = -1;
-	}
-
-	// check adaptive optics
-	guiderdescriptor.adaptiveopticsIndex = aoindex;
-	n = _instrument->nComponentsOfType(InstrumentAdaptiveOptics);
-	if (aoindex >= n) {
-		guiderdescriptor.adaptiveopticsIndex = -1;
-	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "getting '%s|%d|%d|%d'",
-		guiderdescriptor.instrumentname.c_str(),
-		guiderdescriptor.ccdIndex,
-		guiderdescriptor.guideportIndex,
-		guiderdescriptor.adaptiveopticsIndex);
-#endif
+	std::string	instrumentname = name();
 
 	// retrieve the guider factory
 	GuiderPrx	guider;
 	try {
-		guider = guiderfactory->get(guiderdescriptor);
+		guider = guiderfactory->get(instrumentname);
 	} catch (const std::exception& x) {
 		std::string	msg = astro::stringprintf(
 			"cannot get guider: %s", x.what());

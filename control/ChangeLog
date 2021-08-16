@@ -1,5 +1,43 @@
 ChangeLog for the Astro project.
 
+20210816:
+	* fix SimCcd to handle exception when star catalogs are not present
+	* add error messages if star catalog files are missing
+
+20210815:
+	* fix interval and guiderate in the calibration
+	* add declination to the calibration and the startCalibration
+	  interface
+	* add refreshParameters method to guider.ice interface
+	* remove the GuiderDescriptor class from the Guider interface
+	* rename Guider::getDescriptor() to Guider::getInstrumentName()
+
+20210814:
+	* fix initialization of CelestronMount class
+	* fix API for the NiceMount
+	* add north/south tracking modes to Mount device and CelestronMount
+	* correctly implement east/west for CelestronMount
+	* correctly implement east/west  in SimCcd, StarCamera and
+	  SimGuideport
+
+20210813:
+	* change simulator implementation to just rotate the image
+	* add east/west display to snowguide calibration command
+	* add meridian_flipped and east members to the calibration
+	* add east/west to the persistent calibration
+	* add meridian_flip methods to the Ice protocol
+
+20210812:
+	* add xshift and yshift options to the transform image processing
+	  element
+
+20210811:
+	* fix some typos in tools
+
+20210810:
+	* get everything back in working order
+	* fix bug that we could not access the calibration database
+
 20210630:
 	* improve configure.ac detection of required libraries
 

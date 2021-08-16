@@ -1,5 +1,35 @@
 ChangeLog for the Qt GUI to Astrophotography
 
+20210816:
+	* unify gain computations into GainCalculator class
+	* add gain to guider (needed to efficiently use ASI cameras)
+
+20210815:
+	* fixes for declination, interval and guiderate
+	* add declination to calibration and to startCalibration interface
+	* add parameter refresh function for guider
+	* relocate some functions into a popup menu in the
+	  guidercontrollerwidget
+	* fix default for guidercontroller
+	* remove the GuiderDescriptor class from guider.ice interface
+
+20210814:
+	* more segementation fault problems eliminated?
+	* allow for the monitor images to be scaled down
+	* fix (?) a seg fault issue with the pointing application
+	* add north/south tracking modes
+	* debug flip settings
+
+20210813:
+	* add flip check boxes to guidercontrollerwidget
+	* add east/west to calibration display
+	* calibrate button sends east/west to guider
+	* calibration calculator stores east/west in the calibration
+	* add EastWestIndicator widget
+
+20210811:
+	* add gain control to snowlife app
+
 20210611:
 	* fix connect for nonexistent currentIndexChange(QString)
 	  -> currentTextChanged(QString)

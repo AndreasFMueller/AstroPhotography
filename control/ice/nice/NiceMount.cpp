@@ -80,6 +80,10 @@ bool    NiceMount::telescopePositionWest() {
 	return _mount->telescopePositionWest();
 }
 
+bool    NiceMount::trackingNorth() {
+	return _mount->trackingNorth();
+}
+
 void    NiceMount::cancel() {
 	_mount->cancel();
 }

@@ -12,6 +12,14 @@ drivers
 	Contains subdirectories for driver classes for all supported
 	cameras and other devices. This include
 
+	asi
+		drivers for the ASI cameras
+	atik
+		drivers for ATIK cameras, based on a library provided
+		by ATIK (no longer supported, because the library seems
+		no longer to be maintained)
+	celestron
+		driver for the celestron mount
 	microtouch
 		a driver class to control the Microtouch focuser from
 		Starizona
@@ -20,8 +28,14 @@ drivers
 	net
 		a pseudo driver that gives access to remote cameras over
 		the CORBA interface as if the camera wer actually local
+	othello
+		drivers for devices built for the project, i.e. the 
+		guide port and focuser interfaces
 	qhy
-		drivers for QHYCCD cameras
+		drivers for QHYCCD cameras, based on a home made library,
+		essentially only supporting the QHY8Pro
+	qhy2
+		drivers for all QHYCCD cameras, based on QHYCCD SDK library
 	qsi
 		driver for Quantum Scientific Imaging cameras, requires
 		the open source QSI API library to be installed.

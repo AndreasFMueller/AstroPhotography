@@ -295,7 +295,8 @@ void	GPCalibrationProcess::main2(astro::thread::Thread<GPCalibrationProcess>& _t
 	gridconstant.guiderate(guiderate());
 	grid = gridconstant(gridspacing); // suggested displacement in pixels
 	calibration()->interval(grid);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "grid constant: %f", grid);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "grid constant: %d->%f",
+		calibration()->calibrationid(), grid);
 
 	// measure the initial point
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "place initial point");
@@ -349,24 +350,27 @@ void	GPCalibrationProcess::main2(astro::thread::Thread<GPCalibrationProcess>& _t
 	// now compute the calibration data, and fix the time constant
 	calibration()->calibrate();
 	//cal.rescale(1. / grid);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "calibration complete: interval=%.1f",
+		calibration()->interval());
 
 	// send the progress indicator to the end
 	pi.t = Timer::gettime() - starttime;
 	pi.progress = 1.0;
 	callback(pi);
 
+	// inform the callback that calibration is complete, this also
+	// ensures that the guider saves the calibration
+	callback(calibration());
+
 	// tell the guider that calibration is complete
 	if (hasGuider()) {
 		guider()->saveCalibration();
 	}
 
-	// inform the callback that calibration is complete, this also
-	// ensures that the guider saves the calibration
-	callback(calibration());
-
 	// the guider is now calibrated
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "calibration: %s",
-		calibration()->toString().c_str());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "calibration: %s, interval=%.1f",
+		calibration()->toString().c_str(),
+		calibration()->interval());
 	calibrated = true;
 
 	// signal other threads that we are done

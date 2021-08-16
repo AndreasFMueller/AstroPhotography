@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
  <class>snowgui::calibrationselectiondialog</class>
- <widget class="QDialog" name="calibrationselectiondialog">
+ <widget class="QDialog" name="snowgui::calibrationselectiondialog">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>700</width>
+    <width>800</width>
     <height>372</height>
    </rect>
   </property>
   <property name="minimumSize">
    <size>
-    <width>700</width>
+    <width>800</width>
     <height>0</height>
    </size>
   </property>
@@ -82,7 +82,7 @@
   <connection>
    <sender>buttonBox</sender>
    <signal>accepted()</signal>
-   <receiver>calibrationselectiondialog</receiver>
+   <receiver>snowgui::calibrationselectiondialog</receiver>
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -98,7 +98,7 @@
   <connection>
    <sender>buttonBox</sender>
    <signal>rejected()</signal>
-   <receiver>calibrationselectiondialog</receiver>
+   <receiver>snowgui::calibrationselectiondialog</receiver>
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">

@@ -24,20 +24,22 @@ namespace snowstar {
  * database. The flipped argument allows to use the calibration if it was
  * computed on the other side of the meridian.
  *
- * \param calid		the calibration id
- * \param flipped	whether or not the calibration eeds to be flipped
- * \param current	current call context
+ * \param calid			the calibration id
+ * \param meridian_flipped	whether or not the calibration eeds to be
+ *				meridian flipped
+ * \param current		current call context
  */
-void GuiderI::useCalibration(Ice::Int calid, bool /* flipped */,
-// XXX the flipped argument is currently not evaluated
+void GuiderI::useCalibration(Ice::Int calid, bool meridian_flipped,
 	const Ice::Current& current) {
 	CallStatistics::count(current);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "use calibration %d %sflipped",
+		calid, (meridian_flipped) ? "" : "not ");
 	if (calid <= 0) {
 		throw BadParameter("not a valid calibration id");
 	}
 	// retrieve guider data from the database
 	try {
-		guider->useCalibration(calid);
+		guider->useCalibration(calid, meridian_flipped);
 		astro::event(EVENT_CLASS, astro::events::INFO,
 			astro::events::Event::GUIDE,
 			astro::stringprintf("%s now uses calibration %d",
@@ -50,7 +52,41 @@ void GuiderI::useCalibration(Ice::Int calid, bool /* flipped */,
 }
 
 /**
- * \brief Merian flip requires that we need to flip the calibration too
+ * \brief Find out whether calibration is flipped
+ *
+ * \param current		current call context
+ */
+bool GuiderI::calibrationFlipped(ControlType type,
+		const Ice::Current& current) {
+	CallStatistics::count(current);
+	switch (type) {
+	case ControlGuidePort:
+		return guider->guidePortDevice->flipped();
+	case ControlAdaptiveOptics:
+		return guider->adaptiveOpticsDevice->flipped();
+	}
+	throw std::runtime_error("calibrationFlipped not implemented");
+}
+
+/**
+ * \brief Find out whether calibration is meridian flipped
+ *
+ * \param current		current call context
+ */
+bool GuiderI::calibrationMeridianFlipped(ControlType type,
+		const Ice::Current& current) {
+	CallStatistics::count(current);
+	switch (type) {
+	case ControlGuidePort:
+		return guider->guidePortDevice->meridian_flipped();
+	case ControlAdaptiveOptics:
+		return guider->adaptiveOpticsDevice->meridian_flipped();
+	}
+	throw std::runtime_error("calibrationMeridianFlipped not implemented");
+}
+
+/**
+ * \brief flip requires that we need to flip the calibration too
  *
  * \param type		the control device type
  * \param current	current call context
@@ -61,12 +97,32 @@ void GuiderI::flipCalibration(ControlType type,
 	switch (type) {
 	case ControlGuidePort:
 		guider->guidePortDevice->flip();
-		break;
+		return;
 	case ControlAdaptiveOptics:
 		guider->adaptiveOpticsDevice->flip();
-		break;
+		return;
 	}
-	throw std::runtime_error("flipCalibratoin not implemented");
+	throw std::runtime_error("flipCalibration not implemented");
+}
+
+/**
+ * \brief Merian flip requires that we need to flip the calibration too
+ *
+ * \param type		the control device type
+ * \param current	current call context
+ */
+void GuiderI::meridianFlipCalibration(ControlType type,
+	const Ice::Current& current) {
+	CallStatistics::count(current);
+	switch (type) {
+	case ControlGuidePort:
+		guider->guidePortDevice->meridian_flip();
+		return;
+	case ControlAdaptiveOptics:
+		guider->adaptiveOpticsDevice->meridian_flip();
+		return;
+	}
+	throw std::runtime_error("meridianFlipCalibration not implemented");
 }
 
 /**
@@ -132,6 +188,7 @@ Calibration GuiderI::getCalibration(ControlType calibrationtype,
 			= guider->guidePortDevice->calibration();
 		calibration = convert(cal);
 		calibration.flipped = guider->guidePortDevice->flipped();
+		calibration.meridianFlipped = guider->guidePortDevice->meridian_flipped();
 		return calibration;
 		}
 	case ControlAdaptiveOptics:
@@ -147,6 +204,7 @@ Calibration GuiderI::getCalibration(ControlType calibrationtype,
 			= guider->adaptiveOpticsDevice->calibration();
 		calibration = convert(cal);
 		calibration.flipped = guider->adaptiveOpticsDevice->flipped();
+		calibration.meridianFlipped = guider->adaptiveOpticsDevice->meridian_flipped();
 		return calibration;
 	}
 	debug(LOG_ERR, DEBUG_LOG, 0,
@@ -165,11 +223,13 @@ Calibration GuiderI::getCalibration(ControlType calibrationtype,
  * \param current	current call context
  */
 Ice::Int GuiderI::startCalibration(ControlType caltype,
-		Ice::Float gridpixels,
+		Ice::Float gridpixels, bool east, Ice::Float declination,
 		const Ice::Current& current ) {
 	CallStatistics::count(current);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "start calibration, type = %s",
 		calibrationtype2string(caltype).c_str());
+
+	astro::Angle	dec(declination, astro::Angle::Degrees);
 
 	// construct a tracker
 	astro::guiding::TrackerPtr	tracker = getTracker();
@@ -182,14 +242,14 @@ Ice::Int GuiderI::startCalibration(ControlType caltype,
 			astro::stringprintf("start GP %s calibration",
 			guider->instrument().c_str()));
 		return guider->startCalibration(astro::guiding::GP, tracker,
-			gridpixels);
+			gridpixels, east, dec);
 	case ControlAdaptiveOptics:
 		astro::event(EVENT_CLASS, astro::events::INFO,
 			astro::events::Event::GUIDE,
 			astro::stringprintf("start AO %s calibration",
 			guider->instrument().c_str()));
 		return guider->startCalibration(astro::guiding::AO, tracker,
-			gridpixels);
+			gridpixels, east, dec);
 	}
 	debug(LOG_ERR, DEBUG_LOG, 0,
 		"control type is invalid (should not happen)");

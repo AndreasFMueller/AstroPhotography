@@ -57,7 +57,7 @@ std::list<long>	CalibrationStore::getCalibrations(
 			const GuiderDescriptor& guider,
 			ControlDeviceType type) {
 	std::ostringstream	out;
-	out << " name = '" << guider.instrument() << "'";
+	out << " instrument = '" << guider.instrument() << "'";
 	out << " and controltype = ";
 	switch (type) {
 	case GP:	out << 0; break;
@@ -115,12 +115,16 @@ CalibrationPtr	CalibrationStore::getCalibration(long id) {
 	for (int i = 0; i < 6; i++) {
 		calibration->a[i] = r.a[i];
 	}
+	calibration->east((r.east) ? true : false);
+	calibration->declination(Angle(r.declination, Angle::Degrees));
 	calibration->complete((r.complete) ? true : false);
 	calibration->focallength(r.focallength);
 	calibration->masPerPixel(r.masPerPixel);
 	calibration->interval(r.interval);
+	calibration->guiderate(r.guiderate);
 	debug(LOG_DEBUG, DEBUG_LOG, 0,
-		"found calibration with masPerPixel=%.3f", r.masPerPixel);
+		"found calibration with masPerPixel=%.3f,interval=%.1f",
+		r.masPerPixel,r.interval);
 
 	// add the points
 	std::list<CalibrationPointRecord>	points
@@ -171,6 +175,8 @@ void	CalibrationStore::updateCalibration(
 	record.complete = (calibration->complete()) ? 1 : 0;
 	record.focallength = calibration->focallength();
 	record.masPerPixel = calibration->masPerPixel();
+	record.interval = calibration->interval();
+	record.guiderate = calibration->guiderate();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "quality = %f", record.quality);
 	t.update(calibration->calibrationid(), record);
 }

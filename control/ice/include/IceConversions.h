@@ -131,11 +131,11 @@ astro::guiding::Guide::state     convert(const GuiderState& state);
 std::string	guiderstate2string(GuiderState state);
 GuiderState	string2guiderstate(const std::string& s);
 
-GuiderDescriptor	convert(const astro::guiding::GuiderDescriptor& gd);
-astro::guiding::GuiderDescriptor	convert(const GuiderDescriptor& gd);
+std::string	convert(const astro::guiding::GuiderDescriptor& gd);
+astro::guiding::GuiderDescriptor	convertGuiderDescriptor(const std::string& instrument);
 
-GuiderDescriptor	convertname(const astro::guiding::GuiderName& name);
-astro::guiding::GuiderName	convertname(const GuiderDescriptor& name);
+std::string	convertname(const astro::guiding::GuiderName& name);
+astro::guiding::GuiderName	convertnameGuiderName(const std::string& instrument);
 
 ControlType	convertcontroltype(const astro::guiding::ControlDeviceType& caltype);
 astro::guiding::ControlDeviceType	convertcontroltype(const ControlType& caltype);
@@ -159,9 +159,6 @@ astro::guiding::CalibrationPoint	convert(const CalibrationPoint& cp);
 
 Calibration	convert(const astro::guiding::CalibrationPtr cal);
 astro::guiding::CalibrationPtr	convert(const Calibration& cal);
-
-std::string	guiderdescriptor2name(const GuiderDescriptor& descriptor);
-GuiderDescriptor	guiderdescriptorParse(const std::string &name);
 
 // Calibration image related
 CalibrationImageProgress	convert(const astro::camera::CalibrationImageProgress);

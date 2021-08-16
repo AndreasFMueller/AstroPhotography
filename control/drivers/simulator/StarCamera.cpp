@@ -18,9 +18,9 @@ namespace astro {
  *
  * sets the _content variable depending on the environment variable STARCONTENT
  */
-StarCameraBase::StarCameraBase(const ImageRectangle& rectangle)
-	: _content(STARS), _rectangle(rectangle), _stretch(1),
-	  _dark(0), _noise(0), _light(true), _color(0), _radius(0),
+StarCameraBase::StarCameraBase(const ImageRectangle& rectangle, const ImageSize& totalsize)
+	: _content(STARS), _rectangle(rectangle), _totalsize(totalsize),
+	  _stretch(1), _dark(0), _noise(0), _light(true), _color(0), _radius(0),
 	  _innerradius(0) {
 	// check environement variable
 	char	*v = getenv("STARCONTENT");
@@ -110,13 +110,32 @@ void    StarCameraBase::noise(double n) {
  * transformations, and the effect of the focuser.
  */
 Image<double>	*StarCameraBase::doubleImage(StarField& field) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "start building base image");
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "start building image with rectangle %s",
+		rectangle().toString().c_str());
+
+	// if the telescope is to the east, we have to flip the required
+	// rectangle
+	ImageRectangle	rect = rectangle();
+	if (!_west) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "flip image rectangle %s",
+			rect.toString().c_str());
+		ImagePoint	s(rect.size().width() - 1,
+					rect.size().height() - 1);
+		ImagePoint	neworigin = totalsize().flip(rect.origin() + s);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "switching origin %s -> %s",
+			rect.origin().toString().c_str(),
+			neworigin.toString().c_str());
+		rect.setOrigin(neworigin);
+	}
+
+	// new that we have the rectangle, work out the stars
+	ImagePoint	offset;
+
 	// find out how large we should make the field which we will later
 	// transform. This must be large enough so that we catch starts that 
-	// are just ouside the image area, because the will show up when
+	// are just ouside the image area, because they will show up when
 	// the image is out of focus.
-	ImageSize	size = rectangle().size();
-	ImagePoint	offset;
+	ImageSize	size = rect.size();
 	if (0 != _radius) {
 		size = ImageSize(size.width() + 2 * _radius + 1,
 				size.height() + 2 * _radius + 1);
@@ -126,8 +145,8 @@ Image<double>	*StarCameraBase::doubleImage(StarField& field) {
 		int	height = 256 * (1 + size.height() / 256);
 		size = ImageSize(width, height);
 		offset = ImagePoint(
-			(size.width() - rectangle().size().width()) / 2,
-			(size.height() - rectangle().size().height()) / 2
+			(size.width() - rect.size().width()) / 2,
+			(size.height() - rect.size().height()) / 2
 		);
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "image size: %s, offset: %s",
 			size.toString().c_str(), offset.toString().c_str());
@@ -137,9 +156,12 @@ Image<double>	*StarCameraBase::doubleImage(StarField& field) {
 	// - The large rectangle is the coordinate rectangle
 	// - A is the rectangle we want to image, O is the origin on that
 	//   rectangle.
+	//       rectangle() returns the rectangle A
+	//       origin are absolute coordinates of O
 	// - B is the rectangle we need to image if we want to capture
 	//   focus blurr without artifacts. The point offset computed above
-	//   is the offset of the rectangle A withing B.
+	//   is the offset of the rectangle A within B.
+	//       size is the size of rectangle B
 	// y-axis
 	// +------------------------------------------------+
 	// |                                                |
@@ -158,7 +180,7 @@ Image<double>	*StarCameraBase::doubleImage(StarField& field) {
 	// |                                                |
 	// +------------------------------------------------+ x-axis
 	// (0,0)
-	// To compute pixels withing the rectangle B. A point (x_B, y_B)
+	// How to compute pixels withing the rectangle B: A point (x_B, y_B)
 	// has absolute coordinates 
 	//
 	//    (origin.x() - offset.x() + x_B, origin.y() - offset.y() + y_B)
@@ -169,7 +191,7 @@ Image<double>	*StarCameraBase::doubleImage(StarField& field) {
 		translation().toString().c_str());
 
 	// fill in the points. 
-	ImagePoint	origin = rectangle().origin();
+	ImagePoint	origin = rect.origin();
 	Point	shift = Point(origin - offset) - translation();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "shift = %s",
 		shift.toString().c_str());
@@ -208,7 +230,7 @@ Image<double>	*StarCameraBase::doubleImage(StarField& field) {
 	}
 
 	// extract the rectangle 
-	ImageRectangle	r(offset, rectangle().size());
+	ImageRectangle	r(offset, rect.size());
 	WindowAdapter<double>	wa(image, r);
 	Image<double>	*result = new Image<double>(wa);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "rectangle %s extracted",
@@ -216,8 +238,8 @@ Image<double>	*StarCameraBase::doubleImage(StarField& field) {
 
 	// stretch the values
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "stretch factor = %.1f", _stretch);
-	int	width = r.size().width();
-	int	height = r.size().height();
+	int	width = rect.size().width();
+	int	height = rect.size().height();
 	for (int x = 0; x < width; x++) {
 		for (int y = 0; y < height; y++) {
 			result->pixel(x, y) = _stretch * result->pixel(x,y);
@@ -228,6 +250,15 @@ Image<double>	*StarCameraBase::doubleImage(StarField& field) {
 	if (noise()) {
 		addnoise(*result);
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "noise added");
+	}
+
+	// if on the east position, flip the image
+	if (!_west) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "rotate image");
+		MirrorAdapter<double>	ma(*result, MirrorAdapter<double>::CENTRAL);
+		Image<double>	*rotated = new Image<double>(ma);
+		delete result;
+		result = rotated;
 	}
 
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "base image complete");
@@ -292,21 +323,6 @@ void	StarCameraBase::addStarIntensity(Image<double>& image,
 		return;
 	}
 	Star	fstar = *starp;
-	if (!_west) {
-		// flip the image point
-		c = image.size().flip(c);
-
-		// flip the star
-		Point	p = fstar.position();
-		Point	flipped(image.size().width() - 1 - p.x(),
-				image.size().height() - 1 - p.y());
-		fstar.position(flipped);
-
-		// flip the shift
-#if 1
-		shift = -shift;
-#endif
-	}
 #if 0
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "add star at c = %s, p = %s, shift = %s",
 		c.toString().c_str(), fstar.position().toString().c_str(),

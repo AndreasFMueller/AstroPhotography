@@ -23,9 +23,9 @@ static void     usage(const char *progname) {
 	std::cout << "    " << p.basename() << " [ options ] <in.fits> "
 		"<out.fits>" << std::endl;
 	std::cout << std::endl;
-	std::cout << "read an image from <in.fits>, extract a point spread "
-		"function, and write the" << std::endl;
-	std::cout << "result to <out.fits>." << std::endl;
+	std::cout << "deconvolve an image read from in.fits using a point spread function from" << std::endl;
+	std::cout << "a image file or a synthetically generated one, then write the deconvolved" << std::endl;
+	std::cout << "image to <out.fits>." << std::endl;
 	std::cout << std::endl;
 	std::cout << "options:" << std::endl;
 	std::cout << std::endl;
@@ -35,8 +35,8 @@ static void     usage(const char *progname) {
 		"exit" << std::endl;
 	std::cout << "    -p,--psf=<file>     point spread function file"
 		<< std::endl;
-	std::cout << "    -m,--method=<meth>  method either 'vancittert' or 'fourier'"
-		<< std::endl;
+	std::cout << "    -m,--method=<meth>  method to use for deconvolution: 'pseuso', 'fourier'," << std::endl;
+	std::cout << "                        'wiener', 'vancittert' or 'fastvancittert'" << std::endl;
 	std::cout << "    -i,--iterations=<n> number of iterations in vancittert"
 		<< std::endl;
 }

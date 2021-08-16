@@ -178,10 +178,8 @@ int	main(int argc, char *argv[]) {
 		servername.toString().c_str());
 
 	// build the guider descriptor
-	GuiderDescriptor	descriptor;
-	descriptor.instrumentname = instrumentname;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "instrument: %s",
-		descriptor.instrumentname.c_str());
+		instrumentname.c_str());
 
 	// connect to the guider factory of a remote server
 	Ice::CommunicatorPtr	ic = CommunicatorSingleton::get();
@@ -193,10 +191,10 @@ int	main(int argc, char *argv[]) {
 	// the next action depends on the command to execute. This first
 	// group of commands does not need a guider
 	if (command == "list") {
-		return guide.list_command(guiderfactory, descriptor);
+		return guide.list_command(guiderfactory, instrumentname);
 	}
 	if (command == "tracks") {
-		return guide.tracks_command(guiderfactory, descriptor);
+		return guide.tracks_command(guiderfactory, instrumentname);
 	}
 	if (command == "forget") {
 		std::list<int>	ids;
@@ -230,7 +228,7 @@ int	main(int argc, char *argv[]) {
 	}
 
 	// retrieve a guider
-	GuiderPrx	guider = guiderfactory->get(descriptor);
+	GuiderPrx	guider = guiderfactory->get(instrumentname);
 	GuiderState	state = guider->getState();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "found the guider in state %s",
 		guiderstate2string(state).c_str());

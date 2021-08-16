@@ -20,14 +20,14 @@ class calibrationselectiondialog : public QDialog
 	Q_OBJECT
 
 	snowstar::ControlType		_controltype;
-	snowstar::GuiderDescriptor	_guiderdescriptor;
+	std::string			_instrumentname;
 	snowstar::GuiderFactoryPrx	_guiderfactory;
 
 	std::vector<snowstar::Calibration>	_calibrations;
 	snowstar::Calibration	_calibration;
 public:
 	void	setGuider(snowstar::ControlType controltype,
-			snowstar::GuiderDescriptor guiderdescriptor,
+			const std::string& instrumentname,
 			snowstar::GuiderFactoryPrx guiderfactory);
 
 public:

@@ -178,8 +178,16 @@ void	mountcontrollerwidget::setupMount() {
 	}
 
 	try {
+		ui->positionIndicator->north(_mount->trackingNorth());
+	} catch (const std::exception& x) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "problem getting tracking: %s",
+			x.what());
+	}
+
+	try {
 		// make sure the star chart knows the orientation
 		_previouswest = _mount->telescopePositionWest();
+		ui->positionIndicator->update(!_previouswest);
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "sending orientation: %s",
 			(_previouswest) ? "west" : "east");
 		emit orientationChanged(_previouswest);
@@ -334,6 +342,7 @@ void	mountcontrollerwidget::statusUpdate() {
 
 	// check the side of the telescope on the mount
 	bool	west = _mount->telescopePositionWest();
+	ui->positionIndicator->update(!west);
 	//debug(LOG_DEBUG, DEBUG_LOG, 0, "telescope orientation: %s",
 	//	(west) ? "west" : "east");
 	if (west != _previouswest) {
@@ -409,6 +418,7 @@ astro::RaDec	mountcontrollerwidget::current() {
 bool	mountcontrollerwidget::orientation() {
 	if (_mount) {
 		bool	west = _mount->telescopePositionWest();
+		ui->positionIndicator->update(!west);
 		return west;
 	} else {
 		throw std::runtime_error("cannot get current position without "

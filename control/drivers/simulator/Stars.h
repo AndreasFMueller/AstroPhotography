@@ -135,6 +135,7 @@ public:
 	void	content(content_type c) { _content = c; }
 private:
 	ImageRectangle	_rectangle;
+	ImageSize	_totalsize;
 	/**
 	 * \brief Translation to be applied to the star field
 	 */
@@ -192,7 +193,7 @@ protected:
 	double	noisevalue() const;
 	std::set<ImagePoint>	hotpixels;
 public:
-	StarCameraBase(const ImageRectangle& rectangle);
+	StarCameraBase(const ImageRectangle& rectangle, const ImageSize& totalsize);
 	StarCameraBase(const StarCameraBase&) = delete;
 	StarCameraBase&	operator=(const StarCameraBase&) = delete;
 
@@ -202,6 +203,8 @@ public:
 		_rectangle = rectangle;
 	}
 	const ImageRectangle&	rectangle() const { return _rectangle; }
+	void	totalsize(const ImageSize& t) { _totalsize = t; }
+	const ImageSize&	totalsize() const { return _totalsize; }
 
 	// accessors to the translation
 	const Point&	translation() const { return _translation; }
@@ -280,8 +283,8 @@ protected:
 template<typename P>
 class StarCamera : public StarCameraBase {
 public:
-	StarCamera(const ImageRectangle& rectangle)
-		: StarCameraBase(rectangle) { }
+	StarCamera(const ImageRectangle& rectangle, const ImageSize& totalsize)
+		: StarCameraBase(rectangle, totalsize) { }
 	ImagePtr	operator()(StarField& field);
 };
 

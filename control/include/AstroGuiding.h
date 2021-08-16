@@ -395,20 +395,55 @@ public:
 	time_t	when() const { return _when; }
 	void	when(time_t w) { _when = w; }
 
+	// telescope position in which the calibration was done
+private:
+	bool	_east;
+public:
+	bool	east() const { return _east; }
+	void	east(bool e) { _east = e; }
+
+private:
+	Angle	_declination;
+public:
+	Angle	declination() const { return _declination; }
+	void	declination(const Angle& d) { _declination = d; }
+
 	// calibration coefficients
 public:
 	double	a[6];
+	// access calibration constants adapted for meridian flip
+	double	coef(int i) const;
 private:
 	bool	_complete;
 public:
 	bool	complete() const { return _complete; }
 	void	complete(bool c) { _complete = c; }
+
+	// the _flipped flag can be used if the camera is suddenly upside
+	// down, this has nothing to do with meridian flip (see below)
 private:
 	bool	_flipped;
 public:
+	int	flippedsign() const { return (_flipped) ? -1 : 1; }
 	bool	flipped() const { return _flipped; }
 	void	flipped(bool f) { _flipped = f; }
 	void	flip() { _flipped = !_flipped; }
+
+	// the _meridian_flipped flag indicates whether the calibration
+	// should be used for the telescope after a meridian flip, i.e.
+	// usually later in the night. This flag has no effect on the
+	// numbers in the a array, but the numbers retrieved with the
+	// coef method do take it into account. The functions that compute
+	// corrections use the coef methods to retrieve the coefficients.
+private:
+	bool	_meridian_flipped;
+public:
+	int	meridian_flipped_sign() const {
+		return (_meridian_flipped) ? -1 : 1;
+	}
+	bool	meridian_flipped() const { return _meridian_flipped; }
+	void	meridian_flipped(bool m) { _meridian_flipped = m; }
+	void	meridian_flip() { _meridian_flipped = !_meridian_flipped; }
 
 protected:
 	void	copy(const BasicCalibration& other);
@@ -422,6 +457,7 @@ public:
 
 	double	quality() const;
 	double	det() const;
+	bool	telescope_east_not_west() const { return det() < 0.; }
 
 private:
 	double	_focallength;
@@ -876,10 +912,12 @@ protected:
 public:
 	CalibrationPtr	calibration() { return _calibration; }
 	int	calibrationid() const;
-	void	calibrationid(int calid);
+	void	calibrationid(int calid, bool meridian_flipped = false);
 	bool	iscalibrated() const;
 	bool	flipped() const;
+	bool	meridian_flipped() const;
 	void	flip();
+	void	meridian_flip();
 
 	// parameters about the calibration
 private:
@@ -954,7 +992,7 @@ public:
 	virtual int	startCalibration(TrackerPtr /* tracker */) {
 		return -1; // suppress warning
 	}
-	virtual void	calibrationid(int /* calid */) { }
+//	virtual void	calibrationid(int /* calid */) { }
 	virtual std::type_index	deviceType() const {
 		return typeid(device);
 	}
@@ -1082,16 +1120,19 @@ public:
 	 * \param type 		the type of the device to calibrate
 	 * \param tracker	The tracker used for tracking. 
 	 * \param gridpixels	number of pixels to dimension the grid
+	 * \param east		telescope position
+	 * \param declination	the declination of the calibration
 	 * \return		the id of the calibration run
 	 */
 	int	startCalibration(ControlDeviceType type,
-			TrackerPtr tracker, float gridpixels);
+			TrackerPtr tracker, float gridpixels,
+			bool east = false, Angle declination = Angle());
 private:
 	void	checkCalibrationState();
 public:
 	void	saveCalibration();
 	void	forgetCalibration();
-	void	useCalibration(int calid);
+	void	useCalibration(int calid, bool meridian_flipped = false);
 	void	unCalibrate(ControlDeviceType type);
 
 	/**
@@ -1274,15 +1315,17 @@ public:
 	std::string	instrument;
 	std::string	ccd;
 	std::string	controldevice;
+	int	east;
+	double	declination;	// degrees
 	double	a[6];
-	double	focallength;
+	double	focallength;	// meter
 	double	quality;
 	double	det;
 	int	complete;
 	double	masPerPixel;
 	int	controltype;
-	double	interval;
-	double	guiderate;
+	double	interval;	// seconds
+	double	guiderate;	// multiples of the siderial rate
 	PersistentCalibration();
 	PersistentCalibration(const BasicCalibration& other);
 	PersistentCalibration&	operator=(const BasicCalibration& other);

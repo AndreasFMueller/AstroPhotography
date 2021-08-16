@@ -43,6 +43,7 @@ void	Calibration_display::operator()(const Calibration& cal) {
 	_out << astro::stringprintf("%4d: ", cal.id);
 	_out << astro::timeformat("%Y-%m-%d %H:%M, ",
 		converttime(cal.timeago));
+	_out << ((cal.east) ? "east, " : "west, ");
 	_out << cal.points.size() << " points, ";
 	_out << astro::stringprintf("quality=%.1f%%, ", 100 * cal.quality);
 	_out << ((cal.complete) ? "complete, " : "incomplete, ");
@@ -59,7 +60,7 @@ void	Calibration_display::operator()(const Calibration& cal) {
 	_out << std::endl;
 	if (_verbose) {
 		_out << std::string("      guider: ");
-		_out << guiderdescriptor2name(cal.guider);
+		_out << cal.instrument;
 		_out << std::endl;
 	}
 
