@@ -4,6 +4,7 @@
  * (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
 #include <SimGuidePort.h>
+#include <SimMount.h>
 #include <SimUtil.h>
 #include <AstroDebug.h>
 #include <AstroExceptions.h>
@@ -151,6 +152,11 @@ void	SimGuidePort::activate(float raplus, float raminus,
 
 	// update the offset
 	update();
+
+	bool	_west = true;
+        if (_locator.simmount()) {
+		_west = _locator.simmount()->telescopePositionWest();
+        }
 	
 	// perform this new activation
 	lastactivation = simtime();
@@ -163,6 +169,9 @@ void	SimGuidePort::activate(float raplus, float raminus,
 		dec = decplus;
 	} else {
 		dec = -decminus;
+	}
+	if (_west) {
+		dec = -dec;
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "new activations: ra = %f, dec = %f",
 		ra, dec);

@@ -46,8 +46,8 @@ MonitorImage::~MonitorImage() {
 void	MonitorImage::setScale(int s) {
 	if (s > 3) {
 		_scale = 3;
-	} else if (s < 0) {
-		_scale = 0;
+	} else if (s < -3) {
+		_scale = -3;
 	} else {
 		_scale = s;
 	}
@@ -124,6 +124,7 @@ void	MonitorImage::update(const snowstar::ImageBuffer& image,
 void	MonitorImage::rebuildImage() {
 	if (!_image) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "no image, giving up");
+		return;
 	}
 
 	std::unique_lock<std::recursive_mutex>	lock(_mutex);

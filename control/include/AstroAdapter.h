@@ -1423,12 +1423,12 @@ public:
 		case NONE:
 			break;
 		case HORIZONTAL:
-			x = image.getSize().width() - x;
+			x = image.getSize().width() - x - 1;
 			break;
 		case CENTRAL:
-			x = image.getSize().width() - x;
+			x = image.getSize().width() - x - 1;
 		case VERTICAL:
-			y = image.getSize().height() - y;
+			y = image.getSize().height() - y - 1;
 			break;
 		}
 		return image.pixel(x, y);

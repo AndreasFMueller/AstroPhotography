@@ -74,6 +74,7 @@ class LiveView : public QMainWindow, public astro::camera::ImageSink {
 	astro::camera::FocuserPtr	_focuser;
 
 	astro::camera::Exposure	_exposure;
+	std::pair<float,float>		_gaininterval;
 
 	// thread to use for exposing, single or otherwise
 	QThread			*_thread;
@@ -121,6 +122,8 @@ public slots:
 	void	setSubframe(astro::image::ImageRectangle);
 	void	setExposuretime(double);
 	void	fullframeClicked();
+
+	void	setGain(int);
 
 	void	doExposure();
 

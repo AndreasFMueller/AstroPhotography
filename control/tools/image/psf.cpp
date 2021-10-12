@@ -31,10 +31,10 @@ static void     usage(const char *progname) {
 	std::cout << std::endl;
 	std::cout << "    -d,--debug          increase debug level"
 		<< std::endl;
-	std::cout << "    -r,-radius=<r>      radius of the psf"
+	std::cout << "    -r,--radius=<r>      radius of the psf (default 32)"
 		<< std::endl;
 	std::cout << "    -s,--stars=<s>      number of stars to use for the "
-		"psf" << std::endl;
+		"psf (default 10)" << std::endl;
 	std::cout << "    -h,-?,--help        display this help message and "
 		"exit" << std::endl;
 	std::cout << std::endl;

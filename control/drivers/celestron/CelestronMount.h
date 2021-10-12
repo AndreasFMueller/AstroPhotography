@@ -29,6 +29,7 @@ class CelestronMount : public astro::device::Mount,
 	void	check_state();
 	void	run();
 	static void	launch(CelestronMount *mount) noexcept;
+	typedef enum { OFF, ALTAZ, NORTH, SOUTH } tracking_mode;
 private:
 	// Goto launches a thread, no other communication with the mount
 	// is allowed until the Goto is completed, and the communication
@@ -45,7 +46,7 @@ private:
 	uint32_t	angle32(const Angle& a);
 	std::pair<double, double>	parseangles(const std::string& s);
 
-	// commands related to the 
+	// commands related to the GPS
 	std::vector<uint8_t>	gps_command(uint8_t a, uint8_t, size_t l);
 	bool	gps_linked();
 	Angle	gps_longitude();
@@ -70,6 +71,9 @@ private:
 	bool	queriable(time_t last);
 	astro::device::Mount::state_type	get_state();
 
+	bool	_north;
+	tracking_mode	getTrackingMode();
+
 public:
 	CelestronMount(const std::string& devicename);
 	virtual ~CelestronMount();
@@ -83,6 +87,7 @@ public:
 	virtual void	Goto(const RaDec& radec);
 	virtual void	Goto(const AzmAlt& azmalt);
 	virtual bool	telescopePositionWest();
+	virtual bool	trackingNorth();
 	virtual void	cancel();
 
 	virtual bool	hasGuideRates();

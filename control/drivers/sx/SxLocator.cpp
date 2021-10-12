@@ -62,7 +62,7 @@ extern "C"
 astro::module::ModuleDescriptor	*getDescriptor() {
 	std::call_once(astro::module::sx::descriptor_once,
 		astro::module::sx::setup_descriptor);
-	USBdebugEnable();
+	//USBdebugEnable();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "SxDescriptor: %p",
 		astro::module::sx::descriptor);
 	return astro::module::sx::descriptor;

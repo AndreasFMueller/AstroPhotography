@@ -18,13 +18,13 @@ namespace Ui {
 class trackselectiondialog : public QDialog {
 	Q_OBJECT
 
-	snowstar::GuiderDescriptor      _guiderdescriptor;
+	std::string      _instrumentname;
 	snowstar::GuiderFactoryPrx      _guiderfactory;
 
 	std::vector<snowstar::TrackingSummary>	_tracks;
 
 public:
-        void    setGuider(snowstar::GuiderDescriptor guiderdescriptor,
+        void    setGuider(const std::string& instrumentname,
                         snowstar::GuiderFactoryPrx guiderfactory);
 
 public:

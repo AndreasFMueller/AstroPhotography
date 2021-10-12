@@ -48,11 +48,37 @@ BasicCalibration::BasicCalibration(const ControlDeviceName& name)
 	a[0] = a[1] = a[2] = a[3] = a[4] = a[5] = 0.;
 	_complete = false;
 	_flipped = false;
+	_meridian_flipped = false;
+	_east = false;
 	_masPerPixel = 0;
 	_focallength = 0;
 	_guiderate = 0;
 	_interval = 0;
 	time(&_when);
+}
+
+/**
+ * \brief Coefficient access with flipping considered
+ *
+ * \param i	the index of the coefficient
+ */
+double	BasicCalibration::coef(int i) const {
+	switch (i) {
+	case 0:
+	case 3:
+		return meridian_flipped_sign() * a[i];
+	case 1:
+	case 2:
+	case 4:
+	case 5:
+		return a[i];
+	default:
+		break;
+	}
+	std::string	msg = stringprintf("undefined calibration "
+		"coefficent %d", i);
+	debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+	throw std::runtime_error(msg);
 }
 
 /**
@@ -63,6 +89,15 @@ BasicCalibration::BasicCalibration(const ControlDeviceName& name)
  * small changes, which makes it impossible to compute good corrections.
  * The inverse matrix will have large entries in this case. Ideally, the
  * determinant should be around 1.
+ *
+ * The determinant also allows to find out in which position of a german
+ * equatorial mount the calibration was done. If the telescope was on the
+ * west side (at the beginning of the night), the determinant is usually
+ * positive. On the east side (after a meridian flip of the telescope),
+ * the determinant is negative. The sign changes again if the guide camera
+ * image is for some reason reversed. This happens e.g. when using an off-axis
+ * guider, the prism or mirror reflecting the guide star off-axis reverses
+ * the image and changes the sign.
  */
 double	BasicCalibration::det() const {
 	return a[0] * a[4] - a[1] * a[3];
@@ -82,6 +117,8 @@ BasicCalibration::BasicCalibration(const ControlDeviceName& name,
 	}
 	_complete = true;
 	_flipped = false;
+	_meridian_flipped = false;
+	_east = false;
 	_masPerPixel = 0;
 	_focallength = 0;
 	_guiderate = 0;
@@ -119,18 +156,21 @@ Point	BasicCalibration::defaultcorrection() const {
  * however, has to be calculated by the caller.
  */
 Point	BasicCalibration::correction(const Point& offset, double Deltat) const {
-        double	determinant = det();
+        double	determinant = det() * meridian_flipped_sign();
 	if (0 == det()) {
 		throw std::runtime_error("no calibration");
 	}
-	double	s = (flipped()) ? -1 : 1;
+	double	s = flippedsign();
 	double	Deltax = -(s * offset.x()) - Deltat * a[2];
 	double	Deltay = -(s * offset.y()) - Deltat * a[5];
-        double	x = ( a[4] * Deltax - a[1] * Deltay) / determinant;
-        double	y = (-a[3] * Deltax + a[0] * Deltay) / determinant;
+        double	x = ( coef(4) * Deltax - coef(1) * Deltay) / determinant;
+        double	y = (-coef(3) * Deltax + coef(0) * Deltay) / determinant;
 	Point	result(x, y);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "correction for offset %s: %s",
-		offset.toString().c_str(), result.toString().c_str());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "correction for offset %s: %s "
+		"(flipped=%s, meridian_flipped=%s)",
+		offset.toString().c_str(), result.toString().c_str(),
+		(_flipped) ? "true" : "false",
+		(_meridian_flipped) ? "true" : "false");
 	return result;
 }
 
@@ -138,9 +178,11 @@ Point	BasicCalibration::correction(const Point& offset, double Deltat) const {
  * \brief Compute the pixel offset that we would see after a correction
  */
 Point	BasicCalibration::offset(const Point& point, double Deltat) const {
-	double	s = (flipped()) ? -1 : 1;
-	double	x = s * (a[0] * point.x() + a[1] * point.y() + a[2] * Deltat);
-	double	y = s * (a[3] * point.x() + a[4] * point.y() + a[5] * Deltat);
+	double	s = flippedsign();
+	double	x = s * (coef(0) * point.x() + coef(1) * point.y()
+			+ coef(2) * Deltat);
+	double	y = s * (coef(3) * point.x() + coef(4) * point.y()
+			+ coef(5) * Deltat);
 	Point	result(x, y);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "offset %s for correction %s, t=%.1f",
 		result.toString().c_str(), point.toString().c_str(), Deltat);
@@ -161,7 +203,7 @@ void	BasicCalibration::rescale(double scalefactor) {
  * \brief Output of guider calibration data
  */
 std::ostream&	operator<<(std::ostream& out, const BasicCalibration& cal) {
-	double	s = (cal.flipped()) ? -1 : 1;
+	double	s = cal.flippedsign();
 	out << "[" << (s * cal.a[0]) << "," << (s * cal.a[1])
 			<< "," << cal.a[2] << ";";
 	out <<        (s * cal.a[3]) << "," << (s * cal.a[4])
@@ -225,6 +267,7 @@ void	BasicCalibration::reset() {
 BasicCalibration&	BasicCalibration::operator=(const BasicCalibration& other) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "copying basic calibration");
 	copy(other);
+	_calibrationid = other._calibrationid;
 	return *this;
 }
 
@@ -242,9 +285,13 @@ void	BasicCalibration::copy(const BasicCalibration& other) {
 	for (int i = 0; i < 6; i++) { a[i] = other.a[i]; }
 	_complete = other._complete;
 	_flipped = other._flipped;
+	_meridian_flipped = other._meridian_flipped;
+	_east = other._east;
+	_declination = other._declination;
 	_masPerPixel = other._masPerPixel;
 	_focallength = other._focallength;
 	_interval = other._interval;
+	_guiderate = other._guiderate;
 
 	// copy points
 	clear();

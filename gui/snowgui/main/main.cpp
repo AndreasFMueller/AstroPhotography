@@ -124,7 +124,7 @@ int main(int argc, char *argv[]) {
 		ServerSelectionDialog	*s
 			= new ServerSelectionDialog(NULL, servicediscovery);
 		s->exec();
-		delete s;
+		//delete s;
 		return a.exec();
 	}
 	return EXIT_FAILURE;

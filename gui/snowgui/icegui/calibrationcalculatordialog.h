@@ -27,7 +27,6 @@ class calibrationcalculatordialog : public QDialog {
 	double	_pixelsize;	// pixel size in [m]
 	double	_angle;		// rotation angle in [degrees]
 	double	_guiderate;	// guider rate, default 0.5
-	double	_declination;	// declination in [degrees]
 	double	_decrate;	// rate of the declination drive
 				// relative to the RA drive
 	bool	_telescopewest;	// wether or not the telescope was on the west
@@ -48,20 +47,9 @@ public:
 	double	angle() const { return _angle; }
 	double	guiderate() const { return _guiderate; }
 	double	decrate() const { return _decrate; }
-	double	declination() const { return _declination; }
+	double	declination() const { return _cal.declination; }
 	bool	telescopewest() const { return _telescopewest; }
 	bool	decinvert() const { return _decinvert; }
-
-#if 0
-	void	focallength(double f);
-	void	pixelsize(double s);
-	void	angle(double a);
-	void	guiderate(double a);
-	void	decrate(double a);
-	void	declination(double d);
-	void	telescopewest(bool w);
-	void	decinvert(bool i);
-#endif
 
 private:
 	Ui::calibrationcalculatordialog *ui;

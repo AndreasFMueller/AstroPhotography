@@ -105,6 +105,14 @@ void	Mount::Goto(const AzmAlt& /* azmalt */) {
 
 /**
  * \brief Find out on which side of the mount the telescope currently is
+ *
+ * This method assumes that hour angles before the meridian belong to
+ * telescope being on the west, while hour angles after the merdiand
+ * belong to east position. This is not entirely correct, because
+ * most mounts allow to track beyond the meridian, or to start tracking
+ * before the meridian. This means that additional information from the
+ * mount is needed to decide whether the telescope is on the east or the
+ * west.
  */
 bool	Mount::telescopePositionWest() {
 	try {
@@ -117,6 +125,13 @@ bool	Mount::telescopePositionWest() {
 		debug(LOG_ERR, DEBUG_LOG, 0, "cannot get telescope "
 			"position: %s", x.what());
 	}
+	return true;
+}
+
+/**
+ * \brief Default tracking mode for north
+ */
+bool	Mount::trackingNorth() {
 	return true;
 }
 

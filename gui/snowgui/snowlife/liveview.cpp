@@ -32,9 +32,10 @@ LiveView::LiveView(QWidget *parent)
 	qRegisterMetaType<astro::image::ImageRectangle>(
 		"astro::image::ImageRectangle");
 
-	// make sure the focuser stuff is initally not visible
+	// make sure groups are initally not visible
 	ui->focuserGroup->setVisible(false);
 	ui->exposureGroup->setVisible(false);
+	ui->gainGroup->setVisible(false);
 
 	// don't display the metadata portion of the imagedisplaywidget
 	ui->imageWidget->crosshairs(true);
@@ -90,6 +91,8 @@ LiveView::LiveView(QWidget *parent)
 		this, SLOT(singleClicked()));
 	connect(ui->focuserSpinBox, SIGNAL(valueChanged(int)),
 		this, SLOT(focusChanged(int)));
+	connect(ui->gainSlider, SIGNAL(valueChanged(int)),
+		this, SLOT(setGain(int)));
 
 	// initialize the exposure structure
 	_exposure.exposuretime(1);
@@ -144,6 +147,18 @@ void	LiveView::openCamera(std::string cameraname) {
 		return;
 	}
 	ui->exposureGroup->setVisible(true);
+
+	// enable the gain
+	if (_ccd->hasGain()) {
+		ui->gainGroup->setVisible(true);
+		_gaininterval = _ccd->gainInterval();
+		float	m = (ui->gainSlider->maximum() - ui->gainSlider->minimum()) / (_gaininterval.second - _gaininterval.first);
+		float	g = _ccd->getGain();
+		int	v = m * (g - _gaininterval.first) + ui->gainSlider->minimum();
+		ui->gainSlider->setValue(v);
+		ui->gainSlider->setEnabled(true);
+		ui->gainLabel->setHidden(false);
+	}
 
 	// initialize the frame size of the exposure structure
 	setSubframe(_ccd->getInfo().getFrame());
@@ -367,6 +382,21 @@ void	LiveView::fullframeClicked() {
  */
 void	LiveView::setExposuretime(double t) {
 	_exposure.exposuretime(t);
+}
+
+/**
+ * \brief Slot to set the exposure gain
+ *
+ * \param g	the gain to use
+ */
+void	LiveView::setGain(int newvalue) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "new gain: %d", newvalue);
+	float	m = (_gaininterval.second - _gaininterval.first)
+		/ (ui->gainSlider->maximum() - ui->gainSlider->minimum());
+	float	g = _gaininterval.first + m * (newvalue - ui->gainSlider->minimum());
+	_exposure.gain(g);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "set gain: %.3f", g);
+	ui->gainLabel->setText(QString(astro::stringprintf("%.1f", g).c_str()));
 }
 
 /**

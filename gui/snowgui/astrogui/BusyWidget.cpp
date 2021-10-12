@@ -7,6 +7,7 @@
 #include <QTimer>
 #include <QPainter>
 #include <QPainterPath>
+#include <QPalette>
 #include <AstroDebug.h>
 #include <cmath>
 
@@ -47,20 +48,10 @@ void	BusyWidget::draw() {
 	QPointF	center(width() / 2., height() / 2.);
 	float	l = ((width() > height()) ? width() : height()) / 2.;
 
-	// fill the rectangle
-	QPainterPath	rectangle;
-	rectangle.moveTo(0,0);
-	rectangle.lineTo(width(), 0);
-	rectangle.lineTo(width(), height());
-	rectangle.lineTo(0, height());
-	rectangle.lineTo(0, 0);
-	QColor	black(0, 0, 0);
-	painter.fillPath(rectangle, black);
-
 	// draw a circle
 	QPainterPath	circle;
 	circle.addEllipse(center, l, l);
-	QColor	dark(0, 0, 0);
+	QColor	dark(0, 0, 0, 128);
 	painter.fillPath(circle, dark);
 
 	// dimensions of the rotating stars
@@ -84,7 +75,7 @@ void	BusyWidget::draw() {
 		star.lineTo(high);
 		i++;
 	}
-	QColor	gray(204, 204, 204);
+	QColor	gray(255, 255, 255, 196);
 	painter.fillPath(star, gray);
 }
 

@@ -50,8 +50,9 @@ std::type_index	get_type_index(T const& obj) {
 /**
  * \brief Retrieve the calibration
  */
-void	ControlDeviceBase::calibrationid(int calid) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "set calibration: %d", calid);
+void	ControlDeviceBase::calibrationid(int calid, bool meridian_flip) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "set calibration: %d, meridian_flip=%s",
+		calid, (meridian_flip) ? "true" : "false");
 
 	// handle special case: calid < 0 indicates that we want to remove
 	// the calibration
@@ -85,6 +86,9 @@ void	ControlDeviceBase::calibrationid(int calid) {
 
 	// now copy stuff over
 	*_calibration = *storedcal;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "meridian flip the calibration: %s",
+		(meridian_flip) ? "yes" : "no");
+	_calibration->meridian_flipped(meridian_flip);
 }
 
 int	ControlDeviceBase::calibrationid() const {
@@ -102,13 +106,32 @@ bool	ControlDeviceBase::flipped() const {
 	if (_calibration) {
 		return _calibration->flipped();
 	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "no calibration available");
 	return false;
 }
 
 void	ControlDeviceBase::flip() {
 	if (_calibration) {
-		return _calibration->flip();
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "flipping calibration");
+		_calibration->flip();
 	}
+	debug(LOG_ERR, DEBUG_LOG, 0, "cannot flip nonexistent calibration");
+}
+
+bool	ControlDeviceBase::meridian_flipped() const {
+	if (_calibration) {
+		return _calibration->meridian_flipped();
+	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "no calibration available");
+	return false;
+}
+
+void	ControlDeviceBase::meridian_flip() {
+	if (_calibration) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "meridian flipping calibration");
+		return _calibration->meridian_flip();
+	}
+	debug(LOG_ERR, DEBUG_LOG, 0, "cannot meridian flip nonexistent calibration");
 }
 
 const std::string&	ControlDeviceBase::instrument() const {
@@ -167,6 +190,13 @@ int	ControlDeviceBase::startCalibration(TrackerPtr /* tracker */) {
 	float	gridpixels = parameter(std::string("gridpixels"), 0.);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "suggested grid pixel size: %.1f",
 		gridpixels);
+
+	_calibration->east(parameter(std::string("telescope_east"), 1.) > 0);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "telescope position %s",
+		_calibration->east() ? "east" : "west");
+	double	declination = parameter(std::string("declination"), 0.0);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "declination=%.1f", declination);
+	_calibration->declination(Angle(declination, Angle::Degrees));
 
 	// compute angular size of pixels
 	_calibration->masPerPixel(

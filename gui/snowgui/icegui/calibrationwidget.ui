@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>300</width>
-    <height>207</height>
+    <height>254</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -43,7 +43,7 @@
      <property name="minimumSize">
       <size>
        <width>0</width>
-       <height>125</height>
+       <height>150</height>
       </size>
      </property>
      <property name="maximumSize">
@@ -53,27 +53,6 @@
       </size>
      </property>
      <layout class="QGridLayout" name="gridLayout">
-      <item row="2" column="1">
-       <widget class="QLabel" name="resolutionField">
-        <property name="text">
-         <string>10000</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="0">
-       <widget class="QLabel" name="numberLabel">
-        <property name="text">
-         <string>Points:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="1">
-       <widget class="QLabel" name="numberField">
-        <property name="text">
-         <string>0</string>
-        </property>
-       </widget>
-      </item>
       <item row="0" column="2">
        <widget class="snowgui::CalibrationDisplayWidget" name="calibrationdisplayWidget" native="true">
         <property name="minimumSize">
@@ -90,20 +69,6 @@
         </property>
        </widget>
       </item>
-      <item row="0" column="0">
-       <widget class="QLabel" name="calibrationIDLabel">
-        <property name="text">
-         <string>ID:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="1">
-       <widget class="QLabel" name="qualityField">
-        <property name="text">
-         <string>0</string>
-        </property>
-       </widget>
-      </item>
       <item row="0" column="1">
        <widget class="QLabel" name="calibrationIDField">
         <property name="text">
@@ -114,31 +79,80 @@
         </property>
        </widget>
       </item>
-      <item row="2" column="0">
-       <widget class="QLabel" name="resolutionLabel">
+      <item row="5" column="1">
+       <widget class="QLabel" name="intervalField">
         <property name="text">
-         <string>Resolution:</string>
+         <string/>
         </property>
        </widget>
       </item>
-      <item row="3" column="0">
-       <widget class="QLabel" name="qualityLabel">
-        <property name="text">
-         <string>Quality:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="4" column="0">
+      <item row="5" column="0">
        <widget class="QLabel" name="intervalLabel">
         <property name="text">
          <string>Interval:</string>
         </property>
        </widget>
       </item>
-      <item row="4" column="1">
-       <widget class="QLabel" name="intervalField">
+      <item row="1" column="1">
+       <widget class="QLabel" name="numberField">
         <property name="text">
-         <string/>
+         <string>0</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="0">
+       <widget class="QLabel" name="resolutionLabel">
+        <property name="text">
+         <string>Resolution:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="1">
+       <widget class="QLabel" name="qualityField">
+        <property name="text">
+         <string>0</string>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="0">
+       <widget class="QLabel" name="qualityLabel">
+        <property name="text">
+         <string>Quality:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="1">
+       <widget class="QLabel" name="resolutionField">
+        <property name="text">
+         <string>10000</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="0">
+       <widget class="QLabel" name="calibrationIDLabel">
+        <property name="text">
+         <string>ID:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="numberLabel">
+        <property name="text">
+         <string>Points:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0">
+       <widget class="QLabel" name="positionLabel">
+        <property name="text">
+         <string>Position:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="1">
+       <widget class="QLabel" name="positionField">
+        <property name="text">
+         <string>east</string>
         </property>
        </widget>
       </item>

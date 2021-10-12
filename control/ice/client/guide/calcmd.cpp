@@ -107,9 +107,9 @@ void	Guide::calibration_show(const Calibration& cal) {
  * \brief Implementation of the list command
  */
 int	Guide::list_command(GuiderFactoryPrx guiderfactory,
-		GuiderDescriptor descriptor) {
+		const std::string& instrument) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "get calibrations from remote server");
-	idlist	l = guiderfactory->getCalibrations(descriptor,
+	idlist	l = guiderfactory->getCalibrations(instrument,
 			ControlGuidePort);
 	std::cout << "number of guider port calibrations: " << l.size()
 		<< std::endl;
@@ -120,7 +120,7 @@ int	Guide::list_command(GuiderFactoryPrx guiderfactory,
 		cd.verbose(verbose);
 		cd(cal);
 	}
-	l = guiderfactory->getCalibrations(descriptor, ControlAdaptiveOptics);
+	l = guiderfactory->getCalibrations(instrument, ControlAdaptiveOptics);
 	std::cout << "number of adaptive optics calibrations: " << l.size()
 		<< std::endl;
 	for (i = l.begin(); i != l.end(); i++) {
@@ -196,7 +196,7 @@ newcalibration:
 	// try to interpret the argument as a calibration type
 	try {
 		ControlType	caltype = string2calibrationtype(calarg);
-		calibrationid = guider->startCalibration(caltype, 0.);
+		calibrationid = guider->startCalibration(caltype, 0., false, 0);
 		std::cout << "new calibration " << calibrationid;
 		std::cout << " in progress" << std::endl;
 		return EXIT_SUCCESS;
@@ -224,7 +224,7 @@ int	Guide::uncalibrate_command(GuiderPrx guider, ControlType type) {
 
 int	Guide::flip_command(GuiderPrx guider, ControlType type) {
 	try {
-		guider->flipCalibration(type);
+		guider->meridianFlipCalibration(type);
 		return EXIT_SUCCESS;
 	} catch (const std::exception& x) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "cannot uncalibrate: %s",

@@ -101,7 +101,7 @@ void	InstrumentSelectionDialog::launch(const std::string& instrumentname,
 
 	// now close the selection dialog
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "close the selection dialog");
-	close();
+	deleteLater();
 }
 
 } // namespace snowgui

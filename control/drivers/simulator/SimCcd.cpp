@@ -44,7 +44,7 @@ SimCcd::SimCcd(const CcdInfo& _info, SimLocator& locator)
 	: Ccd(_info), _locator(locator),
 	  starfield(_info.size(), STARFIELD_OVERSHOOT,
 			number_of_stars(_info.size())),
-	  starcamera(ImageRectangle(_info.size())) {
+	  starcamera(ImageRectangle(_info.size()), _info.size()) {
 	starcamera.addHotPixels(6);
 
 	// set the last direction to an impossible direction to ensure
@@ -63,7 +63,11 @@ void	SimCcd::main(SimCcd *simccd) noexcept {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "starting image construction");
 	try {
 		simccd->createimage();
+	} catch (const std::exception& x) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "cannot create image: %s",
+			x.what());
 	} catch (...) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "cannot create image, unknown exception");
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "image construction complete");
 }

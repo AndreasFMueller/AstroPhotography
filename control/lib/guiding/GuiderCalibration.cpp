@@ -42,16 +42,7 @@ GuiderCalibration::GuiderCalibration(const BasicCalibration& other)
  */
 GuiderCalibration&	GuiderCalibration::operator=(
 				const BasicCalibration& other) {
-	// copy the coefficients
-	for (int i = 0; i < 6; i++) {
-		a[i] = other.a[i];
-	}
-
-	// copy the points and copy the points from other
-	clear();
-	std::copy(other.begin(), other.end(), back_inserter(*this));
-
-	// that's all
+	BasicCalibration::operator=(other);
 	return *this;
 }
 

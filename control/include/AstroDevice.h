@@ -325,6 +325,7 @@ public:
 
 	// Whether the telescope is on the west side of the mount
 	virtual bool	telescopePositionWest();
+	virtual bool	trackingNorth();
 
 	// find guide rates
 	virtual bool	hasGuideRates();

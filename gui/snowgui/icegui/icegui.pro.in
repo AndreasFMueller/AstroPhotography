@@ -139,12 +139,14 @@ SOURCES += 								\
 	CoolerActive.cpp						\
 	CoolerCallbackI.cpp						\
 	CcdCallbackI.cpp						\
+	EastWestIndicator.cpp						\
 	EventMonitor.cpp						\
 	FilterWheelBusy.cpp						\
 	FilterWheelCallbackI.cpp					\
 	FocusButton.cpp							\
 	focuselementstack.cpp						\
 	FocusingCallbackI.cpp						\
+	gaincalculator.cpp						\
 	GuidePortCallbackI.cpp						\
 	GuiderButton.cpp						\
 	HeartbeatMonitor.cpp						\
@@ -169,11 +171,13 @@ HEADERS  += 								\
 	calibrationimagewidget.h					\
 	CallbackIdentity.h						\
 	CoolerActive.h							\
+	EastWestIndicator.h						\
 	EventMonitor.h							\
 	FilterWheelBusy.h						\
 	FocusButton.h							\
 	focuselementstack.h						\
 	FocusingCallbackI.h						\
+	gaincalculator.h						\
 	GuiderButton.h							\
 	HeartbeatMonitor.h						\
 	ImageForwarder.h						\

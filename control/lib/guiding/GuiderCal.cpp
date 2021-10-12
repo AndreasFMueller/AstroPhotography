@@ -60,9 +60,11 @@ void	Guider::calibrationCleanup() {
  * \param type		the type of control device
  * \param tracker	the imaging/tracking device
  * \param gridpixels	the suggested grid pixel size to use for the calibration
+ * \param east		telescope position
+ * \param declination	declination of the calibration
  */
 int	Guider::startCalibration(ControlDeviceType type, TrackerPtr tracker,
-		float gridpixels) {
+		float gridpixels, bool east, Angle declination) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "start calibration for %s",
 		type2string(type).c_str());
 	// make sure we have a tracker
@@ -85,6 +87,12 @@ int	Guider::startCalibration(ControlDeviceType type, TrackerPtr tracker,
 		guidePortDevice->setParameter("focallength", focallength());
 		guidePortDevice->setParameter("guiderate", guiderate());
 		guidePortDevice->setParameter("gridpixels", gridpixels);
+		guidePortDevice->setParameter("telescope_east",
+			(east) ? 1 : 0);
+		guidePortDevice->setParameter("declination",
+			declination.degrees());
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "use declination=%.1f",
+			declination.degrees());
 		return guidePortDevice->startCalibration(tracker);
 	}
 
@@ -161,20 +169,23 @@ void	Guider::checkCalibrationState() {
  * This method retrieves a calibration from the database by its id, and 
  * applies it to the appropriate control device depending on the type found
  * in the database.
+ *
+ * \param calid			the id of the calibration
+ * \param meridian_flipped	whether to meridian flip the calibration
  */
-void	Guider::useCalibration(int calid) {
+void	Guider::useCalibration(int calid, bool meridian_flipped) {
 	if (!_state.canAcceptCalibration()) {
 		throw BadState("cannot accept calibration now");
 	}
 	CalibrationStore	store(database());
 	if (store.contains(calid, GP)) {
 		_state.addCalibration();
-		guidePortDevice->calibrationid(calid);
+		guidePortDevice->calibrationid(calid, meridian_flipped);
 		return;
 	}
 	if (store.contains(calid, AO)) {
 		_state.addCalibration();
-		adaptiveOpticsDevice->calibrationid(calid);
+		adaptiveOpticsDevice->calibrationid(calid, meridian_flipped);
 		return;
 	}
 	std::string	cause = stringprintf("calibration %d not found", calid);

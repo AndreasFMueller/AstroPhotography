@@ -25,7 +25,7 @@ class guidercontrollerwidget : public InstrumentWidget {
 	Q_OBJECT
 
 	snowstar::GuiderFactoryPrx	_guiderfactory;
-	snowstar::GuiderDescriptor	_guiderdescriptor;
+	std::string			_instrumentname;
 	snowstar::GuiderPrx		_guider;
 
 	double	_gpupdateinterval;
@@ -61,6 +61,11 @@ public:
 	void	setupTracker();
 	void	setupFilter();
 	void	updateParameters();
+
+	void	checkGPFlipped();
+	void	checkAOFlipped();
+
+	void	showMore(QWidget *parent);
 
 signals:
 	void	exposureChanged(astro::camera::Exposure);
@@ -103,6 +108,15 @@ public slots:
 
 	void	setTelescope(astro::RaDec);
 	void	setOrientation(bool);
+
+	void	gpFlipStateChanged(int);
+	void	aoFlipStateChanged(int);
+
+	void	gpCalibrationChanged();
+	void	aoCalibrationChanged();
+
+	void	refreshClicked();
+	void	showMoreMenu();
 };
 
 } // namespace snowgui

@@ -13,6 +13,7 @@
 #include "flatwidget.h"
 #include "darkwidget.h"
 #include <QTimer>
+#include "gaincalculator.h"
 
 namespace snowgui {
 
@@ -39,6 +40,8 @@ class imagercontrollerwidget : public InstrumentWidget {
 
 	darkwidget	*_darkwidget;
 	flatwidget	*_flatwidget;
+
+	GainCalculator	_gaincalculator;
 
 public:
 	explicit imagercontrollerwidget(QWidget *parent = NULL);
@@ -79,6 +82,8 @@ private:
 	snowstar::GuiderState	previousstate;
 	bool	ourexposure;
 
+	void	setGain(float gain);
+
 public slots:
 	// changes taht come from the outside
 	void	setExposure(astro::camera::Exposure);
@@ -102,6 +107,8 @@ public slots:
 
 	void	darkClosed();
 	void	flatClosed();
+
+	void	gainChanged(int);
 
 	// needed internally for status udpates
 	void	statusUpdate();

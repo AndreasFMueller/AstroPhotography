@@ -70,7 +70,7 @@ calibrationcalculatordialog::calibrationcalculatordialog(
 	_cal.id = 0;
 	_cal.timeago = 0;
 	if (_guider) {
-		_cal.guider = _guider->getDescriptor();
+		_cal.instrument = _guider->getInstrumentName();
 	}
 	_cal.coefficients = std::vector<float>(6);
 	_cal.coefficients[0] = 1;
@@ -89,6 +89,9 @@ calibrationcalculatordialog::calibrationcalculatordialog(
 	_cal.interval = 0;
 	_cal.type = type;
 	_cal.flipped = false;
+	_cal.meridianFlipped = false;
+	_cal.east = false;
+	_cal.declination = 0;
 
 	// connect elements
 	connect(ui->angleSpinBox, SIGNAL(valueChanged(double)),
@@ -145,7 +148,7 @@ void	calibrationcalculatordialog::updateCalibration() {
 	int	westsign = (_telescopewest) ? 1 : -1;
 	_cal.coefficients[1] = -decsign * pixelspeed * sin(a) * _decrate;
 	_cal.coefficients[4] =  decsign * pixelspeed * cos(a) * _decrate;
-	pixelspeed = pixelspeed * cos(_declination * M_PI / 180);
+	pixelspeed = pixelspeed * cos(_cal.declination * M_PI / 180);
 	_cal.coefficients[0] = pixelspeed * westsign * cos(a);
 	_cal.coefficients[3] = pixelspeed * westsign * sin(a);
 
@@ -177,7 +180,7 @@ void	calibrationcalculatordialog::angleChanged(double angle) {
 }
 
 void	calibrationcalculatordialog::declinationChanged(double declination) {
-	_declination = declination;
+	_cal.declination = declination;
 	updateCalibration();
 }
 
@@ -203,13 +206,14 @@ void	calibrationcalculatordialog::rejectCalibration() {
 }
 
 void	calibrationcalculatordialog::setTelescope(astro::RaDec radec) {
-	_declination = radec.dec().degrees();
-	ui->declinationSpinBox->setValue(_declination);
+	_cal.declination = radec.dec().degrees();
+	ui->declinationSpinBox->setValue(_cal.declination);
 	updateCalibration();
 }
 
 void	calibrationcalculatordialog::setOrientation(bool west) {
 	_telescopewest = west;
+	_cal.east = !west;
 	ui->westCheckBox->setChecked(_telescopewest);
 	updateCalibration();
 }

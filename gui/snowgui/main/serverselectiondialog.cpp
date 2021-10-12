@@ -56,7 +56,7 @@ void	ServerSelectionDialog::accept() {
 	}
 		
 	// close the window
-	close();
+	deleteLater();
 }
 
 } // namespace snowgui

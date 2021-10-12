@@ -39,6 +39,13 @@ calibrationwidget::calibrationwidget(QWidget *parent) :
 	_statusTimer.setInterval(100);
 	connect(&_statusTimer, SIGNAL(timeout()),
 		this, SLOT(statusUpdate()));
+
+	ui->calibrationIDField->setText(QString(""));
+	ui->numberField->setText(QString(""));
+	ui->positionField->setText(QString(""));
+	ui->resolutionField->setText(QString(""));
+	ui->qualityField->setText(QString(""));
+	ui->intervalField->setText(QString(""));
 }
 
 /**
@@ -53,14 +60,14 @@ calibrationwidget::~calibrationwidget() {
  * \brief set the guider information
  */
 void	calibrationwidget::setGuider(snowstar::ControlType controltype,
-		snowstar::GuiderDescriptor guiderdescriptor,
+		const std::string& instrumentname,
 		snowstar::GuiderPrx guider,
 		snowstar::GuiderFactoryPrx guiderfactory,
 		guidercontrollerwidget *guidercontroller) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "set up the guider %s",
-		_guiderdescriptor.instrumentname.c_str());
+		instrumentname.c_str());
 	_controltype = controltype;
-	_guiderdescriptor = guiderdescriptor;
+	_instrumentname = instrumentname;
 	_guider = guider;
 	_guiderfactory = guiderfactory;
 	_guidercontroller = guidercontroller;
@@ -96,11 +103,11 @@ void	calibrationwidget::databaseClicked() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "create a calibration selection");
 	calibrationselectiondialog	*selection
 		= new calibrationselectiondialog(this);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "set guider '%s' in the cal selection",
-		convert(_guiderdescriptor).toString().c_str());
-	selection->setGuider(_controltype, _guiderdescriptor, _guiderfactory);
+	selection->setGuider(_controltype, _instrumentname, _guiderfactory);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "guider set");
 	connect(selection, SIGNAL(calibrationSelected(snowstar::Calibration)),
 		this, SLOT(setCalibration(snowstar::Calibration)));
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "showing selection");
 	selection->show();
 }
 
@@ -108,13 +115,19 @@ void	calibrationwidget::databaseClicked() {
  * \brief Set the calibration
  */
 void	calibrationwidget::setCalibration(snowstar::Calibration cal) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "calibration %d selected", cal.id);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "calibration %d selected, position %s",
+		cal.id, (cal.east) ? "east" : "west");
 	_calibration = cal;
-	ui->calibrationdisplayWidget->setCalibration(cal);
+	ui->calibrationdisplayWidget->setCalibration(_calibration);
 	displayCalibration();
 	if (_guider) {
-		_guider->useCalibration(cal.id, false);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "set cal %d in guider",
+			_calibration.id);
+		_guider->useCalibration(_calibration.id, false);
 	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "emit calibrationChanged(), cal = %d",
+		_calibration.id);
+	emit calibrationChanged();
 }
 
 /**
@@ -133,13 +146,17 @@ void	calibrationwidget::displayCalibration() {
 	}
 	ui->calibrationIDField->setText(QString::number(_calibration.id));
 	ui->numberField->setText(QString::number(_calibration.points.size()));
+	std::string	positionlabel = astro::stringprintf("%s/𝛿=%.1fº",
+		(_calibration.east) ? "east" : "west",
+		_calibration.declination);
+;	ui->positionField->setText(QString(positionlabel.c_str()));
 	ui->qualityField->setText(QString(astro::stringprintf("%.1f%%",
 		_calibration.quality * 100).c_str()));
 	ui->resolutionField->setText(QString(astro::stringprintf("%.0f\"/px",
 		_calibration.masPerPixel / 1000.).c_str()));
 
 	// compute the number of pixels offset we expect from the interval
-	double	speed = _calibration.guiderate * (360 * 3600 / 86400.); // as/s
+	double	speed = _calibration.guiderate * (360. * 3600. / 86400.); // as/s
 	double	offset = _calibration.interval * speed;	// arcsec
 	int	pixeloffset = offset / (_calibration.masPerPixel / 1000.);
 	ui->intervalField->setText(QString(astro::stringprintf("%.1fs/%dpx",
@@ -168,9 +185,13 @@ void	calibrationwidget::calibrateClicked() {
 			_guidercontroller->setupTracker();
 		}
 		try {
+			debug(LOG_DEBUG, DEBUG_LOG, 0,
+				"current declination=%.f",
+				_radec.dec().degrees());
 			// XXX we should get the gridpixels from the
 			// XXX gui, value 0 means ignore it
-			_guider->startCalibration(_controltype, 0.);
+			_guider->startCalibration(_controltype, 0., !_west,
+				_radec.dec().degrees());
 		} catch (const std::exception& x) {
 		}
 	}
@@ -193,12 +214,14 @@ void	calibrationwidget::detailClicked() {
  * \brief Timer upate
  */
 void	calibrationwidget::statusUpdate() {
+	//debug(LOG_DEBUG, DEBUG_LOG, 0, "status update");
 	try {
 		// find out whether something has changed in the state
 		setupState();
 
 		// check whether the calibration has changed
-		snowstar::Calibration	cal = _guider->getCalibration(_controltype);
+		snowstar::Calibration	cal
+			= _guider->getCalibration(_controltype);
 		if ((_calibration.id == cal.id)
 			&& (_calibration.points.size() == cal.points.size())) {
 			return;
@@ -206,6 +229,7 @@ void	calibrationwidget::statusUpdate() {
 		_calibration = cal;
 		ui->calibrationdisplayWidget->setCalibration(_calibration);
 		displayCalibration();
+		emit calibrationChanged();
 	} catch (...) {
 
 	}
@@ -233,6 +257,7 @@ void	calibrationwidget::setupState() {
 			_calibration = _guider->getCalibration(_controltype);
 			ui->calibrationdisplayWidget->setCalibration(_calibration);
 			displayCalibration();
+			emit calibrationChanged();
 		} catch (const std::exception& x) {
 		}
 	}

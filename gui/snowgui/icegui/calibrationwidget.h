@@ -26,7 +26,7 @@ class calibrationwidget : public QWidget {
 	Q_OBJECT
 
 	snowstar::ControlType		_controltype;
-	snowstar::GuiderDescriptor	_guiderdescriptor;
+	std::string			_instrumentname;
 	snowstar::GuiderPrx		_guider;
 	snowstar::GuiderFactoryPrx	_guiderfactory;
 
@@ -38,7 +38,7 @@ class calibrationwidget : public QWidget {
 	snowstar::GuiderState	_state;
 public:
 	void	setGuider(snowstar::ControlType controltype,
-			snowstar::GuiderDescriptor guiderdescriptor,
+			const std::string& instrumentname,
 			snowstar::GuiderPrx guider,
 			snowstar::GuiderFactoryPrx guiderfactory,
 			guidercontrollerwidget *guidercontroller);
@@ -69,6 +69,7 @@ private:
 signals:
 	void	telescopeChanged(astro::RaDec);
 	void	orientationChanged(bool);
+	void	calibrationChanged();
 };
 
 } // namespace snowgui
