@@ -31,7 +31,7 @@ ASTROGUISOURCES =
 
 ASTROGUIHEADERS =
 
-FORMS    +=								\
+FORMS    +=
 
 SOURCES += astrobrowser.cpp $${ASTROGUISOURCES}
 
