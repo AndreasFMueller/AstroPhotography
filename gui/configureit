@@ -36,7 +36,10 @@ Linux)	if [ -r /etc/debian_version ]
 esac
 
 # add ICE PATH for an ICE that we compiled ourselves
-if [ -d /usr/local/opt/ice ]
+if [ -d /opt/homebrew ]
+then
+	ICEDIR=/opt/homebrew
+elif [ -d /usr/local/opt/ice ]
 then
 	ICEDIR=/usr/local/opt/ice
 elif [ -d /usr/local/Ice ]
@@ -92,7 +95,12 @@ Darwin)
 		PATH=${PATH}:/usr/local/opt/qt/bin
 		export PATH
 	fi
-	LDFLAGS="-L/usr/local/lib -lusb-1.0"
+	if [ -d /opt/homebrew/lib ]
+	then
+		LDFLAGS="-L/opt/homebrew/lib -lusb-1.0"
+	else
+		LDFLAGS="-L/usr/local/lib -lusb-1.0"
+	fi
 	CXXFLAGS="${CFLAGS}"
 	export CFLAGS CXXFLAGS LDFLAGS
 	CXXFLAGS="${CXXFLAGS} -stdlib=libc++"

@@ -16,6 +16,7 @@ QMAKE_LFLAGS += @EXTRA_LDFLAGS@
 # Directories for the astrophotography library
 ASTROPATH = @ASTROPATH@
 ASTROLIBDIR = @ASTROLIBDIR@
+LOCALPATH = @LOCALPATH@
 
 LIBS += -L../browser -lbrowser 
 LIBS += -L../astrogui -lastrogui 
@@ -23,7 +24,7 @@ LIBS += -L$${ASTROLIBDIR} -Wl,-rpath,$${ASTROLIBDIR} -lastro
 LIBS += @EXTRA_LIBS@
 LIBS += @EXTRA_LIBS@
 
-INCLUDEPATH += /usr/local/include
+INCLUDEPATH += $${LOCALPATH}/include
 INCLUDEPATH += $${ASTROPATH}/include
 INCLUDEPATH += ../astrogui  ../browser
 
