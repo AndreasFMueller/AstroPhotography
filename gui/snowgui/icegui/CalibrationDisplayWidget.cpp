@@ -85,12 +85,12 @@ void	CalibrationDisplayWidget::drawEnabled(QPainter& painter) {
 }
 
 QPointF	CalibrationDisplayWidget::point(float xpxl, float ypxl) const {
-	QPointF	pf(xpxl * _scale + _center.x(), ypxl * _scale + _center.y());
+	QPointF	pf(xpxl * _scale + _center.x(), -ypxl * _scale + _center.y());
 	return pf;
 }
 
 QPointF	CalibrationDisplayWidget::point(double xpxl, double ypxl) const {
-	QPointF	pf(xpxl * _scale + _center.x(), ypxl * _scale + _center.y());
+	QPointF	pf(xpxl * _scale + _center.x(), -ypxl * _scale + _center.y());
 	return pf;
 }
 
@@ -327,7 +327,7 @@ void	CalibrationDisplayWidget::drawCommon(QPainter& painter,
 			pen.setColor(QColor(0, 0, 0));
 			painter.setPen(pen);
 			QPointF	labelpoint(s * relpoint.x() + cx - 10,
-					s * relpoint.y() + cy - 10);
+					-s * relpoint.y() + cy - 10);
 			char	l[10];
 			snprintf(l, sizeof(l), "%lu", i);
 			painter.drawText(labelpoint.x(), labelpoint.y(),
@@ -352,7 +352,7 @@ void	CalibrationDisplayWidget::drawCommon(QPainter& painter,
 	painter.drawLine(_center, ra);
 	double	r = hypot(rax, ray) * scale;
 	r = scale * (r + 10) / r;
-	painter.drawText(rax * r + cx - 10, ray * r + cy - 10, 20, 20,
+	painter.drawText(rax * r + cx - 10, -ray * r + cy - 10, 20, 20,
 		Qt::AlignCenter, QString("R"));
 
 	// draw D vector
@@ -363,7 +363,7 @@ void	CalibrationDisplayWidget::drawCommon(QPainter& painter,
 	painter.drawLine(_center, dec);
 	r = hypot(decx, decy) * scale;
 	r = scale * (r + 10) / r;
-	painter.drawText(decx * r + cx - 10, decy * r + cy - 10, 20, 20,
+	painter.drawText(decx * r + cx - 10, -decy * r + cy - 10, 20, 20,
 		Qt::AlignCenter, QString("D"));
 
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "draw t vector");
@@ -373,7 +373,7 @@ void	CalibrationDisplayWidget::drawCommon(QPainter& painter,
 	painter.drawLine(_center, drift);
 	r = hypot(driftx, drifty) * scale;
 	r = scale * (r + 10) / r;
-	painter.drawText(driftx * r + cx - 10, h - (drifty * r + cy) - 10,
+	painter.drawText(driftx * r + cx - 10, h - (-drifty * r + cy) - 10,
 		20, 20, Qt::AlignCenter, QString("t"));
 
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "drawing complete");
