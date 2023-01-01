@@ -98,6 +98,7 @@ Guide::state	Guider::state() {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "apparently the calibration "
 			"process has gone away");
 		_state.failCalibration();
+		imager().release();
 		break;
 	case Guide::guiding:
 		if (trackingprocess) {
@@ -109,6 +110,7 @@ Guide::state	Guider::state() {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "apparaently the guiding "
 			"process has gone away");
 		_state.stopGuiding();
+		imager().release();
 		break;
 	default:
 		return result;
@@ -206,6 +208,7 @@ void	Guider::startGuiding(TrackerPtr tracker, double gpinterval,
 		debug(LOG_ERR, DEBUG_LOG, 0, "no tracker specified");
 		throw std::runtime_error("no tracker specified");
 	}
+	imager().controlling(device::Device::ControllingGuiding);
 	// create a TrackingProcess instance
 	_state.startGuiding();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "creating new tracking process");

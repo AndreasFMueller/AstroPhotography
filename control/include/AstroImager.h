@@ -58,6 +58,7 @@ public:
 
 public:
 	Imager(CcdPtr ccd = CcdPtr());
+	~Imager();
 
 	// Image processing
 	void	operator()(ImagePtr image);
@@ -66,6 +67,10 @@ public:
 	void	startExposure(const Exposure& exposure);
 	bool	wait();
 	ImagePtr	getImage(bool raw = false);
+
+	// assume control of the interface
+	void	controlling(device::Device::controlState_t cs);
+	void	release();
 };
 
 typedef std::shared_ptr<Imager>	ImagerPtr;

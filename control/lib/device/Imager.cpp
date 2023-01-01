@@ -24,6 +24,15 @@ Imager::Imager(CcdPtr ccd) : _ccd(ccd) {
 	_interpolate = false;
 }
 
+/**
+ * \grief Destroy the imager
+ */
+Imager::~Imager() {
+	if (_ccd) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "release controlling");
+		_ccd->releaseControlling();
+	}
+}
 
 void	Imager::dark(ImagePtr dark) {
 	std::string	msg = stringprintf("install %s dark image in %s",
@@ -99,6 +108,18 @@ ImagePtr	Imager::getImage(bool raw) {
 
 bool	Imager::wait() {
 	return ccd()->wait();
+}
+
+void	Imager::controlling(device::Device::controlState_t cs) {
+	if (_ccd) {
+		_ccd->controllingState(cs);
+	}
+}
+
+void	Imager::release() {
+	if (_ccd) {
+		_ccd->releaseControlling();
+	}
 }
 
 } // namespace camera

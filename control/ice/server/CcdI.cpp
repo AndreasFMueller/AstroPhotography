@@ -79,6 +79,9 @@ ExposureState	CcdI::exposureStatus(const Ice::Current& current) {
 void	CcdI::startExposure(const Exposure& exposure,
 		const Ice::Current& current) {
 	CallStatistics::count(current);
+	if (_ccd->isControlled()) {
+		throw BadState("cannot start exposure while controlled by other device");
+	}
 	if (_ccd->streaming()) {
 		throw BadState("cannot start exposure while streaming");
 	}
@@ -117,6 +120,9 @@ int	CcdI::lastExposureStart(const Ice::Current& current) {
  */
 void	CcdI::cancelExposure(const Ice::Current& current) {
 	CallStatistics::count(current);
+	if (_ccd->isControlled()) {
+		throw BadState("cannot cancel exposure while controlled by other device");
+	}
 	if (_ccd->streaming()) {
 		throw BadState("cannot cancel exposure while streaming");
 	}
@@ -140,6 +146,9 @@ void	CcdI::cancelExposure(const Ice::Current& current) {
  */
 Exposure	CcdI::getExposure(const Ice::Current& current) {
 	CallStatistics::count(current);
+	if (_ccd->isControlled()) {
+		throw BadState("cannot get exposure while controlled by other device");
+	}
 	try {
 		return convert(_ccd->getExposure());
 	} catch (const astro::camera::BadState& badstate) {
@@ -160,6 +169,9 @@ Exposure	CcdI::getExposure(const Ice::Current& current) {
  */
 ImagePrx	CcdI::getImage(const Ice::Current& current) {
 	CallStatistics::count(current);
+	if (_ccd->isControlled()) {
+		throw BadState("cannot get image while controlled by other device");
+	}
 	if (_ccd->streaming()) {
 		throw BadState("cannot get image while streaming");
 	}
@@ -246,6 +258,9 @@ ShutterState	CcdI::getShutterState(const Ice::Current& current) {
 void	CcdI::setShutterState(ShutterState state,
 		const Ice::Current& current) {
 	CallStatistics::count(current);
+	if (_ccd->isControlled()) {
+		throw BadState("cannot change shutter state while controlled by other device");
+	}
 	_ccd->setShutterState(convert(state));
 }
 
@@ -316,6 +331,9 @@ void	CcdI::registerSink(const Ice::Identity& imagesinkidentity,
 void	CcdI::startStream(const ::snowstar::Exposure& e,
 		const Ice::Current& current) {
 	CallStatistics::count(current);
+	if (_ccd->isControlled()) {
+		throw BadState("cannot start stream while controlled by other device");
+	}
 	if (_ccd->streaming()) {
 		throw BadState("already streaming");
 	}
@@ -334,6 +352,9 @@ void	CcdI::startStream(const ::snowstar::Exposure& e,
 void	CcdI::updateStream(const ::snowstar::Exposure& e,
 		const Ice::Current& current) {
 	CallStatistics::count(current);
+	if (_ccd->isControlled()) {
+		throw BadState("cannot update stream while controlled by other device");
+	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "new exposure time: %.1f",
 		e.exposuretime);
 	_ccd->streamExposure(convert(e));
@@ -346,6 +367,9 @@ void	CcdI::updateStream(const ::snowstar::Exposure& e,
  */
 void	CcdI::stopStream(const ::Ice::Current& current) {
 	CallStatistics::count(current);
+	if (_ccd->isControlled()) {
+		throw BadState("cannot stop stream while controlled by other device");
+	}
 	if (!_ccd->streaming()) {
 		throw BadState("cannot stop stream: not streaming");
 	}
@@ -450,6 +474,14 @@ void	callback_adapter<CcdCallbackPrx>(CcdCallbackPrx p,
 		p->state(s);
 		return;
 	}
+}
+
+/**
+ * \brief find out whether the device is controllable
+ */
+bool	CcdI::isControllable(const Ice::Current& current) {
+	CallStatistics::count(current);
+	return !_ccd->isControlled();
 }
 
 } // namespace snowstar
