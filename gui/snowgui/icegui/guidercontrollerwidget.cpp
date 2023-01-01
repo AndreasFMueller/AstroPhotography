@@ -774,6 +774,29 @@ void	guidercontrollerwidget::launchMonitor() {
 	if (!_guider) {
 		return;
 	}
+
+	// try to get the tracking history to display
+	snowstar::TrackingSummary	summary;
+	snowstar::TrackingHistory	history;
+	try {
+		summary = _guider->getTrackingSummary();
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "get track %d",
+			summary.trackid);
+		history = _guider->getTrackingHistory(summary.trackid);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "got %d points",
+			history.points.size());
+	} catch (const std::exception& x) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "could not get the history: %s",
+			x.what());
+		QMessageBox	message(this);
+		message.setText(QString("Cannot monitor"));
+		message.setInformativeText(QString("Monitoring could not be started as the tracking history could not be retrieved."));
+		message.setStandardButtons(QMessageBox::Ok);
+		message.exec();
+		return;
+	}
+
+	// if there is no tracking monitor, try to get one
 	if (!_trackingmonitordialog) {
 		_trackingmonitordialog = new trackingmonitordialog(this);
 	}
@@ -782,12 +805,7 @@ void	guidercontrollerwidget::launchMonitor() {
 	_trackingmonitorptr = Ice::ObjectPtr(_trackingmonitor);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "tracking monitor generated");
 
-	// get the history of the track
-	snowstar::TrackingSummary	summary = _guider->getTrackingSummary();
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "get track %d", summary.trackid);
-	snowstar::TrackingHistory	history
-		= _guider->getTrackingHistory(summary.trackid);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "got %d points", history.points.size());
+	// add the history to the track display
 	_trackingmonitordialog->add(history);
 
 	// retrieve the calibrations
