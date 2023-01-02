@@ -15,6 +15,7 @@
 #include <memory>
 #include <AstroImage.h>
 #include <AstroCallback.h>
+#include <mutex>
 
 namespace astro {
 
@@ -258,6 +259,24 @@ public:
 	virtual float	parameterValueFloat(const std::string& name) const;
 	virtual std::string	parameterValueString(const std::string& name) const;
 	virtual std::string	userFriendlyName() const;
+	// stuff used for controlling a device
+	std::recursive_mutex	_controlling_mutex;
+	typedef enum {
+		ControllingNone = 0,
+		ControllingCalibrating = 1,
+		ControllingGuiding = 2
+	} controlState_t;
+private:
+	std::string	_controllingName;
+	controlState_t	_controllingState;
+public:
+	const std::string	controllingName();
+	void	controllingName(const std::string& dn);
+	controlState_t	controllingState();
+	void	controllingState(controlState_t cs);
+	void	controlling(const std::string& dn, controlState_t cs);
+	void	releaseControlling();
+	bool	isControlled();
 };
 
 class Mount;

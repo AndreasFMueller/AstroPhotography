@@ -252,6 +252,11 @@ module snowstar {
 		void	updateStream(Exposure e) throws NotImplemented;
 		void	stopStream() throws NotImplemented;
 		void	unregisterSink() throws NotImplemented;
+
+		/**
+		 * \brief Find out whether this device is controllable
+		 */
+		bool	isControllable();
 	};
 
 	struct CoolerInfo {

@@ -61,6 +61,14 @@ fi
 
 # the next few sections are about whether or not to build the ICE components
 # add ICE PATH for Mac OS X
+if [ -d /opt/homebrew ]
+then
+	CFLAGS="${CFLAGS} -I/opt/homebrew/include"
+	CXXFLAGS="${CFLAGS} -I/opt/homebrew/include"
+	LDFLAGS="-L/opt/homebrew/lib -lusb-1.0"
+	ICEDIR=/opt/homebrew
+	SLICEDIR=/opt/homebrew/share/ice/slice
+fi
 if [ -d /usr/local/opt/ice ]
 then
 	ICEDIR=/usr/local/opt/ice
@@ -254,7 +262,12 @@ SuSE)
 		${sbigoption}
 	;;
 Darwin)
-	LDFLAGS="-L/usr/local/lib -lusb-1.0"
+	case `uname -m` in
+	arm64)
+		;;
+	*)	LDFLAGS="-L/usr/local/lib -lusb-1.0"
+		;;
+	esac
 	CXXFLAGS="${CFLAGS} --std=c++11"
 	export CFLAGS CXXFLAGS LDFLAGS
 	CXXFLAGS="${CXXFLAGS} -stdlib=libc++"

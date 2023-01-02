@@ -81,6 +81,7 @@ int	Guider::startCalibration(ControlDeviceType type, TrackerPtr tracker,
 	_progress = 0;
 
 	// start calibration
+	imager().controlling(device::Device::ControllingCalibrating);
 	if ((type == GP) && guidePortDevice) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "start GuidePort calibration");
 		_state.startCalibrating();

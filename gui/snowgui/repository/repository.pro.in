@@ -25,7 +25,7 @@ LIBS +=	@ICELIBS@
 
 INCLUDEPATH += $${ASTROPATH}/include
 INCLUDEPATH += $${ICEDIR}/include
-INCLUDEPATH += /usr/local/include
+INCLUDEPATH += $${LOCALPATH}/include
 INCLUDEPATH += ../icegui ../astrogui
 
 FORMS    +=								\

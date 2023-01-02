@@ -15,7 +15,7 @@ namespace device {
  * \brief Construct a device
  */
 Device::Device(const std::string& devname, DeviceName::device_type type) noexcept
-	: Properties(devname), _name(devname) {
+	: Properties(devname), _name(devname), _controllingName(devname) {
 	_name.type(type);
 }
 
@@ -23,7 +23,7 @@ Device::Device(const std::string& devname, DeviceName::device_type type) noexcep
  * \brief Construct a device from a device name
  */
 Device::Device(const DeviceName& devname, DeviceName::device_type type) noexcept
-	: Properties(devname), _name(devname) {
+	: Properties(devname), _name(devname), _controllingName(_name) {
 	_name.type(type);
 }
 
@@ -136,6 +136,71 @@ std::string	Device::userFriendlyName() const {
 		"%s does not override userFriendlyName()",
 		astro::demangle_string(*this).c_str());
 	return name().toString();
+}
+
+/**
+ * \brief Get the controlling device name
+ */
+const std::string	Device::controllingName() {
+	std::unique_lock<std::recursive_mutex>	_lock(_controlling_mutex);
+	return _controllingName;
+}
+
+/**
+ * \brief set the controlling device name
+ *
+ * \param dn	name of the controlling device
+ */
+void	Device::controllingName(const std::string& dn) {
+	std::unique_lock<std::recursive_mutex>	_lock(_controlling_mutex);
+	_controllingName = dn;
+}
+
+/**
+ * \brief retrieve the controlling state
+ */
+Device::controlState_t	Device::controllingState() {
+	std::unique_lock<std::recursive_mutex>	_lock(_controlling_mutex);
+	return _controllingState;
+}
+
+/**
+ * \brief Set the controlling state
+ *
+ * \param cs	the controlling state to set
+ */
+void Device::controllingState(controlState_t cs) {
+	std::unique_lock<std::recursive_mutex>	_lock(_controlling_mutex);
+	_controllingState = cs;
+}
+
+/**
+ * \brief Start controlling a device
+ *
+ * \param dn	the controlling device name
+ * \param cs	the new controlling state
+ */
+void	Device::controlling(const std::string& dn, controlState_t cs) {
+	std::unique_lock<std::recursive_mutex>	_lock(_controlling_mutex);
+	controllingName(dn);
+	controllingState(cs);
+}
+
+/**
+ * \brief Release any controlling devices for this device
+ */
+void	Device::releaseControlling() {
+	std::unique_lock<std::recursive_mutex>	_lock(_controlling_mutex);
+	controllingName(_name);
+	controllingState(ControllingNone);
+}
+
+/**
+ * \brief Convenience function to find out whether a device is controlled
+ */
+bool	Device::isControlled() {
+	std::unique_lock<std::recursive_mutex>	_lock(_controlling_mutex);
+	return (_controllingState != ControllingNone);
 }
 
 } // namespace device

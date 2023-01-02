@@ -817,9 +817,7 @@ private:
 public:
 	const camera::Exposure&	exposure() const { return _exposure; }
 	camera::Exposure&	exposure() { return _exposure; }
-	void	exposure(const camera::Exposure& exposure) {
-		_exposure = exposure;
-	}
+	void	exposure(const camera::Exposure& exposure);
 
 	// We should be able to get images through the imager, using the
 	// previously defined exposure structure.

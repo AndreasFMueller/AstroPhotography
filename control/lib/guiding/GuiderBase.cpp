@@ -18,6 +18,24 @@ void	GuiderBase::startExposure() {
 }
 
 /**
+ * \brief set the exposure
+ */
+void	GuiderBase::exposure(const camera::Exposure& exposure) {
+	Guide::state	s = state();
+	switch (s) {
+	case Guide::unconfigured:
+	case Guide::idle:
+	case Guide::calibrated:
+		_exposure = exposure;
+		break;
+	default:
+		debug(LOG_ERR, DEBUG_LOG, 0,
+			"cannot change exposure when in state %s",
+			Guide::state2string(s).c_str());
+	}
+}
+
+/**
  * \brief get the image
  *
  * Retrieve an image from the imager. Each image is also sent to the

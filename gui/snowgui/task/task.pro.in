@@ -18,6 +18,7 @@ ICEDIR = @ICEDIR@
 ICELIBS = @ICELIBS@
 ASTROPATH = @ASTROPATH@
 ASTROLIBDIR = @ASTROLIBDIR@
+LOCALPATH = @LOCALPATH@
 
 LIBS += -L$${ASTROLIBDIR} -lastro
 LIBS += -liceastro
@@ -25,7 +26,7 @@ LIBS +=	$${ICELIBS}
 
 INCLUDEPATH += $${ASTROPATH}/include
 INCLUDEPATH += $${ICEDIR}/include
-INCLUDEPATH += /usr/local/include
+INCLUDEPATH += $${LOCALPATH}/include
 INCLUDEPATH += ../icegui ../astrogui
 
 FORMS    +=								\

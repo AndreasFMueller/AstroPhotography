@@ -40,7 +40,7 @@ static void	usage(const char *progname) {
 		"divide 180 degrees in <height> steps" << std::endl;
 	std::cout << "    -w,--width=<width>        width of the radon transform image"
 		<< std::endl;
-	std::cout << "    -h,-?,--help              "
+	std::cout << "    -?,--help                 "
 		"show this help message" << std::endl;
 	std::cout << std::endl;
 }

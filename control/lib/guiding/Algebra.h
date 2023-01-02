@@ -225,8 +225,8 @@ public:
 				result(j,i) = (*this)(i,j);
 			}
 		}
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "transposed matrix: %s",
-			result.toString().c_str());
+		//debug(LOG_DEBUG, DEBUG_LOG, 0, "transposed matrix: %s",
+		//	result.toString().c_str());
 		return result;
 	}
 
@@ -259,8 +259,8 @@ public:
 		for (int i = 0; i < m*n; i++) {
 			result._d[i] = B[i];
 		}
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "inverse matrix: %s",
-			result.toString().c_str());
+		//debug(LOG_DEBUG, DEBUG_LOG, 0, "inverse matrix: %s",
+		//	result.toString().c_str());
 		return result;
 	}
 

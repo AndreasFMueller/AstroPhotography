@@ -96,6 +96,8 @@ public:
 			const Ice::Current& current);
 	void	stopStream(const ::Ice::Current& current);
 	void	unregisterSink(const ::Ice::Current& current);
+
+	bool	isControllable(const ::Ice::Current& current);
 };
 
 /**

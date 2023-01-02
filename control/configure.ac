@@ -58,10 +58,10 @@ CFLAGS="${CFLAGS} -DBSD_DATE=${BSD_DATE}"
 CXXFLAGS="${CXXFLAGS} -DBSD_DATE=${BSD_DATE}"
 
 ## GLPK ##############################################################
-AC_CHECK_LIB([glpk], [glp_create_prob], [], [
+AC_CHECK_HEADER([glpk.h], [], [
 	AC_MSG_ERROR("required package glpk missing")
 ])
-AC_CHECK_HEADER([glpk.h], [], [
+AC_CHECK_LIB([glpk], [glp_create_prob], [], [
 	AC_MSG_ERROR("required package glpk missing")
 ])
 
