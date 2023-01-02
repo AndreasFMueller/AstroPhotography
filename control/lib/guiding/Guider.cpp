@@ -89,6 +89,8 @@ Guide::state	Guider::state() {
 	// that process is still doing it
 	switch (result) {
 	case Guide::calibrating:
+		//debug(LOG_DEBUG, DEBUG_LOG, 0,
+		//	"check whether calibration has finished");
 		if ((guidePortDevice) && (guidePortDevice->calibrating())) {
 			return result;
 		}
@@ -101,6 +103,8 @@ Guide::state	Guider::state() {
 		imager().release();
 		break;
 	case Guide::guiding:
+		//debug(LOG_DEBUG, DEBUG_LOG, 0,
+		//	"check whether guiding has finished");
 		if (trackingprocess) {
 			if (trackingprocess->isrunning()) {
 				return result;
@@ -115,6 +119,7 @@ Guide::state	Guider::state() {
 	default:
 		return result;
 	}
+	// if we get to this point, then the state has changed unexpectedly
 	Guide::state	resultnew = _state;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "state has changed from %s to %s",
 		Guide::state2string(result).c_str(),
@@ -204,6 +209,7 @@ TrackerPtr	Guider::getLargeTracker() {
  */
 void	Guider::startGuiding(TrackerPtr tracker, double gpinterval,
 		double aointerval, bool stepping, FilterMethod filtermethod) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "start guiding");
 	if (!tracker) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "no tracker specified");
 		throw std::runtime_error("no tracker specified");

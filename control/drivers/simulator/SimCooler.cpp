@@ -152,7 +152,7 @@ void	SimCooler::updateTemperature() {
 	if ((timepast > 5) || (temperaturedifference > 1))  {
 		sendInfo();
 	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "udpate complete");
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "update complete");
 }
 
 /**

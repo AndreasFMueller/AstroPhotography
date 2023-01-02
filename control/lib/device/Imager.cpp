@@ -112,12 +112,15 @@ bool	Imager::wait() {
 
 void	Imager::controlling(device::Device::controlState_t cs) {
 	if (_ccd) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0,
+			"start controlling the imager for purpose %d", cs);
 		_ccd->controllingState(cs);
 	}
 }
 
 void	Imager::release() {
 	if (_ccd) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "release imager from control");
 		_ccd->releaseControlling();
 	}
 }

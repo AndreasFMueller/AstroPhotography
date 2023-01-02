@@ -291,30 +291,38 @@ void	guidercontrollerwidget::setupGuider() {
 			ui->staryField->setText(QString(
 				astro::stringprintf("%d", y).c_str()));
 		}
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "setting guide star to (%d,%d)",
+			x, y);
 	} catch (snowstar::BadState& x) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "bad state: %s", x.what());
 	}
 
 	// get the information from the guider
 	ui->trackingMethodBox->blockSignals(true);
-	switch (_guider->getTrackerMethod()) {
-	case snowstar::TrackerUNDEFINED:
-	case snowstar::TrackerNULL:
-	case snowstar::TrackerSTAR:
-		ui->trackingMethodBox->setCurrentIndex(0);
-		break;
-	case snowstar::TrackerPHASE:
-		ui->trackingMethodBox->setCurrentIndex(1);
-		break;
-	case snowstar::TrackerDIFFPHASE:
-		ui->trackingMethodBox->setCurrentIndex(2);
-		break;
-	case snowstar::TrackerLAPLACE:
-		ui->trackingMethodBox->setCurrentIndex(3);
-		break;
-	case snowstar::TrackerLARGE:
-		ui->trackingMethodBox->setCurrentIndex(4);
-		break;
+	try {
+		switch (_guider->getTrackerMethod()) {
+		case snowstar::TrackerUNDEFINED:
+		case snowstar::TrackerNULL:
+		case snowstar::TrackerSTAR:
+			ui->trackingMethodBox->setCurrentIndex(0);
+			break;
+		case snowstar::TrackerPHASE:
+			ui->trackingMethodBox->setCurrentIndex(1);
+			break;
+		case snowstar::TrackerDIFFPHASE:
+			ui->trackingMethodBox->setCurrentIndex(2);
+			break;
+		case snowstar::TrackerLAPLACE:
+			ui->trackingMethodBox->setCurrentIndex(3);
+			break;
+		case snowstar::TrackerLARGE:
+			ui->trackingMethodBox->setCurrentIndex(4);
+			break;
+		}
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "tracking method set");
+	} catch (snowstar::BadState& x) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0,
+			"cannot get tracking method: bad state: %s", x.what());
 	}
 	ui->trackingMethodBox->blockSignals(false);
 
@@ -343,32 +351,50 @@ void	guidercontrollerwidget::setupGuider() {
 	}
 
 	// get the exposure information
-	_exposure = snowstar::convert(_guider->getExposure());
-	astro::Point	ps = snowstar::convert(_guider->getStar());
-	_star = ImagePoint((int)ps.x(), (int)ps.y());
+	try {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "getting exposure info");
+		_exposure = snowstar::convert(_guider->getExposure());
+		astro::Point	ps = snowstar::convert(_guider->getStar());
+		_star = ImagePoint((int)ps.x(), (int)ps.y());
 
-	ui->starxField->setText(QString::number(_star.x()));
-	ui->staryField->setText(QString::number(_star.y()));
+		ui->starxField->setText(QString::number(_star.x()));
+		ui->staryField->setText(QString::number(_star.y()));
 
-	ui->windowradiusSpinBox->blockSignals(true);
-	_windowradius = _exposure.frame().size().width()/2;
-	ui->windowradiusSpinBox->setValue(_windowradius);
-	ui->windowradiusSpinBox->blockSignals(false);
+		ui->windowradiusSpinBox->blockSignals(true);
+		_windowradius = std::min(_exposure.frame().size().width(),
+			_exposure.frame().size().height()) / 2;
+		ui->windowradiusSpinBox->setValue(_windowradius);
+		ui->windowradiusSpinBox->blockSignals(false);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "window radius set to %d",
+			_windowradius);
+	} catch (const std::exception& x) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0,
+			"cannot get exposure information: %s", x.what());
+	}
 
 	// get the filter method
 	ui->filterMethodBox->blockSignals(true);
-	switch (_guider->getFilterMethod()) {
-	case snowstar::FilterNONE:
-		ui->filterMethodBox->setCurrentIndex(0);
-		break;
-	case snowstar::FilterGAIN:
-		ui->filterMethodBox->setCurrentIndex(1);
-		break;
-	case snowstar::FilterKALMAN:
-		ui->filterMethodBox->setCurrentIndex(2);
-		break;
+	try {
+		snowstar::FilterMethod	filtermethod
+			= _guider->getFilterMethod();
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "current filter method: %d",
+			filtermethod);
+		switch (filtermethod) {
+		case snowstar::FilterNONE:
+			ui->filterMethodBox->setCurrentIndex(0);
+			break;
+		case snowstar::FilterGAIN:
+			ui->filterMethodBox->setCurrentIndex(1);
+			break;
+		case snowstar::FilterKALMAN:
+			ui->filterMethodBox->setCurrentIndex(2);
+			break;
+		}
+		setupFilter();
+	} catch (const std::exception& x) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "cannot get filter method: %s",
+			x.what());
 	}
-	setupFilter();
 	ui->filterMethodBox->blockSignals(false);
 
 	// get the guiding interval
@@ -384,11 +410,16 @@ void	guidercontrollerwidget::setupGuider() {
 	}
 
 	// gain
-	GuiderParameterConverter	gpc(_guider->getFilterMethod());
-	int gx = gpc.parameter2dial(_guider->getFilterParameter(0));
-	ui->xGainDial->setValue(gx);
-	int gy = gpc.parameter2dial(_guider->getFilterParameter(1));
-	ui->yGainDial->setValue(gy);
+	try {
+		GuiderParameterConverter	gpc(_guider->getFilterMethod());
+		int gx = gpc.parameter2dial(_guider->getFilterParameter(0));
+		ui->xGainDial->setValue(gx);
+		int gy = gpc.parameter2dial(_guider->getFilterParameter(1));
+		ui->yGainDial->setValue(gy);
+	} catch (const std::exception& x) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "cannot set filter gains: %s",
+			x.what());
+	}
 	
 	// do all the registration stuff
 	_trackingmonitorimage->setGuider(_guider, _trackingmonitorimageptr);
@@ -415,8 +446,24 @@ guidercontrollerwidget::~guidercontrollerwidget() {
  * \brief Set the exposure to use for the guider
  */
 void	guidercontrollerwidget::setExposure(astro::camera::Exposure exposure) {
-	_exposure = exposure;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "setting the exposure: %s",
+		exposure.toString().c_str());
 	try {
+		switch (_guider->getState()) {
+		case snowstar::GuiderUNCONFIGURED:
+		case snowstar::GuiderIDLE:
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "setting exposure state is ok");
+			break;
+		default:
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "setting exposure not allowed in this state");
+			QMessageBox	message(this);
+			message.setText(QString("cannot set exposure"));
+			message.setInformativeText(QString("The exposure can only be changed when the imager is currently not in use"));
+			message.setStandardButtons(QMessageBox::Ok);
+			message.exec();
+			return;
+		}
+		_exposure = exposure;
 		_guider->setExposure(snowstar::convert(_exposure));
 		// XXX star was already set
 		// use the center point as the star
@@ -465,26 +512,25 @@ void	guidercontrollerwidget::selectPoint(astro::image::ImagePoint p) {
  * \brief Set up the tracker
  */
 void	guidercontrollerwidget::setupTracker() {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "window radius: %d", _windowradius);
-	// get the current exposure
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "Tracker setup: window radius: %d",
+		_windowradius);
+	// get the current exposure settings
 	Exposure	exposure = snowstar::convert(_guider->getExposure());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "Tracker setup: current exposure: %s",
+		exposure.toString().c_str());
 
 	// compute the window for exposures
 	ImagePoint	origin(_star.x() - _windowradius,
 				_star.y() - _windowradius);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "origin: %s", origin.toString().c_str());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "Tracker setup: origin: %s",
+		origin.toString().c_str());
 	ImageSize	size(2 * _windowradius, 2 * _windowradius);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "size: %s", size.toString().c_str());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "Tracker setup: size: %s",
+		size.toString().c_str());
 	exposure.frame(ImageRectangle(origin, size));
 	_guider->setExposure(snowstar::convert(exposure));
-
-#if 0
-	// set the star for which tracking should take place
-	snowstar::Point	star;
-	star.x = _windowradius;
-	star.y = _windowradius;
-	_guider->setStar(star);
-#endif
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "Tracker setup: exposure set to: %s",
+		exposure.toString().c_str());
 }
 
 /**
@@ -508,9 +554,11 @@ void	guidercontrollerwidget::startGuiding() {
 
 	// prepare the tracker
 	try {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "start guiding");
 		setupTracker();
 		_guider->startGuiding(_gpupdateinterval, _aoupdateinterval,
 			_stepping);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "guiding started");
 	} catch (...) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "cannot start guiding");
 	}

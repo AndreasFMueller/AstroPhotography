@@ -126,9 +126,9 @@ void	KalmanFilter::update(const Point& o) {
 	Matrix<double,4,4>	I(1);
 	x = (I - K * H) * xpred + K * z;
 	P = (I - K * H) * Ppred * (I - K * H).transpose() + K * R * K.transpose();
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "next estimate: %s",
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "next state estimate: x = %s",
 		x.toString().c_str());
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "next P estimate: %s",
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "next P estimate: P = %s",
 		P.toString().c_str());
 }
 
