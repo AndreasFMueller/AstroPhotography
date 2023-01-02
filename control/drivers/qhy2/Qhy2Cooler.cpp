@@ -21,7 +21,7 @@ void	Qhy2Cooler::start_thread(Qhy2Cooler *cooler) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "cooler thread launch");
 	try {
 		cooler->run();
-	} catch (const std::exception x) {
+	} catch (const std::exception& x) {
 		debug(LOG_ERR, DEBUG_LOG, 0,
 			"exception thrown in cooler thread: %s", x.what());
 	}
