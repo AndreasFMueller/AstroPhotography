@@ -399,6 +399,7 @@ public:
 	JulianDate(time_t when);
 	virtual ~JulianDate() { }
 	double	T() const { return _T; }
+	double	H() const { return _H; }
 	double	years() const;
 	Angle	GMST() const;
 };

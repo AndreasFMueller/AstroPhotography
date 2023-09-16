@@ -4,11 +4,15 @@
 # (c) 2018 Prof Dr Andreas Mueller, Hochschule Rapperswil
 #
 
-bin_PROGRAMS = astrotime astrohorizon astroephemeris astrosunmoon
+bin_PROGRAMS = astrotime astrohorizon astroephemeris astrosunmoon astrojd
 
 noinst_PROGRAMS = gridcalculator
 
 noinst_HEADERS = 
+
+astrojd_SOURCES = astrojd.cpp
+astrojd_DEPENDENCIES = $(top_builddir)/lib/libastro.la
+astrojd_LDADD = -L$(top_builddir)/lib -lastro
 
 astrotime_SOURCES = astrotime.cpp
 astrotime_DEPENDENCIES = $(top_builddir)/lib/libastro.la
