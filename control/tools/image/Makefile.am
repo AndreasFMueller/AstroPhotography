@@ -7,7 +7,7 @@
 
 bin_PROGRAMS = imageinfo makedark makeflat calibrate \
 	transform clamp logscale stack fitsheader imagerepo rescale \
-	gammacorrect convolve background crop radon backprojection \
+	gammacorrect convolve background crop radon radoni backprojection \
 	colorbalance stars findtransform luminance unsharp color \
 	colorclamp hdr destar jpg2fits png2fits nan rgb2xyz psf \
 	deconvolve
@@ -107,6 +107,10 @@ background_LDADD = -L$(top_builddir)/lib -lastro
 radon_SOURCES = radon.cpp
 radon_DEPENDENCIES = $(top_builddir)/lib/libastro.la
 radon_LDADD = -L$(top_builddir)/lib -lastro
+
+radoni_SOURCES = radoni.cpp
+radoni_DEPENDENCIES = $(top_builddir)/lib/libastro.la
+radoni_LDADD = -L$(top_builddir)/lib -lastro
 
 backprojection_SOURCES = backprojection.cpp
 backprojection_DEPENDENCIES = $(top_builddir)/lib/libastro.la

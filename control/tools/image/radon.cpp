@@ -21,7 +21,7 @@ namespace app {
 namespace radon {
 
 /**
- * \brief display a help message for the dark program
+ * \brief display a help message for the radon program
  */
 static void	usage(const char *progname) {
 	Path	p(progname);
@@ -55,10 +55,9 @@ static struct option	longopts[] = {
 };
 
 /**
- * \brief Main function for makedark tool 
+ * \brief Main function for radon tool 
  *
- * This tool takes a number of images from a CCD and produces a dark image
- * from them.
+ * This tool takes an image and computes its radon transform
  */
 int	main(int argc, char *argv[]) {
 	int	width = 1024;
@@ -130,7 +129,7 @@ int	main(int argc, char *argv[]) {
 	return EXIT_SUCCESS;
 }
 
-} // namespace dark
+} // namespace radon
 } // namespace app
 } // namespace astro
 
