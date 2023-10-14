@@ -33,7 +33,7 @@ void	BackProjection::anglesum(int angleindex) {
 	int	bheight = size.height();
 
 	// compute the angle step
-	double	angle = angleindex * M_PI / (_radon.getSize().height() / 2);
+	double	angle = angleindex * M_PI / _radon.getSize().height();
 	double	c = cos(angle), s = sin(angle);
 
 	// determine range of pixels in a row
