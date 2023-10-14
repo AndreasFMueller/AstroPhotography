@@ -617,6 +617,56 @@ template<>
 float	HSL<float>::B() const;
 
 /**
+ * \brief Conversion class from HSV to RGB
+ */
+class HSVBase {
+	double	_h;
+	double	_s;
+	double	_v;
+public:
+	double	h() const { return _h; }
+	double	s() const { return _s; }
+	double	v() const { return _v; }
+private:
+	double	_r, _g, _b;
+public:
+	HSVBase(double hue, double saturation, double value);
+	double	r() const { return _r; }
+	double	g() const { return _g; }
+	double	b() const { return _b; }
+};
+
+template<typename P>
+class HSV : public HSVBase {
+public:
+	HSV(double hue, double saturation, P value)
+		: HSVBase(hue, saturation,
+		  value / std::numeric_limits<P>::max()) {
+	}
+	P	R() const { return std::numeric_limits<P>::max() * r(); }
+	P	G() const { return std::numeric_limits<P>::max() * g(); }
+	P	B() const { return std::numeric_limits<P>::max() * b(); }
+};
+
+template<>
+HSV<double>::HSV(double hue, double saturation, double value);
+template<>
+double	HSV<double>::R() const;
+template<>
+double	HSV<double>::G() const;
+template<>
+double	HSV<double>::B() const;
+
+template<>
+HSV<float>::HSV(double hue, double saturation, float value);
+template<>
+float	HSV<float>::R() const;
+template<>
+float	HSV<float>::G() const;
+template<>
+float	HSV<float>::G() const;
+
+/**
  * \brief RGB pixels of any type
  *
  * RGB pixels encode color with three independent color channels.

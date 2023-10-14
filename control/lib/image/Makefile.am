@@ -93,6 +93,7 @@ libastroimage_la_SOURCES = 						\
 	Histogram.cpp							\
 	HotPixelBase.cpp						\
 	HSLBase.cpp							\
+	HSVBase.cpp							\
 	Image.cpp							\
 	ImageBase.cpp							\
 	ImageBuffer.cpp							\

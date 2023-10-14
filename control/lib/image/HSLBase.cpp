@@ -40,15 +40,15 @@ HSLBase::HSLBase(double hue, double saturation, double luminance)
 	double	hprime = hue / (M_PI / 3);
 	double	chroma = (1 - fabs(2 * luminance - 1)) * saturation;
 	double	x = chroma * (1 - fabs(mod2(hprime) - 1));
-	if (hue < 1) {
+	if (hprime < 1) {
 				_r = chroma; _g = x;      _b = 0;
-	} else if (hue < 2) {
+	} else if (hprime < 2) {
 				_r = x;      _g = chroma; _b = 0;
-	} else if (hue < 3) {
+	} else if (hprime < 3) {
 				_r = 0;      _g = chroma; _b = x;
-	} else if (hue < 4) {
+	} else if (hprime < 4) {
 				_r = 0;      _g = x;      _b = chroma;
-	} else if (hue < 5) {
+	} else if (hprime < 5) {
 				_r = x;      _g = 0;      _b = chroma;
 	} else {
 				_r = chroma; _g = 0;      _b = x;
