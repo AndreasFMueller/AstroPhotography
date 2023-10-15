@@ -108,7 +108,6 @@ static void	filter_radon(Image<double>& rawradon, bool logarithmic,
 		fftw_execute(forward);
 		fspace[0][0] = 0;
 		fspace[0][1] = 0;
-#if 1
 		for (int k = 1; k < w2; k++) {
 			double	factor = 1.;
 			if (k < radius) 
@@ -118,18 +117,14 @@ static void	filter_radon(Image<double>& rawradon, bool logarithmic,
 			fspace[w - k][0] *= factor;
 			fspace[w - k][1] *= factor;
 		}
-#if 1
 		if (w2 == w - w2) {
 			fspace[w2][0] = 0;
 			fspace[w2][1] = 0;
 		}
-#endif
-#endif
 		fftw_execute(backward);
 		for (int x = 0; x < w; x++) {
 			rawradon.pixel((x + w2) % w, y)
 				= rspace[x][0];
-				//= hypot(rspace[x][0], rspace[x][1]);
 		}
 	}
 	if (filteredname.size() != 0) {
@@ -242,7 +237,6 @@ int	main(int argc, char *argv[]) {
 		height = radonptr->size().height();
 	}
 
-#if 1
 	// perform the backprojection transform
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "perform back projection");
 	ImageSize	backprojectionsize(width, height);
@@ -254,7 +248,7 @@ int	main(int argc, char *argv[]) {
 	io::FITSoutfile<double>	out(outfile);
 	out.setPrecious(false);
 	out.write(backprojectionimage);
-#endif
+
 	return EXIT_SUCCESS;
 }
 

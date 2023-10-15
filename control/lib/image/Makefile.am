@@ -89,6 +89,7 @@ libastroimage_la_SOURCES = 						\
 	GammaTransform.cpp						\
 	GaussImage.cpp							\
 	GaussNoiseAdapter.cpp						\
+	HaarWavelet.cpp							\
 	HDR.cpp								\
 	Histogram.cpp							\
 	HotPixelBase.cpp						\

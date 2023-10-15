@@ -56,7 +56,8 @@ include_HEADERS =							\
 	AstroUVC.h							\
 	AstroUnicap.h							\
 	AstroUtils.h							\
-	AstroViewer.h
+	AstroViewer.h							\
+	AstroWavelets.h
 
 noinst_HEADERS =							\
 	Backlash.h							\

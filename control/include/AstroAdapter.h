@@ -2940,7 +2940,6 @@ public:
 	}
 };
 
-
 } // namespace adapter
 } // namespace astro
 

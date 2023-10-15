@@ -10,7 +10,7 @@ bin_PROGRAMS = imageinfo makedark makeflat calibrate \
 	gammacorrect convolve background crop radon radoni backprojection \
 	colorbalance stars findtransform luminance unsharp color \
 	colorclamp hdr destar jpg2fits png2fits nan rgb2xyz psf \
-	deconvolve
+	deconvolve haar
 
 color_SOURCES = color.cpp
 color_DEPENDENCIES = $(top_builddir)/lib/libastro.la
@@ -144,6 +144,10 @@ deconvolve_SOURCES = deconvolve.cpp
 deconvolve_DEPENDENCIES = $(top_builddir)/lib/libastro.la
 deconvolve_LDADD = -L$(top_builddir)/lib -lastro
 
+haar_SOURCES = haar.cpp
+haar_DEPENDENCIES = $(top_builddir)/lib/libastro.la
+haar_LDADD = -L$(top_builddir)/lib -lastro
+
 fitsheadertest:	fitsheader
 	cp andromeda-chart.fits headertest.fits
 	./fitsheader -d add headertest.fits \
@@ -179,4 +183,9 @@ gausstest:	deconvolve
 	./deconvolve --debug --iterations=20 --constrained --prefix=fast --psf=psf.fits --method=fastvancittert \
 		luminance.fits gauss.fits
 
+thaar:	haar
+	./haar --debug --force jackie.fits jackie-wavelets.fits
+	convert jackie-wavelets.fits jackie-wavelets.jpg
+	./haar --debug --force --inverse jackie-wavelets.fits jackie-back.fits
+	convert jackie-back.fits jackie-back.jpg
 
