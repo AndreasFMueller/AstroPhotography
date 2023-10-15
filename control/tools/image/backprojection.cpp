@@ -42,9 +42,112 @@ static void	usage(const char *progname) {
 	std::cout << "    -w,--width=<width>      width of the backprojection transform image"
 		<< std::endl;
 	std::cout << "    -f,--filter             also filter the backprojekction" << std::endl;
+	std::cout << "    -F,--filtered-file=<f>  write the filtered radon transform to this file" << std::endl;
+	std::cout << "                            (implies the -f option)" << std::endl;
+	std::cout << "    -r,--radius=<r>         set the radius for filtering" << std::endl;
 	std::cout << "    -h,-?,--help            "
 		"show this help message" << std::endl;
 	std::cout << std::endl;
+}
+
+/**
+ * \brief logarithmic image
+ *
+ * convert the image values to logarithmic values to make small
+ * values visible
+ *
+ * \param image		replace pixel values of this image by logs
+ */
+static void	logarithmic_image (Image<double>& image) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "take logarithm values of image");
+	const unsigned int	l = image.size().getPixels();
+	for (unsigned int i = 0; i < l; i++) {
+		double v = image[i];
+		if (v < 1) {
+			v = 0;
+		} else {
+			v = log(v);
+		}
+		image[i] = v;
+	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "logarithmization complete");
+}
+
+/**
+ * \brief Filter the radon transform
+ *
+ * This function performs a Fourier-filtering on every row of the input
+ * image
+ *
+ * \param rawradon	the raw radon transform
+ * \param logarithmic	whether or not to export a logarithmic version
+ * \param filteredname	the name of the file to write the filtered 
+ *			radon transform to
+ */
+static void	filter_radon(Image<double>& rawradon, bool logarithmic,
+			const std::string& filteredname, double radius) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "filtering radon transform, radius = %f",
+		radius);
+	// perform filtering on 1d Fourier transforms
+	const int	w = rawradon.size().width();
+	const int	w2 = w / 2;
+	const int	h = rawradon.size().height();
+	fftw_complex	*rspace
+		= (fftw_complex*)fftw_malloc(sizeof(fftw_complex) * w);
+	fftw_complex	*fspace
+		= (fftw_complex*)fftw_malloc(sizeof(fftw_complex) * w);
+	fftw_plan	forward = fftw_plan_dft_1d(w, rspace, fspace,
+				-1, FFTW_ESTIMATE);
+	fftw_plan	backward = fftw_plan_dft_1d(w, fspace, rspace,
+				1, FFTW_ESTIMATE);
+	for (int y = 0; y < h; y++) {
+		for (int x = 0; x < w; x++) {
+			rspace[x][0] = rawradon.pixel((x + w2) % w, y);
+			rspace[x][1] = 0;
+		}
+		fftw_execute(forward);
+		fspace[0][0] = 0;
+		fspace[0][1] = 0;
+#if 1
+		for (int k = 1; k < w2; k++) {
+			double	factor = 1.;
+			if (k < radius) 
+				factor = k / radius;
+			fspace[k][0] *= factor;
+			fspace[k][1] *= factor;
+			fspace[w - k][0] *= factor;
+			fspace[w - k][1] *= factor;
+		}
+#if 1
+		if (w2 == w - w2) {
+			fspace[w2][0] = 0;
+			fspace[w2][1] = 0;
+		}
+#endif
+#endif
+		fftw_execute(backward);
+		for (int x = 0; x < w; x++) {
+			rawradon.pixel((x + w2) % w, y)
+				= rspace[x][0];
+				//= hypot(rspace[x][0], rspace[x][1]);
+		}
+	}
+	if (filteredname.size() != 0) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0,
+			"writing filtered radon transform to %s",
+			filteredname.c_str());
+		io::FITSoutfile<double>	out(filteredname);
+		out.setPrecious(false);
+		if (logarithmic) {
+			Image<double>	im(rawradon);
+			logarithmic_image(im);
+			out.write(im);
+		} else {
+			out.write(rawradon);
+		}
+		debug(LOG_DEBUG, DEBUG_LOG, 0,
+			"filtered image written");
+	}
 }
 
 static struct option	longopts[] = {
@@ -52,7 +155,10 @@ static struct option	longopts[] = {
 { "height",		required_argument,	NULL,	'h' }, /* 1 */
 { "debug",		no_argument,		NULL,	'd' }, /* 2 */
 { "filter",		no_argument,		NULL,	'f' }, /* 3 */
-{ "help",		no_argument,		NULL,	'?' }, /* 4 */
+{ "filtered-file",	required_argument,	NULL,	'F' }, /* 4 */
+{ "log",		no_argument,		NULL,	'l' }, /* 5 */
+{ "help",		no_argument,		NULL,	'?' }, /* 6 */
+{ "radius",		required_argument,	NULL,	'r' }, /* 7 */
 { NULL,			0,			NULL,	0   }
 };
 
@@ -63,25 +169,38 @@ static struct option	longopts[] = {
  * from them.
  */
 int	main(int argc, char *argv[]) {
+	std::string	filteredname;
 	int	width = -1;
 	int	height = -1;
 	int	c;
 	int	longindex;
 	bool	filter = false;
-	while (EOF != (c = getopt_long(argc, argv, "dw:h:f?",
+	bool	logarithmic = false;
+	double	radius = 0;
+	while (EOF != (c = getopt_long(argc, argv, "dw:h:fF:lr:?",
 		longopts, &longindex)))
 		switch (c) {
 		case 'd':
 			debuglevel = LOG_DEBUG;
 			break;
 		case 'h':
-			height = atoi(optarg);
+			height = std::stoi(optarg);
 			break;
 		case 'w':
-			width = atoi(optarg);
+			width = std::stoi(optarg);
 			break;
 		case 'f':
 			filter = true;
+			break;
+		case 'F':
+			filteredname = std::string(optarg);
+			filter = true;
+			break;
+		case 'l':
+			logarithmic = true;
+			break;
+		case 'r':
+			radius = std::stoi(optarg);
 			break;
 		case '?':
 			usage(argv[0]);
@@ -106,6 +225,15 @@ int	main(int argc, char *argv[]) {
 	DoubleAdapter	radon(radonptr);
 	Image<double>	rawradon(radon);
 
+	// new filter implementation
+	if (filter) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "filtering: %s file=%s",
+			(logarithmic) ? "logarithmic" : "linear",
+			filteredname.c_str());
+		filter_radon(rawradon, logarithmic, filteredname,
+			(radius > 0) ? radius : 300);
+	}
+
 	// if width or height are not set, we set them from the image
 	if (width < 0) {
 		width = radonptr->size().width();
@@ -114,61 +242,19 @@ int	main(int argc, char *argv[]) {
 		height = radonptr->size().height();
 	}
 
+#if 1
 	// perform the backprojection transform
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "perform back projection");
 	ImageSize	backprojectionsize(width, height);
 	BackProjection	backprojection(backprojectionsize, rawradon);
 	Image<double>	backprojectionimage(backprojection);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "back projection completed");
 
 	// if filtering is not required, return the image
-	if (!filter) {
-		io::FITSoutfile<double>	out(outfile);
-		out.setPrecious(false);
-		out.write(backprojectionimage);
-		return EXIT_SUCCESS;
-	}
-
-	// perform the filtering
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "filtering required");
-	FourierImage	fi(backprojectionimage);
-	FourierImage	filterimage(backprojectionimage.size());
-	int	w = filterimage.size().width();
-	int	W = w / 2;
-	int	h = filterimage.size().height();
-	int	rmax = ((W < h) ? W : h) / 2;
-	debug(LOG_DEBUG, DEBUG_LOG, 0,
-		"fourier image has size %d x %d, rmax = %d", w, h, rmax);
-	for (int x = 0; x < w / 2; x++) {
-		for (int y = 0; y < h; y++) {
-			double	r = 0;
-			double	r00 = hypot(x, y);
-			double	r01 = hypot(x, h - y);
-			//double	r10 = hypot(W - x, y);
-			//double	r11 = hypot(W - x, h - y);
-			if (r00 < rmax) {
-				r = r00;
-			}
-			if (r01 < rmax) {
-				r = r01;
-			}
-			//if (r10 < rmax) {
-			//	r = r10;
-			//}
-			//if (r11 < rmax) {
-			//	r = r11;
-			//}
-			filterimage.pixel(2 * x, y) = r;
-			filterimage.pixel(2 * x + 1, y) = 0;
-		}
-	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "filter function initialized");
-	FourierImagePtr	fourierfiltered = fi * filterimage;
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "fourier function multiplied");
-	ImagePtr	filtered = fourierfiltered->inverse();
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "multiplied");
-	io::FITSout	out(outfile);
+	io::FITSoutfile<double>	out(outfile);
 	out.setPrecious(false);
-	out.write(filtered);
-
+	out.write(backprojectionimage);
+#endif
 	return EXIT_SUCCESS;
 }
 
