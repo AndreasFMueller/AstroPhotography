@@ -30,43 +30,43 @@
 /* Define to 1 if you have the <inttypes.h> header file. */
 #undef HAVE_INTTYPES_H
 
-/* Define to 1 if you have the `cfitsio' library (-lcfitsio). */
+/* Define to 1 if you have the 'cfitsio' library (-lcfitsio). */
 #undef HAVE_LIBCFITSIO
 
-/* Define to 1 if you have the `dl' library (-ldl). */
+/* Define to 1 if you have the 'dl' library (-ldl). */
 #undef HAVE_LIBDL
 
-/* Define to 1 if you have the `fftw3' library (-lfftw3). */
+/* Define to 1 if you have the 'fftw3' library (-lfftw3). */
 #undef HAVE_LIBFFTW3
 
-/* Define to 1 if you have the `glpk' library (-lglpk). */
+/* Define to 1 if you have the 'glpk' library (-lglpk). */
 #undef HAVE_LIBGLPK
 
 /* Define to 1 if you have the <libintl.h> header file. */
 #undef HAVE_LIBINTL_H
 
-/* Define to 1 if you have the `jpeg' library (-ljpeg). */
+/* Define to 1 if you have the 'jpeg' library (-ljpeg). */
 #undef HAVE_LIBJPEG
 
-/* Define to 1 if you have the `m' library (-lm). */
+/* Define to 1 if you have the 'm' library (-lm). */
 #undef HAVE_LIBM
 
-/* Define to 1 if you have the `png' library (-lpng). */
+/* Define to 1 if you have the 'png' library (-lpng). */
 #undef HAVE_LIBPNG
 
-/* Define to 1 if you have the `pthread' library (-lpthread). */
+/* Define to 1 if you have the 'pthread' library (-lpthread). */
 #undef HAVE_LIBPTHREAD
 
-/* Define to 1 if you have the `sqlite3' library (-lsqlite3). */
+/* Define to 1 if you have the 'sqlite3' library (-lsqlite3). */
 #undef HAVE_LIBSQLITE3
 
-/* Define to 1 if you have the `usb-1.0' library (-lusb-1.0). */
+/* Define to 1 if you have the 'usb-1.0' library (-lusb-1.0). */
 #undef HAVE_LIBUSB_1_0
 
 /* Define to 1 if you have the <libusb-1.0/libusb.h> header file. */
 #undef HAVE_LIBUSB_1_0_LIBUSB_H
 
-/* Define to 1 if you have the `uuid' library (-luuid). */
+/* Define to 1 if you have the 'uuid' library (-luuid). */
 #undef HAVE_LIBUUID
 
 /* Define to 1 if you have the <locale.h> header file. */
@@ -156,7 +156,7 @@
 /* Define to the version of this package. */
 #undef PACKAGE_VERSION
 
-/* Define to 1 if all of the C90 standard headers exist (not just the ones
+/* Define to 1 if all of the C89 standard headers exist (not just the ones
    required in a freestanding environment). This macro is provided for
    backward compatibility; new code need not use it. */
 #undef STDC_HEADERS
