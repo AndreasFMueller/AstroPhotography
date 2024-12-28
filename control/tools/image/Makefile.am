@@ -6,7 +6,7 @@
 #
 
 bin_PROGRAMS = imageinfo makedark makeflat calibrate \
-	transform clamp logscale stack fitsheader imagerepo rescale \
+	transform clamp logscale imagestack fitsheader imagerepo rescale \
 	gammacorrect convolve background crop radon radoni backprojection \
 	colorbalance stars findtransform luminance unsharp color \
 	colorclamp hdr destar jpg2fits png2fits nan rgb2xyz psf \
@@ -60,9 +60,9 @@ transform_SOURCES = transform.cpp
 transform_DEPENDENCIES = $(top_builddir)/lib/libastro.la
 transform_LDADD = -L$(top_builddir)/lib -lastro 
 
-stack_SOURCES = stack.cpp
-stack_DEPENDENCIES = $(top_builddir)/lib/libastro.la
-stack_LDADD = -L$(top_builddir)/lib -lastro 
+imagestack_SOURCES = imagestack.cpp
+imagestack_DEPENDENCIES = $(top_builddir)/lib/libastro.la
+imagestack_LDADD = -L$(top_builddir)/lib -lastro 
 
 clamp_SOURCES = clamp.cpp
 clamp_DEPENDENCIES = $(top_builddir)/lib/libastro.la
@@ -162,10 +162,10 @@ fitsheadertest:	fitsheader
 		FOO mustbestring "test string"
 
 .PHONY:	orion
-orion:
+orion:	imagestack
 	rm -f orion.fits
-	./stack --debug --output=orion.fits orion/orion*.fits 2>&1 | tee stack.log
-#	./stack --debug --output=orion.fits orion/orion1.fits orion/orion2.fits 2>&1 | tee stack.log
+	./imagestack --debug --output=orion.fits orion/orion*.fits 2>&1 | tee stack.log
+#	./imagestack --debug --output=orion.fits orion/orion1.fits orion/orion2.fits 2>&1 | tee stack.log
 
 test:	png2fits
 	rm -f t.fits
