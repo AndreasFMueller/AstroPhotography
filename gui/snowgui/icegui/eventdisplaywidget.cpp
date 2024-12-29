@@ -86,6 +86,9 @@ EventDisplayWidget::~EventDisplayWidget() {
 		try {
 			_events->unregisterMonitor(_monitoridentity);
 		} catch (const std::exception& x) {
+			debug(LOG_ERR, DEBUG_LOG, 0,
+				"cannot unregister event monitor %s: %s",
+				_monitoridentity.name.c_str(), x.what());
 		}
 	}
 	delete ui;
@@ -103,6 +106,9 @@ void	EventDisplayWidget::setEvents(snowstar::EventHandlerPrx events) {
 				"%s", _monitoridentity.name.c_str());
 			_events->unregisterMonitor(_monitoridentity);
 		} catch (const std::exception& x) {
+			debug(LOG_ERR, DEBUG_LOG, 0,
+				"cannot unregister event monitor %s: %s",
+				_monitoridentity.name.c_str(), x.what());
 		}
 	}
 

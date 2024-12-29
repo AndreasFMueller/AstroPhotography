@@ -86,9 +86,21 @@ void	calibrationimagewidget::do_unregister() {
 		SIGNAL(updateSignal(snowstar::CalibrationImageProgress)),
 		0, 0);
 	if (_guider) {
-		_guider->unregisterCalibrationImageMonitor(_monitoridentity);
+		try {
+			_guider->unregisterCalibrationImageMonitor(_monitoridentity);
+		} catch (const std::exception& x) {
+			debug(LOG_ERR, DEBUG_LOG, 0, "cannot unregister "
+				"calibration image monitor %s: %s",
+				_monitoridentity.name.c_str(), x.what());
+		}
 	}
-	snowstar::CommunicatorSingleton::remove(_monitoridentity);
+	try {
+		snowstar::CommunicatorSingleton::remove(_monitoridentity);
+	} catch (const std::exception& x) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "cannot remove calibration "
+			"image monitor %s: %s",
+			_monitoridentity.name.c_str(), x.what());
+	}
 	_monitor = NULL;
 }
 

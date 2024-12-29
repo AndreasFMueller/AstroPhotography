@@ -129,13 +129,27 @@ coolercontrollerwidget::~coolercontrollerwidget() {
 	// unregister the callback
 	Ice::Identity	_identity = identity();
 	if (_cooler) {
-		_cooler->unregisterCallback(_identity);
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "unregister callback");
+		try {
+			_cooler->unregisterCallback(_identity);
+			debug(LOG_DEBUG, DEBUG_LOG, 0,
+				"unregister cooler callback %s",
+				_identity.name.c_str());
+		} catch (const std::exception& x) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0,
+				"unregister cooler callback %s",
+				_identity.name.c_str());
+		}
 	}
 
 	// remove the callback
-	snowstar::CommunicatorSingleton::remove(_identity);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "cooler callback removed");
+	try {
+		snowstar::CommunicatorSingleton::remove(_identity);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "cooler callback %s removed",
+			_identity.name.c_str());
+	} catch (const std::exception& x) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "cannot remove cooler callback "
+			"%s: %s", _identity.name.c_str(), x.what());
+	}
 	_cooler_callback = NULL;
 	if (ui) {
 		delete ui;
@@ -162,8 +176,14 @@ void	coolercontrollerwidget::setupCooler() {
 	// if we already have a cooler and a callback, we should
 	// destroy them
 	if ((_cooler) && (_cooler_callback)) {
-		_cooler->unregisterCallback(identity());
-		snowstar::CommunicatorSingleton::remove(identity());
+		try {
+			_cooler->unregisterCallback(identity());
+			snowstar::CommunicatorSingleton::remove(identity());
+		} catch (const std::exception& x) {
+			debug(LOG_ERR, DEBUG_LOG, 0,
+				"can't cleanup previous cooler callback %s: %s",
+				identity().name.c_str(), x.what());
+		}
 	}
 
 	// enable all input widgets

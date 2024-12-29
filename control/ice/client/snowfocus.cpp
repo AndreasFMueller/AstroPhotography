@@ -339,7 +339,15 @@ int	main(int argc, char *argv[]) {
 		while (!signal_received) {
 			sleep(1);
 		}
-		focusing->unregisterCallback(ident);
+		try {
+			focusing->unregisterCallback(ident);
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "focusing callback %s "
+				"removed", ident.name.c_str());
+		} catch (const std::exception& x) {
+			debug(LOG_ERR, DEBUG_LOG, 0, "cannot remove focusing "
+				"callback %s: %s",
+				ident.name.c_str(), x.what());
+		}
 		return EXIT_SUCCESS;
 	}
 

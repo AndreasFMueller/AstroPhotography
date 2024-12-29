@@ -68,9 +68,27 @@ filterwheelcontrollerwidget::~filterwheelcontrollerwidget() {
 	Ice::Identity	_identity = identity();
 
 	if (_filterwheel) {
-		_filterwheel->unregisterCallback(_identity);
+		try {
+			_filterwheel->unregisterCallback(_identity);
+			debug(LOG_DEBUG, DEBUG_LOG, 0,
+				"filterwheel callback %s unregistered",
+				_identity.name.c_str());
+		} catch (const std::exception& x) {
+			debug(LOG_ERR, DEBUG_LOG, 0,
+				"cannot unregister filterhweel callback %s: %s",
+				_identity.name.c_str(), x.what());
+		}
 	}
-	snowstar::CommunicatorSingleton::remove(_identity);
+	try {
+		snowstar::CommunicatorSingleton::remove(_identity);
+		debug(LOG_DEBUG, DEBUG_LOG, 0,
+			"filterwheel callback %s removed",
+			_identity.name.c_str());
+	} catch (const std::exception& x) {
+		debug(LOG_ERR, DEBUG_LOG, 0,
+			"cannot remove filterwheel callback %s: %s",
+			_identity.name.c_str(), x.what());
+	}
 
 	delete ui;
 }
@@ -181,6 +199,8 @@ void	filterwheelcontrollerwidget::setupFilterwheel() {
 
 		// register the callback with the server
 		_filterwheel->registerCallback(identity());
+	} else {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "no filter wheel found");
 	}
 	ui->filterBox->blockSignals(false);
 
@@ -219,7 +239,13 @@ void    filterwheelcontrollerwidget::setFilter(int index) {
 void    filterwheelcontrollerwidget::filterwheelChanged(int index) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "filterwheelChanged(%d)", index);
 	if (_filterwheel) {
-		_filterwheel->unregisterCallback(identity());
+		try {
+			_filterwheel->unregisterCallback(identity());
+		} catch (...) {
+			debug(LOG_ERR, DEBUG_LOG, 0,
+				"cannot unregister old filterwheel callback %s",
+				identity().name.c_str());
+		}
 	}
 	_filterwheel = _instrument.filterwheel(index);
 	try {

@@ -129,6 +129,7 @@ void	focusercontrollerwidget::setupFocuser() {
 		ui->positionSpinBox->setEnabled(true);
 		ui->positionButton->setEnabled(true);
 	} else {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "no focuser detected");
 		ui->currentField->setEnabled(false);
 		ui->positionSpinBox->setEnabled(false);
 		ui->positionButton->setEnabled(false);

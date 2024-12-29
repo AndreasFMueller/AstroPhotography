@@ -167,7 +167,14 @@ int	command_monitor(CcdPrx ccd) {
 	Ice::Identity	identity = CommunicatorSingleton::add(callbackptr);
 	ccd->registerCallback(identity);
 	sleep(86400);
-	ccd->unregisterCallback(identity);
+	try {
+		ccd->unregisterCallback(identity);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "ccd callback %s removed",
+			identity.name.c_str());
+	} catch (const std::exception& x) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "cannot remove ccd callback "
+			"%s: %s", identity.name.c_str(), x.what());
+	}
 	return EXIT_SUCCESS;
 }
 

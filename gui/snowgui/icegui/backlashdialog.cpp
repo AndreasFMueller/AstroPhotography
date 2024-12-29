@@ -62,7 +62,15 @@ void	BacklashDialog::guider(snowstar::GuiderPrx guider) {
 			SIGNAL(updateResultSignal(snowstar::BacklashResult)),
 			0, 0);
 		if (_guider) {
-			_guider->unregisterBacklashMonitor(_monitoridentity);
+			try {
+				_guider->unregisterBacklashMonitor(_monitoridentity);
+			} catch (const std::exception& x) {
+				debug(LOG_ERR, DEBUG_LOG, 0,
+					"cannot unregister backlash monitor "
+					"%s: %s",
+					_monitoridentity.name.c_str(),
+					x.what());
+			}
 		}
 	}
 

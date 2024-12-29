@@ -185,6 +185,9 @@ void	SystemInfoWidget::heartbeat_lost() {
 		_daemon->unregisterHeartbeatMonitor(_heartbeat_identity);
 		_daemon->registerHeartbeatMonitor(_heartbeat_identity);
 	} catch (const std::exception& x) {
+		debug(LOG_ERR, DEBUG_LOG, 0,
+			"cannot remove heartbeat monitor %s: %s",
+			_heartbeat_identity.name.c_str(), x.what());
 	}
 }
 

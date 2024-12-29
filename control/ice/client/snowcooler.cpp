@@ -170,9 +170,15 @@ int	command_monitor(CoolerPrx cooler) {
 	while (0 == (rc = sleep(60))) { }
 
 	// unregister
-	cooler->unregisterCallback(ident);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "monitor %s unregistered",
-		ident.name.c_str());
+	try {
+		cooler->unregisterCallback(ident);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "cooler callback %s unregistered",
+			ident.name.c_str());
+	} catch (const std::exception& x) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "cannot unregister cooler "
+			"callback %s , %s",
+			ident.name.c_str(), x.what());
+	}
 	return EXIT_SUCCESS;
 }
 

@@ -128,7 +128,16 @@ int	command_monitor(FilterWheelPrx filterwheel) {
 	filterwheel->registerCallback(ident);
 	signal(SIGINT, signal_handler);
 	sleep(86400);
-	filterwheel->unregisterCallback(ident);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "removing filterwheel callback %s",
+		ident.name.c_str());
+	try {
+		filterwheel->unregisterCallback(ident);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "removed filterwheel callback "
+			"%s", ident.name.c_str());
+	} catch (const std::exception& x) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "failed to remove filterwheel "
+			"callback %s: %s", ident.name.c_str(), x.what());
+	}
 	return EXIT_SUCCESS;
 }
 

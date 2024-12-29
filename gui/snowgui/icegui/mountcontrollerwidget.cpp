@@ -79,6 +79,9 @@ mountcontrollerwidget::~mountcontrollerwidget() {
 		try {
 			_mount->unregisterCallback(_identity);
 		} catch (...) {
+			debug(LOG_ERR, DEBUG_LOG, 0,
+				"cannot remove mount callback %s",
+				_identity.name.c_str());
 		}
 	}
 	MountCallbackI	*_callback = dynamic_cast<MountCallbackI*>(
@@ -390,7 +393,13 @@ void	mountcontrollerwidget::mountChanged(int index) {
 	if (_mount) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0,
 			"unregister previous mount");
-		_mount->unregisterCallback(_identity);
+		try {
+			_mount->unregisterCallback(_identity);
+		} catch (...) {
+			debug(LOG_ERR, DEBUG_LOG, 0,
+				"cannot unregister old mount callback %s",
+				_identity.name.c_str());
+		}
 	} 
 
 	// get the mount and set it put

@@ -76,7 +76,13 @@ guideportcontrollerwidget::guideportcontrollerwidget(QWidget *parent)
  */
 guideportcontrollerwidget::~guideportcontrollerwidget() {
 	if (_guideport) {
-		_guideport->unregisterCallback(_guideport_identity);
+		try {
+			_guideport->unregisterCallback(_guideport_identity);
+		} catch (...) {
+			debug(LOG_ERR, DEBUG_LOG, 0,
+				"cannot unregister guideport monitor %s",
+				_guideport_identity.name.c_str());
+		}
 	}
 	try {
 		snowstar::CommunicatorSingleton::remove(_guideport_identity);
@@ -181,8 +187,9 @@ void	guideportcontrollerwidget::guideportChanged(int index) {
 				_guideport_identity);
 		}
 	} catch (const std::exception& x) {
-		debug(LOG_ERR, DEBUG_LOG, 0, "cannot remove callback: %s",
-			x.what());
+		debug(LOG_ERR, DEBUG_LOG, 0,
+			"cannot remove guideport callback %s: %s",
+			_guideport_identity.name.c_str(), x.what());
 	}
 	_guideport = _instrument.guideport(index);
 	setupGuideport();

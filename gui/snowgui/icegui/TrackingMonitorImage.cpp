@@ -43,7 +43,13 @@ void	TrackingMonitorImage::setGuider(snowstar::GuiderPrx guider,
  */
 void	TrackingMonitorImage::unregister() {
 	if (_guider) {
-		_guider->unregisterImageMonitor(_myidentity);
+		try {
+			_guider->unregisterImageMonitor(_myidentity);
+		} catch (const std::exception& x) {
+			debug(LOG_ERR, DEBUG_LOG, 0,
+				"cannot unregister tracking image monitor "
+				"%s: %s", _myidentity.name.c_str(), x.what());
+		}
 	}
 }
 

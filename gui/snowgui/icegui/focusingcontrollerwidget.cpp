@@ -69,8 +69,13 @@ focusingcontrollerwidget::focusingcontrollerwidget(QWidget *parent) :
  */
 focusingcontrollerwidget::~focusingcontrollerwidget() {
 	_timer.stop();
-	_focusing->unregisterCallback(_ident);
-	snowstar::CommunicatorSingleton::remove(_ident);
+	try {
+		_focusing->unregisterCallback(_ident);
+		snowstar::CommunicatorSingleton::remove(_ident);
+	} catch (...) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "cannot cleanup focusing "
+			"callback %s", _ident.name.c_str());
+	}
 	// we should also remove it from the adapter
 	delete ui;
 }

@@ -26,7 +26,13 @@ TrackingMonitorController::TrackingMonitorController(QObject *parent,
  */
 TrackingMonitorController::~TrackingMonitorController() {
 	if (_guider) {
-		_guider->unregisterTrackingMonitor(_myidentity);
+		try {
+			_guider->unregisterTrackingMonitor(_myidentity);
+		} catch (const std::exception& x) {
+			debug(LOG_ERR, DEBUG_LOG, 0,
+				"cannot unregister tracking monitor %s: %s",
+				_myidentity.name.c_str(), x.what());
+		}
 	}
 }
 

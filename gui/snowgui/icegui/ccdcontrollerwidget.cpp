@@ -288,7 +288,16 @@ ccdcontrollerwidget::~ccdcontrollerwidget() {
 		Ice::Identity	_identity = CallbackIdentity::identity(
 			_ccd_callback);
 		if (_ccd) {
-			_ccd->unregisterCallback(_identity);
+			try {
+				_ccd->unregisterCallback(_identity);
+				debug(LOG_DEBUG, DEBUG_LOG, 0,
+					"ccd callback %s unregistered",
+					_identity.name.c_str());
+			} catch (const std::exception& x) {
+				debug(LOG_ERR, DEBUG_LOG, 0,
+					"cannot unregister ccd callback %s: %s",
+					_identity.name.c_str(), x.what());
+			}
 		}
 	}
 	delete ui;
@@ -787,7 +796,14 @@ void	ccdcontrollerwidget::ccdChanged(int index) {
 			Ice::Identity	_identity
 				= CallbackIdentity::identity(_ccd_callback);
 			if (_ccd) {
-				_ccd->unregisterCallback(_identity);
+				try {
+					_ccd->unregisterCallback(_identity);
+				} catch (const std::exception& x) {
+					debug(LOG_ERR, DEBUG_LOG, 0,
+						"cannot unregister old ccd "
+						"callback %s",
+						_identity.name.c_str());
+				}
 			}
 		}
 	} catch (const std::exception& x) {

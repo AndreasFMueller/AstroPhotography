@@ -165,7 +165,14 @@ int	command_monitor(GuidePortPrx guideport) {
 	while (0 == (rc = sleep(60))) { }
 
 	// unregister the callback
-	guideport->unregisterCallback(ident);
+	try {
+		guideport->unregisterCallback(ident);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "guidport callback %s removed",
+			ident.name.c_str());
+	} catch (const std::exception& x) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "cannot remove guidport callback "
+			"%s: %s", ident.name.c_str(), x.what());
+	}
 	return EXIT_SUCCESS;
 }
 

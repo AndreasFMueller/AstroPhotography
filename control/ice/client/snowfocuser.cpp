@@ -157,9 +157,14 @@ int	command_monitor(FocuserPrx focuser) {
 	while (0 == (rc = sleep(60))) { }
 
 	// unregister
-	focuser->unregisterCallback(ident);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "monitor %s unregistered",
-		ident.name.c_str());
+	try {
+		focuser->unregisterCallback(ident);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "focuser monitor %s unregistered",
+			ident.name.c_str());
+	} catch (const std::exception& x) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "cannot unregister focuser "
+			"callback %s: %s", ident.name.c_str(), x.what());
+	}
 	return EXIT_SUCCESS;
 }
 
