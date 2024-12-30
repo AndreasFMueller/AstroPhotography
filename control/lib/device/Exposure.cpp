@@ -170,13 +170,14 @@ std::string	Exposure::quality2string(quality_t q) {
 }
 
 Exposure::quality_t	Exposure::string2quality(const std::string& q) {
-	if (q == "high") {
+	std::string	tq = trim(q);
+	if (tq == "high") {
 		return high;
 	}
-	if (q == "fast") {
+	if (tq == "fast") {
 		return fast;
 	}
-	std::string	msg = stringprintf("unknown quality %s", q.c_str());
+	std::string	msg = stringprintf("unknown quality '%s'", tq.c_str());
 	throw std::runtime_error(msg);
 }
 

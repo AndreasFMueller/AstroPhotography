@@ -77,6 +77,9 @@ exposewidget::exposewidget(QWidget *parent)
 	connect(ui->repositoryTree,
 		SIGNAL(itemDoubleClicked(QTreeWidgetItem*,int)),
 		this, SLOT(itemDoubleClicked(QTreeWidgetItem*,int)));
+
+	connect(this, SIGNAL(repositorySelected()),
+		this, SLOT(selectRepository()));
 }
 
 /**
@@ -109,6 +112,7 @@ void	exposewidget::instrumentSetup(astro::discover::ServiceObject serviceobject,
  * \brief main thread setup completion
  */
 void	exposewidget::setupComplete() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "setupComplete()");
 }
 
 /**
@@ -140,16 +144,17 @@ void	exposewidget::setRepositories(snowstar::RepositoriesPrx repositories) {
 		box->addItem(QString(reponame.c_str()));
 		if (!_repository) {
 			_repositoryname = reponame;
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "get repository '%s'",
+				_repositoryname.c_str());
 			_repository = _repositories->get(_repositoryname);
 		}
 		ui->repositoryBox->setCurrentIndex(0);
 	}
 	ui->repositoryBox->setEnabled(true);
 	ui->repositoryBox->blockSignals(false);
-	repositoryChanged(QString(_repositoryname.c_str()));
 
-	// update the file list
-	updateImagelist();
+	// make sure repository is updated on the main thread
+	emit repositorySelected();
 }
 
 /**
@@ -160,7 +165,10 @@ void	exposewidget::repositoryChanged(const QString& repositoryname) {
 		repositoryname.toLatin1().data());
 	_repositoryname = std::string(repositoryname.toLatin1().data());
 	_repository = _repositories->get(_repositoryname);
+	updateRepositoryContent();
+}
 
+void	exposewidget::updateRepositoryContent() {
 	// now that we have a repository, lets retrieve the project name
 	// strings
 	QString	currentproject = ui->projectBox->currentText();
@@ -182,6 +190,7 @@ void	exposewidget::repositoryChanged(const QString& repositoryname) {
 			}
 			ui->projectBox->addItem(project);
 		}
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "project names updated");
 	}
 	ui->projectBox->blockSignals(false);
 	if (currentindex >= 0) {
@@ -191,6 +200,11 @@ void	exposewidget::repositoryChanged(const QString& repositoryname) {
 	}
 
 	updateImagelist();
+}
+
+void	exposewidget::selectRepository() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "selectRepository called");
+	updateRepositoryContent();
 }
 
 /**
@@ -473,20 +487,28 @@ void	exposewidget::updateImagelist() {
 
 	// remove all children
 	int	n = ui->repositoryTree->topLevelItemCount();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "process %d top level items", n);
 	for (int i = 0; i < n; i++) {
 		QTreeWidgetItem	*top = ui->repositoryTree->topLevelItem(i);
 		while (top->childCount() > 0) {
 			delete top->takeChild(0);
 		}
 	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "children deleted");
 
-	std::string	condition = astro::stringprintf("project = '%s'",
-				_projectname.c_str());
+	std::string	condition("project like '%'");
+	if (astro::trim(_projectname).size() > 0) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "getting ids for project '%s'",
+			_projectname.c_str());
+		std::string	condition = astro::stringprintf(
+					"project = '%s'", _projectname.c_str());
+	}
 	snowstar::idlist	ids = _repository->getIdsCondition(condition);
 	_selectedfiles = ids.size();
-	ui->downloadButton->setEnabled(_selectedfiles > 0);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "got %d ids", _selectedfiles);
 	for (auto ptr = ids.begin(); ptr != ids.end(); ptr++) {
 		int	id = *ptr;
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "download info for id %d", id);
 		snowstar::ImageInfo	info = _repository->getInfo(id);
 
 		QStringList	list;
@@ -527,10 +549,14 @@ void	exposewidget::updateImagelist() {
 
 		RepositoryKey	key;
 		if (((info.purpose == "light") || (info.purpose == "flat")) && (info.filter.size() > 0)) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "using purpose and filter");
 			key = RepositoryKey(info.purpose, info.filter);
 		} else {
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "using purpose only");
 			key = RepositoryKey(info.purpose);
 		}
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "repository key is '%s'",
+			key.toString().c_str());
 		auto s = _repository_index.find(key);
 		if (s == _repository_index.end()) {
 			debug(LOG_DEBUG, DEBUG_LOG, 0, "key not found: '%s', try again without filter",
@@ -547,6 +573,7 @@ void	exposewidget::updateImagelist() {
 				key.toString().c_str());
 		}
 	}
+	ui->downloadButton->setEnabled(_selectedfiles > 0);
 }
 
 /**

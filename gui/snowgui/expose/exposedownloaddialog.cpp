@@ -81,6 +81,8 @@ void	exposedownloaddialog::accept() {
 	if (thread) {
 		thread->stopProcess();
 		if (thread->isRunning()) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0,
+				"waiting for thread to terminate");
 			thread->wait();
 		}
 		delete thread;

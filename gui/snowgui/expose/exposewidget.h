@@ -51,6 +51,7 @@ private:
 
 	void	updateHeaderlist();
 	void	updateImagelist();
+	void	updateRepositoryContent();
 
 	astro::image::ImagePtr	currentImage(snowstar::ImageEncoding encoding);
 
@@ -59,9 +60,11 @@ private:
 signals:
 	void	startExposure();
 	void	offerImage(astro::image::ImagePtr, std::string);
+	void	repositorySelected();
 
 public slots:
 	void	repositoryChanged(const QString&);
+	void	selectRepository();
 	void	startClicked();
 	void	projectChanged(const QString&);
 	void	filterwheelSelected(snowstar::FilterWheelPrx);
