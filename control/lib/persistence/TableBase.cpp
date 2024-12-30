@@ -17,7 +17,7 @@ TableBase::TableBase(Database database, const std::string& tablename,
 	: _database(database), _tablename(tablename) {
 	if (NULL == _database) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "no database");
-		throw BadDatabase("no database persent");
+		throw BadDatabase("no database present");
 	}
 	// test whether the database contains the table
 	if (!_database->hastable(tablename)) {
