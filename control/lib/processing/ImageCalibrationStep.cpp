@@ -26,6 +26,7 @@ namespace process {
  */
 ImageCalibrationStep::ImageCalibrationStep(NodePaths& parent)
 	: ImageStep(parent) {
+	_interpolation = 1;
 	_interpolate = true;
 	_demosaic = false;
 	_flip = false;
@@ -40,6 +41,9 @@ ProcessingStep::state	ImageCalibrationStep::do_work() {
 	int	flatid = -1;
 
 	astro::camera::Imager	imager;
+
+	// set interpolation step width
+	imager.interpolation(_interpolation);
 
 	// check for the dark image
 	if (_dark) {

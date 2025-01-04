@@ -45,6 +45,12 @@ public:
 	void	flatdivide(bool flatdivide) { _flatdivide = flatdivide; }
 
 private:
+	int	_interpolation;
+public:
+	int	interpolation() const { return _interpolation; }
+	void	interpolation(int i) { _interpolation = i; }
+
+private:
 	bool	_interpolate;
 public:
 	bool	interpolate() const { return _interpolate; }

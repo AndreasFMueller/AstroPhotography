@@ -483,6 +483,7 @@ public:
 class ImageCalibrationStep : public ImageStep {
 	ProcessingStepPtr	_dark;
 	ProcessingStepPtr	_flat;
+	int	_interpolation;
 	bool	_interpolate;
 	bool	_demosaic;
 	bool	_flip;
@@ -492,6 +493,8 @@ public:
 	void	dark(ProcessingStepPtr d) { _dark = d; }
 	ProcessingStepPtr	flat() const { return _flat; }
 	void	flat(ProcessingStepPtr f) { _flat = f; }
+	int	interpolation() const { return _interpolation; }
+	void	interpolation(int i) { _interpolation = i; }
 	bool	interpolate() const { return _interpolate; }
 	void	interpolate(bool i) { _interpolate = i; }
 	bool	demosaic() const { return _demosaic; }

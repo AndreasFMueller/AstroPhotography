@@ -93,7 +93,8 @@ public:
 	Corrector(astro::image::ImagePtr calibrationimage,
 		const astro::image::ImageRectangle rectangle
 			= astro::image::ImageRectangle());
-	virtual void	operator()(astro::image::ImagePtr image) const = 0;
+	virtual void	operator()(astro::image::ImagePtr image,
+				const int interpolation_distance = 0) const = 0;
 };
 
 /**
@@ -104,7 +105,8 @@ public:
 	DarkCorrector(astro::image::ImagePtr dark,
 		const astro::image::ImageRectangle rectangle
 			= astro::image::ImageRectangle());
-	virtual void	operator()(astro::image::ImagePtr image) const;
+	virtual void	operator()(astro::image::ImagePtr image,
+				const int interpolation_distance = 0) const;
 };
 
 /**
@@ -115,7 +117,8 @@ public:
 	FlatCorrector(astro::image::ImagePtr flat,
 		const astro::image::ImageRectangle rectangle
 			= astro::image::ImageRectangle());
-	virtual void	operator()(astro::image::ImagePtr image) const;
+	virtual void	operator()(astro::image::ImagePtr image,
+				const int interpolation_distance = 0) const;
 };
 
 /**

@@ -22,10 +22,11 @@ Imager::Imager(CcdPtr ccd) : _ccd(ccd) {
 	_darksubtract = false;
 	_flatdivide = false;
 	_interpolate = false;
+	_interpolation = 0;
 }
 
 /**
- * \grief Destroy the imager
+ * \brief Destroy the imager
  */
 Imager::~Imager() {
 	if (_ccd) {
@@ -34,6 +35,10 @@ Imager::~Imager() {
 	}
 }
 
+/**
+ * \brief Set the dark image
+ * \param dark	the dark image
+ */
 void	Imager::dark(ImagePtr dark) {
 	std::string	msg = stringprintf("install %s dark image in %s",
 		dark->size().toString().c_str(),
@@ -43,6 +48,10 @@ void	Imager::dark(ImagePtr dark) {
 	_dark = dark;
 }
 
+/**
+ * \brief Set the flat image
+ * \param flat	the flat image
+ */
 void	Imager::flat(ImagePtr flat) {
 	std::string	msg = stringprintf("install %s flat image in %s",
 		flat->size().toString().c_str(),
@@ -54,25 +63,35 @@ void	Imager::flat(ImagePtr flat) {
 
 /**
  * \brief Apply image correction
+ * \param	image to process
  */
 void	Imager::operator()(ImagePtr image) {
 	ImageRectangle	frame = image->getFrame();
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "working on image %s",
-			frame.toString().c_str());
+	debug(LOG_DEBUG, DEBUG_LOG, 0,
+		"working on image %s, %s dark, %s flat, interpolation = %d",
+		frame.toString().c_str(),
+		(_dark) ? "" : " no", (_flat) ? "" : " no",
+		_interpolation);
+
+	// perform dark correction
 	if ((_dark) && (_darksubtract)) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "perform dark correction");
 		DarkCorrector	corrector(_dark, frame);
-		corrector(image);
+		corrector(image, _interpolation);
 	} else {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "skipping dark correction");
 	}
+
+	// perform flat correction
 	if ((_flat) && (_flatdivide)) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "perform flat correction");
 		FlatCorrector	corrector(_flat, frame);
-		corrector(image);
+		corrector(image, _interpolation);
 	} else {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "skipping flat correction");
 	}
+
+	// XXX-Interpolation This step isn't really necessary any longer
 	if ((_interpolate) && (_dark)) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "interpolate bad pixels");
 		Interpolator	interpolator(_dark, frame);

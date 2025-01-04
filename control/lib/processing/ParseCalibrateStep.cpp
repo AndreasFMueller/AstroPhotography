@@ -38,6 +38,20 @@ void	ProcessorParser::startCalibrate(const attr_t& attrs) {
 		cal->flat(flat);
 	}
 
+	// get the interpolation value
+	i = attrs.find(std::string("interpolation"));
+	if (attrs.end() != i) {
+		if (i->second == std::string("bayer")) {
+			cal->interpolation(2);
+		} else if (i->second == std::string("mono")) {
+			cal->interpolation(1);
+		} else if (i->second == std::string("none")) {
+			cal->interpolation(0);
+		} else {
+			cal->interpolation(std::stoi(i->second));
+		}
+	}
+
 	// check other attributes
 	i = attrs.find(std::string("demosaic"));
 	if (i != attrs.end()) {
