@@ -32,6 +32,16 @@ void	ProcessorParser::startFlatimage(const attr_t& attrs) {
 			darkname.c_str(), darkstep->id());
 		flat->dark(darkstep);
 	}
+
+	i = attrs.find(std::string("mosaic"));
+	if (attrs.end() != i) {
+		std::string	mosaicvalue = i->second;
+		if (mosaicvalue == std::string("yes")) {
+			flat->mosaic(true);
+		}
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "mosaic = %s",
+			(flat->mosaic()) ? "yes" : "no");
+	}
 	
 	startCommon(attrs);
 	if (flat->dark()) {

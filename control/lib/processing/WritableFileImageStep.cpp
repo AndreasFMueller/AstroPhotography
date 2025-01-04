@@ -18,6 +18,8 @@ WritableFileImageStep::WritableFileImageStep(NodePaths& parent,
 	: FileImageStep(parent, filename) {
 	_previousstate = idle;
 	ProcessingStep::status(idle);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "create writable file step '%s'",
+		filename.c_str());
 }
 
 std::string	WritableFileImageStep::fullname() const {
@@ -33,7 +35,9 @@ std::string	WritableFileImageStep::fullname() const {
  */
 ProcessingStep::state	WritableFileImageStep::status() {
 	std::unique_lock<std::recursive_mutex>	lock(_mutex);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "checking status %s", dstname().c_str());
+	debug(LOG_DEBUG, DEBUG_LOG, 0,
+		"checking status %s, previous state is %s", dstname().c_str(),
+		statename(_previousstate).c_str());
 	if (precursors().size() != 1) {
 		_previousstate = ProcessingStep::failed;
 		return _previousstate;

@@ -39,6 +39,7 @@ static void	usage(const char *progname) {
 		<< std::endl;
 	std::cout << " -D,--dark=<dark>         use <dark> as the bias for "
 		"flat computation" << std::endl;
+	std::cout << " -m,--mosaic              normalize each channel of an Bayer mosaic individually" << std::endl;
 	std::cout << std::endl;
 }
 
@@ -47,6 +48,7 @@ static struct option	longopts[] = {
 { "outfile",	required_argument,	NULL,	'o' }, /* 0 */
 { "help",	no_argument,		NULL,	'h' }, /* 0 */
 { "dark",	required_argument,	NULL,	'D' }, /* 0 */
+{ "mosaic",	required_argument,	NULL,	'm' }, /* 0 */
 { NULL,		0,			NULL,	 0  }, /* 0 */
 };
 
@@ -61,7 +63,8 @@ int	main(int argc, char *argv[]) {
 	const char	*darkfilename = NULL;
 	int	c;
 	int	longindex;
-	while (EOF != (c = getopt_long(argc, argv, "do:D:?h",
+	bool	mosaic = false;
+	while (EOF != (c = getopt_long(argc, argv, "do:D:?hm",
 		longopts, &longindex)))
 		switch (c) {
 		case 'd':
@@ -72,6 +75,9 @@ int	main(int argc, char *argv[]) {
 			break;
 		case 'o':
 			outfilename = optarg;
+			break;
+		case 'm':
+			mosaic = true;
 			break;
 		case '?':
 		case 'h':
@@ -116,8 +122,9 @@ int	main(int argc, char *argv[]) {
 	// now produce the flat image
 	FlatFrameFactory	fff;
 	ImagePtr	flat;
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "computing flat image");
-	flat = fff(images, dark);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "computing flat image%s",
+		(mosaic) ? " (mosaic)" : "");
+	flat = fff(images, dark, mosaic);
 
 	// display some info about the flat image
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "flat image %d x %d generated",

@@ -14,12 +14,14 @@ namespace process {
  * \brief Create a FlatImageStep instance
  */
 FlatImageStep::FlatImageStep(NodePaths& parent) : ImageStep(parent) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "creating flat image step");
 }
 
 /**
  * \brief Perform the work to create a flat image
  */
 ProcessingStep::state	FlatImageStep::do_work() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "start work on flat image");
 	// find the pointer to the dark image
 	int	darkid = -1;
 	if (_dark) {
@@ -61,7 +63,7 @@ ProcessingStep::state	FlatImageStep::do_work() {
 
 	// use the FlatFrameFactory to create a new flat image
 	astro::calibration::FlatFrameFactory	fff;
-	_image = fff(images, darkimage);
+	_image = fff(images, darkimage, _mosaic);
 
 	// remember the current time
 	time_t	now;

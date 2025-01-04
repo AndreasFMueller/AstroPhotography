@@ -76,6 +76,7 @@ ProcessingStep::state	FileImageStep::status() {
  * \brief Get the image by reading it form disk
  */
 ImagePtr	FileImageStep::image() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "reading file %s", fullname().c_str());
 	astro::io::FITSin	in(fullname());
 	ImagePtr	image = in.read();
 	return image;
@@ -85,7 +86,9 @@ ImagePtr	FileImageStep::image() {
  * \brief Do the work, i.e. read the image from disk
  */
 ProcessingStep::state	FileImageStep::do_work() {
-	return status();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "work on the file image %s",
+		fullname().c_str());
+	return this->status();
 }
 
 /**

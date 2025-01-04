@@ -461,9 +461,12 @@ public:
  */
 class FlatImageStep : public ImageStep {
 	ProcessingStepPtr	_dark;
+	bool	_mosaic;
 public:
 	ProcessingStepPtr	dark() const { return _dark; }
 	void	dark(ProcessingStepPtr d) { _dark = d; }
+	bool	mosaic() const { return _mosaic; }
+	void	mosaic(const bool m) { _mosaic = m; }
 	FlatImageStep(NodePaths& parent);
 private:
 	virtual ProcessingStep::state	do_work();

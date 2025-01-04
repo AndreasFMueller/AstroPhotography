@@ -58,7 +58,8 @@ protected:
 public:
 	astro::image::ImagePtr	operator()(
 				const astro::image::ImageSequence& images,
-				const astro::image::ImagePtr biasimage) const;
+				const astro::image::ImagePtr biasimage,
+				const bool mosaic = false) const;
 };
 
 /**
