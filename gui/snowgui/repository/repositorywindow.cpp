@@ -37,14 +37,15 @@ repositorywindow::repositorywindow(QWidget *parent,
 	headers << "Date";		// 3
 	headers << "Time";		// 4
 	headers << "Exposure";		// 5
-	headers << "Temperature";	// 6
-	headers << "Binning";		// 7
-	headers << "Size";		// 8
-	headers << "Filter";		// 9
-	headers << "Bayer";		// 10
-	headers << "Focus";		// 11
-	headers << "Filename";		// 12
-	headers << "UUID";		// 13
+	headers << "Gain";		// 6
+	headers << "Temperature";	// 7
+	headers << "Binning";		// 8
+	headers << "Size";		// 9
+	headers << "Filter";		// 10
+	headers << "Bayer";		// 11
+	headers << "Focus";		// 12
+	headers << "Filename";		// 13
+	headers << "UUID";		// 14
 	ui->repositoryTree->setHeaderLabels(headers);
 	ui->repositoryTree->header()->resizeSection(0, 80);
 	ui->repositoryTree->header()->resizeSection(1, 100);
@@ -52,13 +53,14 @@ repositorywindow::repositorywindow(QWidget *parent,
 	ui->repositoryTree->header()->resizeSection(3, 100);
 	ui->repositoryTree->header()->resizeSection(4, 80);
 	ui->repositoryTree->header()->resizeSection(5, 60);
-	ui->repositoryTree->header()->resizeSection(6, 80);
-	ui->repositoryTree->header()->resizeSection(7, 50);
-	ui->repositoryTree->header()->resizeSection(8, 100);
+	ui->repositoryTree->header()->resizeSection(6, 60);
+	ui->repositoryTree->header()->resizeSection(7, 80);
+	ui->repositoryTree->header()->resizeSection(8, 50);
 	ui->repositoryTree->header()->resizeSection(9, 100);
-	ui->repositoryTree->header()->resizeSection(10, 80);
+	ui->repositoryTree->header()->resizeSection(10, 100);
 	ui->repositoryTree->header()->resizeSection(11, 80);
-	ui->repositoryTree->header()->resizeSection(12, 190);
+	ui->repositoryTree->header()->resizeSection(12, 80);
+	ui->repositoryTree->header()->resizeSection(13, 190);
 
 	// window title
 	std::string	title = astro::stringprintf("Repository overview on %s",
@@ -154,6 +156,10 @@ void	repositorywindow::addImages(QTreeWidgetItem *top,
 
 		// exposure
 		s = astro::stringprintf("%.3f", info.exposuretime);
+		list << QString(s.c_str());
+
+		// gain
+		s = astro::stringprintf("%.3f", info.gain);
 		list << QString(s.c_str());
 
 		// temperature
