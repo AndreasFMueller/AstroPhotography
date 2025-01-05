@@ -19,13 +19,17 @@ using namespace astro::adapter;
 namespace astro {
 namespace calibration {
 
-//////////////////////////////////////////////////////////////////////
-// Type dark correctors
-//
-// Dark correction can be applied to any type of image, with varying
-// primitive pixel types. These templates perform dark correction
-// based on the various possible pixel types
-//////////////////////////////////////////////////////////////////////
+/**
+ * \brief Type dark correctors
+ *
+ * Dark correction can be applied to any type of image, with varying
+ * primitive pixel types. These templates perform dark correction
+ * based on the various possible pixel types.
+ *
+ * \param interpolation_distance	how wide the grid is for interpolation
+ *					use 2 for bayer sensors, 1 for mono
+ *					sensors and 0 for no interpolation
+ */
 template<typename ImagePixelType, typename DarkPixelType>
 void	dark_correct(Image<ImagePixelType>& image,
 		const ConstImageAdapter<DarkPixelType>& dark,
@@ -80,7 +84,8 @@ void	dark_correct(Image<ImagePixelType>& image,
 		return;
 	}
 
-	// interpolate neighbouring pixels
+	// interpolate all 8 neighbouring pixels
+	int	interpolation_counter = 0;
 	for (int x = 0; x < image.size().width(); x++) {
 		for (int y = 0; y < image.size().height(); y++) {
 			// only work in this pixel of the dark pixel is a NaN
@@ -91,36 +96,35 @@ void	dark_correct(Image<ImagePixelType>& image,
 			// find the everage of the neighboring pixels
 			double	sum = 0;
 			int	counter = 0;
-			int	X = x + interpolation_distance;
-			if (image.size().contains(X, y)) {
-				sum += image.pixel(X, y);
-				counter++;
-			}
-			X = x - interpolation_distance;
-			if (image.size().contains(X, y)) {
-				sum += image.pixel(X, y);
-				counter++;
-			}
-			int	Y = y + interpolation_distance;
-			if (image.size().contains(x, Y)) {
-				sum += image.pixel(x, Y);
-				counter++;
-			}
-			Y = y - interpolation_distance;
-			if (image.size().contains(x, Y)) {
-				sum += image.pixel(x, Y);
-				counter++;
+			for (int xi = -interpolation_distance;
+				xi <= interpolation_distance;
+				xi += interpolation_distance) {
+				for (int yi = -interpolation_distance;
+					yi <= interpolation_distance;
+					yi += interpolation_distance) {
+					if ((xi == 0) && (yi == 0))
+						continue;
+					int	X = x + xi;
+					int	Y = y + yi;
+					if (image.size().contains(X, Y)) {
+						sum += image.pixel(X, Y);
+						counter++;
+					}
+				}
 			}
 			// if we have no neighbours, set the value to zero
 			if (counter > 0) {
 				sum = (1. / counter);
 			}
-			debug(LOG_DEBUG, DEBUG_LOG, 0,
-				"interpolated value at (%d,%d) is %f (from %d)",
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "interpolated value at "
+				"(%d,%d) is %f (from %d neighbours)",
 				x, y, sum, counter);
 			image.pixel(x, y) = sum;
+			interpolation_counter++;
 		}
 	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "%d interpolations performed",
+		interpolation_counter);
 }
 
 #define	dark_correct_for(T)						\

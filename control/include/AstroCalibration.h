@@ -29,21 +29,31 @@ public:
 /**
  * \brief Factory for dark frames.
  *
- * 
+ * The dark frame factory creates dark frames, i.e. frames that contain
+ * information about the dark current and the reliability of indiviual
+ * pixels. It does not address pixel values in relation to neighbouring
+ * pixels, that is the domain of the flat frames.
+ *
+ * A dark frame is an image with a floating point value that is typically
+ * the average of the values measurered in a sequence of images handed
+ * over to the operator() as an image sequence. If bad pixeldetection 
+ * is enabled, then bad pixel values are set to NaN, indicating that
+ * this pixel does not have a reliable value.
  */
 class DarkFrameFactory : public CalibrationFrameFactory {
-	double	_badpixellimit;
+	double	_badpixellimitstddevs;
 protected:
 	virtual void	copyMetadata(astro::image::ImagePtr calframe,
 				astro::image::ImagePtr firstimage) const;
 public:
-	double	badpixellimit() const { return _badpixellimit; }
-	void	badpixellimit(double b) { _badpixellimit = b; }
-	DarkFrameFactory(double badpixellimit = 3)
-		: _badpixellimit(badpixellimit) {
+	double	badpixellimitstddevs() const { return _badpixellimitstddevs; }
+	void	badpixellimitstddevs(double b) { _badpixellimitstddevs = b; }
+	DarkFrameFactory(double badpixellimitstddevs = 3)
+		: _badpixellimitstddevs(badpixellimitstddevs) {
 	}
 	astro::image::ImagePtr	operator()(
-		const astro::image::ImageSequence& images) const;
+		const astro::image::ImageSequence& images,
+		bool detect_bad_pixels = false) const;
 };
 
 /**

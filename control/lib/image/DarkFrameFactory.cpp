@@ -26,10 +26,27 @@ namespace calibration {
 
 /**
  * \brief Perform dark computation for a subgrid
+ *
+ * Bad pixel detection will be performde if the detect_bad_pixels
+ * argument is set to true. A pixel is considered bad if its value
+ * differs by more than badpixellimitstddevs standard deviations
+ * from mean of the image.
+ *
+ * TODO: This criterion is probably not good. It should not rely
+ *       on the mean of all the other pixels of the image, but only
+ *       on the values of the image sequence
+ *
+ * \param im	the ImageMean object that also contains the dark image
+ * \param grid	the part of the grid that is to be worked on
+ * \param badpixellimitstddevs	the numer of standard deviations offset
+ *				to consider a pixel bad
+ * \param detect_bad_pixels	Whether or not to perform bad pixel detection
  */
 template<typename T>
 size_t	subdark(const ImageSequence&, ImageMean<T>& im,
-	const Subgrid grid, unsigned int badpixellimit = 3) {
+		const Subgrid grid,
+		unsigned int badpixellimitstddevs = 3,
+		bool detect_bad_pixels = false) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "processing subgrid %s",
 		grid.toString().c_str());
 	// we also need the mean of the image to decide which pixels are
@@ -37,15 +54,28 @@ size_t	subdark(const ImageSequence&, ImageMean<T>& im,
 	T	mean = im.mean(grid);
 	T	var = im.variance(grid);
 
+	// the subgrid to work on
+	SubgridAdapter<T>	sga(*im.image, grid);
+	ImageSize	size = sga.getSize();
+
+	// handle the case where not bad pixel detection is necessary
+	if (!detect_bad_pixels) {
+		for (int x = 0; x < size.width(); x++) {
+			for (int y = 0; y < size.height(); y++) {
+				T	v = sga.pixel(x, y);
+				sga.writablepixel(x, y) = v;
+			}
+		}
+		return 0;
+	}
+
 	// now find out which pixels are bad, and mark them using NaNs.
 	// we consider pixels bad if the deviate from the mean by more
 	// than three standard deviations
-	T	stddevk = badpixellimit * sqrt(var);
+	T	stddevk = badpixellimitstddevs * sqrt(var);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "found mean: %f, variance: %f, "
-		"stddev*%.1f = %f", mean, var, badpixellimit, stddevk);
+		"stddev*%.1f = %f", mean, var, badpixellimitstddevs, stddevk);
 	size_t	badpixelcount = 0;
-	SubgridAdapter<T>	sga(*im.image, grid);
-	ImageSize	size = sga.getSize();
 	for (int x = 0; x < size.width(); x++) {
 		for (int y = 0; y < size.height(); y++) {
 			T	v = sga.pixel(x, y);
@@ -73,30 +103,32 @@ size_t	subdark(const ImageSequence&, ImageMean<T>& im,
  * This allows 
  * \param images	sequence of images to use to compute the 
  *			dark image
- * \param badpixellimit	number of standard deviations to consider a pixel bad
+ * \param badpixellimitstddevs	number of standard deviations to consider a pixel bad
  */
 template<typename T>
 ImagePtr	dark_plain(const ImageSequence& images,
-			double badpixellimit = 3) {
+			double badpixellimitstddevs = 3) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "plain dark processing");
 	ImageMean<T>	im(images, true);
-	size_t	badpixels = subdark<T>(images, im, Subgrid(), badpixellimit);
+	size_t	badpixels = subdark<T>(images, im, Subgrid(), badpixellimitstddevs);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "total bad pixels: %d", badpixels);
 	
 	// that's it, we now have a dark image
 	ImagePtr	darkimg = im.getImagePtr();
 	darkimg->setMetadata(FITSKeywords::meta("BADPIXEL", (long)badpixels));
 	darkimg->setMetadata(FITSKeywords::meta("BDPXLLIM",
-		(double)badpixellimit));
+		(double)badpixellimitstddevs));
 	return darkimg;
 }
 
 template<typename T>
-ImagePtr	dark(const ImageSequence& images, double badpixellimit = 3,
-			bool gridded = false) {
+ImagePtr	dark(const ImageSequence& images,
+			double badpixellimitstddevs = 3,
+			bool gridded = false,
+			bool detect_bad_pixels = false) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "gridded: %s", (gridded) ? "YES" : "NO");
 	if (!gridded) {
-		return dark_plain<T>(images, badpixellimit);
+		return dark_plain<T>(images, badpixellimitstddevs);
 	}
 
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "gridded dark processing");
@@ -105,25 +137,26 @@ ImagePtr	dark(const ImageSequence& images, double badpixellimit = 3,
 	size_t	badpixels = 0;
 	ImageSize	step(2, 2);
 	badpixels += subdark<T>(images, im, Subgrid(ImagePoint(0, 0), step),
-			badpixellimit);
+			badpixellimitstddevs, detect_bad_pixels);
 	badpixels += subdark<T>(images, im, Subgrid(ImagePoint(1, 0), step),
-			badpixellimit);
+			badpixellimitstddevs, detect_bad_pixels);
 	badpixels += subdark<T>(images, im, Subgrid(ImagePoint(0, 1), step),
-			badpixellimit);
+			badpixellimitstddevs, detect_bad_pixels);
 	badpixels += subdark<T>(images, im, Subgrid(ImagePoint(1, 1), step),
-			badpixellimit);
+			badpixellimitstddevs, detect_bad_pixels);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "total bad pixels: %d", badpixels);
 	ImagePtr	darkimg = im.getImagePtr();
 	darkimg->setMetadata(FITSKeywords::meta("BADPIXEL", (long)badpixels));
 	darkimg->setMetadata(FITSKeywords::meta("BDPXLLIM",
-		(double)badpixellimit));
+		(double)badpixellimitstddevs));
 	return darkimg;
 }
 
 /**
  * \brief Dark image construction function for arbitrary image sequences
  */
-ImagePtr DarkFrameFactory::operator()(const ImageSequence& images) const {
+ImagePtr DarkFrameFactory::operator()(const ImageSequence& images,
+		bool detect_bad_pixels) const {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "processing %d images into dark frame",
 		images.size());
 	// make sure we have at least one image
@@ -146,9 +179,11 @@ ImagePtr DarkFrameFactory::operator()(const ImageSequence& images) const {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "float limit is %u", floatlimit);
 	ImagePtr	result;
 	if (firstimage->bitsPerPlane() <= floatlimit) {
-		result = dark<float>(images, _badpixellimit, gridded);
+		result = dark<float>(images, _badpixellimitstddevs, gridded,
+			detect_bad_pixels);
 	} else {
-		result = dark<double>(images, _badpixellimit, gridded);
+		result = dark<double>(images, _badpixellimitstddevs, gridded,
+			detect_bad_pixels);
 	}
 
 	// copy the metadata
