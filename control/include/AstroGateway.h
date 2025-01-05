@@ -31,6 +31,7 @@ public:
 	time_t	lastimagestart;
 	// exposure
 	float	exposuretime;
+	float	gain;
 	// taskqueue
 	int	currenttaskid;
 	// mount

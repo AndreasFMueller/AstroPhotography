@@ -342,6 +342,7 @@ module snowstar {
 		float	ccdtemperature;
 		double	lastimagestartago;
 		float	exposuretime;
+		float	gain;
 		int	currenttaskid;
 		RaDec	telescope;
 		bool	west;

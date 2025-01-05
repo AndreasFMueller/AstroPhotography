@@ -59,6 +59,7 @@ void	Gateway::update(const std::string& instrument,
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "update exposure info");
 	TaskUpdatePtr	taskudpate = get(instrument);
 	taskudpate->exposuretime = exposure.exposuretime();
+	taskudpate->gain = exposure.gain();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "update exposure info complete");
 }
 

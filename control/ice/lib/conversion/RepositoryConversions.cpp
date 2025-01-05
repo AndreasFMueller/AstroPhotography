@@ -21,6 +21,7 @@ ImageInfo	convert(const astro::project::ImageEnvelope& envelope) {
 	result.size = convert(envelope.size());
 	result.binning = convert(envelope.binning());
 	result.exposuretime = envelope.exposuretime();
+	result.gain = envelope.gain();
 	result.temperature = envelope.temperature();
 	result.purpose = astro::camera::Exposure::purpose2string(envelope.purpose());
 	result.bayer = envelope.bayer();
@@ -40,6 +41,7 @@ astro::project::ImageEnvelope	convert(const ImageInfo& info) {
 	envelope.size(convert(info.size));
 	envelope.binning(convert(info.binning));
 	envelope.exposuretime(info.exposuretime);
+	envelope.gain(info.gain);
 	envelope.temperature(info.temperature);
 	envelope.purpose(astro::camera::Exposure::string2purpose(info.purpose));
 	envelope.observation(converttime(info.observationago));

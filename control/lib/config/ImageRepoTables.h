@@ -29,6 +29,7 @@ public:
 	int	ybin;
 	int	pixeltype;
 	double	exposuretime;
+	double	gain;
 	double	temperature;
 	std::string	purpose;
 	std::string	quality;

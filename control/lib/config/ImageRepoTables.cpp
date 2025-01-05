@@ -20,6 +20,7 @@ ImageInfo::ImageInfo() {
 	pixeltype = 8;
 	depth = 1;
 	exposuretime = 0;
+	gain = 1.;
 	temperature = 0;
 	purpose = "light";
 	quality = "high";
@@ -42,6 +43,7 @@ bool	ImageInfo::operator==(const ImageInfo& other) const {
 	if (depth != other.depth) { return false; }
 	if (pixeltype != other.pixeltype) { return false; }
 	if (exposuretime != other.exposuretime) { return false; }
+	if (gain != other.gain) { return false; }
 	if (temperature != other.temperature) { return false; }
 	if (purpose != other.purpose) { return false; }
 	if (quality != other.quality) { return false; }
@@ -76,6 +78,7 @@ std::string	ImageTableAdapter::createstatement() {
 		"    depth int not null default 1,\n"
 		"    pixeltype int not null default 16,\n"
 		"    exposuretime float not null default 1,\n"
+		"    gain float not null default -1,\n"
 		"    temperature float not null default 0,\n"
 		"    purpose char(5) not null default 'light',\n"
 		"    quality char(5) not null default 'high',\n"
@@ -105,6 +108,7 @@ ImageRecord	ImageTableAdapter::row_to_object(int objectid,
 	record.depth = row["depth"]->intValue();
 	record.pixeltype = row["pixeltype"]->intValue();
 	record.exposuretime = row["exposuretime"]->doubleValue();
+	record.gain = row["gain"]->doubleValue();
 	record.temperature = row["temperature"]->doubleValue();
 	record.purpose = row["purpose"]->stringValue();
 	record.quality = row["quality"]->stringValue();
@@ -130,6 +134,7 @@ UpdateSpec	ImageTableAdapter::object_to_updatespec(const ImageRecord& imagerec) 
 	spec.insert(Field("ybin", factory.get(imagerec.ybin)));
 	spec.insert(Field("pixeltype", factory.get(imagerec.pixeltype)));
 	spec.insert(Field("exposuretime", factory.get(imagerec.exposuretime)));
+	spec.insert(Field("gain", factory.get(imagerec.gain)));
 	spec.insert(Field("temperature", factory.get(imagerec.temperature)));
 	spec.insert(Field("purpose", factory.get(imagerec.purpose)));
 	spec.insert(Field("quality", factory.get(imagerec.quality)));

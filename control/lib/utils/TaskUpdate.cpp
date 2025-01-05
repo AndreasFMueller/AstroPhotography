@@ -17,6 +17,7 @@ TaskUpdate::TaskUpdate(const std::string& instrument)
 	ccdtemperature = 0;
 	lastimagestart = 0;
 	exposuretime = -1;
+	gain = -1;
 	currenttaskid = 0;
 	west = true;
 	filter = -1;
@@ -30,6 +31,7 @@ TaskUpdate::TaskUpdate(const TaskUpdate& other)
 	ccdtemperature = other.ccdtemperature;
 	lastimagestart = other.lastimagestart;
 	exposuretime = other.exposuretime;
+	gain = other.gain;
 	currenttaskid = other.currenttaskid;
 	telescope = other.telescope;
 	west = other.west;
@@ -46,6 +48,7 @@ TaskUpdate&	TaskUpdate::operator=(const TaskUpdate& other) {
 	ccdtemperature = other.ccdtemperature;
 	lastimagestart = other.lastimagestart;
 	exposuretime = other.exposuretime;
+	gain = other.gain;
 	currenttaskid = other.currenttaskid;
 	telescope = other.telescope;
 	west = other.west;
@@ -85,6 +88,9 @@ std::string	TaskUpdate::toString(std::string separator) const {
 	out << separator;
 
 	out << stringprintf("exposure time=%.3f", exposuretime);
+	out << separator;
+
+	out << stringprintf("gain=%.3f", gain);
 	out << separator;
 
 	out << stringprintf("current task=%d", currenttaskid);

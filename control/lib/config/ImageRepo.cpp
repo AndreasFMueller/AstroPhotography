@@ -128,6 +128,11 @@ void	ImageRepo::scan_file(const std::string& filename) {
 		imageinfo.exposuretime
 			= (double)infile.getMetadata("EXPTIME");
 	} catch (...) { }
+	imageinfo.gain = -1;
+	try {
+		imageinfo.gain
+			= (double)infile.getMetadata("GAIN");
+	} catch (...) { }
 	imageinfo.temperature = 0;
 	try {
 		imageinfo.temperature

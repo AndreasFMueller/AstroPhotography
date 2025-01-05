@@ -24,6 +24,7 @@ module snowstar {
 		ImageSize	size;
 		BinningMode	binning;
 		double	exposuretime;
+		double	gain;
 		double	temperature;
 		string	purpose;
 		double	observationago;

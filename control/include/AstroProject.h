@@ -46,6 +46,13 @@ public:
 	float	exposuretime() const { return _exposuretime; }
 	void	exposuretime(float e) { _exposuretime = e; }
 
+	// exposure time of the image
+private:
+	float	_gain;
+public:
+	float	gain() const { return _gain; }
+	void	gain(float e) { _gain = e; }
+
 	// temperature of the CCD chip
 private:
 	float	_temperature;
@@ -135,6 +142,13 @@ private:
 public:
 	float	exposuretime() const { return _exposuretime; }
 	void	exposuretime(float e) { _exposuretime = e; }
+
+	// gain
+private:
+	float	_gain;
+public:
+	float	gain() const { return _gain; }
+	void	gain(float e) { _gain = e; }
 
 	// temperature
 private:

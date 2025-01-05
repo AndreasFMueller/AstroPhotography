@@ -258,6 +258,7 @@ astro::gateway::TaskUpdate convert(const StatusUpdate& statusupdate) {
         result.ccdtemperature = statusupdate.ccdtemperature + astro::Temperature::zero;
         result.lastimagestart = converttime(statusupdate.lastimagestartago);
         result.exposuretime = statusupdate.exposuretime;
+        result.gain = statusupdate.gain;
         result.currenttaskid = statusupdate.currenttaskid;
         result.telescope = astro::RaDec(
 		astro::Angle(statusupdate.telescope.ra,
@@ -284,6 +285,7 @@ StatusUpdate    convert(const astro::gateway::TaskUpdate& taskupdate) {
 	result.ccdtemperature = taskupdate.ccdtemperature - astro::Temperature::zero;
 	result.lastimagestartago = converttime(taskupdate.lastimagestart);
 	result.exposuretime = taskupdate.exposuretime;
+	result.gain = taskupdate.gain;
 	result.currenttaskid = taskupdate.currenttaskid;
 	result.telescope.ra = taskupdate.telescope.ra().hours();
 	result.telescope.dec = taskupdate.telescope.dec().degrees();
