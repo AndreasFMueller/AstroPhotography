@@ -37,19 +37,21 @@ static void	usage(const char *progname) {
 		"to <outfile>" << std::endl;
 	std::cout << " -h,-?,--help             show this help message"
 		<< std::endl;
-	std::cout << " -D,--dark=<dark>         use <dark> as the bias for "
+	std::cout << " -B,--bias=<bias>         use <bias> as the bias for "
 		"flat computation" << std::endl;
 	std::cout << " -m,--mosaic              normalize each channel of an Bayer mosaic individually" << std::endl;
+	std::cout << " -i,--interpolate         interpolate bad pixels found in the bias frame" << std::endl;
 	std::cout << std::endl;
 }
 
 static struct option	longopts[] = {
-{ "debug",	no_argument,		NULL,	'd' }, /* 0 */
-{ "outfile",	required_argument,	NULL,	'o' }, /* 0 */
-{ "help",	no_argument,		NULL,	'h' }, /* 0 */
-{ "dark",	required_argument,	NULL,	'D' }, /* 0 */
-{ "mosaic",	required_argument,	NULL,	'm' }, /* 0 */
-{ NULL,		0,			NULL,	 0  }, /* 0 */
+{ "debug",		no_argument,		NULL,	'd' }, /* 0 */
+{ "outfile",		required_argument,	NULL,	'o' }, /* 1 */
+{ "help",		no_argument,		NULL,	'h' }, /* 2 */
+{ "bias",		required_argument,	NULL,	'B' }, /* 3 */
+{ "mosaic",		required_argument,	NULL,	'm' }, /* 4 */
+{ "interpolate",	no_argument,		NULL,	'i' }, /* 5 */
+{ NULL,			0,			NULL,	 0  }, /* 6 */
 };
 
 /**
@@ -60,24 +62,28 @@ static struct option	longopts[] = {
  */
 int	main(int argc, char *argv[]) {
 	char	*outfilename = NULL;
-	const char	*darkfilename = NULL;
+	const char	*biasfilename = NULL;
 	int	c;
 	int	longindex;
 	bool	mosaic = false;
-	while (EOF != (c = getopt_long(argc, argv, "do:D:?hm",
+	bool	interpolate = false;
+	while (EOF != (c = getopt_long(argc, argv, "do:B:?hm",
 		longopts, &longindex)))
 		switch (c) {
 		case 'd':
 			debuglevel = LOG_DEBUG;
 			break;
-		case 'D':
-			darkfilename = optarg;
+		case 'B':
+			biasfilename = optarg;
 			break;
 		case 'o':
 			outfilename = optarg;
 			break;
 		case 'm':
 			mosaic = true;
+			break;
+		case 'i':
+			interpolate = true;
 			break;
 		case '?':
 		case 'h':
@@ -104,19 +110,19 @@ int	main(int argc, char *argv[]) {
 		images.push_back(image);
 	}
 
-	// Get the dark image. This can come from a file, in which case we
+	// Get the bias image. This can come from a file, in which case we
 	// have to read the image from the file
-	ImagePtr	dark;
-	if (NULL != darkfilename) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "reading dark image: %s",
-			darkfilename);
-		std::string	f = std::string(darkfilename);
+	ImagePtr	bias;
+	if (NULL != biasfilename) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "reading bias image: %s",
+			biasfilename);
+		std::string	f = std::string(biasfilename);
 		FITSin	infile(f);
-		dark = infile.read();
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "got dark %d x %d",
-			dark->size().width(), dark->size().height());
+		bias = infile.read();
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "got bias %d x %d",
+			bias->size().width(), bias->size().height());
 	} else {
-		dark = ImagePtr(new Image<float>(images[0]->size()));
+		bias = ImagePtr(new Image<float>(images[0]->size()));
 	}
 
 	// now produce the flat image
@@ -124,7 +130,7 @@ int	main(int argc, char *argv[]) {
 	ImagePtr	flat;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "computing flat image%s",
 		(mosaic) ? " (mosaic)" : "");
-	flat = fff(images, dark, mosaic);
+	flat = fff(images, bias, mosaic, interpolate);
 
 	// display some info about the flat image
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "flat image %d x %d generated",
