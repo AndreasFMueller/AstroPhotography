@@ -193,3 +193,21 @@ thaar:	haar
 	./haar --debug --force --inverse jackie-wavelets.fits jackie-back.fits
 	convert jackie-back.fits jackie-back.jpg
 
+darkrepo = /usr/local/astrophoto/ferdinand/repositories/20241230
+darktest:	makedark
+	./makedark --debug --badpixels --stddev=5 --interpolate		\
+		 --outfile=darktest.fits 				\
+		$(darkrepo)/image-20241230-00014.fits			\
+		$(darkrepo)/image-20241230-00015.fits			\
+		$(darkrepo)/image-20241230-00016.fits			\
+		$(darkrepo)/image-20241230-00017.fits			\
+		$(darkrepo)/image-20241230-00018.fits			\
+		$(darkrepo)/image-20241230-00094.fits			\
+		$(darkrepo)/image-20241230-00095.fits			\
+		$(darkrepo)/image-20241230-00096.fits			\
+		$(darkrepo)/image-20241230-00097.fits			\
+		$(darkrepo)/image-20241230-00098.fits			\
+		$(darkrepo)/image-20241230-00099.fits
+	./listnan darktest.fits
+	./fitsheader display darktest.fits
+

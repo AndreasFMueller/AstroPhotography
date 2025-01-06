@@ -53,7 +53,8 @@ public:
 	}
 	astro::image::ImagePtr	operator()(
 		const astro::image::ImageSequence& images,
-		bool detect_bad_pixels = false) const;
+		bool detect_bad_pixels = false,
+		bool interpolate = false) const;
 };
 
 /**

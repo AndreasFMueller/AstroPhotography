@@ -39,13 +39,18 @@ static void	usage(const char *progname) {
 	std::cout << "    -h,-?,--help                  show this help message" << std::endl;
 	std::cout << "    -o,--outfile=<outfile.fits>   filename of the output dark image"
 		<< std::endl;
+	std::cout << "    -s,--stddev=<s>               offset required to classify as bad" << std::endl;
+	std::cout << "    -i,--interpolate              interpolate bad dark values" << std::endl;
 }
 
 static struct option	longopts[] = {
 { "debug",		no_argument,		NULL,	'd' }, /* 0 */
-{ "help",		no_argument,		NULL,	'h' }, /* 1 */
-{ "outfile",		required_argument,	NULL,	'o' }, /* 2 */
-{ NULL,			0,			NULL,	 0  }, /* 3 */
+{ "badpixels",		no_argument,		NULL,	'b' }, /* 1 */
+{ "help",		no_argument,		NULL,	'h' }, /* 2 */
+{ "interpolate",	no_argument,		NULL,	'i' }, /* 3 */
+{ "outfile",		required_argument,	NULL,	'o' }, /* 4 */
+{ "stddev",		required_argument,	NULL,	's' }, /* 5 */
+{ NULL,			0,			NULL,	 0  }, /* 6 */
 };
 
 /**
@@ -58,14 +63,27 @@ int	main(int argc, char *argv[]) {
 	char	*outfilename = NULL;
 	int	c;
 	int	longindex;
-	while (EOF != (c = getopt_long(argc, argv, "do:h?",
+	bool	detect_bad_pixels = false;
+	bool	interpolate = false;
+	double	stddevs = 3;
+	while (EOF != (c = getopt_long(argc, argv, "bdo:h?is:",
 		longopts, &longindex)))
 		switch (c) {
+		case 'b':
+			detect_bad_pixels = true;
+			break;
 		case 'd':
 			debuglevel = LOG_DEBUG;
 			break;
 		case 'o':
 			outfilename = optarg;
+			break;
+		case 'i':
+			interpolate = true;
+			break;
+		case 's':
+			stddevs = std::stod(optarg);
+			detect_bad_pixels = true;
 			break;
 		case 'h':
 		case '?':
@@ -93,7 +111,10 @@ int	main(int argc, char *argv[]) {
 	}
 
 	DarkFrameFactory	dff;
-	ImagePtr	dark = dff(images);
+	if (detect_bad_pixels) {
+		dff.badpixellimitstddevs(stddevs);
+	}
+	ImagePtr	dark = dff(images, detect_bad_pixels, interpolate);
 
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "dark image %d x %d generated",
 		dark->size().width(), dark->size().height());
