@@ -16,6 +16,14 @@ export CFLAGS CXXFLAGS
 # always enable the othello driver
 commonflags="--enable-othello"
 
+# check for the USB library
+if pkg-config --exists libusb-1.0
+then
+	CFLAGS="${CFLAGS} `pkg-config --cflags libusb-1.0`"
+	CXXFLAGS="${CXXFLAGS} `pkg-config --cflags libusb-1.0`"
+	LDFLAGS="${LDFLAGS} `pkg-config --libs libusb-1.0`"
+fi
+
 # we always build the microtouch driver, as it is very small and we need
 # the USB library it depends on anyway
 commonflags="${commonflags} --enable-microtouch"
@@ -61,12 +69,12 @@ fi
 
 # the next few sections are about whether or not to build the ICE components
 # add ICE PATH for Mac OS X
-if [ -d /opt/homebrew ]
+if [ -d /opt/homebrew/opt/ice ]
 then
-	CFLAGS="${CFLAGS} -I/opt/homebrew/include"
-	CXXFLAGS="${CFLAGS} -I/opt/homebrew/include"
-	LDFLAGS="-L/opt/homebrew/lib -lusb-1.0"
-	ICEDIR=/opt/homebrew
+	CFLAGS="${CFLAGS} -I/opt/homebrew/opt/ice/include"
+	CXXFLAGS="${CFLAGS} -I/opt/homebrew/opt/ice/include"
+	LDFLAGS="${LDFLAGS} -L/opt/homebrew/opt/ice/lib -lusb-1.0"
+	ICEDIR=/opt/homebrew/opt/ice
 	SLICEDIR=/opt/homebrew/share/ice/slice
 fi
 if [ -d /usr/local/opt/ice ]
