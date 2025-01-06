@@ -257,16 +257,30 @@ Result	Sqlite3Statement::result() {
 // crashes the database.
 static std::once_flag	sqlite3_once_flag;
 static void	sqlite3_initialize_once() {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "configureing sqlite3");
-	int	rc;
-	if (SQLITE_OK != (rc = sqlite3_config(SQLITE_CONFIG_SERIALIZED))) {
-		debug(LOG_ERR, DEBUG_LOG, 0,
-			"cannot put in serialized mode: %s",
-			sqlite3_errstr(rc));
-	}
-	if (SQLITE_OK != (rc = sqlite3_initialize())) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "configuring sqlite3");
+	int	rc = sqlite3_initialize();
+	if (SQLITE_OK != rc) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "cannot initialize sqlite3: %s",
 			sqlite3_errstr(rc));
+	}
+	rc = sqlite3_threadsafe();
+	switch (rc) {
+	case 0:
+		debug(LOG_WARNING, DEBUG_LOG, 0, "sqlite3 is not thread safe");
+		break;
+	case 1:
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "sqlite3 is serialized, "
+			"configure to multithread");
+		rc = sqlite3_config(SQLITE_CONFIG_MULTITHREAD);
+		if (SQLITE_OK != rc) {
+			debug(LOG_ERR, DEBUG_LOG, 0,
+				"cannot put in serialized mode: %s",
+				sqlite3_errstr(rc));
+		}
+		break;
+	case 2:
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "sqlite3 is multithreaded");
+		break;
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "sqlite3 initialized");
 }
