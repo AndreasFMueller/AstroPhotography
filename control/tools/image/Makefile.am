@@ -211,3 +211,86 @@ darktest:	makedark
 	./listnan darktest.fits
 	./fitsheader display darktest.fits
 
+biasrepo = /usr/local/astrophoto/ferdinand/repositories/20250103
+biastest:	biastest.fits
+biastest.fits:	makedark Makefile
+	./makedark --debug --badpixels --absolute=100 			\
+		 --outfile=biastest.fits 				\
+		$(biasrepo)/image-20250103-00201.fits			\
+		$(biasrepo)/image-20250103-00202.fits			\
+		$(biasrepo)/image-20250103-00203.fits			\
+		$(biasrepo)/image-20250103-00204.fits			\
+		$(biasrepo)/image-20250103-00205.fits			\
+		$(biasrepo)/image-20250103-00206.fits			\
+		$(biasrepo)/image-20250103-00207.fits			\
+		$(biasrepo)/image-20250103-00208.fits			\
+		$(biasrepo)/image-20250103-00209.fits			\
+		$(biasrepo)/image-20250103-00210.fits			\
+		$(biasrepo)/image-20250103-00211.fits			\
+		$(biasrepo)/image-20250103-00212.fits			\
+		$(biasrepo)/image-20250103-00213.fits			\
+		$(biasrepo)/image-20250103-00214.fits			\
+		$(biasrepo)/image-20250103-00215.fits			\
+		$(biasrepo)/image-20250103-00216.fits			\
+		$(biasrepo)/image-20250103-00217.fits			\
+		$(biasrepo)/image-20250103-00218.fits			\
+		$(biasrepo)/image-20250103-00219.fits			\
+		$(biasrepo)/image-20250103-00220.fits			\
+		$(biasrepo)/image-20250103-00221.fits			\
+		$(biasrepo)/image-20250103-00222.fits			\
+		$(biasrepo)/image-20250103-00223.fits			\
+		$(biasrepo)/image-20250103-00224.fits			\
+		$(biasrepo)/image-20250103-00225.fits			\
+		$(biasrepo)/image-20250103-00226.fits			\
+		$(biasrepo)/image-20250103-00227.fits			\
+		$(biasrepo)/image-20250103-00228.fits			\
+		$(biasrepo)/image-20250103-00229.fits			\
+		$(biasrepo)/image-20250103-00220.fits
+	./listnan biastest.fits
+	./fitsheader display biastest.fits
+
+flatrepo = /usr/local/astrophoto/ferdinand/repositories/20250103
+flattest:	makeflat biastest.fits
+	./makeflat --debug --bias=biastest.fits 			\
+		 --outfile=flattest.fits 				\
+		$(flatrepo)/image-20250103-00111.fits			\
+		$(flatrepo)/image-20250103-00112.fits			\
+		$(flatrepo)/image-20250103-00113.fits			\
+		$(flatrepo)/image-20250103-00114.fits			\
+		$(flatrepo)/image-20250103-00115.fits			\
+		$(flatrepo)/image-20250103-00116.fits			\
+		$(flatrepo)/image-20250103-00117.fits			\
+		$(flatrepo)/image-20250103-00118.fits			\
+		$(flatrepo)/image-20250103-00119.fits			\
+		$(flatrepo)/image-20250103-00120.fits			\
+		$(flatrepo)/image-20250103-00121.fits			\
+		$(flatrepo)/image-20250103-00122.fits			\
+		$(flatrepo)/image-20250103-00123.fits			\
+		$(flatrepo)/image-20250103-00124.fits			\
+		$(flatrepo)/image-20250103-00125.fits			\
+		$(flatrepo)/image-20250103-00126.fits			\
+		$(flatrepo)/image-20250103-00127.fits			\
+		$(flatrepo)/image-20250103-00128.fits			\
+		$(flatrepo)/image-20250103-00129.fits			\
+		$(flatrepo)/image-20250103-00130.fits			\
+		$(flatrepo)/image-20250103-00131.fits			\
+		$(flatrepo)/image-20250103-00132.fits			\
+		$(flatrepo)/image-20250103-00133.fits			\
+		$(flatrepo)/image-20250103-00134.fits			\
+		$(flatrepo)/image-20250103-00135.fits			\
+		$(flatrepo)/image-20250103-00136.fits			\
+		$(flatrepo)/image-20250103-00137.fits			\
+		$(flatrepo)/image-20250103-00138.fits			\
+		$(flatrepo)/image-20250103-00139.fits			\
+		$(flatrepo)/image-20250103-00140.fits
+	./listnan flattest.fits
+	./fitsheader display flattest.fits
+
+calibraterepo = /usr/local/astrophoto/ferdinand/repositories/20250103
+calibratetest:	calibrated.fits
+calibrated.fits:	darktest.fits flattest.fits
+	./calibrate --debug --interpolate --bayer			\
+		--dark=darktest.fits --flat=flattest.fits		\
+		$(calibraterepo)/image-20250103-00020.fits		\
+		calibrated.fits
+

@@ -5,6 +5,7 @@
  */
 #include <includes.h>
 #include <AstroCalibration.h>
+#include <AstroIO.h>
 #include <AstroDebug.h>
 
 using namespace astro::image;
@@ -19,47 +20,58 @@ namespace calibration {
  * a calibration image. The base class of course has no data on which
  * to base the creation of a calibration image, so it just returns an
  * empty image pointer.
+ *
+ * \param images	the image sequence to create the image from
  */
-ImagePtr	CalibrationFrameFactory::operator()(const ImageSequence&) const {
-	debug(LOG_ERR, DEBUG_LOG, 0, "base class factory method called, "
-		"probably an error");
-	return ImagePtr();
+ImagePtr	CalibrationFrameFactory::operator()(
+			const ImageSequence& images) const {
+	std::string	msg = astro::stringprintf("base class factory method "
+		"called (%d images), probably an error", images.size());
+	debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+	throw std::runtime_error(msg);
 }
 
+// The following macro simplifies the code on the copyMeta method
+#define	copy_metadata(name)						\
+	if (firstimage->hasMetadata(name)) {				\
+		calframe->setMetadata(firstimage->getMetadata(name));	\
+	}
+
+/**
+ * \brief Copy metadata to the calibration frame created by the factory
+ *
+ * \param calframe	the calibration frame to copy metadata to
+ * \param images	the image sequence from which to get the
+ *			common metadata
+ */
 void	CalibrationFrameFactory::copyMetadata(ImagePtr calframe,
-		ImagePtr firstimage) const {
+		const ImageSequence& images,
+		const std::string& purpose) const {
+	// if there aren't any images, skip ahead to the new meta data
+	if (images.size() > 0) {
+		// get the first image, which is used to get the common 
+		// metadata from
+		ImagePtr firstimage = *images.begin();
 
-	// copy information about the images
-	if (firstimage->hasMetadata("EXPTIME")) {
-		calframe->setMetadata(firstimage->getMetadata("EXPTIME"));
-	}
-	if (firstimage->hasMetadata("XBINNING")) {
-		calframe->setMetadata(firstimage->getMetadata("XBINNING"));
-	}
-	if (firstimage->hasMetadata("YBINNING")) {
-		calframe->setMetadata(firstimage->getMetadata("YBINNING"));
-	}
-	if (firstimage->hasMetadata("SET-TEMP")) {
-		calframe->setMetadata(firstimage->getMetadata("SET-TEMP"));
-	}
-	if (firstimage->hasMetadata("CCD-TEMP")) {
-		calframe->setMetadata(firstimage->getMetadata("CCD-TEMP"));
-	}
-	if (firstimage->hasMetadata("DATE-OBS")) {
-		calframe->setMetadata(firstimage->getMetadata("DATE-OBS"));
+		// copy information about the images
+		copy_metadata("EXPTIME");
+		copy_metadata("XBINNING");
+		copy_metadata("YBINNING");
+		copy_metadata("SET-TEMP");
+		copy_metadata("CCD-TEMP");
+		copy_metadata("DATE-OBS");
+		calframe->setMosaicType(firstimage->getMosaicType());
+
+		// copy information about the project
+		copy_metadata("CAMERA");
+		copy_metadata("INSTRUME");
+		copy_metadata("PROJECT");
 	}
 
-	// copy information about the project
-	if (firstimage->hasMetadata("CAMERA")) {
-		calframe->setMetadata(firstimage->getMetadata("CAMERA"));
-	}
-	if (firstimage->hasMetadata("INSTRUME")) {
-		calframe->setMetadata(firstimage->getMetadata("INSTRUME"));
-	}
-	if (firstimage->hasMetadata("PROJECT")) {
-		calframe->setMetadata(firstimage->getMetadata("PROJECT"));
-	}
-	calframe->setMosaicType(firstimage->getMosaicType());
+	// add common information about subframes
+	calframe->setMetadata(io::FITSKeywords::meta("PURPOSE", purpose));
+	calframe->setMetadata(io::FITSKeywords::meta("CALSUBFM",
+		(long)images.size()));
 }
 
 } // calibration

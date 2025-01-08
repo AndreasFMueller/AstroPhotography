@@ -20,7 +20,7 @@ typedef struct {
 	bool	unique;
 } FITSKeyword;
 
-#define	Nkeywords	107
+#define	Nkeywords	108
 FITSKeyword	keywords[Nkeywords] = {
 // standard keywords
 { // 0
@@ -664,6 +664,12 @@ FITSKeyword	keywords[Nkeywords] = {
 	std::string("QUALITY"),
 	std::string("imager quality"),
 	std::type_index(typeid(std::string)),
+	true
+},
+{ // 107
+	std::string("CALSUBFM"),
+	std::string("number of calibration subframes"),
+	std::type_index(typeid(long)),
 	true
 }
 };

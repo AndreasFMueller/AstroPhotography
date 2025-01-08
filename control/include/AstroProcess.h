@@ -448,6 +448,21 @@ public:
 	double	badpixellimit() const { return _badpixellimit; }
 	void	badpixellimit(double b) { _badpixellimit = b; }
 private:
+	bool	_interpolate;
+public:
+	bool	interpolate() const { return _interpolate; }
+	void	interpolate(bool i) { _interpolate = i; }
+private:
+	int	_absolute;
+public:
+	int	absolute() const { return _absolute; }
+	void	absolute(int a) { _absolute = a; }
+private:
+	bool	_detect_bad_pixels;
+public:
+	bool	detect_bad_pixels() const { return _detect_bad_pixels; }
+	void	detect_bad_pixels(bool d) { _detect_bad_pixels = d; }
+private:
 	virtual ProcessingStep::state	do_work();
 public:
 	virtual std::string	what() const;
@@ -461,12 +476,20 @@ public:
  */
 class FlatImageStep : public ImageStep {
 	ProcessingStepPtr	_dark;
-	bool	_mosaic;
 public:
 	ProcessingStepPtr	dark() const { return _dark; }
 	void	dark(ProcessingStepPtr d) { _dark = d; }
+private:
+	bool	_mosaic;
+public:
 	bool	mosaic() const { return _mosaic; }
 	void	mosaic(const bool m) { _mosaic = m; }
+private:
+	bool	_interpolate;
+public:
+	bool	interpolate() const { return _interpolate; }
+	void	interpolate(bool i) { _interpolate = i; }
+public:
 	FlatImageStep(NodePaths& parent);
 private:
 	virtual ProcessingStep::state	do_work();

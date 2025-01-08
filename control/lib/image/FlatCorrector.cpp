@@ -5,6 +5,7 @@
  */
 #include <AstroCalibration.h>
 #include <AstroFilter.h>
+#include <AstroAdapter.h>
 #include <PixelValue.h>
 #include <limits>
 #include <AstroDebug.h>
@@ -18,17 +19,19 @@ using namespace astro::image::filter;
 namespace astro {
 namespace calibration {
 
-//////////////////////////////////////////////////////////////////////
-// Type flat correctors
-//
-// Flat correction can be applied to any type of image, with varying
-// primitive pixel types. These templates perform flat correction
-// based on the various possible pixel types
-//////////////////////////////////////////////////////////////////////
+/**
+ * \brief Type flat correctors
+ *
+ * Flat correction can be applied to any type of image, with varying
+ * primitive pixel types. These templates perform flat correction
+ * based on the various possible pixel types
+ *
+ * \param image		the image to correct
+ * \param flat		the flat image to use for the correction
+ */
 template<typename ImagePixelType, typename FlatPixelType>
-void	flat_correct(Image<ImagePixelType>& image,
-		const Image<FlatPixelType>& flat,
-		const int interpolation_distance = 0) {
+static void	flat_correct(Image<ImagePixelType>& image,
+		const Image<FlatPixelType>& flat) {
 	ImagePixelType	max = std::numeric_limits<ImagePixelType>::max();
 
 	// first check that image sizes match
@@ -71,98 +74,53 @@ void	flat_correct(Image<ImagePixelType>& image,
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "bad pixels: %d in image, %d in flat",
 		bad_imagepixel_counter, bad_flatpixel_counter);
-
-	// don't interpolate if the interpolation_distance is 0
-	if (0 == interpolation_distance) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "don't interpolate bad pixels");
-		return;
-	}
-
-	// interpolate all the pixels 
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "interpolationg NaNs in flat");
-	int	interpolation_counter = 0;
-	for (int x = 0; x < image.size().width(); x++) {
-		for (int y = 0; y < image.size().height(); y++) {
-			FlatPixelType	dp = flat.pixel(x, y);
-			if (dp == dp) {
-				interpolation_counter++;
-				continue;
-			}
-			debug(LOG_DEBUG, DEBUG_LOG, 0, "found NaN at (%d,%d)",
-				x, y);
-			int	counter = 0;
-			double	sum = 0;
-			// try the neighbors
-			int	X = x + interpolation_distance;
-			if (image.size().contains(X, y)) {
-				ImagePixelType	p = image.pixel(X, y);
-				sum += p;
-				counter++;
-			}
-			X = x - interpolation_distance;
-			if (image.size().contains(X, y)) {
-				ImagePixelType	p = image.pixel(X, y);
-				sum += p;
-				counter++;
-			}
-			int	Y = y + interpolation_distance;
-			if (image.size().contains(x, Y)) {
-				ImagePixelType	p = image.pixel(x, Y);
-				sum += p;
-				counter++;
-			}
-			Y = y - interpolation_distance;
-			if (image.size().contains(x, Y)) {
-				ImagePixelType	p = image.pixel(x, Y);
-				sum += p;
-				counter++;
-			}
-			if (counter > 0) {
-				sum = (1. / counter) * sum;
-			} else {
-				// as a fall back, use the original pixel
-				sum = image.pixel(x, y);
-			}
-			image.pixel(x, y) = sum;
-			debug(LOG_DEBUG, DEBUG_LOG, 0,
-				"interpolated value at (%d,%d) = %f (from %d)",
-				x, y, sum, counter);
-		}
-	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "%d interpolated pixels",
-		interpolation_counter);
 }
 
 #define	flat_correct_for(T)						\
 {									\
 	Image<T>	*timage	= dynamic_cast<Image<T> *>(&*image);	\
 	if (NULL != timage) {						\
-		flat_correct(*timage, flat, interpolation_distance);	\
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "found %s pixel type",	\
+			#T);						\
+		flat_correct(*timage, flat);				\
 		return;							\
 	}								\
 }
 
 template<typename FlatPixelType>
-void	flat_correct_typed(ImagePtr image,
-		const Image<FlatPixelType>& flat,
-		const int interpolation_distance = 0) {
-	flat_correct_for(unsigned char);
-	flat_correct_for(unsigned short);
-	flat_correct_for(unsigned int);
-	flat_correct_for(unsigned long);
-	flat_correct_for(double);
-	flat_correct_for(float);
+static void	flat_correct_typed(ImagePtr image,
+			const Image<FlatPixelType>& flat) {
+	flat_correct_for(unsigned char)
+	flat_correct_for(unsigned short)
+	flat_correct_for(unsigned int)
+	flat_correct_for(unsigned long)
+	flat_correct_for(double)
+	flat_correct_for(float)
 	std::string	msg("flat correction only for primitive types");
 	debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 	throw std::runtime_error(msg);
 }
 
-//////////////////////////////////////////////////////////////////////
-// FlatCorrector implementation
-//////////////////////////////////////////////////////////////////////
+/**
+ * \brief Constructor for the FlatCorrector
+ *
+ * \param _flat		the flat image to use
+ * \param _rectangle	the rectangle inside the flat to concentrate on
+ */
 FlatCorrector::FlatCorrector(const ImagePtr _flat,
 	const ImageRectangle _rectangle)
 	: Corrector(_flat, _rectangle) {
+}
+
+#define flat_correct_typed0(T)						\
+{									\
+	Image<T>	*ip = dynamic_cast<Image<T> *>(&*calibrationimage);\
+	if (NULL != ip) {						\
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "found %s cal image type",\
+			#T);						\
+		adapter::WindowAdapter<T>    window(*ip, rectangle);	\
+		flat_correct_typed<T>(image, window);			\
+	}								\
 }
 
 /**
@@ -180,20 +138,15 @@ FlatCorrector::FlatCorrector(const ImagePtr _flat,
  *			When flat correcting Bayer-images, it should be set 
  *			to 2, otherwise 1. If 0, no interpolation is performed
  */
-void	FlatCorrector::operator()(ImagePtr image, const int interpolation_distance) const {
-	Image<float>	*fp = dynamic_cast<Image<float> *>(&*calibrationimage);
-	Image<double>	*dp = dynamic_cast<Image<double> *>(&*calibrationimage);
-	if (NULL != fp) {
-		flat_correct_typed<float>(image, *fp, interpolation_distance);
-		return;
-	}
-	if (NULL != dp) {
-		flat_correct_typed<double>(image, *dp, interpolation_distance);
-		return;
-	}
-	std::string	msg("flat image must be of floating point type");
-	debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
-	throw std::runtime_error(msg);
+void	FlatCorrector::operator()(ImagePtr image,
+		const int interpolation_distance) const {
+	// try float calibration image type
+	flat_correct_typed0(float)
+	flat_correct_typed0(double)
+
+	// interpolate the image (this is controlled by the value
+	// of the interpolation_distance)
+	Corrector::operator()(image, interpolation_distance);
 }
 
 } // calibration

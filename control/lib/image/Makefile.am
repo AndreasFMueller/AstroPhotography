@@ -31,6 +31,7 @@ libastroimage_la_SOURCES = 						\
 	Blurr.cpp							\
 	CalibrationFrameFactory.cpp					\
 	CalibrationFrameProcess.cpp					\
+	CalibrationInterpolation.cpp					\
 	Calibrator.cpp							\
 	CentralProjection.cpp						\
 	CGFilter.cpp							\

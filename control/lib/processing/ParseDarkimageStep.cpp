@@ -24,6 +24,25 @@ void	ProcessorParser::startDarkimage(const attr_t& attrs,
 	auto    i = attrs.find(std::string("stddevs"));
 	if (i != attrs.end()) {
 		dark->badpixellimit(std::stod(i->second));
+		dark->detect_bad_pixels(true);
+	}
+
+	i = attrs.find(std::string("interpolate"));
+	if (i != attrs.end()) {
+		if ((i->second == "yes") || (i->second == "true"))
+			dark->interpolate(true);
+	}
+
+	i = attrs.find(std::string("absolute"));
+	if (i != attrs.end()) {
+		dark->absolute(std::stoi(i->second));
+		dark->detect_bad_pixels(true);
+	}
+
+	i = attrs.find(std::string("detect_bad_pixels"));
+	if (i != attrs.end()) {
+		if ((i->second == "yes") || (i->second == "true"))
+			dark->detect_bad_pixels(true);
 	}
 
 	// remember the step everywhere

@@ -42,6 +42,12 @@ void	ProcessorParser::startFlatimage(const attr_t& attrs) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "mosaic = %s",
 			(flat->mosaic()) ? "yes" : "no");
 	}
+
+	i = attrs.find(std::string("interpolate"));
+	if (attrs.end() != i) {
+		if ((i->second == "true") || (i->second == "yes"))
+			flat->interpolate(true);
+	}
 	
 	startCommon(attrs);
 	if (flat->dark()) {

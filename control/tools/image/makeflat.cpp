@@ -65,8 +65,7 @@ int	main(int argc, char *argv[]) {
 	const char	*biasfilename = NULL;
 	int	c;
 	int	longindex;
-	bool	mosaic = false;
-	bool	interpolate = false;
+	FlatFrameFactory	fff;
 	while (EOF != (c = getopt_long(argc, argv, "do:B:?hm",
 		longopts, &longindex)))
 		switch (c) {
@@ -80,10 +79,10 @@ int	main(int argc, char *argv[]) {
 			outfilename = optarg;
 			break;
 		case 'm':
-			mosaic = true;
+			fff.mosaic(true);
 			break;
 		case 'i':
-			interpolate = true;
+			fff.interpolate(true);
 			break;
 		case '?':
 		case 'h':
@@ -119,18 +118,18 @@ int	main(int argc, char *argv[]) {
 		std::string	f = std::string(biasfilename);
 		FITSin	infile(f);
 		bias = infile.read();
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "got bias %d x %d",
-			bias->size().width(), bias->size().height());
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "got bias %d x %d, %s",
+			bias->size().width(), bias->size().height(),
+			bias->info().c_str());
 	} else {
 		bias = ImagePtr(new Image<float>(images[0]->size()));
 	}
 
 	// now produce the flat image
-	FlatFrameFactory	fff;
 	ImagePtr	flat;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "computing flat image%s",
-		(mosaic) ? " (mosaic)" : "");
-	flat = fff(images, bias, mosaic, interpolate);
+		(fff.mosaic()) ? " (mosaic)" : "");
+	flat = fff(images, bias);
 
 	// display some info about the flat image
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "flat image %d x %d generated",

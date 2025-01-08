@@ -26,43 +26,44 @@ namespace filter {
  * the mean value. There is a Mean filter derived from this type but in its
  * basic form it computes the integer rounded version.
  */
-template<typename T, typename S>
+template<typename PixelType, typename ResultType>
 class PixelTypeFilter {
 public:
-	virtual S	filter(const ConstImageAdapter<T>& image) = 0;
-	virtual T	operator()(const ConstImageAdapter<T>& image) = 0;
+	virtual ResultType	filter(const ConstImageAdapter<PixelType>& image) = 0;
+	virtual PixelType	operator()(const ConstImageAdapter<PixelType>& image) = 0;
 };
 
 /**
  * \brief Filter to count NaNs
  */
-template<typename T, typename S>
-class CountNaNs : public PixelTypeFilter<T, S> {
+template<typename PixelType, typename CounterType>
+class CountNaNs : public PixelTypeFilter<PixelType, CounterType> {
 public:
 	CountNaNs() { }
-	virtual S	filter(const ConstImageAdapter<T>& image);
-	virtual T	operator()(const ConstImageAdapter<T>& image);
+	virtual CounterType	filter(const ConstImageAdapter<PixelType>& image);
+	virtual PixelType	operator()(const ConstImageAdapter<PixelType>& image);
 };
 
-template<typename T, typename S>
-S	CountNaNs<T, S>::filter(const ConstImageAdapter<T>& image) {
-	S	result = 0;
+template<typename PixelType, typename CounterType>
+CounterType	CountNaNs<PixelType, CounterType>::filter(const ConstImageAdapter<PixelType>& image) {
+	CounterType	result = 0;
 	ImageSize	size = image.getSize();
-	for (int x = 0; x < size.width(); x++) {
-		for (int y = 0; y < size.height(); y++) {
-			T	v = image.pixel(x, y);
-		
-			if ((std::numeric_limits<T>::has_quiet_NaN) && (v != v)) {
-				result += 1;
+	if (std::numeric_limits<PixelType>::has_quiet_NaN) {
+		for (int x = 0; x < size.width(); x++) {
+			for (int y = 0; y < size.height(); y++) {
+				PixelType	v = image.pixel(x, y);
+				if (!(v == v)) {
+					result += 1;
+				}
 			}
 		}
 	}
 	return result;
 }
 
-template<typename T, typename S>
-T	CountNaNs<T, S>::operator()(const ConstImageAdapter<T>& image) {
-	return (T)filter(image);
+template<typename PixelType, typename CounterType>
+PixelType	CountNaNs<PixelType, CounterType>::operator()(const ConstImageAdapter<PixelType>& image) {
+	return (PixelType)filter(image);
 }
 
 /**

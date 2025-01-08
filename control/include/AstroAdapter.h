@@ -19,6 +19,11 @@ namespace adapter {
 //////////////////////////////////////////////////////////////////////
 // Identity adapter
 //////////////////////////////////////////////////////////////////////
+/**
+ * \brief Identity Adapter
+ *
+ * The IdentityAdapter applies the identity transformation
+ */
 template<typename Pixel>
 class IdentityAdapter : public ConstImageAdapter<Pixel> {
 	const ConstImageAdapter<Pixel>&	_image;

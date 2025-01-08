@@ -24,7 +24,27 @@ using namespace astro::io;
 namespace astro {
 namespace calibration {
 
-// normalization gridded and ungridded should be separate from bias frame
+/**
+ * \brief Constructor for the FlatFrameFactory
+ *
+ * \param mosaic	whether to perform the construction on a grid
+ * \param interpolate	whether to interpolate pixels indicated as bad by
+ *			the bias image
+ */
+FlatFrameFactory::FlatFrameFactory(bool mosaic, bool interpolate)
+	: _mosaic(mosaic), _interpolate(interpolate) {
+}
+
+/**
+ * \brief Normalize an image
+ *
+ * This method computes the maximum of an image and then devides all
+ * pixels by this value. The image can be a SubgridAdapter, which measn
+ * that only the pixels of the subgrid are normalized. This is used
+ * by the mosaic_normalize template to perform subgridded normalization.
+ *
+ * \param image 	the image to normalize
+ */
 template<typename T>
 static void	normalize(ImageAdapter<T>& image) {
 	Max<T, double>	maxfilter;
@@ -37,8 +57,14 @@ static void	normalize(ImageAdapter<T>& image) {
 			image.writablepixel(x, y) = v / maxvalue;
 		}
 	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "image normalized");
 }
 
+/**
+ * \brief Normalize a mosaic image
+ *
+ * \param image		normalize in a mosaiced way
+ */
 template<typename T>
 static void	mosaic_normalize(ImageAdapter<T>& image) {
 	Max<T, double>	maxfilter;
@@ -53,72 +79,33 @@ static void	mosaic_normalize(ImageAdapter<T>& image) {
 	}
 }
 
-// interpolation 
-template<typename T>
-static T	interpolate(ImageAdapter<T>& image, int x, int y) {
-	T	sum = 0;
-	int	counter = 0;
-	for (int xi = -1; xi <= 1; xi++) {
-		for (int yi = -1; yi <= 1; yi++) {
-			if ((xi == 0) && (yi == 0))
-				continue;
-			int	X = x + xi;
-			int	Y = y + yi;
-			T	v = image.pixel(X, Y);
-			if (v == v) {
-				sum += v;
-				counter++;
-			}
-		}
-	}
-	if (counter > 0) {
-		sum = (1. / counter) * sum;
-	}
-	return sum;
-}
-
-template<typename T>
-static void	interpolate(ImageAdapter<T>& image, bool mosaic) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "interpolate in %smosaic image",
-		(mosaic) ? "" : "non ");
-	if (mosaic) {
-		for (int x = 0; x <= 1; x++) {
-			for (int y = 0; y <= 1; y++) {
-				debug(LOG_DEBUG, DEBUG_LOG, 0,
-					"interpolate on (%d,%d) subgrid", x, y);
-				Subgrid	s(ImagePoint(x, y), ImageSize(2, 2));
-				SubgridAdapter<T>	sa(image, s);
-				interpolate(sa, false);
-			}
-		}
-	} else {
-		ImageSize	size = image.getSize();
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "interpolate %s image",
-			size.toString().c_str());
-		for (int x = 0; x < size.width(); x++) {
-			for (int y = 0; y < size.width(); y++) {
-				T	v = interpolate(image, x, y);
-				image.writablepixel(x, y) = v;
-			}
-		}
-	}
-}
-
 /**
  * \brief Flat image construction function for arbitrary image sequences
+ *
+ * Construct a flat image from a sequence of images
+ *
+ * \param images	the sequence of images to construct the flat from
+ * \param bias		the bias image to subtract first
  */
-template<typename T>
-static ImagePtr	flat(const ImageSequence& images, const Image<T>& bias,
-			bool mosaic, bool _interpolate) {
+template<typename FlatPixelType>
+ImagePtr	FlatFrameFactory::flat(const ImageSequence& images,
+			const Image<FlatPixelType>& bias) const {
+	// first we report how many NaNs there are in the bias image
+	//debug(LOG_DEBUG, DEBUG_LOG, 0, "bias is type %s", bias.info().c_str());
+	CountNaNs<FlatPixelType, size_t>	countnans;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "bias has %d nans",
+		countnans.filter(bias));
+
 	// we first compute the pixelwise mean, but we have to eliminate
 	// possible cosmic ray artefacts, so we let the thing compute
 	// the variance nevertheless
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "compute mean of images");
-	ImageMean<T>	im(images, bias, true);
+	ImageMean<FlatPixelType>	im(images, bias, true);
 
 	// extract the image
 	ImagePtr	result = im.getImagePtr();
-	Image<T>	*image = dynamic_cast<Image<T> *>(&*result);
+	Image<FlatPixelType>	*image
+		= dynamic_cast<Image<FlatPixelType> *>(&*result);
 
 	// remember bad pixels in the bias frame
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "copy bad pixels from bias to flat");
@@ -126,7 +113,7 @@ static ImagePtr	flat(const ImageSequence& images, const Image<T>& bias,
 	int	bad_bias_pixels = 0;
 	for (int x = 0; x < size.width(); x++) {
 		for (int y = 0; y < size.height(); y++) {
-			T	b = bias.pixel(x, y);
+			FlatPixelType	b = bias.pixel(x, y);
 			if (b == b)
 				continue;
 			image->writablepixel(x, y) = b;
@@ -139,59 +126,56 @@ static ImagePtr	flat(const ImageSequence& images, const Image<T>& bias,
 	// interpolate bad pixels, if asked to do so
 	if (_interpolate) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "bad pixel interpolation");
-		interpolate(*image, mosaic);
+		CalibrationInterpolation	ci(_mosaic);
+		ci.interpolate(*(ImageAdapter<FlatPixelType>*)image,
+			*(ConstImageAdapter<FlatPixelType>*)&bias);
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "flat image interpolated");
 	}
 
 	// normalize 
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "flat image normalization");
-	if (mosaic) {
+	if (_mosaic) {
 		mosaic_normalize(*image);
 	} else {
 		normalize(*image);
 	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "image normalized");
 
 	return result;
 }
 
-static ImagePtr	flat(const ImageSequence& images, bool interpolate) {
+template
+ImagePtr	FlatFrameFactory::flat(
+			const astro::image::ImageSequence& images,
+			const Image<float>& bias) const;
+template
+ImagePtr	FlatFrameFactory::flat(
+			const astro::image::ImageSequence& images,
+			const Image<double>& bias) const;
+
+/**
+ * \brief Construct a flat image 
+ *
+ * This is a very basic version that does not understand bias frames
+ * and interpolation
+ *
+ * \param images	the images used to construct the flat
+ */
+ImagePtr	FlatFrameFactory::flat(const ImageSequence& images) const {
 	// we first compute the pixelwise mean, but we have to eliminate
 	// possible cosmic ray artefacts, so we let the thing compute
 	// the variance nevertheless
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "compute mean of images");
 	ImageMean<float>	im(images, true);
 
-	// extract the image
+	// extract the image, which consists of mean values for each pixel
 	ImagePtr	result = im.getImagePtr();
 	Image<float>	*image = dynamic_cast<Image<float> *>(&*result);
 
-	// interpolate any bad pixels
-	if (interpolate) {
-		debug(LOG_ERR, DEBUG_LOG, 0, "interpolation missing");
-	}
-
-	// find the maximum value of the image
-	Max<float, double>	maxfilter;
-	float	maxvalue = maxfilter(*image);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "maximum value: %f", maxvalue);
-
-	// devide the image by that value, so that the new maximum value
-	// is 1
-	for (int x = 0; x < image->size().width(); x++) {
-		for (int y = 0; y < image->size().height(); y++) {
-			image->pixel(x, y) /= maxvalue;
-		}
-	}
+	// normaliize the flat image just computed
+	normalize(*image);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "image normalized");
-	return result;
-}
 
-void	FlatFrameFactory::copyMetadata(ImagePtr flat,
-	ImagePtr firstimage) const {
-	CalibrationFrameFactory::copyMetadata(flat, firstimage);
-	flat->setMetadata(FITSKeywords::meta(std::string("PURPOSE"),
-                std::string("flat")));
+	return result;
 }
 
 /**
@@ -201,51 +185,53 @@ void	FlatFrameFactory::copyMetadata(ImagePtr flat,
  * \param biasimage	the bias image to use to calibrate the images
  */
 ImagePtr	FlatFrameFactory::operator()(const ImageSequence& images,
-			const ImagePtr biasimage,
-			const bool mosaic,
-			const bool interpolate) const {
+			const ImagePtr biasimage) const {
 	ImagePtr	result;
 
-	// make sure we have images
+	// Make sure we have images
 	if (images.size() == 0) {
 		throw std::runtime_error("no images supplied for flat");
 	}
 
-	// check the type of bias image we have
+	// Check whether we have a bias image. If we don't then we
+	// cannot do interpolation either and we can simply call
+	// the simple flat creation function without a bias frame.
 	if (!biasimage) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "not using a bias image");
-		result =  flat(images, interpolate);
+		result =  flat(images);
 		goto metadata;
 	}
 
-	// handle double bias image
+	// If we do have a bias frame, then we first have to find out
+	// what the pixel type of the bias frame is. We then use the
+	// flat function with a bias argument to create a flat image.
+	// Note, however, that this only works for floating point pixel
+	// types.
 	{
+		// handle bias image with double type pixels
 		Image<double>	*doublebias
 				= dynamic_cast<Image<double>*>(&*biasimage);
 		if (doublebias) {
-			debug(LOG_DEBUG, DEBUG_LOG, 0, "bias is Image<double>");
-			CountNaNs<double, double>	countnans;
-			debug(LOG_DEBUG, DEBUG_LOG, 0, "bias has %f nans",
-				countnans(*doublebias));
-			result = flat(images, *doublebias, mosaic, interpolate);
+			result = flat(images, *doublebias);
 			goto metadata;
 		}
 	}
 	{
+		// handle bias image with float type pixels
 		Image<float>	*floatbias
 				= dynamic_cast<Image<float>*>(&*biasimage);
 		if (floatbias) {
-			debug(LOG_DEBUG, DEBUG_LOG, 0, "bias is Image<float>");
-			CountNaNs<float, double>	countnans;
-			debug(LOG_DEBUG, DEBUG_LOG, 0, "bias has %f nans",
-				countnans(*floatbias));
-			result = flat(images, *floatbias, mosaic, interpolate);
+			result = flat<float>(images, *floatbias);
 			goto metadata;
 		}
 	}
-	throw std::runtime_error("no useful flat image supplied");
+
+	// we cannot handle other types of bias images
+	throw std::runtime_error("no useful bias image supplied");
 metadata:
-	copyMetadata(result, *images.begin());
+	// copy the meta data information from the first image of the
+	// image sequence 
+	copyMetadata(result, images, "flat");
 	return result;
 }
 

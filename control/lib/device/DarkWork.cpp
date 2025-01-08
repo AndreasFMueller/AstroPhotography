@@ -78,7 +78,8 @@ ImagePtr	DarkWork::common(astro::thread::ThreadBase& /* thread */) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "got %d images", _imageno);
 
 	// construct the dark image from the images retrieved
-	calibration::DarkFrameFactory	darkfactory(_badpixellimit);
+	calibration::DarkFrameFactory	darkfactory;
+	darkfactory.badpixellimitstddevs(_badpixellimit);
 	_darkimage = darkfactory(images);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "got an %s dark image with %s pixels",
 		_darkimage->size().toString().c_str(),

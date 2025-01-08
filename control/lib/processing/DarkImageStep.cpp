@@ -21,6 +21,10 @@ DarkImageStep::DarkImageStep(NodePaths& parent,
 	camera::Exposure::purpose_t purpose)
 	: ImageStep(parent), _purpose(purpose) {
 	_badpixellimit = 3;
+	_interpolate = false;
+	_absolute = 0;
+	_detect_bad_pixels = false;
+	
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "nodepaths: %s",
 		NodePaths::info().c_str());
 }
@@ -38,10 +42,15 @@ ProcessingStep::state	DarkImageStep::do_work() {
 	}
 
 	// actually produce the dark frame
-	astro::calibration::DarkFrameFactory	dff(_badpixellimit);
+	astro::calibration::DarkFrameFactory	dff;
+	dff.badpixellimitstddevs(_badpixellimit);
+	dff.absolute(absolute());
+	dff.detect_bad_pixels(detect_bad_pixels());
+	dff.interpolate(interpolate());
 	_image = dff(images);
 
-	// set the purpose
+	// set the purpose, this is only necessary for bias images, because
+	// by default the purpose is set to "dark"
 	if (camera::Exposure::bias == purpose()) {
 		_image->setMetadata(io::FITSKeywords::meta(
 			std::string("PURPOSE"), std::string("bias")));

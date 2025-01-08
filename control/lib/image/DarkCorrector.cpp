@@ -31,9 +31,8 @@ namespace calibration {
  *					sensors and 0 for no interpolation
  */
 template<typename ImagePixelType, typename DarkPixelType>
-void	dark_correct(Image<ImagePixelType>& image,
-		const ConstImageAdapter<DarkPixelType>& dark,
-		const int interpolation_distance = 0) {
+static void	dark_correct(Image<ImagePixelType>& image,
+			const ConstImageAdapter<DarkPixelType>& dark) {
 	// first check that image sizes match
 	if (image.size() != dark.getSize()) {
 		std::string	msg = stringprintf("size: image %s != dark %s",
@@ -77,69 +76,20 @@ void	dark_correct(Image<ImagePixelType>& image,
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "bad pixels: image %d, dark %d",
 		bad_imagepixel_counter, bad_darkpixel_counter);
-
-	// if interpolation_distance = 0, skip interpolation step
-	if (0 == interpolation_distance) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "skipping interpolation step");
-		return;
-	}
-
-	// interpolate all 8 neighbouring pixels
-	int	interpolation_counter = 0;
-	for (int x = 0; x < image.size().width(); x++) {
-		for (int y = 0; y < image.size().height(); y++) {
-			// only work in this pixel of the dark pixel is a NaN
-			DarkPixelType	dp = dark.pixel(x, y);
-			if (dp == dp)
-				continue;
-
-			// find the everage of the neighboring pixels
-			double	sum = 0;
-			int	counter = 0;
-			for (int xi = -interpolation_distance;
-				xi <= interpolation_distance;
-				xi += interpolation_distance) {
-				for (int yi = -interpolation_distance;
-					yi <= interpolation_distance;
-					yi += interpolation_distance) {
-					if ((xi == 0) && (yi == 0))
-						continue;
-					int	X = x + xi;
-					int	Y = y + yi;
-					if (image.size().contains(X, Y)) {
-						sum += image.pixel(X, Y);
-						counter++;
-					}
-				}
-			}
-			// if we have no neighbours, set the value to zero
-			if (counter > 0) {
-				sum = (1. / counter);
-			}
-			debug(LOG_DEBUG, DEBUG_LOG, 0, "interpolated value at "
-				"(%d,%d) is %f (from %d neighbours)",
-				x, y, sum, counter);
-			image.pixel(x, y) = sum;
-			interpolation_counter++;
-		}
-	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "%d interpolations performed",
-		interpolation_counter);
 }
 
 #define	dark_correct_for(T)						\
 {									\
 	Image<T>	*timage	= dynamic_cast<Image<T> *>(&*image);	\
 	if (NULL != timage) {						\
-		dark_correct(*timage, dark, interpolation_distance);	\
+		dark_correct(*timage, dark);				\
 		return;							\
 	}								\
 }
 
 template<typename DarkPixelType>
 void	dark_correct_typed(ImagePtr image,
-		const ConstImageAdapter<DarkPixelType>& dark,
-		const int interpolation_distance = 0) {
+		const ConstImageAdapter<DarkPixelType>& dark) {
 	dark_correct_for(unsigned char);
 	dark_correct_for(unsigned short);
 	dark_correct_for(unsigned int);
@@ -151,12 +101,23 @@ void	dark_correct_typed(ImagePtr image,
 	throw std::runtime_error(msg);
 }
 
-//////////////////////////////////////////////////////////////////////
-// DarkCorrector implementation
-//////////////////////////////////////////////////////////////////////
+/**
+ * \brief Constructor for DarkCorrector
+ * * \param _dark		the dark calibration image
+ * \param _rectangle	the rectangle of interest
+ */
 DarkCorrector::DarkCorrector(const ImagePtr _dark,
 	const ImageRectangle _rectangle)
 	: Corrector(_dark, _rectangle) {
+}
+
+#define dark_correct_typed0(T)						\
+{									\
+	Image<T>	*ip = dynamic_cast<Image<T> *>(&*calibrationimage);\
+	if (NULL != ip) {						\
+		WindowAdapter<T>	wa(*ip, rectangle);		\
+		dark_correct_typed<T>(image, wa);			\
+	}								\
 }
 
 /**
@@ -166,26 +127,20 @@ DarkCorrector::DarkCorrector(const ImagePtr _dark,
  * as most of the time, the uncorrected image is no longer needed.
  * If a new image is required, first create the new image, then apply
  * the dark corrector in place.
+ *
  * \param image     image to dark correct
  * \param interpolation_distance
  */
 void	DarkCorrector::operator()(ImagePtr image,
 		const int interpolation_distance) const {
-	Image<float>	*fp = dynamic_cast<Image<float> *>(&*calibrationimage);
-	Image<double>	*dp = dynamic_cast<Image<double> *>(&*calibrationimage);
-	if (NULL != fp) {
-		WindowAdapter<float>	wa(*fp, rectangle);
-		dark_correct_typed<float>(image, wa, interpolation_distance);
-		return;
-	}
-	if (NULL != dp) {
-		WindowAdapter<double>	wa(*dp, rectangle);
-		dark_correct_typed<double>(image, wa, interpolation_distance);
-		return;
-	}
-	std::string	msg("dark image must be of floating point type");
-	debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
-	throw std::runtime_error(msg);
+	// try the floating point pixel types for calibration
+	dark_correct_typed0(float)
+	dark_correct_typed0(double)
+
+	// there are no other possible pixel types for the calibration image
+	// so we can just go on the perform the interpolation, which is done
+	// using the base class operator()
+	Corrector::operator()(image, interpolation_distance);
 }
 
 } // calibration

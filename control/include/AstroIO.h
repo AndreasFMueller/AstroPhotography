@@ -2,7 +2,6 @@
  * AstroIO.h -- classes and functions to perform image IO to/from IO files
  *
  * (c) 2012 Prof Dr Andreas Mueller, Hochschule Rapperswil
- * $Id$
  */
 #ifndef _AstroIO_h
 #define _AstroIO_h

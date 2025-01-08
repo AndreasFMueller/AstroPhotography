@@ -62,8 +62,8 @@ ProcessingStep::state	FlatImageStep::do_work() {
 	}
 
 	// use the FlatFrameFactory to create a new flat image
-	astro::calibration::FlatFrameFactory	fff;
-	_image = fff(images, darkimage, _mosaic);
+	astro::calibration::FlatFrameFactory	fff(mosaic(), interpolate());
+	_image = fff(images, darkimage);
 
 	// remember the current time
 	time_t	now;

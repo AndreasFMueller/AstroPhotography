@@ -50,7 +50,8 @@ static struct option	longopts[] = {
 { "interpolate",	no_argument,		NULL,	'i' }, /* 3 */
 { "outfile",		required_argument,	NULL,	'o' }, /* 4 */
 { "stddev",		required_argument,	NULL,	's' }, /* 5 */
-{ NULL,			0,			NULL,	 0  }, /* 6 */
+{ "absolute",		required_argument,	NULL,	'a' }, /* 6 */
+{ NULL,			0,			NULL,	 0  }, /* 7 */
 };
 
 /**
@@ -63,14 +64,15 @@ int	main(int argc, char *argv[]) {
 	char	*outfilename = NULL;
 	int	c;
 	int	longindex;
-	bool	detect_bad_pixels = false;
-	bool	interpolate = false;
-	double	stddevs = 3;
-	while (EOF != (c = getopt_long(argc, argv, "bdo:h?is:",
+	DarkFrameFactory	dff;
+	while (EOF != (c = getopt_long(argc, argv, "a:bdo:h?is:",
 		longopts, &longindex)))
 		switch (c) {
+		case 'a':
+			dff.absolute(std::stod(optarg));
+			break;
 		case 'b':
-			detect_bad_pixels = true;
+			dff.detect_bad_pixels(true);
 			break;
 		case 'd':
 			debuglevel = LOG_DEBUG;
@@ -79,11 +81,11 @@ int	main(int argc, char *argv[]) {
 			outfilename = optarg;
 			break;
 		case 'i':
-			interpolate = true;
+			dff.interpolate(true);
 			break;
 		case 's':
-			stddevs = std::stod(optarg);
-			detect_bad_pixels = true;
+			dff.badpixellimitstddevs(std::stod(optarg));
+			dff.detect_bad_pixels(true);
 			break;
 		case 'h':
 		case '?':
@@ -110,11 +112,7 @@ int	main(int argc, char *argv[]) {
 		images.push_back(image);
 	}
 
-	DarkFrameFactory	dff;
-	if (detect_bad_pixels) {
-		dff.badpixellimitstddevs(stddevs);
-	}
-	ImagePtr	dark = dff(images, detect_bad_pixels, interpolate);
+	ImagePtr	dark = dff(images);
 
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "dark image %d x %d generated",
 		dark->size().width(), dark->size().height());
