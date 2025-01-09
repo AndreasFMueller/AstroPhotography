@@ -59,10 +59,10 @@ CXXFLAGS="${CXXFLAGS} -DBSD_DATE=${BSD_DATE}"
 
 ## GLPK ##############################################################
 AC_CHECK_HEADER([glpk.h], [], [
-	AC_MSG_ERROR("required package glpk missing")
+	AC_MSG_ERROR("header glpk.h of required package glpk missing")
 ])
 AC_CHECK_LIB([glpk], [glp_create_prob], [], [
-	AC_MSG_ERROR("required package glpk missing")
+	AC_MSG_ERROR("library for required package glpk missing")
 ])
 
 ## FFTW3 #############################################################
@@ -88,9 +88,9 @@ fi
 ## LIBUSB ############################################################
 if pkg-config --exists libusb-1.0
 then
-	LIBS="${LIBS} `pkg-config --libs libusb-1.0`"
-	CFLAGS="${CFLAGS} `pkg-config --cflags libusb-1.0`"
-	CXXFLAGS="${CXXFLAGS} `pkg-config --cflags libusb-1.0`"
+	LIBS="${LIBS} `pkg-config --libs libusb-1.0` "
+	CFLAGS="${CFLAGS} `pkg-config --cflags libusb-1.0` "
+	CXXFLAGS="${CXXFLAGS} `pkg-config --cflags libusb-1.0` "
 else
 	AC_CHECK_HEADERS([libusb-1.0/libusb.h])
 	AC_CHECK_LIB([usb-1.0], [libusb_bulk_transfer])
@@ -648,7 +648,7 @@ AM_CONDITIONAL(ENABLE_SYSTEMD, test ${enable_systemd} = yes)
 # this causes an error if the repo directorry is automounted)
 AC_ARG_ENABLE([repodir],
 [AS_HELP_STRING([--disable-repodir],  [do not install image repo directory])],
-[], [enable_repodir=yes])
+[], [enable_repodir=yes])
 echo enable_repodir ${enable_repodir}
 AM_CONDITIONAL(ENABLE_REPODIR, test ${enable_repodir} = yes)
 

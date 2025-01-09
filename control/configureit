@@ -2,7 +2,7 @@
 # configuration used for development purposes on all development plattforms
 # (currently Mac OS X, OpenSuSE, Ubuntu)
 #
-# (c) 2014 Prof Dr Andreas Muelle, Hochschule Rapperswil
+# (c) 2014 Prof Dr Andreas Muelle, Hochschule Rapperswil
 #
 
 # set default compiler flags
@@ -73,7 +73,7 @@ if [ -d /opt/homebrew/opt/ice ]
 then
 	CFLAGS="${CFLAGS} -I/opt/homebrew/opt/ice/include"
 	CXXFLAGS="${CFLAGS} -I/opt/homebrew/opt/ice/include"
-	LDFLAGS="${LDFLAGS} -L/opt/homebrew/opt/ice/lib -lusb-1.0"
+	LDFLAGS="${LDFLAGS} -L/opt/homebrew/opt/ice/lib"
 	ICEDIR=/opt/homebrew/opt/ice
 	SLICEDIR=/opt/homebrew/share/ice/slice
 fi
@@ -270,12 +270,19 @@ SuSE)
 		${sbigoption}
 	;;
 Darwin)
+	# depending on the architecture, add the library directories
+	# for homebrew
 	case `uname -m` in
-	arm64)
+	arm64)	LDFLAGS="-L/opt/homebrew/lib"
+		CFLAGS="-I/opt/homebrew/include"
+		CXXFLAGS="-I/opt/homebrew/include"
 		;;
-	*)	LDFLAGS="-L/usr/local/lib -lusb-1.0"
+	*)	LDFLAGS="-L/usr/local/lib"
+		CFLAGS="-I/usr/local/include"
+		CXXFLAGS="-I/usr/local/include"
 		;;
 	esac
+	# compiler flags to get th right compiler version
 	CXXFLAGS="${CFLAGS} --std=c++11"
 	export CFLAGS CXXFLAGS LDFLAGS
 	CXXFLAGS="${CXXFLAGS} -stdlib=libc++"
