@@ -2,7 +2,6 @@
 # Makefile.am -- build the image processing tools
 #
 # (c) 2012 Prof Dr Andreas Mueller, Hochschule Rapperswil
-# $Id$
 #
 
 bin_PROGRAMS = imageinfo makedark makeflat calibrate \
@@ -10,7 +9,7 @@ bin_PROGRAMS = imageinfo makedark makeflat calibrate \
 	gammacorrect convolve background crop radon radoni backprojection \
 	colorbalance stars findtransform luminance unsharp color \
 	colorclamp hdr destar jpg2fits png2fits nan rgb2xyz psf \
-	deconvolve haar listnan
+	deconvolve haar listnan abinspect
 
 color_SOURCES = color.cpp
 color_DEPENDENCIES = $(top_builddir)/lib/libastro.la
@@ -151,6 +150,10 @@ haar_LDADD = -L$(top_builddir)/lib -lastro
 listnan_SOURCES = listnan.cpp
 listnan_DEPENDENCIES = $(top_builddir)/lib/libastro.la
 listnan_LDADD = -L$(top_builddir)/lib -lastro
+
+abinspect_SOURCES = abinspect.cpp
+abinspect_DEPENDENCIES = $(top_builddir)/lib/libastro.la
+abinspect_LDADD = -L$(top_builddir)/lib -lastro
 
 fitsheadertest:	fitsheader
 	cp andromeda-chart.fits headertest.fits

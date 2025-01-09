@@ -97,6 +97,7 @@ int	main(int argc, char *argv[]) {
 	if (argc <= optind) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "no images specified");
 		std::cerr << "no image file arguments specified" << std::endl;
+		return EXIT_FAILURE;
 	}
 
 	// read the images into memory
