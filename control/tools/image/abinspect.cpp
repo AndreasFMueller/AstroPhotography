@@ -85,7 +85,7 @@ int	main(int argc, char *argv[]) {
 			break;
 		case '?':
 			usage(argv[0]);
-			break;
+			return EXIT_SUCCESS;
 		case 'w':
 			patchwidth = std::stoi(optarg);
 			break;
