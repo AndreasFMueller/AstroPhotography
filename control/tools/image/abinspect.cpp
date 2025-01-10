@@ -9,6 +9,8 @@
 #include <AstroImage.h>
 #include <AstroIO.h>
 
+#include "abadapter.h"
+
 namespace astro {
 namespace app {
 namespace abinspect {
