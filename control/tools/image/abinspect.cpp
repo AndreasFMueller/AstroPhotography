@@ -1,5 +1,5 @@
 /*
- * abinspect.cpp -- 
+ * abinspect.cpp -- aberration inspector
  *
  * (c) 2025 Prof Dr Andreas Müller
  */
@@ -13,20 +13,48 @@ namespace astro {
 namespace app {
 namespace abinspect {
 
+/**
+ * \brief Help message
+ *
+ * \param progname	name of the program
+ */
 static void	usage(char *progname) {
+	std::cout << "construct an aberration inspector for an image"
+		<< std::endl;
+	std::cout << std::endl;
+	std::cout << "    " << progname << " [ options ] infile outfile"
+		<< std::endl;
+	std::cout << "options:" << std::endl;
+	std::cout << "  -d,--debug        show debug messages" << std::endl;
+	std::cout << "  -g,--gap=<4>	  width of the gap between parts"
+		<< std::endl;
+	std::cout << "  -?,--help      show this help message and exit"
+		<< std::endl;
+	std::cout << "  -w,--width=<w>    width of each part (must be even)"
+		<< std::endl;
+	std::cout << "  -h,--height=<h>   height of each part (must be even)"
+		<< std::endl;
 }
 
 static struct option	options[] = {
 { "debug",		no_argument,		NULL,	'd' },
 { "gap",		required_argument,	NULL,	'g' },
-{ "help",		no_argument,		NULL,	'h' },
-{ "size",		required_argument,	NULL,	's' },
+{ "help",		no_argument,		NULL,	'?' },
+{ "height",		required_argument,	NULL,	'h' },
+{ "width",		required_argument,	NULL,	'w' },
 { NULL,			0,			NULL,	 0  }
 };
 
+/**
+ * \brief Main function for the aberration inspector program
+ *
+ * \param argc		the number of arguments
+ * \param argv		the list of arguments
+ */
 int	main(int argc, char *argv[]) {
 	int	gapwidth = 3;
-	int	patchsize = 200;
+	int	patchwidth = 200;
+	int	patchheight = 150;
 
 	int	c;
 	int	longindex;
@@ -39,11 +67,14 @@ int	main(int argc, char *argv[]) {
 		case 'g':
 			gapwidth = std::stoi(optarg);
 			break;
-		case 'h':
+		case '?':
 			usage(argv[0]);
 			break;
-		case 's':
-			patchsize = std::stoi(optarg);
+		case 'w':
+			patchwidth = std::stoi(optarg);
+			break;
+		case 'h':
+			patchheight = std::stoi(optarg);
 			break;
 		}
 
@@ -55,7 +86,8 @@ int	main(int argc, char *argv[]) {
 	}
 	std::string	infilename(argv[optind++]);
 	if (argc <= optind) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "no output image file name specified");
+		debug(LOG_DEBUG, DEBUG_LOG, 0,
+			"no output image file name specified");
 		std::cerr << "no output image file argument" << std::endl;
 		return EXIT_FAILURE;
 	}
@@ -66,10 +98,11 @@ int	main(int argc, char *argv[]) {
 	ImagePtr	inimage = infile.read();
 
 	// compute the window sizes
-	int	l = 3 * patchsize + 2 * gapwidth;
-	if ((l > inimage->size().width()) || (l > inimage->size().height())) {
+	int	lw = 3 * patchwidth + 2 * gapwidth; 
+	int	lh = 3 * patchheight + 2 * gapwidth;
+	if ((lw > inimage->size().width()) || (lh > inimage->size().height())) {
 		std::cerr << "input image too small, must be at least ";
-		std::cerr << l << "x" << l << std::endl;
+		std::cerr << patchwidth << "x" << patchheight << std::endl;
 		return EXIT_FAILURE;
 	}
 
