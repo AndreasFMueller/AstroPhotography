@@ -297,3 +297,5 @@ calibrated.fits:	darktest.fits flattest.fits
 		$(calibraterepo)/image-20250103-00020.fits		\
 		calibrated.fits
 
+abtest:	abinspect
+	./abinspect --debug --width=400 --height=300 jackie.fits blubb.fits

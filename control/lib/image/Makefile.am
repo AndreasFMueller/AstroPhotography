@@ -19,6 +19,7 @@ noinst_LTLIBRARIES = libastroimage.la
 
 libastroimage_la_SOURCES = 						\
 	absolute.cpp							\
+	AberrationInspectorLayout.cpp					\
 	Adapters.cpp							\
 	AffineTransformBuilder.cpp					\
 	AiryImage.cpp							\

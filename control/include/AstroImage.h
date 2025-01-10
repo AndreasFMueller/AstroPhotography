@@ -193,6 +193,9 @@ public:
 	// subimage
 	ImagePoint	subimage(const ImagePoint& point) const;
 	ImagePoint	subimage(int x, int y) const;
+	// convert local coordinates to global coordinates
+	ImagePoint	global(const ImagePoint& point) const;
+	ImagePoint	global(int x, int y) const;
 	// border distance
 	int	borderDistance(const ImagePoint& point) const;
 	// limits of the ranges
@@ -1820,6 +1823,26 @@ public:
 };
 
 typedef std::shared_ptr<ImageBuffer>	ImageBufferPtr;
+
+/**
+ * \brief A helper class to compute the window layout in an aberration inspector
+ */
+class	AberrationInspectorLayout {
+public:
+	typedef std::pair<ImageRectangle, ImageRectangle>	windowpair_t;
+private:
+	std::vector<windowpair_t>	_windowlist;
+	ImageSize	_targetsize;
+	ImageSize	_sourcesize;
+	bool	_mosaic;
+	int	even(int x) const;
+public:
+	AberrationInspectorLayout(const ImageSize& targetsize,
+		const ImageSize& sourcesize, bool mosaic = false);
+	void	layout(int hwindows, int vwindows, int gap = 0);
+	size_t	nwindows() const { return _windowlist.size(); }
+	const windowpair_t&	window(size_t i) const;
+};
 
 } // namespace image
 } // namespace astro
