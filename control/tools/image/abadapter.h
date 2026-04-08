@@ -55,7 +55,12 @@ void	WindowsAdapter<Pixel>::add(const ImageRectangle& targetrectangle,
 		const ImageRectangle& sourcerectangle) {
 	// XXX make sure the rectangles have the same size
 	if (targetrectangle.size() != sourcerectangle.size()) {
-		std::string	msg = astro::stringprintf();
+		std::string	msg = astro::stringprintf(
+			"size mismatch: %s != %s",
+			targetrectangle.size().toString(),
+			sourcerectangle.size().toString());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw std::runtime_error(msg);
 	}
 	window_t	newwindow(targetrectangle,
 				WindowAdapter<Pixel>(image, sourcerectangle));
