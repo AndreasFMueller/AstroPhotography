@@ -18,7 +18,7 @@ static void	usage(const char *progname) {
 	Path	path(progname);
 	std::cout << "usage: " << std::endl;
 	std::cout << std::endl;
-	std::cout << "    " << path.basename() << " [ options ] file "
+	std::cout << "    " << path.basename() << " [ options ] infile outfile "
 		<< std::endl;
 	std::cout << std::endl;
 	std::cout << "Perform a Haar Wavelet transform on the image"

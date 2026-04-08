@@ -290,6 +290,14 @@ ImagePoint	ImageRectangle::subimage(const ImagePoint& point) const {
 	return subimage(point.x(), point.y());
 }
 
+ImagePoint	ImageRectangle::global(const ImagePoint& point) const {
+	return ImagePoint(point.x() - _origin.x(), point.y() - _origin.y());
+}
+
+ImagePoint	ImageRectangle::global(int x, int y) const {
+	return ImagePoint(x - _origin.x(), y - _origin.y());
+}
+
 int	ImageRectangle::borderDistance(const ImagePoint& point) const {
 	ImagePoint	upper = upperright();
 	int	m, n;

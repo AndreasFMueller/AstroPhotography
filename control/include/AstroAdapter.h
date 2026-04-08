@@ -10,6 +10,7 @@
 #include <AstroMask.h>
 #include <AstroDebug.h>
 #include <AstroTypes.h>
+#include <deque>
 
 using namespace astro::image;
 
@@ -315,6 +316,82 @@ public:
 		return _image.pixel(p.x(), p.y());
 	}
 };
+
+
+//////////////////////////////////////////////////////////////////////
+// Multiple Windows
+//////////////////////////////////////////////////////////////////////
+
+/**
+ * \brief A template that maps various subframes of an image
+ *
+ * This adapter accepts pairs of rectangles of the source and target
+ * image. When a pixel value is requested, it searches for the first
+ * rectangle containing the pixel and returns the corresponding pixel
+ * from the source image.
+ */
+template<typename Pixel>
+class WindowsAdapter : public ConstImageAdapter<Pixel> {
+typedef std::pair<ImageRectangle, WindowAdapter<Pixel> >	window_t;
+	std::deque<window_t>	windows;
+	const ConstImageAdapter<Pixel>&	image;
+
+public:
+	WindowsAdapter(const ConstImageAdapter<Pixel>& _image,
+		const ImageSize& _size);
+	void	add(const ImageRectangle& frame, const ImageRectangle& from);
+	virtual Pixel	pixel(int x, int y) const;
+};
+
+/**
+ * \brief Construct a Windows adapter image
+ *
+ * \param _image	the source image 
+ * \param _targetsize	the size of the target image
+ */
+template<typename Pixel>
+WindowsAdapter<Pixel>::WindowsAdapter(const ConstImageAdapter<Pixel>& _image,
+		const ImageSize& _targetsize)
+	: ConstImageAdapter<Pixel>(_targetsize), image(_image) {
+}
+
+/**
+ * \brief Add a pair of rectangles to the WindowsAdapter
+ *
+ * \param targetrectangle		the target rectangle
+ * \param sourcerectangle		the source
+ */
+template<typename Pixel>
+void	WindowsAdapter<Pixel>::add(const ImageRectangle& targetrectangle,
+		const ImageRectangle& sourcerectangle) {
+	// make sure the rectangles have the same size
+	if (targetrectangle.size() != sourcerectangle.size()) {
+		std::string	msg = astro::stringprintf("windows of "
+			"different size: %s != %s",
+			targetrectangle.size().toString().c_str(),
+			sourcerectangle.size().toString().c_str());
+	}
+	window_t	newwindow(targetrectangle,
+				WindowAdapter<Pixel>(image, sourcerectangle));
+	windows.push_front(newwindow);
+}
+
+/**
+ * \brief Access pixels of the subwindows
+ *
+ * \param x	the x coordinate of the main window
+ * \param y	the y coordinate of the main window
+ */
+template<typename Pixel>
+Pixel	WindowsAdapter<Pixel>::pixel(int x, int y) const {
+	for (auto i = windows.begin(); i != windows.end(); i++) {
+		if (i->first.contains(x, y)) {
+			ImagePoint	p = i->first.global(x, y);
+			return i->second.pixel(p.x(), p.y());
+		}
+	}
+	return Pixel();
+}
 
 //////////////////////////////////////////////////////////////////////
 // Copying image
@@ -2944,6 +3021,76 @@ public:
 		return l;
 	}
 };
+
+//////////////////////////////////////////////////////////////////////
+// Factory to create AberrationInspectors
+//////////////////////////////////////////////////////////////////////
+/**
+ * \brief A template to crate an aberration inspector
+ *
+ * This is essentially a WindowsAdapter that uses a special grid layout
+ * of the subwindows.
+ */
+template<typename Pixel>
+class AberrationInspectorFactory {
+	ImageSize	_targetsize;
+	int	_hwindows;
+public:
+	int	hwindows() const { return _hwindows; }
+	void	hwindows(int h) { _hwindows = h; }
+private:
+	int	_vwindows;
+public:
+	int	vwindows() const { return _vwindows; }
+	void	vwindows(int v) { _vwindows = v; }
+private:
+	int	_gap;
+public:
+	int	gap() const { return _gap; }
+	void	gap(int g) { _gap = g; }
+
+	AberrationInspectorFactory(const ImageSize& targetsize);
+	WindowsAdapter<Pixel>	*operator()(
+		const ConstImageAdapter<Pixel>& source, bool _mosaic) const;
+};
+
+/**
+ * \brief Constructor for the AberrationInspectorFactory
+ *
+ * \param targetsize	the size of the inspector to be created
+ */
+template<typename Pixel>
+AberrationInspectorFactory<Pixel>::AberrationInspectorFactory(
+	const ImageSize& targetsize) : _targetsize(targetsize) {
+	_hwindows = 3;
+	_vwindows = 3;
+	_gap = 2;
+}
+
+/**
+ * \brief Operator to extract a new WindowsAdapter
+ *
+ * This method creates a WindowsAdapter with a layout constructed from
+ * a AberrationInspectorLayout. The caller has to delete this adapter.
+ *
+ * \param source	the source image adapter to take the image data from
+ * \param _mosaic	whether the image is a Bayer mosaic
+ */
+template<typename Pixel>
+WindowsAdapter<Pixel>	*AberrationInspectorFactory<Pixel>::operator()(
+	const ConstImageAdapter<Pixel>& source,
+	bool _mosaic) const {
+	AberrationInspectorLayout	abl(_targetsize,
+		source.getSize(), _mosaic);
+	abl.layout(_hwindows, _vwindows, _gap);
+	WindowsAdapter<Pixel>	*wa = new WindowsAdapter<Pixel>(source,
+		_targetsize);
+	for (size_t i = 0; i < abl.nwindows(); i++) {
+		auto	p = abl.window(i);
+		wa->add(p.second, p.first);
+	}
+	return wa;
+}
 
 } // namespace adapter
 } // namespace astro
