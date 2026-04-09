@@ -1095,7 +1095,7 @@ public:
 			ImageRow	r(frame.size(), subframe.origin().y() + y);
 			std::fill(pixels + r.firstoffset + subframe.origin().x(),
 				pixels + r.firstoffset + subframe.origin().x()
-					+ frame.size().width(), value);
+					+ subframe.size().width(), value);
 		}
 	}
 

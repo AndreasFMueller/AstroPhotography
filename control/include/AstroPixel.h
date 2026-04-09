@@ -15,6 +15,7 @@
 #include <cmath>
 #include <limits>
 #include <typeinfo>
+#include <AstroFormat.h>
 
 namespace astro {
 namespace image {
@@ -212,6 +213,7 @@ void	convertPixelValue(destValue& dest, const srcValue& src) {
 		typename std::is_integral<destValue>::type(),
 		typename std::is_integral<srcValue>::type());
 }
+
 
 /**
  * \brief The color_traits struct class is used to select color conversion
@@ -1598,7 +1600,39 @@ RGB<T>	colorluminanceclamp(const RGB<T> p, T maximum, T minimum = (T)0) {
 	return q;
 }
 
+/**
+ * \brief template class 
+ */
+template<typename Pixel>
+std::string	pixelValueString(const Pixel& v); 
+
+template<>
+std::string	pixelValueString<double>(const double& v);
+template<>
+std::string	pixelValueString<float>(const float& v);
+template<>
+std::string	pixelValueString<unsigned char>(const unsigned char& v);
+template<>
+std::string	pixelValueString<unsigned short>(const unsigned short& v);
+template<>
+std::string	pixelValueString<unsigned int>(const unsigned int& v);
+template<>
+std::string	pixelValueString<unsigned long>(const unsigned long& v);
+template<>
+std::string	pixelValueString<RGB<unsigned char>>(const RGB<unsigned char>& p);
+template<>
+std::string	pixelValueString<RGB<unsigned short>>(const RGB<unsigned short>& p);
+template<>
+std::string	pixelValueString<RGB<unsigned int>>(const RGB<unsigned int>& p);
+template<>
+std::string	pixelValueString<RGB<unsigned long>>(const RGB<unsigned long>& p);
+template<>
+std::string	pixelValueString<RGB<float>>(const RGB<float>& p);
+template<>
+std::string	pixelValueString<RGB<double>>(const RGB<double>& p);
+
 } // namespace image
 } // namespace astro
+
 
 #endif /* _AstroPixel_h */

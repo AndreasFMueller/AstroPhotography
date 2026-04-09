@@ -149,5 +149,70 @@ unsigned char   conversionFunction<unsigned char, double>(const double& src) {
 	return x;
 }
 
+//
+// Pixel value conversion to string for debugging
+//
+template<>
+std::string	pixelValueString<unsigned char>(const unsigned char& u) {
+	unsigned int	v = u;
+	return stringprintf("%lu", v);
+}
+template<>
+std::string	pixelValueString<unsigned short>(const unsigned short& u) {
+	unsigned int	v = u;
+	return stringprintf("%lu", v);
+}
+template<>
+std::string	pixelValueString<unsigned int>(const unsigned int& u) {
+	unsigned int	v = u;
+	return stringprintf("%lu", v);
+}
+template<>
+std::string	pixelValueString<unsigned long>(const unsigned long& u) {
+	return stringprintf("%lu", u);
+}
+
+template<>
+std::string	pixelValueString<float>(const float& f) {
+	return stringprintf("%f", f);
+}
+template<>
+std::string	pixelValueString<double>(const double& f) {
+	return stringprintf("%f", f);
+}
+template<>
+std::string	pixelValueString<RGB<unsigned char>>(const RGB<unsigned char>& p) {
+	unsigned long	r = p.R;
+	unsigned long	g = p.G;
+	unsigned long	b = p.B;
+	return stringprintf("(%lu,%lu,%lu)", r, g, b);
+}
+template<>
+std::string	pixelValueString<RGB<unsigned short>>(const RGB<unsigned short>& p) {
+	unsigned long	r = p.R;
+	unsigned long	g = p.G;
+	unsigned long	b = p.B;
+	return stringprintf("(%lu,%lu,%lu)", r, g, b);
+}
+template<>
+std::string	pixelValueString<RGB<unsigned int>>(const RGB<unsigned int>& p) {
+	unsigned long	r = p.R;
+	unsigned long	g = p.G;
+	unsigned long	b = p.B;
+	return stringprintf("(%lu,%lu,%lu)", r, g, b);
+}
+template<>
+std::string	pixelValueString<RGB<unsigned long>>(const RGB<unsigned long>& p) {
+	return stringprintf("(%lu,%lu,%lu)", p.R, p.G, p.B);
+}
+template<>
+std::string	pixelValueString<RGB<float>>(const RGB<float>& p) {
+	return stringprintf("(%f,%f,%f)", p.R, p.G, p.B);
+}
+template<>
+std::string	pixelValueString<RGB<double>>(const RGB<double>& p) {
+	return stringprintf("(%f,%f,%f)", p.R, p.G, p.B);
+}
+
 } // image
 } // astro
