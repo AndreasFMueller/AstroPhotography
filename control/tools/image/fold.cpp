@@ -157,14 +157,13 @@ public:
 			yy -= BakerAdapter<Pixel>::_image.getSize().height();
 			xx += BakerAdapter<Pixel>::_w;
 		}
-debug(LOG_DEBUG, DEBUG_LOG, 0, "(%d,%d) - (%d,%d)", x, y, xx, yy);
 		Pixel	p1 = BakerAdapter<Pixel>::_image.pixel(xx, yy) * 0.5;
 		Pixel	p2 = BakerAdapter<Pixel>::_image.pixel(xx, yy + 1) * 0.5;
 		Pixel	s = p1 + p2;
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "(%d,%d) -> (%d,%d) %s/%s -> %s", x, y, xx, yy,
-			astro::image::pixelValueString(p1).c_str(),
-			astro::image::pixelValueString(p2).c_str(),
-			astro::image::pixelValueString(s).c_str());
+		//debug(LOG_DEBUG, DEBUG_LOG, 0, "(%d,%d) -> (%d,%d) %s/%s -> %s", x, y, xx, yy,
+		//	astro::image::pixelValueString(p1).c_str(),
+		//	astro::image::pixelValueString(p2).c_str(),
+		//	astro::image::pixelValueString(s).c_str());
 		return s;
 	}
 };
@@ -188,10 +187,10 @@ public:
 		Pixel	p1 = BakerAdapter<Pixel>::_image.pixel(xx,     yy) * 0.5;
 		Pixel	p2 = BakerAdapter<Pixel>::_image.pixel(xx + 1, yy) * 0.5;
 		Pixel	s = p1 + p2;
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "(%d,%d) -> (%d,%d) %s/%s -> %s", x, y, xx, yy,
-			astro::image::pixelValueString(p1).c_str(),
-			astro::image::pixelValueString(p2).c_str(),
-			astro::image::pixelValueString(s).c_str());
+		//debug(LOG_DEBUG, DEBUG_LOG, 0, "(%d,%d) -> (%d,%d) %s/%s -> %s", x, y, xx, yy,
+		//	astro::image::pixelValueString(p1).c_str(),
+		//	astro::image::pixelValueString(p2).c_str(),
+		//	astro::image::pixelValueString(s).c_str());
 		return s;
 	}
 };

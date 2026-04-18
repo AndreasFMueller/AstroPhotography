@@ -303,7 +303,7 @@ calibrated.fits:	darktest.fits flattest.fits
 
 
 foldtest:	fold
-	./fold --baker --both --debug --width=32 --height=18 --test --repeat=20 --sequence --force --color --maximum baker.jpg
+	./fold --baker --both --debug --width=320 --height=180 --test --repeat=20 --sequence --force --color --maximum baker.jpg
 
 abtest:	abinspect
 	./abinspect --debug --width=400 --height=300 jackie.fits blubb.fits
