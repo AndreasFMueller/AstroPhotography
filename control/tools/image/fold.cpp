@@ -31,7 +31,7 @@ public:
 		: ConstImageAdapter<Pixel>(image.getSize()), _image(image) {
 	}
 	virtual Pixel	pixel(int x, int y) const {
-		Pixel	p;
+		Pixel	p(0);
 		return p;
 	}
 };
@@ -90,12 +90,146 @@ public:
 	if (NULL != p) {						\
 		if (vertical) {						\
 			VerticalFoldAdapter<pixel >	a(*p);		\
-			result = ImagePtr(new Image<pixel>(a));		\
+			return ImagePtr(new Image<pixel>(a));		\
 		} else {						\
 			HorizontalFoldAdapter<pixel >	a(*p);		\
-			result = ImagePtr(new Image<pixel>(a));		\
+			return ImagePtr(new Image<pixel>(a));		\
 		}							\
 	}								\
+}
+
+/**
+ * \brief Function to perform the fold
+ *
+ * \param image		the image to fold
+ * \param vertical	vertical or horizontal fold direction
+ */
+ImagePtr	fold(ImagePtr image, bool vertical) {
+	fold_adapter(image, double, vertical)
+	fold_adapter(image, float, vertical)
+	fold_adapter(image, unsigned short, vertical)
+	fold_adapter(image, unsigned long, vertical)
+	fold_adapter(image, unsigned char, vertical)
+	fold_adapter(image, RGB<double>, vertical)
+	fold_adapter(image, RGB<float>, vertical)
+	fold_adapter(image, RGB<unsigned short>, vertical)
+	fold_adapter(image, RGB<unsigned long>, vertical)
+	fold_adapter(image, RGB<unsigned char>, vertical)
+	std::string	msg = stringprintf("unknown pixel type for fold transform");
+	debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+	throw std::runtime_error(msg);
+}
+
+/**
+ * \brief base class for baker adapters
+ */
+template<typename Pixel>
+class BakerAdapter : public ConstImageAdapter<Pixel> {
+protected:
+	const ConstImageAdapter<Pixel>&	_image;
+	int	_h;
+	int	_w;
+public:
+	BakerAdapter(const ConstImageAdapter<Pixel>& image)
+		: ConstImageAdapter<Pixel>(image.getSize()), _image(image) {
+		_h = image.getSize().height() / 2;
+		_w = image.getSize().width() / 2;
+	}
+	virtual Pixel	pixel(int x, int y) const {
+		Pixel	p(0);
+		return p;
+	}
+};
+
+/**
+ * \brief Horizontal baker adapter
+ */
+template<typename Pixel>
+class HorizontalBakerAdapter : public BakerAdapter<Pixel> {
+public:
+	HorizontalBakerAdapter(const ConstImageAdapter<Pixel>& image)
+		: BakerAdapter<Pixel>(image) {
+	}
+	virtual Pixel	pixel(int x, int y) const {
+		int	xx = x / 2;
+		int	yy = 2 * y;
+		if (y >= BakerAdapter<Pixel>::_h) {
+			yy -= BakerAdapter<Pixel>::_image.getSize().height();
+			xx += BakerAdapter<Pixel>::_w;
+		}
+debug(LOG_DEBUG, DEBUG_LOG, 0, "(%d,%d) - (%d,%d)", x, y, xx, yy);
+		Pixel	p1 = BakerAdapter<Pixel>::_image.pixel(xx, yy) * 0.5;
+		Pixel	p2 = BakerAdapter<Pixel>::_image.pixel(xx, yy + 1) * 0.5;
+		Pixel	s = p1 + p2;
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "(%d,%d) -> (%d,%d) %s/%s -> %s", x, y, xx, yy,
+			astro::image::pixelValueString(p1).c_str(),
+			astro::image::pixelValueString(p2).c_str(),
+			astro::image::pixelValueString(s).c_str());
+		return s;
+	}
+};
+
+/**
+ * \brief Vertical baker adapter
+ */
+template<typename Pixel>
+class VerticalBakerAdapter : public BakerAdapter<Pixel> {
+public:
+	VerticalBakerAdapter(const ConstImageAdapter<Pixel>& image)
+		: BakerAdapter<Pixel>(image) {
+	}
+	virtual Pixel	pixel(int x, int y) const {
+		int	xx = 2 * x;
+		int	yy = y / 2;
+		if (x >= BakerAdapter<Pixel>::_w) {
+			yy += BakerAdapter<Pixel>::_h;
+			xx -= BakerAdapter<Pixel>::_image.getSize().width();
+		}
+		Pixel	p1 = BakerAdapter<Pixel>::_image.pixel(xx,     yy) * 0.5;
+		Pixel	p2 = BakerAdapter<Pixel>::_image.pixel(xx + 1, yy) * 0.5;
+		Pixel	s = p1 + p2;
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "(%d,%d) -> (%d,%d) %s/%s -> %s", x, y, xx, yy,
+			astro::image::pixelValueString(p1).c_str(),
+			astro::image::pixelValueString(p2).c_str(),
+			astro::image::pixelValueString(s).c_str());
+		return s;
+	}
+};
+
+#define baker_adapter(image, pixel, vertical)				\
+{									\
+	Image<pixel>	*p = dynamic_cast<Image<pixel >*>(&*image);	\
+	if (NULL != p) {						\
+		if (vertical) {						\
+			VerticalBakerAdapter<pixel >	a(*p);		\
+			return ImagePtr(new Image<pixel>(a));		\
+		} else {						\
+			HorizontalBakerAdapter<pixel >	a(*p);		\
+			return ImagePtr(new Image<pixel>(a));		\
+		}							\
+	}								\
+}
+
+/**
+ * \brief Function to perform the baker transform
+ *
+ * \param image		the image to baker transform
+ * \param vertical	vertical or horizontal transform direction
+ */
+static ImagePtr	baker(ImagePtr image, bool vertical) {
+	baker_adapter(image, double, vertical)
+	baker_adapter(image, float, vertical)
+	baker_adapter(image, unsigned short, vertical)
+	baker_adapter(image, unsigned long, vertical)
+	baker_adapter(image, unsigned char, vertical)
+	baker_adapter(image, RGB<double>, vertical)
+	baker_adapter(image, RGB<float>, vertical)
+	baker_adapter(image, RGB<unsigned short>, vertical)
+	baker_adapter(image, RGB<unsigned long>, vertical)
+	baker_adapter(image, RGB<unsigned char>, vertical)
+	std::string	msg = stringprintf("unknown pixel type for baker transform");
+	debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+	throw std::runtime_error(msg);
 }
 
 /**
@@ -289,6 +423,7 @@ static ImagePtr		create_testimage(const ImageSize& size, bool color,
  * \brief Options for the fold program
  */
 static struct option	longopts[] = {
+{ "baker",	no_argument,		NULL,		'B' },
 { "both",	no_argument,		NULL,		'b' },
 { "color",	no_argument,		NULL,		'c' },
 { "debug",	no_argument,		NULL,		'd' },
@@ -315,9 +450,10 @@ static void	usage(const char *progname) {
 	Path	path(progname);
 	std::cout << "usage: " << std::endl;
 	std::cout << std::endl;
-	std::cout << "    " << path.basename() << " [ -bdfHh?vw ] image folded";
+	std::cout << "    " << path.basename() << " [ -BbdfHh?vw ] image folded";
 	std::cout << std::endl;
 	std::cout << "options:" << std::endl;
+	std::cout << " -B,--baker         use baker transform instead of folding" << std::endl;
 	std::cout << " -b,--both          fold in both directions" << std::endl;
 	std::cout << " -c,--color         generate a color test image"
 		<< std::endl;
@@ -461,6 +597,7 @@ int	main(int argc, char *argv[]) {
 	int	width = 64;
 	int	height = 36;
 	int	sequencenumber = -1;
+	bool	usebaker = false;
 
 	// parse command line
 	int	c;
@@ -468,6 +605,9 @@ int	main(int argc, char *argv[]) {
 	while (EOF != (c = getopt_long(argc, argv, "bcdfh?irstvw", longopts,
 		&longindex))) {
 		switch (c) {
+		case 'B':
+			usebaker = true;
+			break;
 		case 'b':
 			both = true;
 			break;
@@ -562,34 +702,26 @@ int	main(int argc, char *argv[]) {
 	}
 	while (repeat-- > 0) {
 		if (!vertical || both) {
-			debug(LOG_DEBUG, DEBUG_LOG, 0, "horizontal fold");
-			fold_adapter(result, double, false);
-			fold_adapter(result, float, false);
-			fold_adapter(result, unsigned short, false);
-			fold_adapter(result, unsigned long, false);
-			fold_adapter(result, unsigned char, false);
-			fold_adapter(result, RGB<double>, false);
-			fold_adapter(result, RGB<float>, false);
-			fold_adapter(result, RGB<unsigned short>, false);
-			fold_adapter(result, RGB<unsigned long>, false);
-			fold_adapter(result, RGB<unsigned char>, false);
+			if (usebaker) {
+				debug(LOG_DEBUG, DEBUG_LOG, 0, "horizontal baker");
+				result = baker(result, false);
+			} else {
+				debug(LOG_DEBUG, DEBUG_LOG, 0, "horizontal fold");
+				result = fold(result, false);
+			}
 			if (sequencenumber >= 0) {
 				writeImage(result, outfilename,
 					sequencenumber++);
 			}
 		}
 		if (vertical || both) {
-			debug(LOG_DEBUG, DEBUG_LOG, 0, "vertical fold");
-			fold_adapter(result, double, true);
-			fold_adapter(result, float, true);
-			fold_adapter(result, unsigned short, true);
-			fold_adapter(result, unsigned long, true);
-			fold_adapter(result, unsigned char, true);
-			fold_adapter(result, RGB<double>, true);
-			fold_adapter(result, RGB<float>, true);
-			fold_adapter(result, RGB<unsigned short>, true);
-			fold_adapter(result, RGB<unsigned long>, true);
-			fold_adapter(result, RGB<unsigned char>, true);
+			if (usebaker) {
+				debug(LOG_DEBUG, DEBUG_LOG, 0, "vertical baker");
+				result = baker(result, true);
+			} else {
+				debug(LOG_DEBUG, DEBUG_LOG, 0, "vertical fold");
+				result = fold(result, true);
+			}
 			if (sequencenumber >= 0) {
 				writeImage(result, outfilename,
 					sequencenumber++);

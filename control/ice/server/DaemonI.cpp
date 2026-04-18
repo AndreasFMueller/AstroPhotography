@@ -16,8 +16,11 @@
 #include <AstroUtils.h>
 #include <sys/utsname.h>
 #include <sys/times.h>
+#if defined(__APPLE__)
 #include <sys/sysctl.h>
+#endif
 #ifdef __linux__
+#include <linux/sysctl.h>
 #include <sys/sysinfo.h>
 #endif /* __linux__ */
 
