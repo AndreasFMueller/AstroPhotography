@@ -312,3 +312,7 @@ foldtest:	fold
 abtest:	abinspect
 	./abinspect --debug --width=400 --height=300 jackie.fits blubb.fits
 
+imagepath = ../../../../../Vorlesungen/private/Numb3rsPrivate/2026-fs-greatesthits/flightradar/images
+meantest:	mean
+	./mean --debug --outfile=mean.jpg $(imagepath)/*.png
+
