@@ -9,7 +9,7 @@ bin_PROGRAMS = imageinfo makedark makeflat calibrate \
 	gammacorrect convolve background crop radon radoni backprojection \
 	colorbalance stars findtransform luminance unsharp color \
 	colorclamp hdr destar jpg2fits png2fits nan rgb2xyz psf \
-	deconvolve haar listnan abinspect fold
+	deconvolve haar listnan abinspect fold mean
 
 color_SOURCES = color.cpp
 color_DEPENDENCIES = $(top_builddir)/lib/libastro.la
@@ -158,6 +158,10 @@ abinspect_LDADD = -L$(top_builddir)/lib -lastro
 fold_SOURCES = fold.cpp
 fold_DEPENDENCIES = $(top_builddir)/lib/libastro.la
 fold_LDADD = -L$(top_builddir)/lib -lastro
+
+mean_SOURCES = mean.cpp
+mean_DEPENDENCIES = $(top_builddir)/lib/libastro.la
+mean_LDADD = -L$(top_builddir)/lib -lastro
 
 fitsheadertest:	fitsheader
 	cp andromeda-chart.fits headertest.fits
