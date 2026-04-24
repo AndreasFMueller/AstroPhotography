@@ -9,7 +9,7 @@ bin_PROGRAMS = imageinfo makedark makeflat calibrate \
 	gammacorrect convolve background crop radon radoni backprojection \
 	colorbalance stars findtransform luminance unsharp color \
 	colorclamp hdr destar jpg2fits png2fits nan rgb2xyz psf \
-	deconvolve haar listnan abinspect fold mean
+	deconvolve haar listnan abinspect fold mean newton areatransform
 
 color_SOURCES = color.cpp
 color_DEPENDENCIES = $(top_builddir)/lib/libastro.la
@@ -163,6 +163,14 @@ mean_SOURCES = mean.cpp
 mean_DEPENDENCIES = $(top_builddir)/lib/libastro.la
 mean_LDADD = -L$(top_builddir)/lib -lastro
 
+newton_SOURCES = newton.cpp
+newton_DEPENDENCIES = $(top_builddir)/lib/libastro.la
+newton_LDADD = -L$(top_builddir)/lib -lastro
+
+areatransform_SOURCES = areatransform.cpp
+areatransform_DEPENDENCIES = $(top_builddir)/lib/libastro.la
+areatransform_LDADD = -L$(top_builddir)/lib -lastro
+
 fitsheadertest:	fitsheader
 	cp andromeda-chart.fits headertest.fits
 	./fitsheader -d add headertest.fits \
@@ -315,4 +323,16 @@ abtest:	abinspect
 imagepath = ../../../../../Vorlesungen/private/Numb3rsPrivate/2026-fs-greatesthits/flightradar/images
 meantest:	mean
 	./mean --debug --outfile=mean.jpg $(imagepath)/*.png
+
+newtontest:	newton
+	resolution=0.00288600288600288600;				\
+	size=1001x1201;							\
+	./newton --debug --outfile=newton-graded.jpg --graded 		\
+		--size="$${size}" --resolution=$${resolution};		\
+	./newton --debug --outfile=newton.jpg 				\
+		--size="$${size}" --resolution=$${resolution}
+
+areatransformtest:	areatransform
+	./areatransform --debug --outfile=area.jpg --matrix='[4,1;3,1]' \
+		--repeats=7 --sequence
 

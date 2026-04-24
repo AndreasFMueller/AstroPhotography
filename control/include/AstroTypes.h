@@ -42,6 +42,7 @@ public:
 	Point(const astro::image::ImagePoint& point) noexcept
 		: _x(point.x()), _y(point.y()) {}
 	Point(double angle) noexcept : _x(cos(angle)), _y(sin(angle)) { }
+	Point(const std::string& point);
 	double	x() const { return _x; }
 	double	y() const { return _y; }
 	double	abs() const;

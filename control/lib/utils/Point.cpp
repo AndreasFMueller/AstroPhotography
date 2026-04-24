@@ -15,6 +15,15 @@ static const double	epsilon = 1e-10;
 //////////////////////////////////////////////////////////////////////
 // Point implementation
 //////////////////////////////////////////////////////////////////////
+Point::Point(const std::string& point) {
+	std::string	p = point.substr(point.find_first_not_of("("));
+	p = p.substr(0, p.find_last_not_of(")"));
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "parsing %s", point.c_str());
+	auto	o = p.find(',');
+	_x = std::stod(p.substr(0, o - 1));
+	_y = std::stod(p.substr(0));
+}
+
 Point	Point::operator+(const Point& other) const {
 	return Point(_x + other._x, _y + other._y);
 }
