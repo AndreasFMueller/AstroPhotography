@@ -24,6 +24,12 @@ static void	usage(const char *progname) {
 	std::cout << "usage:" << std::endl;
 	std::cout << "   " << progname << " [ options ] files" << std::endl;
 	std::cout << "options:" << std::endl;
+	std::cout << " -d,--debug      enable debugging" << std::endl;
+	std::cout << " -h,-?,--helpS   show this help message and exit"
+		<< std::endl;
+	std::cout << " -n,--number=<n>    process only <n> images (useful for "
+		"debugging)" << std::endl;
+	std::cout << " -o,--outfile=<o>   outfile named <o>" << std::endl;
 }
 
 /**
@@ -53,6 +59,7 @@ static struct option    longopts[] = {
  * \param argv	parameter array
  */
 static int	main(int argc, char *argv[]) {
+	debug_set_ident("mean");
 	std::string	outfilename;
 	int	number = -1; // unlimited number of images
 

@@ -586,6 +586,7 @@ static void	writeImage(ImagePtr image, const std::string& filename,
  * \param argv	arguments
  */
 int	main(int argc, char *argv[]) {
+	debug_set_ident("fold");
 	// boolean control variables
 	bool	vertical = false;
 	bool	both = false;

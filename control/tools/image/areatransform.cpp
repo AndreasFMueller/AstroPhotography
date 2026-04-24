@@ -229,6 +229,7 @@ static struct option	options[] = {
  * \param argv		argument vector
  */
 static int	main(int argc, char *argv[]) {
+	debug_set_ident("areatransform");
 	std::string	inputfilename;
 	std::string	outputfilename;
 	Matrix	matrix;
