@@ -52,10 +52,10 @@ public:
 		Pixel	p1 = FoldAdapter<Pixel>::_image.pixel(xx, y) * 0.5;
 		Pixel	p2 = FoldAdapter<Pixel>::_image.pixel(w - xx, y) * 0.5;
 		Pixel	s = p1 + p2;
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "(%d,%d) -> %s/%s -> %s", x, y,
-			astro::image::pixelValueString(p1).c_str(),
-			astro::image::pixelValueString(p2).c_str(),
-			astro::image::pixelValueString(s).c_str());
+		//debug(LOG_DEBUG, DEBUG_LOG, 0, "(%d,%d) -> %s/%s -> %s", x, y,
+		//	astro::image::pixelValueString(p1).c_str(),
+		//	astro::image::pixelValueString(p2).c_str(),
+		//	astro::image::pixelValueString(s).c_str());
 		return s;
 	}
 };
@@ -76,10 +76,10 @@ public:
 		Pixel	p1 = FoldAdapter<Pixel>::_image.pixel(x, yy) * 0.5;
 		Pixel	p2 = FoldAdapter<Pixel>::_image.pixel(x, h - yy) * 0.5;
 		Pixel	s = p1 + p2;
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "(%d,%d) -> %s/%s -> %s", x, y,
-			astro::image::pixelValueString(p1).c_str(),
-			astro::image::pixelValueString(p2).c_str(),
-			astro::image::pixelValueString(s).c_str());
+		//debug(LOG_DEBUG, DEBUG_LOG, 0, "(%d,%d) -> %s/%s -> %s", x, y,
+		//	astro::image::pixelValueString(p1).c_str(),
+		//	astro::image::pixelValueString(p2).c_str(),
+		//	astro::image::pixelValueString(s).c_str());
 		return s;
 	}
 };
@@ -496,6 +496,7 @@ static void	usage(const char *progname) {
  */
 static void	writeImage(ImagePtr image, const std::string& filename,
 			int number) {
+	float	uscale = scale;
 	// extract the extension for the image type
 	auto pointoffset = filename.find_last_of(".");
 	std::string	name = filename.substr(0, pointoffset);
@@ -533,23 +534,24 @@ static void	writeImage(ImagePtr image, const std::string& filename,
 
 	if (maximum) {
 		// find the scale factor
-		scale = astro::image::filter::max_luminance(image);
+		uscale = astro::image::filter::max_luminance(image);
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "found maximum = %f", scale);
 	}
-	scale = 255. / scale;
+	uscale = 255. / uscale;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "rescaling with %f,%f", scale, uscale);
 	Image<RGB<unsigned char>>	*scaledimage = NULL;
-	rescale_pixels(image, scale, unsigned char)
-	rescale_pixels(image, scale, unsigned short)
-	rescale_pixels(image, scale, unsigned int)
-	rescale_pixels(image, scale, unsigned long)
-	rescale_pixels(image, scale, float)
-	rescale_pixels(image, scale, double)
-	rescale_pixels(image, scale, RGB<unsigned char>)
-	rescale_pixels(image, scale, RGB<unsigned short>)
-	rescale_pixels(image, scale, RGB<unsigned int>)
-	rescale_pixels(image, scale, RGB<unsigned long>)
-	rescale_pixels(image, scale, RGB<float>)
-	rescale_pixels(image, scale, RGB<double>)
+	rescale_pixels(image, uscale, unsigned char)
+	rescale_pixels(image, uscale, unsigned short)
+	rescale_pixels(image, uscale, unsigned int)
+	rescale_pixels(image, uscale, unsigned long)
+	rescale_pixels(image, uscale, float)
+	rescale_pixels(image, uscale, double)
+	rescale_pixels(image, uscale, RGB<unsigned char>)
+	rescale_pixels(image, uscale, RGB<unsigned short>)
+	rescale_pixels(image, uscale, RGB<unsigned int>)
+	rescale_pixels(image, uscale, RGB<unsigned long>)
+	rescale_pixels(image, uscale, RGB<float>)
+	rescale_pixels(image, uscale, RGB<double>)
 	if (NULL == scaledimage) {
 		std::string	msg = stringprintf("unknown pixel type");
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
@@ -687,8 +689,27 @@ int	main(int argc, char *argv[]) {
 		image = create_testimage(ImageSize(width, height),
 			color, integer);
 	} else {
-		io::FITSin	in(infilename);
-		image = in.read();
+		if (FITS::isfitsfilename(infilename)) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "read FITS '%s'",
+				infilename.c_str());
+			io::FITSin	in(infilename);
+			image = in.read();
+		} else if (JPEG::isjpegfilename(infilename)) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "read JPEG '%s'",
+				infilename.c_str());
+			JPEG	jpeg;
+			image = jpeg.readJPEG(infilename);
+		} else if (PNG::ispngfilename(infilename)) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "read PNG '%s'",
+				infilename.c_str());
+			PNG	png;
+			image = png.readPNG(infilename);
+		} else {
+			debug(LOG_ERR, DEBUG_LOG, 0,
+				"don't know how to read '%s'",
+				infilename.c_str());
+			return EXIT_FAILURE;
+		}
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "found %s-image of type %s",
 		image->size().toString().c_str(),
@@ -703,10 +724,12 @@ int	main(int argc, char *argv[]) {
 	while (repeat-- > 0) {
 		if (!vertical || both) {
 			if (usebaker) {
-				debug(LOG_DEBUG, DEBUG_LOG, 0, "horizontal baker");
+				debug(LOG_DEBUG, DEBUG_LOG, 0,
+					"horizontal baker");
 				result = baker(result, false);
 			} else {
-				debug(LOG_DEBUG, DEBUG_LOG, 0, "horizontal fold");
+				debug(LOG_DEBUG, DEBUG_LOG, 0,
+					"horizontal fold");
 				result = fold(result, false);
 			}
 			if (sequencenumber >= 0) {
@@ -716,10 +739,12 @@ int	main(int argc, char *argv[]) {
 		}
 		if (vertical || both) {
 			if (usebaker) {
-				debug(LOG_DEBUG, DEBUG_LOG, 0, "vertical baker");
+				debug(LOG_DEBUG, DEBUG_LOG, 0,
+					"vertical baker");
 				result = baker(result, true);
 			} else {
-				debug(LOG_DEBUG, DEBUG_LOG, 0, "vertical fold");
+				debug(LOG_DEBUG, DEBUG_LOG, 0,
+					"vertical fold");
 				result = fold(result, true);
 			}
 			if (sequencenumber >= 0) {
