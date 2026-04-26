@@ -120,6 +120,13 @@ static int	main(int argc, char *argv[]) {
 		// accumulate image
 		addimage(newimage, image::RGB<unsigned char>)
 	}
+
+	// chech for no image
+	if (NULL == img) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "no input image found");
+		return EXIT_FAILURE;
+	}
+
 	// rescale with the scale factor
 	image::Image<image::RGB<unsigned char>>	*meanimage
 		= new image::Image<image::RGB<unsigned char>>(*img,
